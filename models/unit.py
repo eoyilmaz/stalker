@@ -18,16 +18,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
 
+
+
+
 ########################################################################
 class Unit(object):
     """the base Unit class that keeps data about the units
     """
     
     #----------------------------------------------------------------------
-    def __init__(self, name, abbreviation, conversionRatio):
+    def __init__(self, name, abbreviation):
         self._name = self._checkName(name)
         self._abbreviation = self._checkAbbreviation(abbreviation)
-        self._conversionRatio = self._checkConversionRatio(conversionRatio) #float(conversionRatio)
     
     
     
@@ -60,20 +62,6 @@ class Unit(object):
     
     
     #----------------------------------------------------------------------
-    def _checkConversionRatio(self, conversionRatio):
-        """checks the conversion ratio
-        """
-        
-        if not isinstance(conversionRatio, (int, float)) or \
-           conversionRatio <= 0:
-            raise( ValueError("conversionRatio should be instance of integer \
-            or float") )
-        
-        return float(conversionRatio)
-    
-    
-    
-    #----------------------------------------------------------------------
     def name():
         def fget(self):
             """returns the name
@@ -102,6 +90,36 @@ class Unit(object):
         return locals()
     
     abbreviation = property( **abbreviation() )
+
+
+
+
+
+
+########################################################################
+class ConvertableUnit(Unit):
+    """Convertable units like linear and angular units will derive from this
+    class
+    """
+    
+    #----------------------------------------------------------------------
+    def __init__(self, name, abbreviation, conversionRatio):
+        super(ConvertableUnit, self).__init__(name, abbreviation)
+        self._conversionRatio = self._checkConversionRatio(conversionRatio) #float(conversionRatio)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _checkConversionRatio(self, conversionRatio):
+        """checks the conversion ratio
+        """
+        
+        if not isinstance(conversionRatio, (int, float)) or \
+           conversionRatio <= 0:
+            raise( ValueError("conversionRatio should be instance of integer \
+            or float and cannot be negative or zero") )
+        
+        return float(conversionRatio)
     
     
     
@@ -120,6 +138,70 @@ class Unit(object):
         return locals()
     
     conversionRatio = property( **conversionRatio() )
+
+
+
+
+
+
+########################################################################
+class Linear(Unit):
+    pass
+
+
+
+
+
+
+########################################################################
+class Angular(Unit):
+    pass
+
+
+
+
+
+
+########################################################################
+class Time(Unit):
+    
+    #----------------------------------------------------------------------
+    def __init__(self, name, abberation, fps):
+        super(Time, self).__init__(name, abberation)
+        self._fps = self._checkFps(fps)
     
     
     
+    #----------------------------------------------------------------------
+    def _checkFps(self, fps):
+        """checks the fps
+        """
+        
+        if not isinstance(fps, (int, float)) or \
+           fps <= 0:
+            raise( ValueError("fps should be instance of integer \
+            or float and cannot be negative or zero") )
+        
+        return float(fps)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def fps():
+        def fget(self):
+            """returns the fps
+            """
+            return self._fps
+        
+        def fset(self, fps):
+            """sets the fps
+            """
+            self._fps = self._checkFps(fps)
+        
+        return locals()
+    
+    fps = property( **fps() )
+
+
+
+

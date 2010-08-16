@@ -11,8 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
-   test.rst
    modules.rst
+   contribute.rst
 
 Indices and tables
 ==================
