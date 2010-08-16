@@ -1,14 +1,14 @@
 <!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-08-16 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Mon Aug 16 18:25:44 EEST 2010 by ozgur on platform Linux 2.6.32-24-generic in JVM 1.6.0_16-b01 -->
+<!-- Do Not Remove: Saved date Mon Aug 16 18:51:41 EEST 2010 by ozgur on platform Linux 2.6.32-24-generic in JVM 1.6.0_16-b01 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1281972344809" size="495683"
+    <resource referenceCreated="1281973901669" size="495710"
         spec="/home/ozgur/Documents/development/stalker/docs/_static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
@@ -8882,7 +8882,7 @@
         <ctrlPoint1 x="11646.474" y="958.83356" xsi:type="point"/>
     </child>
     <child ID="1424" label="TimeUnit" layerID="1"
-        created="1277505769682" x="10295.694" y="755.39404"
+        created="1277505769682" x="10267.694" y="737.39404"
         width="95.25" height="46.25" strokeWidth="1.0" autoSized="true" xsi:type="node">
         <fillColor>#ECFFD4</fillColor>
         <strokeColor>#776D6D</strokeColor>
@@ -9587,8 +9587,8 @@
         <URIString>http://vue.tufts.edu/rdf/resource/d175941d7f0001014ed1a34a819236b1</URIString>
         <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
     </child>
-    <child ID="1783" layerID="1" created="1279318609254" x="10191.862"
-        y="643.25" width="129.29004" height="112.64453"
+    <child ID="1783" layerID="1" created="1279318609254" x="10210.892"
+        y="643.2529" width="100.006836" height="94.6416"
         strokeWidth="1.0" autoSized="false" controlCount="2"
         arrowState="2" xsi:type="link">
         <strokeColor>#000000</strokeColor>
@@ -9604,12 +9604,12 @@
             </metadata>
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/dd566b887f0001010c4cdf7e80fa9d0b</URIString>
-        <point1 x="10192.362" y="643.75"/>
-        <point2 x="10320.652" y="755.39453"/>
+        <point1 x="10211.392" y="643.7529"/>
+        <point2 x="10310.398" y="737.39453"/>
         <ID1 xsi:type="node">1788</ID1>
         <ID2 xsi:type="node">1424</ID2>
-        <ctrlPoint0 x="10212.33" y="730.212" xsi:type="point"/>
-        <ctrlPoint1 x="10253.309" y="686.6913" xsi:type="point"/>
+        <ctrlPoint0 x="10253.664" y="706.87866" xsi:type="point"/>
+        <ctrlPoint1 x="10294.643" y="663.358" xsi:type="point"/>
     </child>
     <child ID="1784" layerID="1" created="1279318611707" x="10155.469"
         y="759.00195" width="20.916992" height="39.16992"

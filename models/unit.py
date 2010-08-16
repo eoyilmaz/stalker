@@ -145,7 +145,11 @@ class ConvertableUnit(Unit):
 
 
 ########################################################################
-class Linear(Unit):
+class Linear(ConvertableUnit):
+    """The conversion ratio is the ratio to the centimeter. It shows how much
+    centimeter is equal to 1 unit of this. 1 meter is 100 centimeter so the
+    conversion ratio is 100
+    """
     pass
 
 
@@ -154,7 +158,11 @@ class Linear(Unit):
 
 
 ########################################################################
-class Angular(Unit):
+class Angular(ConvertableUnit):
+    """The conversion ratio is the ratio to degree. It means how much
+    degree is equal to this unit, 1 raidan is equal to 57.2957795 degree so the
+    conversion ratio is 57.2957795
+    """
     pass
 
 
@@ -164,6 +172,10 @@ class Angular(Unit):
 
 ########################################################################
 class Time(Unit):
+    """Time units like PAL, NTSC etc.
+    """
+    
+    
     
     #----------------------------------------------------------------------
     def __init__(self, name, abberation, fps):
