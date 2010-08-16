@@ -25,15 +25,9 @@ class Unit(object):
     
     #----------------------------------------------------------------------
     def __init__(self, name, abbreviation, conversionRatio):
-        
-        if not isinstance(conversionRatio, (int, float)) or \
-           conversionRatio <= 0:
-            raise( ValueError("conversionRatio should be instance of integer \
-            or float") )
-        
         self._name = self._checkName(name)
         self._abbreviation = self._checkAbbreviation(abbreviation)
-        self._conversionRatio = float(conversionRatio)
+        self._conversionRatio = self._checkConversionRatio(conversionRatio) #float(conversionRatio)
     
     
     
@@ -66,6 +60,20 @@ class Unit(object):
     
     
     #----------------------------------------------------------------------
+    def _checkConversionRatio(self, conversionRatio):
+        """checks the conversion ratio
+        """
+        
+        if not isinstance(conversionRatio, (int, float)) or \
+           conversionRatio <= 0:
+            raise( ValueError("conversionRatio should be instance of integer \
+            or float") )
+        
+        return float(conversionRatio)
+    
+    
+    
+    #----------------------------------------------------------------------
     def name():
         def fget(self):
             """returns the name
@@ -94,6 +102,24 @@ class Unit(object):
         return locals()
     
     abbreviation = property( **abbreviation() )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def conversionRatio():
+        def fget(self):
+            """returns the conversionRatio
+            """
+            return self._conversionRatio
+        
+        def fset(self, conversionRatio):
+            """sets the conversionRatio
+            """
+            self._conversionRatio = self._checkConversionRatio(conversionRatio)
+        
+        return locals()
+    
+    conversionRatio = property( **conversionRatio() )
     
     
     
