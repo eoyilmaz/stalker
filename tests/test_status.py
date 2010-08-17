@@ -35,32 +35,63 @@ class TestStatusBase(unittest.TestCase):
         """test the name attribute
         """
         
+        #----------------------------------------------------------------------
         # the name should be a str or unicode
         self.assertRaises(ValueError, status.StatusBase, 1, '1')
+        # check the property
+        aStatusBase = status.StatusBase('Complete', 'Cmpl')
+        self.assertRaises(ValueError, setattr, aStatusBase, 'name', 1)
         
+        
+        #----------------------------------------------------------------------
         # the name could not be an empty string
         self.assertRaises(ValueError, status.StatusBase, '', 'Cmp')
+        # check the property
+        aStatusBase = status.StatusBase('Complete', 'Cmpl')
+        self.assertRaises(ValueError, setattr, aStatusBase, 'name', '')
         
+        
+        #----------------------------------------------------------------------
         # the first letter of the name should be in upper case and the other
         # letters should be in lower case
         statusName = 'test'
         aStatusBase = status.StatusBase(statusName, 'tst')
         self.assertEqual(statusName.title(), aStatusBase.name)
         
+        # check the property
+        aStatusBase = status.StatusBase('Complete', 'Cmpl')
+        aStatusBase.name = statusName
+        self.assertEqual(statusName.title(), aStatusBase.name)
+        
+        #----------------------------------------------------------------------
         # the first letter of the name could not be an integer
         statusName = '1test'
         self.assertRaises(ValueError, status.StatusBase, statusName, \
                            statusName)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_abbreviation(self):
-        #"""tests the abbreviation attribute
-        #"""
         
-        ## the abbreviation should be a str or unicode
-        ##aStatusBase = status.StatusBase( 'on'
+        # check the property
+        aStatusBase = status.StatusBase('Complete', 'Cmpl')
+        self.assertRaises(ValueError, setattr, aStatusBase, 'name', statusName)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_abbreviation(self):
+        """tests the abbreviation attribute
+        """
         
-        ## the abbreviation can not be an empty string
-        #self.fail()
+        #----------------------------------------------------------------------
+        # the abbreviation should be a str or unicode
+        self.assertRaises(ValueError, status.StatusBase, 'Complete', 1 )
+        
+        # check the property
+        aStatusBase = status.StatusBase( 'Complete', 'Cmlt' )
+        self.assertRaises(ValueError, setattr, aStatusBase, 'abbreviation', 1)
+        
+        #----------------------------------------------------------------------
+        # the abbreviation can not be an empty string
+        self.assertRaises(ValueError, status.StatusBase, 'Complete', '')
+        
+        # check the property
+        aStatusBase = status.StatusBase( 'Complete', 'Cmlt' )
+        self.assertRaises(ValueError, setattr, aStatusBase, 'abbreviation', '')

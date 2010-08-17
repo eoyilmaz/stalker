@@ -32,6 +32,7 @@ class StatusBase(object):
     def __init__(self, name, abbreviation, thumbnail=None):
         
         self._name = self._checkName(name)
+        self._abbreviation = self._checkAbbreviation( abbreviation )
     
     
     
@@ -51,6 +52,18 @@ class StatusBase(object):
     
     
     #----------------------------------------------------------------------
+    def _checkAbbreviation(self, abbreviation):
+        """checks the abbreviation attribute
+        """
+        
+        if abbreviation == '' \
+           or not isinstance( abbreviation, (str, unicode) ):
+            raise( ValueError("the abbreviation shouldn't be empty and it \
+            should be a str or unicode"))
+    
+    
+    
+    #----------------------------------------------------------------------
     def name():
         def fget(self):
             """returns the name property
@@ -58,8 +71,26 @@ class StatusBase(object):
             return self._name
         
         def fset(self, name):
-            self._name = self._checkName
+            self._name = self._checkName(name)
         
         return locals()
     
     name = property( **name() )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def abbreviation():
+        def fget(self):
+            """returns the abbreviation property
+            """
+            return self._abbreviation
+        
+        def fset(self, abbreviation):
+            """sets the abbreviation
+            """
+            self._abbreviation = self._checkAbbreviation( abbreviation )
+        
+        return locals()
+    
+    abbreviation = property( **abbreviation() )
