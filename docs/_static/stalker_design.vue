@@ -1,14 +1,14 @@
-<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-08-17 -->
+<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-08-18 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Tue Aug 17 13:29:29 EEST 2010 by ozgur on platform Linux 2.6.32-24-generic in JVM 1.6.0_16-b01 -->
+<!-- Do Not Remove: Saved date Wed Aug 18 15:07:29 EEST 2010 by ozgur on platform Linux 2.6.32-24-generic in JVM 1.6.0_16-b01 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1282040969218" size="495710"
+    <resource referenceCreated="1282133249647" size="499321"
         spec="/home/ozgur/Documents/development/stalker/docs/_static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
@@ -7331,7 +7331,7 @@
     <child ID="1280" label="Status" layerID="1" created="1272407146552"
         x="10650.533" y="689.02484" width="46.0" height="23.0"
         strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#ECFFD4</fillColor>
+        <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-plain-12</font>
@@ -7423,10 +7423,10 @@
   &lt;head color="#000000" style="color: #000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-left: 0px; margin-bottom: 0px; margin-top: 0px; margin-right: 0px; color: #000000; font-size: 12 }
-        ol { font-family: Arial; vertical-align: middle; margin-left: 30; margin-top: 6; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; margin-bottom: 0; margin-top: 0; margin-right: 0; color: #000000 }
-        ul { font-family: Arial; vertical-align: middle; margin-left: 30; margin-top: 6; list-style-position: outside; font-size: 12 }
+        body { color: #000000; font-family: Arial; font-size: 12; margin-bottom: 0px; margin-right: 0px; margin-top: 0px; margin-left: 0px }
+        ol { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
+        p { color: #000000; margin-bottom: 0; margin-right: 0; margin-top: 0; margin-left: 0 }
+        ul { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
       --&gt;
     &lt;/style&gt;
     
@@ -7806,7 +7806,7 @@
     <child ID="1295" label="Tag" layerID="1" created="1272407402727"
         x="10288.469" y="556.9269" width="120.75" height="66.5"
         strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#ECFFD4</fillColor>
+        <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-plain-12</font>
@@ -7823,7 +7823,7 @@
         <child ID="1413" label="id | INTEGER" created="1277502086534"
             x="34.0" y="23.0" width="83.0" height="23.0"
             strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -7842,7 +7842,7 @@
         <child ID="1418" label="name | UNICODE" created="1277502086534"
             x="34.0" y="43.25" width="108.0" height="23.0"
             strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -8473,10 +8473,10 @@
   &lt;head color="#000000" style="color: #000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-left: 0px; margin-bottom: 0px; margin-top: 0px; margin-right: 0px; color: #000000; font-size: 12 }
-        ol { font-family: Arial; vertical-align: middle; margin-left: 30; margin-top: 6; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; margin-bottom: 0; margin-top: 0; margin-right: 0; color: #000000 }
-        ul { font-family: Arial; vertical-align: middle; margin-left: 30; margin-top: 6; list-style-position: outside; font-size: 12 }
+        body { color: #000000; font-family: Arial; font-size: 12; margin-bottom: 0px; margin-right: 0px; margin-top: 0px; margin-left: 0px }
+        ol { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
+        p { color: #000000; margin-bottom: 0; margin-right: 0; margin-top: 0; margin-left: 0 }
+        ul { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
       --&gt;
     &lt;/style&gt;
     
@@ -8531,7 +8531,7 @@
     <child ID="1396" label="StatusBase" layerID="1"
         created="1277500787817" x="10646.169" y="556.2019" width="147.0"
         height="107.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#ECFFD4</fillColor>
+        <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-plain-12</font>
@@ -8548,7 +8548,7 @@
         <child ID="1419" label="id | INTEGER" created="1277502172918"
             x="34.0" y="23.0" width="83.0" height="23.0"
             strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -8567,7 +8567,7 @@
         <child ID="1399" label="name | UNICODE" created="1277500787818"
             x="34.0" y="43.25" width="108.0" height="23.0"
             strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -8586,7 +8586,7 @@
         <child ID="1397" label="abbreviation | UNICODE"
             created="1277500787818" x="34.0" y="63.5" width="143.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -8884,7 +8884,7 @@
     <child ID="1424" label="TimeUnit" layerID="1"
         created="1277505769682" x="10267.694" y="737.39404"
         width="95.25" height="46.25" strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#ECFFD4</fillColor>
+        <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-plain-12</font>
@@ -8901,7 +8901,7 @@
         <child ID="1426" label="fps | FLOAT" created="1277505769683"
             x="34.0" y="23.0" width="74.0" height="23.0"
             strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -8922,7 +8922,7 @@
     <child ID="1428" label="AngularUnit" layerID="1"
         created="1277506331876" x="10139.16" y="797.66907" width="75.0"
         height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#ECFFD4</fillColor>
+        <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-plain-12</font>
@@ -8941,7 +8941,7 @@
     <child ID="1432" label="LinearUnit" layerID="1"
         created="1277506386808" x="10045.243" y="794.33575" width="68.0"
         height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#ECFFD4</fillColor>
+        <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-plain-12</font>
@@ -9661,7 +9661,7 @@
     <child ID="1788" label="Unit" layerID="1" created="1279318732207"
         x="10108.845" y="557.0019" width="147.0" height="86.75"
         strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#ECFFD4</fillColor>
+        <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-plain-12</font>
@@ -9678,7 +9678,7 @@
         <child ID="1789" label="id | INTEGER" created="1279318732207"
             x="34.0" y="23.0" width="83.0" height="23.0"
             strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -9697,7 +9697,7 @@
         <child ID="1790" label="name | UNICODE" created="1279318732208"
             x="34.0" y="43.25" width="108.0" height="23.0"
             strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -9716,7 +9716,7 @@
         <child ID="1791" label="abbreviation | UNICODE"
             created="1279318732208" x="34.0" y="63.5" width="143.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -9794,7 +9794,7 @@
     <child ID="1810" label="ConvertableUnit" layerID="1"
         created="1281972179144" x="10095.511" y="713.25183"
         width="149.25" height="46.25" strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#ECFFD4</fillColor>
+        <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-plain-12</font>
@@ -9811,7 +9811,7 @@
         <child ID="1811" label="conversionRatio | FLOAT"
             created="1281972179145" x="34.0" y="23.0" width="146.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -9853,6 +9853,81 @@
         <ctrlPoint0 x="10098.052" y="781.296" xsi:type="point"/>
         <ctrlPoint1 x="10103.945" y="763.8402" xsi:type="point"/>
     </child>
+    <child ID="1813" layerID="1" created="1282128089956" x="10134.669"
+        y="451.40195" width="26.299805" height="23.0" strokeWidth="1.0"
+        autoSized="false" xsi:type="node">
+        <fillColor>#9DDB53</fillColor>
+        <strokeColor>#776D6D</strokeColor>
+        <textColor>#000000</textColor>
+        <font>Arial-plain-12</font>
+        <metadata-list category-list-size="1" other-list-size="0"
+            ontology-list-size="0" RCategoryListSize="0">
+            <ontology-list-string></ontology-list-string>
+            <metadata xsi:type="vue-metadata-element">
+                <value></value>
+                <key>http://vue.tufts.edu/vue.rdfs#none</key>
+                <type>1</type>
+            </metadata>
+        </metadata-list>
+        <URIString>http://vue.tufts.edu/rdf/resource/84ca7c987f00010138aea98153c19261</URIString>
+        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+    </child>
+    <child ID="1817" label="Shows implemented" layerID="1"
+        created="1282128100173" x="10169.07" y="468.37695" width="149.0"
+        height="17.0" strokeWidth="0.0" autoSized="false" xsi:type="text">
+        <strokeColor>#404040</strokeColor>
+        <textColor>#000000</textColor>
+        <font>SansSerif-plain-14</font>
+        <metadata-list category-list-size="1" other-list-size="0"
+            ontology-list-size="0" RCategoryListSize="0">
+            <ontology-list-string></ontology-list-string>
+            <metadata xsi:type="vue-metadata-element">
+                <value></value>
+                <key>http://vue.tufts.edu/vue.rdfs#none</key>
+                <type>1</type>
+            </metadata>
+        </metadata-list>
+        <URIString>http://vue.tufts.edu/rdf/resource/84ca7c997f00010138aea9817270f61e</URIString>
+        <richText>&lt;html&gt;
+  &lt;head color="#000000" style="color: #000000"&gt;
+    &lt;style type="text/css"&gt;
+      &lt;!--
+        body { color: #000000; font-size: 12; font-family: Arial; margin-bottom: 0px; margin-right: 0px; margin-top: 0px; margin-left: 0px }
+        ol { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
+        p { color: #000000; margin-bottom: 0; margin-right: 0; margin-top: 0; margin-left: 0 }
+        ul { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
+      --&gt;
+    &lt;/style&gt;
+    
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p color="#000000" style="color: #000000"&gt;
+      Shows implemented
+    &lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</richText>
+        <label>Shows implemented</label>
+    </child>
+    <child ID="1818" layerID="1" created="1282128771399" x="10141.045"
+        y="481.3519" width="25.632812" height="23.0" strokeWidth="1.0"
+        autoSized="false" xsi:type="node">
+        <fillColor>#F2AE45</fillColor>
+        <strokeColor>#776D6D</strokeColor>
+        <textColor>#000000</textColor>
+        <font>Arial-plain-12</font>
+        <metadata-list category-list-size="1" other-list-size="0"
+            ontology-list-size="0" RCategoryListSize="0">
+            <ontology-list-string></ontology-list-string>
+            <metadata xsi:type="vue-metadata-element">
+                <value></value>
+                <key>http://vue.tufts.edu/vue.rdfs#none</key>
+                <type>1</type>
+            </metadata>
+        </metadata-list>
+        <URIString>http://vue.tufts.edu/rdf/resource/84d4ca357f00010138aea981c2362867</URIString>
+        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+    </child>
     <layer ID="1" label="Layer 1" created="0" x="0.0" y="0.0"
         width="1.4E-45" height="1.4E-45" strokeWidth="0.0" autoSized="false">
         <metadata-list category-list-size="0" other-list-size="0"
@@ -9861,8 +9936,8 @@
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/5d104b32c00007d601b277f026b72230</URIString>
     </layer>
-    <userZoom>1.0</userZoom>
-    <userOrigin x="3799.4695" y="228.37689"/>
+    <userZoom>1.25</userZoom>
+    <userOrigin x="4751.337" y="287.47113"/>
     <presentationBackground>#202020</presentationBackground>
     <PathwayList currentPathway="-1" revealerIndex="-1"/>
     <date>2009-05-20</date>

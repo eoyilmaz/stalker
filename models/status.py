@@ -57,9 +57,11 @@ class StatusBase(object):
         """
         
         if abbreviation == '' \
-           or not isinstance( abbreviation, (str, unicode) ):
+           or not isinstance(abbreviation, (str, unicode)):
             raise( ValueError("the abbreviation shouldn't be empty and it \
             should be a str or unicode"))
+        
+        return abbreviation
     
     
     
@@ -75,7 +77,7 @@ class StatusBase(object):
         
         return locals()
     
-    name = property( **name() )
+    name = property(**name())
     
     
     
@@ -89,8 +91,31 @@ class StatusBase(object):
         def fset(self, abbreviation):
             """sets the abbreviation
             """
-            self._abbreviation = self._checkAbbreviation( abbreviation )
+            self._abbreviation = self._checkAbbreviation(abbreviation)
         
         return locals()
     
-    abbreviation = property( **abbreviation() )
+    abbreviation = property(**abbreviation())
+
+
+
+
+
+
+########################################################################
+class Status(StatusBase):
+    """the general usage status class
+    """
+    pass
+
+
+
+
+
+########################################################################
+class StatusList(StatusBase):
+    """the list version of the Status
+    holds multiple statuses to be used as a multip list choice for several
+    other classes
+    """
+    pass

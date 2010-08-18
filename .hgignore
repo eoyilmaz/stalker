@@ -4,3 +4,4 @@ syntax: glob
 *~*
 *.pyc
 docs/_build/*
+.coverage

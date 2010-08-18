@@ -82,10 +82,10 @@ class TestStatusBase(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the abbreviation should be a str or unicode
-        self.assertRaises(ValueError, status.StatusBase, 'Complete', 1 )
+        self.assertRaises(ValueError, status.StatusBase, 'Complete', 1)
         
         # check the property
-        aStatusBase = status.StatusBase( 'Complete', 'Cmlt' )
+        aStatusBase = status.StatusBase('Complete', 'Cmlt')
         self.assertRaises(ValueError, setattr, aStatusBase, 'abbreviation', 1)
         
         #----------------------------------------------------------------------
@@ -93,5 +93,45 @@ class TestStatusBase(unittest.TestCase):
         self.assertRaises(ValueError, status.StatusBase, 'Complete', '')
         
         # check the property
-        aStatusBase = status.StatusBase( 'Complete', 'Cmlt' )
+        aStatusBase = status.StatusBase('Complete', 'Cmlt')
         self.assertRaises(ValueError, setattr, aStatusBase, 'abbreviation', '')
+        
+        #----------------------------------------------------------------------
+        # check if the abbreviation is get correctly
+        name = 'Complete'
+        abbr = 'Cmplt'
+        aStatusBase = status.StatusBase(name, abbr)
+        self.assertEquals( aStatusBase.abbreviation, abbr)
+
+
+
+
+
+
+########################################################################
+class StatusListTest(unittest.TestCase):
+    """tests the StatusList class
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_statuses_list(self):
+        """tests the statuses list attribute
+        """
+        
+        # the statuses attribute should be a list of statuses
+        # can be empty?
+        #
+        
+        aStatusList = (
+            status.Status( 'Not Available', 'N/A' ),
+            status.Status( 'Waiting To Start', 'WStrt' ),
+            status.Status( 'Started', 'Strt' ),
+            status.Status( 'Waiting For Approve', 'WAppr' ),
+            status.Status( 'Approved', 'Appr' ),
+            status.Status( 'Finished', 'Fnsh' ),
+            status.Status( 'On Hold', 'OH' ),
+            )
+        
+        
