@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
 ########################################################################
-class StatusBase(object):
-    """The StatusBase class
+class Status(object):
+    """The Status class
     """
     
     
@@ -103,19 +103,91 @@ class StatusBase(object):
 
 
 ########################################################################
-class Status(StatusBase):
-    """the general usage status class
-    """
-    pass
-
-
-
-
-
-########################################################################
-class StatusList(StatusBase):
+class StatusList(object):
     """the list version of the Status
-    holds multiple statuses to be used as a multip list choice for several
+    holds multiple statuses to be used as a choice list for several
     other classes
     """
-    pass
+    
+    #----------------------------------------------------------------------
+    def __init__(self, name, statuses):
+        
+        
+        self._name = self._checkName(name)
+        self._statuses = self._checkStatuses(statuses)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _checkName(self, name):
+        """checks the given name
+        """
+        
+        if name == '':
+            raise(ValueError('name can not be empty'))
+        
+        if not isinstance( name, (str, unicode) ):
+            raise(ValueError('name should be a string or unicode'))
+        
+        return name
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _checkStatuses(self, statuses):
+        """checks the given statusList
+        """
+        
+        if not isinstance(statuses, list):
+            raise(ValueError('statuses should be an instance of list'))
+        
+        if len(statuses) < 1:
+            raise(ValueError('statuses should not be an empty list'))
+        
+        for status in statuses:
+            if not isinstance(status, Status):
+                raise(ValueError('all elements must be an object of Status in \
+                the given statuses list'))
+        
+        return statuses
+    
+    
+    
+    #----------------------------------------------------------------------
+    def name():
+        
+        def fget(self):
+            """returns the name attribute
+            """
+            return self._name
+        
+        def fset(self, name):
+            """sets the name attribute
+            """
+            self._name = self._checkName(name)
+        
+        return locals()
+    
+    name = property(**name())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def statuses():
+        
+        def fget(self):
+            """returns the statusList
+            """
+            return self._statuses
+        
+        def fset(self, statuses):
+            """sets the statuses
+            """
+            self._statuses = self._checkStatuses(statuses)
+        
+        return locals()
+    
+    statuses = property(**statuses())
+    
+    
+    

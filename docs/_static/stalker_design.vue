@@ -1,14 +1,14 @@
-<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-08-18 -->
+<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-08-19 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Wed Aug 18 15:07:29 EEST 2010 by ozgur on platform Linux 2.6.32-24-generic in JVM 1.6.0_16-b01 -->
+<!-- Do Not Remove: Saved date Thu Aug 19 20:03:53 EEST 2010 by ozgur on platform Linux 2.6.32-24-generic in JVM 1.6.0_16-b01 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1282133249647" size="499321"
+    <resource referenceCreated="1282237433654" size="497297"
         spec="/home/ozgur/Documents/development/stalker/docs/_static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
@@ -7328,25 +7328,6 @@
         <ctrlPoint0 x="10541.42" y="1020.1666" xsi:type="point"/>
         <ctrlPoint1 x="10889.579" y="960.7524" xsi:type="point"/>
     </child>
-    <child ID="1280" label="Status" layerID="1" created="1272407146552"
-        x="10650.533" y="689.02484" width="46.0" height="23.0"
-        strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#9DDB53</fillColor>
-        <strokeColor>#776D6D</strokeColor>
-        <textColor>#000000</textColor>
-        <font>Arial-plain-12</font>
-        <metadata-list category-list-size="1" other-list-size="0"
-            ontology-list-size="0" RCategoryListSize="0">
-            <ontology-list-string></ontology-list-string>
-            <metadata xsi:type="vue-metadata-element">
-                <value></value>
-                <key>http://vue.tufts.edu/vue.rdfs#none</key>
-                <type>1</type>
-            </metadata>
-        </metadata-list>
-        <URIString>http://vue.tufts.edu/rdf/resource/416412967f00010135ea57117e38581f</URIString>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
-    </child>
     <child ID="1284" label="Pipeline Step" layerID="1"
         created="1272407197438" x="11954.452" y="1036.1267"
         width="184.5" height="251.5" strokeWidth="1.0" autoSized="true" xsi:type="node">
@@ -7420,52 +7401,52 @@
             </metadata-list>
             <URIString>http://vue.tufts.edu/rdf/resource/7464cb477f0001014a6b2ab74e33abce</URIString>
             <richText>&lt;html&gt;
-  &lt;head color="#000000" style="color: #000000"&gt;
+  &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { color: #000000; font-family: Arial; font-size: 12; margin-bottom: 0px; margin-right: 0px; margin-top: 0px; margin-left: 0px }
-        ol { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
-        p { color: #000000; margin-bottom: 0; margin-right: 0; margin-top: 0; margin-left: 0 }
-        ul { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
+        body { margin-left: 0px; margin-right: 0px; font-family: Arial; color: #000000; margin-bottom: 0px; font-size: 12; margin-top: 0px }
+        ol { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
+        p { margin-left: 0; margin-right: 0; color: #000000; margin-bottom: 0; margin-top: 0 }
+        ul { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
       --&gt;
     &lt;/style&gt;
     
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       design
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       model
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       rig
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       shading
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       previs
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       match move
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       animation
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       fx
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       cloth sim
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       layout
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       lighting
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       compositing
     &lt;/p&gt;
   &lt;/body&gt;
@@ -7861,7 +7842,7 @@
         <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
     </child>
     <child ID="1299" label="Event" layerID="1" created="1272407465751"
-        x="10905.537" y="556.225" width="159.0" height="188.0"
+        x="11008.537" y="556.225" width="159.0" height="188.0"
         strokeWidth="1.0" autoSized="true" xsi:type="node">
         <fillColor>#ECFFD4</fillColor>
         <strokeColor>#776D6D</strokeColor>
@@ -8156,9 +8137,9 @@
         <ctrlPoint1 x="9879.902" y="965.43164" xsi:type="point"/>
     </child>
     <child ID="1355" label="StatusList" layerID="1"
-        created="1274041570267" x="10720.1455" y="689.0018"
-        width="156.0" height="46.25" strokeWidth="1.0" autoSized="true" xsi:type="node">
-        <fillColor>#ECFFD4</fillColor>
+        created="1274041570267" x="10822.748" y="556.2019" width="156.0"
+        height="66.5" strokeWidth="1.0" autoSized="true" xsi:type="node">
+        <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-plain-12</font>
@@ -8172,10 +8153,29 @@
             </metadata>
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/a33b57e77f0001016609e5f078560790</URIString>
+        <child ID="1819" label="name | UNICODE" created="1282135802029"
+            x="34.0" y="23.0" width="108.0" height="23.0"
+            strokeWidth="1.0" autoSized="true" xsi:type="node">
+            <fillColor>#F2AE45</fillColor>
+            <strokeColor>#776D6D</strokeColor>
+            <textColor>#000000</textColor>
+            <font>Arial-plain-12</font>
+            <metadata-list category-list-size="1" other-list-size="0"
+                ontology-list-size="0" RCategoryListSize="0">
+                <ontology-list-string></ontology-list-string>
+                <metadata xsi:type="vue-metadata-element">
+                    <value></value>
+                    <key>http://vue.tufts.edu/vue.rdfs#none</key>
+                    <type>1</type>
+                </metadata>
+            </metadata-list>
+            <URIString>http://vue.tufts.edu/rdf/resource/853fff177f00010138aea98112cb477d</URIString>
+            <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        </child>
         <child ID="1395" label="statuses | MANY | STATUS"
-            created="1277500691762" x="34.0" y="23.0" width="155.0"
+            created="1277500691762" x="34.0" y="43.25" width="155.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -8470,31 +8470,31 @@
             </metadata-list>
             <URIString>http://vue.tufts.edu/rdf/resource/7464cb547f0001014a6b2ab78c34774b</URIString>
             <richText>&lt;html&gt;
-  &lt;head color="#000000" style="color: #000000"&gt;
+  &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { color: #000000; font-family: Arial; font-size: 12; margin-bottom: 0px; margin-right: 0px; margin-top: 0px; margin-left: 0px }
-        ol { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
-        p { color: #000000; margin-bottom: 0; margin-right: 0; margin-top: 0; margin-left: 0 }
-        ul { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
+        body { margin-left: 0px; margin-right: 0px; font-family: Arial; color: #000000; margin-bottom: 0px; font-size: 12; margin-top: 0px }
+        ol { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
+        p { margin-left: 0; margin-right: 0; color: #000000; margin-bottom: 0; margin-top: 0 }
+        ul { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
       --&gt;
     &lt;/style&gt;
     
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Character
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Vehicle
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Prop
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Environment
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Shot
     &lt;/p&gt;
   &lt;/body&gt;
@@ -8528,9 +8528,9 @@
         <ctrlPoint0 x="10609.087" y="984.65564" xsi:type="point"/>
         <ctrlPoint1 x="11251.895" y="954.8819" xsi:type="point"/>
     </child>
-    <child ID="1396" label="StatusBase" layerID="1"
-        created="1277500787817" x="10646.169" y="556.2019" width="147.0"
-        height="107.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
+    <child ID="1396" label="Status" layerID="1" created="1277500787817"
+        x="10646.169" y="556.2019" width="147.0" height="107.0"
+        strokeWidth="1.0" autoSized="true" xsi:type="node">
         <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
         <textColor>#000000</textColor>
@@ -8622,50 +8622,6 @@
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
         <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
-    </child>
-    <child ID="1400" layerID="1" created="1277500831122" x="10678.875"
-        y="662.7012" width="14.1171875" height="26.824219"
-        strokeWidth="1.0" autoSized="false" controlCount="0"
-        arrowState="2" xsi:type="link">
-        <strokeColor>#000000</strokeColor>
-        <textColor>#000000</textColor>
-        <font>Arial-plain-11</font>
-        <metadata-list category-list-size="1" other-list-size="0"
-            ontology-list-size="0" RCategoryListSize="0">
-            <ontology-list-string></ontology-list-string>
-            <metadata xsi:type="vue-metadata-element">
-                <value></value>
-                <key>http://vue.tufts.edu/vue.rdfs#none</key>
-                <type>1</type>
-            </metadata>
-        </metadata-list>
-        <URIString>http://vue.tufts.edu/rdf/resource/70fbee187f0001010a530461149da065</URIString>
-        <point1 x="10692.492" y="663.2012"/>
-        <point2 x="10679.375" y="689.0254"/>
-        <ID1 xsi:type="node">1396</ID1>
-        <ID2 xsi:type="node">1280</ID2>
-    </child>
-    <child ID="1401" layerID="1" created="1277500832842" x="10760.16"
-        y="662.70215" width="20.767578" height="26.799805"
-        strokeWidth="1.0" autoSized="false" controlCount="0"
-        arrowState="2" xsi:type="link">
-        <strokeColor>#000000</strokeColor>
-        <textColor>#000000</textColor>
-        <font>Arial-plain-11</font>
-        <metadata-list category-list-size="1" other-list-size="0"
-            ontology-list-size="0" RCategoryListSize="0">
-            <ontology-list-string></ontology-list-string>
-            <metadata xsi:type="vue-metadata-element">
-                <value></value>
-                <key>http://vue.tufts.edu/vue.rdfs#none</key>
-                <type>1</type>
-            </metadata>
-        </metadata-list>
-        <URIString>http://vue.tufts.edu/rdf/resource/70fbee187f0001010a530461f76d4398</URIString>
-        <point1 x="10760.66" y="663.20215"/>
-        <point2 x="10780.428" y="689.00195"/>
-        <ID1 xsi:type="node">1396</ID1>
-        <ID2 xsi:type="node">1355</ID2>
     </child>
     <child ID="1402" label="Group" layerID="1" created="1277500921470"
         x="8752.752" y="1035.6519" width="165.75" height="127.8125"
@@ -9735,7 +9691,7 @@
         <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
     </child>
     <child ID="1800" label="Template" layerID="1"
-        created="1280838310236" x="11094.97" y="556.225" width="132.75"
+        created="1280838310236" x="11197.97" y="556.225" width="132.75"
         height="66.5" strokeWidth="1.0" autoSized="true" xsi:type="node">
         <fillColor>#ECFFD4</fillColor>
         <strokeColor>#776D6D</strokeColor>
@@ -9889,19 +9845,19 @@
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/84ca7c997f00010138aea9817270f61e</URIString>
         <richText>&lt;html&gt;
-  &lt;head color="#000000" style="color: #000000"&gt;
+  &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { color: #000000; font-size: 12; font-family: Arial; margin-bottom: 0px; margin-right: 0px; margin-top: 0px; margin-left: 0px }
-        ol { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
-        p { color: #000000; margin-bottom: 0; margin-right: 0; margin-top: 0; margin-left: 0 }
-        ul { vertical-align: middle; list-style-position: outside; font-size: 12; font-family: Arial; margin-top: 6; margin-left: 30 }
+        body { margin-left: 0px; margin-right: 0px; font-family: Arial; color: #000000; margin-bottom: 0px; font-size: 12; margin-top: 0px }
+        ol { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
+        p { margin-left: 0; margin-right: 0; color: #000000; margin-bottom: 0; margin-top: 0 }
+        ul { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
       --&gt;
     &lt;/style&gt;
     
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Shows implemented
     &lt;/p&gt;
   &lt;/body&gt;
@@ -9936,8 +9892,8 @@
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/5d104b32c00007d601b277f026b72230</URIString>
     </layer>
-    <userZoom>1.25</userZoom>
-    <userOrigin x="4751.337" y="287.47113"/>
+    <userZoom>1.0</userZoom>
+    <userOrigin x="3799.4695" y="228.37689"/>
     <presentationBackground>#202020</presentationBackground>
     <PathwayList currentPathway="-1" revealerIndex="-1"/>
     <date>2009-05-20</date>
