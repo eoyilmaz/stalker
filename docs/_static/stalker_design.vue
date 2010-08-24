@@ -1,14 +1,14 @@
-<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-08-19 -->
+<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-08-23 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Thu Aug 19 20:03:53 EEST 2010 by ozgur on platform Linux 2.6.32-24-generic in JVM 1.6.0_16-b01 -->
+<!-- Do Not Remove: Saved date Mon Aug 23 19:14:20 EEST 2010 by ozgur on platform Linux 2.6.32-24-generic in JVM 1.6.0_16-b01 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1282237433654" size="497297"
+    <resource referenceCreated="1282580060775" size="497297"
         spec="/home/ozgur/Documents/development/stalker/docs/_static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
@@ -7404,10 +7404,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; margin-right: 0px; font-family: Arial; color: #000000; margin-bottom: 0px; font-size: 12; margin-top: 0px }
-        ol { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
-        p { margin-left: 0; margin-right: 0; color: #000000; margin-bottom: 0; margin-top: 0 }
-        ul { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
+        body { margin-left: 0px; color: #000000; font-size: 12; font-family: Arial; margin-top: 0px; margin-bottom: 0px; margin-right: 0px }
+        ol { margin-left: 30; font-size: 12; font-family: Arial; margin-top: 6; vertical-align: middle; list-style-position: outside }
+        p { margin-left: 0; color: #000000; margin-top: 0; margin-bottom: 0; margin-right: 0 }
+        ul { margin-left: 30; font-size: 12; font-family: Arial; margin-top: 6; vertical-align: middle; list-style-position: outside }
       --&gt;
     &lt;/style&gt;
     
@@ -8473,10 +8473,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; margin-right: 0px; font-family: Arial; color: #000000; margin-bottom: 0px; font-size: 12; margin-top: 0px }
-        ol { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
-        p { margin-left: 0; margin-right: 0; color: #000000; margin-bottom: 0; margin-top: 0 }
-        ul { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
+        body { margin-left: 0px; color: #000000; font-size: 12; font-family: Arial; margin-top: 0px; margin-bottom: 0px; margin-right: 0px }
+        ol { margin-left: 30; font-size: 12; font-family: Arial; margin-top: 6; vertical-align: middle; list-style-position: outside }
+        p { margin-left: 0; color: #000000; margin-top: 0; margin-bottom: 0; margin-right: 0 }
+        ul { margin-left: 30; font-size: 12; font-family: Arial; margin-top: 6; vertical-align: middle; list-style-position: outside }
       --&gt;
     &lt;/style&gt;
     
@@ -9848,10 +9848,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; margin-right: 0px; font-family: Arial; color: #000000; margin-bottom: 0px; font-size: 12; margin-top: 0px }
-        ol { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
-        p { margin-left: 0; margin-right: 0; color: #000000; margin-bottom: 0; margin-top: 0 }
-        ul { margin-left: 30; font-family: Arial; vertical-align: middle; list-style-position: outside; margin-top: 6; font-size: 12 }
+        body { margin-left: 0px; color: #000000; font-size: 12; font-family: Arial; margin-top: 0px; margin-bottom: 0px; margin-right: 0px }
+        ol { margin-left: 30; font-size: 12; font-family: Arial; margin-top: 6; vertical-align: middle; list-style-position: outside }
+        p { margin-left: 0; color: #000000; margin-top: 0; margin-bottom: 0; margin-right: 0 }
+        ul { margin-left: 30; font-size: 12; font-family: Arial; margin-top: 6; vertical-align: middle; list-style-position: outside }
       --&gt;
     &lt;/style&gt;
     
@@ -9865,8 +9865,8 @@
 </richText>
         <label>Shows implemented</label>
     </child>
-    <child ID="1818" layerID="1" created="1282128771399" x="10141.045"
-        y="481.3519" width="25.632812" height="23.0" strokeWidth="1.0"
+    <child ID="1818" layerID="1" created="1282128771399" x="10135.042"
+        y="480.68524" width="25.632812" height="23.0" strokeWidth="1.0"
         autoSized="false" xsi:type="node">
         <fillColor>#F2AE45</fillColor>
         <strokeColor>#776D6D</strokeColor>
@@ -9892,8 +9892,8 @@
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/5d104b32c00007d601b277f026b72230</URIString>
     </layer>
-    <userZoom>1.0</userZoom>
-    <userOrigin x="3799.4695" y="228.37689"/>
+    <userZoom>1.5</userZoom>
+    <userOrigin x="5703.204" y="346.56534"/>
     <presentationBackground>#202020</presentationBackground>
     <PathwayList currentPathway="-1" revealerIndex="-1"/>
     <date>2009-05-20</date>
