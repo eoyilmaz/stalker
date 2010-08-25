@@ -31,9 +31,10 @@ class ImageFormatTest(unittest.TestCase):
     """
     
     
+    
     #----------------------------------------------------------------------
     def test_name(self):
-        """tests the name attribute
+        """testing the name attribute
         """
         
         #----------------------------------------------------------------------
@@ -79,7 +80,7 @@ class ImageFormatTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_width(self):
-        """tests the width attribute
+        """testing the width attribute
         """
         
         #----------------------------------------------------------------------
@@ -91,7 +92,7 @@ class ImageFormatTest(unittest.TestCase):
         printResolution = 300
         
         #----------------------------------------------------------------------
-        # the width should be an integer
+        # the width should be an integer or float
         self.assertRaises(ValueError,
                           imageFormat.ImageFormat,
                           name,
@@ -157,7 +158,7 @@ class ImageFormatTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_height(self):
-        """tests the height attribute
+        """testing the height attribute
         """
         
         #----------------------------------------------------------------------
@@ -235,7 +236,7 @@ class ImageFormatTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_deviceAspectRatio(self):
-        """tests the device aspect ratio attribute
+        """testing the device aspect ratio attribute
         """
         
         #----------------------------------------------------------------------
@@ -267,7 +268,7 @@ class ImageFormatTest(unittest.TestCase):
                                                 pixelAspect, printResolution)
         
         # the device aspect for this setup should be around 1.7778
-        self.assertAlmostEquals(anImageFormat.deviceAspect, 1.7778)
+        self.assertTrue(abs(anImageFormat.deviceAspect - 1.7778) < 0.01)
         
         
         #----------------------------------------------------------------------
@@ -282,19 +283,37 @@ class ImageFormatTest(unittest.TestCase):
                                                 pixelAspect, printResolution)
         
         # the device aspect for this setup should be around 4/3
-        self.assertAlmostEquals(anImageFormat.deviceAspect, 1.3333)
+        self.assertTrue(abs(anImageFormat.deviceAspect - 1.3333) < 0.01)
         
+        #----------------------------------------------------------------------
+        # just changing one of the width or height should be causing an update
+        # in deviceAspect
+        
+        # start with PAL
+        name = 'PAL'
+        width = 720
+        height = 576
+        pixelAspect = 1.0667
+        printResolution = 300
+        previousDeviceAspect = anImageFormat.deviceAspect
+        
+        # change to HD
+        anImageFormat.width = 1920
+        anImageFormat.height = 1080
+        anImageFormat.pixelAspect = 1.0
+        self.assertTrue(abs(anImageFormat.deviceAspect - 1.77778) < 0.001)
+        self.assertNotEqual(anImageFormat.deviceAspect, previousDeviceAspect)
         
         #----------------------------------------------------------------------
         # the device aspect should be write propetected
         self.assertRaises(AttributeError,
                           setattr, anImageFormat, 'deviceAspect', 10)
-        
+    
     
     
     #----------------------------------------------------------------------
-    def test_pixelAspectRatio(self):
-        """tests the pixel aspect ratio
+    def test_pixelAspect(self):
+        """testing the pixel aspect ratio
         """
         
         #----------------------------------------------------------------------
@@ -331,7 +350,7 @@ class ImageFormatTest(unittest.TestCase):
         anImageFormat = imageFormat.ImageFormat(name, width, height, int(1),
                                                 printResolution)
         
-        self.assertTrue(isinstance(anImageFormat.pixelAspectRatio, float))
+        self.assertTrue(isinstance(anImageFormat.pixelAspect, float))
         
         #----------------------------------------------------------------------
         # the pixel aspect ratio can not be zero
@@ -343,7 +362,7 @@ class ImageFormatTest(unittest.TestCase):
                                                 pixelAspect, printResolution)
         
         self.assertRaises(ValueError, setattr, anImageFormat,
-                          'pixelAspectRatio', 0 )
+                          'pixelAspect', 0 )
         
         #----------------------------------------------------------------------
         # the pixel aspect ratio can not be negative
@@ -358,16 +377,16 @@ class ImageFormatTest(unittest.TestCase):
                                                 pixelAspect, printResolution)
         
         self.assertRaises(ValueError, setattr, anImageFormat,
-                          'pixelAspectRatio', -1.0 )
+                          'pixelAspect', -1.0 )
         
         self.assertRaises(ValueError, setattr, anImageFormat,
-                          'pixelAspectRatio', -1 )
+                          'pixelAspect', -1 )
     
     
     
     #----------------------------------------------------------------------
     def test_printResolution(self):
-        """tests the print resolution
+        """testing the print resolution
         """
         #----------------------------------------------------------------------
         # some proper values

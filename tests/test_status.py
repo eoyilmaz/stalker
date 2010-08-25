@@ -25,7 +25,7 @@ from stalker.models import status
 
 ########################################################################
 class TestStatus(unittest.TestCase):
-    """tests the status class
+    """testing the status class
     """
     
     
@@ -77,7 +77,7 @@ class TestStatus(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_abbreviation(self):
-        """tests the abbreviation attribute
+        """testing the abbreviation attribute
         """
         
         #----------------------------------------------------------------------
@@ -110,14 +110,14 @@ class TestStatus(unittest.TestCase):
 
 ########################################################################
 class StatusListTest(unittest.TestCase):
-    """tests the StatusList class
+    """testing the StatusList class
     """
     
     
     
     #----------------------------------------------------------------------
     def test_name(self):
-        """tests the name attribute
+        """testing the name attribute
         """
         
         # proper values
@@ -162,7 +162,7 @@ class StatusListTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_statusList(self):
-        """tests the statuses list attribute
+        """testing the statuses list attribute
         """
         
         # proper values

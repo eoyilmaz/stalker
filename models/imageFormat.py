@@ -28,4 +28,208 @@ class ImageFormat(object):
     
     #----------------------------------------------------------------------
     def __init__(self, name, width, height, pixelAspect, printResolution=300 ):
-        pass
+        
+        self._name = self._checkName(name)
+        self._width = self._checkWidth(width)
+        self._height = self._checkHeight(height)
+        self._pixelAspect = self._checkPixelAspect(pixelAspect)
+        self._printResolution = self._checkPrintResolution(printResolution)
+        self._deviceAspect = 1.0
+        
+        self._updateDeviceAspect()
+        
+    
+    
+    #----------------------------------------------------------------------
+    def _updateDeviceAspect(self):
+        """updates the device aspect ratio for the given width and height
+        """
+        self._deviceAspect = float(self._width) / float(self._height) \
+            * float(self._pixelAspect)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _checkName(self, name):
+        """checks the given name
+        """
+        
+        if not isinstance(name, (str, unicode)):
+            raise(ValueError("name should be instance of str or unicode"))
+        
+        if name == '' or len(name) < 1:
+            raise(ValueError("name should not be an empty string"))
+        
+        return name
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _checkWidth(self, width):
+        """checks the given width
+        """
+        if not isinstance(width, (int, float)):
+            raise(ValueError("width should be an instance of int or float"))
+        
+        if width <= 0:
+            raise(ValueError("width shouldn't be zero or negative"))
+        
+        return int(width)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _checkHeight(self, height):
+        """checks the given height
+        """
+        if not isinstance(height, (int, float)):
+            raise(ValueError("height should be an instance of int or float"))
+        
+        if height <= 0:
+            raise(ValueError("height shouldn't be zero or negative"))
+        
+        return int(height)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _checkPixelAspect(self, pixelAspect):
+        """checks the given pixel aspect
+        """
+        if not isinstance(pixelAspect, (int, float)):
+            raise(ValueError("pixelAspect should be an instance of int or \
+            float"))
+        
+        if pixelAspect <= 0:
+            raise(ValueError("pixelAspect can not be zero or a negative \
+            value"))
+        
+        return float(pixelAspect)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _checkPrintResolution(self, printResolution):
+        """checks the print resolution
+        """
+        if not isinstance(printResolution, (int, float)):
+            raise(ValueError("print resolution should be an instance of int \
+            or float"))
+        
+        if printResolution <= 0:
+            raise(ValueError("print resolution should not be zero or \
+            negative"))
+        
+        return float(printResolution)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def name():
+        def fget(self):
+            """returns the name attribute
+            """
+            return self._name
+        
+        def fset(self, name):
+            """sets the name attribute
+            """
+            self._name = self._checkName(name)
+        
+        return locals()
+    
+    name = property(**name())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def width():
+        def fget(self):
+            """returns the width
+            """
+            return self._width
+        
+        def fset(self, width):
+            """sets the width
+            """
+            self._width = self._checkWidth(width)
+            # also update the deviceAspect
+            self._updateDeviceAspect()
+        
+        return locals()
+    
+    width = property(**width())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def height():
+        def fget(self):
+            """returns the height
+            """
+            return self._height
+        
+        def fset(self, height):
+            """sets the height
+            """
+            self._height = self._checkHeight(height)
+            
+            # also update the deviceAspect
+            self._updateDeviceAspect()
+        
+        return locals()
+    
+    height = property(**height())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def pixelAspect():
+        def fget(self):
+            """returns the pixelAspect ratio
+            """
+            return self._pixelAspect
+        
+        def fset(self, pixelAspect):
+            """sets the pixelAspect ratio
+            """
+            self._pixelAspect = self._checkPixelAspect(pixelAspect)
+            
+            # also update the deviceAspect
+            self._updateDeviceAspect()
+        
+        return locals()
+    
+    pixelAspect = property(**pixelAspect())
+    
+    
+    
+    #----------------------------------------------------------------------
+    @property
+    def deviceAspect(self):
+        """returns the device aspect
+        """
+        return self._deviceAspect
+    
+    
+    
+    #----------------------------------------------------------------------
+    def printResolution():
+        
+        def fget(self):
+            """returns the print resolution
+            """
+            return self._printResolution
+        
+        def fset(self, printResolution):
+            """sets the print resolution
+            """
+            self._printResolution = self._checkPrintResolution(printResolution)
+        
+        return locals()
+    
+    printResolution = property(**printResolution())
+    
+    
+    
+    
