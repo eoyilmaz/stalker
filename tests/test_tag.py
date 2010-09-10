@@ -28,14 +28,14 @@ from stalker.models import tag
 
 ########################################################################
 class TagTest(unittest.TestCase):
-    """tests the Tag class
+    """testing the Tag class
     """
     
     
     
     #----------------------------------------------------------------------
-    def test_name(self):
-        """tests the name attribute
+    def test_name_str_unicode(self):
+        """testing the name attribute being an instance of string or unicode
         """
         
         #----------------------------------------------------------------------
@@ -46,6 +46,13 @@ class TagTest(unittest.TestCase):
         name = 'a new tag'
         aTag = tag.Tag(name)
         self.assertRaises(ValueError, setattr, aTag, 'name', newName)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_empty(self):
+        """testing the name attribute being empty
+        """
         
         #----------------------------------------------------------------------
         # the name can not be empty
@@ -55,6 +62,13 @@ class TagTest(unittest.TestCase):
         name = 'a new tag'
         aTag = tag.Tag(name)
         self.assertRaises(ValueError, setattr, aTag, 'name', newName)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_property(self):
+        """testing the name property
+        """
         
         #----------------------------------------------------------------------
         # test if we get the name attribute correctly by using the name

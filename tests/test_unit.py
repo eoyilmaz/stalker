@@ -34,6 +34,8 @@ class UnitTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_init_arguments(self):
+        """testing the init arguments
+        """
         # the initialization should have the attributes below:
         # id, name, shortName
         
@@ -48,15 +50,39 @@ class UnitTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_name(self):
+    def test_name_empty(self):
+        """testing the name attribute against being empty
+        """
         # the unit should always have a name
         self.assertRaises(ValueError, unit.Unit, '', '')
-        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_attribute_str_unicedo(self):
+        """testing the name attribute not being string or unicode
+        """
+        # the name attribute should only accept string or unicode
+        self.assertRaises(ValueError, unit.Unit, 1, 'm')
+        self.assertRaises(ValueError, unit.Unit, [], 'm')
+        self.assertRaises(ValueError, unit.Unit, {}, 'm')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_property_str_unicode(self):
+        """testing the name attribute against being string or unicode
+        """
         # the name should be string type
         aUnit = unit.Unit('meter', 'm')
-        
         self.assertRaises(ValueError, setattr, aUnit, "name", 1)
-        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_property(self):
+        """testing the name property
+        """
         # test name property
         name = 'meter'
         aUnit = unit.Unit(name, 'm')
@@ -65,20 +91,38 @@ class UnitTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_abbriviation(self):
-        # the unit should always have a shortName
-        
+    def test_abbreviation_empty(self):
+        """testing the abbreviation attribute being empty
+        """
         # the abbreviation shouldn't be empty
         self.assertRaises(ValueError, unit.Unit, 'meter', '')
-        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_abbreviation_str_unicode(self):
+        """testing the abbreviation attribute string or unicode
+        """
         # the abbreviation shouldn't be anything other than a string or unicode
         self.assertRaises(ValueError, unit.Unit, 'meter', 1)
-        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_abbreviation_property_str_unicode(self):
+        """testing the abbreviation property string or unicode
+        """
         # assigning values to abbreviation should also return ValueErrors
         aUnit = unit.Unit('meter', 'm')
         self.assertRaises(ValueError, setattr, aUnit, 'abbreviation', '')
         self.assertRaises(ValueError, setattr, aUnit, 'abbreviation', 1)
-        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_abbreviation_property(self):
+        """testing the abbreviation property
+        """
         # test abbreviation property
         name = 'meter'
         abbreviation = 'm'
@@ -99,32 +143,72 @@ class ConvertableUnitTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_conversionRatio(self):
-        
-        name = 'meter'
-        abbr = 'm'
-        convRatio = 100
-        
+    def setUp(self):
+        """setting up some default values
+        """
+        self.name = 'meter'
+        self.abbr = 'm'
+        self.convRatio = 100
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_conversionRatio_zero(self):
+        """testing the conversionRatio attribute being zero
+        """
         # shouldn't be zero
-        self.assertRaises(ValueError, unit.ConvertableUnit, name, abbr, 0)
+        self.assertRaises(ValueError, unit.ConvertableUnit, self.name,
+                          self.abbr, 0)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_conversionRatio_negative(self):
+        """testing the conversionRatio attribute being negative
+        """
         
-        # shouldn't be below zero
-        self.assertRaises(ValueError, unit.ConvertableUnit, name, abbr, -1)
+        # shouldn't be negative
+        self.assertRaises(ValueError, unit.ConvertableUnit, self.name,
+                          self.abbr, -1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_conversionRatio_not_float(self):
+        """testing the conversionRatio attribute against not initialized as
+        float
+        """
         
         # should only accept floats
         self.assertRaises(ValueError,
                           unit.ConvertableUnit,
-                          name, abbr, 'a string')
+                          self.name, self.abbr, 'a string')
         
         self.assertRaises(ValueError,
                           unit.ConvertableUnit,
-                          name, abbr, u'a unicode')
+                          self.name, self.abbr, u'a unicode')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_conversionRatio_float(self):
+        """testing the conversionRatio attribute if set correctly as float
+        """
         
         # check if the conversion ratio is instance of float
-        aConvUnit = unit.ConvertableUnit(name, abbr, convRatio)
+        aConvUnit = unit.ConvertableUnit(self.name, self.abbr, self.convRatio)
         self.assertTrue(isinstance(aConvUnit.conversionRatio, float))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_conversionRatio_property(self):
+        """testing the conversionRatio property
+        """
         
         # check if the conversion ratio is assigned correctly
+        aConvUnit = unit.ConvertableUnit(self.name, self.abbr, self.convRatio)
+        
         newConvRatio = 1000.0
         aConvUnit.conversionRatio = newConvRatio
         self.assertTrue(aConvUnit.conversionRatio, newConvRatio)

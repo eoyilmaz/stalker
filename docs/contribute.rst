@@ -18,6 +18,43 @@ prohibited. Every added code to the trunk should have a corresponding test.
 
 .. _TDD: http://en.wikipedia.org/wiki/Test-driven_development
 
+Testing
+=======
+As stated above all the code written should have a corresponding test.
+
+Adding new features should start with design sketches. These sketches could be
+plain text files or mind maps or anything that can express the thing in you
+mind. While writing down these sketches, it should be kept in mind that these
+files also could be used to generate the documentation of the system. So
+writing down the sketches as rest files inside the docs is something very
+meaningful.
+
+The design should be followed by the tests. And the test should be
+followed by the implemantation, and the implamantation should be followed by
+tests again, until you are confident about your code and it is rock solid. Then
+the refactoring phase can start, and because you have enough tests that will
+keep your code doing a certain thing, you can freely change your code, because
+you know that you code will be doing the same thing until it is passing all the
+tests.
+
+The first tests written should always fail. This is something good to have.
+This will inform us that the code the test is testing is not written yet. So
+lets start adding the code that will pass the tests.
+
+The test framework of Stalker is unitTest and nose to help testing.
+
+These python modules should be installed to test Stalker properly:
+
+ * Nose
+ * Coverage
+ * Mocker
+
+The coverage of the tests should be kept as close as possible to %100.
+
+There is a helper script in the root of the project, called doTests. This is a
+shell script for linux, which runs all the neccessary tests and prints the
+tests results.
+
 Code Style
 ==========
 For the general coding style every participant should strictly follow `PEP 8`_
