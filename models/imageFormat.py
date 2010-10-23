@@ -1,20 +1,22 @@
 #-*- coding: utf-8 -*-
-"""
-Copyright (C) 2010  Erkan Ozgur Yilmaz
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>
-"""
+########################################################################
+# 
+# Copyright (C) 2010  Erkan Ozgur Yilmaz
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+# 
+########################################################################
 
 
 
@@ -136,6 +138,16 @@ class ImageFormat(object):
             """
             self._name = self._checkName(name)
         
+        doc = """this is a property to set and get the name of the
+        imageFormat
+        
+        the name can not be:
+        
+        * an empty string
+        * None
+        * anthing other than a string or unicode
+        """
+        
         return locals()
     
     name = property(**name())
@@ -155,6 +167,13 @@ class ImageFormat(object):
             self._width = self._checkWidth(width)
             # also update the deviceAspect
             self._updateDeviceAspect()
+        
+        doc = """this is a property to set and get the width of the
+        imageFormat
+        
+        * this attribute should be set to a positif non-zero integer
+        * given a float the object will cast the float to an integer
+        """
         
         return locals()
     
@@ -177,6 +196,13 @@ class ImageFormat(object):
             # also update the deviceAspect
             self._updateDeviceAspect()
         
+        doc = """this is a property to set and get the height of the
+        imageFormat
+        
+        * this attribute should be set to a positif non-zero integer
+        * given a float the object will cast the float to an integer
+        """
+        
         return locals()
     
     height = property(**height())
@@ -198,6 +224,13 @@ class ImageFormat(object):
             # also update the deviceAspect
             self._updateDeviceAspect()
         
+        doc = """this is a property to set and get the pixelAspect of the
+        imageFormat
+        
+        * this attribute should be set to a positif non-zero float
+        * given an integer the object will cast the integer to a float
+        """
+        
         return locals()
     
     pixelAspect = property(**pixelAspect())
@@ -208,6 +241,9 @@ class ImageFormat(object):
     @property
     def deviceAspect(self):
         """returns the device aspect
+        
+        because the deviceAspect is calculated from the width/height*pixel
+        formula, this property is read-only.
         """
         return self._deviceAspect
     
@@ -225,6 +261,9 @@ class ImageFormat(object):
             """sets the print resolution
             """
             self._printResolution = self._checkPrintResolution(printResolution)
+        
+        doc = """the printResolution property to set and get the
+        _printResolution attribute"""
         
         return locals()
     

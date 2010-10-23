@@ -12,8 +12,22 @@ Contents:
    :maxdepth: 2
    
    design.rst
-   modules.rst
    contribute.rst
+
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   
+   stalker.models
+   stalker.models.entity
+   stalker.models.imageFormat
+   stalker.models.link
+   stalker.models.status
+   stalker.models.tag
+   stalker.models.unit
+   stalker.models.user
+
 
 Indices and tables
 ==================

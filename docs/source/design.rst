@@ -166,3 +166,47 @@ Get the "rig" tasks of ozgur:
 As you see all the functionalities of SQLAlchemy is fully supported. At the end
 all the models are plain old python objects (POPO) and the persistancy part is
 handled with SQLAlchemy.
+
+Data Classes And Inheritance Map
+================================
+
+ImageFormat:
+ Description:
+  It is used to store information about various image formats.
+ 
+ Attributes:
+  +-------------------+---------+
+  | attribute name    | type    |
+  +===================+=========+
+  | name              | unicode |
+  +-------------------+---------+
+  | width             | integer |
+  +-------------------+---------+
+  | height            | integer |
+  +-------------------+---------+
+  | deviceAspectRatio | float   |
+  +-------------------+---------+
+  | pixelAspectRatio  | float   |
+  +-------------------+---------+
+  | printResolution   | float   |
+  +-------------------+---------+
+
+Unit:
+ Description:
+  This is the base Unit class that keeps data about the units
+ 
+ Attributes:
+  +-------------------+---------+
+  | attribute name    | type    |
+  +===================+=========+
+  | name              | unicode |
+  +-------------------+---------+
+  | abbreviation      | unicode |
+  +-------------------+---------+
+
+ConvertableUnit:
+ Description:
+  Convertable units like linear and angular units will derive from this class
+ 
+ Attributes:
+  

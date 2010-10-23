@@ -1,20 +1,22 @@
 #-*- coding: utf-8 -*-
-"""
-Copyright (C) 2010  Erkan Ozgur Yilmaz
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>
-"""
+########################################################################
+# 
+# Copyright (C) 2010  Erkan Ozgur Yilmaz
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+# 
+########################################################################
 
 
 
@@ -223,23 +225,53 @@ class TimeTest(unittest.TestCase):
     """tests the models/unit/Time class
     """
     
+    
+    
     #----------------------------------------------------------------------
-    def testFps(self):
-        # the fps shouldn't be zero or negative
-        self.assertRaises(ValueError, unit.Time, 'PAL', 'PAL', 0)
-        self.assertRaises(ValueError, unit.Time, 'NTSC', 'NTSC', -20 )
-        self.assertRaises(ValueError, unit.Time, '', '', -20 )
-        self.assertRaises(ValueError, unit.Time, 'PAL', '', -20 )
-        self.assertRaises(ValueError, unit.Time, '', 'PAL', -20 )
-        
+    def setUp(self):
+        """setup some values
+        """
+        self.name = 'PAL'
+        self.abbr = 'PAL'
+        self.fps = 25.0
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_zero(self):
+        """testing the fps attribute against being zero
+        """
+        # the fps shouldn't be zero
+        self.assertRaises(ValueError, unit.Time, self.name, self.abbr, 0)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_negative(self):
+        """testing the fps attribute against being negative
+        """
+        # the fps shouldn't be negative
+        self.assertRaises(ValueError, unit.Time, self.name, self.abbr, -20 )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_float(self):
+        """testing the fps attribute against being float
+        """
         # check if the fps is float
-        name = 'PAL'
-        abbr = 'PAL'
-        convRatio = 25
-        aTimeUnit = unit.Time( name, abbr, convRatio)
+        intFps = 25
+        aTimeUnit = unit.Time(self.name, self.abbr, intFps)
         self.assertTrue(isinstance(aTimeUnit.fps, float))
-        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_property(self):
+        """testing the fps property
+        """
         # check if the fps is assigned correctly
         newFPS = 30.0
+        aTimeUnit = unit.Time(self.name, self.abbr, self.fps)
         aTimeUnit.fps = newFPS
         self.assertEquals(aTimeUnit.fps, newFPS)

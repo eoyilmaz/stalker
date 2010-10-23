@@ -51,37 +51,40 @@ These python modules should be installed to test Stalker properly:
 
 The coverage of the tests should be kept as close as possible to %100.
 
-There is a helper script in the root of the project, called doTests. This is a
+There is a helper script in the root of the project, called *doTests*. This is a
 shell script for linux, which runs all the neccessary tests and prints the
-tests results.
+tests results and the coverage table.
 
 Code Style
 ==========
 For the general coding style every participant should strictly follow `PEP 8`_
 rules, and there are some extra rules as listed below:
+ * Class names should start with an upper-case letter, function and method
+   names should start with lower-case letter
+ 
  * The class definitions should be precided by 72 `#` characters, if you are
    using Wing IDE it is trivial cause Wing has these kind of templates:
    
    ::
-   
-           ########################################################################
-           class StatusBase(object):
-               """The StatusBase class
-               """
-               pass
-   
+     
+     ########################################################################
+     class StatusBase(object):
+         """The StatusBase class
+         """
+         pass
+     
  * The method or function definitions should be precided by 70 `-` characters,
    and the line should be commented out, again if you are using Wing IDE it
    does that automatically
    
    ::
    
-           #----------------------------------------------------------------------
-           def __init__(self, name, abbreviation, thumbnail=None):
-               
-               self._name = self._checkName(name)
-   
- 
+     #----------------------------------------------------------------------
+     def __init__(self, name, abbreviation, thumbnail=None):
+     
+         self._name = self._checkName(name)
+     
+     
  * There should be 3 spaces before and after functions and class methods:
    ::
    
