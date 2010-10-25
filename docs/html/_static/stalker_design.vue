@@ -1,18 +1,18 @@
-<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-10-21 -->
+<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-10-25 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Thu Oct 21 02:17:48 EEST 2010 by ozgur on platform Linux 2.6.32-25-generic in JVM 1.6.0_16-b01 -->
+<!-- Do Not Remove: Saved date Mon Oct 25 22:56:58 EEST 2010 by ozgur on platform Linux 2.6.32-25-generic in JVM 1.6.0_16-b01 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1287616668367" size="492301"
-        spec="/home/ozgur/Documents/development/stalker/docs/_static/stalker_design.vue"
+    <resource referenceCreated="1288036619250" size="492301"
+        spec="/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
-        <property key="File" value="/home/ozgur/Documents/development/stalker/docs/_static/stalker_design.vue"/>
+        <property key="File" value="/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue"/>
     </resource>
     <fillColor>#FFFFFF</fillColor>
     <strokeColor>#404040</strokeColor>
@@ -6759,8 +6759,8 @@
         </child>
         <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
     </child>
-    <child ID="1220" layerID="1" created="1272406209511" x="10383.844"
-        y="824.72656" width="114.27637" height="413.8496"
+    <child ID="1220" layerID="1" created="1272406209511" x="10383.447"
+        y="824.72656" width="113.57129" height="413.8496"
         strokeWidth="1.0" autoSized="false" controlCount="2"
         arrowState="2" xsi:type="link">
         <strokeColor>#000000</strokeColor>
@@ -6776,11 +6776,11 @@
             </metadata>
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/4156061d7f00010135ea5711c2172d7e</URIString>
-        <point1 x="10497.62" y="825.22656"/>
+        <point1 x="10496.519" y="825.22656"/>
         <point2 x="10410.482" y="1238.0762"/>
         <ID1 xsi:type="node">1292</ID1>
         <ID2 xsi:type="node">1205</ID2>
-        <ctrlPoint0 x="10443.291" y="1072.5376" xsi:type="point"/>
+        <ctrlPoint0 x="10440.595" y="1070.6526" xsi:type="point"/>
         <ctrlPoint1 x="10334.36" y="1082.7192" xsi:type="point"/>
     </child>
     <child ID="1227" label="Booking" layerID="1" created="1272406409370"
@@ -7398,52 +7398,52 @@
             </metadata-list>
             <URIString>http://vue.tufts.edu/rdf/resource/7464cb477f0001014a6b2ab74e33abce</URIString>
             <richText>&lt;html&gt;
-  &lt;head color="#000000" style="color: #000000"&gt;
+  &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { color: #000000; margin-top: 0px; font-size: 12; font-family: Arial; margin-left: 0px; margin-bottom: 0px; margin-right: 0px }
-        ol { vertical-align: middle; margin-top: 6; font-size: 12; list-style-position: outside; font-family: Arial; margin-left: 30 }
-        p { color: #000000; margin-top: 0; margin-left: 0; margin-bottom: 0; margin-right: 0 }
-        ul { vertical-align: middle; margin-top: 6; font-size: 12; list-style-position: outside; font-family: Arial; margin-left: 30 }
+        body { margin-right: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; font-size: 12; font-family: Arial; color: #000000 }
+        ol { margin-top: 6; list-style-position: outside; vertical-align: middle; margin-left: 30; font-size: 12; font-family: Arial }
+        p { margin-right: 0; margin-top: 0; margin-bottom: 0; margin-left: 0; color: #000000 }
+        ul { margin-top: 6; list-style-position: outside; vertical-align: middle; margin-left: 30; font-size: 12; font-family: Arial }
       --&gt;
     &lt;/style&gt;
     
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       design
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       model
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       rig
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       shading
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       previs
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       match move
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       animation
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       fx
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       cloth sim
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       layout
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       lighting
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       compositing
     &lt;/p&gt;
   &lt;/body&gt;
@@ -8015,7 +8015,7 @@
         <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
     </child>
     <child ID="1337" layerID="1" created="1273535548147" x="10252.009"
-        y="824.7246" width="231.1748" height="413.8379"
+        y="824.7246" width="232.45215" height="413.8379"
         strokeWidth="1.0" autoSized="false" controlCount="2"
         arrowState="2" xsi:type="link">
         <strokeColor>#000000</strokeColor>
@@ -8031,11 +8031,11 @@
             </metadata>
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/84a6a8077f00010170ca62f7da0e7b0d</URIString>
-        <point1 x="10482.684" y="825.2246"/>
+        <point1 x="10483.961" y="825.2246"/>
         <point2 x="10252.509" y="1238.0625"/>
         <ID1 xsi:type="node">1292</ID1>
         <ID2 xsi:type="node">1088</ID2>
-        <ctrlPoint0 x="10406.219" y="1056.4238" xsi:type="point"/>
+        <ctrlPoint0 x="10413.937" y="1043.2068" xsi:type="point"/>
         <ctrlPoint1 x="10255.375" y="1165.2032" xsi:type="point"/>
     </child>
     <child ID="1355" label="StatusList" layerID="1"
@@ -8372,31 +8372,31 @@
             </metadata-list>
             <URIString>http://vue.tufts.edu/rdf/resource/7464cb547f0001014a6b2ab78c34774b</URIString>
             <richText>&lt;html&gt;
-  &lt;head color="#000000" style="color: #000000"&gt;
+  &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { color: #000000; margin-top: 0px; font-size: 12; font-family: Arial; margin-left: 0px; margin-bottom: 0px; margin-right: 0px }
-        ol { vertical-align: middle; margin-top: 6; font-size: 12; list-style-position: outside; font-family: Arial; margin-left: 30 }
-        p { color: #000000; margin-top: 0; margin-left: 0; margin-bottom: 0; margin-right: 0 }
-        ul { vertical-align: middle; margin-top: 6; font-size: 12; list-style-position: outside; font-family: Arial; margin-left: 30 }
+        body { margin-right: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; font-size: 12; font-family: Arial; color: #000000 }
+        ol { margin-top: 6; list-style-position: outside; vertical-align: middle; margin-left: 30; font-size: 12; font-family: Arial }
+        p { margin-right: 0; margin-top: 0; margin-bottom: 0; margin-left: 0; color: #000000 }
+        ul { margin-top: 6; list-style-position: outside; vertical-align: middle; margin-left: 30; font-size: 12; font-family: Arial }
       --&gt;
     &lt;/style&gt;
     
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Character
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Vehicle
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Prop
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Environment
     &lt;/p&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Shot
     &lt;/p&gt;
   &lt;/body&gt;
@@ -9604,19 +9604,19 @@
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/84ca7c997f00010138aea9817270f61e</URIString>
         <richText>&lt;html&gt;
-  &lt;head color="#000000" style="color: #000000"&gt;
+  &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { color: #000000; margin-top: 0px; font-size: 12; font-family: Arial; margin-left: 0px; margin-bottom: 0px; margin-right: 0px }
-        ol { vertical-align: middle; margin-top: 6; font-size: 12; list-style-position: outside; font-family: Arial; margin-left: 30 }
-        p { color: #000000; margin-top: 0; margin-left: 0; margin-bottom: 0; margin-right: 0 }
-        ul { vertical-align: middle; margin-top: 6; font-size: 12; list-style-position: outside; font-family: Arial; margin-left: 30 }
+        body { margin-right: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; font-size: 12; font-family: Arial; color: #000000 }
+        ol { margin-top: 6; list-style-position: outside; vertical-align: middle; margin-left: 30; font-size: 12; font-family: Arial }
+        p { margin-right: 0; margin-top: 0; margin-bottom: 0; margin-left: 0; color: #000000 }
+        ul { margin-top: 6; list-style-position: outside; vertical-align: middle; margin-left: 30; font-size: 12; font-family: Arial }
       --&gt;
     &lt;/style&gt;
     
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       Shows implemented
     &lt;/p&gt;
   &lt;/body&gt;
@@ -9781,19 +9781,19 @@
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/c647f0e17f00010148a70acdc50d0bdb</URIString>
         <richText>&lt;html&gt;
-  &lt;head color="#000000" style="color: #000000"&gt;
+  &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { color: #000000; margin-top: 0px; font-size: 12; font-family: Arial; margin-left: 0px; margin-bottom: 0px; margin-right: 0px }
-        ol { vertical-align: middle; margin-top: 6; font-size: 12; list-style-position: outside; font-family: Arial; margin-left: 30 }
-        p { color: #000000; margin-top: 0; margin-left: 0; margin-bottom: 0; margin-right: 0 }
-        ul { vertical-align: middle; margin-top: 6; font-size: 12; list-style-position: outside; font-family: Arial; margin-left: 30 }
+        body { margin-right: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; font-size: 12; font-family: Arial; color: #000000 }
+        ol { margin-top: 6; list-style-position: outside; vertical-align: middle; margin-left: 30; font-size: 12; font-family: Arial }
+        p { margin-right: 0; margin-top: 0; margin-bottom: 0; margin-left: 0; color: #000000 }
+        ul { margin-top: 6; list-style-position: outside; vertical-align: middle; margin-left: 30; font-size: 12; font-family: Arial }
       --&gt;
     &lt;/style&gt;
     
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;p color="#000000" style="color: #000000"&gt;
+    &lt;p style="color: #000000" color="#000000"&gt;
       these need to have a single table inheritence
     &lt;/p&gt;
   &lt;/body&gt;
@@ -9810,12 +9810,12 @@
         <URIString>http://vue.tufts.edu/rdf/resource/5d104b32c00007d601b277f026b72230</URIString>
     </layer>
     <userZoom>1.0</userZoom>
-    <userOrigin x="3799.4695" y="207.37689"/>
+    <userOrigin x="3799.4695" y="228.37689"/>
     <presentationBackground>#202020</presentationBackground>
     <PathwayList currentPathway="-1" revealerIndex="-1"/>
     <date>2009-05-20</date>
     <mapFilterModel/>
     <modelVersion>5</modelVersion>
-    <saveLocation>/home/ozgur/Documents/development/stalker/docs/_static</saveLocation>
-    <saveFile>/home/ozgur/Documents/development/stalker/docs/_static/stalker_design.vue</saveFile>
+    <saveLocation>/home/ozgur/Documents/development/stalker/docs/source/_static</saveLocation>
+    <saveFile>/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue</saveFile>
 </LW-MAP>

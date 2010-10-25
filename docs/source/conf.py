@@ -227,3 +227,5 @@ man_pages = [
     ('index', 'stalker', u'Stalker Documentation',
      [u'Erkan Ozgur Yilmaz'], 1)
 ]
+
+autosummary_generate = True

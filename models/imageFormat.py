@@ -141,11 +141,10 @@ class ImageFormat(object):
         doc = """this is a property to set and get the name of the
         imageFormat
         
-        the name can not be:
-        
-        * an empty string
-        * None
-        * anthing other than a string or unicode
+        the name should be:
+        * a string or unicode value
+        * can not be None
+        * can not be an empty string or empty unicode
         """
         
         return locals()
@@ -171,8 +170,9 @@ class ImageFormat(object):
         doc = """this is a property to set and get the width of the
         imageFormat
         
-        * this attribute should be set to a positif non-zero integer
-        * given a float the object will cast the float to an integer
+        * the width should be set to a positif non-zero integer
+        * integers are also accepted but will be converted to float
+        * for improper inputs the object will raise a ValueError
         """
         
         return locals()
@@ -199,8 +199,9 @@ class ImageFormat(object):
         doc = """this is a property to set and get the height of the
         imageFormat
         
-        * this attribute should be set to a positif non-zero integer
-        * given a float the object will cast the float to an integer
+        * the height should be set to a positif non-zero integer
+        * integers are also accepted but will be converted to float
+        * for improper inputs the object will raise a ValueError
         """
         
         return locals()
@@ -227,8 +228,9 @@ class ImageFormat(object):
         doc = """this is a property to set and get the pixelAspect of the
         imageFormat
         
-        * this attribute should be set to a positif non-zero float
-        * given an integer the object will cast the integer to a float
+        * the pixelAspect should be set to a positif non-zero float
+        * integers are also accepted but will be converted to float
+        * for improper inputs the object will raise a ValueError
         """
         
         return locals()
@@ -262,8 +264,13 @@ class ImageFormat(object):
             """
             self._printResolution = self._checkPrintResolution(printResolution)
         
-        doc = """the printResolution property to set and get the
-        _printResolution attribute"""
+        doc = """this is a property to set and get the printResolution of the
+        imageFormat
+        
+        * it should be set to a positif non-zero float or integer
+        * integers are also accepted but will be converted to float
+        * for improper inputs the object will raise a ValueError
+        """
         
         return locals()
     

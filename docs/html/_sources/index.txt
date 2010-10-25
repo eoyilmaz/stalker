@@ -6,6 +6,24 @@
 Welcome to stalker's documentation!
 ===================================
 
+Stalker is an OpenSource Production Digital Asset Manager (ProdAM) licensed
+under GPL v3 and designed specially for Animation and VFX Studios.
+
+Stalker consists of several parts:
+ * Database
+ * Extensions
+ * Models
+ * UI
+
+The design of the Stalker is tried to be kept as flexible as possible.
+
+Stalker is build over these other OpenSource projects:
+ * Python
+ * SQLAlchemy
+ * PyQt
+ * JQuery
+ * Jinja
+
 Contents:
 
 .. toctree::
@@ -14,11 +32,11 @@ Contents:
    design.rst
    contribute.rst
 
-
 .. autosummary::
    :nosignatures:
    :toctree: generated/
    
+   stalker
    stalker.models
    stalker.models.entity
    stalker.models.imageFormat
@@ -27,6 +45,7 @@ Contents:
    stalker.models.tag
    stalker.models.unit
    stalker.models.user
+
 
 
 Indices and tables

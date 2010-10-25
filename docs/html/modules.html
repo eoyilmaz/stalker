@@ -47,7 +47,7 @@
 <span id="modules"></span><h1>Modules<a class="headerlink" href="#module-stalker.models.entity" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="stalker.models.entity.Entity">
-<em class="property">class </em><tt class="descclassname">stalker.models.entity.</tt><tt class="descname">Entity</tt><big>(</big><em>name</em>, <em>description=''</em>, <em>dateCreated=datetime.datetime(2010</em>, <em>10</em>, <em>23</em>, <em>16</em>, <em>25</em>, <em>6</em>, <em>225318)</em>, <em>dateUpdated=datetime.datetime(2010</em>, <em>10</em>, <em>23</em>, <em>16</em>, <em>25</em>, <em>6</em>, <em>225334)</em>, <em>createdBy=None</em>, <em>updatedBy=None</em>, <em>tags=</em><span class="optional">[</span><span class="optional">]</span>, <em>links=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=-1</em>, <em>statusList=</em><span class="optional">[</span><span class="optional">]</span>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="_modules/stalker/models/entity.html#Entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.entity.Entity" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">stalker.models.entity.</tt><tt class="descname">Entity</tt><big>(</big><em>name</em>, <em>description=''</em>, <em>dateCreated=datetime.datetime(2010</em>, <em>10</em>, <em>23</em>, <em>17</em>, <em>11</em>, <em>47</em>, <em>454202)</em>, <em>dateUpdated=datetime.datetime(2010</em>, <em>10</em>, <em>23</em>, <em>17</em>, <em>11</em>, <em>47</em>, <em>454215)</em>, <em>createdBy=None</em>, <em>updatedBy=None</em>, <em>tags=</em><span class="optional">[</span><span class="optional">]</span>, <em>links=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=-1</em>, <em>statusList=</em><span class="optional">[</span><span class="optional">]</span>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="_modules/stalker/models/entity.html#Entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.entity.Entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>The base class of all the other main objects</p>
 </dd></dl>
 
@@ -69,8 +69,9 @@ formula, this property is read-only.</p>
 <dd><p>this is a property to set and get the height of the
 imageFormat</p>
 <ul class="simple">
-<li>this attribute should be set to a positif non-zero integer</li>
-<li>given a float the object will cast the float to an integer</li>
+<li>the height should be set to a positif non-zero integer</li>
+<li>integers are also accepted but will be converted to float</li>
+<li>for improper inputs the object will raise a ValueError</li>
 </ul>
 </dd></dl>
 
@@ -79,12 +80,10 @@ imageFormat</p>
 <tt class="descname">name</tt><a class="reference internal" href="_modules/stalker/models/imageFormat.html#ImageFormat.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.imageFormat.ImageFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>this is a property to set and get the name of the
 imageFormat</p>
-<p>the name can not be:</p>
-<ul class="simple">
-<li>an empty string</li>
-<li>None</li>
-<li>anthing other than a string or unicode</li>
-</ul>
+<p>the name should be:
+* a string or unicode value
+* can not be None
+* can not be an empty string or empty unicode</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -93,16 +92,22 @@ imageFormat</p>
 <dd><p>this is a property to set and get the pixelAspect of the
 imageFormat</p>
 <ul class="simple">
-<li>this attribute should be set to a positif non-zero float</li>
-<li>given an integer the object will cast the integer to a float</li>
+<li>the pixelAspect should be set to a positif non-zero float</li>
+<li>integers are also accepted but will be converted to float</li>
+<li>for improper inputs the object will raise a ValueError</li>
 </ul>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="stalker.models.imageFormat.ImageFormat.printResolution">
 <tt class="descname">printResolution</tt><a class="reference internal" href="_modules/stalker/models/imageFormat.html#ImageFormat.printResolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.imageFormat.ImageFormat.printResolution" title="Permalink to this definition">¶</a></dt>
-<dd><p>the printResolution property to set and get the
-_printResolution attribute</p>
+<dd><p>this is a property to set and get the printResolution of the
+imageFormat</p>
+<ul class="simple">
+<li>it should be set to a positif non-zero float or integer</li>
+<li>integers are also accepted but will be converted to float</li>
+<li>for improper inputs the object will raise a ValueError</li>
+</ul>
 </dd></dl>
 
 <dl class="attribute">
@@ -111,8 +116,9 @@ _printResolution attribute</p>
 <dd><p>this is a property to set and get the width of the
 imageFormat</p>
 <ul class="simple">
-<li>this attribute should be set to a positif non-zero integer</li>
-<li>given a float the object will cast the float to an integer</li>
+<li>the width should be set to a positif non-zero integer</li>
+<li>integers are also accepted but will be converted to float</li>
+<li>for improper inputs the object will raise a ValueError</li>
 </ul>
 </dd></dl>
 
@@ -235,7 +241,7 @@ conversion ratio is 100</p>
 
 <span class="target" id="module-stalker.models.user"></span><dl class="class">
 <dt id="stalker.models.user.User">
-<em class="property">class </em><tt class="descclassname">stalker.models.user.</tt><tt class="descname">User</tt><big>(</big><em>name</em>, <em>description=''</em>, <em>dateCreated=datetime.datetime(2010</em>, <em>10</em>, <em>23</em>, <em>16</em>, <em>25</em>, <em>6</em>, <em>225318)</em>, <em>dateUpdated=datetime.datetime(2010</em>, <em>10</em>, <em>23</em>, <em>16</em>, <em>25</em>, <em>6</em>, <em>225334)</em>, <em>createdBy=None</em>, <em>updatedBy=None</em>, <em>tags=</em><span class="optional">[</span><span class="optional">]</span>, <em>links=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=-1</em>, <em>statusList=</em><span class="optional">[</span><span class="optional">]</span>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="_modules/stalker/models/user.html#User"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.user.User" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">stalker.models.user.</tt><tt class="descname">User</tt><big>(</big><em>name</em>, <em>description=''</em>, <em>dateCreated=datetime.datetime(2010</em>, <em>10</em>, <em>23</em>, <em>17</em>, <em>11</em>, <em>47</em>, <em>454202)</em>, <em>dateUpdated=datetime.datetime(2010</em>, <em>10</em>, <em>23</em>, <em>17</em>, <em>11</em>, <em>47</em>, <em>454215)</em>, <em>createdBy=None</em>, <em>updatedBy=None</em>, <em>tags=</em><span class="optional">[</span><span class="optional">]</span>, <em>links=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=-1</em>, <em>statusList=</em><span class="optional">[</span><span class="optional">]</span>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="_modules/stalker/models/user.html#User"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.user.User" title="Permalink to this definition">¶</a></dt>
 <dd><p>The user class</p>
 </dd></dl>
 

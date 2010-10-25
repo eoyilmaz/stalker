@@ -1,0 +1,22 @@
+stalker.tests.test_imageFormat
+==============================
+
+.. automodule:: stalker.tests.test_imageFormat
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ImageFormatTest
+   
+   
+
+   
+   
+   

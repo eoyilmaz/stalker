@@ -1,0 +1,22 @@
+stalker.tests.test_entity
+=========================
+
+.. automodule:: stalker.tests.test_entity
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      EntityTest
+   
+   
+
+   
+   
+   
