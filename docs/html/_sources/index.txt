@@ -33,18 +33,30 @@ Contents:
    contribute.rst
 
 .. autosummary::
-   :nosignatures:
    :toctree: generated/
+   :nosignatures:
    
    stalker
    stalker.models
    stalker.models.entity
+   stalker.models.entity.Entity
    stalker.models.imageFormat
+   stalker.models.imageFormat.ImageFormat
    stalker.models.link
+   stalker.models.link.Link
    stalker.models.status
+   stalker.models.status.Status
+   stalker.models.status.StatusList
    stalker.models.tag
+   stalker.models.tag.Tag
    stalker.models.unit
+   stalker.models.unit.Angular
+   stalker.models.unit.ConvertableUnit
+   stalker.models.unit.Linear
+   stalker.models.unit.Time
+   stalker.models.unit.Unit
    stalker.models.user
+   stalker.models.user.User
 
 
 

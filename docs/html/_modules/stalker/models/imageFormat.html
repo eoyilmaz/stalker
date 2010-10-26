@@ -72,12 +72,12 @@
 
 
 <span class="c">########################################################################</span>
-<div class="viewcode-block" id="ImageFormat"><a class="viewcode-back" href="../../../modules.html#stalker.models.imageFormat.ImageFormat">[docs]</a><span class="k">class</span> <span class="nc">ImageFormat</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageFormat"><a class="viewcode-back" href="../../../generated/stalker.models.imageFormat.ImageFormat.html#stalker.models.imageFormat.ImageFormat">[docs]</a><span class="k">class</span> <span class="nc">ImageFormat</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;the image format class</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">pixelAspect</span><span class="p">,</span> <span class="n">printResolution</span><span class="o">=</span><span class="mi">300</span> <span class="p">):</span>
+<div class="viewcode-block" id="ImageFormat.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.imageFormat.ImageFormat.html#stalker.models.imageFormat.ImageFormat.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">pixelAspect</span><span class="p">,</span> <span class="n">printResolution</span><span class="o">=</span><span class="mi">300</span> <span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
@@ -90,7 +90,7 @@
         
     
     
-    <span class="c">#----------------------------------------------------------------------</span>
+    <span class="c">#----------------------------------------------------------------------</span></div>
     <span class="k">def</span> <span class="nf">_updateDeviceAspect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;updates the device aspect ratio for the given width and height</span>
 <span class="sd">        &quot;&quot;&quot;</span>

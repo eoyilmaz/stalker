@@ -42,12 +42,12 @@ class TagTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the name should be a string or unicode
-        newName = 1
-        self.assertRaises(ValueError, tag.Tag, newName)
+        new_name = 1
+        self.assertRaises(ValueError, tag.Tag, new_name)
         # check the name property
         name = 'a new tag'
-        aTag = tag.Tag(name)
-        self.assertRaises(ValueError, setattr, aTag, 'name', newName)
+        a_tag = tag.Tag(name)
+        self.assertRaises(ValueError, setattr, a_tag, 'name', new_name)
     
     
     
@@ -58,12 +58,12 @@ class TagTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the name can not be empty
-        newName = ''
-        self.assertRaises(ValueError, tag.Tag, newName)
+        new_name = ''
+        self.assertRaises(ValueError, tag.Tag, new_name)
         # check the name property
         name = 'a new tag'
-        aTag = tag.Tag(name)
-        self.assertRaises(ValueError, setattr, aTag, 'name', newName)
+        a_tag = tag.Tag(name)
+        self.assertRaises(ValueError, setattr, a_tag, 'name', new_name)
     
     
     
@@ -76,6 +76,6 @@ class TagTest(unittest.TestCase):
         # test if we get the name attribute correctly by using the name
         # property
         name = 'a tag'
-        aTag = tag.Tag(name)
-        self.assertEquals(aTag.name, name)
+        a_tag = tag.Tag(name)
+        self.assertEquals(a_tag.name, name)
         

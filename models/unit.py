@@ -30,34 +30,34 @@ class Unit(object):
     
     #----------------------------------------------------------------------
     def __init__(self, name, abbreviation):
-        self._name = self._checkName(name)
-        self._abbreviation = self._checkAbbreviation(abbreviation)
+        self._name = self._check_name(name)
+        self._abbreviation = self._check_abbreviation(abbreviation)
     
     
     
     #----------------------------------------------------------------------
-    def _checkName(self, name):
+    def _check_name(self, name):
         """checks the name attribute
         """
         
         if not isinstance(name, (str, unicode)) or \
            len(name) == 0:
-            raise( ValueError("name should be instance of string or unicode \
-            and it shouldn't be empty") )
+            raise(ValueError("name should be instance of string or unicode \
+            and it shouldn't be empty"))
         
         return name
     
     
     
     #----------------------------------------------------------------------
-    def _checkAbbreviation(self, abbreviation):
+    def _check_abbreviation(self, abbreviation):
         """checks the abbreviation attribute
         """
         
         if not isinstance(abbreviation, (str, unicode)) or \
            len(abbreviation) == 0:
-            raise( ValueError("abbreviation should be instance of string or \
-            unicode and it shouldn't be empty") )
+            raise(ValueError("abbreviation should be instance of string or \
+            unicode and it shouldn't be empty"))
         
         return abbreviation
     
@@ -71,7 +71,7 @@ class Unit(object):
             return self._name
         
         def fset(self, name):
-            self._name = self._checkName(name)
+            self._name = self._check_name(name)
         
         return locals()
     
@@ -87,7 +87,7 @@ class Unit(object):
             return self._abbreviation
         
         def fset(self, abbr):
-            self._abbreviation = self._checkAbbreviation(abbr)
+            self._abbreviation = self._check_abbreviation(abbr)
         
         return locals()
     
@@ -105,41 +105,41 @@ class ConvertableUnit(Unit):
     """
     
     #----------------------------------------------------------------------
-    def __init__(self, name, abbreviation, conversionRatio):
+    def __init__(self, name, abbreviation, conversion_ratio):
         super(ConvertableUnit, self).__init__(name, abbreviation)
-        self._conversionRatio = self._checkConversionRatio(conversionRatio) #float(conversionRatio)
+        self._conversion_ratio = self._check_conversion_ratio(conversion_ratio) #float(conversion_ratio)
     
     
     
     #----------------------------------------------------------------------
-    def _checkConversionRatio(self, conversionRatio):
+    def _check_conversion_ratio(self, conversion_ratio):
         """checks the conversion ratio
         """
         
-        if not isinstance(conversionRatio, (int, float)) or \
-           conversionRatio <= 0:
-            raise( ValueError("conversionRatio should be instance of integer \
-            or float and cannot be negative or zero") )
+        if not isinstance(conversion_ratio, (int, float)) or \
+           conversion_ratio <= 0:
+            raise(ValueError("conversion_ratio should be instance of integer \
+            or float and cannot be negative or zero"))
         
-        return float(conversionRatio)
+        return float(conversion_ratio)
     
     
     
     #----------------------------------------------------------------------
-    def conversionRatio():
+    def conversion_ratio():
         def fget(self):
-            """returns the conversionRatio
+            """returns the conversion_ratio
             """
-            return self._conversionRatio
+            return self._conversion_ratio
         
-        def fset(self, conversionRatio):
-            """sets the conversionRatio
+        def fset(self, conversion_ratio):
+            """sets the conversion_ratio
             """
-            self._conversionRatio = self._checkConversionRatio(conversionRatio)
+            self._conversion_ratio = self._check_conversion_ratio(conversion_ratio)
         
         return locals()
     
-    conversionRatio = property( **conversionRatio() )
+    conversion_ratio = property( **conversion_ratio() )
 
 
 
@@ -182,19 +182,19 @@ class Time(Unit):
     #----------------------------------------------------------------------
     def __init__(self, name, abberation, fps):
         super(Time, self).__init__(name, abberation)
-        self._fps = self._checkFps(fps)
+        self._fps = self._check_fps(fps)
     
     
     
     #----------------------------------------------------------------------
-    def _checkFps(self, fps):
+    def _check_fps(self, fps):
         """checks the fps
         """
         
         if not isinstance(fps, (int, float)) or \
            fps <= 0:
-            raise( ValueError("fps should be instance of integer \
-            or float and cannot be negative or zero") )
+            raise(ValueError("fps should be instance of integer \
+            or float and cannot be negative or zero"))
         
         return float(fps)
     
@@ -210,7 +210,7 @@ class Time(Unit):
         def fset(self, fps):
             """sets the fps
             """
-            self._fps = self._checkFps(fps)
+            self._fps = self._check_fps(fps)
         
         return locals()
     

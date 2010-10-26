@@ -33,13 +33,13 @@ class Status(object):
     #----------------------------------------------------------------------
     def __init__(self, name, abbreviation, thumbnail=None):
         
-        self._name = self._checkName(name)
-        self._abbreviation = self._checkAbbreviation( abbreviation )
+        self._name = self._check_name(name)
+        self._abbreviation = self._check_abbreviation( abbreviation )
     
     
     
     #----------------------------------------------------------------------
-    def _checkName(self, name):
+    def _check_name(self, name):
         """checks the name attribute
         """
         
@@ -54,13 +54,13 @@ class Status(object):
     
     
     #----------------------------------------------------------------------
-    def _checkAbbreviation(self, abbreviation):
+    def _check_abbreviation(self, abbreviation):
         """checks the abbreviation attribute
         """
         
         if abbreviation == '' \
            or not isinstance(abbreviation, (str, unicode)):
-            raise( ValueError("the abbreviation shouldn't be empty and it \
+            raise(ValueError("the abbreviation shouldn't be empty and it \
             should be a str or unicode"))
         
         return abbreviation
@@ -75,7 +75,7 @@ class Status(object):
             return self._name
         
         def fset(self, name):
-            self._name = self._checkName(name)
+            self._name = self._check_name(name)
         
         return locals()
     
@@ -93,7 +93,7 @@ class Status(object):
         def fset(self, abbreviation):
             """sets the abbreviation
             """
-            self._abbreviation = self._checkAbbreviation(abbreviation)
+            self._abbreviation = self._check_abbreviation(abbreviation)
         
         return locals()
     
@@ -115,13 +115,13 @@ class StatusList(object):
     def __init__(self, name, statuses):
         
         
-        self._name = self._checkName(name)
-        self._statuses = self._checkStatuses(statuses)
+        self._name = self._check_name(name)
+        self._statuses = self._check_statuses(statuses)
     
     
     
     #----------------------------------------------------------------------
-    def _checkName(self, name):
+    def _check_name(self, name):
         """checks the given name
         """
         
@@ -136,8 +136,8 @@ class StatusList(object):
     
     
     #----------------------------------------------------------------------
-    def _checkStatuses(self, statuses):
-        """checks the given statusList
+    def _check_statuses(self, statuses):
+        """checks the given status_list
         """
         
         if not isinstance(statuses, list):
@@ -166,7 +166,7 @@ class StatusList(object):
         def fset(self, name):
             """sets the name attribute
             """
-            self._name = self._checkName(name)
+            self._name = self._check_name(name)
         
         return locals()
     
@@ -178,14 +178,14 @@ class StatusList(object):
     def statuses():
         
         def fget(self):
-            """returns the statusList
+            """returns the status_list
             """
             return self._statuses
         
         def fset(self, statuses):
             """sets the statuses
             """
-            self._statuses = self._checkStatuses(statuses)
+            self._statuses = self._check_statuses(statuses)
         
         return locals()
     

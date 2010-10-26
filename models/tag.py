@@ -33,12 +33,12 @@ class Tag(object):
     #----------------------------------------------------------------------
     def __init__(self, name):
         
-        self._name = self._checkName(name)
+        self._name = self._check_name(name)
     
     
     
     #----------------------------------------------------------------------
-    def _checkName(self, name):
+    def _check_name(self, name):
         """checks the given name attribute
         """
         
@@ -60,7 +60,7 @@ class Tag(object):
         def fset(self, name):
             """sets the name attribute
             """
-            self._name = self._checkName(name)
+            self._name = self._check_name(name)
         
         return locals()
     

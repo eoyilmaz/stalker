@@ -22,14 +22,14 @@
 
 import mocker
 
-mockerObj = mocker.Mocker()
-obj = mockerObj.mock()
+mocker_obj = mocker.Mocker()
+obj = mocker_obj.mock()
 
 obj.hello()
-mockerObj.result("Hi!")
-mockerObj.count(0,1000)
+mocker_obj.result("Hi!")
+mocker_obj.count(0,1000)
 
-mockerObj.replay()
+mocker_obj.replay()
 
 obj.hello()
 #'Hi!'
@@ -37,7 +37,7 @@ obj.hello()
 #obj.bye()
 #Traceback (most recent call last):
 #...
-#mockerObj.MatchError: [Mocker] Unexpected expression: obj.bye
+#mocker_obj.MatchError: [Mocker] Unexpected expression: obj.bye
 
-#mockerObj.restore()
-#mockerObj.verify()
+#mocker_obj.restore()
+#mocker_obj.verify()

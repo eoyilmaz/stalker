@@ -41,8 +41,8 @@ class TestStatus(unittest.TestCase):
         # the name should be a str or unicode
         self.assertRaises(ValueError, status.Status, 1, '1')
         # check the property
-        aStatus = status.Status('Complete', 'Cmpl')
-        self.assertRaises(ValueError, setattr, aStatus, 'name', 1)
+        a_status = status.Status('Complete', 'Cmpl')
+        self.assertRaises(ValueError, setattr, a_status, 'name', 1)
         
     
     #----------------------------------------------------------------------
@@ -53,8 +53,8 @@ class TestStatus(unittest.TestCase):
         # the name could not be an empty string
         self.assertRaises(ValueError, status.Status, '', 'Cmp')
         # check the property
-        aStatus = status.Status('Complete', 'Cmpl')
-        self.assertRaises(ValueError, setattr, aStatus, 'name', '')
+        a_status = status.Status('Complete', 'Cmpl')
+        self.assertRaises(ValueError, setattr, a_status, 'name', '')
     
     
     
@@ -67,14 +67,14 @@ class TestStatus(unittest.TestCase):
         #----------------------------------------------------------------------
         # the first letter of the name should be in upper case and the other
         # letters should be in lower case
-        statusName = 'test'
-        aStatus = status.Status(statusName, 'tst')
-        self.assertEqual(statusName.title(), aStatus.name)
+        status_name = 'test'
+        a_status = status.Status(status_name, 'tst')
+        self.assertEqual(status_name.title(), a_status.name)
         
         # check the property
-        aStatus = status.Status('Complete', 'Cmpl')
-        aStatus.name = statusName
-        self.assertEqual(statusName.title(), aStatus.name)
+        a_status = status.Status('Complete', 'Cmpl')
+        a_status.name = status_name
+        self.assertEqual(status_name.title(), a_status.name)
     
     
     
@@ -85,13 +85,13 @@ class TestStatus(unittest.TestCase):
         """
         #----------------------------------------------------------------------
         # the first letter of the name could not be an integer
-        statusName = '1test'
-        self.assertRaises(ValueError, status.Status, statusName, \
-                           statusName)
+        status_name = '1test'
+        self.assertRaises(ValueError, status.Status, status_name, \
+                           status_name)
         
         # check the property
-        aStatus = status.Status('Complete', 'Cmpl')
-        self.assertRaises(ValueError, setattr, aStatus, 'name', statusName)
+        a_status = status.Status('Complete', 'Cmpl')
+        self.assertRaises(ValueError, setattr, a_status, 'name', status_name)
     
     
     
@@ -106,8 +106,8 @@ class TestStatus(unittest.TestCase):
         self.assertRaises(ValueError, status.Status, 'Complete', 1)
         
         # check the property
-        aStatus = status.Status('Complete', 'Cmlt')
-        self.assertRaises(ValueError, setattr, aStatus, 'abbreviation', 1)
+        a_status = status.Status('Complete', 'Cmlt')
+        self.assertRaises(ValueError, setattr, a_status, 'abbreviation', 1)
     
     
     
@@ -121,15 +121,15 @@ class TestStatus(unittest.TestCase):
         self.assertRaises(ValueError, status.Status, 'Complete', '')
         
         # check the property
-        aStatus = status.Status('Complete', 'Cmlt')
-        self.assertRaises(ValueError, setattr, aStatus, 'abbreviation', '')
+        a_status = status.Status('Complete', 'Cmlt')
+        self.assertRaises(ValueError, setattr, a_status, 'abbreviation', '')
         
         #----------------------------------------------------------------------
         # check if the abbreviation is get correctly
         name = 'Complete'
         abbr = 'Cmplt'
-        aStatus = status.Status(name, abbr)
-        self.assertEquals( aStatus.abbreviation, abbr)
+        a_status = status.Status(name, abbr)
+        self.assertEquals( a_status.abbreviation, abbr)
 
 
 
@@ -149,10 +149,10 @@ class StatusListTest(unittest.TestCase):
         """
         
         # proper values
-        self.listName = 'aStatusList'
+        self.list_name = 'a_status_list'
         
         # should use Mocks in the list
-        self.aStatusList = [
+        self.a_status_list = [
             status.Status('Not Available', 'N/A'),
             status.Status('Waiting To Start', 'WStrt'),
             status.Status('Started', 'Strt'),
@@ -171,11 +171,11 @@ class StatusListTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the name couldn't be empty
-        self.assertRaises(ValueError, status.StatusList, '', self.aStatusList)
+        self.assertRaises(ValueError, status.StatusList, '', self.a_status_list)
         
         # test the name property
-        aStatusList_obj = status.StatusList(self.listName, self.aStatusList)
-        self.assertRaises(ValueError, setattr, aStatusList_obj, 'name', '')
+        a_status_list_obj = status.StatusList(self.list_name, self.a_status_list)
+        self.assertRaises(ValueError, setattr, a_status_list_obj, 'name', '')
     
     
     
@@ -186,12 +186,12 @@ class StatusListTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the name should be a string or unicode
-        self.assertRaises(ValueError, status.StatusList, 1, self.aStatusList)
+        self.assertRaises(ValueError, status.StatusList, 1, self.a_status_list)
         
-        aStatusList_obj = status.StatusList(self.listName, self.aStatusList)
-        self.assertRaises(ValueError, setattr, aStatusList_obj, 'name', 1)
-        self.assertRaises(ValueError, setattr, aStatusList_obj, 'name', [])
-        self.assertRaises(ValueError, setattr, aStatusList_obj, 'name', {})
+        a_status_list_obj = status.StatusList(self.list_name, self.a_status_list)
+        self.assertRaises(ValueError, setattr, a_status_list_obj, 'name', 1)
+        self.assertRaises(ValueError, setattr, a_status_list_obj, 'name', [])
+        self.assertRaises(ValueError, setattr, a_status_list_obj, 'name', {})
     
     
     
@@ -202,17 +202,17 @@ class StatusListTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # it should be property
-        newListName = 'new status list name'
+        new_list_name = 'new status list name'
         
         # check if we can properly assign new values to name property
-        aStatusList_obj = status.StatusList(self.listName, self.aStatusList)
-        aStatusList_obj.name = newListName
-        self.assertEquals(aStatusList_obj.name, newListName)
+        a_status_list_obj = status.StatusList(self.list_name, self.a_status_list)
+        a_status_list_obj.name = new_list_name
+        self.assertEquals(a_status_list_obj.name, new_list_name)
     
     
     
     #----------------------------------------------------------------------
-    def test_statusList_accepting_statuses(self):
+    def test_status_list_accepting_statuses(self):
         """testing the statuses list attribute
         """
         
@@ -223,73 +223,73 @@ class StatusListTest(unittest.TestCase):
         #----------------------------------------------------------------------
         # it should only accept lists of statuses
         self.assertRaises(ValueError,
-                          status.StatusList, self.listName, 'a str')
+                          status.StatusList, self.list_name, 'a str')
         self.assertRaises(ValueError,
-                          status.StatusList, self.listName, {})
+                          status.StatusList, self.list_name, {})
         self.assertRaises(ValueError,
-                          status.StatusList, self.listName, 1)
+                          status.StatusList, self.list_name, 1)
     
     
     
     #----------------------------------------------------------------------
-    def test_statusList_property_accepting_only_statuses(self):
-        """testing the statusList attribute as a property and accepting
+    def test_status_list_property_accepting_only_statuses(self):
+        """testing the status_list attribute as a property and accepting
         Status objects only
         """
-        newStatusList = status.StatusList( self.listName, self.aStatusList )
+        new_status_list = status.StatusList( self.list_name, self.a_status_list )
         
         # check the property
         self.assertRaises(ValueError,
-                          setattr,newStatusList, 'statuses', '1')
+                          setattr,new_status_list, 'statuses', '1')
         
         self.assertRaises(ValueError,
-                          setattr, newStatusList, 'statuses', ['1'])
+                          setattr, new_status_list, 'statuses', ['1'])
         
         self.assertRaises(ValueError,
-                          setattr, newStatusList, 'statuses', 1)
+                          setattr, new_status_list, 'statuses', 1)
         
         self.assertRaises(ValueError,
-                          setattr, newStatusList, 'statuses', [1, 'w'])
+                          setattr, new_status_list, 'statuses', [1, 'w'])
     
     
     
     #----------------------------------------------------------------------
-    def test_statusList_being_empty(self):
-        """testing statusList against being empty
+    def test_status_list_being_empty(self):
+        """testing status_list against being empty
         """
         
         #----------------------------------------------------------------------
         # the list couldn't be empty
         self.assertRaises(ValueError,
-                          status.StatusList, self.listName, [])
+                          status.StatusList, self.list_name, [])
     
     
     
     #----------------------------------------------------------------------
     def test_statusList_list_elements_being_status_objects(self):
-        """testing statusList elements against not being derived from Status
+        """testing status_list elements against not being derived from Status
         class
         """
         
         #----------------------------------------------------------------------
         # every element should be an object derived from Status
-        aFakeStatusList = [1, 2, 'a string', u'a unicode', 4.5]
+        a_fake_status_list = [1, 2, 'a string', u'a unicode', 4.5]
         
         self.assertRaises(ValueError,
-                          status.StatusList, self.listName, aFakeStatusList)
+                          status.StatusList, self.list_name, a_fake_status_list)
     
     
     
     #----------------------------------------------------------------------
     def test_statusList_property(self):
-        """testing statusList as being property
+        """testing status_list as being property
         """
         
         #----------------------------------------------------------------------
         # it should be a property so check if it sets property correctly
-        aStatusList_obj = status.StatusList( self.listName, self.aStatusList)
-        newListOfStatutes = [ status.Status('New Status', 'abbr') ]
-        aStatusList_obj.statuses = newListOfStatutes
-        self.assertEquals( aStatusList_obj.statuses, newListOfStatutes)
+        a_status_list_obj = status.StatusList( self.list_name, self.a_status_list)
+        new_list_of_statutes = [ status.Status('New Status', 'abbr') ]
+        a_status_list_obj.statuses = new_list_of_statutes
+        self.assertEquals( a_status_list_obj.statuses, new_list_of_statutes)
         
         

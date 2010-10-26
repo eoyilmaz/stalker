@@ -1,0 +1,186 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>stalker.models.imageFormat.ImageFormat &mdash; Stalker v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Stalker v0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="stalker.models.link" href="stalker.models.link.html" />
+    <link rel="prev" title="stalker.models.imageFormat" href="stalker.models.imageFormat.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="stalker.models.link.html" title="stalker.models.link"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="stalker.models.imageFormat.html" title="stalker.models.imageFormat"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Stalker v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="stalker-models-imageformat-imageformat">
+<h1>stalker.models.imageFormat.ImageFormat<a class="headerlink" href="#stalker-models-imageformat-imageformat" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="stalker.models.imageFormat.ImageFormat">
+<em class="property">class </em><tt class="descclassname">stalker.models.imageFormat.</tt><tt class="descname">ImageFormat</tt><big>(</big><em>name</em>, <em>width</em>, <em>height</em>, <em>pixel_aspect=1.0</em>, <em>print_resolution=300</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/imageFormat.html#ImageFormat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.imageFormat.ImageFormat" title="Permalink to this definition">¶</a></dt>
+<dd><p>the image format class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of the object, it cannot be empty or anything other
+than a string or unicode</li>
+<li><strong>width</strong> &#8211; the width of the format, it cannot be zero or negative, if a
+float number is given it will be converted to integer</li>
+<li><strong>height</strong> &#8211; the height of the format, it cannot be zero or negative, if
+a float number is given it will be converted to integer</li>
+<li><strong>pixel_aspect</strong> &#8211; the pixel aspect ratio of the current ImageFormat
+object, it can not be zero or negative, and if given as an integer it
+will be converted to a float, the default value is 1.0</li>
+<li><strong>print_resolution</strong> &#8211; the print resolution of the ImageFormat given as
+DPI (dot-per-inch). It can not be zero or negative</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="stalker.models.imageFormat.ImageFormat.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>name</em>, <em>width</em>, <em>height</em>, <em>pixel_aspect=1.0</em>, <em>print_resolution=300</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/imageFormat.html#ImageFormat.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.imageFormat.ImageFormat.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><a class="reference internal" href="#stalker.models.imageFormat.ImageFormat.__init__" title="stalker.models.imageFormat.ImageFormat.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(name,&nbsp;width,&nbsp;height[,&nbsp;...])</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">device_aspect</span></tt></td>
+<td>returns the device aspect</td>
+</tr>
+<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">height</span></tt></td>
+<td>this is a property to set and get the height of the</td>
+</tr>
+<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">name</span></tt></td>
+<td>this is a property to set and get the name of the</td>
+</tr>
+<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">pixel_aspect</span></tt></td>
+<td>this is a property to set and get the pixel_aspect of the</td>
+</tr>
+<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">print_resolution</span></tt></td>
+<td>this is a property to set and get the print_resolution of the</td>
+</tr>
+<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">width</span></tt></td>
+<td>this is a property to set and get the width of the</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="stalker.models.imageFormat.html"
+                        title="previous chapter">stalker.models.imageFormat</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="stalker.models.link.html"
+                        title="next chapter">stalker.models.link</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/generated/stalker.models.imageFormat.ImageFormat.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="stalker.models.link.html" title="stalker.models.link"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="stalker.models.imageFormat.html" title="stalker.models.imageFormat"
+             >previous</a> |</li>
+        <li><a href="../index.html">Stalker v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Erkan Ozgur Yilmaz.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

@@ -26,33 +26,51 @@
 ########################################################################
 class ImageFormat(object):
     """the image format class
+    
+    :param name: the name of the object, it cannot be empty or anything other
+      than a string or unicode
+    
+    :param width: the width of the format, it cannot be zero or negative, if a
+      float number is given it will be converted to integer
+    
+    :param height: the height of the format, it cannot be zero or negative, if
+      a float number is given it will be converted to integer
+    
+    :param pixel_aspect: the pixel aspect ratio of the current ImageFormat
+      object, it can not be zero or negative, and if given as an integer it
+      will be converted to a float, the default value is 1.0
+    
+    :param print_resolution: the print resolution of the ImageFormat given as
+      DPI (dot-per-inch). It can not be zero or negative
+    
     """
     
     #----------------------------------------------------------------------
-    def __init__(self, name, width, height, pixelAspect, printResolution=300 ):
+    def __init__(self, name, width, height,
+                 pixel_aspect=1.0, print_resolution=300 ):
         
-        self._name = self._checkName(name)
-        self._width = self._checkWidth(width)
-        self._height = self._checkHeight(height)
-        self._pixelAspect = self._checkPixelAspect(pixelAspect)
-        self._printResolution = self._checkPrintResolution(printResolution)
-        self._deviceAspect = 1.0
+        self._name = self._check_name(name)
+        self._width = self._check_width(width)
+        self._height = self._check_height(height)
+        self._pixel_aspect = self._check_pixel_aspect(pixel_aspect)
+        self._print_resolution = self._check_print_resolution(print_resolution)
+        self._device_aspect = 1.0
         
-        self._updateDeviceAspect()
+        self._update_device_aspect()
         
     
     
     #----------------------------------------------------------------------
-    def _updateDeviceAspect(self):
+    def _update_device_aspect(self):
         """updates the device aspect ratio for the given width and height
         """
-        self._deviceAspect = float(self._width) / float(self._height) \
-            * float(self._pixelAspect)
+        self._device_aspect = float(self._width) / float(self._height) \
+            * float(self._pixel_aspect)
     
     
     
     #----------------------------------------------------------------------
-    def _checkName(self, name):
+    def _check_name(self, name):
         """checks the given name
         """
         
@@ -67,7 +85,7 @@ class ImageFormat(object):
     
     
     #----------------------------------------------------------------------
-    def _checkWidth(self, width):
+    def _check_width(self, width):
         """checks the given width
         """
         if not isinstance(width, (int, float)):
@@ -81,7 +99,7 @@ class ImageFormat(object):
     
     
     #----------------------------------------------------------------------
-    def _checkHeight(self, height):
+    def _check_height(self, height):
         """checks the given height
         """
         if not isinstance(height, (int, float)):
@@ -95,34 +113,34 @@ class ImageFormat(object):
     
     
     #----------------------------------------------------------------------
-    def _checkPixelAspect(self, pixelAspect):
+    def _check_pixel_aspect(self, pixel_aspect):
         """checks the given pixel aspect
         """
-        if not isinstance(pixelAspect, (int, float)):
-            raise(ValueError("pixelAspect should be an instance of int or \
+        if not isinstance(pixel_aspect, (int, float)):
+            raise(ValueError("pixel_aspect should be an instance of int or \
             float"))
         
-        if pixelAspect <= 0:
-            raise(ValueError("pixelAspect can not be zero or a negative \
+        if pixel_aspect <= 0:
+            raise(ValueError("pixel_aspect can not be zero or a negative \
             value"))
         
-        return float(pixelAspect)
+        return float(pixel_aspect)
     
     
     
     #----------------------------------------------------------------------
-    def _checkPrintResolution(self, printResolution):
+    def _check_print_resolution(self, print_resolution):
         """checks the print resolution
         """
-        if not isinstance(printResolution, (int, float)):
+        if not isinstance(print_resolution, (int, float)):
             raise(ValueError("print resolution should be an instance of int \
             or float"))
         
-        if printResolution <= 0:
+        if print_resolution <= 0:
             raise(ValueError("print resolution should not be zero or \
             negative"))
         
-        return float(printResolution)
+        return float(print_resolution)
     
     
     
@@ -136,10 +154,10 @@ class ImageFormat(object):
         def fset(self, name):
             """sets the name attribute
             """
-            self._name = self._checkName(name)
+            self._name = self._check_name(name)
         
         doc = """this is a property to set and get the name of the
-        imageFormat
+        image_format
         
         the name should be:
         * a string or unicode value
@@ -163,12 +181,12 @@ class ImageFormat(object):
         def fset(self, width):
             """sets the width
             """
-            self._width = self._checkWidth(width)
-            # also update the deviceAspect
-            self._updateDeviceAspect()
+            self._width = self._check_width(width)
+            # also update the device_aspect
+            self._update_device_aspect()
         
         doc = """this is a property to set and get the width of the
-        imageFormat
+        image_format
         
         * the width should be set to a positif non-zero integer
         * integers are also accepted but will be converted to float
@@ -191,13 +209,13 @@ class ImageFormat(object):
         def fset(self, height):
             """sets the height
             """
-            self._height = self._checkHeight(height)
+            self._height = self._check_height(height)
             
-            # also update the deviceAspect
-            self._updateDeviceAspect()
+            # also update the device_aspect
+            self._update_device_aspect()
         
         doc = """this is a property to set and get the height of the
-        imageFormat
+        image_format
         
         * the height should be set to a positif non-zero integer
         * integers are also accepted but will be converted to float
@@ -211,61 +229,61 @@ class ImageFormat(object):
     
     
     #----------------------------------------------------------------------
-    def pixelAspect():
+    def pixel_aspect():
         def fget(self):
-            """returns the pixelAspect ratio
+            """returns the pixel_aspect ratio
             """
-            return self._pixelAspect
+            return self._pixel_aspect
         
-        def fset(self, pixelAspect):
-            """sets the pixelAspect ratio
+        def fset(self, pixel_aspect):
+            """sets the pixel_aspect ratio
             """
-            self._pixelAspect = self._checkPixelAspect(pixelAspect)
+            self._pixel_aspect = self._check_pixel_aspect(pixel_aspect)
             
-            # also update the deviceAspect
-            self._updateDeviceAspect()
+            # also update the device_aspect
+            self._update_device_aspect()
         
-        doc = """this is a property to set and get the pixelAspect of the
-        imageFormat
+        doc = """this is a property to set and get the pixel_aspect of the
+        ImageFormat
         
-        * the pixelAspect should be set to a positif non-zero float
+        * the pixel_aspect should be set to a positif non-zero float
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise a ValueError
         """
         
         return locals()
     
-    pixelAspect = property(**pixelAspect())
+    pixel_aspect = property(**pixel_aspect())
     
     
     
     #----------------------------------------------------------------------
     @property
-    def deviceAspect(self):
+    def device_aspect(self):
         """returns the device aspect
         
-        because the deviceAspect is calculated from the width/height*pixel
+        because the device_aspect is calculated from the width/height*pixel
         formula, this property is read-only.
         """
-        return self._deviceAspect
+        return self._device_aspect
     
     
     
     #----------------------------------------------------------------------
-    def printResolution():
+    def print_resolution():
         
         def fget(self):
             """returns the print resolution
             """
-            return self._printResolution
+            return self._print_resolution
         
-        def fset(self, printResolution):
+        def fset(self, print_resolution):
             """sets the print resolution
             """
-            self._printResolution = self._checkPrintResolution(printResolution)
+            self._print_resolution = self._check_print_resolution(print_resolution)
         
-        doc = """this is a property to set and get the printResolution of the
-        imageFormat
+        doc = """this is a property to set and get the print_resolution of the
+        ImageFormat
         
         * it should be set to a positif non-zero float or integer
         * integers are also accepted but will be converted to float
@@ -274,7 +292,7 @@ class ImageFormat(object):
         
         return locals()
     
-    printResolution = property(**printResolution())
+    print_resolution = property(**print_resolution())
     
     
     

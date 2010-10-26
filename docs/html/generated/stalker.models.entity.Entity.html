@@ -1,0 +1,178 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>stalker.models.entity.Entity &mdash; Stalker v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Stalker v0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="stalker.models.imageFormat" href="stalker.models.imageFormat.html" />
+    <link rel="prev" title="stalker.models.entity" href="stalker.models.entity.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="stalker.models.imageFormat.html" title="stalker.models.imageFormat"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="stalker.models.entity.html" title="stalker.models.entity"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Stalker v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="stalker-models-entity-entity">
+<h1>stalker.models.entity.Entity<a class="headerlink" href="#stalker-models-entity-entity" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="stalker.models.entity.Entity">
+<em class="property">class </em><tt class="descclassname">stalker.models.entity.</tt><tt class="descname">Entity</tt><big>(</big><em>name</em>, <em>created_by=None</em>, <em>updated_by=None</em>, <em>status_list=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=0</em>, <em>date_created=datetime.datetime(2010</em>, <em>10</em>, <em>26</em>, <em>18</em>, <em>24</em>, <em>20</em>, <em>768613)</em>, <em>date_updated=datetime.datetime(2010</em>, <em>10</em>, <em>26</em>, <em>18</em>, <em>24</em>, <em>20</em>, <em>768626)</em>, <em>description=''</em>, <em>tags=</em><span class="optional">[</span><span class="optional">]</span>, <em>links=</em><span class="optional">[</span><span class="optional">]</span>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/entity.html#Entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.entity.Entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base class of all the other classes</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>created_by</strong> &#8211; the created_by attribute should contain a User object
+who is created this object</li>
+<li><strong>updated_by</strong> &#8211; the updated_by attribute should contain a User object
+who is updated the user lastly. the created_by and updated_by attributes
+should point the same object if this entity is just created</li>
+<li><strong>date_created</strong> &#8211; the date that this object is created. it should be a
+time before now</li>
+<li><strong>date_updated</strong> &#8211; this is the date that this object is updated lastly.
+for newly created entities this is equal to date_created and the
+date_updated cannot be before date_created</li>
+<li><strong>name</strong> &#8211; a string or unicode attribute that holds the name of this
+entity. it could not be empty, the first letter should be an upper case
+alphabetic (not alphanumeric).</li>
+<li><strong>description</strong> &#8211; a string or unicode attribute that holds the
+description of this entity object, it could be empty</li>
+<li><strong>status_list</strong> &#8211; this attribute holds a status list object, which shows
+the possible statuses that this entity could be in. This attribute can
+not be empty.</li>
+<li><strong>status</strong> &#8211; an integer value which is the index of the status in the
+status_list attribute. So the value of this attribute couldn&#8217;t be lower
+than 0 and higher than the length of the status_list object and nothing
+other than an integer</li>
+<li><strong>tags</strong> &#8211; a list of tag objects related to this entity. tags could be an
+empty list, or when omitted it will be set to an empty list</li>
+<li><strong>links</strong> &#8211; (not sure about the implementation) a list of link objects.
+that shows the various links related to this entity object. it is
+initialized with an empty list when omitted</li>
+<li><strong>thumbnail</strong> &#8211; (not tested yet) a file object that shows the thumbnail
+file of this entity. thumbnail could be None.</li>
+<li><strong>notes</strong> &#8211; a list of note objects. notes can be an empty list.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="stalker.models.entity.Entity.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>name</em>, <em>created_by=None</em>, <em>updated_by=None</em>, <em>status_list=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=0</em>, <em>date_created=datetime.datetime(2010</em>, <em>10</em>, <em>26</em>, <em>18</em>, <em>24</em>, <em>20</em>, <em>768613)</em>, <em>date_updated=datetime.datetime(2010</em>, <em>10</em>, <em>26</em>, <em>18</em>, <em>24</em>, <em>20</em>, <em>768626)</em>, <em>description=''</em>, <em>tags=</em><span class="optional">[</span><span class="optional">]</span>, <em>links=</em><span class="optional">[</span><span class="optional">]</span>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/entity.html#Entity.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.entity.Entity.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><a class="reference internal" href="#stalker.models.entity.Entity.__init__" title="stalker.models.entity.Entity.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(name,&nbsp;10,&nbsp;26,&nbsp;18,&nbsp;24,&nbsp;20,&nbsp;10,&nbsp;26,&nbsp;...)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="stalker.models.entity.html"
+                        title="previous chapter">stalker.models.entity</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="stalker.models.imageFormat.html"
+                        title="next chapter">stalker.models.imageFormat</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/generated/stalker.models.entity.Entity.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="stalker.models.imageFormat.html" title="stalker.models.imageFormat"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="stalker.models.entity.html" title="stalker.models.entity"
+             >previous</a> |</li>
+        <li><a href="../index.html">Stalker v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Erkan Ozgur Yilmaz.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

@@ -72,21 +72,21 @@
 
 
 <span class="c">########################################################################</span>
-<div class="viewcode-block" id="Status"><a class="viewcode-back" href="../../../modules.html#stalker.models.status.Status">[docs]</a><span class="k">class</span> <span class="nc">Status</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Status"><a class="viewcode-back" href="../../../generated/stalker.models.status.Status.html#stalker.models.status.Status">[docs]</a><span class="k">class</span> <span class="nc">Status</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The Status class</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Status.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.status.Status.html#stalker.models.status.Status.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAbbreviation</span><span class="p">(</span> <span class="n">abbreviation</span> <span class="p">)</span>
     
     
     
-    <span class="c">#----------------------------------------------------------------------</span>
+    <span class="c">#----------------------------------------------------------------------</span></div>
     <span class="k">def</span> <span class="nf">_checkName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the name attribute</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -153,14 +153,14 @@
 
 
 <span class="c">########################################################################</span></div>
-<div class="viewcode-block" id="StatusList"><a class="viewcode-back" href="../../../modules.html#stalker.models.status.StatusList">[docs]</a><span class="k">class</span> <span class="nc">StatusList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="StatusList"><a class="viewcode-back" href="../../../generated/stalker.models.status.StatusList.html#stalker.models.status.StatusList">[docs]</a><span class="k">class</span> <span class="nc">StatusList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;the list version of the Status</span>
 <span class="sd">    holds multiple statuses to be used as a choice list for several</span>
 <span class="sd">    other classes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">statuses</span><span class="p">):</span>
+<div class="viewcode-block" id="StatusList.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.status.StatusList.html#stalker.models.status.StatusList.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">statuses</span><span class="p">):</span>
         
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -168,7 +168,7 @@
     
     
     
-    <span class="c">#----------------------------------------------------------------------</span>
+    <span class="c">#----------------------------------------------------------------------</span></div>
     <span class="k">def</span> <span class="nf">_checkName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the given name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
