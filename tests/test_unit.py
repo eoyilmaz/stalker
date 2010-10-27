@@ -34,6 +34,17 @@ class UnitTest(unittest.TestCase):
     """
     
     
+    
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """setting up some default values
+        """
+        self.name = 'meter'
+        self.abbr = 'm'
+        self.conv_ratio = 100
+    
+    
+    
     #----------------------------------------------------------------------
     def test_init_arguments(self):
         """testing the init arguments
@@ -47,7 +58,7 @@ class UnitTest(unittest.TestCase):
         self.assertRaises(ValueError, unit.Unit, '', '')
         
         # this should work
-        a_unit = unit.Unit('meter', 'm')
+        a_unit = unit.Unit('meter', 'm', 100.0)
     
     
     
@@ -132,74 +143,72 @@ class UnitTest(unittest.TestCase):
         a_unit = unit.Unit(name, abbreviation)
         
         self.assertEquals(a_unit.abbreviation, abbreviation)
-
-
-
-
-
-
-########################################################################
-class ConvertableUnitTest(unittest.TestCase):
-    """tests the ConveratableUnit class
-    """
     
     
     
     #----------------------------------------------------------------------
-    def setUp(self):
-        """setting up some default values
-        """
-        self.name = 'meter'
-        self.abbr = 'm'
-        self.conv_ratio = 100
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_conversionRatio_zero(self):
+    def test_conversion_ratio_zero(self):
         """testing the conversion_ratio attribute being zero
         """
         # shouldn't be zero
-        self.assertRaises(ValueError, unit.ConvertableUnit, self.name,
-                          self.abbr, 0)
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            self.name,
+            self.abbr,
+            0
+        )
     
     
     
     #----------------------------------------------------------------------
-    def test_conversionRatio_negative(self):
+    def test_conversion_ratio_negative(self):
         """testing the conversion_ratio attribute being negative
         """
         
         # shouldn't be negative
-        self.assertRaises(ValueError, unit.ConvertableUnit, self.name,
-                          self.abbr, -1)
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            self.name,
+            self.abbr,
+            -1
+        )
     
     
     
     #----------------------------------------------------------------------
-    def test_conversionRatio_not_float(self):
+    def test_conversion_ratio_not_float(self):
         """testing the conversion_ratio attribute against not initialized as
         float
         """
         
         # should only accept floats
-        self.assertRaises(ValueError,
-                          unit.ConvertableUnit,
-                          self.name, self.abbr, 'a string')
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            self.name,
+            self.abbr,
+            'a string'
+        )
         
-        self.assertRaises(ValueError,
-                          unit.ConvertableUnit,
-                          self.name, self.abbr, u'a unicode')
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            self.name,
+            self.abbr,
+            u'a unicode'
+        )
     
     
     
     #----------------------------------------------------------------------
-    def test_conversionRatio_float(self):
+    def test_conversion_ratio_float(self):
         """testing the conversion_ratio attribute if set correctly as float
         """
         
         # check if the conversion ratio is instance of float
-        a_conv_unit = unit.ConvertableUnit(
+        a_conv_unit = unit.Unit(
             self.name, self.abbr, self.conv_ratio
         )
         self.assertTrue(isinstance(a_conv_unit.conversion_ratio, float))
@@ -207,18 +216,25 @@ class ConvertableUnitTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_conversionRatio_property(self):
+    def test_conversion_ratio_property(self):
         """testing the conversion_ratio property
         """
         
         # check if the conversion ratio is assigned correctly
-        a_conv_unit = unit.ConvertableUnit(
+        a_conv_unit = unit.Unit(
             self.name, self.abbr, self.conv_ratio
         )
         
         new_conv_ratio = 1000.0
         a_conv_unit.conversion_ratio = new_conv_ratio
         self.assertTrue(a_conv_unit.conversion_ratio, new_conv_ratio)
+
+
+
+
+
+
+
 
 
 

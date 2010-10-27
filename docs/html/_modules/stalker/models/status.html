@@ -81,13 +81,13 @@
     <span class="c">#----------------------------------------------------------------------</span>
 <div class="viewcode-block" id="Status.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.status.Status.html#stalker.models.status.Status.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAbbreviation</span><span class="p">(</span> <span class="n">abbreviation</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_abbreviation</span><span class="p">(</span> <span class="n">abbreviation</span> <span class="p">)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span></div>
-    <span class="k">def</span> <span class="nf">_checkName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the name attribute</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
@@ -102,13 +102,13 @@
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">_checkAbbreviation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_abbreviation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the abbreviation attribute</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="n">abbreviation</span> <span class="o">==</span> <span class="s">&#39;&#39;</span> \
            <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">abbreviation</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">)):</span>
-            <span class="k">raise</span><span class="p">(</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;the abbreviation shouldn&#39;t be empty and it </span><span class="se">\</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;the abbreviation shouldn&#39;t be empty and it </span><span class="se">\</span>
 <span class="s">            should be a str or unicode&quot;</span><span class="p">))</span>
         
         <span class="k">return</span> <span class="n">abbreviation</span>
@@ -116,23 +116,23 @@
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="Status.name"><a class="viewcode-back" href="../../../modules.html#stalker.models.status.Status.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the name property</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
         
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">name</span><span class="p">())</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="Status.abbreviation"><a class="viewcode-back" href="../../../modules.html#stalker.models.status.Status.abbreviation">[docs]</a>    <span class="k">def</span> <span class="nf">abbreviation</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">abbreviation</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the abbreviation property</span>
 <span class="sd">            &quot;&quot;&quot;</span>
@@ -141,10 +141,10 @@
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;sets the abbreviation</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAbbreviation</span><span class="p">(</span><span class="n">abbreviation</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_abbreviation</span><span class="p">(</span><span class="n">abbreviation</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">abbreviation</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">abbreviation</span><span class="p">())</span>
 
 
@@ -163,13 +163,13 @@
 <div class="viewcode-block" id="StatusList.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.status.StatusList.html#stalker.models.status.StatusList.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">statuses</span><span class="p">):</span>
         
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_statuses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkStatuses</span><span class="p">(</span><span class="n">statuses</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_statuses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_statuses</span><span class="p">(</span><span class="n">statuses</span><span class="p">)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span></div>
-    <span class="k">def</span> <span class="nf">_checkName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the given name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
@@ -184,8 +184,8 @@
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">_checkStatuses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statuses</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;checks the given statusList</span>
+    <span class="k">def</span> <span class="nf">_check_statuses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statuses</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;checks the given status_list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statuses</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -204,7 +204,7 @@
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="StatusList.name"><a class="viewcode-back" href="../../../modules.html#stalker.models.status.StatusList.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">():</span>
         
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the name attribute</span>
@@ -214,29 +214,29 @@
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;sets the name attribute</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">name</span><span class="p">())</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="StatusList.statuses"><a class="viewcode-back" href="../../../modules.html#stalker.models.status.StatusList.statuses">[docs]</a>    <span class="k">def</span> <span class="nf">statuses</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">statuses</span><span class="p">():</span>
         
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;returns the statusList</span>
+            <span class="sd">&quot;&quot;&quot;returns the status_list</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_statuses</span>
         
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statuses</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;sets the statuses</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_statuses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkStatuses</span><span class="p">(</span><span class="n">statuses</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_statuses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_statuses</span><span class="p">(</span><span class="n">statuses</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">statuses</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">statuses</span><span class="p">())</span>
     
     

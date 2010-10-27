@@ -51,7 +51,6 @@ Contents:
    stalker.models.tag.Tag
    stalker.models.unit
    stalker.models.unit.Angular
-   stalker.models.unit.ConvertableUnit
    stalker.models.unit.Linear
    stalker.models.unit.Time
    stalker.models.unit.Unit

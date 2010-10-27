@@ -14,7 +14,6 @@ stalker.models.unit
    .. autosummary::
    
       Angular
-      ConvertableUnit
       Linear
       Time
       Unit

@@ -24,6 +24,7 @@ stalker.models.unit.Time
    .. autosummary::
    
       ~Time.abbreviation
+      ~Time.conversion_ratio
       ~Time.fps
       ~Time.name
    

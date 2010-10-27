@@ -74,120 +74,119 @@
 <span class="c">########################################################################</span>
 <div class="viewcode-block" id="Unit"><a class="viewcode-back" href="../../../generated/stalker.models.unit.Unit.html#stalker.models.unit.Unit">[docs]</a><span class="k">class</span> <span class="nc">Unit</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;the base Unit class that keeps data about the units</span>
+<span class="sd">    </span>
+<span class="sd">    :param name: the name of the unit, should be a string or unicode</span>
+<span class="sd">    </span>
+<span class="sd">    :param abbreviation: the abbreviation of the unit, cm for centimeters, m</span>
+<span class="sd">      for meters, km for kilometers and so on</span>
+<span class="sd">    </span>
+<span class="sd">    :param conversion_ratio: the conversion ratio to the base unit. the base</span>
+<span class="sd">        unit is:</span>
+<span class="sd">        </span>
+<span class="sd">            * centimeter (cm) for Linear Units</span>
+<span class="sd">            * degree (deg) for Angular Units</span>
+<span class="sd">            * second (sec) for Time Units</span>
+<span class="sd">        </span>
+<span class="sd">        the default value is 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="Unit.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.unit.Unit.html#stalker.models.unit.Unit.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAbbreviation</span><span class="p">(</span><span class="n">abbreviation</span><span class="p">)</span>
+<div class="viewcode-block" id="Unit.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.unit.Unit.html#stalker.models.unit.Unit.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">,</span> <span class="n">conversion_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_abbreviation</span><span class="p">(</span><span class="n">abbreviation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_conversion_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_conversion_ratio</span><span class="p">(</span><span class="n">conversion_ratio</span><span class="p">)</span> <span class="c">#float(conversion_ratio)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span></div>
-    <span class="k">def</span> <span class="nf">_checkName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the name attribute</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">))</span> <span class="ow">or</span> \
            <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span><span class="p">(</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;name should be instance of string or unicode </span><span class="se">\</span>
-<span class="s">            and it shouldn&#39;t be empty&quot;</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;name should be instance of string or unicode </span><span class="se">\</span>
+<span class="s">            and it shouldn&#39;t be empty&quot;</span><span class="p">))</span>
         
         <span class="k">return</span> <span class="n">name</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">_checkAbbreviation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_abbreviation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the abbreviation attribute</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">abbreviation</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">))</span> <span class="ow">or</span> \
            <span class="nb">len</span><span class="p">(</span><span class="n">abbreviation</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span><span class="p">(</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;abbreviation should be instance of string or </span><span class="se">\</span>
-<span class="s">            unicode and it shouldn&#39;t be empty&quot;</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;abbreviation should be instance of string or </span><span class="se">\</span>
+<span class="s">            unicode and it shouldn&#39;t be empty&quot;</span><span class="p">))</span>
         
         <span class="k">return</span> <span class="n">abbreviation</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="Unit.name"><a class="viewcode-back" href="../../../modules.html#stalker.models.unit.Unit.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the name</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
         
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span> <span class="o">**</span><span class="n">name</span><span class="p">()</span> <span class="p">)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="Unit.abbreviation"><a class="viewcode-back" href="../../../modules.html#stalker.models.unit.Unit.abbreviation">[docs]</a>    <span class="k">def</span> <span class="nf">abbreviation</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">abbreviation</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the abbreviation</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span>
         
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abbr</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAbbreviation</span><span class="p">(</span><span class="n">abbr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_abbreviation</span><span class="p">(</span><span class="n">abbr</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">abbreviation</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span> <span class="o">**</span><span class="n">abbreviation</span><span class="p">()</span> <span class="p">)</span>
-
-
-
-
-
-
-<span class="c">########################################################################</span></div>
-<div class="viewcode-block" id="ConvertableUnit"><a class="viewcode-back" href="../../../generated/stalker.models.unit.ConvertableUnit.html#stalker.models.unit.ConvertableUnit">[docs]</a><span class="k">class</span> <span class="nc">ConvertableUnit</span><span class="p">(</span><span class="n">Unit</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convertable units like linear and angular units will derive from this</span>
-<span class="sd">    class</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    
+    
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="ConvertableUnit.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.unit.ConvertableUnit.html#stalker.models.unit.ConvertableUnit.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">,</span> <span class="n">conversionRatio</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ConvertableUnit</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">abbreviation</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_conversionRatio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkConversionRatio</span><span class="p">(</span><span class="n">conversionRatio</span><span class="p">)</span> <span class="c">#float(conversionRatio)</span>
-    
-    
-    
-    <span class="c">#----------------------------------------------------------------------</span></div>
-    <span class="k">def</span> <span class="nf">_checkConversionRatio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conversionRatio</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_conversion_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conversion_ratio</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the conversion ratio</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">conversionRatio</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> \
-           <span class="n">conversionRatio</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span><span class="p">(</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;conversionRatio should be instance of integer </span><span class="se">\</span>
-<span class="s">            or float and cannot be negative or zero&quot;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">conversion_ratio</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> \
+           <span class="n">conversion_ratio</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;conversion_ratio should be instance of integer </span><span class="se">\</span>
+<span class="s">            or float and cannot be negative or zero&quot;</span><span class="p">))</span>
         
-        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">conversionRatio</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">conversion_ratio</span><span class="p">)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="ConvertableUnit.conversionRatio"><a class="viewcode-back" href="../../../modules.html#stalker.models.unit.ConvertableUnit.conversionRatio">[docs]</a>    <span class="k">def</span> <span class="nf">conversionRatio</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">conversion_ratio</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;returns the conversionRatio</span>
+            <span class="sd">&quot;&quot;&quot;returns the conversion_ratio</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conversionRatio</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conversion_ratio</span>
         
-        <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conversionRatio</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;sets the conversionRatio</span>
+        <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conversion_ratio</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;sets the conversion_ratio</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_conversionRatio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkConversionRatio</span><span class="p">(</span><span class="n">conversionRatio</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_conversion_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_conversion_ratio</span><span class="p">(</span><span class="n">conversion_ratio</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
-    <span class="n">conversionRatio</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span> <span class="o">**</span><span class="n">conversionRatio</span><span class="p">()</span> <span class="p">)</span>
+    
+    <span class="n">conversion_ratio</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span> <span class="o">**</span><span class="n">conversion_ratio</span><span class="p">()</span> <span class="p">)</span>
 
 
 
@@ -195,7 +194,7 @@
 
 
 <span class="c">########################################################################</span></div>
-<div class="viewcode-block" id="Linear"><a class="viewcode-back" href="../../../generated/stalker.models.unit.Linear.html#stalker.models.unit.Linear">[docs]</a><span class="k">class</span> <span class="nc">Linear</span><span class="p">(</span><span class="n">ConvertableUnit</span><span class="p">):</span>
+<div class="viewcode-block" id="Linear"><a class="viewcode-back" href="../../../generated/stalker.models.unit.Linear.html#stalker.models.unit.Linear">[docs]</a><span class="k">class</span> <span class="nc">Linear</span><span class="p">(</span><span class="n">Unit</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The conversion ratio is the ratio to the centimeter. It shows how much</span>
 <span class="sd">    centimeter is equal to 1 unit of this. 1 meter is 100 centimeter so the</span>
 <span class="sd">    conversion ratio is 100</span>
@@ -208,7 +207,7 @@
 
 
 <span class="c">########################################################################</span></div>
-<div class="viewcode-block" id="Angular"><a class="viewcode-back" href="../../../generated/stalker.models.unit.Angular.html#stalker.models.unit.Angular">[docs]</a><span class="k">class</span> <span class="nc">Angular</span><span class="p">(</span><span class="n">ConvertableUnit</span><span class="p">):</span>
+<div class="viewcode-block" id="Angular"><a class="viewcode-back" href="../../../generated/stalker.models.unit.Angular.html#stalker.models.unit.Angular">[docs]</a><span class="k">class</span> <span class="nc">Angular</span><span class="p">(</span><span class="n">Unit</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The conversion ratio is the ratio to degree. It means how much</span>
 <span class="sd">    degree is equal to this unit, 1 raidan is equal to 57.2957795 degree so the</span>
 <span class="sd">    conversion ratio is 57.2957795</span>
@@ -229,27 +228,27 @@
     
     <span class="c">#----------------------------------------------------------------------</span>
 <div class="viewcode-block" id="Time.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.unit.Time.html#stalker.models.unit.Time.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">abberation</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Time</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">abberation</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkFps</span><span class="p">(</span><span class="n">fps</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Time</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">abberation</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_fps</span><span class="p">(</span><span class="n">fps</span><span class="p">)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span></div>
-    <span class="k">def</span> <span class="nf">_checkFps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_fps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the fps</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fps</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> \
            <span class="n">fps</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span><span class="p">(</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;fps should be instance of integer </span><span class="se">\</span>
-<span class="s">            or float and cannot be negative or zero&quot;</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;fps should be instance of integer </span><span class="se">\</span>
+<span class="s">            or float and cannot be negative or zero&quot;</span><span class="p">))</span>
         
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">fps</span><span class="p">)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="Time.fps"><a class="viewcode-back" href="../../../modules.html#stalker.models.unit.Time.fps">[docs]</a>    <span class="k">def</span> <span class="nf">fps</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">fps</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the fps</span>
 <span class="sd">            &quot;&quot;&quot;</span>
@@ -258,10 +257,10 @@
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;sets the fps</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkFps</span><span class="p">(</span><span class="n">fps</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_fps</span><span class="p">(</span><span class="n">fps</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">fps</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span> <span class="o">**</span><span class="n">fps</span><span class="p">()</span> <span class="p">)</span>
 </pre></div></div>
 

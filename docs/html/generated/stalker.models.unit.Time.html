@@ -57,6 +57,20 @@
 <dt id="stalker.models.unit.Time">
 <em class="property">class </em><tt class="descclassname">stalker.models.unit.</tt><tt class="descname">Time</tt><big>(</big><em>name</em>, <em>abberation</em>, <em>fps</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/unit.html#Time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.unit.Time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time units like PAL, NTSC etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fps</strong> &#8211; frames-per-second (fps) for Time Units (I know it sounds
+wrong  it should be named MediaSpeed if we are going to use fps as the
+unit, and if we are talking about time then the unit should be seconds,
+but in animation/vfx world media speed as time unit is much meaningful)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="stalker.models.unit.Time.__init__">
 <tt class="descname">__init__</tt><big>(</big><em>name</em>, <em>abberation</em>, <em>fps</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/unit.html#Time.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.unit.Time.__init__" title="Permalink to this definition">¶</a></dt>
@@ -82,13 +96,16 @@
 </colgroup>
 <tbody valign="top">
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">abbreviation</span></tt></td>
-<td>returns the abbreviation</td>
+<td>the abbreviation property, sets and returns the name of the</td>
+</tr>
+<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">conversion_ratio</span></tt></td>
+<td>the conversion_ratio property, sets and returns the</td>
 </tr>
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">fps</span></tt></td>
 <td>returns the fps</td>
 </tr>
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">name</span></tt></td>
-<td>returns the name</td>
+<td>the name property, sets and returns the name of the current</td>
 </tr>
 </tbody>
 </table>

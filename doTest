@@ -1,3 +1,0 @@
-clear
-clear
-nosetests --with-coverage --cover-package stalker

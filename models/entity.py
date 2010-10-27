@@ -21,7 +21,7 @@
 
 
 import datetime
-
+from stalker.models import status
 
 
 
@@ -92,17 +92,499 @@ class Entity(object):
                  ):
         
         # the attributes
-        self.name = name
-        self.description = description
-        self.date_created = date_created
-        self.date_updated = date_updated
-        self.created_by = created_by
-        self.updated_by = updated_by
-        self.tags = tags
-        self.links = links
-        self.status = status
-        self.status_list = status_list
-        self.notes = notes
-        self.thumbnail = thumbnail
+        self._name = self._check_name(name)
+        self._description = self._check_description(description)
+        self._date_created = self._check_date_created(date_created)
+        self._date_updated = self._check_date_updated(date_updated)
+        self._created_by = self._check_created_by(created_by)
+        self._updated_by = self._check_updated_by(updated_by)
+        self._tags = self._check_tags(tags)
+        self._links = self._check_links(links)
+        self._status_list = self._check_status_list(status_list)
+        self._status = self._check_status(status)
+        self._notes = self._check_notes(notes)
+        self._thumbnail = thumbnail
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_created_by(self, created_by_in):
+        """checks the given created_by_in attribute
+        """
+        
+        #-------------------------------------------------------------------
+        # Python documentation says one of the nice ways to over come circular
+        # imports is late imports and it is perfectly ok to use it like that
+        # 
+        # just try to import the module as late as possible
+        # 
+        # ref:
+        # http://docs.python.org/faq/programming.html#what-are-the-best-
+        #                               practices-for-using-import-in-a-module
+        #-------------------------------------------------------------------
+        from stalker.models import user
+        
+        # raise ValueError when:
+        # it is None
+        if created_by_in is None:
+            raise ValueError("the created_by attribute can not be set to None")
+        
+        if not isinstance(created_by_in, user.User):
+            raise ValueError("the created_by attribute should be an instance \
+            of stalker.models.user.User")
+        
+        return created_by_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_updated_by(self, updated_by_in):
+        """checks the given updated_by_in attribute
+        """
+        
+        from stalker.models import user
+        
+        # raise ValueError when:
+        # it is None
+        if updated_by_in is None:
+            raise ValueError("the created_by attribute can not be set to None")
+        
+        if not isinstance(updated_by_in, user.User):
+            raise ValueError("the updated_by attribute should be an instance \
+            of stalker.models.user.User")
+        
+        return updated_by_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_date_created(self, date_created_in):
+        """checks the given date_creaetd_in
+        """
+        
+        # raise ValueError when:
+        
+        # it is None
+        if date_created_in is None:
+            raise ValueError("the date_created could not be None")
+        
+        if not isinstance(date_created_in, datetime.datetime):
+            raise ValueError("the date_created should be an instance of \
+            datetime.datetime")
+        
+        return date_created_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_date_updated(self, date_updated_in):
+        """checks the given date_updated_in
+        """
+        
+        # raise ValueError when:
+        
+        # it is None
+        if date_updated_in is None:
+            raise ValueError("the date_updated could not be None")
+        
+        # it is not an instance of datetime.datetime
+        if not isinstance(date_updated_in, datetime.datetime):
+            raise ValueError("the date_updated should be an instance of \
+            datetime.datetime")
+        
+        # lower than date_created
+        if date_updated_in < self.date_created:
+            raise ValueError("the date_updated could not be set to a date \
+            before date_created, try setting the date_created before")
+        
+        return date_updated_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_description(self, description_in):
+        """checks the given description_in value
+        """
+        
+        # raise ValueError when:
+        
+        # it is not an instance of string or unicode
+        if not isinstance(description_in, (str, unicode)):
+            raise ValueError("the description should be set to a string or \
+            unicode")
+        
+        return description_in
+    
+    
+    #----------------------------------------------------------------------
+    def _check_links(self, links_in):
+        """checks the given links_in value
+        """
+        
+        # raise ValueError when:
+        
+        # it is not an instance of list
+        if not isinstance(links_in, list):
+            raise ValueError("the lists attribute should be set to a list")
+        
+        return links_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_name(self, name_in):
+        """checks the given name_in value
+        """
+        
+        # raise ValueError when:
+        
+        # it is not an instance of string or unicode
+        if not isinstance(name_in, (str, unicode)):
+            raise ValueError("the name attribute should be set to a string \
+            or unicode")
+        
+        # it is empty
+        if name_in == "":
+            raise ValueError("the name couldn't be an empty string")
+        
+        if name_in is None:
+            raise ValueError("the name couldn't be set to None")
+        
+        return self._condition_name(name_in)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _condition_name(self, name_in):
+        """conditions the name_in value
+        """
+        
+        import re
+        
+        print name_in
+        # remove unnecesary characters from the beginning
+        name_in = re.sub('(^[^A-Za-z]+)', r'', name_in)
+        print name_in
+        
+        # remove white spaces
+        name_in = re.sub('([\s])+', r'', name_in)
+        print name_in
+        
+        # capitalize the first letter
+        name_in = name_in[0].upper() + name_in[1:]
+        print name_in
+        
+        return name_in
         
         
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_notes(self, notes_in):
+        """checks the given notes_in value
+        """
+        
+        # raise ValueError when:
+        
+        # it is not an instance of list
+        if not isinstance(notes_in, list):
+            raise ValueError("the notes attribute should be an instance of \
+            list")
+        
+        return notes_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_tags(self, tags_in):
+        """checks the given tags_in value
+        """
+        
+        # raise ValueError when:
+        
+        # it is not an instance of list
+        if not isinstance(tags_in, list):
+            raise ValueError("the tags attribute should be set to a list")
+        
+        return tags_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_status_list(self, status_list_in):
+        """checks the given status_list_in value
+        """
+        
+        # raise ValueError when:
+        
+        # it is not an instance of status_list
+        if not isinstance(status_list_in, status.StatusList):
+            raise ValueError("the status list should be an instance of \
+            stalker.models.status.StatusList")
+        
+        return status_list_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_status(self, status_in):
+        """checks the given status_in value
+        """
+        
+        # raise ValueError when:
+        # it is set to None
+        if status_in is None:
+            raise ValueError("the status couldn't be None, set it to a \
+            non-negative integer")
+        
+        # it is not an instance of int
+        if not isinstance(status_in, int):
+            raise ValueError("the status must be an instance of integer")
+        
+        # if it is not in the correct range:
+        if status_in < 0:
+            raise ValueError("the status must be a non-negative integer")
+        
+        if status_in >= len(self._status_list.statuses):
+            raise ValueError("the status can not be bigger than the length of \
+            the status_list")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def created_by():
+        
+        def fget(self):
+            return self._created_by
+        
+        def fset(self, created_by_in):
+            self._created_by = self._check_created_by(created_by_in)
+        
+        doc = """this is the property that sets and returns the created_by
+        attribute"""
+        
+        return locals()
+    
+    created_by = property(**created_by())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def updated_by():
+        
+        def fget(self):
+            return self._updated_by
+        
+        def fset(self, updated_by_in):
+            self._updated_by = self._check_updated_by(updated_by_in)
+        
+        doc = """this is the property that sets and returns the updated_by
+        attribute"""
+        
+        return locals()
+    
+    updated_by = property(**updated_by())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def links():
+        
+        def fget(self):
+            return self._links
+        
+        def fset(self, links_in):
+            self._links = self._check_links(links_in)
+        
+        doc = """this is the property that sets and returns the links attribute
+        """
+        
+        return locals()
+    
+    links = property(**links())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def notes():
+        
+        def fget(self):
+            return self._notes
+        
+        def fset(self, notes_in):
+            self._notes = notes_in
+        
+        doc = """this is the property that sets and returns the notes attribute
+        """
+        
+        return locals()
+    
+    notes = property(**notes())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def tags():
+        
+        def fget(self):
+            return self._tags
+        
+        def fset(self, tags_in):
+            self._tags = tags_in
+        
+        doc = """this is the property that sets and returns the tags attribute
+        """
+        
+        return locals()
+    
+    tags = property(**tags())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def date_created():
+        
+        def fget(self):
+            return self._date_created
+        
+        def fset(self, date_created_in):
+            self._date_created = self._check_date_created(date_created_in)
+        
+        doc = """this is the property that sets and returns the date_created
+        attribute"""
+        
+        return locals()
+    
+    date_created = property(**date_created())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def date_updated():
+        
+        def fget(self):
+            return self._date_updated
+        
+        def fset(self, date_updated_in):
+            self._date_updated = self._check_date_updated(date_updated_in)
+        
+        doc = """this is the property that sets and returns the date_updated
+        attribute"""
+        
+        return locals()
+    
+    date_updated = property(**date_updated())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def description():
+        
+        def fget(self):
+            return self._description
+        
+        def fset(self, description_in):
+            self._description = self._check_description(description_in)
+        
+        doc = """this is the property that sets and returns the description
+        attribute"""
+        
+        return locals()
+    
+    description = property(**description())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def links():
+        
+        def fget(self):
+            return self._links
+        
+        def fset(self, links_in):
+            self._links = self._check_links(links_in)
+        
+        doc = """this is the property that sets and returns the links \
+        attribute"""
+        
+        return locals()
+    
+    links = property(**links())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def status():
+        
+        def fget(self):
+            return self._status
+        
+        def fset(self, status_in):
+            self._status = self._check_status(status_in)
+        
+        doc = """this is the property that sets and returns the status \
+        attribute"""
+        
+        return locals()
+    
+    status = property(**status())
+        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def status_list():
+        
+        def fget(self):
+            return self._status_list
+        
+        def fset(self, status_list_in):
+            self._status_list = self._check_status_list(status_list_in)
+        
+        doc = """this is the property that sets and returns the status_list \
+        attribute"""
+        
+        return locals()
+    
+    status_list = property(**status_list())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def name():
+        
+        def fget(self):
+            return self._name
+        
+        def fset(self, name_in):
+            self._name = self._check_name(name_in)
+        
+        doc = """this is the property that sets and returns the name \
+        attribute"""
+        
+        return locals()
+    
+    name = property(**name())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def notes():
+        
+        def fget(self):
+            return self._notes
+        
+        def fset(self, notes_in):
+            self._notes = self._check_notes(notes_in)
+        
+        doc = """this is the property that sets and returns the notes \
+        attribute"""
+        
+        return locals()
+    
+    notes = property(**notes())
+    
+    
+    
+    

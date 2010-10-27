@@ -24,6 +24,7 @@ stalker.models.unit.Unit
    .. autosummary::
    
       ~Unit.abbreviation
+      ~Unit.conversion_ratio
       ~Unit.name
    
    

@@ -26,12 +26,28 @@
 ########################################################################
 class Unit(object):
     """the base Unit class that keeps data about the units
+    
+    :param name: the name of the unit, should be a string or unicode
+    
+    :param abbreviation: the abbreviation of the unit, cm for centimeters, m
+      for meters, km for kilometers and so on, it should be a string or unicode
+    
+    :param conversion_ratio: the conversion ratio to the base unit. the base
+        unit is:
+        
+            * centimeter (cm) for Linear Units
+            * degree (deg) for Angular Units
+            * 1.0 for Time Units, because it is useless for Time Units
+        
+        the default value is 1.0 and it only accepts integers or floats, if
+        given an integer it will be converted to float.
     """
     
     #----------------------------------------------------------------------
-    def __init__(self, name, abbreviation):
+    def __init__(self, name, abbreviation, conversion_ratio=1.0):
         self._name = self._check_name(name)
         self._abbreviation = self._check_abbreviation(abbreviation)
+        self._conversion_ratio = self._check_conversion_ratio(conversion_ratio) #float(conversion_ratio)
     
     
     
@@ -66,12 +82,14 @@ class Unit(object):
     #----------------------------------------------------------------------
     def name():
         def fget(self):
-            """returns the name
-            """
             return self._name
         
         def fset(self, name):
             self._name = self._check_name(name)
+        
+        doc = """the name property, sets and returns the name of the current
+        unit"""
+        
         
         return locals()
     
@@ -82,32 +100,17 @@ class Unit(object):
     #----------------------------------------------------------------------
     def abbreviation():
         def fget(self):
-            """returns the abbreviation
-            """
             return self._abbreviation
         
         def fset(self, abbr):
             self._abbreviation = self._check_abbreviation(abbr)
         
+        doc = """the abbreviation property, sets and returns the name of the
+        current unit"""
+        
         return locals()
     
     abbreviation = property( **abbreviation() )
-
-
-
-
-
-
-########################################################################
-class ConvertableUnit(Unit):
-    """Convertable units like linear and angular units will derive from this
-    class
-    """
-    
-    #----------------------------------------------------------------------
-    def __init__(self, name, abbreviation, conversion_ratio):
-        super(ConvertableUnit, self).__init__(name, abbreviation)
-        self._conversion_ratio = self._check_conversion_ratio(conversion_ratio) #float(conversion_ratio)
     
     
     
@@ -128,14 +131,14 @@ class ConvertableUnit(Unit):
     #----------------------------------------------------------------------
     def conversion_ratio():
         def fget(self):
-            """returns the conversion_ratio
-            """
             return self._conversion_ratio
         
         def fset(self, conversion_ratio):
-            """sets the conversion_ratio
-            """
-            self._conversion_ratio = self._check_conversion_ratio(conversion_ratio)
+            self._conversion_ratio = \
+                self._check_conversion_ratio(conversion_ratio)
+        
+        doc = """the conversion_ratio property, sets and returns the
+        conversion_ratio of the current unit"""
         
         return locals()
     
@@ -147,7 +150,7 @@ class ConvertableUnit(Unit):
 
 
 ########################################################################
-class Linear(ConvertableUnit):
+class Linear(Unit):
     """The conversion ratio is the ratio to the centimeter. It shows how much
     centimeter is equal to 1 unit of this. 1 meter is 100 centimeter so the
     conversion ratio is 100
@@ -160,7 +163,7 @@ class Linear(ConvertableUnit):
 
 
 ########################################################################
-class Angular(ConvertableUnit):
+class Angular(Unit):
     """The conversion ratio is the ratio to degree. It means how much
     degree is equal to this unit, 1 raidan is equal to 57.2957795 degree so the
     conversion ratio is 57.2957795
@@ -175,13 +178,18 @@ class Angular(ConvertableUnit):
 ########################################################################
 class Time(Unit):
     """Time units like PAL, NTSC etc.
+      
+      :param fps: frames-per-second (fps) for Time Units (I know it sounds
+        wrong  it should be named MediaSpeed if we are going to use fps as the
+        unit, and if we are talking about time then the unit should be seconds,
+        but in animation/vfx world media speed as time unit is much meaningful)
     """
     
     
     
     #----------------------------------------------------------------------
     def __init__(self, name, abberation, fps):
-        super(Time, self).__init__(name, abberation)
+        super(Time, self).__init__(name, abberation, 1.0)
         self._fps = self._check_fps(fps)
     
     

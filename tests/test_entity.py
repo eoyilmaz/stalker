@@ -68,6 +68,7 @@ class EntityTest(mocker.MockerTestCase):
         self.mock_status_list = self.mocker.mock(status.StatusList)
         statusCnt = len(self.mock_status_list.statuses)
         self.mocker.result(5)
+        self.mocker.count(1, None)
         
         self.mocker.replay()
         
@@ -110,7 +111,7 @@ class EntityTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self._entity,
-            '_created_by',
+            'created_by',
             test_value
         )
     
@@ -154,7 +155,7 @@ class EntityTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self._entity,
-            '_created_by',
+            'created_by',
             None
         )
     
@@ -198,7 +199,7 @@ class EntityTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self._entity,
-            '_updated_by',
+            'updated_by',
             test_value
         )
     
@@ -242,7 +243,7 @@ class EntityTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self._entity,
-            '_created_by',
+            'updated_by',
             None
         )
     
@@ -288,7 +289,7 @@ class EntityTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self._entity,
-            "_date_created",
+            "date_created",
             test_value
         )
     
@@ -351,7 +352,7 @@ class EntityTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self._entity,
-            "_date_updated",
+            "date_updated",
             test_value
         )
     
@@ -525,17 +526,19 @@ class EntityTest(mocker.MockerTestCase):
             ("1testName", "TestName"),
             ("_testName", "TestName"),
             ("2423$+^^+^'%+%%&_testName", "TestName"),
-            ("2423$+^^+^'%+%%&_testName_35", "TestName"),
+            ("2423$+^^+^'%+%%&_testName_35", "TestName_35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35", "TestName_35"),
         ]
         
         for test_value in test_group:
             # set the new name
             self._entity.name = test_value[0]
             
-            self.assertNotEqual(
+            self.assertEquals(
                 self._entity.name,
                 test_value[1],
-                "the name property is not correctly conditioned"
+                "the name property is not correctly conditioned for, " + \
+                    test_value[0] + ", " + test_value[1]
             )
     
     
@@ -910,24 +913,24 @@ class EntityTest(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_links_property_being_set_to_something_else_than_a_list(self):
+        """testing if a ValueError is going to be reaised when setting the list
+        attribute something other than a list
+        """
         
+        test_value = "a string"
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self._entity,
+            "links",
+            test_value
+        )
+    
+    
+    
     #----------------------------------------------------------------------
     def test_notes_being_not_intialized(self):
         """test if nothing is raised when creating an entity without setting a

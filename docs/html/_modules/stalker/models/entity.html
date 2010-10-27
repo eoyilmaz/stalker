@@ -76,7 +76,49 @@
 
 <span class="c">########################################################################</span>
 <div class="viewcode-block" id="Entity"><a class="viewcode-back" href="../../../generated/stalker.models.entity.Entity.html#stalker.models.entity.Entity">[docs]</a><span class="k">class</span> <span class="nc">Entity</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The base class of all the other main objects</span>
+    <span class="sd">&quot;&quot;&quot;The base class of all the other classes</span>
+<span class="sd">    </span>
+<span class="sd">    :param created_by: the created_by attribute should contain a User object</span>
+<span class="sd">      who is created this object</span>
+<span class="sd">    </span>
+<span class="sd">    :param updated_by: the updated_by attribute should contain a User object</span>
+<span class="sd">      who is updated the user lastly. the created_by and updated_by attributes</span>
+<span class="sd">      should point the same object if this entity is just created</span>
+<span class="sd">    </span>
+<span class="sd">    :param date_created: the date that this object is created. it should be a</span>
+<span class="sd">      time before now</span>
+<span class="sd">    </span>
+<span class="sd">    :param date_updated: this is the date that this object is updated lastly.</span>
+<span class="sd">      for newly created entities this is equal to date_created and the</span>
+<span class="sd">      date_updated cannot be before date_created</span>
+<span class="sd">    </span>
+<span class="sd">    :param name: a string or unicode attribute that holds the name of this</span>
+<span class="sd">      entity. it could not be empty, the first letter should be an upper case</span>
+<span class="sd">      alphabetic (not alphanumeric).</span>
+<span class="sd">    </span>
+<span class="sd">    :param description: a string or unicode attribute that holds the</span>
+<span class="sd">      description of this entity object, it could be empty</span>
+<span class="sd">    </span>
+<span class="sd">    :param status_list: this attribute holds a status list object, which shows</span>
+<span class="sd">      the possible statuses that this entity could be in. This attribute can</span>
+<span class="sd">      not be empty.</span>
+<span class="sd">    </span>
+<span class="sd">    :param status: an integer value which is the index of the status in the</span>
+<span class="sd">      status_list attribute. So the value of this attribute couldn&#39;t be lower</span>
+<span class="sd">      than 0 and higher than the length of the status_list object and nothing</span>
+<span class="sd">      other than an integer</span>
+<span class="sd">    </span>
+<span class="sd">    :param tags: a list of tag objects related to this entity. tags could be an</span>
+<span class="sd">      empty list, or when omitted it will be set to an empty list</span>
+<span class="sd">    </span>
+<span class="sd">    :param links: (not sure about the implementation) a list of link objects.</span>
+<span class="sd">      that shows the various links related to this entity object. it is</span>
+<span class="sd">      initialized with an empty list when omitted</span>
+<span class="sd">    </span>
+<span class="sd">    :param thumbnail: (not tested yet) a file object that shows the thumbnail</span>
+<span class="sd">      file of this entity. thumbnail could be None.</span>
+<span class="sd">    </span>
+<span class="sd">    :param notes: a list of note objects. notes can be an empty list.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     
@@ -84,35 +126,34 @@
     <span class="c">#----------------------------------------------------------------------</span>
 <div class="viewcode-block" id="Entity.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.entity.Entity.html#stalker.models.entity.Entity.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">name</span><span class="p">,</span>
+                 <span class="n">created_by</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">updated_by</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">status_list</span><span class="o">=</span><span class="p">[],</span>
+                 <span class="n">status</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">date_created</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+                 <span class="n">date_updated</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
                  <span class="n">description</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
-                 <span class="n">dateCreated</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
-                 <span class="n">dateUpdated</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
-                 <span class="n">createdBy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">updatedBy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                  <span class="n">tags</span><span class="o">=</span><span class="p">[],</span>
                  <span class="n">links</span><span class="o">=</span><span class="p">[],</span>
-                 <span class="n">status</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">statusList</span><span class="o">=</span><span class="p">[],</span>
                  <span class="n">notes</span><span class="o">=</span><span class="p">[],</span>
                  <span class="n">thumbnail</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                  <span class="p">):</span>
         
-        <span class="c">## the attributes</span>
-        <span class="c">#self.name = name</span>
-        <span class="c">#self.description = description</span>
-        <span class="c">#self.dateCreated = dateCreated</span>
-        <span class="c">#self.dateUpdated = dateUpdated</span>
-        <span class="c">#self.createdBy = createdBy</span>
-        <span class="c">#self.updatedBy = updatedBy</span>
-        <span class="c">#self.tags = tags</span>
-        <span class="c">#self.links = links</span>
-        <span class="c">#self.status = status</span>
-        <span class="c">#self.statusList = statusList</span>
-        <span class="c">#self.notes = notes</span>
-        <span class="c">#self.thumbnail = thumbnail</span>
-        <span class="k">pass</span>
-    
-    </div></div>
+        <span class="c"># the attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">date_created</span> <span class="o">=</span> <span class="n">date_created</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">date_updated</span> <span class="o">=</span> <span class="n">date_updated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">created_by</span> <span class="o">=</span> <span class="n">created_by</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updated_by</span> <span class="o">=</span> <span class="n">updated_by</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">links</span> <span class="o">=</span> <span class="n">links</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_list</span> <span class="o">=</span> <span class="n">status_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">notes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thumbnail</span> <span class="o">=</span> <span class="n">thumbnail</span>
+        
+        </div></div>
 </pre></div>
 
           </div>

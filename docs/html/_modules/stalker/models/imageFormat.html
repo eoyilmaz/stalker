@@ -74,33 +74,51 @@
 <span class="c">########################################################################</span>
 <div class="viewcode-block" id="ImageFormat"><a class="viewcode-back" href="../../../generated/stalker.models.imageFormat.ImageFormat.html#stalker.models.imageFormat.ImageFormat">[docs]</a><span class="k">class</span> <span class="nc">ImageFormat</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;the image format class</span>
+<span class="sd">    </span>
+<span class="sd">    :param name: the name of the object, it cannot be empty or anything other</span>
+<span class="sd">      than a string or unicode</span>
+<span class="sd">    </span>
+<span class="sd">    :param width: the width of the format, it cannot be zero or negative, if a</span>
+<span class="sd">      float number is given it will be converted to integer</span>
+<span class="sd">    </span>
+<span class="sd">    :param height: the height of the format, it cannot be zero or negative, if</span>
+<span class="sd">      a float number is given it will be converted to integer</span>
+<span class="sd">    </span>
+<span class="sd">    :param pixel_aspect: the pixel aspect ratio of the current ImageFormat</span>
+<span class="sd">      object, it can not be zero or negative, and if given as an integer it</span>
+<span class="sd">      will be converted to a float, the default value is 1.0</span>
+<span class="sd">    </span>
+<span class="sd">    :param print_resolution: the print resolution of the ImageFormat given as</span>
+<span class="sd">      DPI (dot-per-inch). It can not be zero or negative</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="ImageFormat.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.imageFormat.ImageFormat.html#stalker.models.imageFormat.ImageFormat.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">pixelAspect</span><span class="p">,</span> <span class="n">printResolution</span><span class="o">=</span><span class="mi">300</span> <span class="p">):</span>
+<div class="viewcode-block" id="ImageFormat.__init__"><a class="viewcode-back" href="../../../generated/stalker.models.imageFormat.ImageFormat.html#stalker.models.imageFormat.ImageFormat.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span>
+                 <span class="n">pixel_aspect</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">print_resolution</span><span class="o">=</span><span class="mi">300</span> <span class="p">):</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pixelAspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkPixelAspect</span><span class="p">(</span><span class="n">pixelAspect</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_printResolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkPrintResolution</span><span class="p">(</span><span class="n">printResolution</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_deviceAspect</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_width</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_height</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pixel_aspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_pixel_aspect</span><span class="p">(</span><span class="n">pixel_aspect</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_print_resolution</span><span class="p">(</span><span class="n">print_resolution</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device_aspect</span> <span class="o">=</span> <span class="mf">1.0</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">_updateDeviceAspect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_device_aspect</span><span class="p">()</span>
         
     
     
     <span class="c">#----------------------------------------------------------------------</span></div>
-    <span class="k">def</span> <span class="nf">_updateDeviceAspect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_update_device_aspect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;updates the device aspect ratio for the given width and height</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_deviceAspect</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">)</span> \
-            <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pixelAspect</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device_aspect</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">)</span> \
+            <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pixel_aspect</span><span class="p">)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">_checkName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the given name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
@@ -115,7 +133,7 @@
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">_checkWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the given width</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
@@ -129,7 +147,7 @@
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">_checkHeight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the given height</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
@@ -143,39 +161,39 @@
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">_checkPixelAspect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixelAspect</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_pixel_aspect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixel_aspect</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the given pixel aspect</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pixelAspect</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
-            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;pixelAspect should be an instance of int or </span><span class="se">\</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pixel_aspect</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;pixel_aspect should be an instance of int or </span><span class="se">\</span>
 <span class="s">            float&quot;</span><span class="p">))</span>
         
-        <span class="k">if</span> <span class="n">pixelAspect</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;pixelAspect can not be zero or a negative </span><span class="se">\</span>
+        <span class="k">if</span> <span class="n">pixel_aspect</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;pixel_aspect can not be zero or a negative </span><span class="se">\</span>
 <span class="s">            value&quot;</span><span class="p">))</span>
         
-        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">pixelAspect</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">pixel_aspect</span><span class="p">)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">_checkPrintResolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printResolution</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_print_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_resolution</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;checks the print resolution</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">printResolution</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">print_resolution</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
             <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;print resolution should be an instance of int </span><span class="se">\</span>
 <span class="s">            or float&quot;</span><span class="p">))</span>
         
-        <span class="k">if</span> <span class="n">printResolution</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">print_resolution</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;print resolution should not be zero or </span><span class="se">\</span>
 <span class="s">            negative&quot;</span><span class="p">))</span>
         
-        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">printResolution</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">print_resolution</span><span class="p">)</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="ImageFormat.name"><a class="viewcode-back" href="../../../modules.html#stalker.models.imageFormat.ImageFormat.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the name attribute</span>
 <span class="sd">            &quot;&quot;&quot;</span>
@@ -184,26 +202,25 @@
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;sets the name attribute</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         
         <span class="n">doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;this is a property to set and get the name of the</span>
-<span class="s">        imageFormat</span>
+<span class="s">        image_format</span>
 <span class="s">        </span>
-<span class="s">        the name can not be:</span>
-<span class="s">        </span>
-<span class="s">        * an empty string</span>
-<span class="s">        * None</span>
-<span class="s">        * anthing other than a string or unicode</span>
+<span class="s">        the name should be:</span>
+<span class="s">        * a string or unicode value</span>
+<span class="s">        * can not be None</span>
+<span class="s">        * can not be an empty string or empty unicode</span>
 <span class="s">        &quot;&quot;&quot;</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">name</span><span class="p">())</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="ImageFormat.width"><a class="viewcode-back" href="../../../modules.html#stalker.models.imageFormat.ImageFormat.width">[docs]</a>    <span class="k">def</span> <span class="nf">width</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">width</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the width</span>
 <span class="sd">            &quot;&quot;&quot;</span>
@@ -212,25 +229,26 @@
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;sets the width</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
-            <span class="c"># also update the deviceAspect</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_updateDeviceAspect</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_width</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+            <span class="c"># also update the device_aspect</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_device_aspect</span><span class="p">()</span>
         
         <span class="n">doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;this is a property to set and get the width of the</span>
-<span class="s">        imageFormat</span>
+<span class="s">        image_format</span>
 <span class="s">        </span>
-<span class="s">        * this attribute should be set to a positif non-zero integer</span>
-<span class="s">        * given a float the object will cast the float to an integer</span>
+<span class="s">        * the width should be set to a positif non-zero integer</span>
+<span class="s">        * integers are also accepted but will be converted to float</span>
+<span class="s">        * for improper inputs the object will raise a ValueError</span>
 <span class="s">        &quot;&quot;&quot;</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">width</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">width</span><span class="p">())</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="ImageFormat.height"><a class="viewcode-back" href="../../../modules.html#stalker.models.imageFormat.ImageFormat.height">[docs]</a>    <span class="k">def</span> <span class="nf">height</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">height</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the height</span>
 <span class="sd">            &quot;&quot;&quot;</span>
@@ -239,83 +257,90 @@
         <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;sets the height</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_height</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
             
-            <span class="c"># also update the deviceAspect</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_updateDeviceAspect</span><span class="p">()</span>
+            <span class="c"># also update the device_aspect</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_device_aspect</span><span class="p">()</span>
         
         <span class="n">doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;this is a property to set and get the height of the</span>
-<span class="s">        imageFormat</span>
+<span class="s">        image_format</span>
 <span class="s">        </span>
-<span class="s">        * this attribute should be set to a positif non-zero integer</span>
-<span class="s">        * given a float the object will cast the float to an integer</span>
+<span class="s">        * the height should be set to a positif non-zero integer</span>
+<span class="s">        * integers are also accepted but will be converted to float</span>
+<span class="s">        * for improper inputs the object will raise a ValueError</span>
 <span class="s">        &quot;&quot;&quot;</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
+    
     <span class="n">height</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">height</span><span class="p">())</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
-<div class="viewcode-block" id="ImageFormat.pixelAspect"><a class="viewcode-back" href="../../../modules.html#stalker.models.imageFormat.ImageFormat.pixelAspect">[docs]</a>    <span class="k">def</span> <span class="nf">pixelAspect</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">pixel_aspect</span><span class="p">():</span>
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;returns the pixelAspect ratio</span>
+            <span class="sd">&quot;&quot;&quot;returns the pixel_aspect ratio</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pixelAspect</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pixel_aspect</span>
         
-        <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixelAspect</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;sets the pixelAspect ratio</span>
+        <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixel_aspect</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;sets the pixel_aspect ratio</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pixelAspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkPixelAspect</span><span class="p">(</span><span class="n">pixelAspect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pixel_aspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_pixel_aspect</span><span class="p">(</span><span class="n">pixel_aspect</span><span class="p">)</span>
             
-            <span class="c"># also update the deviceAspect</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_updateDeviceAspect</span><span class="p">()</span>
+            <span class="c"># also update the device_aspect</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_device_aspect</span><span class="p">()</span>
         
-        <span class="n">doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;this is a property to set and get the pixelAspect of the</span>
-<span class="s">        imageFormat</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;this is a property to set and get the pixel_aspect of the</span>
+<span class="s">        ImageFormat</span>
 <span class="s">        </span>
-<span class="s">        * this attribute should be set to a positif non-zero float</span>
-<span class="s">        * given an integer the object will cast the integer to a float</span>
+<span class="s">        * the pixel_aspect should be set to a positif non-zero float</span>
+<span class="s">        * integers are also accepted but will be converted to float</span>
+<span class="s">        * for improper inputs the object will raise a ValueError</span>
 <span class="s">        &quot;&quot;&quot;</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
-    <span class="n">pixelAspect</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">pixelAspect</span><span class="p">())</span>
+    
+    <span class="n">pixel_aspect</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">pixel_aspect</span><span class="p">())</span>
     
     
     
     <span class="c">#----------------------------------------------------------------------</span>
     <span class="nd">@property</span>
-<div class="viewcode-block" id="ImageFormat.deviceAspect"><a class="viewcode-back" href="../../../modules.html#stalker.models.imageFormat.ImageFormat.deviceAspect">[docs]</a>    <span class="k">def</span> <span class="nf">deviceAspect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">device_aspect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;returns the device aspect</span>
 <span class="sd">        </span>
-<span class="sd">        because the deviceAspect is calculated from the width/height*pixel</span>
+<span class="sd">        because the device_aspect is calculated from the width/height*pixel</span>
 <span class="sd">        formula, this property is read-only.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deviceAspect</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device_aspect</span>
     
     
     
-    <span class="c">#----------------------------------------------------------------------</span></div>
-<div class="viewcode-block" id="ImageFormat.printResolution"><a class="viewcode-back" href="../../../modules.html#stalker.models.imageFormat.ImageFormat.printResolution">[docs]</a>    <span class="k">def</span> <span class="nf">printResolution</span><span class="p">():</span>
+    <span class="c">#----------------------------------------------------------------------</span>
+    <span class="k">def</span> <span class="nf">print_resolution</span><span class="p">():</span>
         
         <span class="k">def</span> <span class="nf">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;returns the print resolution</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_printResolution</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_resolution</span>
         
-        <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printResolution</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_resolution</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;sets the print resolution</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_printResolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkPrintResolution</span><span class="p">(</span><span class="n">printResolution</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_print_resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_print_resolution</span><span class="p">(</span><span class="n">print_resolution</span><span class="p">)</span>
         
-        <span class="n">doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;the printResolution property to set and get the</span>
-<span class="s">        _printResolution attribute&quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;this is a property to set and get the print_resolution of the</span>
+<span class="s">        ImageFormat</span>
+<span class="s">        </span>
+<span class="s">        * it should be set to a positif non-zero float or integer</span>
+<span class="s">        * integers are also accepted but will be converted to float</span>
+<span class="s">        * for improper inputs the object will raise a ValueError</span>
+<span class="s">        &quot;&quot;&quot;</span>
         
         <span class="k">return</span> <span class="nb">locals</span><span class="p">()</span>
-    </div>
-    <span class="n">printResolution</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">printResolution</span><span class="p">())</span>
+    
+    <span class="n">print_resolution</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="o">**</span><span class="n">print_resolution</span><span class="p">())</span>
     
     
     

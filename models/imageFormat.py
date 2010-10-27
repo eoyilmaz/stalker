@@ -47,7 +47,7 @@ class ImageFormat(object):
     
     #----------------------------------------------------------------------
     def __init__(self, name, width, height,
-                 pixel_aspect=1.0, print_resolution=300 ):
+                 pixel_aspect=1.0, print_resolution=300):
         
         self._name = self._check_name(name)
         self._width = self._check_width(width)

@@ -55,11 +55,36 @@
 <h1>stalker.models.unit.Unit<a class="headerlink" href="#stalker-models-unit-unit" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="stalker.models.unit.Unit">
-<em class="property">class </em><tt class="descclassname">stalker.models.unit.</tt><tt class="descname">Unit</tt><big>(</big><em>name</em>, <em>abbreviation</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/unit.html#Unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.unit.Unit" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">stalker.models.unit.</tt><tt class="descname">Unit</tt><big>(</big><em>name</em>, <em>abbreviation</em>, <em>conversion_ratio=1.0</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/unit.html#Unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.unit.Unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>the base Unit class that keeps data about the units</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of the unit, should be a string or unicode</li>
+<li><strong>abbreviation</strong> &#8211; the abbreviation of the unit, cm for centimeters, m
+for meters, km for kilometers and so on, it should be a string or unicode</li>
+<li><strong>conversion_ratio</strong> &#8211; <p>the conversion ratio to the base unit. the base
+unit is:</p>
+<blockquote>
+<ul>
+<li>centimeter (cm) for Linear Units</li>
+<li>degree (deg) for Angular Units</li>
+<li>1.0 for Time Units, because it is useless for Time Units</li>
+</ul>
+</blockquote>
+<p>the default value is 1.0 and it only accepts integers or floats, if
+given an integer it will be converted to float.</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="stalker.models.unit.Unit.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>name</em>, <em>abbreviation</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/unit.html#Unit.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.unit.Unit.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>name</em>, <em>abbreviation</em>, <em>conversion_ratio=1.0</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/unit.html#Unit.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.unit.Unit.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -69,7 +94,7 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><a class="reference internal" href="#stalker.models.unit.Unit.__init__" title="stalker.models.unit.Unit.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(name,&nbsp;abbreviation)</td>
+<tr><td><a class="reference internal" href="#stalker.models.unit.Unit.__init__" title="stalker.models.unit.Unit.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(name,&nbsp;abbreviation[,&nbsp;conversion_ratio])</td>
 <td></td>
 </tr>
 </tbody>
@@ -82,10 +107,13 @@
 </colgroup>
 <tbody valign="top">
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">abbreviation</span></tt></td>
-<td>returns the abbreviation</td>
+<td>the abbreviation property, sets and returns the name of the</td>
+</tr>
+<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">conversion_ratio</span></tt></td>
+<td>the conversion_ratio property, sets and returns the</td>
 </tr>
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">name</span></tt></td>
-<td>returns the name</td>
+<td>the name property, sets and returns the name of the current</td>
 </tr>
 </tbody>
 </table>
