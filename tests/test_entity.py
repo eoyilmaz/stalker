@@ -1,22 +1,4 @@
 #-*- coding: utf-8 -*-
-########################################################################
-# 
-# Copyright (C) 2010  Erkan Ozgur Yilmaz
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>
-# 
-########################################################################
 
 
 
@@ -58,17 +40,18 @@ class EntityTest(mocker.MockerTestCase):
         self.mock_user = self.mocker.mock(user.User)
         
         # a mock link
-        self.mock_link = self.mocker.mock(link.Link)
+        self.mock_link1 = self.mocker.mock(link.Link)
+        self.mock_link2 = self.mocker.mock(link.Link)
         
         # a mock tag
-        self.mockTag1 = self.mocker.mock(tag.Tag)
-        self.mockTag2 = self.mocker.mock(tag.Tag)
+        self.mock_tag1 = self.mocker.mock(tag.Tag)
+        self.mock_tag2 = self.mocker.mock(tag.Tag)
         
         # a mock status_list
         self.mock_status_list = self.mocker.mock(status.StatusList)
         statusCnt = len(self.mock_status_list.statuses)
         self.mocker.result(5)
-        self.mocker.count(1, None)
+        self.mocker.count(0, None)
         
         self.mocker.replay()
         
@@ -88,8 +71,8 @@ class EntityTest(mocker.MockerTestCase):
             date_created=self.date_created,
             date_updated=self.date_updated,
             description=self.description,
-            tags=[self.mockTag1, self.mockTag2],
-            links=[self.mock_link]
+            tags=[self.mock_tag1, self.mock_tag2],
+            links=[self.mock_link1, self.mock_link2]
         )
     
     
@@ -840,6 +823,19 @@ class EntityTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_tags_property_set_properly(self):
+        """testing if the property is set correctly
+        """
+        
+        test_value = [self.mock_tag1]
+        
+        self._entity.tags = test_value
+        
+        self.assertEquals( self._entity.tags, test_value )        
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_links_being_not_intialized(self):
         """test if nothing is raised when creating an entity without setting a
         links parameter
@@ -928,6 +924,19 @@ class EntityTest(mocker.MockerTestCase):
             "links",
             test_value
         )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_links_property_set_properly(self):
+        """testing if the property is set correctly
+        """
+        
+        test_value = [self.mock_link1]
+        
+        self._entity.links = test_value
+        
+        self.assertEquals( self._entity.links, test_value )
     
     
     

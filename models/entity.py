@@ -1,22 +1,4 @@
 #-*- coding: utf-8 -*-
-########################################################################
-# 
-# Copyright (C) 2010  Erkan Ozgur Yilmaz
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>
-# 
-########################################################################
 
 
 
@@ -77,7 +59,7 @@ class Entity(object):
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 name,
+                 name=None,
                  created_by=None,
                  updated_by=None,
                  status_list=[],
@@ -389,49 +371,13 @@ class Entity(object):
     
     
     #----------------------------------------------------------------------
-    def links():
-        
-        def fget(self):
-            return self._links
-        
-        def fset(self, links_in):
-            self._links = self._check_links(links_in)
-        
-        doc = """this is the property that sets and returns the links attribute
-        """
-        
-        return locals()
-    
-    links = property(**links())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def notes():
-        
-        def fget(self):
-            return self._notes
-        
-        def fset(self, notes_in):
-            self._notes = notes_in
-        
-        doc = """this is the property that sets and returns the notes attribute
-        """
-        
-        return locals()
-    
-    notes = property(**notes())
-    
-    
-    
-    #----------------------------------------------------------------------
     def tags():
         
         def fget(self):
             return self._tags
         
         def fset(self, tags_in):
-            self._tags = tags_in
+            self._tags = self._check_tags(tags_in)
         
         doc = """this is the property that sets and returns the tags attribute
         """

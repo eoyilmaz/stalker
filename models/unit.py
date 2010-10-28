@@ -1,22 +1,4 @@
 #-*- coding: utf-8 -*-
-########################################################################
-# 
-# Copyright (C) 2010  Erkan Ozgur Yilmaz
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>
-# 
-########################################################################
 
 
 
@@ -44,7 +26,11 @@ class Unit(object):
     """
     
     #----------------------------------------------------------------------
-    def __init__(self, name, abbreviation, conversion_ratio=1.0):
+    def __init__(self,
+                 name=None,
+                 abbreviation=None,
+                 conversion_ratio=1.0
+                 ):
         self._name = self._check_name(name)
         self._abbreviation = self._check_abbreviation(abbreviation)
         self._conversion_ratio = self._check_conversion_ratio(conversion_ratio) #float(conversion_ratio)
@@ -188,8 +174,11 @@ class Time(Unit):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, name, abberation, fps):
-        super(Time, self).__init__(name, abberation, 1.0)
+    def __init__(self,
+                 name=None,
+                 abbreviation=None,
+                 fps=None):
+        super(Time, self).__init__(name, abbreviation, 1.0)
         self._fps = self._check_fps(fps)
     
     

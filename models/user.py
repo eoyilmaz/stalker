@@ -1,22 +1,4 @@
 #-*- coding: utf-8 -*-
-########################################################################
-# 
-# Copyright (C) 2010  Erkan Ozgur Yilmaz
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>
-# 
-########################################################################
 
 
 
@@ -29,7 +11,46 @@ from stalker.models import entity
 
 ########################################################################
 class User(entity.Entity):
-    """The user class
+    """The user class is designed to hold data about a User in the system. It
+    is derived from the entity.Entity class
+    
+    it adds these parameters to the EntityClass
+    
+    :param email: holds the e-mail of the user
+    
+    :param login_name: it is the login name of the user, it should be all lower
+      case. Giving a string or unicode that has uppercase letters, it will be
+      converted to lower case.
+    
+    :param first_name: it is the first name of the user, must be a string or
+      unicode, middle name also can be added here, so it accepts white-spaces
+      in the variable, but it will truncate the white spaces at the beginin and
+      at the end of the variable.
+    
+    :param last_name: it is the last name of the user, must be a string or
+      unicode, again it can not contain any white spaces at the beggining and
+      at the end of the variable
+    
+    :param departments: it is a list that holds Department objects and it shows
+      which department of this user belongs to, a user can be a member of more
+      than one department
+    
+    :param password: it is the password of the user, can contain any character
+      and it should be mangled by using the key
+    
+    :param permission_groups: it is a list of permission groups that this user
+      is belong to
+    
+    :param tasks: it is a list of Task objects which holds the tasks that this
+      user has been assigned to
+    
+    :param projects: it is a list of Project objects which holds the projects
+      that this user is a part of
+    
+    :param responsible_sequences: it is a list of Sequence objects that this
+      user is responsible of
     """
+    
+    
     
     pass
