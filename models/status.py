@@ -2,88 +2,96 @@
 
 
 
+from stalker.models import entity
 
 
 
 ########################################################################
-class Status(object):
+class Status(entity.SimpleEntity):
     """The Status class
+    
+    :param shortName: the shortName of the status name, keep it as simple
+      as possible, the string will be formated to have all upper-case and no
+      white spaces at the beggining and at the end of the attribute
     """
     
     
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 name=None,
-                 abbreviation=None,
-                 thumbnail=None
+                 #name=None,
+                 shortName=None,
+                 thumbnail=None,
+                 **kwargs
                  ):
         
-        self._name = self._check_name(name)
-        self._abbreviation = self._check_abbreviation( abbreviation )
+        super(Status,self).__init__(**kwargs)
+        
+        #self._name = self._check_name(name)
+        self._shortName = self._check_shortName(shortName)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def _check_name(self, name):
+        #"""checks the name attribute
+        #"""
+        
+        #if name == "" \
+           #or not isinstance(name, (str, unicode) ) \
+           #or name[0] in [str(i) for i in range(10)]:
+            #raise(ValueError("the name shouldn't be empty and it should be a \
+            #str or unicode"))
+        
+        #return name.title()
     
     
     
     #----------------------------------------------------------------------
-    def _check_name(self, name):
-        """checks the name attribute
+    def _check_shortName(self, shortName):
+        """checks the shortName attribute
         """
         
-        if name == "" \
-           or not isinstance(name, (str, unicode) ) \
-           or name[0] in [str(i) for i in range(10)]:
-            raise(ValueError("the name shouldn't be empty and it should be a \
-            str or unicode"))
-        
-        return name.title()
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _check_abbreviation(self, abbreviation):
-        """checks the abbreviation attribute
-        """
-        
-        if abbreviation == '' \
-           or not isinstance(abbreviation, (str, unicode)):
-            raise(ValueError("the abbreviation shouldn't be empty and it \
+        if shortName == '' \
+           or not isinstance(shortName, (str, unicode)):
+            raise(ValueError("the shortName shouldn't be empty and it \
             should be a str or unicode"))
         
-        return abbreviation
+        return shortName
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def name():
+        #def fget(self):
+            #"""returns the name property
+            #"""
+            #return self._name
+        
+        #def fset(self, name):
+            #self._name = self._check_name(name)
+        
+        #return locals()
+    
+    #name = property(**name())
     
     
     
     #----------------------------------------------------------------------
-    def name():
+    def shortName():
         def fget(self):
-            """returns the name property
+            """returns the shortName property
             """
-            return self._name
+            return self._shortName
         
-        def fset(self, name):
-            self._name = self._check_name(name)
+        def fset(self, shortName):
+            """sets the shortName
+            """
+            self._shortName = self._check_shortName(shortName)
         
         return locals()
     
-    name = property(**name())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def abbreviation():
-        def fget(self):
-            """returns the abbreviation property
-            """
-            return self._abbreviation
-        
-        def fset(self, abbreviation):
-            """sets the abbreviation
-            """
-            self._abbreviation = self._check_abbreviation(abbreviation)
-        
-        return locals()
-    
-    abbreviation = property(**abbreviation())
+    shortName = property(**shortName())
 
 
 
@@ -91,36 +99,42 @@ class Status(object):
 
 
 ########################################################################
-class StatusList(object):
+class StatusList(entity.SimpleEntity):
     """the list version of the Status
-    holds multiple statuses to be used as a choice list for several
-    other classes
+    
+    Holds multiple statuses to be used as a choice list for several other
+    classes
+    
+    :param statuses: this is a list of status objects, so you can prepare
+      different StatusList objects for different kind of entities
     """
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 name=None,
-                 statuses=[]
+                 #name=None,
+                 statuses=[],
+                 **kwargs
                  ):
         
+        super(StatusList,self).__init__(**kwargs)
         
-        self._name = self._check_name(name)
+        #self._name = self._check_name(name)
         self._statuses = self._check_statuses(statuses)
     
     
     
-    #----------------------------------------------------------------------
-    def _check_name(self, name):
-        """checks the given name
-        """
+    ##----------------------------------------------------------------------
+    #def _check_name(self, name):
+        #"""checks the given name
+        #"""
         
-        if name == '':
-            raise(ValueError('name can not be empty'))
+        #if name == '':
+            #raise(ValueError('name can not be empty'))
         
-        if not isinstance( name, (str, unicode) ):
-            raise(ValueError('name should be a string or unicode'))
+        #if not isinstance( name, (str, unicode) ):
+            #raise(ValueError('name should be a string or unicode'))
         
-        return name
+        #return name
     
     
     
@@ -144,22 +158,22 @@ class StatusList(object):
     
     
     
-    #----------------------------------------------------------------------
-    def name():
+    ##----------------------------------------------------------------------
+    #def name():
         
-        def fget(self):
-            """returns the name attribute
-            """
-            return self._name
+        #def fget(self):
+            #"""returns the name attribute
+            #"""
+            #return self._name
         
-        def fset(self, name):
-            """sets the name attribute
-            """
-            self._name = self._check_name(name)
+        #def fset(self, name):
+            #"""sets the name attribute
+            #"""
+            #self._name = self._check_name(name)
         
-        return locals()
+        #return locals()
     
-    name = property(**name())
+    #name = property(**name())
     
     
     
@@ -167,14 +181,13 @@ class StatusList(object):
     def statuses():
         
         def fget(self):
-            """returns the status_list
-            """
             return self._statuses
         
         def fset(self, statuses):
-            """sets the statuses
-            """
             self._statuses = self._check_statuses(statuses)
+        
+        doc = """this is the property that sets and returns the statuses, or
+        namely the status list of this StatusList object"""
         
         return locals()
     
