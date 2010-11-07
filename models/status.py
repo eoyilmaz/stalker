@@ -27,23 +27,7 @@ class Status(entity.SimpleEntity):
         
         super(Status,self).__init__(**kwargs)
         
-        #self._name = self._check_name(name)
         self._shortName = self._check_shortName(shortName)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _check_name(self, name):
-        #"""checks the name attribute
-        #"""
-        
-        #if name == "" \
-           #or not isinstance(name, (str, unicode) ) \
-           #or name[0] in [str(i) for i in range(10)]:
-            #raise(ValueError("the name shouldn't be empty and it should be a \
-            #str or unicode"))
-        
-        #return name.title()
     
     
     
@@ -58,22 +42,6 @@ class Status(entity.SimpleEntity):
             should be a str or unicode"))
         
         return shortName
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def name():
-        #def fget(self):
-            #"""returns the name property
-            #"""
-            #return self._name
-        
-        #def fset(self, name):
-            #self._name = self._check_name(name)
-        
-        #return locals()
-    
-    #name = property(**name())
     
     
     
@@ -120,21 +88,6 @@ class StatusList(entity.SimpleEntity):
         
         #self._name = self._check_name(name)
         self._statuses = self._check_statuses(statuses)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _check_name(self, name):
-        #"""checks the given name
-        #"""
-        
-        #if name == '':
-            #raise(ValueError('name can not be empty'))
-        
-        #if not isinstance( name, (str, unicode) ):
-            #raise(ValueError('name should be a string or unicode'))
-        
-        #return name
     
     
     

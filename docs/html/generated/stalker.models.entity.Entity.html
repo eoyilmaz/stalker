@@ -55,28 +55,14 @@
 <h1>stalker.models.entity.Entity<a class="headerlink" href="#stalker-models-entity-entity" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="stalker.models.entity.Entity">
-<em class="property">class </em><tt class="descclassname">stalker.models.entity.</tt><tt class="descname">Entity</tt><big>(</big><em>name=None</em>, <em>created_by=None</em>, <em>updated_by=None</em>, <em>status_list=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=0</em>, <em>date_created=datetime.datetime(2010</em>, <em>10</em>, <em>27</em>, <em>15</em>, <em>44</em>, <em>4</em>, <em>130339)</em>, <em>date_updated=datetime.datetime(2010</em>, <em>10</em>, <em>27</em>, <em>15</em>, <em>44</em>, <em>4</em>, <em>130354)</em>, <em>description=''</em>, <em>tags=</em><span class="optional">[</span><span class="optional">]</span>, <em>links=</em><span class="optional">[</span><span class="optional">]</span>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/entity.html#Entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.entity.Entity" title="Permalink to this definition">¶</a></dt>
-<dd><p>The base class of all the other classes</p>
+<em class="property">class </em><tt class="descclassname">stalker.models.entity.</tt><tt class="descname">Entity</tt><big>(</big><em>status_list=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=0</em>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/entity.html#Entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.entity.Entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a normal entity class that derives from AuditEntity and adds
+status variables and notes to the parameters list</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>created_by</strong> &#8211; the created_by attribute should contain a User object
-who is created this object</li>
-<li><strong>updated_by</strong> &#8211; the updated_by attribute should contain a User object
-who is updated the user lastly. the created_by and updated_by attributes
-should point the same object if this entity is just created</li>
-<li><strong>date_created</strong> &#8211; the date that this object is created. it should be a
-time before now</li>
-<li><strong>date_updated</strong> &#8211; this is the date that this object is updated lastly.
-for newly created entities this is equal to date_created and the
-date_updated cannot be before date_created</li>
-<li><strong>name</strong> &#8211; a string or unicode attribute that holds the name of this
-entity. it could not be empty, the first letter should be an upper case
-alphabetic (not alphanumeric).</li>
-<li><strong>description</strong> &#8211; a string or unicode attribute that holds the
-description of this entity object, it could be empty</li>
 <li><strong>status_list</strong> &#8211; this attribute holds a status list object, which shows
 the possible statuses that this entity could be in. This attribute can
 not be empty.</li>
@@ -84,13 +70,6 @@ not be empty.</li>
 status_list attribute. So the value of this attribute couldn&#8217;t be lower
 than 0 and higher than the length of the status_list object and nothing
 other than an integer</li>
-<li><strong>tags</strong> &#8211; a list of tag objects related to this entity. tags could be an
-empty list, or when omitted it will be set to an empty list</li>
-<li><strong>links</strong> &#8211; (not sure about the implementation) a list of link objects.
-that shows the various links related to this entity object. it is
-initialized with an empty list when omitted</li>
-<li><strong>thumbnail</strong> &#8211; (not tested yet) a file object that shows the thumbnail
-file of this entity. thumbnail could be None.</li>
 <li><strong>notes</strong> &#8211; a list of note objects. notes can be an empty list.</li>
 </ul>
 </td>
@@ -99,7 +78,7 @@ file of this entity. thumbnail could be None.</li>
 </table>
 <dl class="method">
 <dt id="stalker.models.entity.Entity.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>name=None</em>, <em>created_by=None</em>, <em>updated_by=None</em>, <em>status_list=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=0</em>, <em>date_created=datetime.datetime(2010</em>, <em>10</em>, <em>27</em>, <em>15</em>, <em>44</em>, <em>4</em>, <em>130339)</em>, <em>date_updated=datetime.datetime(2010</em>, <em>10</em>, <em>27</em>, <em>15</em>, <em>44</em>, <em>4</em>, <em>130354)</em>, <em>description=''</em>, <em>tags=</em><span class="optional">[</span><span class="optional">]</span>, <em>links=</em><span class="optional">[</span><span class="optional">]</span>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/entity.html#Entity.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.entity.Entity.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>status_list=</em><span class="optional">[</span><span class="optional">]</span>, <em>status=0</em>, <em>notes=</em><span class="optional">[</span><span class="optional">]</span>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/entity.html#Entity.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.entity.Entity.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -109,7 +88,7 @@ file of this entity. thumbnail could be None.</li>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><a class="reference internal" href="#stalker.models.entity.Entity.__init__" title="stalker.models.entity.Entity.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(10,&nbsp;27,&nbsp;15,&nbsp;44,&nbsp;4,&nbsp;10,&nbsp;27,&nbsp;15,&nbsp;44,&nbsp;4)</td>
+<tr><td><a class="reference internal" href="#stalker.models.entity.Entity.__init__" title="stalker.models.entity.Entity.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(**kwargs[,&nbsp;status_list,&nbsp;status,&nbsp;notes])</td>
 <td></td>
 </tr>
 </tbody>

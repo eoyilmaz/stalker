@@ -55,13 +55,25 @@
 <h1>stalker.models.status.StatusList<a class="headerlink" href="#stalker-models-status-statuslist" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="stalker.models.status.StatusList">
-<em class="property">class </em><tt class="descclassname">stalker.models.status.</tt><tt class="descname">StatusList</tt><big>(</big><em>name=None</em>, <em>statuses=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="../_modules/stalker/models/status.html#StatusList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.status.StatusList" title="Permalink to this definition">¶</a></dt>
-<dd><p>the list version of the Status
-holds multiple statuses to be used as a choice list for several
-other classes</p>
+<em class="property">class </em><tt class="descclassname">stalker.models.status.</tt><tt class="descname">StatusList</tt><big>(</big><em>statuses=</em><span class="optional">[</span><span class="optional">]</span>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/status.html#StatusList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.status.StatusList" title="Permalink to this definition">¶</a></dt>
+<dd><p>the list version of the Status</p>
+<p>Holds multiple statuses to be used as a choice list for several other
+classes</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>statuses</strong> &#8211; this is a list of status objects, so you can prepare
+different StatusList objects for different kind of entities</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="stalker.models.status.StatusList.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>name=None</em>, <em>statuses=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="../_modules/stalker/models/status.html#StatusList.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.status.StatusList.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>statuses=</em><span class="optional">[</span><span class="optional">]</span>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/status.html#StatusList.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.status.StatusList.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -71,7 +83,7 @@ other classes</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><a class="reference internal" href="#stalker.models.status.StatusList.__init__" title="stalker.models.status.StatusList.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([name,&nbsp;statuses])</td>
+<tr><td><a class="reference internal" href="#stalker.models.status.StatusList.__init__" title="stalker.models.status.StatusList.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(**kwargs[,&nbsp;statuses])</td>
 <td></td>
 </tr>
 </tbody>
@@ -84,10 +96,10 @@ other classes</p>
 </colgroup>
 <tbody valign="top">
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">name</span></tt></td>
-<td>returns the name attribute</td>
+<td>this is the property that sets and returns the name         attribute</td>
 </tr>
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">statuses</span></tt></td>
-<td>returns the status_list</td>
+<td>this is the property that sets and returns the statuses, or</td>
 </tr>
 </tbody>
 </table>

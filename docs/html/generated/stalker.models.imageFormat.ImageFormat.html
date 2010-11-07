@@ -55,15 +55,14 @@
 <h1>stalker.models.imageFormat.ImageFormat<a class="headerlink" href="#stalker-models-imageformat-imageformat" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="stalker.models.imageFormat.ImageFormat">
-<em class="property">class </em><tt class="descclassname">stalker.models.imageFormat.</tt><tt class="descname">ImageFormat</tt><big>(</big><em>name=None</em>, <em>width=None</em>, <em>height=None</em>, <em>pixel_aspect=1.0</em>, <em>print_resolution=300</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/imageFormat.html#ImageFormat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.imageFormat.ImageFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">stalker.models.imageFormat.</tt><tt class="descname">ImageFormat</tt><big>(</big><em>width=None</em>, <em>height=None</em>, <em>pixel_aspect=1.0</em>, <em>print_resolution=300</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/imageFormat.html#ImageFormat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.imageFormat.ImageFormat" title="Permalink to this definition">¶</a></dt>
 <dd><p>the image format class</p>
+<p>adds up this parameters to the SimpleEntity:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> &#8211; the name of the object, it cannot be empty or anything other
-than a string or unicode</li>
 <li><strong>width</strong> &#8211; the width of the format, it cannot be zero or negative, if a
 float number is given it will be converted to integer</li>
 <li><strong>height</strong> &#8211; the height of the format, it cannot be zero or negative, if
@@ -80,7 +79,7 @@ DPI (dot-per-inch). It can not be zero or negative</li>
 </table>
 <dl class="method">
 <dt id="stalker.models.imageFormat.ImageFormat.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>name=None</em>, <em>width=None</em>, <em>height=None</em>, <em>pixel_aspect=1.0</em>, <em>print_resolution=300</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/imageFormat.html#ImageFormat.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.imageFormat.ImageFormat.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>width=None</em>, <em>height=None</em>, <em>pixel_aspect=1.0</em>, <em>print_resolution=300</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/imageFormat.html#ImageFormat.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.imageFormat.ImageFormat.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -90,7 +89,7 @@ DPI (dot-per-inch). It can not be zero or negative</li>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><a class="reference internal" href="#stalker.models.imageFormat.ImageFormat.__init__" title="stalker.models.imageFormat.ImageFormat.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([name,&nbsp;width,&nbsp;height,&nbsp;...])</td>
+<tr><td><a class="reference internal" href="#stalker.models.imageFormat.ImageFormat.__init__" title="stalker.models.imageFormat.ImageFormat.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(**kwargs[,&nbsp;width,&nbsp;height,&nbsp;...])</td>
 <td></td>
 </tr>
 </tbody>
@@ -109,7 +108,7 @@ DPI (dot-per-inch). It can not be zero or negative</li>
 <td>this is a property to set and get the height of the</td>
 </tr>
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">name</span></tt></td>
-<td>this is a property to set and get the name of the</td>
+<td>this is the property that sets and returns the name         attribute</td>
 </tr>
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">pixel_aspect</span></tt></td>
 <td>this is a property to set and get the pixel_aspect of the</td>

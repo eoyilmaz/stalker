@@ -2,15 +2,17 @@
 
 
 
+from stalker.models import entity
+
+
 
 
 
 ########################################################################
-class ImageFormat(object):
+class ImageFormat(entity.SimpleEntity):
     """the image format class
     
-    :param name: the name of the object, it cannot be empty or anything other
-      than a string or unicode
+    adds up this parameters to the SimpleEntity:
     
     :param width: the width of the format, it cannot be zero or negative, if a
       float number is given it will be converted to integer
@@ -29,14 +31,16 @@ class ImageFormat(object):
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 name=None,
                  width=None,
                  height=None,
                  pixel_aspect=1.0,
                  print_resolution=300,
+                 **kwargs
                  ):
         
-        self._name = self._check_name(name)
+        super(ImageFormat,self).__init__(**kwargs)
+        
+        #self._name = self._check_name(name)
         self._width = self._check_width(width)
         self._height = self._check_height(height)
         self._pixel_aspect = self._check_pixel_aspect(pixel_aspect)
@@ -56,18 +60,18 @@ class ImageFormat(object):
     
     
     
-    #----------------------------------------------------------------------
-    def _check_name(self, name):
-        """checks the given name
-        """
+    ##----------------------------------------------------------------------
+    #def _check_name(self, name):
+        #"""checks the given name
+        #"""
         
-        if not isinstance(name, (str, unicode)):
-            raise(ValueError("name should be instance of str or unicode"))
+        #if not isinstance(name, (str, unicode)):
+            #raise(ValueError("name should be instance of str or unicode"))
         
-        if name == '' or len(name) < 1:
-            raise(ValueError("name should not be an empty string"))
+        #if name == '' or len(name) < 1:
+            #raise(ValueError("name should not be an empty string"))
         
-        return name
+        #return name
     
     
     
@@ -131,30 +135,30 @@ class ImageFormat(object):
     
     
     
-    #----------------------------------------------------------------------
-    def name():
-        def fget(self):
-            """returns the name attribute
-            """
-            return self._name
+    ##----------------------------------------------------------------------
+    #def name():
+        #def fget(self):
+            #"""returns the name attribute
+            #"""
+            #return self._name
         
-        def fset(self, name):
-            """sets the name attribute
-            """
-            self._name = self._check_name(name)
+        #def fset(self, name):
+            #"""sets the name attribute
+            #"""
+            #self._name = self._check_name(name)
         
-        doc = """this is a property to set and get the name of the
-        image_format
+        #doc = """this is a property to set and get the name of the
+        #image_format
         
-        the name should be:
-        * a string or unicode value
-        * can not be None
-        * can not be an empty string or empty unicode
-        """
+        #the name should be:
+        #* a string or unicode value
+        #* can not be None
+        #* can not be an empty string or empty unicode
+        #"""
         
-        return locals()
+        #return locals()
     
-    name = property(**name())
+    #name = property(**name())
     
     
     

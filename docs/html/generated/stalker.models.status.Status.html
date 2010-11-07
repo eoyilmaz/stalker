@@ -55,11 +55,24 @@
 <h1>stalker.models.status.Status<a class="headerlink" href="#stalker-models-status-status" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="stalker.models.status.Status">
-<em class="property">class </em><tt class="descclassname">stalker.models.status.</tt><tt class="descname">Status</tt><big>(</big><em>name=None</em>, <em>abbreviation=None</em>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/status.html#Status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.status.Status" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">stalker.models.status.</tt><tt class="descname">Status</tt><big>(</big><em>shortName=None</em>, <em>thumbnail=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/status.html#Status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.status.Status" title="Permalink to this definition">¶</a></dt>
 <dd><p>The Status class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>shortName</strong> &#8211; the shortName of the status name, keep it as simple
+as possible, the string will be formated to have all upper-case and no
+white spaces at the beggining and at the end of the attribute</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="stalker.models.status.Status.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>name=None</em>, <em>abbreviation=None</em>, <em>thumbnail=None</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/status.html#Status.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.status.Status.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>shortName=None</em>, <em>thumbnail=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/stalker/models/status.html#Status.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stalker.models.status.Status.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -69,7 +82,7 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><a class="reference internal" href="#stalker.models.status.Status.__init__" title="stalker.models.status.Status.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([name,&nbsp;abbreviation,&nbsp;thumbnail])</td>
+<tr><td><a class="reference internal" href="#stalker.models.status.Status.__init__" title="stalker.models.status.Status.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(**kwargs[,&nbsp;shortName,&nbsp;thumbnail])</td>
 <td></td>
 </tr>
 </tbody>
@@ -81,11 +94,11 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">abbreviation</span></tt></td>
-<td>returns the abbreviation property</td>
+<tr><td><tt class="xref py py-obj docutils literal"><span class="pre">Status.abbreviation</span></tt></td>
+<td></td>
 </tr>
 <tr><td><tt class="xref py py-obj docutils literal"><span class="pre">name</span></tt></td>
-<td>returns the name property</td>
+<td>this is the property that sets and returns the name         attribute</td>
 </tr>
 </tbody>
 </table>

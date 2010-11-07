@@ -22,8 +22,9 @@ class SimpleEntity(object):
       at the beggining and at the end of the string
     
     :param description: a string or unicode attribute that holds the
-      description of this entity object, it could be empty or it could not
-      again have white spaces at the beggining and at the end of the string
+      description of this entity object, it could be an empty string, and it
+      could not again have white spaces at the beggining and at the end of the
+      string
     
     :param tags: a list of tag objects related to this entity. tags could be an
       empty list, or when omitted it will be set to an empty list

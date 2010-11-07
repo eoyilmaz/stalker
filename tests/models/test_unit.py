@@ -21,26 +21,26 @@ class UnitTest(unittest.TestCase):
     def setUp(self):
         """setting up some default values
         """
-        self.name = 'meter'
+        self.name = 'Meter'
         self.abbr = 'm'
         self.conv_ratio = 100
     
     
     
-    #----------------------------------------------------------------------
-    def test_init_arguments(self):
-        """testing the init arguments
-        """
-        # the initialization should have the attributes below:
-        # id, name, short_name
+    ##----------------------------------------------------------------------
+    #def test_init_arguments(self):
+        #"""testing the init arguments
+        #"""
+        ## the initialization should have the attributes below:
+        ## id, name, short_name
         
-        # these all should raise ValueErrors
+        ## these all should raise ValueErrors
         
-        # empty arguments
-        self.assertRaises(ValueError, unit.Unit, '', '')
+        ## empty arguments
+        #self.assertRaises(ValueError, unit.Unit, '', '')
         
-        # this should work
-        a_unit = unit.Unit('meter', 'm', 100.0)
+        ## this should work
+        #a_unit = unit.Unit('Meter', 'm', 100.0)
     
     
     
@@ -49,7 +49,12 @@ class UnitTest(unittest.TestCase):
         """testing the name attribute against being empty
         """
         # the unit should always have a name
-        self.assertRaises(ValueError, unit.Unit, '', '')
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            name='',
+            abbreviation=self.abbr
+        )
     
     
     
@@ -58,9 +63,26 @@ class UnitTest(unittest.TestCase):
         """testing the name attribute not being string or unicode
         """
         # the name attribute should only accept string or unicode
-        self.assertRaises(ValueError, unit.Unit, 1, 'm')
-        self.assertRaises(ValueError, unit.Unit, [], 'm')
-        self.assertRaises(ValueError, unit.Unit, {}, 'm')
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            name=1,
+            abbreviation='m'
+        )
+        
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            name=[],
+            abbreviation='m'
+        )
+        
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            name={},
+            abbreviation='m'
+        )
     
     
     
@@ -69,7 +91,7 @@ class UnitTest(unittest.TestCase):
         """testing the name attribute against being string or unicode
         """
         # the name should be string type
-        a_unit = unit.Unit('meter', 'm')
+        a_unit = unit.Unit(name='Meter', abbreviation='m')
         self.assertRaises(ValueError, setattr, a_unit, "name", 1)
     
     
@@ -79,8 +101,8 @@ class UnitTest(unittest.TestCase):
         """testing the name property
         """
         # test name property
-        name = 'meter'
-        a_unit = unit.Unit(name, 'm')
+        name = 'Meter'
+        a_unit = unit.Unit(name=name, abbreviation='m')
         self.assertEquals( a_unit.name, name)
     
     
@@ -90,7 +112,12 @@ class UnitTest(unittest.TestCase):
         """testing the abbreviation attribute being empty
         """
         # the abbreviation shouldn't be empty
-        self.assertRaises(ValueError, unit.Unit, 'meter', '')
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            name='Meter',
+            abbreviation=''
+        )
     
     
     
@@ -100,7 +127,12 @@ class UnitTest(unittest.TestCase):
         """
         # the abbreviation shouldn't be anything other than a string or
         # unicode
-        self.assertRaises(ValueError, unit.Unit, 'meter', 1)
+        self.assertRaises(
+            ValueError,
+            unit.Unit,
+            name='Meter',
+            abbreviation=1
+        )
     
     
     
@@ -109,7 +141,7 @@ class UnitTest(unittest.TestCase):
         """testing the abbreviation property string or unicode
         """
         # assigning values to abbreviation should also return ValueErrors
-        a_unit = unit.Unit('meter', 'm')
+        a_unit = unit.Unit(name='Meter', abbreviation='m')
         self.assertRaises(ValueError, setattr, a_unit, 'abbreviation', '')
         self.assertRaises(ValueError, setattr, a_unit, 'abbreviation', 1)
     
@@ -120,9 +152,9 @@ class UnitTest(unittest.TestCase):
         """testing the abbreviation property
         """
         # test abbreviation property
-        name = 'meter'
+        name = 'Meter'
         abbreviation = 'm'
-        a_unit = unit.Unit(name, abbreviation)
+        a_unit = unit.Unit(name=name, abbreviation=abbreviation)
         
         self.assertEquals(a_unit.abbreviation, abbreviation)
     
@@ -136,9 +168,9 @@ class UnitTest(unittest.TestCase):
         self.assertRaises(
             ValueError,
             unit.Unit,
-            self.name,
-            self.abbr,
-            0
+            name=self.name,
+            abbreviation=self.abbr,
+            conversion_ratio=0
         )
     
     
@@ -152,9 +184,9 @@ class UnitTest(unittest.TestCase):
         self.assertRaises(
             ValueError,
             unit.Unit,
-            self.name,
-            self.abbr,
-            -1
+            name=self.name,
+            abbreviation=self.abbr,
+            conversion_ratio=-1
         )
     
     
@@ -169,17 +201,17 @@ class UnitTest(unittest.TestCase):
         self.assertRaises(
             ValueError,
             unit.Unit,
-            self.name,
-            self.abbr,
-            'a string'
+            name=self.name,
+            abbreviation=self.abbr,
+            conversion_ratio='a string'
         )
         
         self.assertRaises(
             ValueError,
             unit.Unit,
-            self.name,
-            self.abbr,
-            u'a unicode'
+            name=self.name,
+            abbreviation=self.abbr,
+            conversion_ratio=u'a unicode'
         )
     
     
@@ -191,8 +223,11 @@ class UnitTest(unittest.TestCase):
         
         # check if the conversion ratio is instance of float
         a_conv_unit = unit.Unit(
-            self.name, self.abbr, self.conv_ratio
+            name=self.name,
+            abbreviation=self.abbr,
+            conversion_ratio=self.conv_ratio
         )
+        
         self.assertTrue(isinstance(a_conv_unit.conversion_ratio, float))
     
     
@@ -204,7 +239,9 @@ class UnitTest(unittest.TestCase):
         
         # check if the conversion ratio is assigned correctly
         a_conv_unit = unit.Unit(
-            self.name, self.abbr, self.conv_ratio
+            name=self.name,
+            abbreviation=self.abbr,
+            conversion_ratio=self.conv_ratio
         )
         
         new_conv_ratio = 1000.0
@@ -245,7 +282,13 @@ class TimeTest(unittest.TestCase):
         """testing the fps attribute against being zero
         """
         # the fps shouldn't be zero
-        self.assertRaises(ValueError, unit.Time, self.name, self.abbr, 0)
+        self.assertRaises(
+            ValueError,
+            unit.Time,
+            name=self.name,
+            abbreviation=self.abbr,
+            fps=0
+        )
     
     
     
@@ -254,7 +297,13 @@ class TimeTest(unittest.TestCase):
         """testing the fps attribute against being negative
         """
         # the fps shouldn't be negative
-        self.assertRaises(ValueError, unit.Time, self.name, self.abbr, -20 )
+        self.assertRaises(
+            ValueError,
+            unit.Time,
+            name=self.name,
+            abbreviation=self.abbr,
+            fps=-20
+        )
     
     
     
@@ -264,7 +313,12 @@ class TimeTest(unittest.TestCase):
         """
         # check if the fps is float
         int_fps = 25
-        a_time_unit = unit.Time(self.name, self.abbr, int_fps)
+        a_time_unit = unit.Time(
+            name=self.name,
+            abbreviation=self.abbr,
+            fps=int_fps
+        )
+        
         self.assertTrue(isinstance(a_time_unit.fps, float))
     
     
@@ -275,6 +329,10 @@ class TimeTest(unittest.TestCase):
         """
         # check if the fps is assigned correctly
         newFPS = 30.0
-        a_time_unit = unit.Time(self.name, self.abbr, self.fps)
+        a_time_unit = unit.Time(
+            name=self.name,
+            abbreviation=self.abbr,
+            fps=self.fps
+        )
         a_time_unit.fps = newFPS
         self.assertEquals(a_time_unit.fps, newFPS)

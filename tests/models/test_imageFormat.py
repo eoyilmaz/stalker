@@ -30,67 +30,67 @@ class ImageFormatTest(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_name_str_or_unicode(self):
-        """testing the name attribute against not being string or unicode
-        """
+    ##----------------------------------------------------------------------
+    #def test_name_str_or_unicode(self):
+        #"""testing the name attribute against not being string or unicode
+        #"""
         
-        #----------------------------------------------------------------------
-        # the name should be string or unicode
-        self.assertRaises(ValueError,
-                          imageFormat.ImageFormat,
-                          1920,
-                          self.width,
-                          self.height,
-                          self.pixel_aspect,
-                          self.print_resolution)
+        ##----------------------------------------------------------------------
+        ## the name should be string or unicode
+        #self.assertRaises(ValueError,
+                          #imageFormat.ImageFormat,
+                          #1920,
+                          #self.width,
+                          #self.height,
+                          #self.pixel_aspect,
+                          #self.print_resolution)
     
     
     
-    #----------------------------------------------------------------------
-    def test_name_property_str_or_unicode(self):
-        """testing the name property against not being string or unicode
-        """
+    ##----------------------------------------------------------------------
+    #def test_name_property_str_or_unicode(self):
+        #"""testing the name property against not being string or unicode
+        #"""
         
-        # test also the name property
-        an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
-        )
+        ## test also the name property
+        #an_image_format = imageFormat.ImageFormat(
+            #self.name, self.width, self.height, self.pixel_aspect,
+            #self.print_resolution
+        #)
         
-        self.assertRaises(ValueError, setattr, an_image_format, 'name', 1920)
+        #self.assertRaises(ValueError, setattr, an_image_format, 'name', 1920)
     
     
     
-    #----------------------------------------------------------------------
-    def test_name_empty_sting(self):
-        """testing the name attribute against being an empty string
-        """
+    ##----------------------------------------------------------------------
+    #def test_name_empty_sting(self):
+        #"""testing the name attribute against being an empty string
+        #"""
         
-        #----------------------------------------------------------------------
-        # the name could not be an empty string
-        self.assertRaises(ValueError,
-                          imageFormat.ImageFormat,
-                          '',
-                          self.width,
-                          self.height,
-                          self.pixel_aspect,
-                          self.print_resolution)
+        ##----------------------------------------------------------------------
+        ## the name could not be an empty string
+        #self.assertRaises(ValueError,
+                          #imageFormat.ImageFormat,
+                          #'',
+                          #self.width,
+                          #self.height,
+                          #self.pixel_aspect,
+                          #self.print_resolution)
     
     
     
-    #----------------------------------------------------------------------
-    def test_name_property_empty_string(self):
-        """testing the name property against being an empty string
-        """
+    ##----------------------------------------------------------------------
+    #def test_name_property_empty_string(self):
+        #"""testing the name property against being an empty string
+        #"""
         
-        # test also the name property
-        an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
-        )
+        ## test also the name property
+        #an_image_format = imageFormat.ImageFormat(
+            #self.name, self.width, self.height, self.pixel_aspect,
+            #self.print_resolution
+        #)
         
-        self.assertRaises(ValueError, setattr, an_image_format, 'name', '')
+        #self.assertRaises(ValueError, setattr, an_image_format, 'name', '')
     
     
     
@@ -101,21 +101,25 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the width should be an integer or float
-        self.assertRaises(ValueError,
-                          imageFormat.ImageFormat,
-                          self.name,
-                          '1920',
-                          self.height,
-                          self.pixel_aspect,
-                          self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width='1920',
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
+        )
         
-        self.assertRaises(ValueError,
-                          imageFormat.ImageFormat,
-                          self.name,
-                          [1920],
-                          self.height,
-                          self.pixel_aspect,
-                          self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=[1920],
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
+        )
     
     
     
@@ -126,12 +130,18 @@ class ImageFormatTest(unittest.TestCase):
         
         # test also the property
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
-        self.assertRaises(ValueError, setattr, an_image_format, 'width', '1920')
-        self.assertRaises(ValueError, setattr, an_image_format, 'width', [1920])
+        self.assertRaises(ValueError, setattr, an_image_format, 'width',
+                          '1920')
+        
+        self.assertRaises(ValueError, setattr, an_image_format, 'width',
+                          [1920])
     
     
     
@@ -146,8 +156,11 @@ class ImageFormatTest(unittest.TestCase):
         a_float_width = 1920.0
         
         an_image_format = imageFormat.ImageFormat(
-            self.name, a_float_width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=a_float_width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertTrue(isinstance(an_image_format.width, int))
@@ -165,8 +178,11 @@ class ImageFormatTest(unittest.TestCase):
         a_float_width = 1920.0
         
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         an_image_format.width = a_float_width
@@ -181,9 +197,15 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # could not be zero
-        self.assertRaises(ValueError, imageFormat.ImageFormat, self.name,
-                          0, self.height, self.pixel_aspect,
-                          self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=0,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
+        )
     
     
     #----------------------------------------------------------------------
@@ -193,8 +215,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property for this
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertRaises(ValueError, setattr, an_image_format, 'width', 0)
@@ -211,11 +236,11 @@ class ImageFormatTest(unittest.TestCase):
         self.assertRaises(
             ValueError,
             imageFormat.ImageFormat,
-            self.name,
-            -10,
-            self.height,
-            self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=-10,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
     
     
@@ -227,8 +252,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property for this
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertRaises(ValueError, setattr, an_image_format, 'width', -100)
@@ -242,21 +270,25 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the height should be an integer
-        self.assertRaises(ValueError,
-                          imageFormat.ImageFormat,
-                          self.name,
-                          self.width,
-                          '1080',
-                          self.pixel_aspect,
-                          self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height='1080',
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
+        )
         
-        self.assertRaises(ValueError,
-                          imageFormat.ImageFormat,
-                          self.name,
-                          self.width,
-                          [1080],
-                          self.pixel_aspect,
-                          self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=[1080],
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
+        )
     
     
     
@@ -267,8 +299,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # test also the property
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertRaises(
@@ -290,8 +325,11 @@ class ImageFormatTest(unittest.TestCase):
         # the given floats should be converted to integer
         a_float_height = 1080.0
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, a_float_height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=a_float_height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertTrue(isinstance(an_image_format.height, int))
@@ -308,8 +346,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property for this
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         an_image_format.height = a_float_height
@@ -324,9 +365,15 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # could not be zero
-        self.assertRaises(ValueError, imageFormat.ImageFormat,
-                          self.name, self.width, 0, self.pixel_aspect,
-                          self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=0,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
+        )
     
     
     
@@ -337,8 +384,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property for this
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertRaises(ValueError, setattr, an_image_format, 'height', 0)
@@ -352,9 +402,15 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # could not be negative
-        self.assertRaises(ValueError, imageFormat.ImageFormat,
-                          self.name, self.width, -10, self.pixel_aspect,
-                          self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=-10,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
+        )
     
     
     
@@ -365,8 +421,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property for this
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertRaises(ValueError, setattr, an_image_format, 'height', -100)
@@ -388,8 +447,12 @@ class ImageFormatTest(unittest.TestCase):
         #print_resolution = 300
         
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution)
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
+        )
         
         self.assertTrue(isinstance(an_image_format.device_aspect, float))
     
@@ -412,8 +475,13 @@ class ImageFormatTest(unittest.TestCase):
         pixel_aspect = 1.0
         print_resolution = 300
         
-        an_image_format = imageFormat.ImageFormat(name, width, height,
-                                                pixel_aspect, print_resolution)
+        an_image_format = imageFormat.ImageFormat(
+            name=name,
+            width=width,
+            height=height,
+            pixel_aspect=pixel_aspect,
+            print_resolution=print_resolution
+        )
         
         # the device aspect for this setup should be around 1.7778
         self.assertEquals( "%1.4g" % an_image_format.device_aspect, "%1.4g" % 1.7778 )
@@ -427,8 +495,13 @@ class ImageFormatTest(unittest.TestCase):
         pixel_aspect = 1.0667
         print_resolution = 300
         
-        an_image_format = imageFormat.ImageFormat(name, width, height,
-                                                pixel_aspect, print_resolution)
+        an_image_format = imageFormat.ImageFormat(
+            name=name,
+            width=width,
+            height=height,
+            pixel_aspect=pixel_aspect,
+            print_resolution=print_resolution
+        )
         
         # the device aspect for this setup should be around 4/3
         self.assertEquals("%1.4g" % an_image_format.device_aspect, "%1.4g" % 1.3333)
@@ -453,7 +526,11 @@ class ImageFormatTest(unittest.TestCase):
         print_resolution = 300
         
         an_image_format = imageFormat.ImageFormat(
-            name, width, height, pixel_aspect, print_resolution
+            name=name,
+            width=width,
+            height=height,
+            pixel_aspect=pixel_aspect,
+            print_resolution=print_resolution
         )
         
         previous_device_aspect = an_image_format.device_aspect
@@ -478,8 +555,11 @@ class ImageFormatTest(unittest.TestCase):
         """
         
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         #----------------------------------------------------------------------
@@ -498,21 +578,33 @@ class ImageFormatTest(unittest.TestCase):
         # the pixel aspect ratio should be a given as float or integer number
         
         # any other variable type than int and float is not ok
-        self.assertRaises(ValueError,
-                          imageFormat.ImageFormat,
-                          self.name,
-                          self.width,
-                          self.height,
-                          '1.0',
-                          self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect='1.0',
+            print_resolution=self.print_resolution
+        )
         
         # float is ok
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, 1.0, self.print_resolution)
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=1.0,
+            print_resolution=self.print_resolution
+        )
         
         # int is ok
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, 2, self.print_resolution)
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=2,
+            print_resolution=self.print_resolution
+        )
     
     
     
@@ -525,7 +617,12 @@ class ImageFormatTest(unittest.TestCase):
         # given an integer for the pixel aspect ratio,
         # the returned pixel aspect ratio should be a float
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, int(1), self.print_resolution)
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=int(1),
+            print_resolution=self.print_resolution
+        )
         
         self.assertTrue(isinstance(an_image_format.pixel_aspect, float))
     
@@ -538,9 +635,15 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the pixel aspect ratio can not be zero
-        self.assertRaises(ValueError, imageFormat.ImageFormat,
-                          self.name, self.width, self.height, 0,
-                          self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=0,
+            print_resolution=self.print_resolution
+        )
     
     
     
@@ -551,8 +654,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertRaises(ValueError, setattr, an_image_format,
@@ -567,11 +673,25 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the pixel aspect ratio can not be negative
-        self.assertRaises(ValueError, imageFormat.ImageFormat, self.name,
-                          self.width, self.height, -1.0, self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=-1.0,
+            print_resolution=self.print_resolution
+        )
         
-        self.assertRaises(ValueError, imageFormat.ImageFormat, self.name,
-                          self.width, self.height, -1, self.print_resolution)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=-1,
+            print_resolution=self.print_resolution
+        )
     
     
     
@@ -582,8 +702,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertRaises(ValueError, setattr, an_image_format,
@@ -601,7 +724,9 @@ class ImageFormatTest(unittest.TestCase):
         """
         
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height
+            name=self.name,
+            width=self.width,
+            height=self.height
         )
         
         default_value = 1.0
@@ -618,12 +743,18 @@ class ImageFormatTest(unittest.TestCase):
         #----------------------------------------------------------------------
         # the print resolution can be ommited
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect
         )
         
         # then the default value is going to be used
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect
         )
         
         get_print_resolution = an_image_format.print_resolution
@@ -641,17 +772,30 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the print resolution should be initialized with an integer or a float
-        self.assertRaises(ValueError, imageFormat.ImageFormat, self.name,
-                          self.width, self.height, self.pixel_aspect, '300.0')
-        
-        an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution='300.0'
         )
         
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            float(self.print_resolution)
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
+        )
+        
+        an_image_format = imageFormat.ImageFormat(
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=float(self.print_resolution)
         )
     
     
@@ -663,8 +807,15 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the print resolution can not be zero
-        self.assertRaises(ValueError, imageFormat.ImageFormat, self.name,
-                          self.width, self.height, self.pixel_aspect, 0)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=0
+        )
     
     
     
@@ -675,8 +826,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertRaises(ValueError, setattr, an_image_format,
@@ -691,11 +845,25 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the print resolution can not be negative
-        self.assertRaises(ValueError, imageFormat.ImageFormat, self.name,
-                          self.width, self.height, self.pixel_aspect, -300)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=-300
+        )
         
-        self.assertRaises(ValueError, imageFormat.ImageFormat, self.name,
-                          self.width, self.height, self.pixel_aspect, -300.0)
+        self.assertRaises(
+            ValueError,
+            imageFormat.ImageFormat,
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=-300.0
+        )
     
     
     
@@ -706,8 +874,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property
         an_image_format = imageFormat.ImageFormat(
-            self.name, self.width, self.height, self.pixel_aspect,
-            self.print_resolution
+            name=self.name,
+            width=self.width,
+            height=self.height,
+            pixel_aspect=self.pixel_aspect,
+            print_resolution=self.print_resolution
         )
         
         self.assertRaises(ValueError, setattr, an_image_format,

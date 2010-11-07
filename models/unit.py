@@ -2,14 +2,18 @@
 
 
 
+from stalker.models import entity
+
+
+
 
 
 
 ########################################################################
-class Unit(object):
+class Unit(entity.SimpleEntity):
     """the base Unit class that keeps data about the units
     
-    :param name: the name of the unit, should be a string or unicode
+    adds these parameters to the SimpleEntity
     
     :param abbreviation: the abbreviation of the unit, cm for centimeters, m
       for meters, km for kilometers and so on, it should be a string or unicode
@@ -27,27 +31,30 @@ class Unit(object):
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 name=None,
                  abbreviation=None,
-                 conversion_ratio=1.0
+                 conversion_ratio=1.0,
+                 **kwargs
                  ):
-        self._name = self._check_name(name)
+        #self._name = self._check_name(name)
+        
+        super(Unit,self).__init__(**kwargs)
+        
         self._abbreviation = self._check_abbreviation(abbreviation)
         self._conversion_ratio = self._check_conversion_ratio(conversion_ratio) #float(conversion_ratio)
     
     
     
-    #----------------------------------------------------------------------
-    def _check_name(self, name):
-        """checks the name attribute
-        """
+    ##----------------------------------------------------------------------
+    #def _check_name(self, name):
+        #"""checks the name attribute
+        #"""
         
-        if not isinstance(name, (str, unicode)) or \
-           len(name) == 0:
-            raise(ValueError("name should be instance of string or unicode \
-            and it shouldn't be empty"))
+        #if not isinstance(name, (str, unicode)) or \
+           #len(name) == 0:
+            #raise(ValueError("name should be instance of string or unicode \
+            #and it shouldn't be empty"))
         
-        return name
+        #return name
     
     
     
@@ -65,21 +72,21 @@ class Unit(object):
     
     
     
-    #----------------------------------------------------------------------
-    def name():
-        def fget(self):
-            return self._name
+    ##----------------------------------------------------------------------
+    #def name():
+        #def fget(self):
+            #return self._name
         
-        def fset(self, name):
-            self._name = self._check_name(name)
+        #def fset(self, name):
+            #self._name = self._check_name(name)
         
-        doc = """the name property, sets and returns the name of the current
-        unit"""
+        #doc = """the name property, sets and returns the name of the current
+        #unit"""
         
         
-        return locals()
+        #return locals()
     
-    name = property( **name() )
+    #name = property( **name() )
     
     
     
@@ -175,10 +182,11 @@ class Time(Unit):
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 name=None,
                  abbreviation=None,
-                 fps=None):
-        super(Time, self).__init__(name, abbreviation, 1.0)
+                 fps=None,
+                 **kwargs
+                 ):
+        super(Time, self).__init__(abbreviation=abbreviation, **kwargs)
         self._fps = self._check_fps(fps)
     
     

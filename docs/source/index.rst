@@ -38,6 +38,8 @@ Contents:
    
    stalker
    stalker.models
+   stalker.models.comment
+   stalker.models.comment.Comment
    stalker.models.entity
    stalker.models.entity.Entity
    stalker.models.imageFormat
