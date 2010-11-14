@@ -201,8 +201,8 @@ class CommentTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_to_property_being_set_to_other_than_entity(self):
-        """testing if a ValueError will be raised if the to **property** tried
-        to be set to a something other than an entity object
+        """testing if a ValueError will be raised if the **to** **property**
+        tried to be set to a something other than an entity object
         """
         
         # try to set the to property to something other than an entity object

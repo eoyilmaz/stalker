@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Department(entity.Entity):
+class Department(entity.AuditEntity):
     """the department class
     """
     

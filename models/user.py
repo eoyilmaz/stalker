@@ -10,11 +10,11 @@ from stalker.models import entity
 
 
 ########################################################################
-class User(entity.Entity):
+class User(entity.AuditEntity):
     """The user class is designed to hold data about a User in the system. It
-    is derived from the entity.Entity class
+    is derived from the entity.AuditEntity class
     
-    it adds these parameters to the EntityClass
+    it adds these parameters to the AuditEntity class
     
     :param email: holds the e-mail of the user
     

@@ -149,6 +149,7 @@ class SimpleEntityTest(mocker.MockerTestCase):
             ("2423$+^^+^'%+%%&_testName", "TestName"),
             ("2423$+^^+^'%+%%&_testName_35", "TestName_35"),
             ("2423$ +^^+^ '%+%%&_ testName_ 35", "TestName_35"),
+            ("SH001","SH001"),
         ]
         
         for test_value in test_group:
