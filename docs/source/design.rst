@@ -8,7 +8,7 @@ The project is about creating an Open Source Production Asset Management
 (ProdAM) System called Stalker which is designed for Vfx/Animation Studios.
 Stalker will be consisting of a framework and the interface those has been
 build over the framework. Stalker will have a very flexible design that lets
-the pipeline tds to customize it in a wide variety of perspectives. The out of
+the pipeline TDs to customize it in a wide variety of perspectives. The out of
 the package installation will meet the basic needs of majority of studios
 without too much effort.
 
@@ -21,8 +21,8 @@ system.
 
 Every studio outside establishes and developes its own asset management system.
 Stalker will try to be the framework that these proprietry asset management
-systems will be build over. Thus reducing the work repeated on every big project
-start
+systems will be build over. Thus reducing the work repeated on every big
+project start.
 
 Features and Requirements
 =========================
@@ -167,46 +167,31 @@ As you see all the functionalities of SQLAlchemy is fully supported. At the end
 all the models are plain old python objects (POPO) and the persistancy part is
 handled with SQLAlchemy.
 
-Data Classes And Inheritance Map
-================================
+How Does Stalker Work
+=====================
+Stalker is build over a flexible model which consists of the basic data
+structure that an animation/vfx studio can need. The idea behind is simple,
+just give a system to the artists where they can track and collaborate the
+things they have created.
 
-ImageFormat:
- Description:
-  It is used to store information about various image formats.
- 
- Attributes:
-  +-------------------+---------+
-  | attribute name    | type    |
-  +===================+=========+
-  | name              | unicode |
-  +-------------------+---------+
-  | width             | integer |
-  +-------------------+---------+
-  | height            | integer |
-  +-------------------+---------+
-  | deviceAspectRatio | float   |
-  +-------------------+---------+
-  | pixelAspectRatio  | float   |
-  +-------------------+---------+
-  | printResolution   | float   |
-  +-------------------+---------+
+Database
+========
+Stalker can be setup to use both with a database server and without a database
+server. Though a setup with a dedicated database server is recommended.
 
-Unit:
- Description:
-  This is the base Unit class that keeps data about the units
- 
- Attributes:
-  +-------------------+---------+
-  | attribute name    | type    |
-  +===================+=========+
-  | name              | unicode |
-  +-------------------+---------+
-  | abbreviation      | unicode |
-  +-------------------+---------+
+Because the database part of Stalker is build over SQLAlchemy, the database
+server can be any system that SQLAlchemy supports. This also means that you can
+setup Stalker to use SQLite databases which doesn't require a server but for
+user counts more than 50 (I presume) it is recommended to use a dedicated
+database server
 
-ConvertableUnit:
- Description:
-  Convertable units like linear and angular units will derive from this class
- 
- Attributes:
-  
+Models
+======
+Because SQLAlchemy allows the system designers to use the regular Python
+classes as they are, all the database models are modelled in a regular Python
+class hierarchy. So the classes works without any persistency. But they are
+designed persistency in mind.
+
+The ::stalker.models module consists of basic models that a studio will need.
+And a studio can customize the database models and add new models to the
+existance hierarchy.

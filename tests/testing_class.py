@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 class AClass(object):
     def __init__(self,
                  arg1=None,

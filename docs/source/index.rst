@@ -7,7 +7,7 @@ Welcome to stalker's documentation!
 ===================================
 
 Stalker is an OpenSource Production Digital Asset Manager (ProdAM) licensed
-under GPL v3 and designed specially for Animation and VFX Studios.
+under BSD License and designed specially for Animation and VFX Studios.
 
 Stalker consists of several parts:
  * Database
