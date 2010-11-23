@@ -88,18 +88,18 @@ class SimpleEntity(object):
         
         import re
         
-        print name_in
+        #print name_in
         # remove unnecesary characters from the beginning
         name_in = re.sub('(^[^A-Za-z]+)', r'', name_in)
-        print name_in
+        #print name_in
         
         # remove white spaces
         name_in = re.sub('([\s])+', r'', name_in)
-        print name_in
+        #print name_in
         
         # capitalize the first letter
         name_in = name_in[0].upper() + name_in[1:]
-        print name_in
+        #print name_in
         
         return name_in
         
