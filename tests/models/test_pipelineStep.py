@@ -49,6 +49,22 @@ class PipelineStepTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_code_attribute_being_None(self):
+        """testing if a ValueError will be raised when trying to assign None
+        to the code attribute
+        """
+        
+        self.assertRaises(
+            ValueError,
+            pipelineStep.PipelineStep,
+            name=self.name,
+            description=self.description,
+            code=None
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_code_property_being_empty(self):
         """testing if a ValueError will be raised when trying to assign an
         empty string to the code property 

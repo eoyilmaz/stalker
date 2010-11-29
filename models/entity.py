@@ -64,18 +64,18 @@ class SimpleEntity(object):
         
         # raise ValueError when:
         
-        # it is not an instance of string or unicode
-        if not isinstance(name_in, (str, unicode)):
-            raise ValueError("the name attribute should be set to a string \
-            or unicode")
+        # it is None
+        if name_in is None:
+            raise ValueError("the name couldn't be set to None")
         
         # it is empty
         if name_in == "":
             raise ValueError("the name couldn't be an empty string")
         
-        # it is None
-        if name_in is None:
-            raise ValueError("the name couldn't be set to None")
+        # it is not an instance of string or unicode
+        if not isinstance(name_in, (str, unicode)):
+            raise ValueError("the name attribute should be set to a string \
+            or unicode")
         
         return self._condition_name(name_in)
     
