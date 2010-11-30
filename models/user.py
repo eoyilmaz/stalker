@@ -56,4 +56,36 @@ class User(entity.AuditEntity):
     
     
     
-    pass
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 email='',
+                 login_name='',
+                 first_name='',
+                 last_name='',
+                 department=None,
+                 password='',
+                 permission_groups=[],
+                 tasks=[],
+                 projects=[],
+                 leader_of_projects=[],
+                 leader_of_sequences=[],
+                 **kwargs
+                 ):
+        
+        super(User, self).__init__(**kwargs)
+        
+        #self._department = self._check_department(department)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def _check_department(self, department_in):
+        #"""checks the given department value
+        #"""
+        
+        ## 
+        
+        
+    
+    
+    

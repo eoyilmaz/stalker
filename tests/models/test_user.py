@@ -57,6 +57,10 @@ class UserTest(mocker.MockerTestCase):
         self.mock_sequence3 = self.mocker.mock(sequence.Sequence)
         self.mock_sequence4 = self.mocker.mock(sequence.Sequence)
         
+        # a mock user
+        self.mock_admin = self.mocker.mock(user.User)
+        
+        
         self.mocker.replay()
         
         # create a proper user object
@@ -78,10 +82,14 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
             leader_of_sequences=[self.mock_sequence1,
                                  self.mock_sequence2,
                                  self.mock_sequence3,
-                                 self.mock_sequence4]
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
         )
     
     
@@ -91,7 +99,37 @@ class UserTest(mocker.MockerTestCase):
         """testing if the email attribute accepting only string or unicode
         values
         """
-        self.fail('test not implemented yet')
+        
+        # try to create a new user with wrong attribte
+        test_value = ['an email']
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=test_value,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -100,7 +138,29 @@ class UserTest(mocker.MockerTestCase):
         """testing if the email property accepting only string or unicode
         values
         """
-        self.fail('test not implemented yet')
+        
+        # try to assign something else than a string or unicode
+        test_value = 1
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'email',
+            test_value
+        )
+        
+        
+        
+        test_value = ['an email']
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'email',
+            test_value
+        )
     
     
     
@@ -115,7 +175,36 @@ class UserTest(mocker.MockerTestCase):
                        '@',
                        ]
         
-        self.fail('test not implemented yet')
+        # any of this values should raise a ValueError
+        for value in test_values:
+            
+            self.assertRaises(
+                ValueError,
+                user.User,
+                name=self.name,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                description=self.description,
+                email=value,
+                password=self.password,
+                login_name=self.login_name,
+                department=self.mock_department,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                leader_of_sequences=[self.mock_sequence1,
+                                     self.mock_sequence2,
+                                     self.mock_sequence3,
+                                     self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
     
     
     
@@ -130,7 +219,15 @@ class UserTest(mocker.MockerTestCase):
                        '@',
                        ]
         
-        self.fail('test not implemented yet')
+        # any of these email values should raise a ValueError
+        for value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_user,
+                'email',
+                value
+            )
     
     
     
@@ -139,7 +236,38 @@ class UserTest(mocker.MockerTestCase):
         """testing if login_name attribute accepts only strings or unicode
         """
         
-        self.fail('test not implemented yet')
+        test_values = [23412, ['a_user_login_name'] , [], {}, 3234.12312]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                user.User,
+                name=self.name,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=test_value,
+                department=self.mock_department,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                leader_of_projects=[self.mock_project1,
+                                    self.mock_project2],
+                leader_of_sequences=[self.mock_sequence1,
+                                     self.mock_sequence2,
+                                     self.mock_sequence3,
+                                     self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
     
     
     
@@ -148,7 +276,16 @@ class UserTest(mocker.MockerTestCase):
         """testing if login_name property accepts only strings or unicode
         """
         
-        self.fail('test not implemented yet')
+        test_values = [12312, 132.123123, ['aloginname'], {}, []]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_user,
+                'login_name',
+                test_value
+            )
     
     
     
@@ -158,7 +295,35 @@ class UserTest(mocker.MockerTestCase):
         empty string to login_name attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name='',
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -168,7 +333,13 @@ class UserTest(mocker.MockerTestCase):
         empty string to login_name property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'login_name',
+            ''
+        )
     
     
     
@@ -178,7 +349,35 @@ class UserTest(mocker.MockerTestCase):
         to login_name attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=None,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -188,7 +387,13 @@ class UserTest(mocker.MockerTestCase):
         to login_name property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'login_name',
+            None
+        )
     
     
     
@@ -197,7 +402,49 @@ class UserTest(mocker.MockerTestCase):
         """testing if the login_name attribute formatted correctly
         """
         
-        self.fail('test not implemented yet')
+        #                 input       expected
+        test_values = [ ('e. ozgur', 'eozgur'),
+                        ('erkan', 'erkan'),
+                        ('Ozgur', 'ozgur'),
+                        ('Erkan ozgur', 'erkanozgur'),
+                        ('eRKAN', 'erkan'),
+                        ('eRkaN', 'erkan'),
+                        (' eRkAn', 'erkan'),
+                        (' eRkan ozGur', 'erkanozgur'),
+                    ]
+        
+        for valuePair in test_values:
+            # set the input and expect the expected output
+            test_user = user.User(
+                name=self.name,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=valuePair[0],
+                department=self.mock_department,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                leader_of_sequences=[self.mock_sequence1,
+                                     self.mock_sequence2,
+                                     self.mock_sequence3,
+                                     self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
+            
+            self.assertEquals(
+                test_user._login_name,
+                valuePair[1]
+            )
     
     
     
@@ -206,7 +453,25 @@ class UserTest(mocker.MockerTestCase):
         """testing if the loing_name property formatted correctly
         """
         
-        self.fail('test not implemented yet')
+        #                 input       expected
+        test_values = [ ('e. ozgur', 'eozgur'),
+                        ('erkan', 'erkan'),
+                        ('Ozgur', 'ozgur'),
+                        ('Erkan ozgur', 'erkanozgur'),
+                        ('eRKAN', 'erkan'),
+                        ('eRkaN', 'erkan'),
+                        (' eRkAn', 'erkan'),
+                        (' eRkan ozGur', 'erkanozgur'),
+                    ]
+        
+        for valuePair in test_values:
+            # set the input and expect the expected output
+            self.mock_user.login_name = valuePair[0]
+            
+            self.assertEquals(
+                self.mock_user.login_name,
+                valuePair[1]
+            )
     
     
     
@@ -216,7 +481,33 @@ class UserTest(mocker.MockerTestCase):
         first_name attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=None,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -226,7 +517,13 @@ class UserTest(mocker.MockerTestCase):
         first_name property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'first_name',
+            None
+        )
     
     
     
@@ -236,7 +533,36 @@ class UserTest(mocker.MockerTestCase):
         empty string to first_name attribute
         """
         
-        self.fail('test not implemented yet')
+        # try to assign None to the first_name attribute
+        test_value = None
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=test_value,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -246,7 +572,13 @@ class UserTest(mocker.MockerTestCase):
         empty string to first_name property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'first_name',
+            ''
+        )
     
     
     
@@ -255,7 +587,49 @@ class UserTest(mocker.MockerTestCase):
         """testing if the first_name attribute is formatted correctly
         """
         
-        self.fail('test not implemented yet')
+        #                 input       expected
+        test_values = [ ('e. ozgur', 'E. Ozgur'),
+                        ('erkan', 'Erkan'),
+                        ('ozgur', 'Ozgur'),
+                        ('Erkan ozgur', 'Erkan Ozgur'),
+                        ('eRKAN', 'Erkan'),
+                        ('eRkaN', 'Erkan'),
+                        (' eRkAn', 'Erkan'),
+                        (' eRkan ozGur', 'Erkan Ozgur'),
+                    ]
+        
+        for valuePair in test_values:
+            # set the input and expect the expected output
+            test_user = user.User(
+                name=self.name,
+                first_name=valuePair[0],
+                last_name=self.last_name,
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=self.login_name,
+                department=self.mock_department,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                leader_of_sequences=[self.mock_sequence1,
+                                     self.mock_sequence2,
+                                     self.mock_sequence3,
+                                     self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
+            
+            self.assertEquals(
+                test_user._first_name,
+                valuePair[1]
+            )
     
     
     
@@ -264,7 +638,26 @@ class UserTest(mocker.MockerTestCase):
         """testing if the first_name property is formatted correctly
         """
         
-        self.fail('test not implemented yet')
+        #                 input       expected
+        test_values = [ ('e. ozgur', 'E. Ozgur'),
+                        ('erkan', 'Erkan'),
+                        ('ozgur', 'Ozgur'),
+                        ('Erkan ozgur', 'Erkan Ozgur'),
+                        ('eRKAN', 'Erkan'),
+                        ('eRkaN', 'Erkan'),
+                        (' eRkAn', 'Erkan'),
+                        (' eRkan ozGur', 'Erkan Ozgur'),
+                    ]
+        
+        for valuePair in test_values:
+            # set the input and expect the expected output
+            
+            self.mock_user.first_name = valuePair[0]
+            
+            self.assertEquals(
+                self.mock_user.first_name,
+                valuePair[1]
+            )
     
     
     
@@ -273,7 +666,68 @@ class UserTest(mocker.MockerTestCase):
         """testing if the first_name attribute accepts only strings or unicode
         """
         
-        self.fail('test not implemented yet')
+        # try to assign something other than a string or unicode
+        
+        test_value = 1
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=test_value,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
+        
+        
+        test_value = ['this is my first name']
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=test_value,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -282,13 +736,18 @@ class UserTest(mocker.MockerTestCase):
         """testing if the first_name property accepts only strings or unicode
         """
         
-        self.fail('test not implemented yet')
+        test_values = [12412, ['Erkan Ozgur']]
+        
+        for value in test_values:
+            
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_user,
+                'first_name',
+                value
+            )
     
-        
-        
-        
-        
-        
     
     
     #----------------------------------------------------------------------
@@ -297,7 +756,33 @@ class UserTest(mocker.MockerTestCase):
         last_name attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=None,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -307,7 +792,13 @@ class UserTest(mocker.MockerTestCase):
         last_name property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'last_name',
+            None
+        )
     
     
     
@@ -317,7 +808,33 @@ class UserTest(mocker.MockerTestCase):
         empty string to last_name attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name='',
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -327,7 +844,13 @@ class UserTest(mocker.MockerTestCase):
         empty string to last_name property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'last_name',
+            ''
+        )
     
     
     
@@ -336,7 +859,47 @@ class UserTest(mocker.MockerTestCase):
         """testing if the last_name attribute is formatted correctly
         """
         
-        self.fail('test not implemented yet')
+        #                 input       expected
+        test_values = [ ('yilmaz', 'Yilmaz'),
+                        ('Yilmaz', 'Yilmaz'),
+                        ('yILMAZ', 'Yilmaz'),
+                        ('yIlmaZ', 'Yilmaz'),
+                        (' yIlmAz', 'Yilmaz'),
+                        (' yILmAz  ', 'Yilmaz'),
+                    ]
+        
+        for valuePair in test_values:
+            # set the input and expect the expected output
+            test_user = user.User(
+                name=self.name,
+                first_name=self.first_name,
+                last_name=valuePair[0],
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=self.login_name,
+                department=self.mock_department,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                leader_of_sequences=[self.mock_sequence1,
+                                     self.mock_sequence2,
+                                     self.mock_sequence3,
+                                     self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
+            
+            self.assertEquals(
+                test_user._last_name,
+                valuePair[1]
+            )
     
     
     
@@ -345,7 +908,22 @@ class UserTest(mocker.MockerTestCase):
         """testing if the last_name property is formatted correctly
         """
         
-        self.fail('test not implemented yet')
+        #                 input       expected
+        test_values = [ ('yilmaz', 'Yilmaz'),
+                        ('Yilmaz', 'Yilmaz'),
+                        ('yILMAZ', 'Yilmaz'),
+                        ('yIlmaZ', 'Yilmaz'),
+                        (' yIlmAz', 'Yilmaz'),
+                        (' yILmAz  ', 'Yilmaz'),
+                    ]
+        
+        for valuePair in test_values:
+            self.mock_user.last_name = valuePair[0]
+            
+            self.assertEquals(
+                self.mock_user.last_name,
+                valuePair[1]
+            )
     
     
     
@@ -354,7 +932,36 @@ class UserTest(mocker.MockerTestCase):
         """testing if the last_name attribute accepts only strings or unicode
         """
         
-        self.fail('test not implemented yet')
+        test_values = [123123, ['asdfas'], [], {}]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                user.User,
+                name=self.name,
+                first_name=self.first_name,
+                last_name=test_value,
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=self.login_name,
+                department=self.mock_department,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                leader_of_sequences=[self.mock_sequence1,
+                                     self.mock_sequence2,
+                                     self.mock_sequence3,
+                                     self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
     
     
     
@@ -363,7 +970,16 @@ class UserTest(mocker.MockerTestCase):
         """testing if the last_name property accepts only strings or unicode
         """
         
-        self.fail('test not implemented yet')
+        test_values = [123123, ['a last name'], {},(), 234.23423]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_user,
+                'last_name',
+                test_value
+            )
     
     
     
@@ -373,7 +989,35 @@ class UserTest(mocker.MockerTestCase):
         for the department attribute
         """
         
-        self.fail('test not implemented yet')
+        #try to assign None to department
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=None,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -383,7 +1027,15 @@ class UserTest(mocker.MockerTestCase):
         for the department property
         """
         
-        self.fail('test not implemented yet')
+        # try to assign None to the department property
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'department',
+            None
+        )
     
     
     
@@ -393,7 +1045,36 @@ class UserTest(mocker.MockerTestCase):
         anything other than a Department object to department attribute
         """
         
-        self.fail('test not implemented yet')
+        # try to assign something other than a department object
+        test_value = 'A department'
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=test_value,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -403,7 +1084,16 @@ class UserTest(mocker.MockerTestCase):
         anything other than a Department object to department property
         """
         
-        self.fail('test not implemented yet')
+        # try to assign something other than a department
+        test_value = 'a department'
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'department',
+            test_value
+        )
     
     
     
@@ -413,7 +1103,35 @@ class UserTest(mocker.MockerTestCase):
         to the password attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=None,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -423,43 +1141,49 @@ class UserTest(mocker.MockerTestCase):
         to the password property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'password',
+            None
+        )
     
     
     
-    #----------------------------------------------------------------------
-    def test_password_attribute_being_mangled(self):
-        """testing if the password is mangled when trying to store it
-        """
+    ##----------------------------------------------------------------------
+    #def test_password_attribute_being_mangled(self):
+        #"""testing if the password is mangled when trying to store it
+        #"""
         
-        self.fail('test not implemented yet')
+        #self.fail('test not implemented yet')
     
     
     
-    #----------------------------------------------------------------------
-    def test_password_property_being_mangled(self):
-        """testing if the password is mangled when trying to store it
-        """
+    ##----------------------------------------------------------------------
+    #def test_password_property_being_mangled(self):
+        #"""testing if the password is mangled when trying to store it
+        #"""
         
-        self.fail('test not implemented yet')
+        #self.fail('test not implemented yet')
     
     
     
-    #----------------------------------------------------------------------
-    def test_password_attribute_retrieved_back_correctly(self):
-        """testing if the password attribute decoded and retrieved correctly
-        """
+    ##----------------------------------------------------------------------
+    #def test_password_attribute_retrieved_back_correctly(self):
+        #"""testing if the password attribute decoded and retrieved correctly
+        #"""
         
-        self.fail('test not implemented yet')
+        #self.fail('test not implemented yet')
     
     
     
-    #----------------------------------------------------------------------
-    def test_password_property_retrieved_back_correctly(self):
-        """testing if the password property decoded and retrieved correctly
-        """
+    ##----------------------------------------------------------------------
+    #def test_password_property_retrieved_back_correctly(self):
+        #"""testing if the password property decoded and retrieved correctly
+        #"""
         
-        self.fail('test not implemented yet')
+        #self.fail('test not implemented yet')
     
     
     
@@ -469,7 +1193,34 @@ class UserTest(mocker.MockerTestCase):
         permission_groups attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=None,
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -479,7 +1230,13 @@ class UserTest(mocker.MockerTestCase):
         permission_groups property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'permission_groups',
+            None
+        )
     
     
     
@@ -489,7 +1246,36 @@ class UserTest(mocker.MockerTestCase):
         empty list to the permission_groups attribute
         """
         
-        self.fail('test not implemented yet')
+        test_value = []
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=test_value,
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -499,7 +1285,13 @@ class UserTest(mocker.MockerTestCase):
         empty list to the permission_groups property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'permission_groups',
+            []
+        )
     
     
     
@@ -509,7 +1301,41 @@ class UserTest(mocker.MockerTestCase):
         anything other then a Group object to the permission_group attribute
         """
         
-        self.fail('test not implemented yet')
+        test_values = [23123,
+                       1231.43122,
+                       'a_group',
+                       ['group1', 'group2', 234],
+                       ]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                user.User,
+                name=self.name,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=self.login_name,
+                department=self.mock_department,
+                permission_groups=test_value,
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                leader_of_projects=[self.mock_project1,
+                                    self.mock_project2],
+                leader_of_sequences=[self.mock_sequence1,
+                                     self.mock_sequence2,
+                                     self.mock_sequence3,
+                                     self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
     
     
     
@@ -519,7 +1345,20 @@ class UserTest(mocker.MockerTestCase):
         anything other then a Group object to the permission_group property
         """
         
-        self.fail('test not implemented yet')
+        test_values = [23123,
+                       1231.43122,
+                       'a_group',
+                       ['group1', 'group2', 234],
+                       ]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_user,
+                'permission_groups',
+                test_value
+            )
     
     
     
@@ -529,7 +1368,32 @@ class UserTest(mocker.MockerTestCase):
         to the tasks attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=None,
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -539,7 +1403,13 @@ class UserTest(mocker.MockerTestCase):
         to the tasks attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'tasks',
+            None
+        )
     
     
     
@@ -549,7 +1419,35 @@ class UserTest(mocker.MockerTestCase):
         anything other than a list of task objects to the tasks attribute
         """
         
-        self.fail('test not implemented yet')
+        test_values = [ 12312, 1233244.2341, ['aTask1', 'aTask2'], 'a_task']
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                user.User,
+                name=self.name,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=self.login_name,
+                department=self.mock_department,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=test_value,
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                leader_of_projects=[self.mock_project1,
+                                    self.mock_project2],
+                leader_of_sequences=[self.mock_sequence1,
+                                     self.mock_sequence2,
+                                     self.mock_sequence3,
+                                     self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
     
     
     
@@ -559,7 +1457,16 @@ class UserTest(mocker.MockerTestCase):
         anything other than a list of task objects to the tasks attribute
         """
         
-        self.fail('test not implemented yet')
+        test_values = [ 12312, 1233244.2341, ['aTask1', 'aTask2'], 'a_task']
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_user,
+                'tasks',
+                test_value
+            )
     
     
     
@@ -569,7 +1476,31 @@ class UserTest(mocker.MockerTestCase):
         tasks attribute
         """
         
-        self.fail('test not implemented yet')
+        # this should work without any error
+        aUserObj = user.User(
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -579,7 +1510,8 @@ class UserTest(mocker.MockerTestCase):
         tasks property
         """
         
-        self.fail('test not implemented yet')
+        # this should work without any error
+        self.mock_user.tasks = []
     
     
     
@@ -588,7 +1520,32 @@ class UserTest(mocker.MockerTestCase):
         """testing if the projects attribute accepts an empty list
         """
         
-        self.fail('test not implemented yet')
+        # this should work properly
+        user.User(
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -597,7 +1554,8 @@ class UserTest(mocker.MockerTestCase):
         """testing if the projects property accepts an empty list
         """
         
-        self.fail('test not implemented yet')
+        # this should work properly
+        self.mock_user.projects = []
     
     
     
@@ -607,7 +1565,33 @@ class UserTest(mocker.MockerTestCase):
         to the projects attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=None,
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -617,7 +1601,13 @@ class UserTest(mocker.MockerTestCase):
         to the projects property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'projects',
+            None
+        )
     
     
     
@@ -627,7 +1617,36 @@ class UserTest(mocker.MockerTestCase):
         of other objects project attribute
         """
         
-        self.fail('test not implemented yet')
+        test_values = [ 123123, 1231.2132, ['a_project1', 'a_project2'] ]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                user.User,
+                name=self.name,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=self.login_name,
+                department=self.mock_department,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=test_value,
+                leader_of_projects=[self.mock_project1,
+                                    self.mock_project2],
+                leader_of_sequences=[self.mock_sequence1,
+                                     self.mock_sequence2,
+                                     self.mock_sequence3,
+                                     self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
     
     
     
@@ -637,7 +1656,16 @@ class UserTest(mocker.MockerTestCase):
         of other objects to projects property
         """
         
-        self.fail('test not implemented yet')
+        test_values = [ 123123, 1231.2132, ['a_project1', 'a_project2'] ]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_user,
+                'project',
+                test_value
+            )
     
     
     
@@ -647,7 +1675,34 @@ class UserTest(mocker.MockerTestCase):
         the leader_of_projects attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin,
+            leader_of_projects=None
+        )
     
     
     
@@ -657,7 +1712,13 @@ class UserTest(mocker.MockerTestCase):
         the leader_of_projects property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'leader_of_projects',
+            None
+        )
     
     
     
@@ -666,7 +1727,33 @@ class UserTest(mocker.MockerTestCase):
         """testing if the leader_of_projects attribute accepts an empty list
         """
         
-        self.fail('test not implemented yet')
+        # this should work without any problems
+        self.mock_user = user.User(
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin,
+            leader_of_projects=[]
+        )
     
     
     
@@ -675,7 +1762,8 @@ class UserTest(mocker.MockerTestCase):
         """testing if the leader_of_projects property accepts an empty list
         """
         
-        self.fail('test not implemented yet')
+        # this should work without any problem
+        self.mock_user.leader_of_projects = []
     
     
     
@@ -686,7 +1774,36 @@ class UserTest(mocker.MockerTestCase):
         leader_of_projects attribute
         """
         
-        self.fail('test not implemented yet')
+        test_value = ['a project', 123123, [], {}, 12.2132 ]
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=test_value,
+            leader_of_sequences=[self.mock_sequence1,
+                                 self.mock_sequence2,
+                                 self.mock_sequence3,
+                                 self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -697,7 +1814,15 @@ class UserTest(mocker.MockerTestCase):
         leader_of_projects property
         """
         
-        self.fail('test not implemented yet')
+        test_value = ['a project', 123123, [], {}, 12.2132 ]
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'leader_of_projects',
+            test_value
+        )
     
     
     
@@ -707,7 +1832,32 @@ class UserTest(mocker.MockerTestCase):
         the leader_of_sequences attribute
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=None,
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -717,7 +1867,13 @@ class UserTest(mocker.MockerTestCase):
         the leader_of_sequences property
         """
         
-        self.fail('test not implemented yet')
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            'leader_of_sequences',
+            None
+        )
     
     
     
@@ -725,8 +1881,31 @@ class UserTest(mocker.MockerTestCase):
     def test_leader_of_sequences_attribute_accepts_empty_list(self):
         """testing if the leader_of_sequences attribute accepts an empty list
         """
-        
-        self.fail('test not implemented yet')
+        #this should work
+        a_user = user.User(
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=[],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -735,7 +1914,8 @@ class UserTest(mocker.MockerTestCase):
         """testing if the leader_of_sequences property accepts an empty list
         """
         
-        self.fail('test not implemented yet')
+        # this should work without any error
+        self.mock_user.leader_of_seuqences = []
     
     
     
@@ -746,7 +1926,34 @@ class UserTest(mocker.MockerTestCase):
         leader_of_sequences attribute
         """
         
-        self.fail('test not implemented yet')
+        test_value = ['a sequence', 123123, [], {}, 12.2132 ]
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2],
+            leader_of_sequences=test_value,
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
@@ -757,7 +1964,35 @@ class UserTest(mocker.MockerTestCase):
         leader_of_sequences property
         """
         
-        self.fail('test not implemented yet')
+        test_value = ['a sequence', 123123, [], {}, 12.2132 ]
+        
+        self.assertRaises(
+            ValueError,
+            user.User,
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=self.password,
+            login_name=self.login_name,
+            department=self.mock_department,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            leader_of_projects=[self.mock_project1,
+                                self.mock_project2,
+                                self.mock_project3],
+            leader_of_sequences=test_value,
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
     
     
     
