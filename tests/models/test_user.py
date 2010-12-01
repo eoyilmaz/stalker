@@ -34,11 +34,13 @@ class UserTest(mocker.MockerTestCase):
         assert(isinstance(self.mocker, mocker.Mocker))
         
         # a department
-        self.mock_department = self.mocker.mock(department.Department)
+        self.mock_department1 = self.mocker.mock(department.Department)
+        self.mock_department2 = self.mocker.mock(department.Department)
         
         # a couple of permission groups
         self.mock_permission_group1 = self.mocker.mock(group.Group)
         self.mock_permission_group2 = self.mocker.mock(group.Group)
+        self.mock_permission_group3 = self.mocker.mock(group.Group)
         
         # a couple of tasks
         self.mock_task1 = self.mocker.mock(task.Task)
@@ -72,7 +74,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -82,12 +84,12 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -113,7 +115,7 @@ class UserTest(mocker.MockerTestCase):
             email=test_value,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -123,10 +125,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -188,7 +190,7 @@ class UserTest(mocker.MockerTestCase):
                 email=value,
                 password=self.password,
                 login_name=self.login_name,
-                department=self.mock_department,
+                department=self.mock_department1,
                 permission_groups=[self.mock_permission_group1,
                                    self.mock_permission_group2],
                 tasks=[self.mock_task1,
@@ -198,10 +200,10 @@ class UserTest(mocker.MockerTestCase):
                 projects=[self.mock_project1,
                           self.mock_project2,
                           self.mock_project3],
-                leader_of_sequences=[self.mock_sequence1,
-                                     self.mock_sequence2,
-                                     self.mock_sequence3,
-                                     self.mock_sequence4],
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
                 created_by=self.mock_admin,
                 updated_by=self.mock_admin
             )
@@ -217,6 +219,8 @@ class UserTest(mocker.MockerTestCase):
                        'an_email_with_no_part2',
                        '@an_email_with_only_part2',
                        '@',
+                       'eoyilmaz@',
+                       'eoyilmaz@somecompony@com',
                        ]
         
         # any of these email values should raise a ValueError
@@ -228,6 +232,19 @@ class UserTest(mocker.MockerTestCase):
                 'email',
                 value
             )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_email_property_works_properly(self):
+        """testing if the email property works properly
+        """
+        
+        test_email = 'eoyilmaz@somemail.com'
+        
+        self.mock_user.email = test_email
+        
+        self.assertEquals( self.mock_user.email, test_email)
     
     
     
@@ -249,7 +266,7 @@ class UserTest(mocker.MockerTestCase):
                 email=self.email,
                 password=self.password,
                 login_name=test_value,
-                department=self.mock_department,
+                department=self.mock_department1,
                 permission_groups=[self.mock_permission_group1,
                                    self.mock_permission_group2],
                 tasks=[self.mock_task1,
@@ -259,12 +276,12 @@ class UserTest(mocker.MockerTestCase):
                 projects=[self.mock_project1,
                           self.mock_project2,
                           self.mock_project3],
-                leader_of_projects=[self.mock_project1,
-                                    self.mock_project2],
-                leader_of_sequences=[self.mock_sequence1,
-                                     self.mock_sequence2,
-                                     self.mock_sequence3,
-                                     self.mock_sequence4],
+                projects_lead=[self.mock_project1,
+                               self.mock_project2],
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
                 created_by=self.mock_admin,
                 updated_by=self.mock_admin
             )
@@ -305,7 +322,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name='',
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -315,12 +332,12 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -359,7 +376,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=None,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -369,12 +386,12 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -411,6 +428,7 @@ class UserTest(mocker.MockerTestCase):
                         ('eRkaN', 'erkan'),
                         (' eRkAn', 'erkan'),
                         (' eRkan ozGur', 'erkanozgur'),
+                        ('213 e.ozgur', 'eozgur'),
                     ]
         
         for valuePair in test_values:
@@ -423,7 +441,7 @@ class UserTest(mocker.MockerTestCase):
                 email=self.email,
                 password=self.password,
                 login_name=valuePair[0],
-                department=self.mock_department,
+                department=self.mock_department1,
                 permission_groups=[self.mock_permission_group1,
                                    self.mock_permission_group2],
                 tasks=[self.mock_task1,
@@ -433,10 +451,10 @@ class UserTest(mocker.MockerTestCase):
                 projects=[self.mock_project1,
                           self.mock_project2,
                           self.mock_project3],
-                leader_of_sequences=[self.mock_sequence1,
-                                     self.mock_sequence2,
-                                     self.mock_sequence3,
-                                     self.mock_sequence4],
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
                 created_by=self.mock_admin,
                 updated_by=self.mock_admin
             )
@@ -491,7 +509,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -501,10 +519,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -546,7 +564,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -556,10 +574,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -608,7 +626,7 @@ class UserTest(mocker.MockerTestCase):
                 email=self.email,
                 password=self.password,
                 login_name=self.login_name,
-                department=self.mock_department,
+                department=self.mock_department1,
                 permission_groups=[self.mock_permission_group1,
                                    self.mock_permission_group2],
                 tasks=[self.mock_task1,
@@ -618,10 +636,10 @@ class UserTest(mocker.MockerTestCase):
                 projects=[self.mock_project1,
                           self.mock_project2,
                           self.mock_project3],
-                leader_of_sequences=[self.mock_sequence1,
-                                     self.mock_sequence2,
-                                     self.mock_sequence3,
-                                     self.mock_sequence4],
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
                 created_by=self.mock_admin,
                 updated_by=self.mock_admin
             )
@@ -680,7 +698,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -690,10 +708,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -711,7 +729,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -721,10 +739,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -766,7 +784,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -776,10 +794,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -818,7 +836,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -828,10 +846,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -866,6 +884,7 @@ class UserTest(mocker.MockerTestCase):
                         ('yIlmaZ', 'Yilmaz'),
                         (' yIlmAz', 'Yilmaz'),
                         (' yILmAz  ', 'Yilmaz'),
+                        ('de niro', 'De Niro')
                     ]
         
         for valuePair in test_values:
@@ -878,7 +897,7 @@ class UserTest(mocker.MockerTestCase):
                 email=self.email,
                 password=self.password,
                 login_name=self.login_name,
-                department=self.mock_department,
+                department=self.mock_department1,
                 permission_groups=[self.mock_permission_group1,
                                    self.mock_permission_group2],
                 tasks=[self.mock_task1,
@@ -888,10 +907,10 @@ class UserTest(mocker.MockerTestCase):
                 projects=[self.mock_project1,
                           self.mock_project2,
                           self.mock_project3],
-                leader_of_sequences=[self.mock_sequence1,
-                                     self.mock_sequence2,
-                                     self.mock_sequence3,
-                                     self.mock_sequence4],
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
                 created_by=self.mock_admin,
                 updated_by=self.mock_admin
             )
@@ -945,7 +964,7 @@ class UserTest(mocker.MockerTestCase):
                 email=self.email,
                 password=self.password,
                 login_name=self.login_name,
-                department=self.mock_department,
+                department=self.mock_department1,
                 permission_groups=[self.mock_permission_group1,
                                    self.mock_permission_group2],
                 tasks=[self.mock_task1,
@@ -955,10 +974,10 @@ class UserTest(mocker.MockerTestCase):
                 projects=[self.mock_project1,
                           self.mock_project2,
                           self.mock_project3],
-                leader_of_sequences=[self.mock_sequence1,
-                                     self.mock_sequence2,
-                                     self.mock_sequence3,
-                                     self.mock_sequence4],
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
                 created_by=self.mock_admin,
                 updated_by=self.mock_admin
             )
@@ -1011,10 +1030,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1068,10 +1087,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1098,6 +1117,19 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_department_property_works_properly(self):
+        """testing if the department property works properly
+        """
+        
+        # try to set and get the same value back
+        self.mock_user.department = self.mock_department2
+        
+        self.assertEquals( self.mock_user.department, self.mock_department2)
+        
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_password_attribute_being_None(self):
         """testing if a ValueError will be raised when trying to assign None
         to the password attribute
@@ -1113,7 +1145,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=None,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1123,12 +1155,12 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1148,6 +1180,19 @@ class UserTest(mocker.MockerTestCase):
             'password',
             None
         )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_password_property_works_properly(self):
+        """testing if the password property works properly
+        """
+        
+        test_password = 'a new test password'
+        
+        self.mock_user.password = test_password
+        
+        self.assertEquals(self.mock_user.password, test_password)
     
     
     
@@ -1203,7 +1248,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=None,
             tasks=[self.mock_task1,
                    self.mock_task2,
@@ -1212,12 +1257,12 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1258,7 +1303,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=test_value,
             tasks=[self.mock_task1,
                    self.mock_task2,
@@ -1267,12 +1312,12 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1318,7 +1363,7 @@ class UserTest(mocker.MockerTestCase):
                 email=self.email,
                 password=self.password,
                 login_name=self.login_name,
-                department=self.mock_department,
+                department=self.mock_department1,
                 permission_groups=test_value,
                 tasks=[self.mock_task1,
                        self.mock_task2,
@@ -1327,12 +1372,12 @@ class UserTest(mocker.MockerTestCase):
                 projects=[self.mock_project1,
                           self.mock_project2,
                           self.mock_project3],
-                leader_of_projects=[self.mock_project1,
-                                    self.mock_project2],
-                leader_of_sequences=[self.mock_sequence1,
-                                     self.mock_sequence2,
-                                     self.mock_sequence3,
-                                     self.mock_sequence4],
+                projects_lead=[self.mock_project1,
+                               self.mock_project2],
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
                 created_by=self.mock_admin,
                 updated_by=self.mock_admin
             )
@@ -1363,6 +1408,18 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_permission_groups_property_works_properly(self):
+        """testing if permission_groups property works properly
+        """
+        
+        test_pg = [self.mock_permission_group3]
+        self.mock_user.permission_groups = test_pg
+        
+        self.assertEquals(self.mock_user.permission_groups, test_pg)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_tasks_attribute_None(self):
         """testing if a ValueError will be raised when trying to assign None
         to the tasks attribute
@@ -1378,19 +1435,19 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=None,
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1432,19 +1489,19 @@ class UserTest(mocker.MockerTestCase):
                 email=self.email,
                 password=self.password,
                 login_name=self.login_name,
-                department=self.mock_department,
+                department=self.mock_department1,
                 permission_groups=[self.mock_permission_group1,
                                    self.mock_permission_group2],
                 tasks=test_value,
                 projects=[self.mock_project1,
                           self.mock_project2,
                           self.mock_project3],
-                leader_of_projects=[self.mock_project1,
-                                    self.mock_project2],
-                leader_of_sequences=[self.mock_sequence1,
-                                     self.mock_sequence2,
-                                     self.mock_sequence3,
-                                     self.mock_sequence4],
+                projects_lead=[self.mock_project1,
+                               self.mock_project2],
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
                 created_by=self.mock_admin,
                 updated_by=self.mock_admin
             )
@@ -1485,19 +1542,19 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[],
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1529,7 +1586,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1537,12 +1594,12 @@ class UserTest(mocker.MockerTestCase):
                    self.mock_task3,
                    self.mock_task4],
             projects=[],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1575,7 +1632,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1583,12 +1640,12 @@ class UserTest(mocker.MockerTestCase):
                    self.mock_task3,
                    self.mock_task4],
             projects=None,
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1630,7 +1687,7 @@ class UserTest(mocker.MockerTestCase):
                 email=self.email,
                 password=self.password,
                 login_name=self.login_name,
-                department=self.mock_department,
+                department=self.mock_department1,
                 permission_groups=[self.mock_permission_group1,
                                    self.mock_permission_group2],
                 tasks=[self.mock_task1,
@@ -1638,12 +1695,12 @@ class UserTest(mocker.MockerTestCase):
                        self.mock_task3,
                        self.mock_task4],
                 projects=test_value,
-                leader_of_projects=[self.mock_project1,
-                                    self.mock_project2],
-                leader_of_sequences=[self.mock_sequence1,
-                                     self.mock_sequence2,
-                                     self.mock_sequence3,
-                                     self.mock_sequence4],
+                projects_lead=[self.mock_project1,
+                               self.mock_project2],
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
                 created_by=self.mock_admin,
                 updated_by=self.mock_admin
             )
@@ -1663,16 +1720,16 @@ class UserTest(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_user,
-                'project',
+                'projects',
                 test_value
             )
     
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_projects_attribute_None(self):
+    def test_projects_lead_attribute_None(self):
         """testing if a ValueError will be raised when tyring to assign None to
-        the leader_of_projects attribute
+        the projects_lead attribute
         """
         
         self.assertRaises(
@@ -1685,7 +1742,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1695,36 +1752,36 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin,
-            leader_of_projects=None
+            projects_lead=None
         )
     
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_projects_property_None(self):
+    def test_projects_lead_property_None(self):
         """testing if a ValueError will be raised when tyring to assign None to
-        the leader_of_projects property
+        the projects_lead property
         """
         
         self.assertRaises(
             ValueError,
             setattr,
             self.mock_user,
-            'leader_of_projects',
+            'projects_lead',
             None
         )
     
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_projects_attribute_accepts_empty_list(self):
-        """testing if the leader_of_projects attribute accepts an empty list
+    def test_projects_lead_attribute_accepts_empty_list(self):
+        """testing if the projects_lead attribute accepts an empty list
         """
         
         # this should work without any problems
@@ -1736,7 +1793,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1746,32 +1803,73 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin,
-            leader_of_projects=[]
+            projects_lead=[]
         )
     
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_projects_property_accepts_empty_list(self):
-        """testing if the leader_of_projects property accepts an empty list
+    def test_projects_lead_property_accepts_empty_list(self):
+        """testing if the projects_lead property accepts an empty list
         """
         
         # this should work without any problem
-        self.mock_user.leader_of_projects = []
+        self.mock_user.projects_lead = []
     
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_projects_attr_accepts_only_lits_of_project_obj(self):
+    def test_projects_lead_attr_accepts_only_lits(self):
         """testing if a ValueError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
-        leader_of_projects attribute
+        projects_lead attribute
+        """
+        
+        test_values = ['a project', 123123, {}, 12.2132 ]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                user.User,
+                name=self.name,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=self.login_name,
+                department=self.mock_department1,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                projects_lead=test_value,
+                sequences_lead=[self.mock_sequence1,
+                                self.mock_sequence2,
+                                self.mock_sequence3,
+                                self.mock_sequence4],
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_projects_lead_attr_accepts_only_lits_of_project_obj(self):
+        """testing if a ValueError will be raised when trying to assign a list
+        of other objects than a list of Project objects to the
+        projects_lead attribute
         """
         
         test_value = ['a project', 123123, [], {}, 12.2132 ]
@@ -1786,7 +1884,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1796,11 +1894,11 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=test_value,
-            leader_of_sequences=[self.mock_sequence1,
-                                 self.mock_sequence2,
-                                 self.mock_sequence3,
-                                 self.mock_sequence4],
+            projects_lead=test_value,
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1808,10 +1906,30 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_projects_prop_accepts_only_list_of_project_obj(self):
+    def test_projects_lead_property_accepts_only_lits(self):
+        """testing if a ValueError will be raised when trying to assign a list
+        of other objects than a list of Project objects to the
+        projects_lead attribute
+        """
+        
+        test_values = ['a project', 123123, {}, 12.2132 ]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_user,
+                'projects',
+                test_value
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_projects_lead_prop_accepts_only_list_of_project_obj(self):
         """testing if a ValueError will be raised when trying to assing a list
         of other object than a list of Project objects to the
-        leader_of_projects property
+        projects_lead property
         """
         
         test_value = ['a project', 123123, [], {}, 12.2132 ]
@@ -1820,16 +1938,16 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'leader_of_projects',
+            'projects_lead',
             test_value
         )
     
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_sequences_attribute_None(self):
+    def test_sequences_lead_attribute_None(self):
         """testing if a ValueError will be raised when tyring to assign None to
-        the leader_of_sequences attribute
+        the sequences_lead attribute
         """
         
         self.assertRaises(
@@ -1842,7 +1960,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1852,9 +1970,9 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=None,
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=None,
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1862,24 +1980,24 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_sequences_property_None(self):
+    def test_sequences_lead_property_None(self):
         """testing if a ValueError will be raised when tyring to assign None to
-        the leader_of_sequences property
+        the sequences_lead property
         """
         
         self.assertRaises(
             ValueError,
             setattr,
             self.mock_user,
-            'leader_of_sequences',
+            'sequences_lead',
             None
         )
     
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_sequences_attribute_accepts_empty_list(self):
-        """testing if the leader_of_sequences attribute accepts an empty list
+    def test_sequences_lead_attribute_accepts_empty_list(self):
+        """testing if the sequences_lead attribute accepts an empty list
         """
         #this should work
         a_user = user.User(
@@ -1890,7 +2008,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1900,9 +2018,9 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=[],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[],
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1910,8 +2028,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_sequences_property_accepts_empty_list(self):
-        """testing if the leader_of_sequences property accepts an empty list
+    def test_sequences_lead_property_accepts_empty_list(self):
+        """testing if the sequences_lead property accepts an empty list
         """
         
         # this should work without any error
@@ -1920,10 +2038,49 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_sequences_attr_accepts_only_lits_of_project_obj(self):
+    def test_sequences_lead_attr_accepts_only_lits(self):
         """testing if a ValueError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
-        leader_of_sequences attribute
+        sequences_lead attribute
+        """
+        
+        test_values = ['a sequence', 123123, {}, 12.2132 ]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                user.User,
+                name=self.name,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                description=self.description,
+                email=self.email,
+                password=self.password,
+                login_name=self.login_name,
+                department=self.mock_department1,
+                permission_groups=[self.mock_permission_group1,
+                                   self.mock_permission_group2],
+                tasks=[self.mock_task1,
+                       self.mock_task2,
+                       self.mock_task3,
+                       self.mock_task4],
+                projects=[self.mock_project1,
+                          self.mock_project2,
+                          self.mock_project3],
+                projects_lead=[self.mock_project1,
+                               self.mock_project2],
+                sequences_lead=test_value,
+                created_by=self.mock_admin,
+                updated_by=self.mock_admin
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_lead_attr_accepts_only_lits_of_project_obj(self):
+        """testing if a ValueError will be raised when trying to assign a list
+        of other objects than a list of Project objects to the
+        sequences_lead attribute
         """
         
         test_value = ['a sequence', 123123, [], {}, 12.2132 ]
@@ -1938,7 +2095,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1948,9 +2105,9 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2],
-            leader_of_sequences=test_value,
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=test_value,
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
@@ -1958,10 +2115,10 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_leader_of_sequences_prop_accepts_only_list_of_project_obj(self):
+    def test_sequences_lead_prop_accepts_only_list_of_project_obj(self):
         """testing if a ValueError will be raised when trying to assing a list
         of other object than a list of Project objects to the
-        leader_of_sequences property
+        sequences_lead property
         """
         
         test_value = ['a sequence', 123123, [], {}, 12.2132 ]
@@ -1976,7 +2133,7 @@ class UserTest(mocker.MockerTestCase):
             email=self.email,
             password=self.password,
             login_name=self.login_name,
-            department=self.mock_department,
+            department=self.mock_department1,
             permission_groups=[self.mock_permission_group1,
                                self.mock_permission_group2],
             tasks=[self.mock_task1,
@@ -1986,10 +2143,10 @@ class UserTest(mocker.MockerTestCase):
             projects=[self.mock_project1,
                       self.mock_project2,
                       self.mock_project3],
-            leader_of_projects=[self.mock_project1,
-                                self.mock_project2,
-                                self.mock_project3],
-            leader_of_sequences=test_value,
+            projects_lead=[self.mock_project1,
+                           self.mock_project2,
+                           self.mock_project3],
+            sequences_lead=test_value,
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
