@@ -57,14 +57,11 @@ Features:
  
  7. The first design of the database schema is shown below:
     
-    |Stalker_Design|
+    .. include:: inheritance_diagram.rst 
     
     In this first design all the basic data types tried to be created with an
     inherited structure. All the classes are derived from the Base data type.
-    
-    .. |Stalker_Design| image:: /_static/images/stalker_design.jpeg
-       :width: 800
-    
+ 
  8. A templating system for the file and folder naming convention will be used
     like: {projectServer.path}/{project.name}/assets/{asset.name}/
     {pipelineStep.name}/{asset.variation.name}/{asset.name}_{asset.type.name}

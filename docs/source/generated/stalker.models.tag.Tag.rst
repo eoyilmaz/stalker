@@ -1,9 +1,14 @@
 stalker.models.tag.Tag
 ======================
 
+.. inheritance-diagram:: stalker.models.tag.Tag
+   :parts: 1
+
 .. currentmodule:: stalker.models.tag
 
 .. autoclass:: Tag
+   :show-inheritance:
+   :inherited-members:
 
    
    .. automethod:: __init__

@@ -1,0 +1,14 @@
+Stalker Changes:
+
+v0.0.1.20101209:
+ * added the inheritance diagram as an rst page to reference it anywhere needed
+ * added the empty classes for:
+   * Asset
+   * AssetBase
+   * Booking
+   * Shot
+   * Structure
+   * Template
+   * Version
+ * added the Department class
+ * added inheritance diagrams to the autosummary pages of the classes

@@ -1,9 +1,14 @@
 stalker.models.status.Status
 ============================
 
+.. inheritance-diagram:: stalker.models.status.Status
+   :parts: 1
+
 .. currentmodule:: stalker.models.status
 
 .. autoclass:: Status
+   :show-inheritance:
+   :inherited-members:
 
    
    .. automethod:: __init__
@@ -23,7 +28,9 @@ stalker.models.status.Status
 
    .. autosummary::
    
-      ~Status.abbreviation
+      ~Status.description
       ~Status.name
+      ~Status.shortName
+      ~Status.tags
    
    

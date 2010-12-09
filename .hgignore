@@ -3,5 +3,5 @@ syntax: glob
 
 *~*
 *.pyc
-docs/_build/*
+docs/html/*
 .coverage

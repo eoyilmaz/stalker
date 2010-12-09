@@ -23,6 +23,7 @@ class PipelineStep(entity.SimpleEntity):
       * Previs
       * Match Move
       * Animation
+      
       etc.
     
     :param code: the code of the pipelinestep, it should be all upper case

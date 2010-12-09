@@ -131,8 +131,7 @@ class SimpleEntity(object):
         def fset(self, description_in):
             self._description = self._check_description(description_in)
         
-        doc = """this is the property that sets and returns the description
-        attribute"""
+        doc = """the description of the entity"""
         
         return locals()
     
@@ -149,8 +148,7 @@ class SimpleEntity(object):
         def fset(self, name_in):
             self._name = self._check_name(name_in)
         
-        doc = """this is the property that sets and returns the name \
-        attribute"""
+        doc = """the name of the entity"""
         
         return locals()
     
@@ -167,8 +165,8 @@ class SimpleEntity(object):
         def fset(self, tags_in):
             self._tags = self._check_tags(tags_in)
         
-        doc = """this is the property that sets and returns the tags attribute
-        """
+        doc = """a list of Tag objects which shows the related tags to the
+        entity"""
         
         return locals()
     
@@ -326,8 +324,8 @@ class AuditEntity(SimpleEntity):
         def fset(self, created_by_in):
             self._created_by = self._check_created_by(created_by_in)
         
-        doc = """this is the property that sets and returns the created_by
-        attribute"""
+        doc = """gets and sets the User object who has created this
+        AuditEntity"""
         
         return locals()
     
@@ -344,8 +342,8 @@ class AuditEntity(SimpleEntity):
         def fset(self, updated_by_in):
             self._updated_by = self._check_updated_by(updated_by_in)
         
-        doc = """this is the property that sets and returns the updated_by
-        attribute"""
+        doc = """gets and sets the User object who has updated this
+        AuditEntity"""
         
         return locals()
     
@@ -362,8 +360,8 @@ class AuditEntity(SimpleEntity):
         def fset(self, date_created_in):
             self._date_created = self._check_date_created(date_created_in)
         
-        doc = """this is the property that sets and returns the date_created
-        attribute"""
+        doc = """gets and sets the datetime.datetime object which shows when
+        this object has been created"""
         
         return locals()
     
@@ -380,8 +378,8 @@ class AuditEntity(SimpleEntity):
         def fset(self, date_updated_in):
             self._date_updated = self._check_date_updated(date_updated_in)
         
-        doc = """this is the property that sets and returns the date_updated
-        attribute"""
+        doc = """gets and sets the datetime.datetime object which shows when
+        this object has been updated"""
         
         return locals()
     

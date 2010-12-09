@@ -15,9 +15,10 @@ class Template(entity.SimpleEntity):
     only attribute it has is the `template_code` attiribute
     
     :param template_code: holds the template code suitable to the template
-    engine selected in the settings, the default template rendering engine is
-    Jinja2, so the code is should be a jinja2 template if you want to use the
-    defaults. It should be a string or unicode value, and cannot be empty
+      engine selected in the settings, the default template rendering engine is
+      Jinja2, so the code is should be a jinja2 template if you want to use the
+      defaults. It should be a string or unicode value, and cannot be empty
+    
     """
     
     

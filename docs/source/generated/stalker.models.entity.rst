@@ -13,7 +13,9 @@ stalker.models.entity
 
    .. autosummary::
    
+      AuditEntity
       Entity
+      SimpleEntity
    
    
 

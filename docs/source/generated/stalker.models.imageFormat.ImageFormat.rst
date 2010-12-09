@@ -1,9 +1,14 @@
 stalker.models.imageFormat.ImageFormat
 ======================================
 
+.. inheritance-diagram:: stalker.models.imageFormat.ImageFormat
+   :parts: 1
+
 .. currentmodule:: stalker.models.imageFormat
 
 .. autoclass:: ImageFormat
+   :show-inheritance:
+   :inherited-members:
 
    
    .. automethod:: __init__
@@ -23,11 +28,13 @@ stalker.models.imageFormat.ImageFormat
 
    .. autosummary::
    
+      ~ImageFormat.description
       ~ImageFormat.device_aspect
       ~ImageFormat.height
       ~ImageFormat.name
       ~ImageFormat.pixel_aspect
       ~ImageFormat.print_resolution
+      ~ImageFormat.tags
       ~ImageFormat.width
    
    

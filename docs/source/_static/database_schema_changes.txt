@@ -1,8 +1,0 @@
-changes in Database Schema:
-
- * Removed DataEntity. All its fields are moved to the Base entity. Now all the sub classes of DataEntity are derived from Base entity, this will increase the flexibility and allow any class derived from Base to be parented to anything again derived from the Base
- * added priority to Task
- * added Unit entity and derived all the units from this class, this will be increase the flexilibility, later on users can
- * added printResolution field to ImageFormat entity
- * ImageSequence class renamed to FileSequence
- * 
