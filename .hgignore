@@ -5,3 +5,4 @@ syntax: glob
 *.pyc
 docs/html/*
 .coverage
+.DS_Store
