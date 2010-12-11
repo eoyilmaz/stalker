@@ -140,7 +140,6 @@ class Repository(entity.SimpleEntity):
             
             # return the proper value according to the current os
             platform_system = platform.system()
-            print "the current platform is ", platform_system
             
             if platform_system == 'Linux':
                 return self.linux_path

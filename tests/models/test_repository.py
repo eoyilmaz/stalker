@@ -39,6 +39,7 @@ class RepositoryTester(mocker.MockerTestCase):
         # then call it for a second time inside the test method
         tmp = self.mocker.replace("platform.system")
         tmp()
+        self.mocker.count(0,1000)
         # ------------
         
         self.mocker.replay()
