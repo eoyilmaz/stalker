@@ -28,15 +28,8 @@ stalker.models.link.Link
 
    .. autosummary::
    
-      ~Link.created_by
-      ~Link.date_created
-      ~Link.date_updated
       ~Link.description
       ~Link.name
-      ~Link.notes
-      ~Link.status
-      ~Link.status_list
       ~Link.tags
-      ~Link.updated_by
    
    

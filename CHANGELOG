@@ -1,4 +1,23 @@
 Stalker Changes:
+v0.0.1.20101219:
+ * started to implement:
+   * a database entry point
+   * a customizable object model and database tables
+   * an automatic mapper to map the objects and tables together according to
+     user settings
+   things can change a lot in this phase, I'm just trying to figure out the
+   best possible way to do it.
+ * added a new entity type called TaggedEntity which derives from SimpleEntity,
+   and moved all the tag related attributes of SimpleEntity to TaggedEntity,
+   and all the child classes deriving from SimpleEntity now derives from
+   TaggedEntity, also moved the tests related with tag in SimpleEntity to
+   TaggedEntity.
+ * tag.Tag now derives from the SimpleEntity and doesn't add any other
+   attribute to its super.
+ * updated tests for tag.Tag
+ * updated docs for TaggedEntity
+ * finished implementing the Department object and its tests
+ * removed the notes attribute from the Entity class
 
 v0.0.1.20101209:
  * added the inheritance diagram as an rst page to reference it anywhere needed

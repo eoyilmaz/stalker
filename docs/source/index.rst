@@ -21,6 +21,7 @@ Stalker is build over these other OpenSource projects:
  * Python
  * SQLAlchemy
  * PyQt
+ * PySide
  * JQuery
  * Jinja
 
@@ -49,6 +50,10 @@ Summary
    :nosignatures:
    
    stalker
+   stalker.db
+   stalker.db.mapper
+   stalker.db.setup
+   stalker.db.tables
    stalker.models
    stalker.models.asset
    stalker.modesl.asset.Asset
@@ -64,6 +69,7 @@ Summary
    stalker.models.department.Department
    stalker.models.entity
    stalker.models.entity.SimpleEntity
+   stalker.models.entity.TaggedEntity
    stalker.models.entity.AuditEntity
    stalker.models.entity.Entity
    stalker.models.group

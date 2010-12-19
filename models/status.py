@@ -7,7 +7,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Status(entity.SimpleEntity):
+class Status(entity.TaggedEntity):
     """The Status class
     
     :param shortName: the shortName of the status name, keep it as simple
@@ -67,7 +67,7 @@ class Status(entity.SimpleEntity):
 
 
 ########################################################################
-class StatusList(entity.SimpleEntity):
+class StatusList(entity.TaggedEntity):
     """the list version of the Status
     
     Holds multiple statuses to be used as a choice list for several other

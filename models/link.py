@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Link(entity.SimpleEntity):
+class Link(entity.TaggedEntity):
     """A link is the type of class that holds information about outer
     resources, like web links, files, file sequences and folders. It is the
     main door of Stalker to the file system and the internet. It is aimed to

@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Unit(entity.SimpleEntity):
+class Unit(entity.TaggedEntity):
     """the base Unit class that keeps data about the units
     
     adds these parameters to the SimpleEntity

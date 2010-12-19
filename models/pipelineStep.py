@@ -11,7 +11,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class PipelineStep(entity.SimpleEntity):
+class PipelineStep(entity.TaggedEntity):
     """A PipelineStep object represents the general pipeline steps which are
     used around the studio. A couple of examples are:
     

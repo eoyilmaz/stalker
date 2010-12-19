@@ -8,7 +8,7 @@ from stalker.models import entity, pipelineStep
 
 
 ########################################################################
-class AssetType(entity.SimpleEntity):
+class AssetType(entity.TaggedEntity):
     """The AssetType class holds the information about the asset type.
     
     One asset type object has information about the pipeline steps that this

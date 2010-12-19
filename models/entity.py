@@ -33,10 +33,8 @@ class SimpleEntity(object):
     
 
     #----------------------------------------------------------------------
-    def __init__(self, name=None, description='', tags=[]):
-        
+    def __init__(self, name=None, description=''):
         self._name = self._check_name(name)
-        self._tags = self._check_tags(tags)
         self._description = self._check_description(description)
     
     
@@ -108,21 +106,6 @@ class SimpleEntity(object):
     
     
     #----------------------------------------------------------------------
-    def _check_tags(self, tags_in):
-        """checks the given tags_in value
-        """
-        
-        # raise ValueError when:
-        
-        # it is not an instance of list
-        if not isinstance(tags_in, list):
-            raise ValueError("the tags attribute should be set to a list")
-        
-        return tags_in
-    
-    
-    
-    #----------------------------------------------------------------------
     def description():
         
         def fget(self):
@@ -153,6 +136,40 @@ class SimpleEntity(object):
         return locals()
     
     name = property(**name())
+
+
+
+
+
+
+########################################################################
+class TaggedEntity(SimpleEntity):
+    """The entity type that adds tags to the SimpleEntity
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, tags=[], **kwargs):
+        
+        super(TaggedEntity, self).__init__(**kwargs)
+        
+        self._tags = self._check_tags(tags)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_tags(self, tags_in):
+        """checks the given tags_in value
+        """
+        
+        # raise ValueError when:
+        
+        # it is not an instance of list
+        if not isinstance(tags_in, list):
+            raise ValueError("the tags attribute should be set to a list")
+        
+        return tags_in
     
     
     
@@ -171,16 +188,14 @@ class SimpleEntity(object):
         return locals()
     
     tags = property(**tags())
-    
-    
-    
+
 
 
 
 
 
 ########################################################################
-class AuditEntity(SimpleEntity):
+class AuditEntity(TaggedEntity):
     """This is the entity class which is derived from the SimpleEntity and adds
     audit information like created_by, updated_by, date_created and
     date_updated.
@@ -403,8 +418,6 @@ class Entity(AuditEntity):
       status_list attribute. So the value of this attribute couldn't be lower
       than 0 and higher than the length of the status_list object and nothing
       other than an integer
-    
-    :param notes: a list of note objects. notes can be an empty list.
     """
     
     
@@ -413,7 +426,7 @@ class Entity(AuditEntity):
     def __init__(self,
                  status_list=[],
                  status=0,
-                 notes=[],
+                 #notes=[],
                  **kwargs
                  ):
         
@@ -421,7 +434,7 @@ class Entity(AuditEntity):
         #self._links = self._check_links(links)
         self._status_list = self._check_status_list(status_list)
         self._status = self._check_status(status)
-        self._notes = self._check_notes(notes)
+        #self._notes = self._check_notes(notes)
         #self._thumbnail = thumbnail
     
     
@@ -441,19 +454,19 @@ class Entity(AuditEntity):
     
     
     
-    #----------------------------------------------------------------------
-    def _check_notes(self, notes_in):
-        """checks the given notes_in value
-        """
+    ##----------------------------------------------------------------------
+    #def _check_notes(self, notes_in):
+        #"""checks the given notes_in value
+        #"""
         
-        # raise ValueError when:
+        ## raise ValueError when:
         
-        # it is not an instance of list
-        if not isinstance(notes_in, list):
-            raise ValueError("the notes attribute should be an instance of \
-            list")
+        ## it is not an instance of list
+        #if not isinstance(notes_in, list):
+            #raise ValueError("the notes attribute should be an instance of \
+            #list")
         
-        return notes_in
+        #return notes_in
     
     
     
@@ -556,21 +569,21 @@ class Entity(AuditEntity):
     
     
     
-    #----------------------------------------------------------------------
-    def notes():
+    ##----------------------------------------------------------------------
+    #def notes():
         
-        def fget(self):
-            return self._notes
+        #def fget(self):
+            #return self._notes
         
-        def fset(self, notes_in):
-            self._notes = self._check_notes(notes_in)
+        #def fset(self, notes_in):
+            #self._notes = self._check_notes(notes_in)
         
-        doc = """this is the property that sets and returns the notes \
-        attribute"""
+        #doc = """notes is a list of Notes objects, it is a place to store notes
+        #about this entity"""
         
-        return locals()
+        #return locals()
     
-    notes = property(**notes())
+    #notes = property(**notes())
     
     
     

@@ -12,7 +12,7 @@ from stalker.models import entity, user, link, tag, status
 
 
 ########################################################################
-class SimpleEntityTest(mocker.MockerTestCase):
+class SimpleEntityTester(mocker.MockerTestCase):
     """testing the SimpleEntity class
     """
     
@@ -26,20 +26,10 @@ class SimpleEntityTest(mocker.MockerTestCase):
         self.description = "This is a test entity, and this is a proper \
         description for it"
         
-        # create some mock tag objects, not neccessarly needed but create them
-        self.mock_tag1 = self.mocker.mock(tag.Tag)
-        self.mock_tag2 = self.mocker.mock(tag.Tag)
-        
-        self.tags = [self.mock_tag1, self.mock_tag2]
-        
-        # now replay it
-        self.mocker.replay()
-        
         # create a proper SimpleEntity to use it later in the tests
         self.simple_entity = entity.SimpleEntity(
             name=self.name,
-            description=self.description,
-            tags=self.tags
+            description=self.description
         )
     
     
@@ -53,8 +43,7 @@ class SimpleEntityTest(mocker.MockerTestCase):
             ValueError,
             entity.SimpleEntity,
             name='',
-            description=self.description,
-            tags=self.tags,
+            description=self.description
         )
     
     
@@ -68,8 +57,7 @@ class SimpleEntityTest(mocker.MockerTestCase):
             ValueError,
             entity.SimpleEntity,
             name=None,
-            description=self.description,
-            tags=self.tags,
+            description=self.description
         )
     
     
@@ -131,8 +119,7 @@ class SimpleEntityTest(mocker.MockerTestCase):
             ValueError,
             entity.SimpleEntity,
             name=1,
-            description=self.description,
-            tags=self.tags,
+            description=self.description
         )
     
     
@@ -175,8 +162,7 @@ class SimpleEntityTest(mocker.MockerTestCase):
             ValueError,
             entity.SimpleEntity,
             name=self.name,
-            description=100,
-            tags=self.tags,
+            description=100
         )
     
     
@@ -196,6 +182,41 @@ class SimpleEntityTest(mocker.MockerTestCase):
             "description",
             test_value
         )
+
+
+
+
+
+
+########################################################################
+class TaggedEntityTester(mocker.MockerTestCase):
+    """tests the Tagged entity class
+    """
+    
+    
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """seting up some proper values
+        """
+        self.name = 'Test Entity'
+        self.description = "This is a test entity, and this is a proper \
+        description for it"
+        
+        # create some mock tag objects, not neccessarly needed but create them
+        self.mock_tag1 = self.mocker.mock(tag.Tag)
+        self.mock_tag2 = self.mocker.mock(tag.Tag)
+        
+        self.tags = [self.mock_tag1, self.mock_tag2]
+        
+        # now replay it
+        self.mocker.replay()
+        
+        # create a proper SimpleEntity to use it later in the tests
+        self.tagged_entity = entity.TaggedEntity(
+            name=self.name,
+            description=self.description,
+            tags=self.tags
+        )
     
     
     
@@ -206,9 +227,9 @@ class SimpleEntityTest(mocker.MockerTestCase):
         """
         
         # this should work without errors
-        aNewSimpleEntity = entity.SimpleEntity(
+        aNewTaggedEntity = entity.TaggedEntity(
             name=self.name,
-            description=self.description,
+            description=self.description
         )
     
     
@@ -219,14 +240,14 @@ class SimpleEntityTest(mocker.MockerTestCase):
         """
         
         # this should work without errors
-        aNewSimpleEntity = entity.SimpleEntity(
+        aNewTaggedEntity = entity.TaggedEntity(
             name=self.name,
             description=self.description,
         )
         
         expected_result = []
         
-        self.assertEquals(aNewSimpleEntity.tags, expected_result)
+        self.assertEquals(aNewTaggedEntity.tags, expected_result)
     
     
     
@@ -242,10 +263,10 @@ class SimpleEntityTest(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            entity.SimpleEntity,
+            entity.TaggedEntity,
             name=self.name,
             description=self.description,
-            tags=test_value,
+            tags=test_value
         )
         
         
@@ -255,10 +276,10 @@ class SimpleEntityTest(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            entity.SimpleEntity,
+            entity.TaggedEntity,
             name=self.name,
             description=self.description,
-            tags=test_value,
+            tags=test_value
         )
     
     
@@ -270,17 +291,16 @@ class SimpleEntityTest(mocker.MockerTestCase):
         
         test_value = [self.mock_tag1]
         
-        self.simple_entity.tags = test_value
+        self.tagged_entity.tags = test_value
         
-        self.assertEquals(self.simple_entity.tags, test_value)
-
+        self.assertEquals(self.tagged_entity.tags, test_value)
 
 
 
 
 
 ########################################################################
-class AuditEntity(mocker.MockerTestCase):
+class AuditEntityTester(mocker.MockerTestCase):
     """testing the AuditEntity class
     """
     
@@ -649,7 +669,7 @@ class AuditEntity(mocker.MockerTestCase):
 
 
 ########################################################################
-class EntityTest(mocker.MockerTestCase):
+class EntityTester(mocker.MockerTestCase):
     """tests the entity class
     
     all the attributes to objects needs a mock object of that object, that is:
@@ -684,6 +704,8 @@ class EntityTest(mocker.MockerTestCase):
         statusCnt = len(self.mock_status_list.statuses)
         self.mocker.result(5)
         self.mocker.count(0, None)
+        
+        # a mock note list
         
         self.mocker.replay()
         
@@ -999,77 +1021,74 @@ class EntityTest(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_notes_being_not_intialized(self):
-        """test if nothing is raised when creating an entity without setting a
-        notes parameter
-        """
+    ##----------------------------------------------------------------------
+    #def test_notes_being_not_intialized(self):
+        #"""test if nothing is raised when creating an entity without setting a
+        #notes parameter
+        #"""
         
-        # this should work without errors
-        aNewEntity = entity.Entity(
-            name=self.name,
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            status_list= self.mock_status_list
-        )
+        ## this should work without errors
+        #aNewEntity = entity.Entity(
+            #name=self.name,
+            #created_by=self.mock_user,
+            #updated_by=self.mock_user,
+            #status_list= self.mock_status_list
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_notes_being_initialized_as_an_empty_list(self):
-        """test if notes is initialized as an empty list
-        """
+    ##----------------------------------------------------------------------
+    #def test_notes_being_initialized_as_an_empty_list(self):
+        #"""test if notes is initialized as an empty list
+        #"""
         
-        # this should work without errors
-        aNewEntity = entity.Entity(
-            name=self.name,
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            status_list= self.mock_status_list
-        )
+        ## this should work without errors
+        #aNewEntity = entity.Entity(
+            #name=self.name,
+            #created_by=self.mock_user,
+            #updated_by=self.mock_user,
+            #status_list= self.mock_status_list
+        #)
         
-        expected_result = []
+        #expected_result = []
         
-        self.assertEquals(aNewEntity.notes, expected_result)
+        #self.assertEquals(aNewEntity.notes, expected_result)
     
     
     
-    #----------------------------------------------------------------------
-    def test_notes_init_with_something_other_than_a_list(self):
-        """test if a ValueError is going to be raised when initializing the
-        notes with something other than a list
-        """
+    ##----------------------------------------------------------------------
+    #def test_notes_init_with_something_other_than_a_list(self):
+        #"""test if a ValueError is going to be raised when initializing the
+        #notes with something other than a list
+        #"""
         
-        #-----------------------
-        # a string
-        test_value = ""
+        #test_values = [1, 12.3, "a string", {}]
         
-        self.assertRaises(
-            ValueError,
-            entity.Entity,
-            name=self.name,
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            status_list=self.mock_status_list,
-            status=0,
-            notes=test_value
-        )
+        ##-----------------------
+        ## a string
+        #for test_value in test_values:
+            #self.assertRaises(
+                #ValueError,
+                #entity.Entity,
+                #name=self.name,
+                #created_by=self.mock_user,
+                #updated_by=self.mock_user,
+                #status_list=self.mock_status_list,
+                #status=0,
+                #notes=test_value
+            #)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_notes_property_working_properly(self):
+        #"""testing if the notes property working properly
+        #"""
         
+        ## assign a new note object to the notes property and check if it is
+        ## assigned correctly
         
-        #-----------------------
-        # an integer
-        test_value = 1231
-        
-        self.assertRaises(
-            ValueError,
-            entity.Entity,
-            name=self.name,
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            status_list=self.mock_status_list,
-            status=0,
-            notes=test_value
-        )
+        #self.fail("test not implemented yet!")
     
     
     

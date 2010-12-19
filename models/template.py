@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Template(entity.SimpleEntity):
+class Template(entity.TaggedEntity):
     """This is the template model. It holds templates for various tasks. The
     only attribute it has is the `template_code` attiribute
     

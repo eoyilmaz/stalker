@@ -12,52 +12,29 @@ from stalker.models import tag
 
 ########################################################################
 class TagTest(unittest.TestCase):
-    """testing the Tag class
+    """testing the Tag class, the tag is now derived from SimpleEntity, and it
+    doesn't add any new attribute to the SimpleEntity so it doesn't need any
+    tests for now.
     """
     
-    
-    
     #----------------------------------------------------------------------
-    def test_name_str_unicode(self):
-        """testing the name attribute being an instance of string or unicode
+    def setUp(self):
+        """setup the test
         """
         
-        #----------------------------------------------------------------------
-        # the name should be a string or unicode
-        new_name = 1
-        self.assertRaises(ValueError, tag.Tag, new_name)
-        # check the name property
-        name = 'a new tag'
-        a_tag = tag.Tag(name)
-        self.assertRaises(ValueError, setattr, a_tag, 'name', new_name)
+        self.name = "a test tag"
+        self.description = "this is a test tag"
     
     
     
     #----------------------------------------------------------------------
-    def test_name_empty(self):
-        """testing the name attribute being empty
+    def test_tag_init(self):
+        """testing if tag inits properly
         """
         
-        #----------------------------------------------------------------------
-        # the name can not be empty
-        new_name = ''
-        self.assertRaises(ValueError, tag.Tag, new_name)
-        # check the name property
-        name = 'a new tag'
-        a_tag = tag.Tag(name)
-        self.assertRaises(ValueError, setattr, a_tag, 'name', new_name)
+        # this should work without any error
+        a_tag_object = tag.Tag(
+            name=self.name,
+            description=self.description
+        )
     
-    
-    
-    #----------------------------------------------------------------------
-    def test_name_property(self):
-        """testing the name property
-        """
-        
-        #----------------------------------------------------------------------
-        # test if we get the name attribute correctly by using the name
-        # property
-        name = 'a tag'
-        a_tag = tag.Tag(name)
-        self.assertEquals(a_tag.name, name)
-        

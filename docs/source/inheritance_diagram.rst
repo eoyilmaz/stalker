@@ -15,6 +15,7 @@
      stalker.models.department.Department
      stalker.models.entity
      stalker.models.entity.SimpleEntity
+     stalker.models.entity.TaggedEntity
      stalker.models.entity.AuditEntity
      stalker.models.entity.Entity
      stalker.models.group
