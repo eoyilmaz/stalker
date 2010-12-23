@@ -1,4 +1,9 @@
 Stalker Changes:
+v0.0.1.20101223:
+ * updating the documentation
+ * AuditEntity now accepts None for updated_by attribute when it an object is
+   created, but sets it to the same value with created_by attribute
+
 v0.0.1.20101219:
  * started to implement:
    * a database entry point

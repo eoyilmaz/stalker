@@ -1,115 +1,191 @@
 Design
 ******
-The design of Stalker mentioned in the sections below.
+
+The design of Stalker is mentioned in the following sections.
 
 Mission
 =======
+
 The project is about creating an Open Source Production Asset Management
 (ProdAM) System called Stalker which is designed for Vfx/Animation Studios.
 Stalker will be consisting of a framework and the interface those has been
-build over the framework. Stalker will have a very flexible design that lets
-the pipeline TDs to customize it in a wide variety of perspectives. The out of
-the package installation will meet the basic needs of majority of studios
-without too much effort.
+build over that framework. Stalker will have a very flexible object model
+design that lets the pipeline TDs to customize it in a wide variety of
+perspectives. The out of the package installation will meet the basic needs of
+majority of studios without too much effort.
 
 Introduction
 ============
+
+An Asset Management Systems' duty is to hold the data which are created by the
+users of the system in an orginized manner, and let them quickly reach and find
+their files. A Production Asset Management Systems' duty is, in addition to the
+asset management systems', also handle the production steps and collaboration
+of the users. If more information about this subject is needed, there are great
+books about Digital Asset Management (DAM) Systems.
+
 The usage of an asset management system in an animation/vfx studio is an
 obligatory duty for the sake of the studio itself. Even the benefits of the
 system becomes silly to be mentioned when compared to the lack of even a simple
-system.
+system to organize stuff.
 
-Every studio outside establishes and developes its own asset management system.
-Stalker will try to be the framework that these proprietry asset management
-systems will be build over. Thus reducing the work repeated on every big
-project start.
+Every studio outside establishes and developes their own asset management
+system. Stalker will try to be the framework that these proprietry asset
+management systems will be build over. Thus reducing the work repeated on every
+big projects start.
+
+Concepts
+========
+
+There are a couple of design concepts those needs to be clarified before any
+further explanation of Stalker.
+
+Stalker Object Model (SOM)
+--------------------------
+
+Stalker has a very robust object model, which is called **Stalker Object
+Model** or **SOM**. The idea behind SOM is to create a simple class hierarchy
+which is both usable right out of the box and also expandable by the studios'
+pipeline TDs. SOM is actually a little bit more complex than the basic possible
+model, it is designed in this way just to be able to create a simple pipeline
+to be able to build the system on it.
+
+Lets look at how a simple studio works and try to create our asset management
+concepts around it.
+
+An animation/vfx studios duty is to complete a **Project**. A project,
+generally is about to create a **Sequence** of **Shots** which are a series of
+images those at the end converts to a movie. So a sequence in general contains
+Shots. Shots are a special type of **Assets** which are related to a range of
+time. So basically to complete a project the studio should complete the
+sequences thus the shots.
+
+We have considered Shots as a special form of assets, so assets have
+**AssetTypes**, it is *Shot* for a Shot asset, and lets say, it is *Character*
+for a character asset, or *Vehicle* for a vehicle asset (pretty straight).
+
+AssetType also defines the **PipelineSteps** of that special asset type. For
+example a Shot can have steps like *Animation*, *FX*, *Layout*, *Lighting*,
+*Compositing* etc. and a character can have *Design*, *Model*, *Rig*, *Shading*
+steps. All these steps defines differentiable **Tasks** those need to be done
+sequently or in parallel to complete that shot or asset. Again, an asset or
+shot has an asset type, which defines the steps thus tasks those needs to be
+done.
+
+A Task relates to a work, a work is a quantity of time spend or going to be
+spend for that specific task. At the end of the work generally a **User**
+creates **Versions** for a task. Versions are list of files showing the
+different incarnations or the progress of a subject in the fileserver or in
+Stalkers term the **Repository**. Also while creating those files to complete
+the tasks a user should be booked. **Bookings** are special type of objects
+holds information about how much time has been spent for a given task.
+
+All the names those shown in bold fonts are a class in SOM. and there are a
+series of other classes to accomodate the needs of a simple studio.
+
+The inheritance diagram of the classes in the SOM is shown below:
+
+.. include:: inheritance_diagram.rst
+
+Stalker is a configurable and expandible system. Both of these feature allows
+the system to have a flexible structure.
+
+There are two levels of expansion, the first level is the simplest one, by just
+adding different statuses, different assetTypes or these kind of things in
+which Stalker's current design is ready to.
+
+The second level of expansion is achieved by expanding the SOM. Expanding the
+some includes creating new classes and database tables, and updating the old
+ones which are already comming with Stalker. These expansion schemes are
+further explained in How To Expand Stalker.
 
 Features and Requirements
-=========================
+-------------------------
 Features:
 
- 1. Will be developed purely in Python (2.6 and over) using TDD (Test Driven
+ 1. Developed purely in Python (2.6 and over) using TDD (Test Driven
     Development) practices
  
  2. SQLAlchemy for the database back-end and ORM
  
- 3. User should be able to select his/her preferred database like PostgreSQL,
-    MySQL, Oracle, SQLite etc. (whatever SQLAlchemy supports)
+ 3. Users are able to select their preferred database like PostgreSQL, MySQL,
+    Oracle, SQLite etc. (whatever SQLAlchemy supports)
  
- 4. The user should be able to select both one or different databases for
-    studio specific and project specific data. It is mostly beneficial when the
-    setup uses SQLite. The project specific data could be kept in project
-    folder as an SQLite db file and the studio specific data can be another
-    SQLite db file or another database connection to PostgreSQL, MySQL, Oracle
-    etc. databases. In an SQLite setup, the database can be backed up with the
-    project folder itself.
+ 4. It is possible to use both one or different databases for studio specific
+    and project specific data. It is mostly beneficial when the setup uses
+    SQLite. The project specific data could be kept in project folder as an
+    SQLite db file and the studio specific data can be another SQLite db file
+    or another database connection to PostgreSQL, MySQL, Oracle etc. databases.
+    In an SQLite setup, the database can be backed up with the project folder
+    itself.
  
- 5. PyQt and web based user interfaces. The design of the interface should fit
-    in to MTV or MVC template. So it will be easy to write the interface in
-    PyQt or in forms of web application.
+ 5. PyQt/PySide and web based user interfaces. All the interfaces designed in
+    MVC structure.
+ 
+ 6. Configuration files lets the user to configure all the aspects of the
+    project management.
+ 
+ 7. Uses Jinja2 as the templating system for the file and folder naming
+    convention will be used like:
     
-    The priorities of the development phase is to create the framework first. 
+    {repository.path}/{project.name}/assets/{asset.name}/{pipelineStep.name}/
+    {asset.variation.name}/{asset.name}_{asset.type.name}_v{asset.version}.{
+    asset.fileFormat.extension}
  
- 6. Configuration files to let the user to configure all the aspects of the
-    project management. There are going to be interfaces for this setup
-    processes and also it should be like setting up a Django or Trac project
-    from the command line.
+ 8. file and folders and file sequences can be uploaded to the server as
+    assets, and the server decides where to place the folder or file by using
+    the templating system.
  
- 7. The first design of the database schema is shown below:
-    
-    .. include:: inheritance_diagram.rst 
-    
-    In this first design all the basic data types tried to be created with an
-    inherited structure. All the classes are derived from the Base data type.
+ 9. The event system gives full control for every CRUD (create/insert, read,
+    update, delete) by giving step like before insert, after insert callbacks.
  
- 8. A templating system for the file and folder naming convention will be used
-    like: {projectServer.path}/{project.name}/assets/{asset.name}/
-    {pipelineStep.name}/{asset.variation.name}/{asset.name}_{asset.type.name}
-    _v{asset.version}.{asset.fileFormat.extension}
- 
- 9. file and folders and file sequences could be uploaded to the server as
-    assets, and the server decides where to place the folder or file
- 
- 10. there should be callbacks for every CRUD (create/insert, read, update,
-     delete) step like before insert, after insert etc.
- 
- 11. pipeline steps should be hierarchically managed to let the project admin
-     create pipeline dependencies between each step, so the system prevents the
-     user to go to the next step before approving the previous ones (like rop
-     dependencies in houdini), or it should keep track of the dependencies
-     instead of preventing
- 
- 12. variations/takes of different versions of assets, a variation/take can be 
-     dependent to a specific asset version (variation root)
- 
-(continiuing)
+ 10. The messaging system allows the users collaborate more efficiently.
 
 Usage Examples
-==============
+--------------
 
 Let's dance with Stalker a little bit.
 
 First import some modules:
 
 >>> from stalker.models import project, user, task, imageFormat
->>> from stalker.db import mapper
+>>> from stalker.db import setup_db
 >>> import datetime
+
+First we need to connect to the database.
+
+>>> session = setup_db.doSetup() # creates and returns the session object
+
+Then retrieve a user, if there are no users we can use the *admin*
+which is always created with the database.
+
+>>> admin = session.query(user.User).filter_by(name='admin')
 
 Let's create a new project called "New Project":
 
->>> newProject = project.Project('New Project')
+>>> newProject = project.Project(name='New Project'
+                                 created_by=admin,
+                                 updated_by=admin)
 
 Change the image format of the project:
 
->>> newProject.imageFormat = imageFormat.ImageFormat( 'HD', 1920, 1080, 1.0 )
+>>> newProject.image_format = imageFormat.ImageFormat(name='HD',
+                                                      width=1920,
+                                                      height=1080,
+                                                      aspect_ratio=1.0
+                                                      )
 
 Add a couple of users to the project
 
->>> newUser = user.User(name='Erkan Ozgur',
-                        last_name='Yilmaz',
-                        e-mail='eoyilmaz@gmail.com',
-                        login_name='eoyilmaz',
-                        password = 'secret')
+>>> newUser1 = user.User(first_name='Erkan Ozgur',
+                         last_name='Yilmaz',
+                         email='eoyilmaz@gmail.com',
+                         name='eoyilmaz',
+                         login_name='eoyilmaz',
+                         password = 'secret',
+                         created_by=admin)
+
+>>> newUser2 = user.User(
 
 
 Save and flush the data:

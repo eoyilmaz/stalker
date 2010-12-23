@@ -4,5 +4,8 @@ syntax: glob
 *~*
 *.pyc
 docs/html/*
+docs/latex/*
+docs/doctrees/*
+docs/source/generated/*
 .coverage
 .DS_Store

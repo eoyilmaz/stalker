@@ -1,6 +1,7 @@
 How To Contribute
 *****************
-Stalker started as an Open Source project with the expactation of 
+
+Stalker started as an Open Source project with the expactation of
 contributions. The soul of the open source is to share the knowledge and
 contribute.
 
@@ -14,9 +15,16 @@ Development Style
 =================
 Stalker is developed strictly by following `TDD`_ practices. So every
 participant should follow TDD metadologly. Skipping this steps is highly
-prohibited. Every added code to the trunk should have a corresponding test.
+prohibited. Every added code to the trunk should have a corresponding test and
+the tests should be written before implementing a single line of code.
 
 .. _TDD: http://en.wikipedia.org/wiki/Test-driven_development
+
+`DRY`_ is also another methodology that a participant should follow. So nothing
+should be repeated. If someting needs to be repeated, then it is a good sign
+that this part needs to be in a special module, class or function.
+
+.. _DRY: http:http://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 
 Testing
 =======
@@ -29,17 +37,21 @@ files also could be used to generate the documentation of the system. So
 writing down the sketches as rest files inside the docs is something very
 meaningful.
 
-The design should be followed by the tests. And the test should be
-followed by the implemantation, and the implamantation should be followed by
-tests again, until you are confident about your code and it is rock solid. Then
-the refactoring phase can start, and because you have enough tests that will
-keep your code doing a certain thing, you can freely change your code, because
-you know that you code will be doing the same thing until it is passing all the
-tests.
+The design should be followed by the tests. And the test should be followed by
+the implemantation, and the implamantation should be followed by tests again,
+until you are confident about your code and it is rock solid. Then the
+refactoring phase can start, and because you have enough tests that will keep
+your code doing a certain thing, you can freely change your code, because you
+know that you code will do the same thing if it passes all the tests.
 
-The first tests written should always fail. This is something good to have.
-This will inform us that the code the test is testing is not written yet. So
-lets start adding the code that will pass the tests.
+The first tests written should always fail by having:
+
+  ::
+    
+    self.fail('the test is not implemented yet')
+
+failures. This is something good to have. This will inform us that the test is
+not written yet. So lets start adding the code that will pass the tests.
 
 The test framework of Stalker is unitTest and nose to help testing.
 
@@ -49,10 +61,13 @@ These python modules should be installed to test Stalker properly:
  * Coverage
  * Mocker
 
+The Mocker library should be used to isolate the currently tested part of the
+code.
+
 The coverage of the tests should be kept as close as possible to %100.
 
-There is a helper script in the root of the project, called *doTests*. This is a
-shell script for linux, which runs all the neccessary tests and prints the
+There is a helper script in the root of the project, called *doTests*. This is
+a shell script for linux, which runs all the neccessary tests and prints the
 tests results and the coverage table.
 
 Code Style

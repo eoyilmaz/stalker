@@ -474,22 +474,30 @@ class AuditEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_updated_by_attribute_empty(self):
-        """testing if ValueError is raised when the updated_by is tried to be
-        set to None
+        """testing if initializing updated_by with None causes it to be set to
+        the same value with created_by attribute
         """
         
-        # it can not be empty (the first created user going to have some
-        # problems if we dont allow empty users, the database should be
-        # initialized with an admin user)
-        #
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.audit_entity,
+            #'updated_by',
+            #None
+        #)
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.audit_entity,
-            'updated_by',
-            None
+        aNewAuditEntity = entity.AuditEntity(
+            name=self.name,
+            description=self.description,
+            tags=self.tags,
+            created_by=self.mock_user,
+            date_created=self.date_created,
+            date_updated=self.date_updated,
         )
+        
+        # now check if they are same
+        self.assertEquals(aNewAuditEntity.created_by,
+                          aNewAuditEntity.updated_by)
     
     
     

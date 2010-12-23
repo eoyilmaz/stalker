@@ -273,10 +273,9 @@ class AuditEntity(TaggedEntity):
         
         from stalker.models import user
         
-        # raise ValueError when:
-        # it is None
         if updated_by_in is None:
-            raise ValueError("the created_by attribute can not be set to None")
+            # set it to what created_by attribute has
+            updated_by_in = self._created_by
         
         if not isinstance(updated_by_in, user.User):
             raise ValueError("the updated_by attribute should be an instance \

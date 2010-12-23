@@ -15,7 +15,8 @@ Stalker consists of several parts:
  * Models
  * UI
 
-The design of the Stalker is tried to be kept as flexible as possible.
+The design of the Stalker is tried to be kept as flexible as possible. So one
+can extend Stalker as much as possible by using configuration files.
 
 Stalker is build over these other OpenSource projects:
  * Python
@@ -33,15 +34,6 @@ Contents:
    design.rst
    contribute.rst
 
-
-Inheritance Diagram
-===================
-
-You can find the inheritance diagram of the classes for every module of being
-used in Stalker below:
-
-.. include:: inheritance_diagram.rst
-
 Summary
 =======
 
@@ -51,8 +43,7 @@ Summary
    
    stalker
    stalker.db
-   stalker.db.mapper
-   stalker.db.setup
+   stalker.db.setup_db
    stalker.db.tables
    stalker.models
    stalker.models.asset

@@ -73,6 +73,8 @@ class User(entity.AuditEntity):
                  **kwargs
                  ):
         
+        # use
+        
         super(User, self).__init__(**kwargs)
         
         self._department = self._check_department(department)
