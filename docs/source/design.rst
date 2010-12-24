@@ -152,7 +152,10 @@ First import some modules:
 >>> from stalker.db import setup_db
 >>> import datetime
 
-First we need to connect to the database.
+First we need to connect to the database. setup_db module contains several
+helper functions to connect to the database defined in the
+config.defaults.py file or uses the settings.py in the folder defined with the
+environment variable STALKER_PATH.
 
 >>> session = setup_db.doSetup() # creates and returns the session object
 

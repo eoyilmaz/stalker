@@ -1,11 +1,10 @@
 #-*- coding: utf-8 -*-
 
 
-
-STUDIO_DATABASE_ENGINE= 'sqlite3'
-STUDIO_DATABASE_NAME = 'stalker_studio.db'
-PROJECT_DATABASE_ENGINE = 'sqlite3'
-PROJECT_DATABASE_NAME = ''
+#DATABASE = 'sqlite:///:memory:'
+DATABASE = 'sqlite:////home/ozgur/stalker_test.db'
+STUDIO_DATABASE= 'sqlite:///:memory:'
+PROJECT_DATABASE = 'sqlite:///:memory:'
 
 # 
 # these are for new projects
@@ -15,14 +14,19 @@ SUPERUSER_NAME = 'admin'
 SUPERUSER_EMAIL = 'admin@admin.com'
 
 
-# the keyword that is going to be used in password scrambling
+# the default keyword which is going to be used in password scrambling
 KEY = "stalker_default_key"
 
 
-# objects to tables list
-OBJECT_TO_TABLE = [
-    ("stalker.models.tag.Tag", "stalker.db.tables.tags_table"),
-    ("stalker.models.entity.SimpleEntity", "stalker.db.tables.tags_table"),
+## objects to tables list
+#OBJECT_TO_TABLE = [
+    #("stalker.models.tag.Tag",
+     #"stalker.db.tables.tags_table"
+     #"properties={tags_table}"),
+    #("stalker.models.entity.SimpleEntity", "stalker.db.tables.tags_table",""),
+#]
+
+
+MAPPERS = [
+'stalker.db.mapper'
 ]
-
-

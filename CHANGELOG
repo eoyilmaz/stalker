@@ -1,4 +1,7 @@
 Stalker Changes:
+v0.0.1.20101224:
+ * started playing with the SQLAlchemy side of the system
+ 
 v0.0.1.20101223:
  * updating the documentation
  * AuditEntity now accepts None for updated_by attribute when it an object is
