@@ -10,9 +10,9 @@ Stalker is an OpenSource Production Digital Asset Manager (ProdAM) licensed
 under BSD License and designed specially for Animation and VFX Studios.
 
 Stalker consists of several parts:
- * Database
+ * Stalker Object Model (SOM)
+ * Database Module
  * Extensions
- * Models
  * UI
 
 The design of the Stalker is tried to be kept as flexible as possible. So one
@@ -21,8 +21,7 @@ can extend Stalker as much as possible by using configuration files.
 Stalker is build over these other OpenSource projects:
  * Python
  * SQLAlchemy
- * PyQt
- * PySide
+ * PyQt or PySide (not sure for now)
  * JQuery
  * Jinja
 
@@ -43,8 +42,11 @@ Summary
    
    stalker
    stalker.db
-   stalker.db.setup_db
+   stalker.db.mapper
+   stalker.db.meta
    stalker.db.tables
+   stalker.db.setup
+   stalker.db.create_mapper
    stalker.models
    stalker.models.asset
    stalker.modesl.asset.Asset

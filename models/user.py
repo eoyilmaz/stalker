@@ -189,12 +189,12 @@ class User(entity.AuditEntity):
         """checks the given last_name attribute
         """
         
-        if last_name_in is None:
-            raise(ValueError('last_name cannot be none'))
-        
-        if not isinstance(last_name_in, (str, unicode)):
-            raise(ValueError('last_name should be instance of string or \
-            unicode'))
+        #if last_name_in is None:
+            #raise(ValueError('last_name cannot be none'))
+        if last_name is not None:
+            if not isinstance(last_name_in, (str, unicode)):
+                raise(ValueError('last_name should be instance of string or \
+                unicode'))
         
         if last_name_in == '':
             raise(ValueError('last_name can not be an empty string'))

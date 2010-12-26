@@ -170,40 +170,40 @@ class DepartmentTester(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_lead_attribute_being_None(self):
-        """testing if a ValueError will be raised when trying to assing None to
-        the lead attribute
-        """
+    ##----------------------------------------------------------------------
+    #def test_lead_attribute_being_None(self):
+        #"""testing if a ValueError will be raised when trying to assing None to
+        #the lead attribute
+        #"""
         
-        self.assertRaises(
-            ValueError,
-            department.Department,
-            name=self.name,
-            description=self.description,
-            created_by=self.mock_admin,
-            updated_by=self.mock_admin,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            members=self.members_list,
-            lead=None
-        )
+        #self.assertRaises(
+            #ValueError,
+            #department.Department,
+            #name=self.name,
+            #description=self.description,
+            #created_by=self.mock_admin,
+            #updated_by=self.mock_admin,
+            #date_created=self.date_created,
+            #date_updated=self.date_updated,
+            #members=self.members_list,
+            #lead=None
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_lead_property_being_None(self):
-        """testing if a ValueError will be raised when trying to assing None to
-        lead property
-        """
+    ##----------------------------------------------------------------------
+    #def test_lead_property_being_None(self):
+        #"""testing if a ValueError will be raised when trying to assing None to
+        #lead property
+        #"""
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_department,
-            "lead",
-            None
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.mock_department,
+            #"lead",
+            #None
+        #)
     
     
     

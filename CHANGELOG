@@ -1,4 +1,13 @@
 Stalker Changes:
+v0.0.1.20101225:
+ * entity.AuditEntity.created_by can now be None (for now)
+ * user.User.last_name can now be None, to let users like admin have no last
+   name
+ * creating tables for catch the general inheritance of the entity classes
+ * entitiy.SimpleEntity.name's first letter is not capitilized anymore
+ * department.Department class now accpets Null for lead attribute (for now
+   again)
+
 v0.0.1.20101224:
  * started playing with the SQLAlchemy side of the system
  

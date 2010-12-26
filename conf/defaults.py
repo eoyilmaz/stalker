@@ -1,32 +1,46 @@
 #-*- coding: utf-8 -*-
 
 
-#DATABASE = 'sqlite:///:memory:'
+#
+# The default database addres
+# 
 DATABASE = 'sqlite:////home/ozgur/stalker_test.db'
+
+#
+# The default settings for the database, see sqlalchemy.create_engine for
+# possible parameters
+# 
+DATABASE_ENGINE_SETTINGS = {
+    'echo':True,
+    }
+
+
 STUDIO_DATABASE= 'sqlite:///:memory:'
 PROJECT_DATABASE = 'sqlite:///:memory:'
+
+#
+# Tells Stalker to create an admin by default
+#
+AUTO_CREATE_ADMIN = True
 
 # 
 # these are for new projects
 # after creating the project you can change them from the interface
 # 
-SUPERUSER_NAME = 'admin'
-SUPERUSER_EMAIL = 'admin@admin.com'
+ADMIN_NAME = 'admin'
+ADMIN_PASSWORD = 'admin'
+ADMIN_EMAIL = 'admin@admin.com'
 
 
 # the default keyword which is going to be used in password scrambling
 KEY = "stalker_default_key"
 
 
-## objects to tables list
-#OBJECT_TO_TABLE = [
-    #("stalker.models.tag.Tag",
-     #"stalker.db.tables.tags_table"
-     #"properties={tags_table}"),
-    #("stalker.models.entity.SimpleEntity", "stalker.db.tables.tags_table",""),
-#]
-
-
+#
+# The default mapper module, see docs for mappers for complete description of
+# mappers
+#
 MAPPERS = [
 'stalker.db.mapper'
 ]
+

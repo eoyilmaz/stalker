@@ -63,13 +63,14 @@ class Department(entity.AuditEntity):
         """
         
         # the lead should not be None
-        if lead is None:
-            raise(ValueError("lead could not be set to None"))
+        #if lead is None:
+            #raise(ValueError("lead could not be set to None"))
         
-        from stalker.models import user
-        # the lead should be an instance of user.User class
-        if not isinstance(lead, user.User):
-            raise(ValueError("lead should be an instance of user.User class"))
+        if lead is not None:
+            from stalker.models import user
+            # the lead should be an instance of user.User class
+            if not isinstance(lead, user.User):
+                raise(ValueError("lead should be an instance of user.User class"))
         
         return lead
     

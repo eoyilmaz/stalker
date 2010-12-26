@@ -108,10 +108,15 @@ Features:
  
  2. SQLAlchemy for the database back-end and ORM
  
- 3. Users are able to select their preferred database like PostgreSQL, MySQL,
+ 3. PyQt/PySide and web based user interfaces. All the interfaces designed in
+    MVC structure.
+ 
+ 4. Jinja2 as the template engine
+ 
+ 5. Users are able to select their preferred database like PostgreSQL, MySQL,
     Oracle, SQLite etc. (whatever SQLAlchemy supports)
  
- 4. It is possible to use both one or different databases for studio specific
+ 6. It is possible to use both one or different databases for studio specific
     and project specific data. It is mostly beneficial when the setup uses
     SQLite. The project specific data could be kept in project folder as an
     SQLite db file and the studio specific data can be another SQLite db file
@@ -119,27 +124,24 @@ Features:
     In an SQLite setup, the database can be backed up with the project folder
     itself.
  
- 5. PyQt/PySide and web based user interfaces. All the interfaces designed in
-    MVC structure.
+ 7. Configuration files lets the user to configure all the aspects of the
+    asset/project management.
  
- 6. Configuration files lets the user to configure all the aspects of the
-    project management.
- 
- 7. Uses Jinja2 as the templating system for the file and folder naming
+ 8. Uses Jinja2 as the templating system for the file and folder naming
     convention will be used like:
     
     {repository.path}/{project.name}/assets/{asset.name}/{pipelineStep.name}/
     {asset.variation.name}/{asset.name}_{asset.type.name}_v{asset.version}.{
     asset.fileFormat.extension}
  
- 8. file and folders and file sequences can be uploaded to the server as
+ 9. file and folders and file sequences can be uploaded to the server as
     assets, and the server decides where to place the folder or file by using
     the templating system.
  
- 9. The event system gives full control for every CRUD (create/insert, read,
-    update, delete) by giving step like before insert, after insert callbacks.
+ 10. The event system gives full control for every CRUD (create/insert, read,
+     update, delete) by giving step like before insert, after insert callbacks.
  
- 10. The messaging system allows the users collaborate more efficiently.
+ 11. The messaging system allows the users collaborate more efficiently.
 
 Usage Examples
 --------------
@@ -148,16 +150,20 @@ Let's dance with Stalker a little bit.
 
 First import some modules:
 
->>> from stalker.models import project, user, task, imageFormat
->>> from stalker.db import setup_db
+First of all import and setup the default database (an in-memory database)
+
+>>> from stalker import db
+>>> db.setup()
+
+Lets import a couple of objects from the SOM
+
+>>> from stalker.models import project, user, task
 >>> import datetime
 
-First we need to connect to the database. setup_db module contains several
-helper functions to connect to the database defined in the
-config.defaults.py file or uses the settings.py in the folder defined with the
-environment variable STALKER_PATH.
+To retrieve any information from the database we need the session object, which
+is stored in db.meta.session
 
->>> session = setup_db.doSetup() # creates and returns the session object
+>>> session = db.meta.session
 
 Then retrieve a user, if there are no users we can use the *admin*
 which is always created with the database.

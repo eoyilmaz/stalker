@@ -130,12 +130,12 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         test_group = [
-            ("testName", "TestName"),
-            ("1testName", "TestName"),
-            ("_testName", "TestName"),
-            ("2423$+^^+^'%+%%&_testName", "TestName"),
-            ("2423$+^^+^'%+%%&_testName_35", "TestName_35"),
-            ("2423$ +^^+^ '%+%%&_ testName_ 35", "TestName_35"),
+            ("testName", "testName"),
+            ("1testName", "testName"),
+            ("_testName", "testName"),
+            ("2423$+^^+^'%+%%&_testName", "testName"),
+            ("2423$+^^+^'%+%%&_testName_35", "testName_35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35", "testName_35"),
             ("SH001","SH001"),
         ]
         

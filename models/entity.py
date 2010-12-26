@@ -95,8 +95,8 @@ class SimpleEntity(object):
         name_in = re.sub('([\s])+', r'', name_in)
         #print name_in
         
-        # capitalize the first letter
-        name_in = name_in[0].upper() + name_in[1:]
+        ## capitalize the first letter
+        #name_in = name_in[0].upper() + name_in[1:]
         #print name_in
         
         return name_in
@@ -253,14 +253,15 @@ class AuditEntity(TaggedEntity):
         #-------------------------------------------------------------------
         from stalker.models import user
         
-        # raise ValueError when:
-        # it is None
-        if created_by_in is None:
-            raise ValueError("the created_by attribute can not be set to None")
+        ## raise ValueError when:
+        ## it is None
+        #if created_by_in is None:
+            #raise ValueError("the created_by attribute can not be set to None")
         
-        if not isinstance(created_by_in, user.User):
-            raise ValueError("the created_by attribute should be an instance \
-            of stalker.models.user.User")
+        if created_by_in is not None:
+            if not isinstance(created_by_in, user.User):
+                raise ValueError("the created_by attribute should be an instance \
+                of stalker.models.user.User")
         
         return created_by_in
     
@@ -277,9 +278,10 @@ class AuditEntity(TaggedEntity):
             # set it to what created_by attribute has
             updated_by_in = self._created_by
         
-        if not isinstance(updated_by_in, user.User):
-            raise ValueError("the updated_by attribute should be an instance \
-            of stalker.models.user.User")
+        if updated_by_in is not None:
+            if not isinstance(updated_by_in, user.User):
+                raise ValueError("the updated_by attribute should be an instance \
+                of stalker.models.user.User")
         
         return updated_by_in
     
