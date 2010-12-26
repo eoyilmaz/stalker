@@ -78,12 +78,28 @@ def __init_db__():
         adminDep = department.Department(name='admins')
         meta.session.add(adminDep)
         
+        
+        tempUser = user.User(
+            name='temp',
+            first_name='temp',
+            login_name='temp',
+            password='temp',
+            department=adminDep,
+            email='temp@temp.com'
+        )
+        
         admin = user.User(
             name=defaults.ADMIN_NAME,
+            first_name=defaults.ADMIN_NAME,
             login_name=defaults.ADMIN_NAME,
             password=defaults.ADMIN_PASSWORD,
-            department=adminDep
+            email=defaults.ADMIN_EMAIL,
+            department=adminDep,
+            created_by=tempUser
         )
+        
+        admin.created_by = admin
+        admin.updated_by = admin
         
         meta.session.add(admin)
         meta.session.commit()

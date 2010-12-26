@@ -2,7 +2,7 @@
 """this is the default mapper to map the default models to the default tables
 """
 
-from sqlalchemy.orm import mapper, relationship, backref
+from sqlalchemy.orm import mapper, relationship, backref, synonym
 from stalker.models import entity, tag, user, department
 from stalker.db import tables
 
@@ -13,8 +13,10 @@ mapper(
     entity.SimpleEntity,
     tables.simpleEntities,
     properties={
-        '__name': tables.simpleEntities.c.name,
-        '__description': tables.simpleEntities.c.description,
+        '_name': tables.simpleEntities.c.name,
+        'name': synonym('_name'),#, map_column=True),
+        '_description': tables.simpleEntities.c.description,
+        'description': synonym('_description')#, map_column=True)
     },
     polymorphic_on=tables.simpleEntities.c.entity_type,
     polymorphic_identity='simpleEntity'
@@ -41,11 +43,12 @@ mapper(
     inherit_condition=tables.taggedEntities.c.id==tables.simpleEntities.c.id,
     polymorphic_identity='taggedEntity',
     properties={
-        '__tags': relationship(
+        '_tags': relationship(
             tag.Tag,
             secondary=tables.taggedEntity_tags,
-            backref='__entities'
-        )
+            backref='_entities'
+        ),
+        'tags': synonym('_tags')#, map_column=True)
     }
 )
 
@@ -60,22 +63,24 @@ mapper(
     inherit_condition=tables.auditEntities.c.id==tables.taggedEntities.c.id,
     polymorphic_identity='auditEntity',
     properties={
-        '__created_by': relationship(
+        '_created_by': relationship(
             user.User,
-            backref='__entities_created',
-            primaryjoin=tables.auditEntities.c.id== \
-                        tables.users.c.entities_created,
-            #post_update=True,
+            backref='_entities_created',
+            primaryjoin=tables.auditEntities.c.created_by_id== \
+                        tables.users.c.id,
+            post_update=True,
             uselist=False
         ),
-        '__updated_by': relationship(
+        'created_by': synonym('_created_by'),#, map_column=True),
+        '_updated_by': relationship(
             user.User,
-            backref='__entities_updated',
-            primaryjoin=tables.auditEntities.c.id== \
-                        tables.users.c.entities_updated,
-            #post_update=True,
+            backref='_entities_updated',
+            primaryjoin=tables.auditEntities.c.updated_by_id== \
+                        tables.users.c.id,
+            post_update=True,
             uselist=False
-        )
+        ),
+        'updated_by': synonym('_updated_by')#, map_column=True)
     }
 )
 print "finished mapping AUDIT ENTITY"
@@ -107,6 +112,21 @@ mapper(
             #primaryjoin=tables.users.c.id==tables.departments.c.members,
             ##post_update=True,
         #),
+        'enitites_created': synonym('_entities_created'),
+        'enitites_updated': synonym('_entities_updated'),
+        'department': synonym('_department'),
+        '_email': tables.users.c.email,
+        'email': synonym('_email'),
+        '_first_name': tables.users.c.first_name,
+        'first_name': synonym('_first_name'),
+        '_last_name': tables.users.c.last_name,
+        'last_name': synonym('_last_name'),
+        '_login_name': tables.users.c.last_name,
+        'loing_name': synonym('_login_name'),
+        '_password': tables.users.c.password,
+        'password': synonym('_password'),
+        
+        
     }
 )
 print "finished mapping USER ENTITY"
@@ -121,13 +141,14 @@ mapper(
     inherit_condition=tables.departments.c.id==tables.auditEntities.c.id,
     polymorphic_identity='department',
     properties={
-        '__members': relationship(
+        '_members': relationship(
             user.User,
-            backref='__department',
-            primaryjoin=tables.departments.c.members==tables.users.c.id,
+            backref='_department',
+            primaryjoin=tables.departments.c.id==tables.users.c.department_id,
             #post_update=True,
             #uselist=False
-        )
+        ),
+        'members': synonym('_members')#, map_column=True)
     }
 )
 

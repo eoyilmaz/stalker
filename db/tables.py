@@ -96,22 +96,22 @@ auditEntities = Table(
     ),
     
     Column(
-        'created_by',
+        'created_by_id',
         Integer,
         ForeignKey(
             'users.id',
             use_alter=True,
-            name='alt1'
+            name='x'
         )
     ),
     
     Column(
-        'updated_by',
+        'updated_by_id',
         Integer,
         ForeignKey(
             'users.id',
             use_alter=True,
-            name='alt1'
+            name='x'
         )
     ),
     
@@ -134,24 +134,60 @@ users = Table(
     ),
     
     Column(
-        'entities_created',
-        Integer,
-        ForeignKey('auditEntities.id')
-    ),
-    
-    Column(
-        'entities_updated',
-        Integer,
-        ForeignKey('auditEntities.id')
-    ),
-    Column(
-        'department',
+        'department_id',
         Integer,
         ForeignKey(
             'departments.id',
-            use_alter=True,
-            name='x'
+            #use_alter=True,
+            #name='x'
         )
+    ),
+    
+    Column('email', String(256)),
+    Column('first_name', String(256)),
+    Column('last_name', String(256)),
+    Column('login_name', String(256)),
+    Column('password', String(256)),
+    
+    Column('permission_groups_id',
+           Integer,
+           ForeignKey('groups.id')
+    ),
+)
+
+
+
+# USER_PROJECTS
+user_projects = Table(
+    'user_projects', metadata,
+    Column(
+        'user_id',
+        Integer,
+        ForeignKey('users.id')
+    ),
+    
+    Column(
+        'project_id',
+        Integer,
+        ForeignKey('projects.id')
+    )
+)
+
+
+
+# USER_TASKS
+user_tasks = Table(
+    'user_tasks', meta,
+    Column(
+        'user_id',
+        Integer,
+        ForeignKey('users.id')
+    ),
+    
+    Column(
+        'task_id',
+        Integer,
+        ForeignKey('tasks.id')
     )
 )
 
@@ -167,11 +203,11 @@ departments = Table(
         primary_key=True
     ),
     
-    Column(
-        'members',
-        Integer,
-        ForeignKey('users.id'),
-    )
+    #Column(
+        #'members',
+        #Integer,
+        #ForeignKey('users.id'),
+    #)
 )
 
 

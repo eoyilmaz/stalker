@@ -148,27 +148,47 @@ Usage Examples
 
 Let's dance with Stalker a little bit.
 
+When you first setup Stalker you will have nothing but an empty database. So
+lets create some data and store them in the database.
+
 First import some modules:
 
-First of all import and setup the default database (an in-memory database)
+First of all import and setup the default database (an in-memory SQLite
+database)
 
->>> from stalker import db
+>>> from stalker import db # the database module
 >>> db.setup()
 
-Lets import a couple of objects from the SOM
+By calling the :func:`~stalker.db.setup` we have created the `session` object
+which is stored under stalker.db.meta.session (this is used to have a Singleton
+pattern in the SQLAlchemy metadata).
 
->>> from stalker.models import project, user, task
->>> import datetime
+Lets import the SOM which is stalker.models
 
-To retrieve any information from the database we need the session object, which
-is stored in db.meta.session
+>>> from stalker import models
+
+Stalker comes with an *admin* user already defined in to it. To create other
+things in the database we need to create the admin by querying it.
 
 >>> session = db.meta.session
+>>> admin = session.query(User).filter_by(name='admin').first()
+
+Lets create another user
+
+>>> newUser = User(name='eoyilmaz',
+                   login_name='eoyilmaz',
+                   first_name='Erkan Ozgur',
+                   last_name='Yilmaz',
+                   password='secret',
+                   email='eoyilmaz@gmail.com')
+
+
+
 
 Then retrieve a user, if there are no users we can use the *admin*
 which is always created with the database.
 
->>> admin = session.query(user.User).filter_by(name='admin')
+>>> admin = session.query(user.User).filter_by(name='admin').first()
 
 Let's create a new project called "New Project":
 

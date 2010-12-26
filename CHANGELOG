@@ -1,4 +1,7 @@
 Stalker Changes:
+v0.0.1.20101226:
+ * in user.User the last_name attribute could be an empty string
+
 v0.0.1.20101225:
  * entity.AuditEntity.created_by can now be None (for now)
  * user.User.last_name can now be None, to let users like admin have no last

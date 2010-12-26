@@ -31,10 +31,12 @@ class User(entity.AuditEntity):
     
     :param last_name: it is the last name of the user, must be a string or
       unicode, again it can not contain any white spaces at the beggining and
-      at the end of the variable and it can not be an empty string or None
+      at the end of the variable and it can be an empty string or None
     
     :param department: it is the department of the current user. It should be
-      a Department object. One user can only be listed in one department.
+      a Department object. One user can only be listed in one department. A
+      user is allowed to have no department to make it easy to create a new
+      user and create the department and assign the user it later.
     
     :param password: it is the password of the user, can contain any character
       and it should be mangled by using the key from the system preferences
@@ -97,16 +99,17 @@ class User(entity.AuditEntity):
         """checks the given department value
         """
         
-        # check if department_in is None
-        if department_in is None:
-            raise(ValueError('department could not be None'))
+        ## check if department_in is None
+        #if department_in is None:
+            #raise(ValueError('department could not be None'))
         
         from stalker.models import department
         
         # check if it is intance of Department object
-        if not isinstance(department_in, department.Department):
-            raise(ValueError('department should be instance of \
-            stalker.models.department.Department'))
+        if department is not None:
+            if not isinstance(department_in, department.Department):
+                raise(ValueError('department should be instance of \
+                stalker.models.department.Department'))
         
         return department_in
     
@@ -191,13 +194,13 @@ class User(entity.AuditEntity):
         
         #if last_name_in is None:
             #raise(ValueError('last_name cannot be none'))
-        if last_name is not None:
+        if last_name_in is not None:
             if not isinstance(last_name_in, (str, unicode)):
                 raise(ValueError('last_name should be instance of string or \
                 unicode'))
         
-        if last_name_in == '':
-            raise(ValueError('last_name can not be an empty string'))
+        #if last_name_in == '':
+            #raise(ValueError('last_name can not be an empty string'))
         
         return self._check_last_name_formatting(last_name_in)
     
@@ -277,9 +280,9 @@ class User(entity.AuditEntity):
                 raise(ValueError('any group in permission_groups should be \
                 an instance of stalker.models.group.Group'))
         
-        if len(permission_groups_in) == 0:
-            raise(ValueError('users should be assigned at least one \
-            permission_group'))
+        #if len(permission_groups_in) == 0:
+            #raise(ValueError('users should be assigned at least to one \
+            #permission_group'))
         
         return permission_groups_in
     
