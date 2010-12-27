@@ -182,49 +182,14 @@ Lets create another user
                    password='secret',
                    email='eoyilmaz@gmail.com')
 
+Save the data to the database
 
+>>> session.add(newUser)
+>>> session.commmit()
 
+Create a query for users:
 
-Then retrieve a user, if there are no users we can use the *admin*
-which is always created with the database.
-
->>> admin = session.query(user.User).filter_by(name='admin').first()
-
-Let's create a new project called "New Project":
-
->>> newProject = project.Project(name='New Project'
-                                 created_by=admin,
-                                 updated_by=admin)
-
-Change the image format of the project:
-
->>> newProject.image_format = imageFormat.ImageFormat(name='HD',
-                                                      width=1920,
-                                                      height=1080,
-                                                      aspect_ratio=1.0
-                                                      )
-
-Add a couple of users to the project
-
->>> newUser1 = user.User(first_name='Erkan Ozgur',
-                         last_name='Yilmaz',
-                         email='eoyilmaz@gmail.com',
-                         name='eoyilmaz',
-                         login_name='eoyilmaz',
-                         password = 'secret',
-                         created_by=admin)
-
->>> newUser2 = user.User(
-
-
-Save and flush the data:
-
->>> mapper.session.save(newUser)
->>> mapper.session.flush()
-
-Get the users from the database:
-
->>> query = mapper.session.query(user.User)
+>>> query = session.query(user.User)
 
 Get all the users:
 
@@ -236,7 +201,10 @@ or select a couple of users by filters:
 
 or select the first user matching query criteria:
 
->>> users = query.filter_by(name='Ozgur').first()
+>>> user_ozgur = query.filter_by(name='Ozgur').first()
+
+
+***** UPDATE BELOW *****
 
 Now add them to the project:
 
@@ -269,31 +237,12 @@ As you see all the functionalities of SQLAlchemy is fully supported. At the end
 all the models are plain old python objects (POPO) and the persistancy part is
 handled with SQLAlchemy.
 
-How Does Stalker Work
-=====================
-Stalker is build over a flexible model which consists of the basic data
-structure that an animation/vfx studio can need. The idea behind is simple,
-just give a system to the artists where they can track and collaborate the
-things they have created.
+How To Customize Stalker
+========================
 
-Database
-========
-Stalker can be setup to use both with a database server and without a database
-server. Though a setup with a dedicated database server is recommended.
+This part explains the customization of Stalker.
 
-Because the database part of Stalker is build over SQLAlchemy, the database
-server can be any system that SQLAlchemy supports. This also means that you can
-setup Stalker to use SQLite databases which doesn't require a server but for
-user counts more than 50 (I presume) it is recommended to use a dedicated
-database server
+How To Extend SOM
+=================
 
-Models
-======
-Because SQLAlchemy allows the system designers to use the regular Python
-classes as they are, all the database models are modelled in a regular Python
-class hierarchy. So the classes works without any persistency. But they are
-designed persistency in mind.
-
-The ::stalker.models module consists of basic models that a studio will need.
-And a studio can customize the database models and add new models to the
-existance hierarchy.
+This part explains how to extend Stalker Object Model or SOM.

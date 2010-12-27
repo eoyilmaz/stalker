@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class AssetBase(entity.Entity):
+class AssetBase(entity.StatusedEntity):
     """This is the base class for Shot and Asset classes.
     """
     

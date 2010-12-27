@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Department(entity.AuditEntity):
+class Department(entity.Entity):
     """A department holds information about a studios departments. The
     informations that a Department object holds is like:
     

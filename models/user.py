@@ -11,7 +11,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class User(entity.AuditEntity):
+class User(entity.Entity):
     """The user class is designed to hold data about a User in the system. It
     is derived from the entity.AuditEntity class
     
@@ -198,6 +198,8 @@ class User(entity.AuditEntity):
             if not isinstance(last_name_in, (str, unicode)):
                 raise(ValueError('last_name should be instance of string or \
                 unicode'))
+        else:
+            last_name_in = ''
         
         #if last_name_in == '':
             #raise(ValueError('last_name can not be an empty string'))

@@ -62,9 +62,8 @@ Summary
    stalker.models.department.Department
    stalker.models.entity
    stalker.models.entity.SimpleEntity
-   stalker.models.entity.TaggedEntity
-   stalker.models.entity.AuditEntity
    stalker.models.entity.Entity
+   stalker.models.entity.StatusedEntity
    stalker.models.group
    stalker.models.group.Group
    stalker.models.imageFormat

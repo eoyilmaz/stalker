@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Sequence(entity.Entity):
+class Sequence(entity.StatusedEntity):
     """the sequence class
     """
     

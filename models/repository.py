@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Repository(entity.TaggedEntity):
+class Repository(entity.Entity):
     """Repository is a class to hold repository server data. A repository is a
     network share that all users have access to.
     

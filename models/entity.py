@@ -26,17 +26,42 @@ class SimpleEntity(object):
       could not again have white spaces at the beggining and at the end of the
       string
     
-    :param tags: a list of tag objects related to this entity. tags could be an
-      empty list, or when omitted it will be set to an empty list
+    :param created_by: the created_by attribute should contain a User object
+      who is created this object
+    
+    :param updated_by: the updated_by attribute should contain a User object
+      who is updated the user lastly. the created_by and updated_by attributes
+      should point the same object if this entity is just created
+    
+    :param date_created: the date that this object is created. it should be a
+      time before now
+    
+    :param date_updated: this is the date that this object is updated lastly.
+      for newly created entities this is equal to date_created and the
+      date_updated cannot be before date_created
+    
     """
     
     
 
     #----------------------------------------------------------------------
-    def __init__(self, name=None, description=''):
+    def __init__(self,
+                 name=None,
+                 description='',
+                 created_by=None,
+                 updated_by=None,
+                 date_created=datetime.datetime.now(),
+                 date_updated=datetime.datetime.now(),
+                 ):
+        
         self._name = self._check_name(name)
         self._description = self._check_description(description)
-    
+        
+        self._created_by = self._check_created_by(created_by)
+        self._updated_by = self._check_updated_by(updated_by)
+        self._date_created = self._check_date_created(date_created)
+        self._date_updated = self._check_date_updated(date_updated)
+
     
     
     #----------------------------------------------------------------------
@@ -136,103 +161,6 @@ class SimpleEntity(object):
         return locals()
     
     name = property(**name())
-
-
-
-
-
-
-########################################################################
-class TaggedEntity(SimpleEntity):
-    """The entity type that adds tags to the SimpleEntity
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, tags=[], **kwargs):
-        
-        super(TaggedEntity, self).__init__(**kwargs)
-        
-        self._tags = self._check_tags(tags)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _check_tags(self, tags_in):
-        """checks the given tags_in value
-        """
-        
-        # raise ValueError when:
-        
-        # it is not an instance of list
-        if not isinstance(tags_in, list):
-            raise ValueError("the tags attribute should be set to a list")
-        
-        return tags_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def tags():
-        
-        def fget(self):
-            return self._tags
-        
-        def fset(self, tags_in):
-            self._tags = self._check_tags(tags_in)
-        
-        doc = """a list of Tag objects which shows the related tags to the
-        entity"""
-        
-        return locals()
-    
-    tags = property(**tags())
-
-
-
-
-
-
-########################################################################
-class AuditEntity(TaggedEntity):
-    """This is the entity class which is derived from the SimpleEntity and adds
-    audit information like created_by, updated_by, date_created and
-    date_updated.
-    
-    :param created_by: the created_by attribute should contain a User object
-      who is created this object
-    
-    :param updated_by: the updated_by attribute should contain a User object
-      who is updated the user lastly. the created_by and updated_by attributes
-      should point the same object if this entity is just created
-    
-    :param date_created: the date that this object is created. it should be a
-      time before now
-    
-    :param date_updated: this is the date that this object is updated lastly.
-      for newly created entities this is equal to date_created and the
-      date_updated cannot be before date_created
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self,
-                 created_by=None,
-                 updated_by=None,
-                 date_created=datetime.datetime.now(),
-                 date_updated=datetime.datetime.now(),
-                 **kwargs
-                 ):
-        
-        # pass the kwargs to the super
-        super(AuditEntity,self).__init__(**kwargs)
-        
-        self._date_created = self._check_date_created(date_created)
-        self._date_updated = self._check_date_updated(date_updated)
-        self._created_by = self._check_created_by(created_by)
-        self._updated_by = self._check_updated_by(updated_by)
     
     
     
@@ -407,9 +335,66 @@ class AuditEntity(TaggedEntity):
 
 
 ########################################################################
-class Entity(AuditEntity):
-    """This is a normal entity class that derives from AuditEntity and adds
-    status variables and notes to the parameters list
+class Entity(SimpleEntity):
+    """This is the entity class which is derived from the SimpleEntity and adds
+    only tags to the list of parameters.
+    
+    :param tags: a list of tag objects related to this entity. tags could be an
+      empty list, or when omitted it will be set to an empty list
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, tags=[], **kwargs):
+        
+        super(Entity, self).__init__(**kwargs)
+        
+        self._tags = self._check_tags(tags)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_tags(self, tags_in):
+        """checks the given tags_in value
+        """
+        
+        # raise ValueError when:
+        
+        # it is not an instance of list
+        if not isinstance(tags_in, list):
+            raise ValueError("the tags attribute should be set to a list")
+        
+        return tags_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def tags():
+        
+        def fget(self):
+            return self._tags
+        
+        def fset(self, tags_in):
+            self._tags = self._check_tags(tags_in)
+        
+        doc = """a list of Tag objects which shows the related tags to the
+        entity"""
+        
+        return locals()
+    
+    tags = property(**tags())
+
+
+
+
+
+
+########################################################################
+class StatusedEntity(Entity):
+    """This is a normal entity class that derives from Entity and adds status
+    variables and notes to the parameters list. Any object that needs a status
+    and a corresponding status list should be derived from this class.
     
     :param status_list: this attribute holds a status list object, which shows
       the possible statuses that this entity could be in. This attribute can

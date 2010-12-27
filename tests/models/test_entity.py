@@ -26,10 +26,22 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.description = "This is a test entity, and this is a proper \
         description for it"
         
+        # create a mock user
+        self.mock_user = self.mocker.mock(user.User)
+        self.mocker.replay()
+        
+        self.date_created = datetime.datetime(2010, 10, 21, 3, 8, 0)
+        self.date_updated = self.date_created
+        
+        
         # create a proper SimpleEntity to use it later in the tests
         self.simple_entity = entity.SimpleEntity(
             name=self.name,
-            description=self.description
+            description=self.description,
+            created_by=self.mock_user,
+            updated_by=self.mock_user,
+            date_created=self.date_created,
+            date_updated=self.date_updated,
         )
     
     
@@ -182,159 +194,6 @@ class SimpleEntityTester(mocker.MockerTestCase):
             "description",
             test_value
         )
-
-
-
-
-
-
-########################################################################
-class TaggedEntityTester(mocker.MockerTestCase):
-    """tests the Tagged entity class
-    """
-    
-    
-    #----------------------------------------------------------------------
-    def setUp(self):
-        """seting up some proper values
-        """
-        self.name = 'Test Entity'
-        self.description = "This is a test entity, and this is a proper \
-        description for it"
-        
-        # create some mock tag objects, not neccessarly needed but create them
-        self.mock_tag1 = self.mocker.mock(tag.Tag)
-        self.mock_tag2 = self.mocker.mock(tag.Tag)
-        
-        self.tags = [self.mock_tag1, self.mock_tag2]
-        
-        # now replay it
-        self.mocker.replay()
-        
-        # create a proper SimpleEntity to use it later in the tests
-        self.tagged_entity = entity.TaggedEntity(
-            name=self.name,
-            description=self.description,
-            tags=self.tags
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tags_being_not_intialized(self):
-        """test if nothing is raised when creating an entity without setting a
-        tags parameter
-        """
-        
-        # this should work without errors
-        aNewTaggedEntity = entity.TaggedEntity(
-            name=self.name,
-            description=self.description
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tags_being_initialized_as_an_empty_list(self):
-        """test if tags is initialized as an empty list
-        """
-        
-        # this should work without errors
-        aNewTaggedEntity = entity.TaggedEntity(
-            name=self.name,
-            description=self.description,
-        )
-        
-        expected_result = []
-        
-        self.assertEquals(aNewTaggedEntity.tags, expected_result)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tags_init_with_something_other_than_a_list(self):
-        """test if a ValueError is going to be raised when initializing the
-        tags with something other than a list
-        """
-        
-        #-----------------------
-        # a string
-        test_value = ""
-        
-        self.assertRaises(
-            ValueError,
-            entity.TaggedEntity,
-            name=self.name,
-            description=self.description,
-            tags=test_value
-        )
-        
-        
-        #-----------------------
-        # an integer
-        test_value = 1231
-        
-        self.assertRaises(
-            ValueError,
-            entity.TaggedEntity,
-            name=self.name,
-            description=self.description,
-            tags=test_value
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tags_property_set_properly(self):
-        """testing if the property is set correctly
-        """
-        
-        test_value = [self.mock_tag1]
-        
-        self.tagged_entity.tags = test_value
-        
-        self.assertEquals(self.tagged_entity.tags, test_value)
-
-
-
-
-
-########################################################################
-class AuditEntityTester(mocker.MockerTestCase):
-    """testing the AuditEntity class
-    """
-    
-    
-    #----------------------------------------------------------------------
-    def setUp(self):
-        """setup the test
-        """
-        
-        # create a couple of mock tag objects
-        self.mock_tag1 = self.mocker.mock(tag.Tag)
-        self.mock_tag2 = self.mocker.mock(tag.Tag)
-        
-        # create a mock user
-        self.mock_user = self.mocker.mock(user.User)
-        
-        self.mocker.replay()
-        
-        self.name = 'The Entity Object'
-        self.description = 'This is a test object, to be used in tests'
-        self.tags = [self.mock_tag1, self.mock_tag2]
-        self.date_created = datetime.datetime(2010, 10, 21, 3, 8, 0)
-        self.date_updated = self.date_created
-        
-        # create a proper audit entity object
-        self.audit_entity = entity.AuditEntity(
-            name=self.name,
-            description=self.description,
-            tags=self.tags,
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-        )
     
     
     
@@ -354,7 +213,7 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             'created_by',
             test_value
         )
@@ -377,52 +236,52 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             'created_by',
             test_value
         )
     
     
     
-    #----------------------------------------------------------------------
-    def test_created_by_attribute_empty(self):
-        """testing if ValueError is raised when the created_by is tried to be
-        set to None
-        """
+    ##----------------------------------------------------------------------
+    #def test_created_by_attribute_empty(self):
+        #"""testing if ValueError is raised when the created_by is tried to be
+        #set to None
+        #"""
         
-        # it can not be empty (the first created user going to have some
-        # problems if we dont allow empty users, the database should be
-        # initialized with an admin user)
-        #
+        ## it can not be empty (the first created user going to have some
+        ## problems if we dont allow empty users, the database should be
+        ## initialized with an admin user)
+        ##
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.audit_entity,
-            'created_by',
-            None
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.simple_entity,
+            #'created_by',
+            #None
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_created_by_property_empty(self):
-        """testing if ValueError is raised when the created_by is tried to be
-        set to None
-        """
+    ##----------------------------------------------------------------------
+    #def test_created_by_property_empty(self):
+        #"""testing if ValueError is raised when the created_by is tried to be
+        #set to None
+        #"""
         
-        # it can not be empty (the first created user going to have some
-        # problems if we dont allow empty users, the database should be
-        # initialized with an admin user)
-        #
+        ## it can not be empty (the first created user going to have some
+        ## problems if we dont allow empty users, the database should be
+        ## initialized with an admin user)
+        ##
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.audit_entity,
-            'created_by',
-            None
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.simple_entity,
+            #'created_by',
+            #None
+        #)
     
     
     
@@ -442,7 +301,7 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             'updated_by',
             test_value
         )
@@ -465,7 +324,7 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             'updated_by',
             test_value
         )
@@ -481,44 +340,43 @@ class AuditEntityTester(mocker.MockerTestCase):
         #self.assertRaises(
             #ValueError,
             #setattr,
-            #self.audit_entity,
+            #self.simple_entity,
             #'updated_by',
             #None
         #)
         
-        aNewAuditEntity = entity.AuditEntity(
+        aNewSimpleEntity = entity.SimpleEntity(
             name=self.name,
             description=self.description,
-            tags=self.tags,
             created_by=self.mock_user,
             date_created=self.date_created,
             date_updated=self.date_updated,
         )
         
         # now check if they are same
-        self.assertEquals(aNewAuditEntity.created_by,
-                          aNewAuditEntity.updated_by)
+        self.assertEquals(aNewSimpleEntity.created_by,
+                          aNewSimpleEntity.updated_by)
     
     
     
-    #----------------------------------------------------------------------
-    def test_created_by_property_empty(self):
-        """testing if ValueError is raised when the created_by is tried to be
-        set to None
-        """
+    ##----------------------------------------------------------------------
+    #def test_created_by_property_empty(self):
+        #"""testing if ValueError is raised when the created_by is tried to be
+        #set to None
+        #"""
         
-        # it can not be empty (the first created user going to have some
-        # problems if we dont allow empty users, the database should be
-        # initialized with an admin user)
-        #
+        ## it can not be empty (the first created user going to have some
+        ## problems if we dont allow empty users, the database should be
+        ## initialized with an admin user)
+        ##
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.audit_entity,
-            'created_by',
-            None
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.simple_entity,
+            #'created_by',
+            #None
+        #)
     
     
     
@@ -540,7 +398,7 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             "date_created",
             test_value
         )
@@ -565,7 +423,7 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             "date_created",
             test_value
         )
@@ -581,7 +439,7 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             "date_created",
             None
         )
@@ -603,7 +461,7 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             "date_updated",
             test_value
         )
@@ -625,7 +483,7 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             "date_updated",
             test_value
         )
@@ -641,7 +499,7 @@ class AuditEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.audit_entity,
+            self.simple_entity,
             "date_updated",
             None
         )
@@ -661,10 +519,9 @@ class AuditEntityTester(mocker.MockerTestCase):
         # and expect a ValueError
         self.assertRaises(
             ValueError,
-            entity.AuditEntity,
+            entity.SimpleEntity,
             name=self.name,
             description=self.description,
-            tags=self.tags,
             created_by=self.mock_user,
             updated_by=self.mock_user,
             date_created=date_created,
@@ -675,10 +532,126 @@ class AuditEntityTester(mocker.MockerTestCase):
 
 
 
-
 ########################################################################
 class EntityTester(mocker.MockerTestCase):
-    """tests the entity class
+    """tests the Entity class
+    """
+    
+    
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """seting up some proper values
+        """
+        self.name = 'Test Entity'
+        self.description = "This is a test entity, and this is a proper \
+        description for it"
+        
+        # create a mock user
+        self.mock_user = self.mocker.mock(user.User)
+        
+        # create some mock tag objects, not neccessarly needed but create them
+        self.mock_tag1 = self.mocker.mock(tag.Tag)
+        self.mock_tag2 = self.mocker.mock(tag.Tag)
+        
+        self.tags = [self.mock_tag1, self.mock_tag2]
+        
+        # now replay it
+        self.mocker.replay()
+        
+        # create a proper SimpleEntity to use it later in the tests
+        self.entity = entity.Entity(
+            name=self.name,
+            description=self.description,
+            created_by=self.mock_user,
+            updated_by=self.mock_user,
+            tags=self.tags
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tags_being_not_intialized(self):
+        """test if nothing is raised when creating an entity without setting a
+        tags parameter
+        """
+        
+        # this should work without errors
+        aNewEntity = entity.Entity(
+            name=self.name,
+            description=self.description
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tags_being_initialized_as_an_empty_list(self):
+        """test if tags is initialized as an empty list
+        """
+        
+        # this should work without errors
+        aNewEntity = entity.Entity(
+            name=self.name,
+            description=self.description,
+        )
+        
+        expected_result = []
+        
+        self.assertEquals(aNewEntity.tags, expected_result)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tags_init_with_something_other_than_a_list(self):
+        """test if a ValueError is going to be raised when initializing the
+        tags with something other than a list
+        """
+        
+        #-----------------------
+        # a string
+        test_value = ""
+        
+        self.assertRaises(
+            ValueError,
+            entity.Entity,
+            name=self.name,
+            description=self.description,
+            tags=test_value
+        )
+        
+        
+        #-----------------------
+        # an integer
+        test_value = 1231
+        
+        self.assertRaises(
+            ValueError,
+            entity.Entity,
+            name=self.name,
+            description=self.description,
+            tags=test_value
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tags_property_set_properly(self):
+        """testing if the property is set correctly
+        """
+        
+        test_value = [self.mock_tag1]
+        
+        self.entity.tags = test_value
+        
+        self.assertEquals(self.entity.tags, test_value)
+
+
+
+
+
+
+########################################################################
+class StatusedEntityTester(mocker.MockerTestCase):
+    """tests the statused entity class
     
     all the attributes to objects needs a mock object of that object, that is:
     user
@@ -724,7 +697,7 @@ class EntityTester(mocker.MockerTestCase):
         
         
         # create a proper entity object
-        self.entity = entity.Entity(
+        self.statused_entity = entity.StatusedEntity(
             name=self.name,
             description=self.description,
             tags=[self.mock_tag1, self.mock_tag2],
@@ -744,23 +717,17 @@ class EntityTester(mocker.MockerTestCase):
         initialize status_list with something other than a StatusList
         """
         
-        self.assertRaises(
-            ValueError,
-            entity.Entity,
-            name=self.name,
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            status_list=100,
-        )
+        testValues = [100, '', 100.2]
         
-        self.assertRaises(
-            ValueError,
-            entity.Entity,
-            name=self.name,
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            status_list='',
-        )
+        for testValue in testValues:
+            self.assertRaises(
+                ValueError,
+                entity.StatusedEntity,
+                name=self.name,
+                created_by=self.mock_user,
+                updated_by=self.mock_user,
+                status_list=100,
+            )
     
     
     
@@ -772,7 +739,7 @@ class EntityTester(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            entity.Entity,
+            entity.StatusedEntity,
             name=self.name,
             created_by=self.mock_user,
             updated_by=self.mock_user,
@@ -796,7 +763,7 @@ class EntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.entity,
+            self.statused_entity,
             "status_list",
             test_value
         )
@@ -812,7 +779,7 @@ class EntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.entity,
+            self.statused_entity,
             "status_list",
             None
         )
@@ -827,7 +794,7 @@ class EntityTester(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            entity.Entity,
+            entity.StatusedEntity,
             name=self.name,
             created_by=self.mock_user,
             updated_by=self.mock_user
@@ -846,7 +813,7 @@ class EntityTester(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            entity.Entity,
+            entity.StatusedEntity,
             name=self.name,
             created_by=self.mock_user,
             updated_by=self.mock_user,
@@ -859,7 +826,7 @@ class EntityTester(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            entity.Entity,
+            entity.StatusedEntity,
             name=self.name,
             created_by=self.mock_user,
             updated_by=self.mock_user,
@@ -880,7 +847,7 @@ class EntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.entity,
+            self.statused_entity,
             "status",
             test_value
         )
@@ -899,7 +866,7 @@ class EntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.entity,
+            self.statused_entity,
             "status",
             test_value
         )
@@ -917,7 +884,7 @@ class EntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.entity,
+            self.statused_entity,
             "status",
             test_value
         )
@@ -931,7 +898,7 @@ class EntityTester(mocker.MockerTestCase):
         #"""
         
         ## this should work without errors
-        #aNewEntity = entity.Entity(
+        #aNewEntity = entity.StatusedEntity(
             #name=self.name,
             #created_by=self.mock_user,
             #updated_by=self.mock_user,
@@ -946,7 +913,7 @@ class EntityTester(mocker.MockerTestCase):
         #"""
         
         ## this should work without errors
-        #aNewEntity = entity.Entity(
+        #aNewEntity = entity.StatusedEntity(
             #name=self.name,
             #created_by=self.mock_user,
             #updated_by=self.mock_user,
@@ -971,7 +938,7 @@ class EntityTester(mocker.MockerTestCase):
         
         #self.assertRaises(
             #ValueError,
-            #entity.Entity,
+            #entity.StatusedEntity,
             #name=self.name,
             #created_by=self.mock_user,
             #updated_by=self.mock_user,
@@ -987,7 +954,7 @@ class EntityTester(mocker.MockerTestCase):
         
         #self.assertRaises(
             #ValueError,
-            #entity.Entity,
+            #entity.StatusedEntity,
             #name=self.name,
             #created_by=self.mock_user,
             #updated_by=self.mock_user,
@@ -1009,7 +976,7 @@ class EntityTester(mocker.MockerTestCase):
         #self.assertRaises(
             #ValueError,
             #setattr,
-            #self.entity,
+            #self.statused_entity,
             #"links",
             #test_value
         #)
@@ -1023,9 +990,9 @@ class EntityTester(mocker.MockerTestCase):
         
         #test_value = [self.mock_link1]
         
-        #self.entity.links = test_value
+        #self.statused_entity.links = test_value
         
-        #self.assertEquals( self.entity.links, test_value )
+        #self.assertEquals( self.statused_entity.links, test_value )
     
     
     
@@ -1036,7 +1003,7 @@ class EntityTester(mocker.MockerTestCase):
         #"""
         
         ## this should work without errors
-        #aNewEntity = entity.Entity(
+        #aNewEntity = entity.StatusedEntity(
             #name=self.name,
             #created_by=self.mock_user,
             #updated_by=self.mock_user,
@@ -1051,7 +1018,7 @@ class EntityTester(mocker.MockerTestCase):
         #"""
         
         ## this should work without errors
-        #aNewEntity = entity.Entity(
+        #aNewEntity = entity.StatusedEntity(
             #name=self.name,
             #created_by=self.mock_user,
             #updated_by=self.mock_user,
@@ -1077,7 +1044,7 @@ class EntityTester(mocker.MockerTestCase):
         #for test_value in test_values:
             #self.assertRaises(
                 #ValueError,
-                #entity.Entity,
+                #entity.StatusedEntity,
                 #name=self.name,
                 #created_by=self.mock_user,
                 #updated_by=self.mock_user,

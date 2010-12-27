@@ -1,4 +1,4 @@
-# ------- test 1 ------------
+## ------- test 1 ------------
 from stalker import db
 
 
@@ -14,18 +14,6 @@ session.add(tag1)
 session.add(tag2)
 session.commit()
 
-# create a tagged entity
-aTaggedEntity1 = entity.TaggedEntity(name='taggedEntity1', description='test')
-
-aTaggedEntity1.tags = [tag1, tag2]
-
-session.add(aTaggedEntity1)
-session.commit()
-
-for aTag in session.query(tag.Tag).all():
-    print aTag.name
-
-
 # a new department
 adminDep = department.Department(name='adminDepartment')
 
@@ -39,6 +27,17 @@ admin = user.User(
     last_name='',
     login_name='admin'
 )
+
+adminDep.created_by = admin
+adminDep.updated_by = admin
+
+admin.created_by = admin
+admin.updated_by = admin
+
+tag1.created_by = tag1.updated_by = admin
+tag2.created_by = tag2.updated_by = admin
+
+admin.tags = [tag1, tag2]
 
 session.add(adminDep)
 session.add(admin)

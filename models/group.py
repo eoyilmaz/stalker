@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Group(entity.AuditEntity):
+class Group(entity.Entity):
     """the group class
     """
     

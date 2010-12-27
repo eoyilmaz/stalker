@@ -1,6 +1,16 @@
 Stalker Changes:
+v0.0.1.20101227:
+ * the test_db is converted to a proper unittest which is testing all the
+   models one by one
+ * test/db renamed to test/z_db to let nose run it latest to solve the problem
+   about mocker and sqlalchemy fighting each other.
+
 v0.0.1.20101226:
  * in user.User the last_name attribute could be an empty string
+ * removed SimpleEntity, TaggedEntity and introduced StatusedEntity to make the
+   inheritance clear and let users to find somebody to blame by moving all the
+   audit information to the the SimpleEntity class in which everything is
+   inherited from. Now even a Tag has audit information.
 
 v0.0.1.20101225:
  * entity.AuditEntity.created_by can now be None (for now)

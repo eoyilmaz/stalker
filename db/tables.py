@@ -16,84 +16,9 @@ metadata = meta.metadata
 # SIMPLE ENTITY
 simpleEntities = Table(
     'simpleEntities', metadata,
-    Column(
-        'id',
-        Integer,
-        primary_key=True
-    ),
-    
-    Column(
-        'name',
-        String(256)
-    ),
-    
-    Column(
-        'description',
-        String
-    ),
-    
-    Column(
-        'entity_type',
-        String(128),
-        nullable=False
-    ),
-)
-
-
-
-# TAG
-tags = Table(
-    'tags', metadata,
-    Column(
-        'id',
-        Integer,
-        ForeignKey('simpleEntities.id'),
-        primary_key=True
-    )
-)
-
-
-# TAGGED_ENTITY_TAGS
-taggedEntity_tags = Table(
-    'taggedEntity_tags', metadata,
-    Column(
-        'taggedEntity_id',
-        Integer,
-        ForeignKey('taggedEntities.id')
-    ),
-    
-    Column(
-        'tag_id',
-        Integer,
-        ForeignKey('tags.id')
-    )
-)
-
-
-
-# TAGGED ENTITY
-taggedEntities = Table(
-    'taggedEntities', metadata,
-    Column(
-        'id',
-        ForeignKey('simpleEntities.id'),
-        primary_key=True
-    ),
-)
-
-
-
-# AUIDIT ENTITY
-auditEntities = Table(
-    'auditEntities', metadata,
-    Column(
-        'id',
-        Integer,
-        ForeignKey(
-            'taggedEntities.id'
-        ),
-        primary_key=True
-    ),
+    Column('id', Integer, primary_key=True),
+    Column('name', String(256)),
+    Column('description', String),
     
     Column(
         'created_by_id',
@@ -115,10 +40,51 @@ auditEntities = Table(
         )
     ),
     
+    Column('date_created', DateTime),
+    Column('date_updated', DateTime),
+    Column('entity_type', String(128), nullable=False),
+)
+
+
+
+# TAG
+tags = Table(
+    'tags', metadata,
     Column(
-        'date_updated',
-        DateTime
+        'id',
+        Integer,
+        ForeignKey('simpleEntities.id'),
+        primary_key=True
     )
+)
+
+
+# ENTITY_TAGS
+entity_tags = Table(
+    'entity_tags', metadata,
+    Column(
+        'entity_id',
+        Integer,
+        ForeignKey('entities.id')
+    ),
+    
+    Column(
+        'tag_id',
+        Integer,
+        ForeignKey('tags.id')
+    )
+)
+
+
+
+# ENTITY
+entities = Table(
+    'entities', metadata,
+    Column(
+        'id',
+        ForeignKey('simpleEntities.id'),
+        primary_key=True
+    ),
 )
 
 
@@ -129,7 +95,7 @@ users = Table(
     Column(
         'id',
         Integer,
-        ForeignKey('auditEntities.id'),
+        ForeignKey('entities.id'),
         primary_key=True
     ),
     
@@ -149,47 +115,47 @@ users = Table(
     Column('login_name', String(256)),
     Column('password', String(256)),
     
-    Column('permission_groups_id',
-           Integer,
-           ForeignKey('groups.id')
-    ),
+    #Column('permission_groups_id',
+           #Integer,
+           #ForeignKey('groups.id')
+    #),
 )
 
 
 
-# USER_PROJECTS
-user_projects = Table(
-    'user_projects', metadata,
-    Column(
-        'user_id',
-        Integer,
-        ForeignKey('users.id')
-    ),
+## USER_PROJECTS
+#user_projects = Table(
+    #'user_projects', metadata,
+    #Column(
+        #'user_id',
+        #Integer,
+        #ForeignKey('users.id')
+    #),
     
-    Column(
-        'project_id',
-        Integer,
-        ForeignKey('projects.id')
-    )
-)
+    #Column(
+        #'project_id',
+        #Integer,
+        #ForeignKey('projects.id')
+    #)
+#)
 
 
 
-# USER_TASKS
-user_tasks = Table(
-    'user_tasks', meta,
-    Column(
-        'user_id',
-        Integer,
-        ForeignKey('users.id')
-    ),
+## USER_TASKS
+#user_tasks = Table(
+    #'user_tasks', meta,
+    #Column(
+        #'user_id',
+        #Integer,
+        #ForeignKey('users.id')
+    #),
     
-    Column(
-        'task_id',
-        Integer,
-        ForeignKey('tasks.id')
-    )
-)
+    #Column(
+        #'task_id',
+        #Integer,
+        #ForeignKey('tasks.id')
+    #)
+#)
 
 
 
@@ -199,7 +165,7 @@ departments = Table(
     Column(
         'id',
         Integer,
-        ForeignKey('auditEntities.id'),
+        ForeignKey('entities.id'),
         primary_key=True
     ),
     
@@ -210,6 +176,13 @@ departments = Table(
     #)
 )
 
+
+
+## TASKS
+#tasks = Table(
+    #'tasks', metadata,
+    #Column(
+        #'id',
 
 
 print "Done Creating Tables!!!"

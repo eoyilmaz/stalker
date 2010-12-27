@@ -9,7 +9,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class ImageFormat(entity.TaggedEntity):
+class ImageFormat(entity.Entity):
     """the image format class
     
     adds up this parameters to the SimpleEntity:

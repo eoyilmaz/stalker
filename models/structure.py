@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Structure(entity.TaggedEntity):
+class Structure(entity.Entity):
     """Structure holds folder structure templates as Jinja2 templates.
     """
     

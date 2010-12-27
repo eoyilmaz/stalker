@@ -20,6 +20,7 @@ class UserTest(mocker.MockerTestCase):
     def setUp(self):
         """setup the test
         """
+        
         # create the default values for parameters
         
         self.name = 'ozgur'
@@ -34,34 +35,33 @@ class UserTest(mocker.MockerTestCase):
         assert(isinstance(self.mocker, mocker.Mocker))
         
         # a department
-        self.mock_department1 = self.mocker.mock(department.Department)
-        self.mock_department2 = self.mocker.mock(department.Department)
+        self.mock_department1 = self.mocker.mock(type=department.Department)
+        self.mock_department2 = self.mocker.mock(type=department.Department)
         
         # a couple of permission groups
-        self.mock_permission_group1 = self.mocker.mock(group.Group)
-        self.mock_permission_group2 = self.mocker.mock(group.Group)
-        self.mock_permission_group3 = self.mocker.mock(group.Group)
+        self.mock_permission_group1 = self.mocker.mock(type=group.Group)
+        self.mock_permission_group2 = self.mocker.mock(type=group.Group)
+        self.mock_permission_group3 = self.mocker.mock(type=group.Group)
         
         # a couple of tasks
-        self.mock_task1 = self.mocker.mock(task.Task)
-        self.mock_task2 = self.mocker.mock(task.Task)
-        self.mock_task3 = self.mocker.mock(task.Task)
-        self.mock_task4 = self.mocker.mock(task.Task)
+        self.mock_task1 = self.mocker.mock(type=task.Task)
+        self.mock_task2 = self.mocker.mock(type=task.Task)
+        self.mock_task3 = self.mocker.mock(type=task.Task)
+        self.mock_task4 = self.mocker.mock(type=task.Task)
         
         # a couple of projects
-        self.mock_project1 = self.mocker.mock(project.Project)
-        self.mock_project2 = self.mocker.mock(project.Project)
-        self.mock_project3 = self.mocker.mock(project.Project)
+        self.mock_project1 = self.mocker.mock(type=project.Project)
+        self.mock_project2 = self.mocker.mock(type=project.Project)
+        self.mock_project3 = self.mocker.mock(type=project.Project)
         
         # a couple of sequences
-        self.mock_sequence1 = self.mocker.mock(sequence.Sequence)
-        self.mock_sequence2 = self.mocker.mock(sequence.Sequence)
-        self.mock_sequence3 = self.mocker.mock(sequence.Sequence)
-        self.mock_sequence4 = self.mocker.mock(sequence.Sequence)
+        self.mock_sequence1 = self.mocker.mock(type=sequence.Sequence)
+        self.mock_sequence2 = self.mocker.mock(type=sequence.Sequence)
+        self.mock_sequence3 = self.mocker.mock(type=sequence.Sequence)
+        self.mock_sequence4 = self.mocker.mock(type=sequence.Sequence)
         
         # a mock user
-        self.mock_admin = self.mocker.mock(user.User)
-        
+        self.mock_admin = self.mocker.mock(type=user.User)
         
         self.mocker.replay()
         
@@ -770,13 +770,11 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_last_name_attribute_None(self):
-        """testing if a ValuError will be raised when trying to assing None to
-        last_name attribute
+        """testing if it will be converted to an empty string if None is
+        assigned to last_name attribute
         """
         
-        self.assertRaises(
-            ValueError,
-            user.User,
+        aNewUser = user.User(
             name=self.name,
             first_name=self.first_name,
             last_name=None,
@@ -801,74 +799,20 @@ class UserTest(mocker.MockerTestCase):
             created_by=self.mock_admin,
             updated_by=self.mock_admin
         )
+        
+        self.assertEquals(aNewUser.last_name, '')
     
     
     
     #----------------------------------------------------------------------
     def test_last_name_property_None(self):
-        """testing if a ValueError will be raised when trying to assign None to
-        last_name property
+        """testing if it will be converted to an empty string if None is
+        assigned to last_name property
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            'last_name',
-            None
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_last_name_attribute_empty(self):
-        """testing if a ValueError will be raised when trying to assign an
-        empty string to last_name attribute
-        """
+        self.mock_user.last_name = None
         
-        self.assertRaises(
-            ValueError,
-            user.User,
-            name=self.name,
-            first_name=self.first_name,
-            last_name='',
-            description=self.description,
-            email=self.email,
-            password=self.password,
-            login_name=self.login_name,
-            department=self.mock_department1,
-            permission_groups=[self.mock_permission_group1,
-                               self.mock_permission_group2],
-            tasks=[self.mock_task1,
-                   self.mock_task2,
-                   self.mock_task3,
-                   self.mock_task4],
-            projects=[self.mock_project1,
-                      self.mock_project2,
-                      self.mock_project3],
-            sequences_lead=[self.mock_sequence1,
-                            self.mock_sequence2,
-                            self.mock_sequence3,
-                            self.mock_sequence4],
-            created_by=self.mock_admin,
-            updated_by=self.mock_admin
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_last_name_property_empty(self):
-        """testing if a ValueError will be raised when trying to assign an
-        empty string to last_name property
-        """
-        
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            'last_name',
-            ''
-        )
+        self.assertEquals(self.mock_user.last_name, '')
     
     
     
@@ -1285,58 +1229,58 @@ class UserTest(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_permission_groups_attribute_for_empty_list(self):
-        """testing if a ValueError will be raised when trying to assign an
-        empty list to the permission_groups attribute
-        """
+    ##----------------------------------------------------------------------
+    #def test_permission_groups_attribute_for_empty_list(self):
+        #"""testing if a ValueError will be raised when trying to assign an
+        #empty list to the permission_groups attribute
+        #"""
         
-        test_value = []
+        #test_value = []
         
-        self.assertRaises(
-            ValueError,
-            user.User,
-            name=self.name,
-            first_name=self.first_name,
-            last_name=self.last_name,
-            description=self.description,
-            email=self.email,
-            password=self.password,
-            login_name=self.login_name,
-            department=self.mock_department1,
-            permission_groups=test_value,
-            tasks=[self.mock_task1,
-                   self.mock_task2,
-                   self.mock_task3,
-                   self.mock_task4],
-            projects=[self.mock_project1,
-                      self.mock_project2,
-                      self.mock_project3],
-            projects_lead=[self.mock_project1,
-                           self.mock_project2],
-            sequences_lead=[self.mock_sequence1,
-                            self.mock_sequence2,
-                            self.mock_sequence3,
-                            self.mock_sequence4],
-            created_by=self.mock_admin,
-            updated_by=self.mock_admin
-        )
+        #self.assertRaises(
+            #ValueError,
+            #user.User,
+            #name=self.name,
+            #first_name=self.first_name,
+            #last_name=self.last_name,
+            #description=self.description,
+            #email=self.email,
+            #password=self.password,
+            #login_name=self.login_name,
+            #department=self.mock_department1,
+            #permission_groups=test_value,
+            #tasks=[self.mock_task1,
+                   #self.mock_task2,
+                   #self.mock_task3,
+                   #self.mock_task4],
+            #projects=[self.mock_project1,
+                      #self.mock_project2,
+                      #self.mock_project3],
+            #projects_lead=[self.mock_project1,
+                           #self.mock_project2],
+            #sequences_lead=[self.mock_sequence1,
+                            #self.mock_sequence2,
+                            #self.mock_sequence3,
+                            #self.mock_sequence4],
+            #created_by=self.mock_admin,
+            #updated_by=self.mock_admin
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_permission_groups_property_for_empty_list(self):
-        """testing if a ValueError will be raised when trying to assign an
-        empty list to the permission_groups property
-        """
+    ##----------------------------------------------------------------------
+    #def test_permission_groups_property_for_empty_list(self):
+        #"""testing if a ValueError will be raised when trying to assign an
+        #empty list to the permission_groups property
+        #"""
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            'permission_groups',
-            []
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.mock_user,
+            #'permission_groups',
+            #[]
+        #)
     
     
     

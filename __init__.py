@@ -6,4 +6,4 @@ vfx studios. See docs for more information.
 
 
 
-__version__ = '0.0.1.20101226'
+__version__ = '0.0.1.20101227'

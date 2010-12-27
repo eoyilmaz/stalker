@@ -15,7 +15,7 @@ from stalker.db import tables, meta
 
 
 #----------------------------------------------------------------------
-def setup(database=None, mappers=[]):
+def setup(database=None, mappers=[], engine_settings=None):
     """
     This is a utillty function that helps to connect the system to the given
     database.
@@ -40,6 +40,9 @@ def setup(database=None, mappers=[]):
     
     if database is None:
         database = defaults.DATABASE
+    
+    #if engine_settings is not None:
+        #defaults.DATABASE_ENGINE_SETTINGS.
     
     # create engine
     meta.engine = create_engine(database, **defaults.DATABASE_ENGINE_SETTINGS)

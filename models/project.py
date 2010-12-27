@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Project(entity.Entity):
+class Project(entity.StatusedEntity):
     """the project class
     """
     

@@ -10,7 +10,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Booking(entity.AuditEntity):
+class Booking(entity.Entity):
     """Booking holds the information about when a user done which task and
     spend how many hours on doing that task.
     """

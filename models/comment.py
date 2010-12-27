@@ -9,7 +9,7 @@ from stalker.models import entity
 
 
 ########################################################################
-class Comment(entity.AuditEntity):
+class Comment(entity.Entity):
     """The Comment data model which derives from the entity.AuditEntity
     
     :param body: the body of the comment, it is a string or unicode variable,
