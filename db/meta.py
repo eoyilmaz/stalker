@@ -17,3 +17,5 @@ session = None
 # the singleton metadata
 metadata = MetaData()
 
+# a couple off helper attributes
+__mappers__ = []

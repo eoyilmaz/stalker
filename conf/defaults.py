@@ -31,6 +31,7 @@ AUTO_CREATE_ADMIN = True
 ADMIN_NAME = 'admin'
 ADMIN_PASSWORD = 'admin'
 ADMIN_EMAIL = 'admin@admin.com'
+ADMIN_DEPARTMENT_NAME = 'admins'
 
 
 # the default keyword which is going to be used in password scrambling

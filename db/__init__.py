@@ -64,18 +64,17 @@ def setup(database=None, mappers=[], engine_settings=None):
     meta.session = Session()
     
     # init database
-    if defaults.AUTO_CREATE_ADMIN:
-        #__init_db__()
-        __create_admin__()
+    __init_db__()
 
 
 
-##----------------------------------------------------------------------
-#def __init_db__():
-    #"""fills the database with default values
-    #"""
+#----------------------------------------------------------------------
+def __init_db__():
+    """fills the database with default values
+    """
     
-    #pass
+    if defaults.AUTO_CREATE_ADMIN:
+        __create_admin__()
 
 
 
@@ -85,23 +84,15 @@ def __create_admin__():
     """
     
     # check if there is already an admin in the database
-    if len(meta.session.query(user.User).filter_by(name='admin').all()) > 1:
+    if len(meta.session.query(user.User). \
+           filter_by(name=defaults.ADMIN_NAME).all()) > 0:
         #there should be an admin user do nothing
+        #print "there is an admin already"
         return
     
     # create the admin department
-    adminDep = department.Department(name='admins')
+    adminDep = department.Department(name=defaults.ADMIN_DEPARTMENT_NAME)
     meta.session.add(adminDep)
-    
-    # create a temp user
-    tempUser = user.User(
-        name='temp',
-        first_name='temp',
-        login_name='temp',
-        password='temp',
-        department=adminDep,
-        email='temp@temp.com'
-    )
     
     # create the admin user
     admin = user.User(
@@ -111,7 +102,7 @@ def __create_admin__():
         password=defaults.ADMIN_PASSWORD,
         email=defaults.ADMIN_EMAIL,
         department=adminDep,
-        created_by=tempUser
+        #created_by=tempUser
     )
     
     admin.created_by = admin
@@ -121,12 +112,13 @@ def __create_admin__():
     adminDep.updated_by = admin
     
     meta.session.add(admin)
+    #meta.session.delete(tempUser)
     meta.session.commit()
 
 
 
 #----------------------------------------------------------------------
-def __create_mappers__(mapper_list):
+def __create_mappers__(mappers):
     """imports the given mapper helper modules, refer to :ref:`mappers` for
     more information about how to create your own mapper modules.
     """
@@ -137,11 +129,21 @@ def __create_mappers__(mapper_list):
     # by just import ing the mapper helper modules
     #
     
-    for _mapper in mapper_list:
+    if meta.__mappers__ == mappers:
+        print "not creating any new mapper"
+        print "current meta.__mappers__ list:"
+        print meta.__mappers__
+        
+        return
+    
+    
+    print "creating mappers"
+    
+    for _mapper in mappers:
         exec("import " + _mapper)
         exec(_mapper + ".setup()")
     
-    
+    meta.__mappers__ = mappers
 
 
 

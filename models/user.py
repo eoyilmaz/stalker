@@ -95,6 +95,16 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
+    def __repr__(self):
+        """return the representation of the current User
+        """
+        
+        return "<user.User (%s %s ('%s'))>" % \
+               (self.first_name, self.last_name, self.login_name)
+    
+    
+    
+    #----------------------------------------------------------------------
     def _check_department(self, department_in):
         """checks the given department value
         """

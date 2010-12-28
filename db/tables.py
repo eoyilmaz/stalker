@@ -17,7 +17,7 @@ metadata = meta.metadata
 simpleEntities = Table(
     'simpleEntities', metadata,
     Column('id', Integer, primary_key=True),
-    Column('name', String(256)),
+    Column('name', String(256), unique=True, nullable=False),
     Column('description', String),
     
     Column(
@@ -94,18 +94,14 @@ users = Table(
     Column(
         'department_id',
         Integer,
-        ForeignKey(
-            'departments.id',
-            #use_alter=True,
-            #name='x'
-        )
+        ForeignKey('departments.id')
     ),
     
-    Column('email', String(256)),
-    Column('first_name', String(256)),
-    Column('last_name', String(256)),
-    Column('login_name', String(256)),
-    Column('password', String(256)),
+    Column('email', String(256), nullable=False),
+    Column('first_name', String(256), nullable=False),
+    Column('last_name', String(256), nullable=True),
+    Column('login_name', String(256), unique=True, nullable=False),
+    Column('password', String(256), nullable=False),
     
     #Column('permission_groups_id',
            #Integer,
@@ -224,4 +220,4 @@ statusLists = Table(
 
 
 
-print "Done Creating Tables!!!"
+#print "Done Creating Tables!!!"

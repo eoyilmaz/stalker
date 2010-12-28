@@ -1,19 +1,37 @@
 #-*- coding: utf-8 -*-
 
 
+import os
 import datetime
 import unittest
 import tempfile
 from sqlalchemy.orm import clear_mappers
 from stalker.conf import defaults
 from stalker import db
-from stalker.models import asset, assetBase, booking, comment, department, \
-     entity, group, imageFormat, link, pipelineStep, project, repository, \
-     sequence, shot, status, structure, tag, task, template, unit, user, \
-     version
-
-
-
+from stalker.models import (
+    asset,
+    assetBase,
+    booking,
+    comment,
+    department,
+    entity,
+    group,
+    imageFormat,
+    link,
+    pipelineStep,
+    project,
+    repository,
+    sequence,
+    shot,
+    status,
+    structure,
+    tag,
+    task,
+    template,
+    unit,
+    user,
+    version
+)
 
 
 
@@ -31,20 +49,24 @@ class DatabaseTester(unittest.TestCase):
         """
         # setup the database
         clear_mappers()
+        db.meta.__mappers__ = []
         
         self.TEST_DATABASE_FILE = tempfile.mktemp() + '.db'
-        self.TEST_DATABASE_URI = 'sqlite:///' + self.TEST_DATABASE_FILE
+        self.TEST_DATABASE_DIALECT = 'sqlite:///'
+        self.TEST_DATABASE_URI = self.TEST_DATABASE_DIALECT + \
+            self.TEST_DATABASE_FILE
+        
+        self._createdDB = False
     
     
     
-    ##----------------------------------------------------------------------
-    #def tearDown(self):
-        #"""tearDown the tests
-        #"""
-        #del(db, models)
-        #del(sys.modules['stalker'])
-        #del(sys.modules['stalker.db'])
-        #del(sys.modules['stalker.models'])
+    #----------------------------------------------------------------------
+    def tearDown(self):
+        """tearDown the tests
+        """
+        
+        if self._createdDB:
+            os.remove(self.TEST_DATABASE_FILE)
     
     
     
@@ -54,7 +76,7 @@ class DatabaseTester(unittest.TestCase):
         """
         
         # create a database in memory
-        db.setup(self.TEST_DATABASE_URI)
+        #db.setup(self.TEST_DATABASE_URI)
         
         
         self.fail('test is not implemented yet')
@@ -72,6 +94,15 @@ class DatabaseTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
+    def test_temp_user_deleted(self):
+        """testing if the temp user is deleted
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_default_admin_creation(self):
         """testing if a default admin is created
         """
@@ -80,13 +111,14 @@ class DatabaseTester(unittest.TestCase):
         defaults.AUTO_CREATE_ADMIN = True
         
         db.setup(self.TEST_DATABASE_URI)
+        self._createdDB = True
         
-        ## check if there is an admin
-        #self.fail('test is not implemented yet')
-        
-        admin = db.meta.session.query(user.User).filter_by(name='admin').first()
+        # check if there is an admin
+        admin = db.meta.session.query(user.User). \
+              filter_by(name=defaults.ADMIN_NAME).first()
         
         self.assertEquals(admin.name, defaults.ADMIN_NAME)
+        
     
     
     
@@ -96,14 +128,47 @@ class DatabaseTester(unittest.TestCase):
         databases
         """
         
-        self.fail('test is not implemented yet')
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def (self):
-        #""""""
+        # set default admin creation to True
+        defaults.AUTO_CREATE_ADMIN = True
         
+        db.setup(self.TEST_DATABASE_URI)
+        self._createdDB = True
+        
+        # try to call the db.setup for a second time and see if there are more
+        # than one admin
+        
+        db.setup(self.TEST_DATABASE_URI)
+        
+        # and get how many admin is created, (it is imipossible to create
+        # second one because the tables.simpleEntity.c.nam.unique=True
+        
+        admins = db.meta.session.query(user.User). \
+               filter_by(name=defaults.ADMIN_NAME).all()
+        
+        self.assertFalse( len(admins) > 1 )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_no_default_admin_creation(self):
+        """testing if there is no user if default.AUTO_CREATE_ADMIN is False
+        """
+        
+        # turn down auto admin creation
+        defaults.AUTO_CREATE_ADMIN = False
+        
+        # setup the db
+        db.setup(self.TEST_DATABASE_URI)
+        self._createdDB = True
+        
+        # check if there is a use with name admin
+        self.assertTrue(db.meta.session.query(user.User). \
+                        filter_by(name=defaults.ADMIN_NAME).first() is None )
+        
+        # check if there is a admins department
+        self.assertTrue(db.meta.session.query(department.Department). \
+                        filter_by(name=defaults.ADMIN_DEPARTMENT_NAME). \
+                        first() is None)
 
 
 
@@ -136,13 +201,14 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # setup the database
         clear_mappers()
+        db.meta.__mappers__ = []
         
         # create a test database, possibly an in memory datase
         cls.TEST_DATABASE_FILE = tempfile.mktemp() + '.db'
         cls.TEST_DATABASE_URI = 'sqlite:///' + cls.TEST_DATABASE_FILE
         
+        # setup using this db
         db.setup(database=cls.TEST_DATABASE_URI)
-        
     
     
     
@@ -152,203 +218,52 @@ class DatabaseModelsTester(unittest.TestCase):
         """tear-off the test
         """
         # delete the default test database file
-        #import os
-        #os.remove(defaults.TEST_DATABASE_FILE)
+        os.remove(cls.TEST_DATABASE_FILE)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_persisting_Angular(self):
+        #"""testing the persistancy of Angular
+        #"""
         
-        
-        
-        # \033[22;30m is black
-        # \033[22;31m is red
-        # \033[22;32m is green
-        # \033[22;37m is gray
-     
-        print "\033[22;31mtearDown class\033[22;37m"
-        
-        #import tempfile
-        #file(tempfile.mktemp(), 'w').write('tests ended')
+        #self.fail('test is not implemented yet')
     
     
     
     #----------------------------------------------------------------------
-    def test_persisting_SimpleEntity(self):
-        """testing the persistancy of SimpleEntity
+    def test_persisting_Asset(self):
+        """testing the persistancy of Asset
         """
         
-        name = 'SimpleEntity_test_creating_of_a_SimpleEntity'
-        description = 'this is for testing purposes'
-        created_by = None
-        updated_by = None
-        date_created = date_updated = datetime.datetime.now()
-        
-        aSimpleEntity = entity.SimpleEntity(
-            name=name,
-            description=description,
-            created_by=created_by,
-            updated_by=updated_by,
-            date_created=date_created,
-            date_updated=date_updated)
-        
-        # persist it to the database
-        db.meta.session.add(aSimpleEntity)
-        db.meta.session.commit()
-        
-        # now try to retrieve it
-        SE_from_DB = db.meta.session.query(entity.SimpleEntity). \
-            filter_by(name=name).first()
-        
-        self.assertEquals(aSimpleEntity.name, SE_from_DB.name)
-        self.assertEquals(aSimpleEntity.description, SE_from_DB.description)
-        self.assertEquals(aSimpleEntity.created_by, SE_from_DB.created_by)
-        self.assertEquals(aSimpleEntity.updated_by, SE_from_DB.updated_by)
-        self.assertEquals(aSimpleEntity.date_created, SE_from_DB.date_created)
-        self.assertEquals(aSimpleEntity.date_updated, SE_from_DB.date_updated)
+        self.fail('test is not implemented yet')
     
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Tag(self):
-        """testing the persistancy of Tag
+    def test_persisting_AssetBase(self):
+        """testing the persistancy of AssetBase
         """
         
-        name = 'Tag_test_creating_a_Tag'
-        description = 'this is for testing purposes'
-        created_by = None
-        updated_by = None
-        date_created = date_updated = datetime.datetime.now()
-        
-        aTag = tag.Tag(
-            name=name,
-            description=description,
-            created_by=created_by,
-            updated_by=updated_by,
-            date_created=date_created,
-            date_updated=date_updated)
-        
-        # persist it to the database
-        db.meta.session.add(aTag)
-        db.meta.session.commit()
-        
-        # now try to retrieve it
-        Tag_from_DB = db.meta.session.query(tag.Tag).filter_by(name=name).first()
-        
-        self.assertEquals(aTag.name, Tag_from_DB.name)
-        self.assertEquals(aTag.description, Tag_from_DB.description)
-        self.assertEquals(aTag.created_by, Tag_from_DB.created_by)
-        self.assertEquals(aTag.updated_by, Tag_from_DB.updated_by)
-        self.assertEquals(aTag.date_created, Tag_from_DB.date_created)
-        self.assertEquals(aTag.date_updated, Tag_from_DB.date_updated)
+        self.fail('test is not implemented yet')
     
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Entity(self):
-        """testing the persistancy of Entity
+    def test_persisting_Booking(self):
+        """testing the persistancy of Booking
         """
         
-        # create an Entity wiht a couple of tags
-        
-        # the Tag1
-        name = 'Tag1_test_creating_an_Entity'
-        description = 'this is for testing purposes'
-        created_by = None
-        updated_by = None
-        date_created = date_updated = datetime.datetime.now()
-        
-        tag1 = tag.Tag(
-            name=name,
-            description=description,
-            created_by=created_by,
-            updated_by=updated_by,
-            date_created=date_created,
-            date_updated=date_updated)
-        
-        # the Tag2
-        name = 'Tag2_test_creating_an_Entity'
-        description = 'this is for testing purposes'
-        created_by = None
-        updated_by = None
-        date_created = date_updated = datetime.datetime.now()
-        
-        tag2 = tag.Tag(
-            name=name,
-            description=description,
-            created_by=created_by,
-            updated_by=updated_by,
-            date_created=date_created,
-            date_updated=date_updated)
-        
-        # the entity
-        name = 'TestEntity'
-        description = 'this is for testing purposes'
-        created_by = None
-        updated_by = None
-        date_created = date_updated = datetime.datetime.now()
-        
-        testEntity = entity.Entity(
-            name=name,
-            description=description,
-            created_by=created_by,
-            updated_by=updated_by,
-            date_created=date_created,
-            date_updated=date_updated,
-            tags=[tag1, tag2],
-        )
-        
-        # persist it to the database
-        db.meta.session.add(testEntity)
-        db.meta.session.commit()
-        
-        # now try to retrieve it
-        testEntityDB = db.meta.session.query(entity.Entity). \
-                     filter_by(name=name).first()
-        
-        # just test the entity part of the object
-        for i, tag_ in enumerate(testEntity.tags):
-            self.assertEquals(tag_, testEntityDB.tags[i])
+        self.fail('test is not implemented yet')
     
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Status(self):
-        """testing the persistancy of Status
+    def test_persisting_Comment(self):
+        """testing the persistancy of Comment
         """
         
-        # the status
-        name = 'TestStatus_test_creating_Status'
-        description = 'this is for testing purposes'
-        created_by = None
-        updated_by = None
-        date_created = datetime.datetime.now()
-        date_updated = datetime.datetime.now()
-        
-        testStatus = status.Status(
-            name=name,
-            description=description,
-            created_by=created_by,
-            updated_by=updated_by,
-            date_created=date_created,
-            date_updated=date_updated,
-            short_name='tstSt'
-        )
-        
-        # persist it to the database
-        db.meta.session.add(testStatus)
-        db.meta.session.commit()
-        
-        # now try to retrieve it
-        testStatusDB = db.meta.session.query(status.Status).first()
-        
-        # just test the satuts part of the object
-        self.assertEquals(testStatus.short_name, testStatusDB.short_name)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_persisting_StatusList(self):
-        """testing the persistancy of StatusList
-        """
-        
-        self.fail('test is not implemented')
+        self.fail('test is not implemented yet')
     
     
     
@@ -437,4 +352,331 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # lead
         self.assertEquals(testDepartment.lead, dep_from_db.lead)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Entity(self):
+        """testing the persistancy of Entity
+        """
+        
+        # create an Entity wiht a couple of tags
+        
+        # the Tag1
+        name = 'Tag1_test_creating_an_Entity'
+        description = 'this is for testing purposes'
+        created_by = None
+        updated_by = None
+        date_created = date_updated = datetime.datetime.now()
+        
+        tag1 = tag.Tag(
+            name=name,
+            description=description,
+            created_by=created_by,
+            updated_by=updated_by,
+            date_created=date_created,
+            date_updated=date_updated)
+        
+        # the Tag2
+        name = 'Tag2_test_creating_an_Entity'
+        description = 'this is for testing purposes'
+        created_by = None
+        updated_by = None
+        date_created = date_updated = datetime.datetime.now()
+        
+        tag2 = tag.Tag(
+            name=name,
+            description=description,
+            created_by=created_by,
+            updated_by=updated_by,
+            date_created=date_created,
+            date_updated=date_updated)
+        
+        # the entity
+        name = 'TestEntity'
+        description = 'this is for testing purposes'
+        created_by = None
+        updated_by = None
+        date_created = date_updated = datetime.datetime.now()
+        
+        testEntity = entity.Entity(
+            name=name,
+            description=description,
+            created_by=created_by,
+            updated_by=updated_by,
+            date_created=date_created,
+            date_updated=date_updated,
+            tags=[tag1, tag2],
+        )
+        
+        # persist it to the database
+        db.meta.session.add(testEntity)
+        db.meta.session.commit()
+        
+        # now try to retrieve it
+        testEntityDB = db.meta.session.query(entity.Entity). \
+                     filter_by(name=name).first()
+        
+        # just test the entity part of the object
+        for i, tag_ in enumerate(testEntity.tags):
+            self.assertEquals(tag_, testEntityDB.tags[i])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Group(self):
+        """testing the persistancy of Group
+        """
+        
+        self.fail('test is not implmented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_ImageFormat(self):
+        """testing the persistancy of ImageFormat
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_persisting_Linear(self):
+        #"""testing the persistancy of Linear
+        #"""
+        
+        #self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Link(self):
+        """testing the persistancy of Link
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_PipelineStep(self):
+        """testing the persistancy of PipelineStep
+        """
+        
+        self.fail('test is not implmented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Project(self):
+        """testing the persistancy of Project
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Repository(self):
+        """testing the persistancy of Repository
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Sequence(self):
+        """testing the persistancy of Sequence
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Shot(self):
+        """testing the persistancy of Shot
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_SimpleEntity(self):
+        """testing the persistancy of SimpleEntity
+        """
+        
+        name = 'SimpleEntity_test_creating_of_a_SimpleEntity'
+        description = 'this is for testing purposes'
+        created_by = None
+        updated_by = None
+        date_created = date_updated = datetime.datetime.now()
+        
+        aSimpleEntity = entity.SimpleEntity(
+            name=name,
+            description=description,
+            created_by=created_by,
+            updated_by=updated_by,
+            date_created=date_created,
+            date_updated=date_updated)
+        
+        # persist it to the database
+        db.meta.session.add(aSimpleEntity)
+        db.meta.session.commit()
+        
+        # now try to retrieve it
+        SE_from_DB = db.meta.session.query(entity.SimpleEntity). \
+            filter_by(name=name).first()
+        
+        self.assertEquals(aSimpleEntity.name, SE_from_DB.name)
+        self.assertEquals(aSimpleEntity.description, SE_from_DB.description)
+        self.assertEquals(aSimpleEntity.created_by, SE_from_DB.created_by)
+        self.assertEquals(aSimpleEntity.updated_by, SE_from_DB.updated_by)
+        self.assertEquals(aSimpleEntity.date_created, SE_from_DB.date_created)
+        self.assertEquals(aSimpleEntity.date_updated, SE_from_DB.date_updated)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Status(self):
+        """testing the persistancy of Status
+        """
+        
+        # the status
+        name = 'TestStatus_test_creating_Status'
+        description = 'this is for testing purposes'
+        created_by = None
+        updated_by = None
+        date_created = datetime.datetime.now()
+        date_updated = datetime.datetime.now()
+        
+        testStatus = status.Status(
+            name=name,
+            description=description,
+            created_by=created_by,
+            updated_by=updated_by,
+            date_created=date_created,
+            date_updated=date_updated,
+            short_name='tstSt'
+        )
+        
+        # persist it to the database
+        db.meta.session.add(testStatus)
+        db.meta.session.commit()
+        
+        # now try to retrieve it
+        testStatusDB = db.meta.session.query(status.Status).first()
+        
+        # just test the satuts part of the object
+        self.assertEquals(testStatus.short_name, testStatusDB.short_name)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_StatusList(self):
+        """testing the persistancy of StatusList
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Structure(self):
+        """testing the persistancy of Structure
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Tag(self):
+        """testing the persistancy of Tag
+        """
+        
+        name = 'Tag_test_creating_a_Tag'
+        description = 'this is for testing purposes'
+        created_by = None
+        updated_by = None
+        date_created = date_updated = datetime.datetime.now()
+        
+        aTag = tag.Tag(
+            name=name,
+            description=description,
+            created_by=created_by,
+            updated_by=updated_by,
+            date_created=date_created,
+            date_updated=date_updated)
+        
+        # persist it to the database
+        db.meta.session.add(aTag)
+        db.meta.session.commit()
+        
+        # now try to retrieve it
+        Tag_from_DB = db.meta.session.query(tag.Tag).filter_by(name=name).first()
+        
+        self.assertEquals(aTag.name, Tag_from_DB.name)
+        self.assertEquals(aTag.description, Tag_from_DB.description)
+        self.assertEquals(aTag.created_by, Tag_from_DB.created_by)
+        self.assertEquals(aTag.updated_by, Tag_from_DB.updated_by)
+        self.assertEquals(aTag.date_created, Tag_from_DB.date_created)
+        self.assertEquals(aTag.date_updated, Tag_from_DB.date_updated)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Task(self):
+        """testing the persistancy of Task
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Template(self):
+        """testing the persistancy of Template
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Unit(self):
+        """testing the persistancy of Unit
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Time(self):
+        """testing the persistancy of Time
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_User(self):
+        """testing the persistancy of User
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Version(self):
+        """testing the persistancy of Version
+        """
+        
+        self.fail('test is not implemented yet')
         

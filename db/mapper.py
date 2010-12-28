@@ -1,14 +1,37 @@
 #-*- coding: utf-8 -*-
 """this is the default mapper to map the default models to the default tables
+
+You can use your also use your own mappers. See the docs.
 """
 
+
+
 from sqlalchemy.orm import mapper, relationship, backref, synonym
-#from stalker.models import entity, tag, user, department, status
-from stalker.models import asset, assetBase, booking, comment, department, \
-     entity, group, imageFormat, link, pipelineStep, project, repository, \
-     sequence, shot, status, structure, tag, task, template, unit, user, \
-     version
 from stalker.db import tables
+from stalker.models import (
+    asset,
+    assetBase,
+    booking,
+    comment,
+    department,
+    entity,
+    group,
+    imageFormat,
+    link,
+    pipelineStep,
+    project,
+    repository,
+    sequence,
+    shot,
+    status,
+    structure,
+    tag,
+    task,
+    template,
+    unit,
+    user,
+    version
+)
 
 
 

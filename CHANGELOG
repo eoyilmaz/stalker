@@ -1,4 +1,14 @@
 Stalker Changes:
+v0.0.1.20101228:
+ * created the block of database tests
+ * added stalker.db.meta.__mappers__ list to hold the mappers and use it to
+   check if anything is already mapped
+ * added tests for db initialization
+ * removed the whole unit class from SOM, only TimeUnit was necessary if the
+   case is inspected in one perspective, but in fact it is also not important,
+   the only object using TimeUnit was the Project class and it can go well
+   without it. Don't need to make things complex.
+
 v0.0.1.20101227:
  * the test_db is converted to a proper unittest which is testing all the
    models one by one

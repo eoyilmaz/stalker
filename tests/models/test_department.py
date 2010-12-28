@@ -207,3 +207,13 @@ class DepartmentTester(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_member_remove_also_removes_department_from_user(self):
+        """testing if removing an user from the members list also removes the
+        department from the users department attribute
+        """
+        
+        self.fail('test is not implemented yet')
+    
+    
+    

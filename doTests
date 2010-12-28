@@ -1,6 +1,6 @@
 clear
 clear
-nosetests $@ --with-coverage --cover-package stalker
-#nosetests --verbosity=2 --with-coverage --cover-package stalker
+#nosetests $@ --with-coverage --cover-package stalker
+nosetests $@ --verbosity=2 --with-coverage --cover-package stalker
 #nosetests --with-sqlalchemy --truthless --with-coverage --cover-package stalker
 #nosetests --with-isolation
