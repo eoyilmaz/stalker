@@ -28,7 +28,6 @@ from stalker.models import (
     tag,
     task,
     template,
-    unit,
     user,
     version
 )

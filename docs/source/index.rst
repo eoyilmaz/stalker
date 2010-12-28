@@ -91,11 +91,6 @@ Summary
    stalker.models.task.Task
    stalker.models.template
    stalker.models.template.Template
-   stalker.models.unit
-   stalker.models.unit.Unit
-   stalker.models.unit.Angular
-   stalker.models.unit.Linear
-   stalker.models.unit.Time
    stalker.models.user
    stalker.models.user.User
    stalker.models.version
