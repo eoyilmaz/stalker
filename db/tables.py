@@ -23,21 +23,13 @@ simpleEntities = Table(
     Column(
         'created_by_id',
         Integer,
-        ForeignKey(
-            'users.id',
-            use_alter=True,
-            name='x'
-        )
+        ForeignKey('users.id', use_alter=True, name='x')
     ),
     
     Column(
         'updated_by_id',
         Integer,
-        ForeignKey(
-            'users.id',
-            use_alter=True,
-            name='x'
-        )
+        ForeignKey('users.id', use_alter=True, name='x')
     ),
     
     Column('date_created', DateTime),
@@ -183,6 +175,53 @@ departments = Table(
     #'tasks', metadata,
     #Column(
         #'id',
+
+
+# STATUS
+statuses = Table(
+    'statuses', metadata,
+    Column(
+        'id',
+        Integer,
+        ForeignKey('entities.id'),
+        primary_key=True
+    ),
+    Column('short_name', String(32))
+)
+
+
+
+# STATUSLIST_STATUSES
+statusList_statuses = Table(
+    'statusList_statuses', metadata,
+    Column(
+        'statusList_id',
+        Integer,
+        ForeignKey('statusLists.id'),
+        primary_key=True
+    ),
+    Column(
+        'status.id',
+        Integer,
+        ForeignKey('statuses.id'),
+        primary_key=True
+    )
+)
+
+
+
+# STATUSLIST
+statusLists = Table(
+    'statusLists', metadata,
+    Column(
+        'id',
+        Integer,
+        ForeignKey('entities.id'),
+        primary_key=True
+    ),
+)
+
+
 
 
 print "Done Creating Tables!!!"

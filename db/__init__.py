@@ -11,6 +11,7 @@ from sqlalchemy.orm import mapper, sessionmaker
 from sqlalchemy import create_engine
 from stalker.conf import defaults
 from stalker.db import tables, meta
+from stalker.models import user, department
 
 
 
@@ -51,7 +52,7 @@ def setup(database=None, mappers=[], engine_settings=None):
     defaults.MAPPERS.extend(mappers)
     
     # create mappers
-    create_mappers(defaults.MAPPERS)
+    __create_mappers__(defaults.MAPPERS)
     
     # create the database
     meta.metadata.create_all(meta.engine)
@@ -63,66 +64,82 @@ def setup(database=None, mappers=[], engine_settings=None):
     meta.session = Session()
     
     # init database
-    #__init_db__()
+    if defaults.AUTO_CREATE_ADMIN:
+        #__init_db__()
+        __create_admin__()
+
+
+
+##----------------------------------------------------------------------
+#def __init_db__():
+    #"""fills the database with default values
+    #"""
+    
+    #pass
 
 
 
 #----------------------------------------------------------------------
-def __init_db__():
-    """fills the database with default values
+def __create_admin__():
+    """creates the admin
     """
     
-    # check the admin setting
-    if defaults.AUTO_CREATE_ADMIN:
-        # insert a new admin to the USERS table
-        from stalker.models import user, department
-        
-        # create the admin department
-        adminDep = department.Department(name='admins')
-        meta.session.add(adminDep)
-        
-        
-        tempUser = user.User(
-            name='temp',
-            first_name='temp',
-            login_name='temp',
-            password='temp',
-            department=adminDep,
-            email='temp@temp.com'
-        )
-        
-        admin = user.User(
-            name=defaults.ADMIN_NAME,
-            first_name=defaults.ADMIN_NAME,
-            login_name=defaults.ADMIN_NAME,
-            password=defaults.ADMIN_PASSWORD,
-            email=defaults.ADMIN_EMAIL,
-            department=adminDep,
-            created_by=tempUser
-        )
-        
-        admin.created_by = admin
-        admin.updated_by = admin
-        
-        meta.session.add(admin)
-        meta.session.commit()
+    # check if there is already an admin in the database
+    if len(meta.session.query(user.User).filter_by(name='admin').all()) > 1:
+        #there should be an admin user do nothing
+        return
+    
+    # create the admin department
+    adminDep = department.Department(name='admins')
+    meta.session.add(adminDep)
+    
+    # create a temp user
+    tempUser = user.User(
+        name='temp',
+        first_name='temp',
+        login_name='temp',
+        password='temp',
+        department=adminDep,
+        email='temp@temp.com'
+    )
+    
+    # create the admin user
+    admin = user.User(
+        name=defaults.ADMIN_NAME,
+        first_name=defaults.ADMIN_NAME,
+        login_name=defaults.ADMIN_NAME,
+        password=defaults.ADMIN_PASSWORD,
+        email=defaults.ADMIN_EMAIL,
+        department=adminDep,
+        created_by=tempUser
+    )
+    
+    admin.created_by = admin
+    admin.updated_by = admin
+    
+    adminDep.created_by = admin
+    adminDep.updated_by = admin
+    
+    meta.session.add(admin)
+    meta.session.commit()
 
 
 
 #----------------------------------------------------------------------
-def create_mappers(mapper_list):
+def __create_mappers__(mapper_list):
     """imports the given mapper helper modules, refer to :ref:`mappers` for
     more information about how to create your own mapper modules.
     """
     
     # 
-    # just import the given list of mapper modules, if they are in the correct
-    # format all the mapping should be done already by just import ing the
-    # mapper helper modules
-    # 
+    # just import the given list of mapper modules and run the setup function,
+    # if they are in the correct format all the mapping should be done already
+    # by just import ing the mapper helper modules
+    #
     
     for _mapper in mapper_list:
         exec("import " + _mapper)
+        exec(_mapper + ".setup()")
     
     
 

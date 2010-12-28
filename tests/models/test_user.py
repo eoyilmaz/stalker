@@ -35,33 +35,33 @@ class UserTest(mocker.MockerTestCase):
         assert(isinstance(self.mocker, mocker.Mocker))
         
         # a department
-        self.mock_department1 = self.mocker.mock(type=department.Department)
-        self.mock_department2 = self.mocker.mock(type=department.Department)
+        self.mock_department1 = self.mocker.mock(department.Department)
+        self.mock_department2 = self.mocker.mock(department.Department)
         
         # a couple of permission groups
-        self.mock_permission_group1 = self.mocker.mock(type=group.Group)
-        self.mock_permission_group2 = self.mocker.mock(type=group.Group)
-        self.mock_permission_group3 = self.mocker.mock(type=group.Group)
+        self.mock_permission_group1 = self.mocker.mock(group.Group)
+        self.mock_permission_group2 = self.mocker.mock(group.Group)
+        self.mock_permission_group3 = self.mocker.mock(group.Group)
         
         # a couple of tasks
-        self.mock_task1 = self.mocker.mock(type=task.Task)
-        self.mock_task2 = self.mocker.mock(type=task.Task)
-        self.mock_task3 = self.mocker.mock(type=task.Task)
-        self.mock_task4 = self.mocker.mock(type=task.Task)
+        self.mock_task1 = self.mocker.mock(task.Task)
+        self.mock_task2 = self.mocker.mock(task.Task)
+        self.mock_task3 = self.mocker.mock(task.Task)
+        self.mock_task4 = self.mocker.mock(task.Task)
         
         # a couple of projects
-        self.mock_project1 = self.mocker.mock(type=project.Project)
-        self.mock_project2 = self.mocker.mock(type=project.Project)
-        self.mock_project3 = self.mocker.mock(type=project.Project)
+        self.mock_project1 = self.mocker.mock(project.Project)
+        self.mock_project2 = self.mocker.mock(project.Project)
+        self.mock_project3 = self.mocker.mock(project.Project)
         
         # a couple of sequences
-        self.mock_sequence1 = self.mocker.mock(type=sequence.Sequence)
-        self.mock_sequence2 = self.mocker.mock(type=sequence.Sequence)
-        self.mock_sequence3 = self.mocker.mock(type=sequence.Sequence)
-        self.mock_sequence4 = self.mocker.mock(type=sequence.Sequence)
+        self.mock_sequence1 = self.mocker.mock(sequence.Sequence)
+        self.mock_sequence2 = self.mocker.mock(sequence.Sequence)
+        self.mock_sequence3 = self.mocker.mock(sequence.Sequence)
+        self.mock_sequence4 = self.mocker.mock(sequence.Sequence)
         
         # a mock user
-        self.mock_admin = self.mocker.mock(type=user.User)
+        self.mock_admin = self.mocker.mock(user.User)
         
         self.mocker.replay()
         

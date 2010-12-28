@@ -14,115 +14,52 @@ class TestStatus(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_name_str_or_unicode(self):
-        #"""test the name attribute if it is str or unicode
-        #"""
-        
-        ##----------------------------------------------------------------------
-        ## the name should be a str or unicode
-        #self.assertRaises(ValueError, status.Status, 1, '1')
-        ## check the property
-        #a_status = status.Status('Complete', 'Cmpl')
-        #self.assertRaises(ValueError, setattr, a_status, 'name', 1)
-        
-    
-    ##----------------------------------------------------------------------
-    #def test_name_for_being_empty(self):
-        #"""testing the name attribute if it is empty
-        #"""
-        ##----------------------------------------------------------------------
-        ## the name could not be an empty string
-        #self.assertRaises(ValueError, status.Status, '', 'Cmp')
-        ## check the property
-        #a_status = status.Status('Complete', 'Cmpl')
-        #self.assertRaises(ValueError, setattr, a_status, 'name', '')
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_name_first_letter_lowercase(self):
-        #"""testing the name attributes first letter against being a lowercase
-        #letter
-        #"""
-        
-        ##----------------------------------------------------------------------
-        ## the first letter of the name should be in upper case and the other
-        ## letters should be in lower case
-        #status_name = 'test'
-        #a_status = status.Status(status_name, 'tst')
-        #self.assertEqual(status_name.title(), a_status.name)
-        
-        ## check the property
-        #a_status = status.Status('Complete', 'Cmpl')
-        #a_status.name = status_name
-        #self.assertEqual(status_name.title(), a_status.name)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_name_first_letter_integer(self):
-        #"""testing the name attributes first letter against being an integer
-        #value
-        #"""
-        ##----------------------------------------------------------------------
-        ## the first letter of the name could not be an integer
-        #status_name = '1test'
-        #self.assertRaises(ValueError, status.Status, status_name, \
-                           #status_name)
-        
-        ## check the property
-        #a_status = status.Status('Complete', 'Cmpl')
-        #self.assertRaises(ValueError, setattr, a_status, 'name', status_name)
-    
-    
-    
     #----------------------------------------------------------------------
-    def test_shortName_str_or_unicode(self):
-        """testing the shortName attribute against not being a string or
+    def test_short_name_str_or_unicode(self):
+        """testing the short_name attribute against not being a string or
         unicode
         """
         
         #----------------------------------------------------------------------
-        # the shortName should be a str or unicode
+        # the short_name should be a str or unicode
         self.assertRaises(
             ValueError,
             status.Status,
             name='Complete',
-            shortName=1
+            short_name=1
         )
         
         # check the property
-        a_status = status.Status(name='Complete', shortName='Cmlt')
+        a_status = status.Status(name='Complete', short_name='Cmlt')
         self.assertRaises(
             ValueError,
             setattr,
             a_status,
-            'shortName',
+            'short_name',
             1
         )
     
     
     
     #----------------------------------------------------------------------
-    def test_shortName_empty_string(self):
-        """testing the shortName attribute against being an empty string
+    def test_short_name_empty_string(self):
+        """testing the short_name attribute against being an empty string
         """
         
         #----------------------------------------------------------------------
-        # the shortName can not be an empty string
+        # the short_name can not be an empty string
         self.assertRaises(ValueError, status.Status, 'Complete', '')
         
         # check the property
-        a_status = status.Status(name='Complete', shortName='Cmlt')
-        self.assertRaises(ValueError, setattr, a_status, 'shortName', '')
+        a_status = status.Status(name='Complete', short_name='Cmlt')
+        self.assertRaises(ValueError, setattr, a_status, 'short_name', '')
         
         #----------------------------------------------------------------------
-        # check if the shortName is get correctly
+        # check if the short_name is get correctly
         name = 'Complete'
         abbr = 'Cmplt'
-        a_status = status.Status(name=name, shortName=abbr)
-        self.assertEquals( a_status.shortName, abbr)
+        a_status = status.Status(name=name, short_name=abbr)
+        self.assertEquals( a_status.short_name, abbr)
 
 
 
@@ -146,13 +83,13 @@ class StatusListTest(unittest.TestCase):
         
         # should use Mocks in the list
         self.a_status_list = [
-            status.Status(name='Not Available', shortName='N/A'),
-            status.Status(name='Waiting To Start', shortName='WStrt'),
-            status.Status(name='Started', shortName='Strt'),
-            status.Status(name='Waiting For Approve', shortName='WAppr'),
-            status.Status(name='Approved', shortName='Appr'),
-            status.Status(name='Finished', shortName='Fnsh'),
-            status.Status(name='On Hold', shortName='OH'),
+            status.Status(name='Not Available', short_name='N/A'),
+            status.Status(name='Waiting To Start', short_name='WStrt'),
+            status.Status(name='Started', short_name='Strt'),
+            status.Status(name='Waiting For Approve', short_name='WAppr'),
+            status.Status(name='Approved', short_name='Appr'),
+            status.Status(name='Finished', short_name='Fnsh'),
+            status.Status(name='On Hold', short_name='OH'),
             ]
     
     
@@ -311,7 +248,7 @@ class StatusListTest(unittest.TestCase):
         )
         
         new_list_of_statutes = [
-            status.Status(name='New Status', shortName='nsts')
+            status.Status(name='New Status', short_name='nsts')
         ]
         
         a_status_list_obj.statuses = new_list_of_statutes

@@ -61,7 +61,7 @@ class SimpleEntity(object):
         self._updated_by = self._check_updated_by(updated_by)
         self._date_created = self._check_date_created(date_created)
         self._date_updated = self._check_date_updated(date_updated)
-
+    
     
     
     #----------------------------------------------------------------------

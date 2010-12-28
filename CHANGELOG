@@ -4,6 +4,10 @@ v0.0.1.20101227:
    models one by one
  * test/db renamed to test/z_db to let nose run it latest to solve the problem
    about mocker and sqlalchemy fighting each other.
+ * Mapping syntax is changed a little bit, now to do the mapping, the
+   <mapper>.setup() function needs to be called to be able to do the mapping
+   any time
+ * started adding tests for every class in SOM
 
 v0.0.1.20101226:
  * in user.User the last_name attribute could be an empty string

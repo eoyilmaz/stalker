@@ -10,7 +10,7 @@ from stalker.models import entity
 class Status(entity.Entity):
     """The Status class
     
-    :param shortName: the shortName of the status name, keep it as simple
+    :param short_name: the short_name of the status name, keep it as simple
       as possible, the string will be formated to have all upper-case and no
       white spaces at the beggining and at the end of the attribute
     """
@@ -20,46 +20,46 @@ class Status(entity.Entity):
     #----------------------------------------------------------------------
     def __init__(self,
                  #name=None,
-                 shortName=None,
+                 short_name=None,
                  thumbnail=None,
                  **kwargs
                  ):
         
         super(Status,self).__init__(**kwargs)
         
-        self._shortName = self._check_shortName(shortName)
+        self._short_name = self._check_short_name(short_name)
     
     
     
     #----------------------------------------------------------------------
-    def _check_shortName(self, shortName):
-        """checks the shortName attribute
+    def _check_short_name(self, short_name):
+        """checks the short_name attribute
         """
         
-        if shortName == '' \
-           or not isinstance(shortName, (str, unicode)):
-            raise(ValueError("the shortName shouldn't be empty and it \
+        if short_name == '' \
+           or not isinstance(short_name, (str, unicode)):
+            raise(ValueError("the short_name shouldn't be empty and it \
             should be a str or unicode"))
         
-        return shortName
+        return short_name
     
     
     
     #----------------------------------------------------------------------
-    def shortName():
+    def short_name():
         def fget(self):
-            """returns the shortName property
+            """returns the short_name property
             """
-            return self._shortName
+            return self._short_name
         
-        def fset(self, shortName):
-            """sets the shortName
+        def fset(self, short_name):
+            """sets the short_name
             """
-            self._shortName = self._check_shortName(shortName)
+            self._short_name = self._check_short_name(short_name)
         
         return locals()
     
-    shortName = property(**shortName())
+    short_name = property(**short_name())
 
 
 

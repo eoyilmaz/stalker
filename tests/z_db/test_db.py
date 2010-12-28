@@ -3,7 +3,17 @@
 
 import datetime
 import unittest
-from stalker import db, models
+import tempfile
+from sqlalchemy.orm import clear_mappers
+from stalker.conf import defaults
+from stalker import db
+from stalker.models import asset, assetBase, booking, comment, department, \
+     entity, group, imageFormat, link, pipelineStep, project, repository, \
+     sequence, shot, status, structure, tag, task, template, unit, user, \
+     version
+
+
+
 
 
 
@@ -15,13 +25,15 @@ class DatabaseTester(unittest.TestCase):
     """tests the database and connection to the database
     """
     
-    ##----------------------------------------------------------------------
-    #def setUp(self):
-        #"""setup the tests
-        #"""
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """setup the tests
+        """
+        # setup the database
+        clear_mappers()
         
-        #print "seting up the tests"
-        #from stalker import db, models
+        self.TEST_DATABASE_FILE = tempfile.mktemp() + '.db'
+        self.TEST_DATABASE_URI = 'sqlite:///' + self.TEST_DATABASE_FILE
     
     
     
@@ -42,9 +54,7 @@ class DatabaseTester(unittest.TestCase):
         """
         
         # create a database in memory
-        databaseAddress = 'sqlite:///:memory:'
-        
-        db.setup(databaseAddress)
+        db.setup(self.TEST_DATABASE_URI)
         
         
         self.fail('test is not implemented yet')
@@ -66,7 +76,18 @@ class DatabaseTester(unittest.TestCase):
         """testing if a default admin is created
         """
         
-        self.fail('test is not implemented yet')
+        # set default admin creation to True
+        defaults.AUTO_CREATE_ADMIN = True
+        
+        db.setup(self.TEST_DATABASE_URI)
+        
+        ## check if there is an admin
+        #self.fail('test is not implemented yet')
+        
+        admin = db.meta.session.query(user.User).filter_by(name='admin').first()
+        
+        self.assertEquals(admin.name, defaults.ADMIN_NAME)
+    
     
     
     #----------------------------------------------------------------------
@@ -108,40 +129,58 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         """setup the test
         """
         
         # setup the database
+        clear_mappers()
         
         # create a test database, possibly an in memory datase
-        db.setup(database='sqlite:///:memory:')
-        self.session = db.meta.session
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def tearDown(self):
-        #"""tear-off the test
-        #"""
+        cls.TEST_DATABASE_FILE = tempfile.mktemp() + '.db'
+        cls.TEST_DATABASE_URI = 'sqlite:///' + cls.TEST_DATABASE_FILE
         
-        ## just delete the session
-        #del(self.session)
+        db.setup(database=cls.TEST_DATABASE_URI)
+        
     
     
     
     #----------------------------------------------------------------------
-    def test_creating_of_a_SimpleEntity(self):
-        """testing persistancy of a SimpleEntity object
+    @classmethod
+    def tearDownClass(cls):
+        """tear-off the test
+        """
+        # delete the default test database file
+        #import os
+        #os.remove(defaults.TEST_DATABASE_FILE)
+        
+        
+        
+        # \033[22;30m is black
+        # \033[22;31m is red
+        # \033[22;32m is green
+        # \033[22;37m is gray
+     
+        print "\033[22;31mtearDown class\033[22;37m"
+        
+        #import tempfile
+        #file(tempfile.mktemp(), 'w').write('tests ended')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_SimpleEntity(self):
+        """testing the persistancy of SimpleEntity
         """
         
-        name = 'aSimpleEntity'
+        name = 'SimpleEntity_test_creating_of_a_SimpleEntity'
         description = 'this is for testing purposes'
         created_by = None
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        aSimpleEntity = models.entity.SimpleEntity(
+        aSimpleEntity = entity.SimpleEntity(
             name=name,
             description=description,
             created_by=created_by,
@@ -150,11 +189,12 @@ class DatabaseModelsTester(unittest.TestCase):
             date_updated=date_updated)
         
         # persist it to the database
-        self.session.add(aSimpleEntity)
-        self.session.commit()
+        db.meta.session.add(aSimpleEntity)
+        db.meta.session.commit()
         
         # now try to retrieve it
-        SE_from_DB = self.session.query(models.entity.SimpleEntity).first()
+        SE_from_DB = db.meta.session.query(entity.SimpleEntity). \
+            filter_by(name=name).first()
         
         self.assertEquals(aSimpleEntity.name, SE_from_DB.name)
         self.assertEquals(aSimpleEntity.description, SE_from_DB.description)
@@ -166,17 +206,17 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_creating_a_Tag(self):
-        """testing persistancy of a Tag object
+    def test_persisting_Tag(self):
+        """testing the persistancy of Tag
         """
         
-        name = 'aTag'
+        name = 'Tag_test_creating_a_Tag'
         description = 'this is for testing purposes'
         created_by = None
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        aTag = models.tag.Tag(
+        aTag = tag.Tag(
             name=name,
             description=description,
             created_by=created_by,
@@ -185,11 +225,11 @@ class DatabaseModelsTester(unittest.TestCase):
             date_updated=date_updated)
         
         # persist it to the database
-        self.session.add(aTag)
-        self.session.commit()
+        db.meta.session.add(aTag)
+        db.meta.session.commit()
         
         # now try to retrieve it
-        Tag_from_DB = self.session.query(models.tag.Tag).first()
+        Tag_from_DB = db.meta.session.query(tag.Tag).filter_by(name=name).first()
         
         self.assertEquals(aTag.name, Tag_from_DB.name)
         self.assertEquals(aTag.description, Tag_from_DB.description)
@@ -201,20 +241,20 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_creating_an_Entity(self):
-        """testing persistancy of an Entity object
+    def test_persisting_Entity(self):
+        """testing the persistancy of Entity
         """
         
         # create an Entity wiht a couple of tags
         
         # the Tag1
-        name = 'Tag1'
+        name = 'Tag1_test_creating_an_Entity'
         description = 'this is for testing purposes'
         created_by = None
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        tag1 = models.tag.Tag(
+        tag1 = tag.Tag(
             name=name,
             description=description,
             created_by=created_by,
@@ -223,13 +263,13 @@ class DatabaseModelsTester(unittest.TestCase):
             date_updated=date_updated)
         
         # the Tag2
-        name = 'Tag2'
+        name = 'Tag2_test_creating_an_Entity'
         description = 'this is for testing purposes'
         created_by = None
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        tag2 = models.tag.Tag(
+        tag2 = tag.Tag(
             name=name,
             description=description,
             created_by=created_by,
@@ -244,7 +284,7 @@ class DatabaseModelsTester(unittest.TestCase):
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        testEntity = models.entity.Entity(
+        testEntity = entity.Entity(
             name=name,
             description=description,
             created_by=created_by,
@@ -255,45 +295,146 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # persist it to the database
-        self.session.add(testEntity)
-        self.session.commit()
+        db.meta.session.add(testEntity)
+        db.meta.session.commit()
         
         # now try to retrieve it
-        testEntityDB = self.session.query(models.entity.Entity).first()
+        testEntityDB = db.meta.session.query(entity.Entity). \
+                     filter_by(name=name).first()
         
         # just test the entity part of the object
-        self.assertEquals(testEntity.tags, testEntityDB.tags)
+        for i, tag_ in enumerate(testEntity.tags):
+            self.assertEquals(tag_, testEntityDB.tags[i])
     
     
     
     #----------------------------------------------------------------------
-    def test_creating_a_Status(self):
-        """testing persistancy of a Status object
+    def test_persisting_Status(self):
+        """testing the persistancy of Status
         """
         
         # the status
-        name = 'TestStatus'
+        name = 'TestStatus_test_creating_Status'
         description = 'this is for testing purposes'
         created_by = None
         updated_by = None
-        date_created = date_updated = datetime.datetime.now()
+        date_created = datetime.datetime.now()
+        date_updated = datetime.datetime.now()
         
-        testStatus = models.status.Status(
+        testStatus = status.Status(
             name=name,
             description=description,
             created_by=created_by,
             updated_by=updated_by,
             date_created=date_created,
             date_updated=date_updated,
+            short_name='tstSt'
         )
         
         # persist it to the database
-        self.session.add(testEntity)
-        self.session.commit()
+        db.meta.session.add(testStatus)
+        db.meta.session.commit()
         
         # now try to retrieve it
-        testEntityDB = self.session.query(models.entity.Entity).first()
+        testStatusDB = db.meta.session.query(status.Status).first()
         
-        # just test the entity part of the object
-        self.assertEquals(testEntity.tags, testEntityDB.tags)
+        # just test the satuts part of the object
+        self.assertEquals(testStatus.short_name, testStatusDB.short_name)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_StatusList(self):
+        """testing the persistancy of StatusList
+        """
+        
+        self.fail('test is not implemented')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Department(self):
+        """testing the persistancy of Department
+        """
+        
+        name = 'TestDepartment_test_persisting_Department'
+        description = 'this is for testing purposes'
+        created_by = None
+        updated_by = None
+        date_created = datetime.datetime.now()
+        date_updated = datetime.datetime.now()
+        
+        testDepartment = department.Department(
+            name=name,
+            description=description,
+            created_by=created_by,
+            updated_by=updated_by,
+            date_created=date_created,
+            date_updated=date_updated
+        )
+        
+        # create three users, one for lead and two for members
+        
+        # user1
+        user1 = user.User(
+            name='user1_test_persisting_department',
+            description='this is for testing purposes',
+            created_by=None,
+            updated_by=None,
+            login_name='user1_tp_department',
+            first_name='user1_first_name',
+            last_name='user1_last_name',
+            email='user1@department.com',
+            department=testDepartment
+        )
+        
+        # user2
+        user2 = user.User(
+            name='user2_test_persisting_department',
+            description='this is for testing purposes',
+            created_by=None,
+            updated_by=None,
+            login_name='user2_tp_department',
+            first_name='user2_first_name',
+            last_name='user2_last_name',
+            email='user2@department.com',
+            department=testDepartment
+        )
+        
+        # user3
+        # create three users, one for lead and two for members
+        user3 = user.User(
+            name='user3_test_persisting_department',
+            description='this is for testing purposes',
+            created_by=None,
+            updated_by=None,
+            login_name='user3_tp_department',
+            first_name='user3_first_name',
+            last_name='user3_last_name',
+            email='user3@department.com',
+            department=testDepartment
+        )
+        
+        # add as the members and the lead
+        testDepartment.lead = user1
+        testDepartment.members = [user1, user2, user3]
+        
+        db.meta.session.add(testDepartment)
+        db.meta.session.commit()
+        
+        # lets check the data
+        # first get the department from the db
+        dep_from_db = db.meta.session.query(department.Department). \
+                    filter_by(name=testDepartment.name).first()
+        
+        # members
+        for i, member in enumerate(dep_from_db.members):
+            self.assertEquals( testDepartment.members[i].name, member.name)
+            self.assertEquals( testDepartment.members[i].last_name,
+                               member.last_name)
+            self.assertEquals( testDepartment.members[i].login_name,
+                               member.login_name)
+        
+        # lead
+        self.assertEquals(testDepartment.lead, dep_from_db.lead)
         

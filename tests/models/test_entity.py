@@ -571,8 +571,8 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tags_being_not_intialized(self):
-        """test if nothing is raised when creating an entity without setting a
-        tags parameter
+        """testing if nothing is raised when creating an entity without setting
+        a tags parameter
         """
         
         # this should work without errors
@@ -585,7 +585,7 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tags_being_initialized_as_an_empty_list(self):
-        """test if tags is initialized as an empty list
+        """testing if tags is initialized as an empty list
         """
         
         # this should work without errors
@@ -602,7 +602,7 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tags_init_with_something_other_than_a_list(self):
-        """test if a ValueError is going to be raised when initializing the
+        """testing if a ValueError is going to be raised when initializing the
         tags with something other than a list
         """
         
@@ -893,8 +893,8 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     ##----------------------------------------------------------------------
     #def test_links_being_not_intialized(self):
-        #"""test if nothing is raised when creating an entity without setting a
-        #links parameter
+        #"""testing if nothing is raised when creating an entity without setting
+        # a links parameter
         #"""
         
         ## this should work without errors
@@ -909,7 +909,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     ##----------------------------------------------------------------------
     #def test_links_being_initialized_as_an_empty_list(self):
-        #"""test if links is initialized as an empty list
+        #"""testing if links is initialized as an empty list
         #"""
         
         ## this should work without errors
@@ -928,7 +928,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     ##----------------------------------------------------------------------
     #def test_links_init_with_something_other_than_a_list(self):
-        #"""test if a ValueError is going to be raised when initializing the
+        #"""testing if a ValueError is going to be raised when initializing the
         #links with something other than a list
         #"""
         
@@ -998,8 +998,8 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     ##----------------------------------------------------------------------
     #def test_notes_being_not_intialized(self):
-        #"""test if nothing is raised when creating an entity without setting a
-        #notes parameter
+        #"""testing if nothing is raised when creating an entity without setting
+        #a notes parameter
         #"""
         
         ## this should work without errors
@@ -1014,7 +1014,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     ##----------------------------------------------------------------------
     #def test_notes_being_initialized_as_an_empty_list(self):
-        #"""test if notes is initialized as an empty list
+        #"""testing if notes is initialized as an empty list
         #"""
         
         ## this should work without errors
@@ -1033,7 +1033,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     ##----------------------------------------------------------------------
     #def test_notes_init_with_something_other_than_a_list(self):
-        #"""test if a ValueError is going to be raised when initializing the
+        #"""testing if a ValueError is going to be raised when initializing the
         #notes with something other than a list
         #"""
         

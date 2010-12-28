@@ -1,11 +1,11 @@
 #-*- coding: utf-8 -*-
-
+import tempfile
 
 #
 # The default database addres
 # 
 DATABASE = 'sqlite:///:memory:'
-TEST_DATABASE = 'sqlite:////home/ozgur/stalker_test.db'
+
 
 #
 # The default settings for the database, see sqlalchemy.create_engine for

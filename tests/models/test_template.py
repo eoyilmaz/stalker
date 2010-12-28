@@ -124,7 +124,7 @@ class TemplateTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_if_template_code_property_accepts_only_strings(self):
-        """tests if the template_code property is only accepting string or
+        """testing if the template_code property is only accepting string or
         unicode values
         """
         

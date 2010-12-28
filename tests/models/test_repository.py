@@ -145,7 +145,7 @@ class RepositoryTester(mocker.MockerTestCase):
                 setattr,
                 self.mock_repo,
                 'windows_path',
-            test_value
+                test_value
             )
     
     
@@ -232,7 +232,19 @@ class RepositoryTester(mocker.MockerTestCase):
         self.mocker.count(0, 1000)
         self.mocker.replay()
         
-        self.assertEquals(self.mock_repo.path, self.mock_repo.windows_path)
+        import platform
+        self.assertEquals(platform.system(), "Windows")
+        
+        new_mock_repo = repository.Repository(
+            name=self.name,
+            description=self.description,
+            tags=[self.mock_tag1, self.mock_tag2],
+            linux_path=self.linux_path,
+            osx_path=self.osx_path,
+            windows_path=self.windows_path
+        )
+        
+        self.assertEquals(new_mock_repo.path, new_mock_repo.windows_path)
     
     
     
