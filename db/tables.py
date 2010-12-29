@@ -218,6 +218,19 @@ statusLists = Table(
 )
 
 
+# REPOSITORY
+repositories = Table(
+    'repositories', metadata,
+    Column(
+        'id',
+        Integer,
+        ForeignKey('entities.id'),
+        primary_key=True
+    ),
+    Column('linux_path', String(256)),
+    Column('windows_path', String(256)),
+    Column('osx_path', String(256)),
+)
 
 
 #print "Done Creating Tables!!!"

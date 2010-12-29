@@ -481,7 +481,44 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Repository
         """
         
-        self.fail('test is not implemented yet')
+        # get the admin
+        session = db.meta.session
+        admin = session.query(user.User). \
+              filter_by(name=defaults.ADMIN_NAME).first()
+        
+        # create a new repository object and try to read it back
+        name = 'Movie-Repo'
+        description = 'test repository'
+        created_by = admin
+        updated_by = admin
+        linux_path = '/mnt/M'
+        osx_path = '/mnt/M'
+        windows_path = 'M:\\'
+        
+        # create the repository object
+        repo = repository.Repository(
+            name=name,
+            description=description,
+            created_by=created_by,
+            updated_by=updated_by,
+            linux_path=linux_path,
+            windows_path=windows_path,
+            osx_path=osx_path
+        )
+        
+        # persist it
+        session.add(repo)
+        session.commit()
+        
+        # get it back
+        repo_db = session.query(repository.Repository). \
+                filter_by(name=name).first()
+        
+        # just test the repository part of the attributes
+        self.assertEquals(repo.linux_path, repo_db.linux_path)
+        self.assertEquals(repo.windows_path, repo_db.windows_path)
+        self.assertEquals(repo.osx_path, repo_db.osx_path)
+        self.assertEquals(repo.path, repo_db.path)
     
     
     
@@ -616,7 +653,8 @@ class DatabaseModelsTester(unittest.TestCase):
         db.meta.session.commit()
         
         # now try to retrieve it
-        Tag_from_DB = db.meta.session.query(tag.Tag).filter_by(name=name).first()
+        tag_query = db.meta.session.query(tag.Tag)
+        Tag_from_DB = tag_query.filter_by(name=name).first()
         
         self.assertEquals(aTag.name, Tag_from_DB.name)
         self.assertEquals(aTag.description, Tag_from_DB.description)
@@ -639,24 +677,6 @@ class DatabaseModelsTester(unittest.TestCase):
     #----------------------------------------------------------------------
     def test_persisting_Template(self):
         """testing the persistancy of Template
-        """
-        
-        self.fail('test is not implemented yet')
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_persisting_Unit(self):
-        """testing the persistancy of Unit
-        """
-        
-        self.fail('test is not implemented yet')
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_persisting_Time(self):
-        """testing the persistancy of Time
         """
         
         self.fail('test is not implemented yet')

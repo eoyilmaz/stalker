@@ -40,7 +40,6 @@ def setup():
     """
     
     # SimpleEntity
-    #print "started mapping SimpleEntity"
     mapper(
         entity.SimpleEntity,
         tables.simpleEntities,
@@ -75,24 +74,20 @@ def setup():
         polymorphic_on=tables.simpleEntities.c.entity_type,
         polymorphic_identity='simpleEntity'
     )
-    #print "finished mapping SimpleEntity"
     
     
     
     # Tag
-    #print "started mapping Tag"
     mapper(
         tag.Tag,
         tables.tags,
         inherits=entity.SimpleEntity,
         polymorphic_identity='tag'
     )
-    #print "finished mapping Tag"
     
     
     
     # Entity
-    #print "started mapping Entity"
     mapper(
         entity.Entity,
         tables.entities,
@@ -108,12 +103,10 @@ def setup():
             'tags': synonym('_tags')
         }
     )
-    #print "finished mapping Entity"
     
     
     
-    # USER
-    #print "started mapping User"
+    # User
     mapper(
         user.User,
         tables.users,
@@ -136,12 +129,10 @@ def setup():
             'password': synonym('_password'),
         },
     )
-    #print "finished mapping User"
     
     
     
-    # DEPARTMENT
-    #print "started mapping Department"
+    # Department
     mapper(
         department.Department,
         tables.departments,
@@ -157,12 +148,10 @@ def setup():
             'members': synonym('_members')
         },
     )
-    #print "finished mapping Department"
     
     
     
     # STATUS
-    #print "started mapping Status"
     mapper(
         status.Status,
         tables.statuses,
@@ -174,12 +163,10 @@ def setup():
             'short_name': synonym('_short_name')
         }
     )
-    #print "finished mapping Status"
     
     
     
     # STATUSLIST
-    #print "started mapping StatusList"
     mapper(
         status.StatusList,
         tables.statusLists,
@@ -194,7 +181,24 @@ def setup():
             'statuses': synonym('_statuses')
         }
     )
-    #print "finished mapping StatusList"
     
     
-    #print "Done Mapping!!!"
+    
+    # REPOSITORY
+    mapper(
+        repository.Repository,
+        tables.repositories,
+        inherits=entity.Entity,
+        inherit_condition=tables.repositories.c.id==tables.entities.c.id,
+        polymorphic_identity='repository',
+        properties={
+            '_linux_path': tables.repositories.c.linux_path,
+            '_windows_path': tables.repositories.c.windows_path,
+            '_osx_path': tables.repositories.c.osx_path
+        },
+        exclude_properties=['path']
+    )
+    
+    
+    
+    

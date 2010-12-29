@@ -32,6 +32,7 @@ Contents:
    
    design.rst
    contribute.rst
+   roadmap.rst
 
 Summary
 =======

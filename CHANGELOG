@@ -1,5 +1,8 @@
 Stalker Changes:
-v0.0.1.20101228:
+v0.1.0.20101228.1:
+ * added repositories table and mapper for the repository.Repsotiry class
+
+v0.1.0.20101228:
  * created the block of database tests
  * added stalker.db.meta.__mappers__ list to hold the mappers and use it to
    check if anything is already mapped
@@ -8,6 +11,7 @@ v0.0.1.20101228:
    usable in some cases, but in fact it is also not important, the only object
    using TimeUnit was the Project class and it can go well without it. Don't
    need to make things more complex than it needs to be.
+ * increased the version number to 0.1.0 to follow the stalker roadmap
 
 v0.0.1.20101227:
  * the test_db is converted to a proper unittest which is testing all the

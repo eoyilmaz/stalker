@@ -159,19 +159,20 @@ database)
 >>> from stalker import db # the database module
 >>> db.setup()
 
-By calling the :func:`~stalker.db.setup` we have created the `session` object
-which is stored under stalker.db.meta.session (this is used to have a Singleton
-pattern in the SQLAlchemy metadata).
+By calling the :func:`~stalker.db.setup` we have created all the mappings for
+SOM and also we have created the ``session`` object
+which is stored under ``stalker.db.meta.session`` (this is used to have a
+Singleton SQLAlchemy metadata).
 
 Lets import the SOM which is stalker.models
 
->>> from stalker import models
+>>> from stalker.models.user import User
 
 Stalker comes with an *admin* user already defined in to it. To create other
-things in the database we need to create the admin by querying it.
+things in the database we need to have the admin user by querying it.
 
->>> session = db.meta.session
->>> admin = session.query(User).filter_by(name='admin').first()
+>>> dbSession = db.meta.session
+>>> admin = dbSession.query(User).filter_by(name='admin').first()
 
 Lets create another user
 
