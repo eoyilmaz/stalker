@@ -260,3 +260,16 @@ def setup():
     
     
     
+    # Template
+    mapper(
+        template.Template,
+        tables.templates,
+        inherits=entity.Entity,
+        inherit_condition=tables.templates.c.id==tables.templates.c.id,
+        polymorphic_identity='Template',
+        properties={
+            '_template_code': tables.templates.c.template_code,
+            'template_code': synonym('_template_code')
+        },
+    )
+    

@@ -117,7 +117,8 @@ class SimpleEntity(object):
         #print name_in
         
         # remove white spaces
-        name_in = re.sub('([\s])+', r'', name_in)
+        #name_in = re.sub('([\s])+', r'', name_in)
+        name_in = name_in.strip()
         #print name_in
         
         ## capitalize the first letter
@@ -125,8 +126,6 @@ class SimpleEntity(object):
         #print name_in
         
         return name_in
-        
-        
     
     
     

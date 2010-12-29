@@ -299,3 +299,20 @@ pipelineSteps = Table(
     ),
     Column('code', String(32)),
 )
+
+
+
+# TEMPLATES
+templates = Table(
+    'templates', metadata,
+    Column(
+        'id',
+        Integer,
+        ForeignKey('entities.id'),
+        primary_key=True,
+    ),
+    Column('template_code', String(32)),
+)
+
+
+

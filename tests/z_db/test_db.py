@@ -783,7 +783,32 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Template
         """
         
-        self.fail('test is not implemented yet')
+        # get the admin
+        admin = get_admin()
+        
+        # create a template object
+        
+        kwargs = {
+            'name': 'Model Asset Template',
+            'description': 'this is a template to be used for models',
+            'created_by': admin,
+            'template_code': '{{projects.root}}/{{project.name}}/SEQUENCES/\
+            {{sequence.name}}/SHOTS/{{shot.name}}'
+        }
+        
+        aTemplate = template.Template(**kwargs)
+        
+        # persist it
+        session = db.meta.session
+        session.add(aTemplate)
+        session.commit()
+        
+        # get it back
+        aTemplate_DB = session.query(template.Template).\
+                     filter_by(name=kwargs['name']).\
+                     filter_by(description=kwargs['description']).first()
+        
+        self.assertEquals(aTemplate.template_code, aTemplate_DB.template_code)
     
     
     

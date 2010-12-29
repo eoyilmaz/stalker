@@ -1,14 +1,14 @@
 <!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-12-29 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Wed Dec 29 15:40:58 EET 2010 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
+<!-- Do Not Remove: Saved date Wed Dec 29 16:55:57 EET 2010 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1293630058246" size="428941"
+    <resource referenceCreated="1293634557287" size="428875"
         spec="/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
@@ -4385,7 +4385,7 @@
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
         <child ID="1958"
-            label="Examples: {{projects.root}}/{{project.name}} /SEQUENCES/{{sequence.name}} /SHOTS/{{shot.name}}"
+            label="Examples:&#xa;    &#xa;    &#xa;      {{projects.root}}/{{project.name}}&#xa;    &#xa;    &#xa;      /SEQUENCES/{{sequence.name}}&#xa;    &#xa;    &#xa;      /SHOTS/{{shot.name}}"
             created="1288799395029" x="34.0" y="63.5" width="191.0"
             height="63.0" strokeWidth="0.0" autoSized="false" xsi:type="text">
             <strokeColor>#404040</strokeColor>
@@ -4429,7 +4429,16 @@
   &lt;/body&gt;
 &lt;/html&gt;
 </richText>
-            <label>Examples: {{projects.root}}/{{project.name}} /SEQUENCES/{{sequence.name}} /SHOTS/{{shot.name}}</label>
+            <label>Examples:
+    
+    
+      {{projects.root}}/{{project.name}}
+    
+    
+      /SEQUENCES/{{sequence.name}}
+    
+    
+      /SHOTS/{{shot.name}}</label>
         </child>
         <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
     </child>
@@ -7332,7 +7341,7 @@
             <URIString>http://vue.tufts.edu/rdf/resource/73a89ec67f0001010b45ad3d273a0a2f</URIString>
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        <shape xsi:type="rectangle"/>
     </child>
     <child ID="2185" layerID="1" created="1290430562212" x="11123.8545"
         y="842.0" width="36.410156" height="128.71875" strokeWidth="1.0"

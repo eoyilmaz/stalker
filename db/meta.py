@@ -6,7 +6,7 @@ remember correctly)
 """
 
 from sqlalchemy import MetaData
-from beaker import session as beakerSession
+#from beaker import session as beakerSession
 
 
 # SQLAlchemy database engine
