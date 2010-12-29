@@ -256,3 +256,46 @@ imageFormats = Table(
     Column('pixel_aspect', Float),
     Column('print_resolution', Float)
 )
+
+
+
+# ASSETTYPE
+assetTypes = Table(
+    'assetTypes', metadata,
+    Column(
+        'id',
+        Integer,
+        ForeignKey('entities.id'),
+        primary_key=True,
+    )
+)
+
+
+# ASSETTYPE_PIPELINE_STEPS
+assetType_pipelineSteps = Table(
+    'assetType_pipelineSteps', metadata,
+    Column(
+        'assetType_id',
+        Integer,
+        ForeignKey('assetTypes.id'),
+    ),
+    
+    Column(
+        'pipelineStep_id',
+        Integer,
+        ForeignKey('pipelineSteps.id'),
+    ),
+)
+
+
+# PIPELINESTEPS
+pipelineSteps = Table(
+    'pipelineSteps', metadata,
+    Column(
+        'id',
+        Integer,
+        ForeignKey('entities.id'),
+        primary_key=True,
+    ),
+    Column('code', String(32)),
+)

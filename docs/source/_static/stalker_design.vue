@@ -1,14 +1,14 @@
 <!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-12-29 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Wed Dec 29 02:57:50 EET 2010 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
+<!-- Do Not Remove: Saved date Wed Dec 29 15:40:58 EET 2010 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1293584270428" size="428986"
+    <resource referenceCreated="1293630058246" size="428941"
         spec="/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
@@ -2277,7 +2277,7 @@
 </richText>
             <label>Examples: design-DESIGN model-MODEL rig-RIG fur-FUR shading-SHADE previs-PREVIS match move-MM animation-ANIM fx-FX cloth sim-CLOTHSIM layout-LAYOUT lighting-LIGHT compositing-COMP</label>
         </child>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        <shape xsi:type="rectangle"/>
     </child>
     <child ID="1295" label="Tag" layerID="1" created="1272407402727"
         x="10323.469" y="577.8772" width="60.13867" height="36.2"
@@ -2939,7 +2939,7 @@
 </richText>
             <label>Examples: Character FuryCharacter Vehicle Prop Environment Shot</label>
         </child>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        <shape xsi:type="rectangle"/>
     </child>
     <child ID="1396" label="Status" layerID="1" created="1277500787817"
         x="9870.169" y="796.2019" width="143.25" height="66.5"
@@ -3380,7 +3380,7 @@
             <URIString>http://vue.tufts.edu/rdf/resource/dd623f737f0001010c4cdf7e1538b03a</URIString>
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        <shape xsi:type="rectangle"/>
     </child>
     <child ID="1475" layerID="1" created="1277542415873" x="10501.944"
         y="622.75" width="798.5039" height="614.0" strokeWidth="1.0"

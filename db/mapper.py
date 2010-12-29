@@ -11,6 +11,7 @@ from stalker.db import tables
 from stalker.models import (
     asset,
     assetBase,
+    assetType,
     booking,
     comment,
     department,
@@ -151,7 +152,7 @@ def setup():
     
     
     
-    # STATUS
+    # Status
     mapper(
         status.Status,
         tables.statuses,
@@ -166,7 +167,7 @@ def setup():
     
     
     
-    # STATUSLIST
+    # StatusList
     mapper(
         status.StatusList,
         tables.statusLists,
@@ -184,7 +185,7 @@ def setup():
     
     
     
-    # REPOSITORY
+    # Repository
     mapper(
         repository.Repository,
         tables.repositories,
@@ -204,7 +205,7 @@ def setup():
     
     
     
-    # IMAGEFORMAT
+    # ImageFormat
     mapper(
         imageFormat.ImageFormat,
         tables.imageFormats,
@@ -224,6 +225,38 @@ def setup():
         exclude_properties=['device_aspect']
     )
     
+    
+    
+    # AssetType
+    mapper(
+        assetType.AssetType,
+        tables.assetTypes,
+        inherits=entity.Entity,
+        inherit_condition=tables.assetTypes.c.id==tables.entities.c.id,
+        polymorphic_identity='AssetType',
+        properties={
+            '_steps': relationship(
+                pipelineStep.PipelineStep,
+                secondary=tables.assetType_pipelineSteps
+                ),
+            'steps': synonym('_steps')
+        }
+    )
+    
+    
+    
+    # PipelineStep
+    mapper(
+        pipelineStep.PipelineStep,
+        tables.pipelineSteps,
+        inherits=entity.Entity,
+        inherit_condition=tables.pipelineSteps.c.id==tables.entities.c.id,
+        polymorphic_identity='PipelineStep',
+        properties={
+            '_code': tables.pipelineSteps.c.code,
+            'code': synonym('_code')
+        }
+    )
     
     
     

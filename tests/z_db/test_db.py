@@ -11,6 +11,7 @@ from stalker import db
 from stalker.models import (
     asset,
     assetBase,
+    assetType,
     booking,
     comment,
     department,
@@ -31,6 +32,16 @@ from stalker.models import (
     user,
     version
 )
+
+
+
+#----------------------------------------------------------------------
+def get_admin():
+    """returns the admin user from the current database
+    """
+    
+    return db.meta.session.query(user.User). \
+          filter_by(name=defaults.ADMIN_NAME).first()
 
 
 
@@ -113,8 +124,7 @@ class DatabaseTester(unittest.TestCase):
         self._createdDB = True
         
         # check if there is an admin
-        admin = db.meta.session.query(user.User). \
-              filter_by(name=defaults.ADMIN_NAME).first()
+        admin = get_admin()
         
         self.assertEquals(admin.name, defaults.ADMIN_NAME)
         
@@ -161,8 +171,7 @@ class DatabaseTester(unittest.TestCase):
         self._createdDB = True
         
         # check if there is a use with name admin
-        self.assertTrue(db.meta.session.query(user.User). \
-                        filter_by(name=defaults.ADMIN_NAME).first() is None )
+        self.assertTrue(get_admin() is None )
         
         # check if there is a admins department
         self.assertTrue(db.meta.session.query(department.Department). \
@@ -245,6 +254,60 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         self.fail('test is not implemented yet')
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_AssetType(self):
+        """testing the persistancy of AssetType
+        """
+        
+        
+        # first get the admin
+        admin = get_admin()
+        
+        # create a couple of PipelineStep objects
+        pStep1 = pipelineStep.PipelineStep(
+            name='Modeling',
+            description='This is where an asset is modeled',
+            created_by=admin,
+            updated_by=admin,
+            code='MDL'
+        )
+        
+        pStep2 = pipelineStep.PipelineStep(
+            name='Lighting',
+            description="lighting done in this stage, don't mix it with \
+            shading",
+            created_by=admin,
+            updated_by=admin,
+            code='LGHT'
+        )
+        
+        # create a new AssetType object
+        kwargs = {
+            'name': 'Character',
+            'description': 'this is a test asset type',
+            'created_by': admin,
+            'updated_by': admin,
+            'steps': [pStep1, pStep2],
+        }
+        
+        aType = assetType.AssetType(**kwargs)
+        
+        # store it in the db
+        db.meta.session.add(aType)
+        db.meta.session.commit()
+        
+        # retrieve it back and check it with the first one
+        aType_DB = db.meta.session.query(assetType.AssetType). \
+                 filter_by(name=kwargs['name']).first()
+        
+        for i, pStep_DB in enumerate(aType_DB.steps):
+            self.assertEquals(aType.steps[i].name, pStep_DB.name)
+            self.assertEquals(aType.steps[i].description, pStep_DB.description) 
+        
+        
     
     
     
@@ -440,8 +503,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get the admin
         session = db.meta.session
-        admin = session.query(user.User). \
-              filter_by(name=defaults.ADMIN_NAME).first()
+        admin = get_admin()
         
         # create a new ImageFormat object and try to read it back
         kwargs = {
@@ -489,7 +551,30 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of PipelineStep
         """
         
-        self.fail('test is not implmented yet')
+        # create a new PipelineStep
+        admin = get_admin()
+        
+        kwargs = {
+            'name': 'RENDER',
+            'description': 'this is the step where all the assets are \
+            rendered',
+            'created_by': admin,
+            'code': 'RNDR'
+        }
+        
+        pStep = pipelineStep.PipelineStep(**kwargs)
+        
+        # save it to database
+        db.meta.session.add(pStep)
+        
+        # retrieve it back
+        pStep_DB = db.meta.session.query(pipelineStep.PipelineStep). \
+                 filter_by(name=kwargs['name']). \
+                 filter_by(description=kwargs['description']). \
+                 first()
+        
+        # lets compare it
+        self.assertEquals(pStep.code, pStep_DB.code)
     
     
     
@@ -509,8 +594,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get the admin
         session = db.meta.session
-        admin = session.query(user.User). \
-              filter_by(name=defaults.ADMIN_NAME).first()
+        admin = get_admin()
         
         # create a new Repository object and try to read it back
         kwargs = {
