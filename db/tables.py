@@ -5,7 +5,15 @@ this file contains the tags table
 
 
 
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import (
+    Table,
+    Column,
+    Integer,
+    Float,
+    String,
+    ForeignKey,
+    DateTime
+)
 from stalker.db import meta
 
 #create the metadata
@@ -229,8 +237,22 @@ repositories = Table(
     ),
     Column('linux_path', String(256)),
     Column('windows_path', String(256)),
-    Column('osx_path', String(256)),
+    Column('osx_path', String(256))
 )
 
 
-#print "Done Creating Tables!!!"
+
+# IMAGEFORMAT
+imageFormats = Table(
+    'imageFormats', metadata,
+    Column(
+        'id',
+        Integer,
+        ForeignKey('entities.id'),
+        primary_key=True,
+    ),
+    Column('width', Integer),
+    Column('height', Integer),
+    Column('pixel_aspect', Float),
+    Column('print_resolution', Float)
+)

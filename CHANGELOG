@@ -1,6 +1,9 @@
 Stalker Changes:
 v0.1.0.20101228.1:
- * added repositories table and mapper for the repository.Repsotiry class
+ * added repositories table and mapper for the repository.Repository class
+ * added imageFormats table and mapper for the imageFormat.ImageFormat class
+ * renamed extensions module to ext
+ * added roadmap to docs
 
 v0.1.0.20101228:
  * created the block of database tests

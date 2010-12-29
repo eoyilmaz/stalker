@@ -431,21 +431,47 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     
+    
+    
     #----------------------------------------------------------------------
     def test_persisting_ImageFormat(self):
         """testing the persistancy of ImageFormat
         """
         
-        self.fail('test is not implemented yet')
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_persisting_Linear(self):
-        #"""testing the persistancy of Linear
-        #"""
+        # get the admin
+        session = db.meta.session
+        admin = session.query(user.User). \
+              filter_by(name=defaults.ADMIN_NAME).first()
         
-        #self.fail('test is not implemented yet')
+        # create a new ImageFormat object and try to read it back
+        kwargs = {
+        'name': 'HD',
+        'description': 'test image format',
+        'created_by': admin,
+        'updated_by': admin,
+        'width': 1920,
+        'height': 1080,
+        'pixel_aspect': 1.0,
+        'print_resolution': 300.0
+        }
+        
+        # create the ImageFormat object
+        imFormat = imageFormat.ImageFormat(**kwargs)
+        
+        # persist it
+        session.add(imFormat)
+        session.commit()
+        
+        # get it back
+        imFormat_db = session.query(imageFormat.ImageFormat). \
+                filter_by(name=kwargs['name']).first()
+        
+        # just test the repository part of the attributes
+        self.assertEquals(imFormat.width, imFormat_db.width)
+        self.assertEquals(imFormat.height, imFormat_db.height)
+        self.assertEquals(imFormat.pixel_aspect, imFormat_db.pixel_aspect)
+        self.assertEquals(imFormat.print_resolution,
+                          imFormat_db.print_resolution)
     
     
     
@@ -486,25 +512,19 @@ class DatabaseModelsTester(unittest.TestCase):
         admin = session.query(user.User). \
               filter_by(name=defaults.ADMIN_NAME).first()
         
-        # create a new repository object and try to read it back
-        name = 'Movie-Repo'
-        description = 'test repository'
-        created_by = admin
-        updated_by = admin
-        linux_path = '/mnt/M'
-        osx_path = '/mnt/M'
-        windows_path = 'M:\\'
+        # create a new Repository object and try to read it back
+        kwargs = {
+        'name': 'Movie-Repo',
+        'description': 'test repository',
+        'created_by': admin,
+        'updated_by': admin,
+        'linux_path': '/mnt/M',
+        'osx_path': '/mnt/M',
+        'windows_path': 'M:\\'
+        }
         
         # create the repository object
-        repo = repository.Repository(
-            name=name,
-            description=description,
-            created_by=created_by,
-            updated_by=updated_by,
-            linux_path=linux_path,
-            windows_path=windows_path,
-            osx_path=osx_path
-        )
+        repo = repository.Repository(**kwargs)
         
         # persist it
         session.add(repo)
@@ -512,7 +532,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get it back
         repo_db = session.query(repository.Repository). \
-                filter_by(name=name).first()
+                filter_by(name=kwargs['name']).first()
         
         # just test the repository part of the attributes
         self.assertEquals(repo.linux_path, repo_db.linux_path)

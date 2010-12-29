@@ -72,7 +72,7 @@ def setup():
             'date_updated': synonym('_date_updated')
         },
         polymorphic_on=tables.simpleEntities.c.entity_type,
-        polymorphic_identity='simpleEntity'
+        polymorphic_identity='SimpleEntity'
     )
     
     
@@ -82,7 +82,7 @@ def setup():
         tag.Tag,
         tables.tags,
         inherits=entity.SimpleEntity,
-        polymorphic_identity='tag'
+        polymorphic_identity='Tag'
     )
     
     
@@ -93,7 +93,7 @@ def setup():
         tables.entities,
         inherits=entity.SimpleEntity,
         inherit_condition=tables.entities.c.id==tables.simpleEntities.c.id,
-        polymorphic_identity='entity',
+        polymorphic_identity='Entity',
         properties={
             '_tags': relationship(
                 tag.Tag,
@@ -112,7 +112,7 @@ def setup():
         tables.users,
         inherits=entity.Entity,
         inherit_condition=tables.users.c.id==tables.entities.c.id,
-        polymorphic_identity='user',
+        polymorphic_identity='User',
         properties={
             'enitites_created': synonym('_entities_created'),
             'enitites_updated': synonym('_entities_updated'),
@@ -138,7 +138,7 @@ def setup():
         tables.departments,
         inherits=entity.Entity,
         inherit_condition=tables.departments.c.id==tables.entities.c.id,
-        polymorphic_identity='department',
+        polymorphic_identity='Department',
         properties={
             '_members': relationship(
                 user.User,
@@ -157,7 +157,7 @@ def setup():
         tables.statuses,
         inherits=entity.Entity,
         inherit_condition=tables.statuses.c.id==tables.entities.c.id,
-        polymorphic_identity='status',
+        polymorphic_identity='Status',
         properties={
             '_short_name': tables.statuses.c.short_name,
             'short_name': synonym('_short_name')
@@ -172,7 +172,7 @@ def setup():
         tables.statusLists,
         inherits=entity.Entity,
         inherit_condition=tables.statusLists.c.id==tables.entities.c.id,
-        polymorphic_identity='statusLists',
+        polymorphic_identity='StatusLists',
         properties={
             '_statuses': relationship(
                 status.Status,
@@ -190,13 +190,38 @@ def setup():
         tables.repositories,
         inherits=entity.Entity,
         inherit_condition=tables.repositories.c.id==tables.entities.c.id,
-        polymorphic_identity='repository',
+        polymorphic_identity='Repository',
         properties={
             '_linux_path': tables.repositories.c.linux_path,
+            'linux_path': synonym('_linux_path'),
             '_windows_path': tables.repositories.c.windows_path,
-            '_osx_path': tables.repositories.c.osx_path
+            'windows_path': synonym('_windows_path'),
+            '_osx_path': tables.repositories.c.osx_path,
+            'osx_path': synonym('_osx_path')
         },
         exclude_properties=['path']
+    )
+    
+    
+    
+    # IMAGEFORMAT
+    mapper(
+        imageFormat.ImageFormat,
+        tables.imageFormats,
+        inherits=entity.Entity,
+        inherit_condition=tables.imageFormats.c.id==tables.entities.c.id,
+        polymorphic_identity='ImageFormat',
+        properties={
+            '_width': tables.imageFormats.c.width,
+            'width': synonym('_width'),
+            '_height': tables.imageFormats.c.height,
+            'height': synonym('_height'),
+            '_pixel_aspect': tables.imageFormats.c.pixel_aspect,
+            'pixel_aspect': synonym('_pixel_aspect'),
+            '_print_resolution': tables.imageFormats.c.print_resolution,
+            'print_resolution': synonym('print_resolution')
+        },
+        exclude_properties=['device_aspect']
     )
     
     
