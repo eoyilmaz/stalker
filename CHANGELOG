@@ -1,4 +1,9 @@
 Stalker Changes:
+v0.1.0.20101229.3:
+ * generalized the Template class. Now every Entity can be assigned to a
+   template, it is not limited with Assets or References.
+ * 
+
 v0.1.0.20101229.2:
  * entity.SimpleEntity.name now can have white spaces, but not at the beggining
    or end, just in the middle

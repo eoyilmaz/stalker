@@ -68,6 +68,103 @@ class Template(entity.Entity):
         return locals()
     
     template_code = property(**template_code())
+
+
+
+
+
+
+########################################################################
+class PipelineTemplate(Template):
+    """PipelineTemplate objects help to specify where to place a file related
+    to a pipelineStep object.
     
+    When a user wants put a :ref:~stalker.models.version.Version of his file to
+    server then Stalker decides where to put this file in the server by looking
+    at the related :ref:~stalker.models.assetType and
+    :ref:~stalker.models.pipelineStep.PipelineStep object of this version an
+    then by using the given template code it evaluates the path and the file
+    names of the current version
+    
+    :param asset_type: holds one asset type object
+    
+    examples::
+    
+        from stalker import db
+        from stalker.models import (
+            asset,
+            pipelineTemplate,
+            status,
+            task,
+            version,
+        )
+        db.setup()
+        session = db.meta.session
+        newCharacterTemplate = pipelineTemplate.PipelineTemplate(
+            name='Character Template',
+            description='This is the template that shows where to save a \
+character asset',
+            path_code='{{project.code}}/ASSETS/{{assetType.name}}s/\
+{{asset.code}}/{{pipelineStep.name}}',
+            file_code='{{asset.code}}_{{take.name}}_{{pipelineStep.name}}_\
+{{version.version_number}}.{{version.file.extension}}'
+        )
+    
+    Lets create a new character asset::
+    
+        from stalker import db
+        
+        charStatList = session.query(status.StatusList).filter_by(\
+name='Character Status List').first()
+        charAssetType = session.query(assetType.AssetType).filter_by(\
+name='Character').first()
+        newAsset = asset.Asset(
+            name='Olum',
+            description='This is the final boss which is going to be seen in the\
+end of the movie. It should give the feeling of the death.'
+            statusList=charStatList,
+            status=0,
+            type=charAssetType)
+    
+    Create a task for the asset
+    
+    >>> newTask = task.Task(
+        name='Model',
+        description'='The modeling task of the asset')
+    
+    Create a new version for the task
+    
+    >>> newVersion=version.Version(
+            name='a version',
+            description='a description',
+            version=1,
+            revision=0,
+        )
+    
+    Attach it to the task
+    
+    >>> newTask.versions.append(newVersion)
+    
+    Assign the new asset to a project from the database
+    
+    >>> session.query(project.Project).filter_by(code='PRENUYK').first().\
+assets.append(newAsset)
+    
+    Save them to the database
+    
+    >>> session.add(newCharacterTemplate, newAsset, newTask, newVersion)
+    >>> session.commit()
+    
+    Now render the template with the given entity, in our case it is the
+    version:
+    
+    >>> newTemplate.render(newVersion)
+    ('PRENUYK/ASSETS/Characters/Olum/Design/','Olum_MAIN_DESIGN_v001')
+    
+    """
+    
+    pass
+        
+        
     
     
