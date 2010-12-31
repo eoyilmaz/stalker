@@ -147,4 +147,30 @@ def __create_mappers__(mappers):
 
 
 
-
+#----------------------------------------------------------------------
+def login(user_name, password):
+    """a login helper for the system, definetely need to change this later
+    """
+    
+    # check if the database is setup
+    if meta.session == None:
+        raise(ValueError("stalker is not connected to any db right now, use\
+        stalker.db.setup(), to setup the default db"))
+    
+    # try to get the given user
+    from stalker.models import user
+    
+    userObj = meta.session.query(user.User).filter_by(name=user_name).first()
+    
+    #assert(isinstance(userObj, user.User))
+    
+    error_msg = "user name and login don't match"
+    
+    if userObj is None:
+        raise(ValueError(error_msg))
+    
+    if userObj.password != password:
+        raise(ValueError(error_msg))
+    
+    meta.logged_user = userObj
+    return userObj

@@ -1,14 +1,14 @@
-<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-12-30 -->
+<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2010-12-31 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Thu Dec 30 17:56:04 EET 2010 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
+<!-- Do Not Remove: Saved date Fri Dec 31 10:51:17 EET 2010 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1293724564343" size="454158"
+    <resource referenceCreated="1293785477991" size="453130"
         spec="/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
@@ -8560,8 +8560,8 @@
         <ID1 xsi:type="node">2322</ID1>
         <ID2 xsi:type="node">2328</ID2>
     </child>
-    <child ID="2333" label="PipelineTemplate" layerID="1"
-        created="1293717259136" x="11323.389" y="1013.83545"
+    <child ID="2333" label="AssetTemplate" layerID="1"
+        created="1293717259136" x="11308.389" y="932.83545"
         width="230.0" height="112.25" strokeWidth="1.0" autoSized="true" xsi:type="node">
         <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
@@ -8655,7 +8655,7 @@
         <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
     </child>
     <child ID="2358" label="ReferenceTemplate" layerID="1"
-        created="1293717927562" x="11564.276" y="1019.83545"
+        created="1293717927562" x="11568.276" y="932.83545"
         width="213.0" height="112.25" strokeWidth="1.0" autoSized="true" xsi:type="node">
         <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
@@ -8831,8 +8831,8 @@
         <ID1 xsi:type="node">1145</ID1>
         <ID2 xsi:type="node">2364</ID2>
     </child>
-    <child ID="2367" layerID="1" created="1293718542929" x="11465.541"
-        y="888.37695" width="62.566406" height="125.958984"
+    <child ID="2367" layerID="1" created="1293718542929" x="11465.306"
+        y="862.2256" width="53.98633" height="71.11035"
         strokeWidth="1.0" autoSized="false" controlCount="0"
         arrowState="2" xsi:type="link">
         <strokeColor>#000000</strokeColor>
@@ -8848,12 +8848,13 @@
             </metadata>
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/37a30c937f00010150882100f2b0c3fd</URIString>
-        <point1 x="11527.607" y="888.87695"/>
-        <point2 x="11466.041" y="1013.83594"/>
+        <point1 x="11518.792" y="862.7256"/>
+        <point2 x="11465.806" y="932.83594"/>
+        <ID1 xsi:type="node">2180</ID1>
         <ID2 xsi:type="node">2333</ID2>
     </child>
-    <child ID="2368" layerID="1" created="1293718544031" x="11556.107"
-        y="891.37695" width="80.36035" height="128.95898"
+    <child ID="2368" layerID="1" created="1293718544031" x="11570.703"
+        y="862.2246" width="58.524414" height="71.11133"
         strokeWidth="1.0" autoSized="false" controlCount="0"
         arrowState="2" xsi:type="link">
         <strokeColor>#000000</strokeColor>
@@ -8869,8 +8870,9 @@
             </metadata>
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/37a30c937f00010150882100d7674f35</URIString>
-        <point1 x="11556.607" y="891.87695"/>
-        <point2 x="11635.968" y="1019.83594"/>
+        <point1 x="11571.203" y="862.7246"/>
+        <point2 x="11628.728" y="932.83594"/>
+        <ID1 xsi:type="node">2180</ID1>
         <ID2 xsi:type="node">2358</ID2>
     </child>
     <layer ID="1" label="Layer 1" created="0" x="0.0" y="0.0"

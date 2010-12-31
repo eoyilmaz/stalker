@@ -92,7 +92,7 @@ Summary
    stalker.models.task.Task
    stalker.models.template
    stalker.models.template.Template
-   stalker.models.template.PipelineTemplate
+   stalker.models.template.AssetTemplate
    stalker.models.user
    stalker.models.user.User
    stalker.models.version

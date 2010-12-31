@@ -31,3 +31,4 @@ __mappers__ = []
     #data_dir='/tmp/cache/data',
     #lock_dir='/tmp/cache/lock'
 #)
+logged_user = None
