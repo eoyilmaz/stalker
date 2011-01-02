@@ -11,7 +11,7 @@ from sqlalchemy.orm import mapper, sessionmaker
 from sqlalchemy import create_engine
 from stalker.conf import defaults
 from stalker.db import tables, meta
-from stalker.models import user, department
+from stalker.models import error, user, department
 
 
 
@@ -149,13 +149,26 @@ def __create_mappers__(mappers):
 
 #----------------------------------------------------------------------
 def login(user_name, password):
-    """a login helper for the system, definetely need to change this later
+    """a login helper for the system, definetely need to change this later with
+    a proper login system.
+    
+    This helper function is written to help users persist their login
+    information in their home folder, the aim of this function is not security.
+    So one can quickly by-pass this system and get himself/herself logged in or
+    query information from the database without login.
+    
+    This function stores the login information of the user in the users home
+    folder, inside a folder called ".stalker" by pickeling the user object in
+    to the file called "logged_user".
+    
+    The user information is going to be used in the database to store who
+    created, updated, read or delete the data.
     """
     
     # check if the database is setup
     if meta.session == None:
-        raise(ValueError("stalker is not connected to any db right now, use\
-        stalker.db.setup(), to setup the default db"))
+        raise(error.LoginError("stalker is not connected to any db right now, \
+        use stalker.db.setup(), to setup the default db"))
     
     # try to get the given user
     from stalker.models import user
@@ -167,10 +180,10 @@ def login(user_name, password):
     error_msg = "user name and login don't match"
     
     if userObj is None:
-        raise(ValueError(error_msg))
+        raise(error.LoginError(error_msg))
     
     if userObj.password != password:
-        raise(ValueError(error_msg))
+        raise(error.LoginError(error_msg))
     
     meta.logged_user = userObj
     return userObj

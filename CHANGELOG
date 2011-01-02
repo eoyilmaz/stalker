@@ -1,4 +1,8 @@
 Stalker Changes:
+v0.1.0.20110102:
+ * added the error.LoginError exception for login errors
+ * started to add tests for db.login function
+
 v0.1.0.20101231:
  * moved the login function to the db.__init__ to let it used just after
    setting up the database without importing any new module

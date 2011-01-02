@@ -105,6 +105,7 @@ class AssetTemplate(Template):
             version,
       )
       
+      # connect to the database (or set it up if it is not already)
       db.setup()
       session = db.meta.session
       

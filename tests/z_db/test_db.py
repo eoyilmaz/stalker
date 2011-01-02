@@ -16,6 +16,7 @@ from stalker.models import (
     comment,
     department,
     entity,
+    error,
     group,
     imageFormat,
     link,
@@ -32,16 +33,6 @@ from stalker.models import (
     user,
     version
 )
-
-
-
-#----------------------------------------------------------------------
-def get_admin():
-    """returns the admin user from the current database
-    """
-    
-    return db.meta.session.query(user.User). \
-          filter_by(name=defaults.ADMIN_NAME).first()
 
 
 
@@ -89,7 +80,7 @@ class DatabaseTester(unittest.TestCase):
         #db.setup(self.TEST_DATABASE_URI)
         
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -99,7 +90,7 @@ class DatabaseTester(unittest.TestCase):
         location
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -108,7 +99,7 @@ class DatabaseTester(unittest.TestCase):
         """testing if the temp user is deleted
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -124,7 +115,7 @@ class DatabaseTester(unittest.TestCase):
         self._createdDB = True
         
         # check if there is an admin
-        admin = get_admin()
+        admin = db.login(defaults.ADMIN_NAME,defaults.ADMIN_PASSWORD)
         
         self.assertEquals(admin.name, defaults.ADMIN_NAME)
         
@@ -159,6 +150,52 @@ class DatabaseTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
+    def test_db_login_LogginError_raised(self):
+        """testing if stalker.models.error.LoginError will be raised when login
+        information is wrong
+        """
+        
+        db.setup(self.TEST_DATABASE_URI)
+        self._createdDB = True
+        
+        test_datas = [
+            ('',''),
+            ('a user name', ''),
+            ('', 'just a pass'),
+            ('no correct user', 'wrong pass')
+        ]
+        
+        for user_name, password in test_datas:
+            self.assertRaises(
+                error.LoginError,
+                db.login,
+                user_name,
+                password
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_db_login_creates_a_file_in_users_home(self):
+        """testing if the db.login function creates a file called logged_user
+        in the $HOME/.stalker folder
+        """
+        
+        self.fail("test is not implemented yet")
+        
+    
+    
+    #----------------------------------------------------------------------
+    def test_db_login_stores_the_information(self):
+        """testing if the db.login stores the information of latest login in
+        the users $HOME/.stalker/logged_user file as a pickled object
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_no_default_admin_creation(self):
         """testing if there is no user if default.AUTO_CREATE_ADMIN is False
         """
@@ -171,11 +208,13 @@ class DatabaseTester(unittest.TestCase):
         self._createdDB = True
         
         # check if there is a use with name admin
-        self.assertTrue(get_admin() is None )
+        self.assertTrue(db.meta.session.query(user.User).\
+                        filter_by(name=defaults.ADMIN_NAME).first()
+                        is None )
         
         # check if there is a admins department
-        self.assertTrue(db.meta.session.query(department.Department). \
-                        filter_by(name=defaults.ADMIN_DEPARTMENT_NAME). \
+        self.assertTrue(db.meta.session.query(department.Department).\
+                        filter_by(name=defaults.ADMIN_DEPARTMENT_NAME).\
                         first() is None)
 
 
@@ -235,7 +274,7 @@ class DatabaseModelsTester(unittest.TestCase):
         #"""testing the persistancy of Angular
         #"""
         
-        #self.fail('test is not implemented yet')
+        #self.fail("test is not implemented yet")
     
     
     
@@ -244,7 +283,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Asset
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -253,7 +292,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of AssetBase
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -264,7 +303,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         
         # first get the admin
-        admin = get_admin()
+        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a couple of PipelineStep objects
         pStep1 = pipelineStep.PipelineStep(
@@ -316,7 +355,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Booking
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -325,7 +364,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Comment
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -503,7 +542,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get the admin
         session = db.meta.session
-        admin = get_admin()
+        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a new ImageFormat object and try to read it back
         kwargs = {
@@ -542,7 +581,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Link
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -552,7 +591,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         # create a new PipelineStep
-        admin = get_admin()
+        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         kwargs = {
             'name': 'RENDER',
@@ -583,7 +622,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Project
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -594,7 +633,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get the admin
         session = db.meta.session
-        admin = get_admin()
+        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a new Repository object and try to read it back
         kwargs = {
@@ -631,7 +670,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Sequence
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -640,7 +679,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Shot
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -720,7 +759,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of StatusList
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -729,7 +768,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Structure
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -774,7 +813,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Task
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -784,7 +823,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         # get the admin
-        admin = get_admin()
+        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a template object
         
@@ -817,7 +856,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of User
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
     
     
     
@@ -826,5 +865,5 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Version
         """
         
-        self.fail('test is not implemented yet')
+        self.fail("test is not implemented yet")
         
