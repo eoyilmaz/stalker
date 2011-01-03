@@ -43,6 +43,12 @@ Summary
    
    stalker
    stalker.db
+   stalker.db.auth
+   stalker.db.auth.authenticate
+   stalker.db.auth.create_session
+   stalker.db.auth.get_user
+   stalker.db.auth.login
+   stalker.db.auth.logout
    stalker.db.mapper
    stalker.db.meta
    stalker.db.tables

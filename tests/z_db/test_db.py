@@ -8,6 +8,7 @@ import tempfile
 from sqlalchemy.orm import clear_mappers
 from stalker.conf import defaults
 from stalker import db
+from stalker.db import auth
 from stalker.models import (
     asset,
     assetBase,
@@ -91,6 +92,23 @@ class DatabaseTester(unittest.TestCase):
         """
         
         self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_creating_the_default_db(self):
+        """testing if the default.DATABASE is going to be used for the database
+        address when nothgin is given for database in setup
+        """
+        # setup without any parameter
+        db.setup()
+        
+        drivername = db.meta.engine.url.drivername
+        database = db.meta.engine.url.database
+        
+        full_db_url = drivername + ':///' + database
+        
+        self.assertEquals(full_db_url, defaults.DATABASE)
     
     
     
@@ -189,6 +207,15 @@ class DatabaseTester(unittest.TestCase):
     def test_db_login_stores_the_information(self):
         """testing if the db.login stores the information of latest login in
         the users $HOME/.stalker/logged_user file as a pickled object
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_authentication(self):
+        """testing the authentication system
         """
         
         self.fail("test is not implemented yet")

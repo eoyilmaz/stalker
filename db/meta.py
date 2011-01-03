@@ -20,15 +20,3 @@ metadata = MetaData()
 
 # a couple off helper attributes
 __mappers__ = []
-
-
-## a sessionData for current user session
-#beakerSession = session.Session(
-    #{},
-    #key='stalker',
-    #type='file',
-    #cookie_expires=True,
-    #data_dir='/tmp/cache/data',
-    #lock_dir='/tmp/cache/lock'
-#)
-logged_user = None

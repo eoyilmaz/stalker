@@ -1,4 +1,9 @@
 Stalker Changes:
+v0.1.0.20110103:
+ * user.User._password is now scrambled, but the password property uses the raw
+   password
+ * added stalker.db.auth for authentication, removed the db.login function.
+
 v0.1.0.20110102:
  * added the error.LoginError exception for login errors
  * started to add tests for db.login function

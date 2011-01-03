@@ -3,6 +3,8 @@
 
 
 import re
+import base64
+import datetime
 from stalker.models import entity
 
 
@@ -19,6 +21,9 @@ class User(entity.Entity):
     
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
+    
+    :param last_login: it is a datetime.datetime object holds the last login
+      date of the user (not implemented yet)
     
     :param login_name: it is the login name of the user, it should be all lower
       case. Giving a string or unicode that has uppercase letters, it will be
@@ -39,7 +44,7 @@ class User(entity.Entity):
       user and create the department and assign the user it later.
     
     :param password: it is the password of the user, can contain any character
-      and it should be mangled by using the key from the system preferences
+      and it should be scrambled by using the key from the system preferences
     
     :param permission_groups: it is a list of permission groups that this user
       is belong to
@@ -84,7 +89,11 @@ class User(entity.Entity):
         self._first_name = self._check_first_name(first_name)
         self._last_name = self._check_last_name(last_name)
         self._login_name = self._check_login_name(login_name)
-        self._password = self._check_password(password)
+        
+        # to be able to mangle the password do it like this
+        self._password = None
+        self.password = password
+        
         self._permission_groups = \
             self._check_permission_groups(permission_groups)
         self._projects = self._check_projects(projects)
@@ -481,8 +490,7 @@ class User(entity.Entity):
             self._login_name = self._check_login_name(login_name_in)
         
         doc = """This is the property that helps to get and set login_name
-        values
-        """
+        values"""
         
         return locals()
     
@@ -494,14 +502,15 @@ class User(entity.Entity):
     def password():
         
         def fget(self):
-            return self._password
+            return base64.decodestring(self._password)
         
         def fset(self, password_in):
-            self._password = self._check_password(password_in)
+            self._password = base64.encodestring(
+                self._check_password(password_in)
+            )
         
-        doc = """This is the property that helps to get and set password
-        values
-        """
+        doc = """This is the password of the user, it is scrambled before
+        stored in the _password attribute"""
         
         return locals()
     
@@ -516,11 +525,11 @@ class User(entity.Entity):
             return self._permission_groups
         
         def fset(self, permission_groups_in):
-            self._permission_groups = self._check_permission_groups(permission_groups_in)
+            self._permission_groups = \
+                self._check_permission_groups(permission_groups_in)
         
-        doc = """This is the property that helps to get and set permission_groups
-        values
-        """
+        doc = """This is the property that helps to get and set
+        permission_groups values"""
         
         return locals()
     
@@ -573,7 +582,8 @@ class User(entity.Entity):
             return self._sequences_lead
         
         def fset(self, sequences_lead_in):
-            self._sequences_lead = self._check_sequences_lead(sequences_lead_in)
+            self._sequences_lead = \
+                self._check_sequences_lead(sequences_lead_in)
         
         doc = """This is the property that helps to get and set sequences_lead
         values

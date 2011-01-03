@@ -769,6 +769,48 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_last_login_attribute_None(self):
+        """testing if nothing happens when the last login attribute is set to
+        None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_last_login_property_None(self):
+        """testing if nothing happens when the last login property is set to
+        None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_last_login_attribute_accepts_only_datetime_instance(self):
+        """testing if a ValueError will be raised for values other than
+        datetime.datetime instances tried to be assigned to last_login
+        attribute
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_last_login_property_accepts_only_datetime_instance(self):
+        """testing if a ValueError will be raised for values other than
+        datetime.datetime instances tried to be assigned to last_login
+        property
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_last_name_attribute_None(self):
         """testing if it will be converted to an empty string if None is
         assigned to last_name attribute
@@ -1140,21 +1182,57 @@ class UserTest(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_password_attribute_being_mangled(self):
-        #"""testing if the password is mangled when trying to store it
-        #"""
+    #----------------------------------------------------------------------
+    def test_password_attribute_being_scrambled(self):
+        """testing if the password is scrambled when trying to store it
+        """
         
-        #self.fail('test not implemented yet')
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_password_property_being_mangled(self):
-        #"""testing if the password is mangled when trying to store it
-        #"""
+        test_password = 'a new test password'
         
-        #self.fail('test not implemented yet')
+        
+        aNew_user = user.User(
+            name=self.name,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            description=self.description,
+            email=self.email,
+            password=test_password,
+            login_name=self.login_name,
+            department=self.mock_department1,
+            permission_groups=[self.mock_permission_group1,
+                               self.mock_permission_group2],
+            tasks=[self.mock_task1,
+                   self.mock_task2,
+                   self.mock_task3,
+                   self.mock_task4],
+            projects=[self.mock_project1,
+                      self.mock_project2,
+                      self.mock_project3],
+            projects_lead=[self.mock_project1,
+                           self.mock_project2],
+            sequences_lead=[self.mock_sequence1,
+                            self.mock_sequence2,
+                            self.mock_sequence3,
+                            self.mock_sequence4],
+            created_by=self.mock_admin,
+            updated_by=self.mock_admin
+        )
+        
+        self.assertNotEquals(test_password, aNew_user._password)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_password_property_being_scrambled(self):
+        """testing if the password is scrambled when trying to store it
+        """
+        
+        test_password = 'a new test password'
+        
+        self.mock_user.password = test_password
+        
+        # test if they are not the same any more
+        self.assertNotEquals(test_password, self.mock_user._password)
     
     
     
