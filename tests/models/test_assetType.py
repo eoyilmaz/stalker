@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.models import assetType, pipelineStep, tag
+from stalker.models import typeEntity, pipelineStep, tag
 
 
 
@@ -44,7 +44,7 @@ class AssetTypeTester(mocker.MockerTestCase):
         self.name = 'An AssetType'
         self.description = 'This is an test asset type'
         
-        self.an_assetType_obj = assetType.AssetType(name=self.name,
+        self.an_assetType_obj = typeEntity.AssetType(name=self.name,
                                              description=self.description,
                                              tags=self.tag_list,
                                              steps=self.pipelineStep_list
@@ -78,7 +78,7 @@ class AssetTypeTester(mocker.MockerTestCase):
         # this should raise a ValueError
         self.assertRaises(
             ValueError,
-            assetType.AssetType,
+            typeEntity.AssetType,
             name=self.name,
             description=self.description,
             tags=self.tag_list,
@@ -87,7 +87,7 @@ class AssetTypeTester(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            assetType.AssetType,
+            typeEntity.AssetType,
             name=self.name,
             description=self.description,
             tags=self.tag_list,
@@ -96,7 +96,7 @@ class AssetTypeTester(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            assetType.AssetType,
+            typeEntity.AssetType,
             name=self.name,
             description=self.description,
             tags=self.tag_list,
@@ -105,7 +105,7 @@ class AssetTypeTester(mocker.MockerTestCase):
     
         self.assertRaises(
             ValueError,
-            assetType.AssetType,
+            typeEntity.AssetType,
             name=self.name,
             description=self.description,
             tags=self.tag_list,

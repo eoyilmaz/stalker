@@ -46,12 +46,15 @@ The basic usage of the system is as follows::
     # if there is no one defined
     auth.login(userObj)
 
-
+The module also introduces a decorator called
+:func:`~stalker.db.auth.login_required` to help adding the authentication
+functionality to any function or method
 """
 
 import os
 import tempfile
 import datetime
+import functools
 from beaker import session as beakerSession
 from stalker import db
 from stalker.models import error, user
@@ -165,4 +168,15 @@ use stalker.db.setup(), to setup the default db"))
                filter_by(id=SESSION['user_id']).first()
     else:
         return None
+
+
+
+#----------------------------------------------------------------------
+def login_required(func):
+    """a decorator that implements login functionality to any function or
+    method
+    """
+    
+    return func
+
 

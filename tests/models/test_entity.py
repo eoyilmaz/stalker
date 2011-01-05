@@ -5,7 +5,7 @@
 import unittest
 import mocker
 import datetime
-from stalker.models import entity, user, link, tag, status
+from stalker.models import entity, user, reference, tag, status
 
 
 
@@ -655,7 +655,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     all the attributes to objects needs a mock object of that object, that is:
     user
-    link
+    reference
     entity
     file
     note
@@ -892,9 +892,9 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     
     ##----------------------------------------------------------------------
-    #def test_links_being_not_intialized(self):
+    #def test_references_being_not_intialized(self):
         #"""testing if nothing is raised when creating an entity without setting
-        # a links parameter
+        # a references parameter
         #"""
         
         ## this should work without errors
@@ -908,8 +908,8 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     
     ##----------------------------------------------------------------------
-    #def test_links_being_initialized_as_an_empty_list(self):
-        #"""testing if links is initialized as an empty list
+    #def test_references_being_initialized_as_an_empty_list(self):
+        #"""testing if references is initialized as an empty list
         #"""
         
         ## this should work without errors
@@ -922,14 +922,14 @@ class StatusedEntityTester(mocker.MockerTestCase):
         
         #expected_result = []
         
-        #self.assertEquals(aNewEntity.links, expected_result)
+        #self.assertEquals(aNewEntity.references, expected_result)
     
     
     
     ##----------------------------------------------------------------------
-    #def test_links_init_with_something_other_than_a_list(self):
+    #def test_references_init_with_something_other_than_a_list(self):
         #"""testing if a ValueError is going to be raised when initializing the
-        #links with something other than a list
+        #references with something other than a list
         #"""
         
         ##-----------------------
@@ -944,7 +944,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
             #updated_by=self.mock_user,
             #status_list=self.mock_status_list,
             #status=0,
-            #links=test_value
+            #references=test_value
         #)
         
         
@@ -960,13 +960,13 @@ class StatusedEntityTester(mocker.MockerTestCase):
             #updated_by=self.mock_user,
             #status_list=self.mock_status_list,
             #status=0,
-            #links=test_value
+            #references=test_value
         #)
     
     
     
     ##----------------------------------------------------------------------
-    #def test_links_property_being_set_to_something_else_than_a_list(self):
+    #def test_references_property_being_set_to_something_else_than_a_list(self):
         #"""testing if a ValueError is going to be reaised when setting the list
         #attribute something other than a list
         #"""
@@ -977,22 +977,22 @@ class StatusedEntityTester(mocker.MockerTestCase):
             #ValueError,
             #setattr,
             #self.statused_entity,
-            #"links",
+            #"references",
             #test_value
         #)
     
     
     
     ##----------------------------------------------------------------------
-    #def test_links_property_set_properly(self):
+    #def test_references_property_set_properly(self):
         #"""testing if the property is set correctly
         #"""
         
-        #test_value = [self.mock_link1]
+        #test_value = [self.mock_reference1]
         
-        #self.statused_entity.links = test_value
+        #self.statused_entity.references = test_value
         
-        #self.assertEquals( self.statused_entity.links, test_value )
+        #self.assertEquals( self.statused_entity.references, test_value )
     
     
     

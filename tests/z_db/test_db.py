@@ -12,7 +12,6 @@ from stalker.db import auth
 from stalker.models import (
     asset,
     assetBase,
-    assetType,
     booking,
     comment,
     department,
@@ -20,9 +19,9 @@ from stalker.models import (
     error,
     group,
     imageFormat,
-    link,
     pipelineStep,
     project,
+    reference,
     repository,
     sequence,
     shot,
@@ -31,6 +30,7 @@ from stalker.models import (
     tag,
     task,
     template,
+    typeEntity,
     user,
     version
 )
@@ -359,14 +359,14 @@ class DatabaseModelsTester(unittest.TestCase):
             'steps': [pStep1, pStep2],
         }
         
-        aType = assetType.AssetType(**kwargs)
+        aType = typeEntity.AssetType(**kwargs)
         
         # store it in the db
         db.meta.session.add(aType)
         db.meta.session.commit()
         
         # retrieve it back and check it with the first one
-        aType_DB = db.meta.session.query(assetType.AssetType). \
+        aType_DB = db.meta.session.query(typeEntity.AssetType). \
                  filter_by(name=kwargs['name']).first()
         
         for i, pStep_DB in enumerate(aType_DB.steps):
@@ -604,15 +604,6 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Link(self):
-        """testing the persistancy of Link
-        """
-        
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_persisting_PipelineStep(self):
         """testing the persistancy of PipelineStep
         """
@@ -646,6 +637,15 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Project(self):
+        """testing the persistancy of Project
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persisting_Reference(self):
         """testing the persistancy of Project
         """
         

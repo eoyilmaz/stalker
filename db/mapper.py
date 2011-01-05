@@ -11,16 +11,15 @@ from stalker.db import tables
 from stalker.models import (
     asset,
     assetBase,
-    assetType,
     booking,
     comment,
     department,
     entity,
     group,
     imageFormat,
-    link,
     pipelineStep,
     project,
+    reference,
     repository,
     sequence,
     shot,
@@ -29,6 +28,7 @@ from stalker.models import (
     tag,
     task,
     template,
+    typeEntity,
     user,
     version
 )
@@ -229,7 +229,7 @@ def setup():
     
     # AssetType
     mapper(
-        assetType.AssetType,
+        typeEntity.AssetType,
         tables.assetTypes,
         inherits=entity.Entity,
         inherit_condition=tables.assetTypes.c.id==tables.entities.c.id,

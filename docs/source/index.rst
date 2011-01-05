@@ -53,14 +53,11 @@ Summary
    stalker.db.meta
    stalker.db.tables
    stalker.db.setup
-   stalker.db.create_mapper
    stalker.models
    stalker.models.asset
-   stalker.modesl.asset.Asset
+   stalker.models.asset.Asset
    stalker.models.assetBase
    stalker.models.assetBase.AssetBase
-   stalker.models.assetType
-   stalker.models.assetType.AssetType
    stalker.models.booking
    stalker.models.booking.Booking
    stalker.models.comment
@@ -75,12 +72,12 @@ Summary
    stalker.models.group.Group
    stalker.models.imageFormat
    stalker.models.imageFormat.ImageFormat
-   stalker.models.link
-   stalker.models.link.Link
    stalker.models.pipelineStep
    stalker.models.pipelineStep.PipelineStep
    stalker.models.project
    stalker.models.project.Project
+   stalker.models.reference
+   stalker.models.reference.Reference
    stalker.models.repository
    stalker.models.repository.Repository
    stalker.models.sequence
@@ -98,7 +95,9 @@ Summary
    stalker.models.task.Task
    stalker.models.template
    stalker.models.template.Template
-   stalker.models.template.AssetTemplate
+   stalker.models.typeEntity
+   stalker.models.typeEntity.AssetType
+   stalker.models.typeEntity.ReferenceType
    stalker.models.user
    stalker.models.user.User
    stalker.models.version

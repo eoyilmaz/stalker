@@ -78,21 +78,17 @@ rules, and there are some extra rules as listed below:
    names should start with lower-case letter
  
  * The class definitions should be precided by 72 `#` characters, if you are
-   using Wing IDE it is trivial cause Wing has these kind of templates:
+   using `Wing IDE`_ it is trivial cause it has these kind of templates::
    
-   ::
-     
      ########################################################################
      class StatusBase(object):
          """The StatusBase class
          """
          pass
-     
+  
  * The method or function definitions should be precided by 70 `-` characters,
-   and the line should be commented out, again if you are using Wing IDE it
-   does that automatically
-   
-   ::
+   and the line should be commented out, again if you are using `Wing IDE`_ it
+   does that automatically::
    
      #----------------------------------------------------------------------
      def __init__(self, name, abbreviation, thumbnail=None):
@@ -100,93 +96,86 @@ rules, and there are some extra rules as listed below:
          self._name = self._checkName(name)
      
      
- * There should be 3 spaces before and after functions and class methods:
-   ::
+ * There should be 3 spaces before and after functions and class methods::
    
-           ########################################################################
-           class StatusBase(object):
-               """The StatusBase class
-               """
-               
-               
-               
-               #----------------------------------------------------------------------
-               def __init__(self, name, abbreviation, thumbnail=None):
-                   
-                   self._name = self._checkName(name)
-               
-               
-               
-               #----------------------------------------------------------------------
-               def _checkName(self, name):
-                   """checks the name attribute
-                   """
-                   
-                   if name == '' or not isinstance(name, (str, unicode) ):
-                       raise(ValueError("the name shouldn't be empty and it should be a \
-                       str or unicode"))
-                   
-                   return name.title()
+     ########################################################################
+     class StatusBase(object):
+         """The StatusBase class
+         """
+         
+         
+         
+         #----------------------------------------------------------------------
+         def __init__(self, name, abbreviation, thumbnail=None):
+             self._name = self._checkName(name)
+         
+         
+         
+         #----------------------------------------------------------------------
+         def _checkName(self, name):
+             """checks the name attribute
+             """
+             
+             if name == '' or not isinstance(name, (str, unicode) ):
+                 raise(ValueError("the name shouldn't be empty and it should \
+                     be a str or unicode"))
+                 
+                 return name.title()
    
- * and also there should be 6 spaces before and after a class body
-   ::
+ * And also there should be 6 spaces before and after a class body::
    
-           #-*- coding: utf-8 -*-
-           """
-           Copyright (C) 2010  Erkan Ozgur Yilmaz
-           
-           This program is free software: you can redistribute it and/or modify
-           it under the terms of the GNU General Public License as published by
-           the Free Software Foundation, either version 3 of the License, or
-           (at your option) any later version.
-           
-           This program is distributed in the hope that it will be useful,
-           but WITHOUT ANY WARRANTY; without even the implied warranty of
-           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-           GNU General Public License for more details.
-           
-           You should have received a copy of the GNU General Public License
-           along with this program.  If not, see <http://www.gnu.org/licenses/>
-           """
-           
-           
-           
-           
-           
-           ########################################################################
-           class A(object):
-               pass
-           
-           
-           
-           
-           
-           
-           ########################################################################
-           class B(object):
-               pass
-        
-        
-        
-        
-        
-           
- * any lines that may contain a code or comment can not be longer than 80
+     #-*- coding: utf-8 -*-
+     
+     
+     
+     
+     
+     
+     ########################################################################
+     class A(object):
+         pass
+     
+     
+     
+     
+     
+     
+     ########################################################################
+     class B(object):
+         pass
+         
+         
+         
+         
+         
+         
+     pass
+ 
+ * Any lines that may contain a code or comment can not be longer than 80
    characters, all the longer lines should be canceled with "\\" character and
-   should continue properly from the line below
+   should continue properly from the line below::
    
-   ::
+     #----------------------------------------------------------------------
+     def _checkName(self, name):
+         """checks the name attribute
+         """
+         
+         if name == '' or not isinstance(name, (str, unicode) ):
+             raise(ValueError("the name shouldn't be empty and it should be a \
+             str or unicode"))
+         
+         return name.title()
+ 
+ * If anything is going to be checked against being None you should do it in
+   this way::
    
-       #----------------------------------------------------------------------
-       def _checkName(self, name):
-           """checks the name attribute
-           """
-           
-           if name == '' or not isinstance(name, (str, unicode) ):
-               raise(ValueError("the name shouldn't be empty and it should be a \
-               str or unicode"))
-           
-           return name.title()
+     if a is None:
+         pass
+ 
+ * Do not add docstrings to __init__ rather use the classes' own docstring.
+ * The first line in the docstring should be a brief summary seperated from the
+   rest by a blank line.
+
 
 If you are going to add a new python file (*.py), there is an empty py file
 with the name empty_code_template_file.py under docs/_static. Before starting
@@ -194,6 +183,7 @@ anything, dublicate this file and place it under the folder you want. This
 files has the neccessary shebang and the GPL 3 license text.
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
+.. _Wing IDE: http://www.wingware.com
 
 SCM - Mercurial (HG)
 ====================

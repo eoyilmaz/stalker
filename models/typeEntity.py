@@ -7,8 +7,32 @@ from stalker.models import entity, pipelineStep
 
 
 
+
+
 ########################################################################
-class AssetType(entity.Entity):
+class TypeEntity(entity.Entity):
+    """TypeEntity is the entry point for types.
+    
+    It is created to group the `Type` objects, so any other classes accepting a
+    ``TypeEntity`` object can have one of the derived classes, this is done in
+    that way mainly to ease the of creation of only one
+    :class:`~stalker.models.template.Template` class and let the others to use
+    this one Template class.
+    
+    It doesn't add any new parameters to it's super.
+    """
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(TypeEntity, self).__init__(**kwargs)
+
+
+
+
+
+
+########################################################################
+class AssetType(TypeEntity):
     """The AssetType class holds the information about the asset type.
     
     One asset type object has information about the pipeline steps that this
@@ -67,4 +91,45 @@ class AssetType(entity.Entity):
         return locals()
     
     steps = property(**steps())
+
+
+
+
+
+
+########################################################################
+class ReferenceType(TypeEntity):
+    """The type of :class:`~stalker.models.reference.Reference` is hold in
+    ReferenceType objects.
     
+    ReferenceType objects hold the type of the reference and it is generaly
+    used by :class:`~stalker.models.project.Project` to sort things out. See
+    :class:`~stalker.models.project.Project` object documentation for details.
+    
+    There are no extra parameters, uses all the defaults from the
+    :class:`~stalker.models.entity.Entity` class.
+    """
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(ReferenceType, self).__init__(**kwargs)
+
+
+
+
+
+
+########################################################################
+class ProjectType(TypeEntity):
+    """Helps to create different type of
+    :class:`~stalker.models.project.Project` objects.
+    
+    Can be used to create different type projects like Commercial, Movie, Still
+    etc.
+    """
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(ProjectType, self).__init__(**kwargs)
+
+

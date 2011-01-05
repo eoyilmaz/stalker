@@ -187,8 +187,8 @@ class SimpleEntity(object):
         
         if created_by_in is not None:
             if not isinstance(created_by_in, user.User):
-                raise ValueError("the created_by attribute should be an instance \
-                of stalker.models.user.User")
+                raise ValueError("the created_by attribute should be an \
+                instance of stalker.models.user.User")
         
         return created_by_in
     
@@ -207,8 +207,8 @@ class SimpleEntity(object):
         
         if updated_by_in is not None:
             if not isinstance(updated_by_in, user.User):
-                raise ValueError("the updated_by attribute should be an instance \
-                of stalker.models.user.User")
+                raise ValueError("the updated_by attribute should be an \
+                instance of stalker.models.user.User")
         
         return updated_by_in
     
@@ -416,7 +416,7 @@ class StatusedEntity(Entity):
                  ):
         
         # the attributes
-        #self._links = self._check_links(links)
+        #self._references = self._check_references(references)
         self._status_list = self._check_status_list(status_list)
         self._status = self._check_status(status)
         #self._notes = self._check_notes(notes)
@@ -425,17 +425,17 @@ class StatusedEntity(Entity):
     
     
     ##----------------------------------------------------------------------
-    #def _check_links(self, links_in):
-        #"""checks the given links_in value
+    #def _check_references(self, references_in):
+        #"""checks the given references_in list
         #"""
         
         ## raise ValueError when:
         
         ## it is not an instance of list
-        #if not isinstance(links_in, list):
+        #if not isinstance(references_in, list):
             #raise ValueError("the lists attribute should be set to a list")
         
-        #return links_in
+        #return references_in
     
     
     
@@ -500,20 +500,20 @@ class StatusedEntity(Entity):
     
     
     ##----------------------------------------------------------------------
-    #def links():
+    #def refereneces():
         
         #def fget(self):
-            #return self._links
+            #return self._references
         
-        #def fset(self, links_in):
-            #self._links = self._check_links(links_in)
+        #def fset(self, references_in):
+            #self._references = self._check_references(references_in)
         
-        #doc = """this is the property that sets and returns the links \
+        #doc = """this is the property that sets and returns the references \
         #attribute"""
         
         #return locals()
     
-    #links = property(**links())
+    #references = property(**references())
     
     
     

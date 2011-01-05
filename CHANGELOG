@@ -1,4 +1,23 @@
-Stalker Changes:
+Stalker Changes
+===============
+
+v0.1.0.20110104:
+ * removed the link.Link and introduced reference.Reference and
+   typeEntity.ReferenceType classes, which I think are more orginized then the
+   previous design.
+ * reorganized the AssetType and ReferenceType objects by introducing the new
+   TypeEntity class and deriving the AssetType and ReferenceType from this
+   class
+ * added ProjectType class to hold different project types (like Commercial,
+   Film, Still etc., it is different than having a Commercial Structure object)
+ * removed AssetTemplate and ReferenceTemplate concepts and generalized the
+   Template class by adding a `type` parameter to it, which accepts TypeEntity
+   and classes derived from TypeEntity.
+
+v0.1.0.20110103.2:
+ * added login_required decorator to the stalker.db.auth module, but the
+   implementation is not done yet
+
 v0.1.0.20110103:
  * user.User._password is now scrambled, but the password property uses the raw
    password
@@ -16,7 +35,6 @@ v0.1.0.20101231:
 v0.1.0.20101229.3:
  * generalized the Template class. Now every Entity can be assigned to a
    template, it is not limited with Assets or References.
- * 
 
 v0.1.0.20101229.2:
  * entity.SimpleEntity.name now can have white spaces, but not at the beggining

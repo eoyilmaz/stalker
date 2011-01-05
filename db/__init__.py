@@ -102,8 +102,28 @@ def __create_admin__():
         password=defaults.ADMIN_PASSWORD,
         email=defaults.ADMIN_EMAIL,
         department=adminDep,
-        #created_by=tempUser
     )
+    
+    #adminDep = object.__new__(department.Department)
+    
+    ## create it by using the __new__ mechanism to avoid having ValueErrors
+    #admin = object.__new__(user.User)
+    
+    ## initialize the department
+    #adminDep.__init__(
+        #name=defaults.ADMIN_DEPARTMENT_NAME,
+        #created_by=admin
+    #)
+    
+    #admin.__init__(
+        #name=defaults.ADMIN_NAME,
+        #first_name=defaults.ADMIN_NAME,
+        #login_name=defaults.ADMIN_NAME,
+        #password=defaults.ADMIN_PASSWORD,
+        #email=defaults.ADMIN_EMAIL,
+        #department=adminDep,
+        #created_by=admin
+    #)
     
     admin.created_by = admin
     admin.updated_by = admin
@@ -112,7 +132,6 @@ def __create_admin__():
     adminDep.updated_by = admin
     
     meta.session.add(admin)
-    #meta.session.delete(tempUser)
     meta.session.commit()
 
 
@@ -137,7 +156,7 @@ def __create_mappers__(mappers):
         return
     
     
-    print "creating mappers"
+    #print "creating mappers"
     
     for _mapper in mappers:
         exec("import " + _mapper)

@@ -1,3 +1,5 @@
+clear
+clear
 rm -R html
 rm -R latex
 rm -R source/generated

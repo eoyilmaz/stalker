@@ -5,8 +5,6 @@
      stalker.models.asset.Asset
      stalker.models.assetBase
      stalker.models.assetBase.AssetBase
-     stalker.models.assetType
-     stalker.models.assetType.AssetType
      stalker.models.booking
      stalker.models.booking.Booking
      stalker.models.comment
@@ -21,12 +19,12 @@
      stalker.models.group.Group
      stalker.models.imageFormat
      stalker.models.imageFormat.ImageFormat
-     stalker.models.link
-     stalker.models.link.Link
      stalker.models.pipelineStep
      stalker.models.pipelineStep.PipelineStep
      stalker.models.project
      stalker.models.project.Project
+     stalker.models.reference
+     stalker.models.reference.Reference
      stalker.models.repository
      stalker.models.repository.Repository
      stalker.models.sequence
@@ -44,7 +42,10 @@
      stalker.models.task.Task
      stalker.models.template
      stalker.models.template.Template
-     stalker.models.template.AssetTemplate
+     stalker.models.typeEntity
+     stalker.models.typeEntity.AssetType
+     stalker.models.typeEntity.ProjectType
+     stalker.models.typeEntity.ReferenceType
      stalker.models.user
      stalker.models.user.User
      stalker.models.version
