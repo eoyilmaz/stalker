@@ -21,7 +21,7 @@ from stalker.models import (
     imageFormat,
     pipelineStep,
     project,
-    reference,
+    link,
     repository,
     sequence,
     shot,
@@ -645,8 +645,8 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Reference(self):
-        """testing the persistancy of Project
+    def test_persisting_Link(self):
+        """testing the persistancy of Link
         """
         
         self.fail("test is not implemented yet")

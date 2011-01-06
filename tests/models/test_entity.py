@@ -5,7 +5,7 @@
 import unittest
 import mocker
 import datetime
-from stalker.models import entity, user, reference, tag, status
+from stalker.models import entity, user, link, tag, status
 
 
 
@@ -655,7 +655,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     all the attributes to objects needs a mock object of that object, that is:
     user
-    reference
+    link
     entity
     file
     note

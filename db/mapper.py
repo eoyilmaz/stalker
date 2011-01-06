@@ -19,7 +19,7 @@ from stalker.models import (
     imageFormat,
     pipelineStep,
     project,
-    reference,
+    link,
     repository,
     sequence,
     shot,

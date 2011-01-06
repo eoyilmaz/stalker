@@ -1,6 +1,14 @@
 Stalker Changes
 ===============
 
+v0.1.0.20110106:
+ * re-introduced the link.Link, which has a general meaning than
+   reference.Reference (I bet it will be reference again tomorrow)
+
+v0.1.0.20110105:
+ * improved the stalker.models.template.Template class documentation, and added
+   an example showing the usage of it.
+
 v0.1.0.20110104:
  * removed the link.Link and introduced reference.Reference and
    typeEntity.ReferenceType classes, which I think are more orginized then the

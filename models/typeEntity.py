@@ -98,21 +98,18 @@ class AssetType(TypeEntity):
 
 
 ########################################################################
-class ReferenceType(TypeEntity):
-    """The type of :class:`~stalker.models.reference.Reference` is hold in
-    ReferenceType objects.
+class LinkType(TypeEntity):
+    """The type of :class:`~stalker.models.link.Link` is hold in LinkType
+    objects.
     
-    ReferenceType objects hold the type of the reference and it is generaly
+    LinkType objects hold the type of the link and it is generaly
     used by :class:`~stalker.models.project.Project` to sort things out. See
     :class:`~stalker.models.project.Project` object documentation for details.
-    
-    There are no extra parameters, uses all the defaults from the
-    :class:`~stalker.models.entity.Entity` class.
     """
     
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
-        super(ReferenceType, self).__init__(**kwargs)
+        super(LinkType, self).__init__(**kwargs)
 
 
 

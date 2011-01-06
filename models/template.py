@@ -11,120 +11,102 @@ from stalker.models import entity
 
 ########################################################################
 class Template(entity.Entity):
-    """This is the template model. It holds templates for various tasks. The
-    only attribute it has is the `template_code` attiribute
+    """The template model holds templates for Types.
     
+    Template objects help to specify where to place a file related to
+    :class:`~stalker.models.typeEntity.TypeEntity` objects and its derived
+    classes.
     
-AssetTemplate objects help to specify where to place a file related
-    to a asset, namely a :class:~stalker.models.version.Version object.
+    The first very important usage of Templates is to place asset
+    :class:`~stalker.models.version.Version`'s to proper places inside a
+    :class:`~stalker.models.project.Project`'s
+    :class:`~stalker.models.structure.Structure`.
     
-    When a user wants put a :class:~stalker.models.version.Version of his file
-    to server then Stalker decides where to put this file in the server by
-    looking at the related :class:~stalker.models.typeEntity.AssetType object
-    and :class:~stalker.models.pipelineStep.PipelineStep object of this version
-    an then by using the given template code it evaluates the path and the file
-    name of the current version, then this information is used to create a new
-    :class:~stalker.models.reference.Reference object showing the file in the
-    repository tied to the current version.
+    :param path_code: The Jinja2 template code which specifies the path of the
+      given item.
     
-    :param asset_type: holds one asset type object
+    :param file_code: The Jinja2 template code which specifies the file name of
+      the given item
     
-    examples, this example is a little bit involved, it first connects to the
-    database, then creates a new template to save characters, then creates a
-    couple of other objects which are needed to create the asset object
+    :param type: A :class:`~stalker.models.typeEntity.TypeEntity` object or any
+      other class which is derived from Type.
     
-    ::
-      
+    Examples:
+    
+    A template for asset versions can have this parameters::
+    
       from stalker import db
-      from stalker.models import (
-            asset,
-            pipelineTemplate,
-            status,
-            task,
-            version,
-      )
+      from satlker.db import auth
+      from stalker.models import typeEntity, template, pipelineStep
       
-      # connect to the database (or set it up if it is not already)
+      # setup the default database
       db.setup()
+      
+      # store the query method for ease of use
       session = db.meta.session
+      query = db.meta.session.query
       
-      # get your user
-      myUser = db.login('ozgur', 'mypass')
+      # login to the system as admin
+      admin = auth.login('admin', 'admin')
       
-      path_code = '{{project.code}}/ASSETS/{{assetType.name}}s/{{asset.code}}/\
-{{pipelineStep.name}}'
-      file_code = '{{asset.code}}_{{take.name}}_{{pipelineStep.name}}_\
-{{version.version_number}}.{{version.file.extension}}'
+      # create a couple of variables
+      path_code = "{{repository.path}}/{{project.code}}/ASSETS/\
+{{asset_type.name}}/{{pipeline_step.code}}"
       
-      newCharacterTemplate = template.Template(
-            name='Character Template',
-            description='This is the template that shows where to save a \
-character asset',
-            path_code=path_code,
-            file_code=file_code,
-            created_by=myUser
+      file_code = "{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
+v{{version.version_number}}"
+      
+      # create a pipeline step object
+      modelingStep = pipelineStep.PipelineStep(
+          name='Modeling',
+          code='MODEL',
+          description='The modeling step of the asset',
+          created_by=admin
       )
       
-      # Lets create a new character asset
-      # just assume that we have already created a statusList for characters
-      # and a Character assetType object
-      # so get them from the database
-      charStatList = session.query(status.StatusList).\
-filter_by(name='Character Status List').first()
-      charAssetType = session.query(typeEntity.AssetType).\
-filter_by(name='Character').first()
-      
-      newAsset = asset.Asset(
-            name='Olum',
-            description='This is the final boss which is going to be seen in \
-the end of the movie. It should give the feeling of the death.',
-            created_by=myUser,
-            status_list=charStatList,
-            status=0,
-            type=charAssetType)
-            
-      # Create a task for the asset
-      newTask = task.Task(
-            name='Model',
-            description='The modeling task of the asset',
-            created_by=myUser)
-      
-      # Create a new version for the task
-      # we are ommiting a lot of keywords here just to keep the example short
-      # and clear
-      newVersion=version.Version(
-            name='a version',
-            description='a description',
-            created_by=myUser,
-            version=1,
-            revision=0,
+      # create a 'Character' AssetType with only one step
+      typeObj = typeEntity.AssetType(
+          name='Character',
+          description='this is the character asset type',
+          created_by=admin,
+          steps=[modelingStep]
       )
       
-      # Attach it to the task
-      newTask.versions.append(newVersion)
+      # now create our template
+      char_template = template.Template(
+          name='Character',
+          description='this is the template which explains how to place \
+Character assets',
+          path_code=path_code,
+          file_code=file_code,
+          type=typeObj,
+      )
       
-      # Assign the new asset to a project from the database
-      session.query(project.Project).filter_by(code='PRENUYK').\
-first().assets.append(newAsset)
+      # assign this template to the structure of the project with id=101
+      myProject = query(project.Project).filter_by(id=101).first()
       
-      # Save them to the database
-      session.add(newCharacterTemplate, newAsset, newTask, newVersion)
+      # append the template to the structures asset templates
+      myProject.structure.asset_templates.append(char_template)
+      
       session.commit()
-      
-      # Now render the template with the given entity, in our case it is the
-      # version:
-      print newCharacterTemplate.render(newVersion)
-      
-    it will output a tuple like this::
-      
-      ('PRENUYK/ASSETS/Characters/Olum/Design/','Olum_MAIN_DESIGN_v001')
     
+    Now with the code above, whenever a new
+    :class:`~stalker.models.version.Version` created for a **Character** asset,
+    Stalker will automatically place the related file to a certain folder and
+    with a certain file name defined by the template. For example the above
+    template should render something like below for Windows:
     
-    :param template_code: holds the template code suitable to the template
-      engine selected in the settings, the default template rendering engine is
-      Jinja2, so the code is should be a jinja2 template if you want to use the
-      defaults. It should be a string or unicode value, and cannot be empty
+    |- M:\\\PROJECTS  --> {{repository.path}}
+       |- PRENSESIN_UYKUSU  --> {{project.code}}
+          |- ASSETS  --> "ASSETS"
+            |- Character  --> {{asset_type.name}}
+               |- Olum  --> {{asset.name}}
+                  |- MODEL  --> {{pipeline_step.code}}
+                     |- Olum_MAIN_MODEL_v001.ma  --> {{asset.name}}_\
+{{take.name}}_{{asset_type.name}}_v{{version.version_number}}
     
+    And one of the good side is you can create a version from Linux, Windows or
+    OSX all the paths will be correctly handled by Stalker.
     """
     
     

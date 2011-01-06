@@ -34,9 +34,9 @@ class Structure(entity.Entity):
       :class:`~stalker.models.typeEntity.AssetType` object.
     
     :param reference_templates: holds
-      :class:`~stalker.models.template.ReferenceTemplate` objects, which can
-      help specifying templates based on the given
-      :class:`~stalker.models.reference.Reference` object
+      :class:`~stalker.models.template.Template` objects, which can help
+      specifying templates based on the given
+      :class:`~stalker.models.typeEntity.LinkType` object
     
     This templates are used in creation of Project folder structure and also
     while interacting with the assets and references in the current project.

@@ -15,6 +15,11 @@ from stalker.models import error, user, department
 
 
 
+# the shortcut for db.meta.session.query
+query = None
+
+
+
 #----------------------------------------------------------------------
 def setup(database=None, mappers=[], engine_settings=None):
     """
@@ -65,6 +70,8 @@ def setup(database=None, mappers=[], engine_settings=None):
     
     # init database
     __init_db__()
+    
+    
 
 
 
