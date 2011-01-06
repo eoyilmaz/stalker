@@ -8,7 +8,7 @@ You can use your also use your own mappers. See the docs.
 
 from sqlalchemy.orm import mapper, relationship, backref, synonym
 from stalker.db import tables
-from stalker.models import (
+from stalker.core.models import (
     asset,
     assetBase,
     booking,

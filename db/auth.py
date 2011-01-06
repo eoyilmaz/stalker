@@ -12,23 +12,23 @@ updated, read or delete the data.
 
 There are two functions to log a user in, first one is
 :func:`~stalker.db.auth.authenticate`, which accepts username and password and
-returns a :class:`~stalker.models.user.User` object::
+returns a :class:`~stalker.core.models.user.User` object::
     
     from stalker.db import auth
     userObj = auth.authenticate('username', 'password')
 
 The second one is the :func:`~stalker.db.auth.login` which uses a given
-:class:`~stalker.models.user.User` object and creates a Beaker Session and
+:class:`~stalker.core.models.user.User` object and creates a Beaker Session and
 stores the logged in user id in that session.
 
 The :func:`~stalker.db.auth.get_user` can be used to get the authenticated and
-logged in :class:`~stalker.models.user.User` object.
+logged in :class:`~stalker.core.models.user.User` object.
 
 The basic usage of the system is as follows::
     
     from stalker import db
     from stalker.db import auth
-    from stalker.models import user
+    from stalker.core.models import user
     
     # directly get the user from the database if there is a user_id
     # in the current auth.SESSION
@@ -57,7 +57,7 @@ import datetime
 import functools
 from beaker import session as beakerSession
 from stalker import db
-from stalker.models import error, user
+from stalker.core.models import error, user
 
 
 
@@ -92,7 +92,7 @@ def create_session():
 #----------------------------------------------------------------------
 def authenticate(username='', password=''):
     """Authenticates the given username and password, returns a
-    stalker.models.user.User object
+    stalker.core.models.user.User object
     
     There needs to be a already setup database for the authentication to hapen.
     """

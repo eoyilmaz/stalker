@@ -164,9 +164,9 @@ SOM and also we have created the ``session`` object
 which is stored under ``stalker.db.meta.session`` (this is used to have a
 Singleton SQLAlchemy metadata).
 
-Lets import the SOM which is stalker.models
+Lets import the SOM which is stalker.core.models
 
->>> from stalker.models.user import User
+>>> from stalker.core.models.user import User
 
 Stalker comes with an *admin* user already defined in to it. To create other
 things in the database we need to have the admin user by querying it.

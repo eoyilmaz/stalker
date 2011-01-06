@@ -11,7 +11,7 @@ from sqlalchemy.orm import mapper, sessionmaker
 from sqlalchemy import create_engine
 from stalker.conf import defaults
 from stalker.db import tables, meta
-from stalker.models import error, user, department
+from stalker.core.models import error, user, department
 
 
 
