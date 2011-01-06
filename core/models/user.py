@@ -77,6 +77,7 @@ class User(entity.Entity):
                  projects_lead=[],
                  sequences_lead=[],
                  tasks=[],
+                 last_login=None,
                  **kwargs
                  ):
         
@@ -100,6 +101,8 @@ class User(entity.Entity):
         self._projects_lead = self._check_projects_lead(projects_lead)
         self._sequence_lead = self._check_sequences_lead(sequences_lead)
         self._tasks = self._check_tasks(tasks)
+        
+        self._last_login = self._check_last_login(last_login)
     
     
     
@@ -203,6 +206,20 @@ class User(entity.Entity):
         """
         
         return first_name_in.strip().title()
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_last_login(self, last_login_in):
+        """checks the given last_login argument
+        """
+        
+        if not isinstance(last_login_in, datetime.datetime) and \
+           last_login_in is not None:
+            raise(ValueError('last_login should be an instance of \
+            datetime.datetime or None'))
+        
+        return last_login_in
     
     
     
@@ -458,6 +475,24 @@ class User(entity.Entity):
         return locals()
     
     first_name = property(**first_name())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def last_login():
+        
+        def fget(self):
+            return self._last_login
+        
+        def fset(self, last_login_in):
+            self._last_login = self._check_last_login(last_login_in)
+        
+        doc = """shows the last login time of the user as a datetime.datetime
+        instance"""
+        
+        return locals()
+    
+    last_login = property(**last_login())
     
     
     

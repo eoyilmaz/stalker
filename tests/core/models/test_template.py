@@ -67,7 +67,7 @@ class TemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_template_code_attribute_not_acception_None(self):
+    def test_if_template_code_argument_not_acception_None(self):
         """testing if assigning None to template_code raises a ValueError
         """
         # try to create a new template object with wrong values
@@ -97,8 +97,8 @@ class TemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_template_code_attribute_accepts_only_strings(self):
-        """testing if the template_code attribute is only accepting string or
+    def test_if_template_code_argument_accepts_only_strings(self):
+        """testing if template_code argument is only accepting string or
         unicode values
         """
         
@@ -124,7 +124,7 @@ class TemplateTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_if_template_code_property_accepts_only_strings(self):
-        """testing if the template_code property is only accepting string or
+        """testing if template_code property is only accepting string or
         unicode values
         """
         
@@ -150,7 +150,7 @@ class TemplateTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_if_template_code_property_works(self):
-        """testing template_code property works correctly
+        """testing if template_code property works correctly
         """
         
         test_value = '{{project.name}}/SEQs/{{sequence.name}}/SHOTS/ \

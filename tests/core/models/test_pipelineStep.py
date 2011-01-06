@@ -82,7 +82,7 @@ class PipelineStepTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_code_argument_accepts_string_only(self):
-        """testing if the code argument accepts just strings
+        """testing if code argument accepts just strings
         """
         
         # try to create a new pipeline step with wrong code
@@ -110,7 +110,7 @@ class PipelineStepTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_code_property_accepts_string_only(self):
-        """testing if the code property accepts just strings
+        """testing if code property accepts just strings
         """
         
         # try to assign something other than a string
@@ -137,7 +137,7 @@ class PipelineStepTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_code_property_working_properly(self):
-        """testing if the code property is working properly
+        """testing if code property is working properly
         """
         
         test_value = 'MM'

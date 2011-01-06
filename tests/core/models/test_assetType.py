@@ -71,7 +71,7 @@ class AssetTypeTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_steps_argument_accepts_pipelineStep_objects_only(self):
-        """testing if the steps argument accepts just PipelineStep objects
+        """testing if steps argument accepts just PipelineStep objects
         """
         
         # lets try to assign them to a newly created AssetType object
@@ -116,7 +116,7 @@ class AssetTypeTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_steps_property_for_being_pipelineStep_objects(self):
-        """testing if the steps `property` accepts just PipelineStep objects
+        """testing if steps `property` accepts just PipelineStep objects
         """
         
         # lets try to assign them to a newly created AssetType object
@@ -157,7 +157,7 @@ class AssetTypeTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_steps_property_working_properly(self):
-        """testing if the steps `property` is working properly
+        """testing if steps `property` is working properly
         """
         
         # lets create a new list of pipelineStep objects

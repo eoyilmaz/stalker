@@ -106,7 +106,7 @@ class CommentTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_body_property_is_set_properly(self):
-        """testing if the body property is set properly
+        """testing if body property is set properly
         """
         
         new_body = 'This is a new comment body'
@@ -239,7 +239,7 @@ class CommentTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_to_property_is_set_properly(self):
-        """testing if the to property is set properly
+        """testing if to property is set properly
         """
         
         new_to = self.mock_entity2

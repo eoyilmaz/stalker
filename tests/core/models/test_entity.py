@@ -138,10 +138,10 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_name_property_is_conditioned(self):
-        """testing if the name is conditioned correctly
+        """testing if name is conditioned correctly
         """
         
-        test_group = [
+        test_values = [
             ("testName", "testName"),
             ("1testName", "testName"),
             ("_testName", "testName"),
@@ -151,16 +151,61 @@ class SimpleEntityTester(mocker.MockerTestCase):
             ("SH001","SH001"),
         ]
         
-        for test_value in test_group:
+        for test_value in test_values:
             # set the new name
             self.simple_entity.name = test_value[0]
             
             self.assertEquals(
                 self.simple_entity.name,
                 test_value[1],
-                "the name property is not correctly conditioned for, " + \
+                "the name property is not correctly formatted for, " + \
                     test_value[0] + ", " + test_value[1]
             )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_nice_name_is_formatted_correctly(self):
+        """testing if nice name is formatted correctly
+        """
+        
+        test_values = [
+            ("testName", "test_name"),
+            ("1testName", "test_name"),
+            ("_testName", "test_name"),
+            ("2423$+^^+^'%+%%&_testName", "test_name"),
+            ("2423$+^^+^'%+%%&_testName_35", "test_name_35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35", "test_name_35"),
+            ("SH001","sh001"),
+            ("My name is Ozgur", "my_name_is_ozgur"),
+            (" this is another name for an asset", 
+             "this_is_another_name_for_an_asset"),
+        ]
+        
+        for test_value in test_values:
+            self.simple_entity.name = test_value[0]
+            
+            self.assertEquals(
+                self.simple_entity.nice_name,
+                test_value[1],
+                "the nice name property is not correctly formatted for, " + \
+                    test_value[0] + ", " + test_value[1]
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_nice_name_property_is_read_only(self):
+        """testing if nice name property is read-only
+        """
+        
+        self.assertRaises(
+            AttributeError,
+            setattr,
+            self.simple_entity,
+            "nice_name",
+            "a text"
+        )
     
     
     
@@ -635,7 +680,7 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tags_property_set_properly(self):
-        """testing if the property is set correctly
+        """testing if property is set correctly
         """
         
         test_value = [self.mock_tag1]
@@ -985,7 +1030,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     ##----------------------------------------------------------------------
     #def test_references_property_set_properly(self):
-        #"""testing if the property is set correctly
+        #"""testing if property is set correctly
         #"""
         
         #test_value = [self.mock_reference1]
@@ -1057,7 +1102,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     ##----------------------------------------------------------------------
     #def test_notes_property_working_properly(self):
-        #"""testing if the notes property working properly
+        #"""testing if notes property working properly
         #"""
         
         ## assign a new note object to the notes property and check if it is

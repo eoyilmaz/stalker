@@ -132,7 +132,7 @@ class StatusListTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_status_list_argument_accepts_statuses_only(self):
-        """testing if the statuses list argument accepts list of statuses only
+        """testing if statuses list argument accepts list of statuses only
         """
         
         # the statuses argument should be a list of statuses

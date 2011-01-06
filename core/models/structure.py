@@ -2,7 +2,7 @@
 
 
 
-from stalker.core.models import entity
+from stalker.core.models import entity, template
 
 
 
@@ -16,7 +16,7 @@ class Structure(entity.Entity):
     :class:`~stalker.core.models.repository.Repository`.
     
     A structure has these parameters:
-    :param folder_template: it is a string holding several lines of text
+    :param project_template: it is a string holding several lines of text
       showing the folder structure of the project. Whenever a project is
       created, folders are created by looking at this folder template.
       
@@ -47,5 +47,125 @@ class Structure(entity.Entity):
     
     
     
-    pass
-
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 project_template="",
+                 asset_templates=[],
+                 reference_templates=[], **kwargs):
+        super(Structure, self).__init__(**kwargs)
+        
+        self._project_template = self._check_project_template(project_template)
+        self._asset_templates = self._check_asset_templates(asset_templates)
+        self._reference_template = \
+            self._check_reference_templates(reference_templates)
+    
+        
+    
+    
+    #----------------------------------------------------------------------
+    def _check_asset_templates(self, asset_templates_in):
+        """checks the given asset_templates list
+        """
+        
+        if not isinstance(asset_templates_in, list):
+            raise(ValueError("asset_templates should be a list object"))
+        
+        for element in asset_templates_in:
+            if not isinstance(element, template.Template):
+                raise(ValueError("asset_templates should only contain \
+                instances of stalker.core.models.template.Template objects"))
+        
+        return asset_templates_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_reference_templates(self, reference_templates_in):
+        """checks the given reference_templates list
+        """
+        
+        if not isinstance(reference_templates_in, list):
+            raise(ValueError("reference_templates should be a list object"))
+        
+        for element in reference_templates_in:
+            if not isinstance(element, template.Template):
+                raise(ValueError("reference_templates should only contain \
+                instances of stalker.core.models.template.Template objects"))
+        
+        return reference_templates_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_project_template(self, project_template_in):
+        """checks the given project_template object
+        """
+        
+        if not isinstance(project_template_in, (str, unicode)):
+            raise(ValueError("project_template should be an instance of string \
+            or unicode"))
+        
+        return project_template_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def asset_templates():
+        
+        def fget(self):
+            return self._asset_templates
+        
+        def fset(self, asset_templates_in):
+            self._asset_templates = \
+                self._check_asset_templates(asset_templates_in)
+        
+        doc = """A list of
+        :class:`~stalker.core.models.template.Template` objects which gives
+        information about the :class:`~stalker.core.models.asset.Asset`
+        :class:`~stalker.core.models.version.Version` file placements"""
+        
+        return locals()
+    
+    asset_templates = property(**asset_templates())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def reference_templates():
+        
+        def fget(self):
+            return self._reference_templates
+        
+        def fset(self, reference_templates_in):
+            self._reference_templates = \
+                self._check_reference_templates(reference_templates_in)
+        
+        doc = """A list of
+        :class:`~stalker.core.models.template.Template` objects which gives
+        information about the placement of references to entities"""
+        
+        return locals()
+    
+    reference_templates = property(**reference_templates())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def project_template():
+        
+        def fget(self):
+            return self._project_template
+        
+        def fset(self, project_template_in):
+            self._project_template = \
+                self._check_project_template(project_template_in)
+        
+        doc= """A string which shows the folder structure of the current
+        project. It can have Jinja2 directives. See the documentation of
+        :class:`~stalker.core.models.structure.Structure` object for more
+        information"""
+        
+        return locals()
+    
+    project_template = property(**project_template())
+    

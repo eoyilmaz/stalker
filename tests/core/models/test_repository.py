@@ -98,7 +98,7 @@ class RepositoryTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_linux_path_property_works_properly(self):
-        """testing if the linux_path property works properly
+        """testing if linux_path property works properly
         """
         
         test_value = '~/newRepoPath/Projects'
@@ -152,7 +152,7 @@ class RepositoryTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_windows_path_property_works_properly(self):
-        """testing if the windows_path property works properly
+        """testing if windows_path property works properly
         """
         
         test_value = '~/newRepoPath/Projects'
@@ -206,7 +206,7 @@ class RepositoryTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_osx_path_property_works_properly(self):
-        """testing if the osx_path property works properly
+        """testing if osx_path property works properly
         """
         
         test_value = '~/newRepoPath/Projects'
@@ -219,7 +219,7 @@ class RepositoryTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_path_returns_properly_for_windows(self):
-        """testing if the path returns the correct value for the os
+        """testing if path returns the correct value for the os
         """
         
         assert(isinstance(self.mocker, mocker.Mocker))
@@ -250,7 +250,7 @@ class RepositoryTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_path_returns_properly_for_linux(self):
-        """testing if the path returns the correct value for the os
+        """testing if path returns the correct value for the os
         """
         
         assert(isinstance(self.mocker, mocker.Mocker))
@@ -269,7 +269,7 @@ class RepositoryTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_path_returns_properly_for_osx(self):
-        """testing if the path returns the correct value for the os
+        """testing if path returns the correct value for the os
         """
         
         assert(isinstance(self.mocker, mocker.Mocker))

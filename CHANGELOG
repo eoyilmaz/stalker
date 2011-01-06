@@ -1,7 +1,15 @@
 Stalker Changes
 ===============
 
-v0.1.0.20110106:
+v0.1.0.20110106.2:
+ * added nice_name property to the stalker.core.models.entity.SimpleEntity
+   class
+ * added tests for stalker.core.models.structure.Structure class
+ * implemented the stalker.core.models.structure.Structure class
+ * added last_login attribute to the stalker.core.models.user.User class and
+   added all the tests
+
+v0.1.0.20110106.1:
  * re-introduced the link.Link, which has a general meaning than
    reference.Reference (I bet it will be reference again tomorrow)
  * stalker.models moved to stalker.core.models

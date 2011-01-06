@@ -651,9 +651,9 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_pixel_aspect_if_being_initialized_correctly(self):
-        """testing if the pixel_aspect is correctly initialized to its default
-        value when omitted
+    def test_pixel_aspect_property_if_being_initialized_correctly(self):
+        """testing if pixel_aspect property is correctly initialized to its
+        default value when omitted
         """
         
         an_image_format = imageFormat.ImageFormat(

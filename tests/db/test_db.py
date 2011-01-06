@@ -97,7 +97,7 @@ class DatabaseTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_creating_the_default_db(self):
-        """testing if the default.DATABASE is going to be used for the database
+        """testing if default.DATABASE is going to be used for the database
         address when nothgin is given for database in setup
         """
         # setup without any parameter
@@ -114,7 +114,7 @@ class DatabaseTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_temp_user_deleted(self):
-        """testing if the temp user is deleted
+        """testing if temp user is deleted
         """
         
         self.fail("test is not implemented yet")
@@ -133,7 +133,7 @@ class DatabaseTester(unittest.TestCase):
         self._createdDB = True
         
         # check if there is an admin
-        admin = db.login(defaults.ADMIN_NAME,defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME,defaults.ADMIN_PASSWORD)
         
         self.assertEquals(admin.name, defaults.ADMIN_NAME)
         
@@ -168,9 +168,9 @@ class DatabaseTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_db_login_LogginError_raised(self):
+    def test_auth_authenticate_LogginError_raised(self):
         """testing if stalker.core.models.error.LoginError will be raised when
-        login information is wrong
+        authentication information is wrong
         """
         
         db.setup(self.TEST_DATABASE_URI)
@@ -186,45 +186,45 @@ class DatabaseTester(unittest.TestCase):
         for user_name, password in test_datas:
             self.assertRaises(
                 error.LoginError,
-                db.login,
+                auth.authenticate,
                 user_name,
                 password
             )
     
     
     
-    #----------------------------------------------------------------------
-    def test_db_login_creates_a_file_in_users_home(self):
-        """testing if the db.login function creates a file called logged_user
-        in the $HOME/.stalker folder
-        """
+    ##----------------------------------------------------------------------
+    #def test_auth_login_creates_a_file_in_users_home(self):
+        #"""testing if auth.login function creates a file called logged_user
+        #in the $HOME/.stalker folder
+        #"""
         
-        self.fail("test is not implemented yet")
+        #self.fail("test is not implemented yet")
         
     
     
-    #----------------------------------------------------------------------
-    def test_db_login_stores_the_information(self):
-        """testing if the db.login stores the information of latest login in
-        the users $HOME/.stalker/logged_user file as a pickled object
-        """
+    ##----------------------------------------------------------------------
+    #def test_auth_login_stores_the_information(self):
+        #"""testing if auth.login stores the information of latest login in
+        #the users $HOME/.stalker/logged_user file as a pickled object
+        #"""
         
-        self.fail("test is not implemented yet")
+        #self.fail("test is not implemented yet")
     
     
     
-    #----------------------------------------------------------------------
-    def test_authentication(self):
-        """testing the authentication system
-        """
+    ##----------------------------------------------------------------------
+    #def test_authentication(self):
+        #"""testing the authentication system
+        #"""
         
-        self.fail("test is not implemented yet")
+        #self.fail("test is not implemented yet")
     
     
     
     #----------------------------------------------------------------------
     def test_no_default_admin_creation(self):
-        """testing if there is no user if default.AUTO_CREATE_ADMIN is False
+        """testing ifre is no user if default.AUTO_CREATE_ADMIN is False
         """
         
         # turn down auto admin creation
@@ -330,7 +330,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         
         # first get the admin
-        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a couple of PipelineStep objects
         pStep1 = pipelineStep.PipelineStep(
@@ -569,7 +569,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get the admin
         session = db.meta.session
-        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a new ImageFormat object and try to read it back
         kwargs = {
@@ -609,7 +609,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         # create a new PipelineStep
-        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         kwargs = {
             'name': 'RENDER',
@@ -660,7 +660,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get the admin
         session = db.meta.session
-        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a new Repository object and try to read it back
         kwargs = {
@@ -850,7 +850,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         # get the admin
-        admin = db.login(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a template object
         

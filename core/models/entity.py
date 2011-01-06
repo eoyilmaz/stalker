@@ -3,6 +3,7 @@
 
 
 import datetime
+import re
 
 
 
@@ -14,7 +15,10 @@ class SimpleEntity(object):
     """The base class of all the others
     
     This class has the basic information about an entity which are the name,
-    the description and tags about this entity.
+    the description, tags and the audit information like created_by,
+    updated_by, date_created and date_updated about this entity. It also
+    creates a ``nice_name`` attribute which filters the white space around and
+    in the ``name`` attribute.
     
     :param name: a string or unicode attribute that holds the name of this
       entity. it could not be empty, the first letter should be an upper case
@@ -54,9 +58,12 @@ class SimpleEntity(object):
                  date_updated=datetime.datetime.now(),
                  ):
         
-        self._name = self._check_name(name)
-        self._description = self._check_description(description)
+        # name and nice_name
+        self._nice_name = ""
+        self._name = ""
+        self.name = name
         
+        self._description = self._check_description(description)
         self._created_by = self._check_created_by(created_by)
         self._updated_by = self._check_updated_by(updated_by)
         self._date_created = self._check_date_created(date_created)
@@ -117,7 +124,6 @@ class SimpleEntity(object):
         #print name_in
         
         # remove white spaces
-        #name_in = re.sub('([\s])+', r'', name_in)
         name_in = name_in.strip()
         #print name_in
         
@@ -126,6 +132,28 @@ class SimpleEntity(object):
         #print name_in
         
         return name_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _condition_nice_name(self, nice_name_in):
+        """conditions the given nice name
+        """
+        
+        # remove camel case letters
+        nice_name_in = re.sub(r'(.+?[a-z]+)([A-Z])', r'\1_\2', nice_name_in)
+        
+        # replace white spaces with under score
+        nice_name_in = re.sub('([\s])+', r'_', nice_name_in)
+        
+        # remove multiple underscores
+        nice_name_in = re.sub(r'([_]+)', r'_', nice_name_in)
+        
+        # turn it to lower case
+        nice_name_in = nice_name_in.lower()
+        
+        return nice_name_in
+        
     
     
     
@@ -154,12 +182,31 @@ class SimpleEntity(object):
         
         def fset(self, name_in):
             self._name = self._check_name(name_in)
+            # also set the nice_name
+            self._nice_name = self._condition_nice_name(self._name)
         
         doc = """the name of the entity"""
         
         return locals()
     
     name = property(**name())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def nice_name():
+        
+        def fget(self):
+            return self._nice_name
+        
+        doc = "this is the nice name of the SimpleEntity, it is a string \
+        which is a little bit more formatted than the name attribute"
+        
+        return locals()
+    
+    nice_name = property(**nice_name())
+    
+    
     
     
     
