@@ -28,32 +28,31 @@ class DepartmentTester(mocker.MockerTestCase):
         self.mock_user3 = self.mocker.mock(user.User)
         self.mock_user4 = self.mocker.mock(user.User)
         
-        self.members_list = [ self.mock_user1,
-                              self.mock_user2,
-                              self.mock_user3,
-                              self.mock_user4,
-                            ]
+        self.members_list = [self.mock_user1,
+                             self.mock_user2,
+                             self.mock_user3,
+                             self.mock_user4,
+                             ]
         
         self.mock_admin = self.mocker.mock(user.User)
         
         self.mocker.replay()
         
-        self.name = 'Test Department'
-        self.description = 'This is a department for testing purposes'
         self.date_created = self.date_updated = datetime.datetime.now()
         
+        self.kwargs = {
+            'name': 'Test Department',
+            'description': 'This is a department for testing purposes',
+            'created_by': self.mock_admin,
+            'updated_by': self.mock_admin,
+            'date_created': self.date_created,
+            'date_updated': self.date_updated,
+            'members': self.members_list,
+            'lead': self.mock_user1
+        }
         
         # create a default department object
-        self.mock_department = department.Department(
-            name=self.name,
-            description=self.description,
-            created_by=self.mock_admin,
-            updated_by=self.mock_admin,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            members=self.members_list,
-            lead=self.mock_user1
-        )
+        self.mock_department = department.Department(**self.kwargs)
     
     
     
@@ -63,16 +62,9 @@ class DepartmentTester(mocker.MockerTestCase):
         """
         
         # this should work without raising any error
-        aNewDepartment = department.Department(
-            name=self.name,
-            description=self.description,
-            created_by=self.mock_admin,
-            updated_by=self.mock_admin,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            members=[],
-            lead=self.mock_user1
-        )
+        self.kwargs['members'] = []
+        
+        aNewDepartment = department.Department(**self.kwargs)
     
     
     
@@ -93,18 +85,12 @@ class DepartmentTester(mocker.MockerTestCase):
         
         test_value = [1, 2.3, [], {}]
         
+        self.kwargs['members'] = test_value
         # this should raise a ValueError
         self.assertRaises(
             ValueError,
             department.Department,
-            name=self.name,
-            description=self.description,
-            created_by=self.mock_admin,
-            updated_by=self.mock_admin,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            members=test_value,
-            lead=self.mock_user1
+            **self.kwargs
         )
     
     
@@ -136,17 +122,11 @@ class DepartmentTester(mocker.MockerTestCase):
         
         # all of the above values should raise an ValueError
         for test_value in test_values:
+            self.kwargs['lead'] = test_value
             self.assertRaises(
                 ValueError,
                 department.Department,
-                name=self.name,
-                description=self.description,
-                created_by=self.mock_admin,
-                updated_by=self.mock_admin,
-                date_created=self.date_created,
-                date_updated=self.date_updated,
-                members=self.members_list,
-                lead=test_value
+                **self.kwargs
             )
     
     
@@ -176,17 +156,11 @@ class DepartmentTester(mocker.MockerTestCase):
         #the lead argument
         #"""
         
+        #self.kwargs['lead'] = None
         #self.assertRaises(
             #ValueError,
             #department.Department,
-            #name=self.name,
-            #description=self.description,
-            #created_by=self.mock_admin,
-            #updated_by=self.mock_admin,
-            #date_created=self.date_created,
-            #date_updated=self.date_updated,
-            #members=self.members_list,
-            #lead=None
+            #**self.kwargs
         #)
     
     
@@ -214,6 +188,5 @@ class DepartmentTester(mocker.MockerTestCase):
         #"""
         
         #self.fail('test is not implemented yet')
-    
     
     

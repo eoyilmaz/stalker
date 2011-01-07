@@ -66,11 +66,7 @@ class StructureTester(mocker.MockerTestCase):
             
             self.kwargs['project_template'] = test_value
             
-            self.assertRaises(
-                ValueError,
-                structure.Structure,
-                **self.kwargs
-            )
+            self.assertRaises(ValueError, structure.Structure, **self.kwargs)
     
     
     
@@ -82,9 +78,7 @@ class StructureTester(mocker.MockerTestCase):
         self.kwargs['project_template'] = ""
         
         # should't raise any errors
-        new_structure = structure.Structure(
-            **self.kwargs
-        )
+        new_structure = structure.Structure(**self.kwargs)
     
     
     
@@ -120,11 +114,7 @@ class StructureTester(mocker.MockerTestCase):
             
             self.kwargs['asset_templates'] = test_value
             
-            self.assertRaises(
-                ValueError,
-                structure.Structure,
-                **self.kwargs
-            )
+            self.assertRaises(ValueError, structure.Structure, **self.kwargs)
     
     
     
@@ -174,11 +164,7 @@ class StructureTester(mocker.MockerTestCase):
             
             self.kwargs['reference_templates'] = test_value
             
-            self.assertRaises(
-                ValueError,
-                structure.Structure,
-                **self.kwargs
-            )
+            self.assertRaises(ValueError, structure.Structure, **self.kwargs)
     
     
     

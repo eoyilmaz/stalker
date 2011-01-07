@@ -26,9 +26,6 @@ class CommentTest(mocker.MockerTestCase):
         # a mock entity object
         # a couple of mock tag objects
         
-        self.name = 'Test Comment'
-        self.description = 'this is a test object'
-        
         # a couple of mock tags
         self.mock_tag1 = self.mocker.mock(tag.Tag)
         self.mock_tag2 = self.mocker.mock(tag.Tag)
@@ -44,22 +41,21 @@ class CommentTest(mocker.MockerTestCase):
         # a mock user object
         self.mock_user = self.mocker.mock(user.User)
         
-        # the body of the comment
-        self.body = 'This is the content of the comment'
-        
         self.mocker.replay()
         
-        self.comment = comment.Comment(
-            name=self.name,
-            description=self.description,
-            tags=[self.mock_tag1, self.mock_tag2],
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            body=self.body,
-            to=self.mock_entity
-        )
+        self.kwargs = {
+            'name': 'Test Comment',
+            'description': 'this is a test object',
+            'tags': [self.mock_tag1, self.mock_tag2],
+            'created_by': self.mock_user,
+            'updated_by': self.mock_user,
+            'date_created': self.date_created,
+            'date_updated': self.date_updated,
+            'body': 'This is the content of the comment',
+            'to': self.mock_entity
+        }
+        
+        self.comment = comment.Comment(**self.kwargs)
     
     
     
@@ -70,19 +66,17 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         # create a new comment with false values
-        self.assertRaises(
-            ValueError,
-            comment.Comment,
-            name=self.name,
-            description=self.description,
-            tags=[self.mock_tag1, self.mock_tag2],
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            body=1,
-            to=self.mock_entity
-        )
+        
+        test_values = [1, 1.0, ['this is the bodybody'],
+                       {'this': 'is the body'}]
+        
+        for test_value in test_values:
+            self.kwargs['body'] = test_value
+            self.assertRaises(
+                ValueError,
+                comment.Comment,
+                **self.kwargs
+            )
     
     
     
@@ -92,15 +86,17 @@ class CommentTest(mocker.MockerTestCase):
         anything other than a string or unicode
         """
         
-        new_body = 1
+        test_values = [1, 1.0, ['this is the bodybody'],
+                       {'this': 'is the body'}]
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.comment,
-            'body',
-            new_body
-        )
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.comment,
+                'body',
+                test_value
+            )
     
     
     
@@ -122,16 +118,8 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         # creating a new comment and skipping the body should work fine
-        a_new_comment =  comment.Comment(
-            name=self.name,
-            description=self.description,
-            tags=[self.mock_tag1, self.mock_tag2],
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            to=self.mock_entity
-        )
+        self.kwargs.pop('body')
+        a_new_comment =  comment.Comment(**self.kwargs)
     
     
     
@@ -142,20 +130,8 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         # create a new comment with no "to" argument
-        
-        self.assertRaises(
-            ValueError,
-            comment.Comment,
-            name=self.name,
-            description=self.description,
-            tags=[self.mock_tag1, self.mock_tag2],
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            body=self.body,
-            to=None
-        )
+        self.kwargs['to'] = None
+        self.assertRaises(ValueError, comment.Comment, **self.kwargs)
     
     
     
@@ -183,19 +159,16 @@ class CommentTest(mocker.MockerTestCase):
         to be set to something other than an entity object
         """
         
-        self.assertRaises(
-            ValueError,
-            comment.Comment,
-            name=self.name,
-            description=self.description,
-            tags=[self.mock_tag1, self.mock_tag2],
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            body=self.body,
-            to='an Entity'
-        )
+        test_values = [1, 1.2, 'an Entity']
+        
+        for test_value in test_values:
+            self.kwargs['to'] = test_value
+            
+            self.assertRaises(
+                ValueError,
+                comment.Comment,
+                **self.kwargs
+            )
     
     
     
@@ -222,17 +195,12 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         # this should raise a ValueError
+        self.kwargs.pop('to')
+        
         self.assertRaises(
             ValueError,
             comment.Comment,
-            name=self.name,
-            description=self.description,
-            tags=[self.mock_tag1, self.mock_tag2],
-            created_by=self.mock_user,
-            updated_by=self.mock_user,
-            date_created=self.date_created,
-            date_updated=self.date_updated,
-            body=self.body,
+            **self.kwargs
         )
     
     

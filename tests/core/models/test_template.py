@@ -22,15 +22,13 @@ class TemplateTester(mocker.MockerTestCase):
         """
         
         # create a proper Template object
-        self.name = 'Test Template'
-        self.description = 'This is a test template'
-        self.template_code = '{{project.name}}/SEQUENCES/{{sequence.name}}'
+        self.kwargs = {
+            'name': 'Test Template',
+            'description': 'This is a test template',
+            'template_code': '{{project.name}}/SEQUENCES/{{sequence.name}}'
+        }
         
-        self.template_obj = template.Template(
-            name=self.name,
-            description=self.description,
-            template_code=self.template_code
-        )
+        self.template_obj = template.Template(**self.kwargs)
     
     
     
@@ -40,13 +38,8 @@ class TemplateTester(mocker.MockerTestCase):
         """
         
         # try to create a new template object with wrong values
-        self.assertRaises(
-            ValueError,
-            template.Template,
-            name=self.name,
-            description=self.description,
-            template_code=''
-        )
+        self.kwargs['template_code'] = ''
+        self.assertRaises(ValueError, template.Template, **self.kwargs)
     
     
     
@@ -71,13 +64,8 @@ class TemplateTester(mocker.MockerTestCase):
         """testing if assigning None to template_code raises a ValueError
         """
         # try to create a new template object with wrong values
-        self.assertRaises(
-            ValueError,
-            template.Template,
-            name=self.name,
-            description=self.description,
-            template_code=None
-        )
+        self.kwargs['template_code'] = None
+        self.assertRaises(ValueError, template.Template, **self.kwargs)
     
     
     
@@ -102,23 +90,11 @@ class TemplateTester(mocker.MockerTestCase):
         unicode values
         """
         
-        # an integer value
-        self.assertRaises(
-            ValueError,
-            template.Template,
-            name=self.name,
-            description=self.description,
-            template_code=1
-        )
-        
-        # a list of strings
-        self.assertRaises(
-            ValueError,
-            template.Template,
-            name=self.name,
-            description=self.description,
-            template_code=[self.template_code]
-        )
+        test_values = [1, ['template_code']]
+        for test_value in test_values:
+            self.kwargs['template_code'] = test_value
+            # an integer value
+            self.assertRaises(ValueError, template.Template, **self.kwargs)
     
     
     
@@ -128,23 +104,16 @@ class TemplateTester(mocker.MockerTestCase):
         unicode values
         """
         
-        # an integer value
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.template_obj,
-            "template_code",
-            1
-        )
-        
-        # a list of proper string templates
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.template_obj,
-            "template_code",
-            [self.template_code]
-        )
+        test_values = [1, ['template_code']]
+        for test_value in test_values:
+            # an integer value
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.template_obj,
+                "template_code",
+                test_value
+            )
     
     
     

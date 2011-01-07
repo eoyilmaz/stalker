@@ -44,11 +44,14 @@ class AssetTypeTester(mocker.MockerTestCase):
         self.name = 'An AssetType'
         self.description = 'This is an test asset type'
         
-        self.an_assetType_obj = typeEntity.AssetType(name=self.name,
-                                             description=self.description,
-                                             tags=self.tag_list,
-                                             steps=self.pipelineStep_list
-                                             )
+        self.kwargs = {
+            'name': self.name,
+            'description': self.description,
+            'tags': self.tag_list,
+            'steps': self.pipelineStep_list
+        }
+        
+        self.an_assetType_obj = typeEntity.AssetType(**self.kwargs)
         
         # create a couple of different object
         # a string
@@ -76,41 +79,20 @@ class AssetTypeTester(mocker.MockerTestCase):
         
         # lets try to assign them to a newly created AssetType object
         # this should raise a ValueError
-        self.assertRaises(
-            ValueError,
-            typeEntity.AssetType,
-            name=self.name,
-            description=self.description,
-            tags=self.tag_list,
-            steps=self.test_attr_1
-        )
         
-        self.assertRaises(
-            ValueError,
-            typeEntity.AssetType,
-            name=self.name,
-            description=self.description,
-            tags=self.tag_list,
-            steps=self.test_attr_2
-        )
+        test_values = [self.test_attr_1,
+                       self.test_attr_2,
+                       self.test_attr_3,
+                       self.test_attr_4]
         
-        self.assertRaises(
-            ValueError,
-            typeEntity.AssetType,
-            name=self.name,
-            description=self.description,
-            tags=self.tag_list,
-            steps=self.test_attr_3
-        )
-    
-        self.assertRaises(
-            ValueError,
-            typeEntity.AssetType,
-            name=self.name,
-            description=self.description,
-            tags=self.tag_list,
-            steps=self.test_attr_4
-        )
+        for test_value in test_values:
+            self.kwargs['steps'] = test_value
+            
+            self.assertRaises(
+                ValueError,
+                typeEntity.AssetType,
+                **self.kwargs
+            )
     
     
     
@@ -121,37 +103,21 @@ class AssetTypeTester(mocker.MockerTestCase):
         
         # lets try to assign them to a newly created AssetType object
         # this should raise a ValueError
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.an_assetType_obj,
-            'steps',
-            self.test_attr_1
-        )
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.an_assetType_obj,
-            'steps',
-            self.test_attr_2
-        )
+        test_values = [self.test_attr_1,
+                       self.test_attr_2,
+                       self.test_attr_3,
+                       self.test_attr_4]
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.an_assetType_obj,
-            'steps',
-            self.test_attr_3
-        )
+        for test_value in test_values:
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.an_assetType_obj,
-            'steps',
-            self.test_attr_4
-        )
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.an_assetType_obj,
+                'steps',
+                test_value
+            )
     
     
     

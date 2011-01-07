@@ -1,6 +1,9 @@
 Stalker Changes
 ===============
 
+v0.1.0.20110107.1:
+ * organized the existant tests
+
 v0.1.0.20110106.2:
  * added nice_name property to the stalker.core.models.entity.SimpleEntity
    class

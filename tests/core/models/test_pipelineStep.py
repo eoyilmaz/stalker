@@ -20,15 +20,13 @@ class PipelineStepTester(mocker.MockerTestCase):
     def setUp(self):
         
         # create a proper pipelineStep object
-        self.name= 'Testing'
-        self.description = 'This is a pipelineStep for testing things'
-        self.code = 'TESTING'
+        self.kwargs = {
+            'name': 'Testing',
+            'description': 'This is a pipelineStep for testing things',
+            'code': 'TESTING'
+        }
         
-        self.pStepObj = pipelineStep.PipelineStep(
-            name=self.name,
-            description=self.description,
-            code=self.code
-        )
+        self.pStepObj = pipelineStep.PipelineStep(**self.kwargs)
     
     
     
@@ -37,14 +35,8 @@ class PipelineStepTester(mocker.MockerTestCase):
         """testing if a ValueError will be raised when trying to assign an
         empty string to the code argument
         """
-        
-        self.assertRaises(
-            ValueError,
-            pipelineStep.PipelineStep,
-            name=self.name,
-            description=self.description,
-            code='',
-        )
+        self.kwargs['code'] = ''
+        self.assertRaises(ValueError, pipelineStep.PipelineStep, **self.kwargs)
     
     
     
@@ -53,14 +45,8 @@ class PipelineStepTester(mocker.MockerTestCase):
         """testing if a ValueError will be raised when trying to assign None
         to the code argument
         """
-        
-        self.assertRaises(
-            ValueError,
-            pipelineStep.PipelineStep,
-            name=self.name,
-            description=self.description,
-            code=None
-        )
+        self.kwargs['code'] = None
+        self.assertRaises(ValueError, pipelineStep.PipelineStep, **self.kwargs)
     
     
     
@@ -69,14 +55,8 @@ class PipelineStepTester(mocker.MockerTestCase):
         """testing if a ValueError will be raised when trying to assign an
         empty string to the code property 
         """
-        
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.pStepObj,
-            "code",
-            ""
-        )
+        self.kwargs['code'] = ""
+        self.assertRaises(ValueError, pipelineStep.PipelineStep, **self.kwargs)
     
     
     
@@ -84,27 +64,16 @@ class PipelineStepTester(mocker.MockerTestCase):
     def test_code_argument_accepts_string_only(self):
         """testing if code argument accepts just strings
         """
+        test_values = [1, ["TT"]]
         
-        # try to create a new pipeline step with wrong code
-        # attirbute and watch if a ValueError will be raised
-        
-        # an integer
-        self.assertRaises(
-            ValueError,
-            pipelineStep.PipelineStep,
-            name=self.name,
-            description=self.description,
-            code=1
-        )
-        
-        # a list
-        self.assertRaises(
-            ValueError,
-            pipelineStep.PipelineStep,
-            name=self.name,
-            description=self.description,
-            code=["TT"]
-        )
+        for test_value in test_values:
+            self.kwargs['code'] = test_value
+            # an integer
+            self.assertRaises(
+                ValueError,
+                pipelineStep.PipelineStep,
+                **self.kwargs
+            )
     
     
     
@@ -113,25 +82,17 @@ class PipelineStepTester(mocker.MockerTestCase):
         """testing if code property accepts just strings
         """
         
-        # try to assign something other than a string
+        test_values = [1, ["TT"]]
         
-        # an integer
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.pStepObj,
-            "code",
-            1
-        )
-        
-        # a list
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.pStepObj,
-            "code",
-            ["TT"]
-        )
+        for test_value in test_values:
+            # an integer
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.pStepObj,
+                "code",
+                test_value
+            )
     
     
     
