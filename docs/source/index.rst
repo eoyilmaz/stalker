@@ -30,6 +30,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
+   install.rst
    design.rst
    contribute.rst
    roadmap.rst
