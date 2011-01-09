@@ -48,17 +48,17 @@ class PipelineStep(entity.Entity):
         """
         
         # check if the code is empty
-        if code=='':
-            raise(ValueError('the code attribute can not be an empty string'))
+        if code=="":
+            raise(ValueError("the code attribute can not be an empty string"))
         
         # check if the code is None
         if code is None:
-            raise(ValueError('the code attribute can not be None'))
+            raise(ValueError("the code attribute can not be None"))
         
         # check if it is something other than a string
         if not isinstance(code, (str, unicode)):
-            raise(ValueError('the code should be an instance of string or \
-            unicode'))
+            raise(ValueError("the code should be an instance of string or \
+            unicode"))
         
         return code
     

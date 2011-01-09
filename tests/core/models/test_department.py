@@ -41,14 +41,14 @@ class DepartmentTester(mocker.MockerTestCase):
         self.date_created = self.date_updated = datetime.datetime.now()
         
         self.kwargs = {
-            'name': 'Test Department',
-            'description': 'This is a department for testing purposes',
-            'created_by': self.mock_admin,
-            'updated_by': self.mock_admin,
-            'date_created': self.date_created,
-            'date_updated': self.date_updated,
-            'members': self.members_list,
-            'lead': self.mock_user1
+            "name": "Test Department",
+            "description": "This is a department for testing purposes",
+            "created_by": self.mock_admin,
+            "updated_by": self.mock_admin,
+            "date_created": self.date_created,
+            "date_updated": self.date_updated,
+            "members": self.members_list,
+            "lead": self.mock_user1
         }
         
         # create a default department object
@@ -62,7 +62,7 @@ class DepartmentTester(mocker.MockerTestCase):
         """
         
         # this should work without raising any error
-        self.kwargs['members'] = []
+        self.kwargs["members"] = []
         
         aNewDepartment = department.Department(**self.kwargs)
     
@@ -85,7 +85,7 @@ class DepartmentTester(mocker.MockerTestCase):
         
         test_value = [1, 2.3, [], {}]
         
-        self.kwargs['members'] = test_value
+        self.kwargs["members"] = test_value
         # this should raise a ValueError
         self.assertRaises(
             ValueError,
@@ -122,7 +122,7 @@ class DepartmentTester(mocker.MockerTestCase):
         
         # all of the above values should raise an ValueError
         for test_value in test_values:
-            self.kwargs['lead'] = test_value
+            self.kwargs["lead"] = test_value
             self.assertRaises(
                 ValueError,
                 department.Department,
@@ -136,7 +136,7 @@ class DepartmentTester(mocker.MockerTestCase):
         """testing if lead property accepts only user objects
         """
         
-        test_values = [ "", 1, 2.3, [], {} ]
+        test_values = ["", 1, 2.3, [], {}]
         
         # all of the above values should raise an ValueError
         for test_value in test_values:
@@ -156,7 +156,7 @@ class DepartmentTester(mocker.MockerTestCase):
         #the lead argument
         #"""
         
-        #self.kwargs['lead'] = None
+        #self.kwargs["lead"] = None
         #self.assertRaises(
             #ValueError,
             #department.Department,
@@ -187,6 +187,6 @@ class DepartmentTester(mocker.MockerTestCase):
         #department from the users department argument
         #"""
         
-        #self.fail('test is not implemented yet')
+        #self.fail("test is not implemented yet")
     
     

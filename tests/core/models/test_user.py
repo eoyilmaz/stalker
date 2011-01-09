@@ -66,32 +66,32 @@ class UserTest(mocker.MockerTestCase):
         # create the default values for parameters
         
         self.kwargs = {
-            'name': 'ozgur',
-            'first_name': 'Erkan Ozgur',
-            'last_name': 'Yilmaz',
-            'description': 'this is a test user',
-            'login_name': 'eoyilmaz',
-            'password': 'hidden',
-            'email': 'eoyilmaz@fake.com',
-            'department': self.mock_department1,
-            'permission_groups': [self.mock_permission_group1,
+            "name": "ozgur",
+            "first_name": "Erkan Ozgur",
+            "last_name": "Yilmaz",
+            "description": "this is a test user",
+            "login_name": "eoyilmaz",
+            "password": "hidden",
+            "email": "eoyilmaz@fake.com",
+            "department": self.mock_department1,
+            "permission_groups": [self.mock_permission_group1,
                                   self.mock_permission_group2],
-            'tasks': [self.mock_task1,
+            "tasks": [self.mock_task1,
                       self.mock_task2,
                       self.mock_task3,
                       self.mock_task4],
-            'projects': [self.mock_project1,
+            "projects": [self.mock_project1,
                          self.mock_project2,
                          self.mock_project3],
-            'projects_lead': [self.mock_project1,
+            "projects_lead": [self.mock_project1,
                               self.mock_project2],
-            'sequences_lead': [self.mock_sequence1,
+            "sequences_lead": [self.mock_sequence1,
                                self.mock_sequence2,
                                self.mock_sequence3,
                                self.mock_sequence4],
-            'created_by': self.mock_admin,
-            'updated_by': self.mock_admin,
-            'last_login': None
+            "created_by": self.mock_admin,
+            "updated_by": self.mock_admin,
+            "last_login": None
         }
         
         # create a proper user object
@@ -106,10 +106,10 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # try to create a new user with wrong attribte
-        test_values = [1, 1.3, ['an email'], {'an':'email'}]
+        test_values = [1, 1.3, ["an email"], {"an":"email"}]
         
         for test_value in test_values:
-            self.kwargs['email'] = test_value
+            self.kwargs["email"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -127,19 +127,19 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'email',
+            "email",
             test_value
         )
         
         
         
-        test_value = ['an email']
+        test_value = ["an email"]
         
         self.assertRaises(
             ValueError,
             setattr,
             self.mock_user,
-            'email',
+            "email",
             test_value
         )
     
@@ -150,15 +150,15 @@ class UserTest(mocker.MockerTestCase):
         """testing if given an email in wrong format will raise a ValueError
         """
         
-        test_values = ['an email in no format',
-                       'an_email_with_no_part2',
-                       '@an_email_with_only_part2',
-                       '@',
+        test_values = ["an email in no format",
+                       "an_email_with_no_part2",
+                       "@an_email_with_only_part2",
+                       "@",
                        ]
         
         # any of this values should raise a ValueError
         for test_value in test_values:
-            self.kwargs['email'] = test_value
+            self.kwargs["email"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -168,12 +168,12 @@ class UserTest(mocker.MockerTestCase):
         """testing if given an email in wrong format will raise a ValueError 
         """
         
-        test_values = ['an email in no format',
-                       'an_email_with_no_part2',
-                       '@an_email_with_only_part2',
-                       '@',
-                       'eoyilmaz@',
-                       'eoyilmaz@somecompony@com',
+        test_values = ["an email in no format",
+                       "an_email_with_no_part2",
+                       "@an_email_with_only_part2",
+                       "@",
+                       "eoyilmaz@",
+                       "eoyilmaz@somecompony@com",
                        ]
         
         # any of these email values should raise a ValueError
@@ -182,7 +182,7 @@ class UserTest(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_user,
-                'email',
+                "email",
                 value
             )
     
@@ -193,7 +193,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if email property works properly
         """
         
-        test_email = 'eoyilmaz@somemail.com'
+        test_email = "eoyilmaz@somemail.com"
         self.mock_user.email = test_email
         self.assertEquals( self.mock_user.email, test_email)
     
@@ -204,10 +204,10 @@ class UserTest(mocker.MockerTestCase):
         """testing if login_name argument accepts only strings or unicode
         """
         
-        test_values = [23412, ['a_user_login_name'] , [], {}, 3234.12312]
+        test_values = [23412, ["a_user_login_name"] , [], {}, 3234.12312]
         
         for test_value in test_values:
-            self.kwargs['login_name'] = test_value
+            self.kwargs["login_name"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -217,14 +217,14 @@ class UserTest(mocker.MockerTestCase):
         """testing if login_name property accepts only strings or unicode
         """
         
-        test_values = [12312, 132.123123, ['aloginname'], {}, []]
+        test_values = [12312, 132.123123, ["aloginname"], {}, []]
         
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
                 setattr,
                 self.mock_user,
-                'login_name',
+                "login_name",
                 test_value
             )
     
@@ -236,7 +236,7 @@ class UserTest(mocker.MockerTestCase):
         empty string to login_name argument
         """
         
-        self.kwargs['login_name'] = ''
+        self.kwargs["login_name"] = ""
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -251,8 +251,8 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'login_name',
-            ''
+            "login_name",
+            ""
         )
     
     
@@ -263,7 +263,7 @@ class UserTest(mocker.MockerTestCase):
         to login_name argument
         """
         
-        self.kwargs['login_name'] = None
+        self.kwargs["login_name"] = None
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -278,7 +278,7 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'login_name',
+            "login_name",
             None
         )
     
@@ -290,21 +290,21 @@ class UserTest(mocker.MockerTestCase):
         """
         
         #                 input       expected
-        test_values = [ ('e. ozgur', 'eozgur'),
-                        ('erkan', 'erkan'),
-                        ('Ozgur', 'ozgur'),
-                        ('Erkan ozgur', 'erkanozgur'),
-                        ('eRKAN', 'erkan'),
-                        ('eRkaN', 'erkan'),
-                        (' eRkAn', 'erkan'),
-                        (' eRkan ozGur', 'erkanozgur'),
-                        ('213 e.ozgur', 'eozgur'),
+        test_values = [ ("e. ozgur", "eozgur"),
+                        ("erkan", "erkan"),
+                        ("Ozgur", "ozgur"),
+                        ("Erkan ozgur", "erkanozgur"),
+                        ("eRKAN", "erkan"),
+                        ("eRkaN", "erkan"),
+                        (" eRkAn", "erkan"),
+                        (" eRkan ozGur", "erkanozgur"),
+                        ("213 e.ozgur", "eozgur"),
                     ]
         
         for valuePair in test_values:
             # set the input and expect the expected output
             
-            self.kwargs['login_name'] = valuePair[0]
+            self.kwargs["login_name"] = valuePair[0]
             
             test_user = user.User(**self.kwargs)
             
@@ -321,14 +321,14 @@ class UserTest(mocker.MockerTestCase):
         """
         
         #                 input       expected
-        test_values = [ ('e. ozgur', 'eozgur'),
-                        ('erkan', 'erkan'),
-                        ('Ozgur', 'ozgur'),
-                        ('Erkan ozgur', 'erkanozgur'),
-                        ('eRKAN', 'erkan'),
-                        ('eRkaN', 'erkan'),
-                        (' eRkAn', 'erkan'),
-                        (' eRkan ozGur', 'erkanozgur'),
+        test_values = [ ("e. ozgur", "eozgur"),
+                        ("erkan", "erkan"),
+                        ("Ozgur", "ozgur"),
+                        ("Erkan ozgur", "erkanozgur"),
+                        ("eRKAN", "erkan"),
+                        ("eRkaN", "erkan"),
+                        (" eRkAn", "erkan"),
+                        (" eRkan ozGur", "erkanozgur"),
                     ]
         
         for valuePair in test_values:
@@ -348,7 +348,7 @@ class UserTest(mocker.MockerTestCase):
         first_name argument
         """
         
-        self.kwargs['first_name'] = None
+        self.kwargs["first_name"] = None
         
         self.assertRaises(
             ValueError,
@@ -368,7 +368,7 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'first_name',
+            "first_name",
             None
         )
     
@@ -381,7 +381,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # try to assign None to the first_name argument
-        self.kwargs['first_name'] = ''
+        self.kwargs["first_name"] = ""
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -396,8 +396,8 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'first_name',
-            ''
+            "first_name",
+            ""
         )
     
     
@@ -408,19 +408,19 @@ class UserTest(mocker.MockerTestCase):
         """
         
         #                 input       expected
-        test_values = [ ('e. ozgur', 'E. Ozgur'),
-                        ('erkan', 'Erkan'),
-                        ('ozgur', 'Ozgur'),
-                        ('Erkan ozgur', 'Erkan Ozgur'),
-                        ('eRKAN', 'Erkan'),
-                        ('eRkaN', 'Erkan'),
-                        (' eRkAn', 'Erkan'),
-                        (' eRkan ozGur', 'Erkan Ozgur'),
+        test_values = [ ("e. ozgur", "E. Ozgur"),
+                        ("erkan", "Erkan"),
+                        ("ozgur", "Ozgur"),
+                        ("Erkan ozgur", "Erkan Ozgur"),
+                        ("eRKAN", "Erkan"),
+                        ("eRkaN", "Erkan"),
+                        (" eRkAn", "Erkan"),
+                        (" eRkan ozGur", "Erkan Ozgur"),
                     ]
         
         for valuePair in test_values:
             # set the input and expect the expected output
-            self.kwargs['first_name'] = valuePair[0]
+            self.kwargs["first_name"] = valuePair[0]
             test_user = user.User(**self.kwargs)
             self.assertEquals(test_user._first_name, valuePair[1])
     
@@ -432,14 +432,14 @@ class UserTest(mocker.MockerTestCase):
         """
         
         #                 input       expected
-        test_values = [ ('e. ozgur', 'E. Ozgur'),
-                        ('erkan', 'Erkan'),
-                        ('ozgur', 'Ozgur'),
-                        ('Erkan ozgur', 'Erkan Ozgur'),
-                        ('eRKAN', 'Erkan'),
-                        ('eRkaN', 'Erkan'),
-                        (' eRkAn', 'Erkan'),
-                        (' eRkan ozGur', 'Erkan Ozgur'),
+        test_values = [ ("e. ozgur", "E. Ozgur"),
+                        ("erkan", "Erkan"),
+                        ("ozgur", "Ozgur"),
+                        ("Erkan ozgur", "Erkan Ozgur"),
+                        ("eRKAN", "Erkan"),
+                        ("eRkaN", "Erkan"),
+                        (" eRkAn", "Erkan"),
+                        (" eRkan ozGur", "Erkan Ozgur"),
                     ]
         
         for valuePair in test_values:
@@ -461,10 +461,10 @@ class UserTest(mocker.MockerTestCase):
         
         # try to assign something other than a string or unicode
         
-        test_values = [1, 1.3, ['my first name'], {'a_frist':'name dict'}]
+        test_values = [1, 1.3, ["my first name"], {"a_frist":"name dict"}]
         
         for test_value in test_values:
-            self.kwargs['first_name']
+            self.kwargs["first_name"]
             
             self.assertRaises(
                 ValueError,
@@ -479,7 +479,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if first_name property accepts only strings or unicode
         """
         
-        test_values = [12412, ['Erkan Ozgur']]
+        test_values = [12412, ["Erkan Ozgur"]]
         
         for value in test_values:
             
@@ -487,7 +487,7 @@ class UserTest(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_user,
-                'first_name',
+                "first_name",
                 value
             )
     
@@ -499,7 +499,7 @@ class UserTest(mocker.MockerTestCase):
         None
         """
         
-        self.kwargs['last_login'] = None
+        self.kwargs["last_login"] = None
         
         # nothing should happen
         a_new_user = user.User(**self.kwargs)
@@ -523,7 +523,7 @@ class UserTest(mocker.MockerTestCase):
         to a datetime.datetime instance
         """
         
-        self.kwargs['last_login'] = datetime.datetime.now()
+        self.kwargs["last_login"] = datetime.datetime.now()
         
         # nothing should happen
         a_new_user = user.User(**self.kwargs)
@@ -537,11 +537,11 @@ class UserTest(mocker.MockerTestCase):
         argument
         """
         
-        test_values = [1, 2.3, 'login time', ['last login time'],
-                       {'a last': 'login time'}]
+        test_values = [1, 2.3, "login time", ["last login time"],
+                       {"a last": "login time"}]
         
         for test_value in test_values:
-            self.kwargs['last_login'] = test_value
+            self.kwargs["last_login"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -553,15 +553,15 @@ class UserTest(mocker.MockerTestCase):
         property
         """
         
-        test_values = [1, 2.3, 'login time', ['last login time'],
-                       {'a last': 'login time'}]
+        test_values = [1, 2.3, "login time", ["last login time"],
+                       {"a last": "login time"}]
         
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
                 setattr,
                 self.mock_user,
-                'last_login',
+                "last_login",
                 test_value
             )
     
@@ -573,9 +573,9 @@ class UserTest(mocker.MockerTestCase):
         assigned to last_name argument
         """
         
-        self.kwargs['last_name'] = None
+        self.kwargs["last_name"] = None
         aNewUser = user.User(**self.kwargs)
-        self.assertEquals(aNewUser.last_name, '')
+        self.assertEquals(aNewUser.last_name, "")
     
     
     
@@ -586,7 +586,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.mock_user.last_name = None
-        self.assertEquals(self.mock_user.last_name, '')
+        self.assertEquals(self.mock_user.last_name, "")
     
     
     
@@ -596,19 +596,19 @@ class UserTest(mocker.MockerTestCase):
         """
         
         #                 input       expected
-        test_values = [ ('yilmaz', 'Yilmaz'),
-                        ('Yilmaz', 'Yilmaz'),
-                        ('yILMAZ', 'Yilmaz'),
-                        ('yIlmaZ', 'Yilmaz'),
-                        (' yIlmAz', 'Yilmaz'),
-                        (' yILmAz  ', 'Yilmaz'),
-                        ('de niro', 'De Niro')
+        test_values = [ ("yilmaz", "Yilmaz"),
+                        ("Yilmaz", "Yilmaz"),
+                        ("yILMAZ", "Yilmaz"),
+                        ("yIlmaZ", "Yilmaz"),
+                        (" yIlmAz", "Yilmaz"),
+                        (" yILmAz  ", "Yilmaz"),
+                        ("de niro", "De Niro")
                     ]
         
         for valuePair in test_values:
             # set the input and expect the expected output
             
-            self.kwargs['last_name'] = valuePair[0]
+            self.kwargs["last_name"] = valuePair[0]
             
             test_user = user.User(**self.kwargs)
             
@@ -625,12 +625,12 @@ class UserTest(mocker.MockerTestCase):
         """
         
         #                 input       expected
-        test_values = [ ('yilmaz', 'Yilmaz'),
-                        ('Yilmaz', 'Yilmaz'),
-                        ('yILMAZ', 'Yilmaz'),
-                        ('yIlmaZ', 'Yilmaz'),
-                        (' yIlmAz', 'Yilmaz'),
-                        (' yILmAz  ', 'Yilmaz'),
+        test_values = [ ("yilmaz", "Yilmaz"),
+                        ("Yilmaz", "Yilmaz"),
+                        ("yILMAZ", "Yilmaz"),
+                        ("yIlmaZ", "Yilmaz"),
+                        (" yIlmAz", "Yilmaz"),
+                        (" yILmAz  ", "Yilmaz"),
                     ]
         
         for valuePair in test_values:
@@ -644,10 +644,10 @@ class UserTest(mocker.MockerTestCase):
         """testing if last_name argument accepts only strings or unicode
         """
         
-        test_values = [123123, ['asdfas'], [], {}]
+        test_values = [123123, ["asdfas"], [], {}]
         
         for test_value in test_values:
-            self.kwargs['last_name'] = test_value
+            self.kwargs["last_name"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -657,46 +657,46 @@ class UserTest(mocker.MockerTestCase):
         """testing if last_name property accepts only strings or unicode
         """
         
-        test_values = [123123, ['a last name'], {},(), 234.23423]
+        test_values = [123123, ["a last name"], {},(), 234.23423]
         
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
                 setattr,
                 self.mock_user,
-                'last_name',
+                "last_name",
                 test_value
             )
     
     
     
-    #----------------------------------------------------------------------
-    def test_department_argument_None(self):
-        """testing if a ValueError will be raised when trying to assign None
-        for the department argument
-        """
+    ##----------------------------------------------------------------------
+    #def test_department_argument_None(self):
+        #"""testing if a ValueError will be raised when trying to assign None
+        #for the department argument
+        #"""
         
-        #try to assign None to department
-        self.kwargs['department'] = None
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        ##try to assign None to department
+        #self.kwargs["department"] = None
+        #self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_department_property_None(self):
-        """testing if a ValueError will be raised when trying to assign None
-        for the department property
-        """
+    ##----------------------------------------------------------------------
+    #def test_department_property_None(self):
+        #"""testing if a ValueError will be raised when trying to assign None
+        #for the department property
+        #"""
         
-        # try to assign None to the department property
+        ## try to assign None to the department property
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            'department',
-            None
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.mock_user,
+            #"department",
+            #None
+        #)
     
     
     
@@ -707,11 +707,11 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # try to assign something other than a department object
-        test_values = ['A department', 1 , 1.0, ['a department'],
-                       {'a': 'deparment'}] 
+        test_values = ["A department", 1 , 1.0, ["a department"],
+                       {"a": "deparment"}] 
         
         for test_value in test_values:
-            self.kwargs['department'] = test_value
+            self.kwargs["department"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -723,13 +723,13 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # try to assign something other than a department
-        test_value = 'a department'
+        test_value = "a department"
         
         self.assertRaises(
             ValueError,
             setattr,
             self.mock_user,
-            'department',
+            "department",
             test_value
         )
     
@@ -753,7 +753,7 @@ class UserTest(mocker.MockerTestCase):
         to the password argument
         """
         
-        self.kwargs['password'] = None
+        self.kwargs["password"] = None
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -768,7 +768,7 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'password',
+            "password",
             None
         )
     
@@ -779,7 +779,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if password property works properly
         """
         
-        test_password = 'a new test password'
+        test_password = "a new test password"
         self.mock_user.password = test_password
         self.assertEquals(self.mock_user.password, test_password)
     
@@ -790,8 +790,8 @@ class UserTest(mocker.MockerTestCase):
         """testing if password is scrambled when trying to store it
         """
         
-        test_password = 'a new test password'
-        self.kwargs['password'] = test_password
+        test_password = "a new test password"
+        self.kwargs["password"] = test_password
         aNew_user = user.User(**self.kwargs)
         self.assertNotEquals(test_password, aNew_user._password)
     
@@ -802,7 +802,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if password is scrambled when trying to store it
         """
         
-        test_password = 'a new test password'
+        test_password = "a new test password"
         self.mock_user.password = test_password
         
         # test if they are not the same any more
@@ -815,7 +815,7 @@ class UserTest(mocker.MockerTestCase):
         #"""testing if password argument decoded and retrieved correctly
         #"""
         
-        #self.fail('test not implemented yet')
+        #self.fail("test not implemented yet")
     
     
     
@@ -824,7 +824,7 @@ class UserTest(mocker.MockerTestCase):
         #"""testing if password property decoded and retrieved correctly
         #"""
         
-        #self.fail('test not implemented yet')
+        #self.fail("test not implemented yet")
     
     
     
@@ -834,7 +834,7 @@ class UserTest(mocker.MockerTestCase):
         permission_groups argument
         """
         
-        self.kwargs['permission_groups'] = None
+        self.kwargs["permission_groups"] = None
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -849,7 +849,7 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'permission_groups',
+            "permission_groups",
             None
         )
     
@@ -904,7 +904,7 @@ class UserTest(mocker.MockerTestCase):
             #ValueError,
             #setattr,
             #self.mock_user,
-            #'permission_groups',
+            #"permission_groups",
             #[]
         #)
     
@@ -918,12 +918,12 @@ class UserTest(mocker.MockerTestCase):
         
         test_values = [23123,
                        1231.43122,
-                       'a_group',
-                       ['group1', 'group2', 234],
+                       "a_group",
+                       ["group1", "group2", 234],
                        ]
         
         for test_value in test_values:
-            self.kwargs['permission_groups'] = test_value
+            self.kwargs["permission_groups"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -936,8 +936,8 @@ class UserTest(mocker.MockerTestCase):
         
         test_values = [23123,
                        1231.43122,
-                       'a_group',
-                       ['group1', 'group2', 234],
+                       "a_group",
+                       ["group1", "group2", 234],
                        ]
         
         for test_value in test_values:
@@ -945,7 +945,7 @@ class UserTest(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_user,
-                'permission_groups',
+                "permission_groups",
                 test_value
             )
     
@@ -968,7 +968,7 @@ class UserTest(mocker.MockerTestCase):
         to the tasks argument
         """
         
-        self.kwargs['tasks'] = None
+        self.kwargs["tasks"] = None
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -983,7 +983,7 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'tasks',
+            "tasks",
             None
         )
     
@@ -995,10 +995,10 @@ class UserTest(mocker.MockerTestCase):
         anything other than a list of task objects to the tasks argument
         """
         
-        test_values = [ 12312, 1233244.2341, ['aTask1', 'aTask2'], 'a_task']
+        test_values = [ 12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
         
         for test_value in test_values:
-            self.kwargs['tasks'] = test_value
+            self.kwargs["tasks"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -1009,14 +1009,14 @@ class UserTest(mocker.MockerTestCase):
         anything other than a list of task objects to the tasks argument
         """
         
-        test_values = [ 12312, 1233244.2341, ['aTask1', 'aTask2'], 'a_task']
+        test_values = [ 12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
         
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
                 setattr,
                 self.mock_user,
-                'tasks',
+                "tasks",
                 test_value
             )
     
@@ -1028,7 +1028,7 @@ class UserTest(mocker.MockerTestCase):
         tasks argument
         """
         
-        self.kwargs['tasks'] = []
+        self.kwargs["tasks"] = []
         
         # this should work without any error
         aUserObj = user.User(**self.kwargs)
@@ -1051,7 +1051,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if projects argument accepts an empty list
         """
         
-        self.kwargs['projects'] = []
+        self.kwargs["projects"] = []
         
         # this should work properly
         user.User(**self.kwargs)
@@ -1074,7 +1074,7 @@ class UserTest(mocker.MockerTestCase):
         to the projects argument
         """
         
-        self.kwargs['projects'] = None
+        self.kwargs["projects"] = None
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -1089,7 +1089,7 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'projects',
+            "projects",
             None
         )
     
@@ -1101,10 +1101,10 @@ class UserTest(mocker.MockerTestCase):
         of other objects project argument
         """
         
-        test_values = [ 123123, 1231.2132, ['a_project1', 'a_project2'] ]
+        test_values = [ 123123, 1231.2132, ["a_project1", "a_project2"] ]
         
         for test_value in test_values:
-            self.kwargs['projects'] = test_value
+            self.kwargs["projects"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -1115,14 +1115,14 @@ class UserTest(mocker.MockerTestCase):
         of other objects to projects property
         """
         
-        test_values = [ 123123, 1231.2132, ['a_project1', 'a_project2'] ]
+        test_values = [ 123123, 1231.2132, ["a_project1", "a_project2"] ]
         
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
                 setattr,
                 self.mock_user,
-                'projects',
+                "projects",
                 test_value
             )
     
@@ -1134,7 +1134,7 @@ class UserTest(mocker.MockerTestCase):
         the projects_lead argument
         """
         
-        self.kwargs['projects_lead'] = None
+        self.kwargs["projects_lead"] = None
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -1149,7 +1149,7 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'projects_lead',
+            "projects_lead",
             None
         )
     
@@ -1160,7 +1160,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if projects_lead argument accepts an empty list
         """
         
-        self.kwargs['projects_lead'] = []
+        self.kwargs["projects_lead"] = []
         
         # this should work without any problems
         self.mock_user = user.User(**self.kwargs)
@@ -1184,10 +1184,10 @@ class UserTest(mocker.MockerTestCase):
         projects_lead argument
         """
         
-        test_values = ['a project', 123123, {}, 12.2132 ]
+        test_values = ["a project", 123123, {}, 12.2132 ]
         
         for test_value in test_values:
-            self.kwargs['projects_lead'] = test_value
+            self.kwargs["projects_lead"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -1199,8 +1199,8 @@ class UserTest(mocker.MockerTestCase):
         projects_lead argument
         """
         
-        test_value = ['a project', 123123, [], {}, 12.2132 ]
-        self.kwargs['projects_lead'] = test_value
+        test_value = ["a project", 123123, [], {}, 12.2132 ]
+        self.kwargs["projects_lead"] = test_value
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -1212,14 +1212,14 @@ class UserTest(mocker.MockerTestCase):
         projects_lead property
         """
         
-        test_values = ['a project', 123123, {}, 12.2132 ]
+        test_values = ["a project", 123123, {}, 12.2132 ]
         
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
                 setattr,
                 self.mock_user,
-                'projects',
+                "projects",
                 test_value
             )
     
@@ -1232,13 +1232,13 @@ class UserTest(mocker.MockerTestCase):
         projects_lead property
         """
         
-        test_value = ['a project', 123123, [], {}, 12.2132 ]
+        test_value = ["a project", 123123, [], {}, 12.2132 ]
         
         self.assertRaises(
             ValueError,
             setattr,
             self.mock_user,
-            'projects_lead',
+            "projects_lead",
             test_value
         )
     
@@ -1250,7 +1250,7 @@ class UserTest(mocker.MockerTestCase):
         the sequences_lead argument
         """
         
-        self.kwargs['sequences_lead'] = None
+        self.kwargs["sequences_lead"] = None
         
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
@@ -1266,7 +1266,7 @@ class UserTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_user,
-            'sequences_lead',
+            "sequences_lead",
             None
         )
     
@@ -1277,7 +1277,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if sequences_lead argument accepts an empty list
         """
         
-        self.kwargs['sequences_lead'] = []
+        self.kwargs["sequences_lead"] = []
         
         #this should work
         a_user = user.User(**self.kwargs)
@@ -1301,10 +1301,10 @@ class UserTest(mocker.MockerTestCase):
         sequences_lead argument
         """
         
-        test_values = ['a sequence', 123123, {}, 12.2132 ]
+        test_values = ["a sequence", 123123, {}, 12.2132 ]
         
         for test_value in test_values:
-            self.kwargs['sequences_lead'] = test_value
+            self.kwargs["sequences_lead"] = test_value
             self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -1316,8 +1316,8 @@ class UserTest(mocker.MockerTestCase):
         sequences_lead argument
         """
         
-        test_value = ['a sequence', 123123, [], {}, 12.2132 ]
-        self.kwargs['sequences_lead'] = test_value
+        test_value = ["a sequence", 123123, [], {}, 12.2132 ]
+        self.kwargs["sequences_lead"] = test_value
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     
@@ -1329,8 +1329,8 @@ class UserTest(mocker.MockerTestCase):
         sequences_lead property
         """
         
-        test_value = ['a sequence', 123123, [], {}, 12.2132 ]
-        self.kwargs['sequences_lead'] = test_value
+        test_value = ["a sequence", 123123, [], {}, 12.2132 ]
+        self.kwargs["sequences_lead"] = test_value
         self.assertRaises(ValueError, user.User, **self.kwargs)
     
     

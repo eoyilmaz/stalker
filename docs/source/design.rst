@@ -172,16 +172,16 @@ Stalker comes with an *admin* user already defined in to it. To create other
 things in the database we need to have the admin user by querying it.
 
 >>> dbSession = db.meta.session
->>> admin = dbSession.query(User).filter_by(name='admin').first()
+>>> admin = dbSession.query(User).filter_by(name="admin").first()
 
 Lets create another user
 
->>> newUser = User(name='eoyilmaz',
-                   login_name='eoyilmaz',
-                   first_name='Erkan Ozgur',
-                   last_name='Yilmaz',
-                   password='secret',
-                   email='eoyilmaz@gmail.com')
+>>> newUser = User(name="eoyilmaz",
+                   login_name="eoyilmaz",
+                   first_name="Erkan Ozgur",
+                   last_name="Yilmaz",
+                   password="secret",
+                   email="eoyilmaz@gmail.com")
 
 Save the data to the database
 
@@ -198,11 +198,11 @@ Get all the users:
 
 or select a couple of users by filters:
 
->>> users = query.filter_by(name='Ozgur')
+>>> users = query.filter_by(name="Ozgur")
 
 or select the first user matching query criteria:
 
->>> user_ozgur = query.filter_by(name='Ozgur').first()
+>>> user_ozgur = query.filter_by(name="Ozgur").first()
 
 
 ***** UPDATE BELOW *****
@@ -218,7 +218,7 @@ Save the new project to the database:
 
 Let's ask the tasks of one user:
 
->>> ozgur = query.filter_by(name='ozgur')
+>>> ozgur = query.filter_by(name="ozgur")
 >>> tasks = ozgur.tasks
 
 Get the on going tasks of this user:
@@ -227,12 +227,12 @@ Get the on going tasks of this user:
 
 Get the on going tasks of this user by using the database:
 
->>> taskQuery = mapper.sessison.query(user.User).filter_by(name='ozgur').join(task.Task).filter_by(status!='complete')
+>>> taskQuery = mapper.sessison.query(user.User).filter_by(name="ozgur").join(task.Task).filter_by(status!="complete")
 >>> onGoingTasks = taskQuery.all()
 
 Get the "rig" tasks of ozgur:
 
->>> rigTasks =  taskQuery.join(pipelineStep.pipelineStep).filter_by(name='Rig').all()
+>>> rigTasks =  taskQuery.join(pipelineStep.pipelineStep).filter_by(name="Rig").all()
 
 As you see all the functionalities of SQLAlchemy is fully supported. At the end
 all the models are plain old python objects (POPO) and the persistancy part is

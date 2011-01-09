@@ -2,7 +2,7 @@
 
 
 
-from stalker.core.models import entity, template
+from stalker.core.models import entity, typeEntity
 
 
 
@@ -20,22 +20,22 @@ class Structure(entity.Entity):
       showing the folder structure of the project. Whenever a project is
       created, folders are created by looking at this folder template.
       
-      The template string can have Jinja2 directives. These variables are
-      given to the template engine:
+      The template string can have Jinja2 directives. These variables are given
+      to the template engine:
       
         * *project*: holds the current :class:`~stalker.core.models.project`
           object using this structure, so you can use {{project.code}} or
           {{project.sequences}} kind of variables in the Jinja2 template
     
     :param asset_templates: holds
-      :class:`~stalker.core.models.template.Template` objects with an
+      :class:`~stalker.core.models.typeEntity.TypeTemplate` objects with an
       :class:`~stalker.core.models.typeEntity.AssetType` connected to its
       `type` attribute, which can help specifying templates based on the
       related :class:`~stalker.core.models.typeEntity.AssetType` object.
     
     :param reference_templates: holds
-      :class:`~stalker.core.models.template.Template` objects, which can help
-      specifying templates based on the given
+      :class:`~stalker.core.models.typeEntity.TypeTemplate` objects, which can
+      help specifying templates based on the given
       :class:`~stalker.core.models.typeEntity.LinkType` object
     
     This templates are used in creation of Project folder structure and also
@@ -71,9 +71,10 @@ class Structure(entity.Entity):
             raise(ValueError("asset_templates should be a list object"))
         
         for element in asset_templates_in:
-            if not isinstance(element, template.Template):
+            if not isinstance(element, typeEntity.TypeTemplate):
                 raise(ValueError("asset_templates should only contain \
-                instances of stalker.core.models.template.Template objects"))
+                instances of stalker.core.models.typeEntity.TypeTemplate \
+                objects"))
         
         return asset_templates_in
     
@@ -90,7 +91,8 @@ class Structure(entity.Entity):
         for element in reference_templates_in:
             if not isinstance(element, template.Template):
                 raise(ValueError("reference_templates should only contain \
-                instances of stalker.core.models.template.Template objects"))
+                instances of stalker.core.models.typeEntity.TypeTemplate \
+                objects"))
         
         return reference_templates_in
     
@@ -120,8 +122,8 @@ class Structure(entity.Entity):
                 self._check_asset_templates(asset_templates_in)
         
         doc = """A list of
-        :class:`~stalker.core.models.template.Template` objects which gives
-        information about the :class:`~stalker.core.models.asset.Asset`
+        :class:`~stalker.core.models.typeEntity.TypeTemplate` objects which
+        gives information about the :class:`~stalker.core.models.asset.Asset`
         :class:`~stalker.core.models.version.Version` file placements"""
         
         return locals()
@@ -141,8 +143,8 @@ class Structure(entity.Entity):
                 self._check_reference_templates(reference_templates_in)
         
         doc = """A list of
-        :class:`~stalker.core.models.template.Template` objects which gives
-        information about the placement of references to entities"""
+        :class:`~stalker.core.models.typeEntity.TypeTemplate` objects which
+        gives information about the placement of references to entities"""
         
         return locals()
     

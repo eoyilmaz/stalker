@@ -15,7 +15,7 @@ There are two functions to log a user in, first one is
 returns a :class:`~stalker.core.models.user.User` object::
     
     from stalker.db import auth
-    userObj = auth.authenticate('username', 'password')
+    userObj = auth.authenticate("username", "password")
 
 The second one is the :func:`~stalker.db.auth.login` which uses a given
 :class:`~stalker.core.models.user.User` object and creates a Beaker Session and
@@ -34,7 +34,7 @@ The basic usage of the system is as follows::
     # in the current auth.SESSION
     # 
     # in this way we prevent asking the user for login information all the time
-    if 'user_id' in auth.SESSION:
+    if "user_id" in auth.SESSION:
         userObj = auth.get_user()
     else:
         # ask the username and password of the user
@@ -62,8 +62,8 @@ from stalker.core.models import error, user
 
 
 SESSION = {}
-SESSION_KEY = 'stalker_key'
-SESSION_VALIDATE_KEY = 'stalker_validate_key'
+SESSION_KEY = "stalker_key"
+SESSION_VALIDATE_KEY = "stalker_validate_key"
 
 
 
@@ -75,13 +75,13 @@ def create_session():
     tempdir = tempfile.gettempdir()
     
     session_options = {
-        'id': '0',
-        'type': 'file',
-        'cookie_expires': False,
-        'data_dir': os.path.sep.join([tempdir, 'stalker_cache', 'data']),
-        'lock_dir': os.path.sep.join([tempdir, 'stalker_cache', 'lock']),
-        'key': SESSION_KEY,
-        'validate_key': SESSION_VALIDATE_KEY,
+        "id": "0",
+        "type": "file",
+        "cookie_expires": False,
+        "data_dir": os.path.sep.join([tempdir, "stalker_cache", "data"]),
+        "lock_dir": os.path.sep.join([tempdir, "stalker_cache", "lock"]),
+        "key": SESSION_KEY,
+        "validate_key": SESSION_VALIDATE_KEY,
     }
     
     SESSION = beakerSession.Session({}, **session_options)
@@ -90,7 +90,7 @@ def create_session():
 
 
 #----------------------------------------------------------------------
-def authenticate(username='', password=''):
+def authenticate(username="", password=""):
     """Authenticates the given username and password, returns a
     stalker.core.models.user.User object
     
@@ -126,11 +126,11 @@ def login(user_obj):
     user_obj.last_login = datetime.datetime.now()
     db.meta.session.commit()
     
-    if 'user_id' not in SESSION:
+    if "user_id" not in SESSION:
         # create the session first
         create_session()
     
-    SESSION.update({'user_id': user_obj.id})
+    SESSION.update({"user_id": user_obj.id})
     SESSION.save()
 
 
@@ -160,10 +160,10 @@ use stalker.db.setup(), to setup the default db"))
     # create the session dictionary
     create_session()
     
-    if 'user_id' in SESSION:
+    if "user_id" in SESSION:
         # create the session
         return db.meta.session.query(user.User).\
-               filter_by(id=SESSION['user_id']).first()
+               filter_by(id=SESSION["user_id"]).first()
     else:
         return None
 

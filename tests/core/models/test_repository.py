@@ -38,12 +38,12 @@ class RepositoryTester(mocker.MockerTestCase):
         self.mocker.replay()
         
         self.kwargs = {
-            'name': 'a repository',
-            'description': 'this is for testing purposes',
-            'tags': [self.mock_tag1, self.mock_tag2],
-            'linux_path': '~/M/Projects',
-            'osx_path': '/Volumes/M/Projects',
-            'windows_path': 'M:\\Projects'
+            "name": "a repository",
+            "description": "this is for testing purposes",
+            "tags": [self.mock_tag1, self.mock_tag2],
+            "linux_path": "~/M/Projects",
+            "osx_path": "/Volumes/M/Projects",
+            "windows_path": "M:\\Projects"
         }
         
         self.mock_repo = repository.Repository(**self.kwargs)
@@ -59,7 +59,7 @@ class RepositoryTester(mocker.MockerTestCase):
         test_values = [123123, 123.1231, [], {}]
         
         for test_value in test_values:
-            self.kwargs['linux_path'] = test_value
+            self.kwargs["linux_path"] = test_value
             self.assertRaises(ValueError, repository.Repository, **self.kwargs)
     
     
@@ -77,7 +77,7 @@ class RepositoryTester(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_repo,
-                'linux_path',
+                "linux_path",
                 test_value
             )
     
@@ -88,7 +88,7 @@ class RepositoryTester(mocker.MockerTestCase):
         """testing if linux_path property works properly
         """
         
-        test_value = '~/newRepoPath/Projects'
+        test_value = "~/newRepoPath/Projects"
         self.mock_repo.linux_path = test_value
         self.assertEquals(self.mock_repo.linux_path, test_value)
     
@@ -103,7 +103,7 @@ class RepositoryTester(mocker.MockerTestCase):
         test_values = [123123, 123.1231, [], {}]
         
         for test_value in test_values:
-            self.kwargs['windows_path'] = test_value
+            self.kwargs["windows_path"] = test_value
             self.assertRaises(ValueError, repository.Repository, **self.kwargs)
     
     
@@ -121,7 +121,7 @@ class RepositoryTester(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_repo,
-                'windows_path',
+                "windows_path",
                 test_value
             )
     
@@ -132,7 +132,7 @@ class RepositoryTester(mocker.MockerTestCase):
         """testing if windows_path property works properly
         """
         
-        test_value = '~/newRepoPath/Projects'
+        test_value = "~/newRepoPath/Projects"
         self.mock_repo.windows_path = test_value
         self.assertEquals(self.mock_repo.windows_path, test_value)
     
@@ -147,7 +147,7 @@ class RepositoryTester(mocker.MockerTestCase):
         test_values = [123123, 123.1231, [], {}]
         
         for test_value in test_values:
-            self.kwargs['osx_path'] = test_value
+            self.kwargs["osx_path"] = test_value
             self.assertRaises(ValueError, repository.Repository, **self.kwargs)
     
     
@@ -165,7 +165,7 @@ class RepositoryTester(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_repo,
-                'osx_path',
+                "osx_path",
             test_value
             )
     
@@ -176,7 +176,7 @@ class RepositoryTester(mocker.MockerTestCase):
         """testing if osx_path property works properly
         """
         
-        test_value = '~/newRepoPath/Projects'
+        test_value = "~/newRepoPath/Projects"
         self.mock_repo.osx_path = test_value
         self.assertEquals(self.mock_repo.osx_path, test_value)
     

@@ -44,15 +44,15 @@ class CommentTest(mocker.MockerTestCase):
         self.mocker.replay()
         
         self.kwargs = {
-            'name': 'Test Comment',
-            'description': 'this is a test object',
-            'tags': [self.mock_tag1, self.mock_tag2],
-            'created_by': self.mock_user,
-            'updated_by': self.mock_user,
-            'date_created': self.date_created,
-            'date_updated': self.date_updated,
-            'body': 'This is the content of the comment',
-            'to': self.mock_entity
+            "name": "Test Comment",
+            "description": "this is a test object",
+            "tags": [self.mock_tag1, self.mock_tag2],
+            "created_by": self.mock_user,
+            "updated_by": self.mock_user,
+            "date_created": self.date_created,
+            "date_updated": self.date_updated,
+            "body": "This is the content of the comment",
+            "to": self.mock_entity
         }
         
         self.comment = comment.Comment(**self.kwargs)
@@ -67,11 +67,11 @@ class CommentTest(mocker.MockerTestCase):
         
         # create a new comment with false values
         
-        test_values = [1, 1.0, ['this is the bodybody'],
-                       {'this': 'is the body'}]
+        test_values = [1, 1.0, ["this is the bodybody"],
+                       {"this": "is the body"}]
         
         for test_value in test_values:
-            self.kwargs['body'] = test_value
+            self.kwargs["body"] = test_value
             self.assertRaises(
                 ValueError,
                 comment.Comment,
@@ -86,15 +86,15 @@ class CommentTest(mocker.MockerTestCase):
         anything other than a string or unicode
         """
         
-        test_values = [1, 1.0, ['this is the bodybody'],
-                       {'this': 'is the body'}]
+        test_values = [1, 1.0, ["this is the bodybody"],
+                       {"this": "is the body"}]
         
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
                 setattr,
                 self.comment,
-                'body',
+                "body",
                 test_value
             )
     
@@ -105,7 +105,7 @@ class CommentTest(mocker.MockerTestCase):
         """testing if body property is set properly
         """
         
-        new_body = 'This is a new comment body'
+        new_body = "This is a new comment body"
         self.comment.body = new_body
         self.assertEquals(new_body, self.comment.body)
     
@@ -118,7 +118,7 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         # creating a new comment and skipping the body should work fine
-        self.kwargs.pop('body')
+        self.kwargs.pop("body")
         a_new_comment =  comment.Comment(**self.kwargs)
     
     
@@ -130,7 +130,7 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         # create a new comment with no "to" argument
-        self.kwargs['to'] = None
+        self.kwargs["to"] = None
         self.assertRaises(ValueError, comment.Comment, **self.kwargs)
     
     
@@ -147,7 +147,7 @@ class CommentTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.comment,
-            'to',
+            "to",
             None
         )
     
@@ -159,10 +159,10 @@ class CommentTest(mocker.MockerTestCase):
         to be set to something other than an entity object
         """
         
-        test_values = [1, 1.2, 'an Entity']
+        test_values = [1, 1.2, "an Entity"]
         
         for test_value in test_values:
-            self.kwargs['to'] = test_value
+            self.kwargs["to"] = test_value
             
             self.assertRaises(
                 ValueError,
@@ -183,8 +183,8 @@ class CommentTest(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.comment,
-            'to',
-            'an Entity'
+            "to",
+            "an Entity"
         )
     
     
@@ -195,7 +195,7 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         # this should raise a ValueError
-        self.kwargs.pop('to')
+        self.kwargs.pop("to")
         
         self.assertRaises(
             ValueError,

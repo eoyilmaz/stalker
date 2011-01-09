@@ -36,7 +36,7 @@ class Status(entity.Entity):
         """checks the short_name attribute
         """
         
-        if short_name == '' \
+        if short_name == "" \
            or not isinstance(short_name, (str, unicode)):
             raise(ValueError("the short_name shouldn't be empty and it \
             should be a str or unicode"))
@@ -97,15 +97,15 @@ class StatusList(entity.Entity):
         """
         
         if not isinstance(statuses, list):
-            raise(ValueError('statuses should be an instance of list'))
+            raise(ValueError("statuses should be an instance of list"))
         
         if len(statuses) < 1:
-            raise(ValueError('statuses should not be an empty list'))
+            raise(ValueError("statuses should not be an empty list"))
         
         for status in statuses:
             if not isinstance(status, Status):
-                raise(ValueError('all elements must be an object of Status in \
-                the given statuses list'))
+                raise(ValueError("all elements must be an object of Status in \
+                the given statuses list"))
         
         return statuses
     

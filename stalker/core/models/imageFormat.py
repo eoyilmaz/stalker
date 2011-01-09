@@ -68,7 +68,7 @@ class ImageFormat(entity.Entity):
         #if not isinstance(name, (str, unicode)):
             #raise(ValueError("name should be instance of str or unicode"))
         
-        #if name == '' or len(name) < 1:
+        #if name == "" or len(name) < 1:
             #raise(ValueError("name should not be an empty string"))
         
         #return name

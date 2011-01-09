@@ -53,7 +53,7 @@ import os, shutil
         ## create a dummy project in one of the project path
         #for serverName, serverPath in defaultSettings.PROJECTS_SERVERS:
             #if os.path.exists( serverPath ):
-                #self._testProjectFullPath = os.path.join( serverPath, 'STALKER_TEST_PROJECT' )
+                #self._testProjectFullPath = os.path.join( serverPath, "STALKER_TEST_PROJECT" )
                 #os.mkdir( self._testProjectFullPath )
                 #break
     
@@ -74,10 +74,10 @@ import os, shutil
         ##"""
         
         ### it should raise an IOError on non existing paths
-        ##self.failUnlessRaises( IOError, stalker.connectToProject, '/non-existing-path' )
+        ##self.failUnlessRaises( IOError, stalker.connectToProject, "/non-existing-path" )
         
         ### it should raise an IOError for non-existing database for existing paths
-        ##self.failUnlessRaises( IOError, stalker.connectToProject, '/home/ozgur' )
+        ##self.failUnlessRaises( IOError, stalker.connectToProject, "/home/ozgur" )
         
         ### check if it setted up the settings correctly
         ###from standalone.conf import settings
@@ -113,11 +113,11 @@ import os, shutil
         #elixir.create_all()
         
         ## create a user
-        #models.User( email=u'eoyilmaz@gmail.com',
-                     #first_name=u'Erkan Ozgur',
-                     #last_name=u'Yilmaz',
-                     #login_name=u'eoyilmaz',
-                     #password=u'1234',
+        #models.User( email=u"eoyilmaz@gmail.com",
+                     #first_name=u"Erkan Ozgur",
+                     #last_name=u"Yilmaz",
+                     #login_name=u"eoyilmaz",
+                     #password=u"1234",
                      #task_enabled=True )
         
         #elixir.session.commit()

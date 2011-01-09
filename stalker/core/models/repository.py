@@ -34,7 +34,7 @@ class Repository(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, linux_path='', windows_path='', osx_path='', **kwargs):
+    def __init__(self, linux_path="", windows_path="", osx_path="", **kwargs):
         super(Repository, self).__init__(**kwargs)
         
         self._linux_path = self._check_linux_path(linux_path)
@@ -141,11 +141,11 @@ class Repository(entity.Entity):
             # return the proper value according to the current os
             platform_system = platform.system()
             
-            if platform_system == 'Linux':
+            if platform_system == "Linux":
                 return self.linux_path
-            elif platform_system == 'Windows':
+            elif platform_system == "Windows":
                 return self.windows_path
-            elif platform_system == 'Darwin':
+            elif platform_system == "Darwin":
                 return self.osx_path
         
         doc = """property that helps to get path for the current os"""

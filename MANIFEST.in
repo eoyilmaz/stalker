@@ -1,0 +1,7 @@
+include README
+include INSTALL
+include MANIFEST.in
+include LICENSE
+inlucde doTests
+recursive-include docs *
+recursive-include tests *

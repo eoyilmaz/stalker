@@ -30,13 +30,13 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.date_updated = self.date_created
         
         self.kwargs = {
-            'name': 'Test Entity',
-            'description': "This is a test entity, and this is a proper \
+            "name": "Test Entity",
+            "description": "This is a test entity, and this is a proper \
             description for it",
-            'created_by': self.mock_user,
-            'updated_by': self.mock_user,
-            'date_created': self.date_created,
-            'date_updated': self.date_updated,
+            "created_by": self.mock_user,
+            "updated_by": self.mock_user,
+            "date_created": self.date_created,
+            "date_updated": self.date_updated,
         }
         
         # create a proper SimpleEntity to use it later in the tests
@@ -45,11 +45,41 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing the equality of two simple entities
+        """
+        
+        # create two simple entities with same parameters and check for
+        # equality
+        simpleEntity1 = entity.SimpleEntity(**self.kwargs)
+        simpleEntity2 = entity.SimpleEntity(**self.kwargs)
+        
+        self.assertTrue(simpleEntity1==simpleEntity2)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing the inequality of two simple entites
+        """
+        
+        # create two simple entities with same parameters and check for
+        # equality
+        simpleEntity1 = entity.SimpleEntity(**self.kwargs)
+        
+        self.kwargs['description'] = ''
+        simpleEntity2 = entity.SimpleEntity(**self.kwargs)
+        
+        self.assertTrue(simpleEntity1!=simpleEntity2)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_name_argument_being_empty(self):
         """testing if ValueError is raised for empty name argument
         """
         
-        self.kwargs['name'] = ''
+        self.kwargs["name"] = ""
         self.assertRaises(ValueError, entity.SimpleEntity, **self.kwargs)
     
     
@@ -59,7 +89,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """testing if ValueError is raised for None name argument
         """
         
-        self.kwargs['name'] = None
+        self.kwargs["name"] = None
         self.assertRaises(ValueError, entity.SimpleEntity, **self.kwargs)
     
     
@@ -117,9 +147,9 @@ class SimpleEntityTester(mocker.MockerTestCase):
         argument to something else than a string or unicode
         """
         
-        test_values = [1, 1.2, ['a name'], {'a': 'name'}]
+        test_values = [1, 1.2, ["a name"], {"a": "name"}]
         for test_value in test_values:
-            self.kwargs['name'] = test_value
+            self.kwargs["name"] = test_value
             self.assertRaises(ValueError, entity.SimpleEntity, **self.kwargs)
     
     
@@ -203,10 +233,10 @@ class SimpleEntityTester(mocker.MockerTestCase):
         desription argument with something else than a string or unicode
         """
         
-        test_values = [1, 1.2, ['a description'], {'a': 'description'}]
+        test_values = [1, 1.2, ["a description"], {"a": "description"}]
         
         for test_value in test_values:
-            self.kwargs['description'] = test_value
+            self.kwargs["description"] = test_value
             
             self.assertRaises(ValueError, entity.SimpleEntity, **self.kwargs)
     
@@ -218,7 +248,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         property to something else then a string or unicode
         """
         
-        test_values = [1, 1.2, ['a description'], {'a': 'description'}]
+        test_values = [1, 1.2, ["a description"], {"a": "description"}]
         
         for test_value in test_values:
             self.assertRaises(
@@ -238,7 +268,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         # the created_by argument should be an instance of User class, in any
         # other case it should raise a ValueError
-        test_value = 'A User Name'
+        test_value = "A User Name"
         
         # be sure that the test value is not an instance of user.User
         self.assertFalse( isinstance(test_value, user.User))
@@ -248,7 +278,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.simple_entity,
-            'created_by',
+            "created_by",
             test_value
         )
     
@@ -261,7 +291,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         # the created_by property should be an instance of User class, in any
         # other case it should raise a ValueError
-        test_value = 'A User Name'
+        test_value = "A User Name"
         
         # be sure that the test value is not an instance of user.User
         self.assertFalse( isinstance(test_value, user.User))
@@ -271,7 +301,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.simple_entity,
-            'created_by',
+            "created_by",
             test_value
         )
     
@@ -292,7 +322,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             #ValueError,
             #setattr,
             #self.simple_entity,
-            #'created_by',
+            #"created_by",
             #None
         #)
     
@@ -313,7 +343,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             #ValueError,
             #setattr,
             #self.simple_entity,
-            #'created_by',
+            #"created_by",
             #None
         #)
     
@@ -326,7 +356,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         # the updated_by argument should be an instance of User class, in any
         # other case it should raise a ValueError
-        test_value = 'A User Name'
+        test_value = "A User Name"
         
         # be sure that the test value is not an instance of user.User
         self.assertFalse(isinstance(test_value, user.User))
@@ -336,7 +366,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.simple_entity,
-            'updated_by',
+            "updated_by",
             test_value
         )
     
@@ -349,7 +379,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         # the updated_by property should be an instance of User class, in any
         # other case it should raise a ValueError
-        test_value = 'A User Name'
+        test_value = "A User Name"
         
         # be sure that the test value is not an instance of user.User
         self.assertFalse( isinstance(test_value, user.User))
@@ -359,7 +389,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.simple_entity,
-            'updated_by',
+            "updated_by",
             test_value
         )
     
@@ -375,11 +405,11 @@ class SimpleEntityTester(mocker.MockerTestCase):
             #ValueError,
             #setattr,
             #self.simple_entity,
-            #'updated_by',
+            #"updated_by",
             #None
         #)
         
-        self.kwargs['updated_by'] = None
+        self.kwargs["updated_by"] = None
         
         aNewSimpleEntity = entity.SimpleEntity(**self.kwargs)
         
@@ -404,7 +434,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             #ValueError,
             #setattr,
             #self.simple_entity,
-            #'created_by',
+            #"created_by",
             #None
         #)
     
@@ -543,8 +573,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         
-        self.kwargs['date_created'] = datetime.datetime(2000, 1, 1, 1, 1, 1)
-        self.kwargs['date_updated'] = datetime.datetime(1990, 1, 1, 1, 1, 1)
+        self.kwargs["date_created"] = datetime.datetime(2000, 1, 1, 1, 1, 1)
+        self.kwargs["date_updated"] = datetime.datetime(1990, 1, 1, 1, 1, 1)
         
         # create a new entity with these dates
         # and expect a ValueError
@@ -577,12 +607,12 @@ class EntityTester(mocker.MockerTestCase):
         self.mocker.replay()
         
         self.kwargs = {
-            'name': 'Test Entity',
-            'description': "This is a test entity, and this is a proper \
+            "name": "Test Entity",
+            "description": "This is a test entity, and this is a proper \
             description for it",
-            'created_by': self.mock_user,
-            'updated_by': self.mock_user,
-            'tags': self.tags
+            "created_by": self.mock_user,
+            "updated_by": self.mock_user,
+            "tags": self.tags
         }
         
         # create a proper SimpleEntity to use it later in the tests
@@ -596,7 +626,7 @@ class EntityTester(mocker.MockerTestCase):
         a tags parameter
         """
         
-        self.kwargs.pop('tags')
+        self.kwargs.pop("tags")
         # this should work without errors
         aNewEntity = entity.Entity(**self.kwargs)
     
@@ -608,7 +638,7 @@ class EntityTester(mocker.MockerTestCase):
         """
         
         # this should work without errors
-        self.kwargs.pop('tags')
+        self.kwargs.pop("tags")
         aNewEntity = entity.Entity(**self.kwargs)
         
         expected_result = []
@@ -623,10 +653,10 @@ class EntityTester(mocker.MockerTestCase):
         tags with something other than a list
         """
         
-        test_values = [ "a tag", 1243, 12.12, {'a': 'tag'}]
+        test_values = [ "a tag", 1243, 12.12, {"a": "tag"}]
         
         for test_value in test_values:
-            self.kwargs['tags'] = test_value
+            self.kwargs["tags"] = test_value
             self.assertRaises(ValueError, entity.Entity, **self.kwargs)
     
     
@@ -640,7 +670,34 @@ class EntityTester(mocker.MockerTestCase):
         self.entity.tags = test_value
         
         self.assertEquals(self.entity.tags, test_value)
-
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """test equality of two entities
+        """
+        
+        # create two entities with same parameters and check for equality
+        entity1 = entity.Entity(**self.kwargs)
+        entity2 = entity.Entity(**self.kwargs)
+        
+        self.assertTrue(entity1==entity2)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """test inequality of two entities
+        """
+        
+        # change the tags and test it again, expect False
+        entity1 = entity.Entity(**self.kwargs)
+        
+        self.kwargs['tags'] = []
+        entity3 = entity.Entity(**self.kwargs)
+        
+        self.assertTrue(entity1!=entity3)
 
 
 
@@ -669,6 +726,8 @@ class StatusedEntityTester(mocker.MockerTestCase):
         
         assert(isinstance(self.mocker, mocker.Mocker))
         
+        self.expect = mocker.Expect(self.mocker)
+        
         # create
         # a mock user
         self.mock_user = self.mocker.mock(user.User)
@@ -685,21 +744,23 @@ class StatusedEntityTester(mocker.MockerTestCase):
         
         # a mock note list
         
+        
+        
         self.mocker.replay()
         
         self.date_created = datetime.datetime(2010, 10, 21, 3, 8, 0)
         self.date_updated = self.date_created
         
         self.kwargs = {
-            'name': 'Test Entity',
-            'description': 'Just testing the very first entity',
-            'tags': [self.mock_tag1, self.mock_tag2],
-            'created_by': self.mock_user,
-            'updated_by': self.mock_user,
-            'status_list': self.mock_status_list,
-            'status': 0,
-            'date_created': self.date_created,
-            'date_updated': self.date_updated,
+            "name": "Test Entity",
+            "description": "Just testing the very first entity",
+            "tags": [self.mock_tag1, self.mock_tag2],
+            "created_by": self.mock_user,
+            "updated_by": self.mock_user,
+            "status_list": self.mock_status_list,
+            "status": 0,
+            "date_created": self.date_created,
+            "date_updated": self.date_updated,
         }
         
         # create a proper entity object
@@ -713,10 +774,10 @@ class StatusedEntityTester(mocker.MockerTestCase):
         initialize status_list with something other than a StatusList
         """
         
-        testValues = [100, '', 100.2]
+        testValues = [100, "", 100.2]
         
         for testValue in testValues:
-            self.kwargs['status_list'] = testValue
+            self.kwargs["status_list"] = testValue
             self.assertRaises(ValueError, entity.StatusedEntity, **self.kwargs)
     
     
@@ -726,7 +787,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
         """testing if ValueError is going to be raised when trying to
         initialize status_list with None
         """
-        self.kwargs['status_list'] = None
+        self.kwargs["status_list"] = None
         self.assertRaises(ValueError, entity.StatusedEntity, **self.kwargs)
     
     
@@ -737,7 +798,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
         status_list to something else than a StatusList object
         """
         
-        test_values = [ "a string", 1.0, 1, {'a': 'statusList'}]
+        test_values = [ "a string", 1.0, 1, {"a": "statusList"}]
         
         for test_value in test_values:
             # now try to set it
@@ -772,7 +833,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
         """testing if a ValueError going to be raised when omiting the
         status_list argument
         """
-        self.kwargs.pop('status_list')
+        self.kwargs.pop("status_list")
         self.assertRaises(ValueError, entity.StatusedEntity, **self.kwargs)
     
     
@@ -784,10 +845,10 @@ class StatusedEntityTester(mocker.MockerTestCase):
         """
         
         # with a string
-        test_values = ['0', [0]]
+        test_values = ["0", [0]]
         
         for test_value in test_values:
-            self.kwargs['status'] = test_value
+            self.kwargs["status"] = test_value
             self.assertRaises(ValueError, entity.StatusedEntity, **self.kwargs)
     
     
@@ -1020,6 +1081,52 @@ class StatusedEntityTester(mocker.MockerTestCase):
         ## assigned correctly
         
         #self.fail("test not implemented yet!")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing equality
+        """
+        
+        statusedEntity1 = entity.StatusedEntity(**self.kwargs)
+        statusedEntity2 = entity.StatusedEntity(**self.kwargs)
+        
+        self.assertTrue(statusedEntity1==statusedEntity2)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing inequality
+        """
+        
+        statusedEntity1 = entity.StatusedEntity(**self.kwargs)
+        
+        statusList1 = self.mocker.mock(status.StatusList)
+        
+        self.expect(statusList1._status_list).\
+            result(self.mocker.mock(status.StatusList))
+        
+        ##statusList1._status_list.statuses
+        ##self.mocker.result([self.mocker.mock(status.Status)])
+        #self.mocker.result([self.mocker.mock(status.Status)])
+        
+        
+        #self.mocker.result(self.mocker.mock(status.StatusList))
+        
+        #self.mocker.replay()
+        
+        ##change some arguments
+        #self.kwargs.update({
+            #'status_list': statusList1,
+            #'status': 1
+        #})
+        
+        #statusedEntity2 = entity.StatusedEntity(**self.kwargs)
+        
+        #self.assertTrue(statusedEntity1!=statusedEntity2)
+    
     
     
     

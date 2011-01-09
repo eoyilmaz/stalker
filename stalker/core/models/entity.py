@@ -51,7 +51,7 @@ class SimpleEntity(object):
     #----------------------------------------------------------------------
     def __init__(self,
                  name=None,
-                 description='',
+                 description="",
                  created_by=None,
                  updated_by=None,
                  date_created=datetime.datetime.now(),
@@ -120,7 +120,7 @@ class SimpleEntity(object):
         
         #print name_in
         # remove unnecesary characters from the beginning
-        name_in = re.sub('(^[^A-Za-z]+)', r'', name_in)
+        name_in = re.sub("(^[^A-Za-z]+)", r"", name_in)
         #print name_in
         
         # remove white spaces
@@ -141,13 +141,13 @@ class SimpleEntity(object):
         """
         
         # remove camel case letters
-        nice_name_in = re.sub(r'(.+?[a-z]+)([A-Z])', r'\1_\2', nice_name_in)
+        nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
         
         # replace white spaces with under score
-        nice_name_in = re.sub('([\s])+', r'_', nice_name_in)
+        nice_name_in = re.sub("([\s])+", r"_", nice_name_in)
         
         # remove multiple underscores
-        nice_name_in = re.sub(r'([_]+)', r'_', nice_name_in)
+        nice_name_in = re.sub(r"([_]+)", r"_", nice_name_in)
         
         # turn it to lower case
         nice_name_in = nice_name_in.lower()
@@ -374,6 +374,28 @@ class SimpleEntity(object):
         return locals()
     
     date_updated = property(**date_updated())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return isinstance(other, SimpleEntity) and \
+           self.name == other.name and \
+           self.description == other.description and \
+           self.created_by == other.created_by
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __ne__(self, other):
+        """the inequality operator
+        """
+        
+        return not self.__eq__(other)
+        
 
 
 
@@ -430,6 +452,15 @@ class Entity(SimpleEntity):
         return locals()
     
     tags = property(**tags())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Entity, self).__eq__(other) and self.tags==other.tags
 
 
 
@@ -461,6 +492,7 @@ class StatusedEntity(Entity):
                  #notes=[],
                  **kwargs
                  ):
+        super(StatusedEntity, self).__init__(**kwargs)
         
         # the attributes
         #self._references = self._check_references(references)
@@ -617,6 +649,15 @@ class StatusedEntity(Entity):
     
     #notes = property(**notes())
     
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(StatusedEntity, self).__eq__(other) and \
+               self.status_list==other.status_list
     
     
     

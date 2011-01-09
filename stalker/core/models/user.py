@@ -67,11 +67,11 @@ class User(entity.Entity):
     #----------------------------------------------------------------------
     def __init__(self,
                  department=None,
-                 email='',
-                 first_name='',
-                 last_name='',
-                 login_name='',
-                 password='',
+                 email="",
+                 first_name="",
+                 last_name="",
+                 login_name="",
+                 password="",
                  permission_groups=[],
                  projects=[],
                  projects_lead=[],
@@ -123,15 +123,15 @@ class User(entity.Entity):
         
         ## check if department_in is None
         #if department_in is None:
-            #raise(ValueError('department could not be None'))
+            #raise(ValueError("department could not be None"))
         
         from stalker.core.models import department
         
         # check if it is intance of Department object
-        if department is not None:
+        if department_in is not None:
             if not isinstance(department_in, department.Department):
-                raise(ValueError('department should be instance of \
-                stalker.core.models.department.Department'))
+                raise(ValueError("department should be instance of \
+                stalker.core.models.department.Department"))
         
         return department_in
     
@@ -144,8 +144,8 @@ class User(entity.Entity):
         
         # check if email_in is an instance of string or unicode
         if not isinstance(email_in, (str, unicode)):
-            raise(ValueError('email should be an instance of string or \
-            unicode'))
+            raise(ValueError("email should be an instance of string or \
+            unicode"))
         
         return self._check_email_format(email_in)
     
@@ -157,25 +157,25 @@ class User(entity.Entity):
         """
         
         # split the mail from @ sign
-        splits = email_in.split('@')
+        splits = email_in.split("@")
         len_splits = len(splits)
         
         # there should be one and only one @ sign
         if len_splits > 2:
-            raise(ValueError('check the email formatting, there are more than \
-            one @ sign'))
+            raise(ValueError("check the email formatting, there are more than \
+            one @ sign"))
         
         if len_splits < 2:
-            raise(ValueError('check the email formatting, there are no @ \
-            sign'))
+            raise(ValueError("check the email formatting, there are no @ \
+            sign"))
         
-        if splits[0] == '':
-            raise(ValueError('check the email formatting, the name part is \
-            missing'))
+        if splits[0] == "":
+            raise(ValueError("check the email formatting, the name part is \
+            missing"))
         
-        if splits[1] == '':
-            raise(ValueError('check the email formatting, the domain part is \
-            missing'))
+        if splits[1] == "":
+            raise(ValueError("check the email formatting, the domain part is \
+            missing"))
         
         return email_in
     
@@ -187,14 +187,14 @@ class User(entity.Entity):
         """
         
         if first_name_in is None:
-            raise(ValueError('first_name cannot be none'))
+            raise(ValueError("first_name cannot be none"))
         
         if not isinstance(first_name_in, (str, unicode)):
-            raise(ValueError('first_name should be instance of string or \
-            unicode'))
+            raise(ValueError("first_name should be instance of string or \
+            unicode"))
         
-        if first_name_in == '':
-            raise(ValueError('first_name can not be an empty string'))
+        if first_name_in == "":
+            raise(ValueError("first_name can not be an empty string"))
         
         return self._check_first_name_formatting(first_name_in)
     
@@ -216,8 +216,8 @@ class User(entity.Entity):
         
         if not isinstance(last_login_in, datetime.datetime) and \
            last_login_in is not None:
-            raise(ValueError('last_login should be an instance of \
-            datetime.datetime or None'))
+            raise(ValueError("last_login should be an instance of \
+            datetime.datetime or None"))
         
         return last_login_in
     
@@ -229,16 +229,16 @@ class User(entity.Entity):
         """
         
         #if last_name_in is None:
-            #raise(ValueError('last_name cannot be none'))
+            #raise(ValueError("last_name cannot be none"))
         if last_name_in is not None:
             if not isinstance(last_name_in, (str, unicode)):
-                raise(ValueError('last_name should be instance of string or \
-                unicode'))
+                raise(ValueError("last_name should be instance of string or \
+                unicode"))
         else:
-            last_name_in = ''
+            last_name_in = ""
         
-        #if last_name_in == '':
-            #raise(ValueError('last_name can not be an empty string'))
+        #if last_name_in == "":
+            #raise(ValueError("last_name can not be an empty string"))
         
         return self._check_last_name_formatting(last_name_in)
     
@@ -259,14 +259,14 @@ class User(entity.Entity):
         """
         
         if login_name_in is None:
-            raise(ValueError('login name could not be None'))
+            raise(ValueError("login name could not be None"))
         
         if not isinstance(login_name_in, (str, unicode)):
-            raise(ValueError('login_name should be instance of string or \
-            unicode'))
+            raise(ValueError("login_name should be instance of string or \
+            unicode"))
         
-        if login_name_in == '':
-            raise(ValueError('login name could not be empty string'))
+        if login_name_in == "":
+            raise(ValueError("login name could not be empty string"))
         
         return self._check_login_name_formatting(login_name_in)
     
@@ -278,10 +278,10 @@ class User(entity.Entity):
         """
         assert(isinstance(login_name_in, str))
         login_name_in = login_name_in.strip()
-        login_name_in = login_name_in.replace(' ','')
+        login_name_in = login_name_in.replace(" ","")
         login_name_in = login_name_in.lower()
-        login_name_in = re.sub( '[^\\(a-zA-Z1-9)]+', '', login_name_in)
-        login_name_in = re.sub( '^[0-9]+', '', login_name_in)
+        login_name_in = re.sub( "[^\\(a-zA-Z1-9)]+", "", login_name_in)
+        login_name_in = re.sub( "^[0-9]+", "", login_name_in)
         
         return login_name_in
     
@@ -293,7 +293,7 @@ class User(entity.Entity):
         """
         
         if password_in is None:
-            raise(ValueError('password cannot be None'))
+            raise(ValueError("password cannot be None"))
         
         return password_in
     
@@ -305,22 +305,22 @@ class User(entity.Entity):
         """
         
         if permission_groups_in is None:
-            raise(ValueError('permission_groups attribute can not be None'))
+            raise(ValueError("permission_groups attribute can not be None"))
         
         if not isinstance(permission_groups_in, list):
-            raise(ValueError('permission_groups should be a list of group \
-            objects'))
+            raise(ValueError("permission_groups should be a list of group \
+            objects"))
         
         from stalker.core.models import group
         
         for permission_group in permission_groups_in:
             if not isinstance(permission_group, group.Group):
-                raise(ValueError('any group in permission_groups should be \
-                an instance of stalker.core.models.group.Group'))
+                raise(ValueError("any group in permission_groups should be \
+                an instance of stalker.core.models.group.Group"))
         
         #if len(permission_groups_in) == 0:
-            #raise(ValueError('users should be assigned at least to one \
-            #permission_group'))
+            #raise(ValueError("users should be assigned at least to one \
+            #permission_group"))
         
         return permission_groups_in
     
@@ -333,18 +333,18 @@ class User(entity.Entity):
         
         # projects can not be None
         if projects_in is None:
-            raise(ValueError('projects can not be None'))
+            raise(ValueError("projects can not be None"))
         
         if not isinstance(projects_in, list):
-            raise(ValueError('projects should be a list of \
-            stalker.core.models.project.Project objects'))
+            raise(ValueError("projects should be a list of \
+            stalker.core.models.project.Project objects"))
         
         from stalker.core.models import project
         
         for a_project in projects_in:
             if not isinstance(a_project, project.Project):
-                raise(ValueError('any element in projects should be an \
-                instance of stalker.core.models.project.Project'))
+                raise(ValueError("any element in projects should be an \
+                instance of stalker.core.models.project.Project"))
         
         return projects_in
         
@@ -356,19 +356,19 @@ class User(entity.Entity):
         """
         
         if projects_lead_in is None:
-            raise(ValueError('projects_lead attribute could not be None, try \
-            setting it to an empty list'))
+            raise(ValueError("projects_lead attribute could not be None, try \
+            setting it to an empty list"))
         
         if not isinstance(projects_lead_in, list):
-            raise(ValueError('projects_lead should be a list of \
-            stalker.core.models.project.Project objects'))
+            raise(ValueError("projects_lead should be a list of \
+            stalker.core.models.project.Project objects"))
         
         from stalker.core.models import project
         
         for a_project in projects_lead_in:
             if not isinstance(a_project, project.Project):
-                raise(ValueError('any element in projects_lead should be an \
-                instance of stalker.core.models.project.Project class'))
+                raise(ValueError("any element in projects_lead should be an \
+                instance of stalker.core.models.project.Project class"))
         
         return projects_lead_in
     
@@ -380,19 +380,19 @@ class User(entity.Entity):
         """
         
         if sequences_lead_in is None:
-            raise(ValueError('sequences_lead attribute could not be None, try \
-            setting it to an empty list'))
+            raise(ValueError("sequences_lead attribute could not be None, try \
+            setting it to an empty list"))
         
         if not isinstance(sequences_lead_in, list):
-            raise(ValueError('sequences_lead should be a list of \
-            stalker.core.models.sequence.Sequence objects'))
+            raise(ValueError("sequences_lead should be a list of \
+            stalker.core.models.sequence.Sequence objects"))
         
         from stalker.core.models import sequence
         
         for a_sequence in sequences_lead_in:
             if not isinstance(a_sequence, sequence.Sequence):
-                raise(ValueError('any element in sequences_lead should be an \
-                instance of stalker.core.models.sequence.Sequence class'))
+                raise(ValueError("any element in sequences_lead should be an \
+                instance of stalker.core.models.sequence.Sequence class"))
         
         return sequences_lead_in
     
@@ -404,19 +404,19 @@ class User(entity.Entity):
         """
         
         if tasks_in is None:
-            raise(ValueError('tasks attribute could not be None, try setting \
-            it to an empty list'))
+            raise(ValueError("tasks attribute could not be None, try setting \
+            it to an empty list"))
         
         if not isinstance(tasks_in, list):
-            raise(ValueError('tasks should be a list of \
-            stalker.core.models.task.Task objects'))
+            raise(ValueError("tasks should be a list of \
+            stalker.core.models.task.Task objects"))
         
         from stalker.core.models import task
         
         for a_task in tasks_in:
             if not isinstance(a_task, task.Task):
-                raise(ValueError('any element in tasks should be an instance \
-                of stalker.core.models.task.Task class'))
+                raise(ValueError("any element in tasks should be an instance \
+                of stalker.core.models.task.Task class"))
         
         return tasks_in
     
@@ -431,9 +431,8 @@ class User(entity.Entity):
         def fset(self, department_in):
             self._department = self._check_department(department_in)
         
-        doc = """This is the property that helps to get and set department
-        values
-        """
+        doc = """department othe user, is is a
+        :class:`~stalker.core.models.department.Department object"""
         
         return locals()
     
@@ -450,7 +449,7 @@ class User(entity.Entity):
         def fset(self, email_in):
             self._email = self._check_email(email_in)
         
-        doc = """This is the property that helps to get and set email values
+        doc = """email of the user, accepts strings or unicodes
         """
         
         return locals()
@@ -468,9 +467,7 @@ class User(entity.Entity):
         def fset(self, first_name_in):
             self._first_name = self._check_first_name(first_name_in)
         
-        doc = """This is the property that helps to get and set first_name
-        values
-        """
+        doc = """first name of the user, accepts string or unicode"""
         
         return locals()
     
@@ -487,8 +484,7 @@ class User(entity.Entity):
         def fset(self, last_login_in):
             self._last_login = self._check_last_login(last_login_in)
         
-        doc = """shows the last login time of the user as a datetime.datetime
-        instance"""
+        doc = """last login time of the user as a datetime.datetime instance"""
         
         return locals()
     
@@ -505,9 +501,7 @@ class User(entity.Entity):
         def fset(self, last_name_in):
             self._last_name = self._check_last_name(last_name_in)
         
-        doc = """This is the property that helps to get and set last_name
-        values
-        """
+        doc = """last name of the user, accepts string or unicode"""
         
         return locals()
     
@@ -524,8 +518,7 @@ class User(entity.Entity):
         def fset(self, login_name_in):
             self._login_name = self._check_login_name(login_name_in)
         
-        doc = """This is the property that helps to get and set login_name
-        values"""
+        doc = """login name of the user, accepts string or unicode"""
         
         return locals()
     
@@ -544,8 +537,8 @@ class User(entity.Entity):
                 self._check_password(password_in)
             )
         
-        doc = """This is the password of the user, it is scrambled before
-        stored in the _password attribute"""
+        doc = """password of the user, it is scrambled before stored in the
+        _password attribute"""
         
         return locals()
     
@@ -563,8 +556,8 @@ class User(entity.Entity):
             self._permission_groups = \
                 self._check_permission_groups(permission_groups_in)
         
-        doc = """This is the property that helps to get and set
-        permission_groups values"""
+        doc = """permission groups that this users is a member of, accepts
+        :class:`~stalker.core.models.group.Group` object"""
         
         return locals()
     
@@ -581,9 +574,8 @@ class User(entity.Entity):
         def fset(self, projects_in):
             self._projects = self._check_projects(projects_in)
         
-        doc = """This is the property that helps to get and set projects
-        values
-        """
+        doc = """projects those the current user assigned to, accepts
+        :class:`~stalker.core.models.project.Project` object"""
         
         return locals()
     
@@ -600,9 +592,8 @@ class User(entity.Entity):
         def fset(self, projects_lead_in):
             self._projects_lead = self._check_projects_lead(projects_lead_in)
         
-        doc = """This is the property that helps to get and set projects_lead
-        values
-        """
+        doc = """projects lead by this current user, accepts
+        :class:`~stalker.core.models.project.Project` object"""
         
         return locals()
     
@@ -620,9 +611,8 @@ class User(entity.Entity):
             self._sequences_lead = \
                 self._check_sequences_lead(sequences_lead_in)
         
-        doc = """This is the property that helps to get and set sequences_lead
-        values
-        """
+        doc = """sequences lead by this user, accpets
+        :class:`~stalker.core.models.sequence.Sequence` objects"""
         
         return locals()
     
@@ -639,10 +629,12 @@ class User(entity.Entity):
         def fset(self, tasks_in):
             self._tasks = self._check_tasks(tasks_in)
         
-        doc = """This is the property that helps to get and set tasks
-        values
-        """
+        doc = """tasks assigned to the current user, accepts
+        :class:`~stalker.core.models.task.Task` objects"""
         
         return locals()
     
     tasks = property(**tasks())
+    
+    
+    

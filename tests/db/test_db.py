@@ -29,7 +29,6 @@ from stalker.core.models import (
     structure,
     tag,
     task,
-    template,
     typeEntity,
     user,
     version
@@ -53,8 +52,8 @@ class DatabaseTester(unittest.TestCase):
         clear_mappers()
         db.meta.__mappers__ = []
         
-        self.TEST_DATABASE_FILE = tempfile.mktemp() + '.db'
-        self.TEST_DATABASE_DIALECT = 'sqlite:///'
+        self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
+        self.TEST_DATABASE_DIALECT = "sqlite:///"
         self.TEST_DATABASE_URI = self.TEST_DATABASE_DIALECT + \
             self.TEST_DATABASE_FILE
         
@@ -78,10 +77,37 @@ class DatabaseTester(unittest.TestCase):
         """
         
         # create a database in memory
-        #db.setup(self.TEST_DATABASE_URI)
+        db.setup("sqlite:///:memory:")
         
+        # try to persist a user and get it back
+        session = db.meta.session
+        query = session.query
         
-        self.fail("test is not implemented yet")
+        # create a new user
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        
+        kwargs = {
+            "name": "eoyilmaz",
+            "first_name": "Erkan Ozgur",
+            "last_name": "Yilmaz",
+            "login_name": "eoyilmaz",
+            "email": "eoyilmaz@gmail.com",
+            "created_by": admin,
+        }
+        
+        newUser = user.User(**kwargs)
+        
+        session.add(newUser)
+        session.commit()
+        
+        # now check if the newUser is there
+        newUser_DB = query(user.User).\
+                   filter_by(name=kwargs["name"]).\
+                   filter_by(first_name=kwargs["first_name"]).\
+                   filter_by(last_name=kwargs["last_name"]).\
+                   first()
+        
+        self.assertTrue(newUser_DB is not None)
     
     
     
@@ -91,7 +117,52 @@ class DatabaseTester(unittest.TestCase):
         location
         """
         
-        self.fail("test is not implemented yet")
+        self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
+        self.TEST_DATABASE_DIALECT = "sqlite:///"
+        self.TEST_DATABASE_URI = self.TEST_DATABASE_DIALECT + \
+            self.TEST_DATABASE_FILE
+        
+        # check if there is no file with the same name
+        self.assertFalse(os.path.exists(self.TEST_DATABASE_FILE))
+        
+        # setup the database
+        db.setup(self.TEST_DATABASE_URI)
+        session = db.meta.session
+        query = session.query
+        
+        # check if the file is created
+        self.assertTrue(os.path.exists(self.TEST_DATABASE_FILE))
+        
+        # create a new user
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        
+        kwargs = {
+            "name": "eoyilmaz",
+            "first_name": "Erkan Ozgur",
+            "last_name": "Yilmaz",
+            "login_name": "eoyilmaz",
+            "email": "eoyilmaz@gmail.com",
+            "created_by": admin,
+        }
+        
+        newUser = user.User(**kwargs)
+        
+        session.add(newUser)
+        session.commit()
+        
+        # now reconnect and check if the newUser is there
+        db.setup(self.TEST_DATABASE_URI)
+        
+        newUser_DB = query(user.User).\
+                   filter_by(name=kwargs["name"]).\
+                   filter_by(first_name=kwargs["first_name"]).\
+                   filter_by(last_name=kwargs["last_name"]).\
+                   first()
+        
+        self.assertTrue(newUser_DB is not None)
+        
+        # delete the temp file
+        os.remove(self.TEST_DATABASE_FILE)
     
     
     
@@ -106,18 +177,9 @@ class DatabaseTester(unittest.TestCase):
         drivername = db.meta.engine.url.drivername
         database = db.meta.engine.url.database
         
-        full_db_url = drivername + ':///' + database
+        full_db_url = drivername + ":///" + database
         
         self.assertEquals(full_db_url, defaults.DATABASE)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_temp_user_deleted(self):
-        """testing if temp user is deleted
-        """
-        
-        self.fail("test is not implemented yet")
     
     
     
@@ -177,10 +239,10 @@ class DatabaseTester(unittest.TestCase):
         self._createdDB = True
         
         test_datas = [
-            ('',''),
-            ('a user name', ''),
-            ('', 'just a pass'),
-            ('no correct user', 'wrong pass')
+            ("",""),
+            ("a user name", ""),
+            ("", "just a pass"),
+            ("no correct user", "wrong pass")
         ]
         
         for user_name, password in test_datas:
@@ -278,11 +340,12 @@ class DatabaseModelsTester(unittest.TestCase):
         db.meta.__mappers__ = []
         
         # create a test database, possibly an in memory datase
-        cls.TEST_DATABASE_FILE = tempfile.mktemp() + '.db'
-        cls.TEST_DATABASE_URI = 'sqlite:///' + cls.TEST_DATABASE_FILE
+        cls.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
+        cls.TEST_DATABASE_URI = "sqlite:///" + cls.TEST_DATABASE_FILE
         
         # setup using this db
         db.setup(database=cls.TEST_DATABASE_URI)
+        
     
     
     
@@ -293,15 +356,6 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         # delete the default test database file
         os.remove(cls.TEST_DATABASE_FILE)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_persisting_Angular(self):
-        #"""testing the persistancy of Angular
-        #"""
-        
-        #self.fail("test is not implemented yet")
     
     
     
@@ -334,29 +388,29 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # create a couple of PipelineStep objects
         pStep1 = pipelineStep.PipelineStep(
-            name='Modeling',
-            description='This is where an asset is modeled',
+            name="Modeling",
+            description="This is where an asset is modeled",
             created_by=admin,
             updated_by=admin,
-            code='MDL'
+            code="MDL"
         )
         
         pStep2 = pipelineStep.PipelineStep(
-            name='Lighting',
+            name="Lighting",
             description="lighting done in this stage, don't mix it with \
             shading",
             created_by=admin,
             updated_by=admin,
-            code='LGHT'
+            code="LGHT"
         )
         
         # create a new AssetType object
         kwargs = {
-            'name': 'Character',
-            'description': 'this is a test asset type',
-            'created_by': admin,
-            'updated_by': admin,
-            'steps': [pStep1, pStep2],
+            "name": "Character",
+            "description": "this is a test asset type",
+            "created_by": admin,
+            "updated_by": admin,
+            "steps": [pStep1, pStep2],
         }
         
         aType = typeEntity.AssetType(**kwargs)
@@ -367,7 +421,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # retrieve it back and check it with the first one
         aType_DB = db.meta.session.query(typeEntity.AssetType). \
-                 filter_by(name=kwargs['name']).first()
+                 filter_by(name=kwargs["name"]).first()
         
         for i, pStep_DB in enumerate(aType_DB.steps):
             self.assertEquals(aType.steps[i].name, pStep_DB.name)
@@ -400,8 +454,8 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Department
         """
         
-        name = 'TestDepartment_test_persisting_Department'
-        description = 'this is for testing purposes'
+        name = "TestDepartment_test_persisting_Department"
+        description = "this is for testing purposes"
         created_by = None
         updated_by = None
         date_created = datetime.datetime.now()
@@ -420,41 +474,41 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # user1
         user1 = user.User(
-            name='user1_test_persisting_department',
-            description='this is for testing purposes',
+            name="user1_test_persisting_department",
+            description="this is for testing purposes",
             created_by=None,
             updated_by=None,
-            login_name='user1_tp_department',
-            first_name='user1_first_name',
-            last_name='user1_last_name',
-            email='user1@department.com',
+            login_name="user1_tp_department",
+            first_name="user1_first_name",
+            last_name="user1_last_name",
+            email="user1@department.com",
             department=testDepartment
         )
         
         # user2
         user2 = user.User(
-            name='user2_test_persisting_department',
-            description='this is for testing purposes',
+            name="user2_test_persisting_department",
+            description="this is for testing purposes",
             created_by=None,
             updated_by=None,
-            login_name='user2_tp_department',
-            first_name='user2_first_name',
-            last_name='user2_last_name',
-            email='user2@department.com',
+            login_name="user2_tp_department",
+            first_name="user2_first_name",
+            last_name="user2_last_name",
+            email="user2@department.com",
             department=testDepartment
         )
         
         # user3
         # create three users, one for lead and two for members
         user3 = user.User(
-            name='user3_test_persisting_department',
-            description='this is for testing purposes',
+            name="user3_test_persisting_department",
+            description="this is for testing purposes",
             created_by=None,
             updated_by=None,
-            login_name='user3_tp_department',
-            first_name='user3_first_name',
-            last_name='user3_last_name',
-            email='user3@department.com',
+            login_name="user3_tp_department",
+            first_name="user3_first_name",
+            last_name="user3_last_name",
+            email="user3@department.com",
             department=testDepartment
         )
         
@@ -491,8 +545,8 @@ class DatabaseModelsTester(unittest.TestCase):
         # create an Entity wiht a couple of tags
         
         # the Tag1
-        name = 'Tag1_test_creating_an_Entity'
-        description = 'this is for testing purposes'
+        name = "Tag1_test_creating_an_Entity"
+        description = "this is for testing purposes"
         created_by = None
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
@@ -506,8 +560,8 @@ class DatabaseModelsTester(unittest.TestCase):
             date_updated=date_updated)
         
         # the Tag2
-        name = 'Tag2_test_creating_an_Entity'
-        description = 'this is for testing purposes'
+        name = "Tag2_test_creating_an_Entity"
+        description = "this is for testing purposes"
         created_by = None
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
@@ -521,8 +575,8 @@ class DatabaseModelsTester(unittest.TestCase):
             date_updated=date_updated)
         
         # the entity
-        name = 'TestEntity'
-        description = 'this is for testing purposes'
+        name = "TestEntity"
+        description = "this is for testing purposes"
         created_by = None
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
@@ -556,7 +610,7 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Group
         """
         
-        self.fail('test is not implmented yet')
+        self.fail("test is not implmented yet")
     
     
     
@@ -573,14 +627,14 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # create a new ImageFormat object and try to read it back
         kwargs = {
-        'name': 'HD',
-        'description': 'test image format',
-        'created_by': admin,
-        'updated_by': admin,
-        'width': 1920,
-        'height': 1080,
-        'pixel_aspect': 1.0,
-        'print_resolution': 300.0
+        "name": "HD",
+        "description": "test image format",
+        "created_by": admin,
+        "updated_by": admin,
+        "width": 1920,
+        "height": 1080,
+        "pixel_aspect": 1.0,
+        "print_resolution": 300.0
         }
         
         # create the ImageFormat object
@@ -592,7 +646,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get it back
         imFormat_db = session.query(imageFormat.ImageFormat). \
-                filter_by(name=kwargs['name']).first()
+                filter_by(name=kwargs["name"]).first()
         
         # just test the repository part of the attributes
         self.assertEquals(imFormat.width, imFormat_db.width)
@@ -612,11 +666,11 @@ class DatabaseModelsTester(unittest.TestCase):
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         kwargs = {
-            'name': 'RENDER',
-            'description': 'this is the step where all the assets are \
-            rendered',
-            'created_by': admin,
-            'code': 'RNDR'
+            "name": "RENDER",
+            "description": "this is the step where all the assets are \
+            rendered",
+            "created_by": admin,
+            "code": "RNDR"
         }
         
         pStep = pipelineStep.PipelineStep(**kwargs)
@@ -626,8 +680,8 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # retrieve it back
         pStep_DB = db.meta.session.query(pipelineStep.PipelineStep). \
-                 filter_by(name=kwargs['name']). \
-                 filter_by(description=kwargs['description']). \
+                 filter_by(name=kwargs["name"]). \
+                 filter_by(description=kwargs["description"]). \
                  first()
         
         # lets compare it
@@ -664,13 +718,13 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # create a new Repository object and try to read it back
         kwargs = {
-        'name': 'Movie-Repo',
-        'description': 'test repository',
-        'created_by': admin,
-        'updated_by': admin,
-        'linux_path': '/mnt/M',
-        'osx_path': '/mnt/M',
-        'windows_path': 'M:\\'
+        "name": "Movie-Repo",
+        "description": "test repository",
+        "created_by": admin,
+        "updated_by": admin,
+        "linux_path": "/mnt/M",
+        "osx_path": "/Volumes/M",
+        "windows_path": "M:\\"
         }
         
         # create the repository object
@@ -682,7 +736,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get it back
         repo_db = session.query(repository.Repository). \
-                filter_by(name=kwargs['name']).first()
+                filter_by(name=kwargs["name"]).first()
         
         # just test the repository part of the attributes
         self.assertEquals(repo.linux_path, repo_db.linux_path)
@@ -715,8 +769,8 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of SimpleEntity
         """
         
-        name = 'SimpleEntity_test_creating_of_a_SimpleEntity'
-        description = 'this is for testing purposes'
+        name = "SimpleEntity_test_creating_of_a_SimpleEntity"
+        description = "this is for testing purposes"
         created_by = None
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
@@ -752,8 +806,8 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         # the status
-        name = 'TestStatus_test_creating_Status'
-        description = 'this is for testing purposes'
+        name = "TestStatus_test_creating_Status"
+        description = "this is for testing purposes"
         created_by = None
         updated_by = None
         date_created = datetime.datetime.now()
@@ -766,7 +820,7 @@ class DatabaseModelsTester(unittest.TestCase):
             updated_by=updated_by,
             date_created=date_created,
             date_updated=date_updated,
-            short_name='tstSt'
+            short_name="tstSt"
         )
         
         # persist it to the database
@@ -795,7 +849,76 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Structure
         """
         
-        self.fail("test is not implemented yet")
+        session = db.meta.session
+        query = session.query
+        
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_EMAIL)
+        
+        # create pipeline steps for character
+        modeling_ptep = pipelineStep.PipelineStep(
+            name="Modeling",
+            description="This is the step where all the modeling job is done",
+            code="MODEL",
+            created_by=admin
+        )
+        
+        animation_pStep = pipelineStep.PipelineStep(
+            name="Animation",
+            description="This is the step where all the animation job is done\
+            it is not limited with characters, other things can also be\
+            animated",
+            code="ANIM",
+            created_by=admin
+        )
+        
+        # create a new assetType
+        char_asset_type = typeEntity.AssetType(
+            name="Character Asset Type",
+            description="This is the asset type which covers animated\
+            charactes",
+            created_by=admin,
+            steps= [modeling_pStep, animation_pStep]
+        )
+        
+        # create a new type template for character assets
+        assetTemplate = typeEntity.TypeTemplate(
+            name="Character Asset Template",
+            description="This is the template for character assets",
+            path_code="ASSETS/{{asset_type.name}}/{{pipeline_step.code}}",
+            file_code="{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
+            v{{version.version_number}}",
+            type=char_asset_type
+        )
+        
+        # create a new link type
+        image_link_type = typeEntity.LinkType(
+            name="Image",
+            description="It is used for links showing an image",
+            created_by=admin
+        )
+        
+        # create a new template for references
+        imageReferenceTemplate = typeEntity.TypeTemplate(
+            name="Image Reference Template",
+            description="this is the template for image references, it shows \
+            where to place the image files",
+            created_by=admin
+        )
+        
+        # create a new structure
+        kwargs = {
+            "name": "Commercial Structure",
+            "description": "The structure for commercials",
+            "created_by": admin,
+            "project_template": "ASSETS\n\
+            SEQUENCES\n\
+            SEQUENCES/{% for sequence in project.sequences %}\
+            {{sequence.code}}\n",
+            "asset_templates": [assetTemplate],
+            "reference_template": [imageReferenceTemplate]
+        }
+        
+        # persist it to the database
     
     
     
@@ -804,8 +927,8 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Tag
         """
         
-        name = 'Tag_test_creating_a_Tag'
-        description = 'this is for testing purposes'
+        name = "Tag_test_creating_a_Tag"
+        description = "this is for testing purposes"
         created_by = None
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
@@ -845,24 +968,24 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Template(self):
-        """testing the persistancy of Template
+    def test_persisting_TypeTemplate(self):
+        """testing the persistancy of TypeTemplate
         """
         
         # get the admin
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
-        # create a template object
+        # create a TypeTemplate object
         
         kwargs = {
-            'name': 'Model Asset Template',
-            'description': 'this is a template to be used for models',
-            'created_by': admin,
-            'template_code': '{{projects.root}}/{{project.name}}/SEQUENCES/\
-            {{sequence.name}}/SHOTS/{{shot.name}}'
+            "name": "Model Asset Template",
+            "description": "this is a template to be used for models",
+            "created_by": admin,
+            "template_code": "{{projects.root}}/{{project.name}}/SEQUENCES/\
+            {{sequence.name}}/SHOTS/{{shot.name}}"
         }
         
-        aTemplate = template.Template(**kwargs)
+        aTemplate = typeEntity.TypeTemplate(**kwargs)
         
         # persist it
         session = db.meta.session
@@ -870,9 +993,9 @@ class DatabaseModelsTester(unittest.TestCase):
         session.commit()
         
         # get it back
-        aTemplate_DB = session.query(template.Template).\
-                     filter_by(name=kwargs['name']).\
-                     filter_by(description=kwargs['description']).first()
+        aTemplate_DB = session.query(typeEntity.TypeTemplate).\
+                     filter_by(name=kwargs["name"]).\
+                     filter_by(description=kwargs["description"]).first()
         
         self.assertEquals(aTemplate.template_code, aTemplate_DB.template_code)
     

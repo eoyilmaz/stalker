@@ -1,6 +1,19 @@
 Stalker Changes
 ===============
 
+v0.1.0.20110108.1:
+ * Template class is renmead to TypeTemplate and moved inside
+   stalker.core.models.typeEntity to prevent the name clashing with Jinja2
+   Template class
+ * added __eq__ to SimpleEntity and still trying to add it to the derived
+   classes
+ * orginized the project structure to conform setup tools for PyPI
+
+v0.1.0.20110107.2:
+ * updating the db tests
+ * stalker.core.models.user.User class is now allowed to have its department
+   to be set None
+
 v0.1.0.20110107.1:
  * organized the existant tests
 

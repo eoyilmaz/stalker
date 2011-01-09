@@ -48,7 +48,7 @@ The first tests written should always fail by having:
 
   ::
     
-    self.fail('the test is not implemented yet')
+    self.fail("the test is not implemented yet")
 
 failures. This is something good to have. This will inform us that the test is
 not written yet. So lets start adding the code that will pass the tests.
@@ -116,7 +116,7 @@ rules, and there are some extra rules as listed below:
              """checks the name attribute
              """
              
-             if name == '' or not isinstance(name, (str, unicode) ):
+             if name == "" or not isinstance(name, (str, unicode) ):
                  raise(ValueError("the name shouldn't be empty and it should \
                      be a str or unicode"))
                  
@@ -160,7 +160,7 @@ rules, and there are some extra rules as listed below:
          """checks the name attribute
          """
          
-         if name == '' or not isinstance(name, (str, unicode) ):
+         if name == "" or not isinstance(name, (str, unicode) ):
              raise(ValueError("the name shouldn't be empty and it should be a \
              str or unicode"))
          

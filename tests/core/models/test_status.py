@@ -20,7 +20,7 @@ class TestStatus(unittest.TestCase):
         argument something other than a string or unicode
         """
         
-        test_values = [1, 1.0, ['Cmplt'], {}, ()]
+        test_values = [1, 1.0, ["Cmplt"], {}, ()]
         
         for test_value in test_values:
             #----------------------------------------------------------------------
@@ -28,7 +28,7 @@ class TestStatus(unittest.TestCase):
             self.assertRaises(
                 ValueError,
                 status.Status,
-                name='Complete',
+                name="Complete",
                 short_name=test_value
             )
     
@@ -41,12 +41,12 @@ class TestStatus(unittest.TestCase):
         """
         
         # check the property
-        a_status = status.Status(name='Complete', short_name='Cmlt')
+        a_status = status.Status(name="Complete", short_name="Cmlt")
         self.assertRaises(
             ValueError,
             setattr,
             a_status,
-            'short_name',
+            "short_name",
             1
         )
     
@@ -60,7 +60,7 @@ class TestStatus(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the short_name can not be an empty string
-        self.assertRaises(ValueError, status.Status, 'Complete', '')
+        self.assertRaises(ValueError, status.Status, "Complete", "")
     
     
     
@@ -71,13 +71,13 @@ class TestStatus(unittest.TestCase):
         """
         
         # check the property
-        a_status = status.Status(name='Complete', short_name='Cmlt')
+        a_status = status.Status(name="Complete", short_name="Cmlt")
         self.assertRaises(
             ValueError,
             setattr,
             a_status,
-            'short_name',
-            ''
+            "short_name",
+            ""
         )
     
     
@@ -89,10 +89,10 @@ class TestStatus(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # check if the short_name is get correctly
-        name = 'Complete'
-        abbr = 'Cmplt'
+        name = "Complete"
+        abbr = "Cmplt"
         
-        a_status = status.Status(name='Complete', short_name='Cmlt')
+        a_status = status.Status(name="Complete", short_name="Cmlt")
         
         a_status = status.Status(name=name, short_name=abbr)
         self.assertEquals(a_status.short_name, abbr)
@@ -115,17 +115,17 @@ class StatusListTest(unittest.TestCase):
         """
         
         # proper values
-        self.list_name = 'a_status_list'
+        self.list_name = "a_status_list"
         
         # should use Mocks in the list
         self.a_status_list = [
-            status.Status(name='Not Available', short_name='N/A'),
-            status.Status(name='Waiting To Start', short_name='WStrt'),
-            status.Status(name='Started', short_name='Strt'),
-            status.Status(name='Waiting For Approve', short_name='WAppr'),
-            status.Status(name='Approved', short_name='Appr'),
-            status.Status(name='Finished', short_name='Fnsh'),
-            status.Status(name='On Hold', short_name='OH'),
+            status.Status(name="Not Available", short_name="N/A"),
+            status.Status(name="Waiting To Start", short_name="WStrt"),
+            status.Status(name="Started", short_name="Strt"),
+            status.Status(name="Waiting For Approve", short_name="WAppr"),
+            status.Status(name="Approved", short_name="Appr"),
+            status.Status(name="Finished", short_name="Fnsh"),
+            status.Status(name="On Hold", short_name="OH"),
             ]
     
     
@@ -139,7 +139,7 @@ class StatusListTest(unittest.TestCase):
         # can be empty?
         #
         
-        test_values = ['a str', {}, 1, 1.0]
+        test_values = ["a str", {}, 1, 1.0]
         
         for test_value in test_values:
             #----------------------------------------------------------------------
@@ -163,7 +163,7 @@ class StatusListTest(unittest.TestCase):
             statuses=self.a_status_list
         )
         
-        test_values = ['1', ['1'], 1, [1, 'w']]
+        test_values = ["1", ["1"], 1, [1, "w"]]
         
         # check the property
         for test_value in test_values:
@@ -171,7 +171,7 @@ class StatusListTest(unittest.TestCase):
                 ValueError,
                 setattr,
                 new_status_list,
-                'statuses',
+                "statuses",
                 test_value
             )
     
@@ -201,7 +201,7 @@ class StatusListTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # every element should be an object derived from Status
-        a_fake_status_list = [1, 2, 'a string', u'a unicode', 4.5]
+        a_fake_status_list = [1, 2, "a string", u"a unicode", 4.5]
         
         self.assertRaises(
             ValueError,
@@ -225,7 +225,7 @@ class StatusListTest(unittest.TestCase):
         )
         
         new_list_of_statutes = [
-            status.Status(name='New Status', short_name='nsts')
+            status.Status(name="New Status", short_name="nsts")
         ]
         
         a_status_list_obj.statuses = new_list_of_statutes

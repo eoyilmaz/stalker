@@ -6,7 +6,7 @@
     #print input1, input2
     #print "original function ended"
 
-#test_func('ozgur', 'yilmaz')
+#test_func("ozgur", "yilmaz")
 
 
 
@@ -32,7 +32,7 @@
     
 
 
-#a_class_inst = AClass('ozgur', 'yilmaz')
+#a_class_inst = AClass("ozgur", "yilmaz")
 
-#a_class_inst.calculate('ozgur2', 'yilmaz2')
+#a_class_inst.calculate("ozgur2", "yilmaz2")
 

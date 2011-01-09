@@ -23,11 +23,11 @@ class ImageFormatTest(unittest.TestCase):
         #----------------------------------------------------------------------
         # some proper values
         self.kwargs = {
-            'name': 'HD',
-            'width': 1920,
-            'height': 1080,
-            'pixel_aspect': 1.0,
-            'print_resolution': 300,
+            "name": "HD",
+            "width": 1920,
+            "height": 1080,
+            "pixel_aspect": 1.0,
+            "print_resolution": 300,
         }
         
         self.mock_imageFormat = imageFormat.ImageFormat(**self.kwargs)
@@ -42,10 +42,10 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the width should be an integer or float
-        test_values = ['1920', [1920], {}, ()]
+        test_values = ["1920", [1920], {}, ()]
         
         for test_value in test_values:
-            self.kwargs['width'] = test_value
+            self.kwargs["width"] = test_value
             self.assertRaises(ValueError, imageFormat.ImageFormat,
                               **self.kwargs)
     
@@ -56,14 +56,14 @@ class ImageFormatTest(unittest.TestCase):
         """testing the width property against not being an integer or float
         """
         
-        test_values = ['1920', [1920], {}, ()]
+        test_values = ["1920", [1920], {}, ()]
         
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
                 setattr,
                 self.mock_imageFormat,
-                'width',
+                "width",
                 test_value
             )
     
@@ -77,7 +77,7 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the given floats should be converted to integer
-        self.kwargs['width'] = 1920.0
+        self.kwargs["width"] = 1920.0
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         self.assertTrue(isinstance(an_image_format.width, int))
     
@@ -103,7 +103,7 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # could not be zero
-        self.kwargs['width'] = 0
+        self.kwargs["width"] = 0
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
     
     
@@ -114,7 +114,7 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property for this
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'width', 0)
+                          "width", 0)
     
     
     
@@ -123,7 +123,7 @@ class ImageFormatTest(unittest.TestCase):
         """testing the width argument against being negative
         """
         
-        self.kwargs['width'] = -10
+        self.kwargs["width"] = -10
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
     
     
@@ -135,7 +135,7 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property for this
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'width', -100)
+                          "width", -100)
     
     
     
@@ -144,10 +144,10 @@ class ImageFormatTest(unittest.TestCase):
         """testing the height argument against not being integer or float
         """
         
-        test_values = ['1080', [1080], {}, ()]
+        test_values = ["1080", [1080], {}, ()]
         
         for test_value in test_values:
-            self.kwargs['height'] = test_value
+            self.kwargs["height"] = test_value
             self.assertRaises(ValueError, imageFormat.ImageFormat,
                               **self.kwargs)
     
@@ -159,9 +159,9 @@ class ImageFormatTest(unittest.TestCase):
         """
         
         # test also the property
-        for test_value in ['1080', [1080]]:
+        for test_value in ["1080", [1080]]:
             self.assertRaises(
-                ValueError, setattr, self.mock_imageFormat, 'height', '1080')
+                ValueError, setattr, self.mock_imageFormat, "height", "1080")
     
     
     
@@ -171,7 +171,7 @@ class ImageFormatTest(unittest.TestCase):
         successfuly
         """
         
-        self.kwargs['height'] = 1080.0
+        self.kwargs["height"] = 1080.0
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         
         self.assertTrue(isinstance(an_image_format.height, int))
@@ -195,7 +195,7 @@ class ImageFormatTest(unittest.TestCase):
         """testing the height argument against being zero
         """
         
-        self.kwargs['height'] = 0
+        self.kwargs["height"] = 0
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
     
     
@@ -206,7 +206,7 @@ class ImageFormatTest(unittest.TestCase):
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'height', 0)
+                          "height", 0)
     
     
     
@@ -214,7 +214,7 @@ class ImageFormatTest(unittest.TestCase):
     def test_height_argument_being_negative(self):
         """testing the height argument against being negative
         """
-        self.kwargs['height'] = -10
+        self.kwargs["height"] = -10
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
     
     
@@ -225,7 +225,7 @@ class ImageFormatTest(unittest.TestCase):
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'height', -100)
+                          "height", -100)
     
     
     
@@ -251,11 +251,11 @@ class ImageFormatTest(unittest.TestCase):
         #----------------------------------------------------------------------
         # Test HD
         self.kwargs.update({
-            'name': 'HD',
-            'width': 1920,
-            'height': 1080,
-            'pixel_aspect': 1.0,
-            'print_resolution': 300
+            "name": "HD",
+            "width": 1920,
+            "height": 1080,
+            "pixel_aspect": 1.0,
+            "print_resolution": 300
         })
         
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
@@ -267,11 +267,11 @@ class ImageFormatTest(unittest.TestCase):
         #----------------------------------------------------------------------
         # test PAL
         self.kwargs.update({
-            'name': 'PAL',
-            'width': 720,
-            'height': 576,
-            'pixel_aspect': 1.0667,
-            'print_resolution': 300
+            "name": "PAL",
+            "width": 720,
+            "height": 576,
+            "pixel_aspect": 1.0667,
+            "print_resolution": 300
         })
         
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
@@ -293,11 +293,11 @@ class ImageFormatTest(unittest.TestCase):
         
         # start with PAL
         self.kwargs.update({
-            'name': 'PAL',
-            'width': 720,
-            'height': 576,
-            'pixel_aspect': 1.0667,
-            'print_resolution': 300
+            "name": "PAL",
+            "width": 720,
+            "height": 576,
+            "pixel_aspect": 1.0667,
+            "print_resolution": 300
         })
         
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
@@ -324,7 +324,7 @@ class ImageFormatTest(unittest.TestCase):
         #----------------------------------------------------------------------
         # the device aspect should be write propetected
         self.assertRaises(AttributeError,
-                          setattr, self.mock_imageFormat, 'device_aspect', 10)
+                          setattr, self.mock_imageFormat, "device_aspect", 10)
     
     
     
@@ -337,15 +337,15 @@ class ImageFormatTest(unittest.TestCase):
         # the pixel aspect ratio should be a given as float or integer number
         
         # any other variable type than int and float is not ok
-        self.kwargs['pixel_aspect'] = '1.0'
+        self.kwargs["pixel_aspect"] = "1.0"
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
         
         # float is ok
-        self.kwargs['pixel_aspect'] = 1.0
+        self.kwargs["pixel_aspect"] = 1.0
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         
         # int is ok
-        self.kwargs['pixel_aspect'] = 2
+        self.kwargs["pixel_aspect"] = 2
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
     
     
@@ -358,7 +358,7 @@ class ImageFormatTest(unittest.TestCase):
         #----------------------------------------------------------------------
         # given an integer for the pixel aspect ratio,
         # the returned pixel aspect ratio should be a float
-        self.kwargs['pixel_aspect'] = 1
+        self.kwargs["pixel_aspect"] = 1
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         self.assertTrue(isinstance(an_image_format.pixel_aspect, float))
     
@@ -372,7 +372,7 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the pixel aspect ratio can not be zero
-        self.kwargs['pixel_aspect'] = 0
+        self.kwargs["pixel_aspect"] = 0
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
     
     
@@ -383,7 +383,7 @@ class ImageFormatTest(unittest.TestCase):
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'pixel_aspect', 0 )
+                          "pixel_aspect", 0 )
     
     
     
@@ -395,10 +395,10 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the pixel aspect ratio can not be negative
-        self.kwargs['pixel_aspect'] = -1.0
+        self.kwargs["pixel_aspect"] = -1.0
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
         
-        self.kwargs['pixel_aspect'] = -1
+        self.kwargs["pixel_aspect"] = -1
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
     
     
@@ -410,10 +410,10 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'pixel_aspect', -1.0 )
+                          "pixel_aspect", -1.0 )
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'pixel_aspect', -1 )
+                          "pixel_aspect", -1 )
     
     
     
@@ -423,7 +423,7 @@ class ImageFormatTest(unittest.TestCase):
         default value when omitted
         """
         
-        self.kwargs.pop('pixel_aspect')
+        self.kwargs.pop("pixel_aspect")
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         default_value = 1.0
         self.assertEquals(an_image_format.pixel_aspect, default_value)
@@ -437,7 +437,7 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the print resolution can be ommited
-        self.kwargs.pop('print_resolution')
+        self.kwargs.pop("print_resolution")
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         
         print_resolution = an_image_format.print_resolution
@@ -454,14 +454,14 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the print resolution should be initialized with an integer or a float
-        self.kwargs['print_resolution'] = '300.0'
+        self.kwargs["print_resolution"] = "300.0"
         
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
         
-        self.kwargs['print_resolution'] = 300
+        self.kwargs["print_resolution"] = 300
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         
-        self.kwargs['print_resolution'] = 300.0
+        self.kwargs["print_resolution"] = 300.0
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
     
     
@@ -470,7 +470,7 @@ class ImageFormatTest(unittest.TestCase):
     def test_print_resolution_argument_zero(self):
         """testing the print_resolution argument being zero
         """
-        self.kwargs['print_resolution'] = 0
+        self.kwargs["print_resolution"] = 0
         #----------------------------------------------------------------------
         # the print resolution can not be zero
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
@@ -484,7 +484,7 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the property
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'print_resolution', 0)
+                          "print_resolution", 0)
     
     
     
@@ -495,10 +495,10 @@ class ImageFormatTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the print resolution can not be negative
-        self.kwargs['print_resolution'] = -300
+        self.kwargs["print_resolution"] = -300
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
         
-        self.kwargs['print_resolution'] = -300.0
+        self.kwargs["print_resolution"] = -300.0
         self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
     
     
@@ -509,10 +509,10 @@ class ImageFormatTest(unittest.TestCase):
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'print_resolution', -300)
+                          "print_resolution", -300)
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
-                          'print_resolution', -300.0)
+                          "print_resolution", -300.0)
     
     
     

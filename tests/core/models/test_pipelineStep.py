@@ -21,9 +21,9 @@ class PipelineStepTester(mocker.MockerTestCase):
         
         # create a proper pipelineStep object
         self.kwargs = {
-            'name': 'Testing',
-            'description': 'This is a pipelineStep for testing things',
-            'code': 'TESTING'
+            "name": "Testing",
+            "description": "This is a pipelineStep for testing things",
+            "code": "TESTING"
         }
         
         self.pStepObj = pipelineStep.PipelineStep(**self.kwargs)
@@ -35,7 +35,7 @@ class PipelineStepTester(mocker.MockerTestCase):
         """testing if a ValueError will be raised when trying to assign an
         empty string to the code argument
         """
-        self.kwargs['code'] = ''
+        self.kwargs["code"] = ""
         self.assertRaises(ValueError, pipelineStep.PipelineStep, **self.kwargs)
     
     
@@ -45,7 +45,7 @@ class PipelineStepTester(mocker.MockerTestCase):
         """testing if a ValueError will be raised when trying to assign None
         to the code argument
         """
-        self.kwargs['code'] = None
+        self.kwargs["code"] = None
         self.assertRaises(ValueError, pipelineStep.PipelineStep, **self.kwargs)
     
     
@@ -55,7 +55,7 @@ class PipelineStepTester(mocker.MockerTestCase):
         """testing if a ValueError will be raised when trying to assign an
         empty string to the code property 
         """
-        self.kwargs['code'] = ""
+        self.kwargs["code"] = ""
         self.assertRaises(ValueError, pipelineStep.PipelineStep, **self.kwargs)
     
     
@@ -67,7 +67,7 @@ class PipelineStepTester(mocker.MockerTestCase):
         test_values = [1, ["TT"]]
         
         for test_value in test_values:
-            self.kwargs['code'] = test_value
+            self.kwargs["code"] = test_value
             # an integer
             self.assertRaises(
                 ValueError,
@@ -101,7 +101,7 @@ class PipelineStepTester(mocker.MockerTestCase):
         """testing if code property is working properly
         """
         
-        test_value = 'MM'
+        test_value = "MM"
         
         # just assign it and check if they are equal
         self.pStepObj.code = test_value

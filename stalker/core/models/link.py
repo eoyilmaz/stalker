@@ -15,15 +15,16 @@ class Link(entity.Entity):
     
     Links are all about to give some external information to the current entity
     (external to the database, so it can be something on the
-    :class:`~stalker.core.models.repository.Repository` or in the Web). The link
-    type is defined by the :class:`~stalker.core.models.typeEntity.LinkType` object
-    and it can be anything like *General*, *File*, *Folder*, *Web*, *Image*,
+    :class:`~stalker.core.models.repository.Repository` or in the Web). The
+    link type is defined by the
+    :class:`~stalker.core.models.typeEntity.LinkType` object and it can be
+    anything like *General*, *File*, *Folder*, *WebPage*, *Image*,
     *ImageSequence*, *Movie*, *Text* etc. (you can also use multiple
-    :class:`~stalker.core.models.tag.Tag` objects to adding more information, and
-    filtering back). Again it is defined by the needs of the studio.
+    :class:`~stalker.core.models.tag.Tag` objects to adding more information,
+    and filtering back). Again it is defined by the needs of the studio.
     
     :param url: The URL to the link, it can be an url to a file in the
-      file system, or a web page, for file sequences use '#' in place of the
+      file system, or a web page, for file sequences use "#" in place of the
       numerator (`Nuke`_ style). Setting URL to None or an empty string is not
       accepted and causes a ValueError to be raised.
     
