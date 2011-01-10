@@ -1,0 +1,55 @@
+Metadata-Version: 1.1
+Name: stalker
+Version: 0.1.0
+Summary: A Production Asset Management (ProdAm) System
+Home-page: http://code.google.com/p/stalker/
+Author: Erkan Ozgur Yilmaz
+Author-email: eoyilmaz@gmail.com
+License: http://www.opensource.org/licenses/bsd-license.php
+Description: About
+        =====
+        
+        Stalker is a Production Digital Asset Management (ProdAM) System licensed under
+        BSD License and designed specially for Animation and VFX Studios.
+        
+        Features:
+         * Flexible design
+         * Designed for animation and vfx studios
+         * Default installation handles nearly all the asset management needs of an
+           animation and vfx studio
+         * Customizable with configuration scripts
+         * Customizable object model (Stalker Object Model - SOM)
+         * Integrated messaging system
+         * Integrated production planing and tracking tools
+         * PyQt/PySide user interfaces
+         * Can be connected to all the major 3d animation packages like Maya, Houdini,
+           Nuke etc. and any program that has a Python API
+         * Can work as a stand-alone application
+        
+        Stalker is build over these other OpenSource projects:
+         * Python
+         * SQLAlchemy
+         * Jinja2
+         * Beaker
+         * PyQt and PySide
+        
+        Source
+        ======
+        The latest developer version is available in `Stalkers' Google Project page`_
+        
+        .. _Stalkers' Google Project page: http://code.google.com/p/stalker/
+Keywords: production,asset,management
+Platform: any
+Classifier: Programming Language :: Python
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Topic :: Database
+Classifier: Topic :: Software Development
+Classifier: Topic :: Utilities
+Classifier: Topic :: Office/Business :: Scheduling
+Requires: beaker
+Requires: jinja2
+Requires: sqlalchemy

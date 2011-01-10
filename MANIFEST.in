@@ -2,6 +2,6 @@ include README
 include INSTALL
 include MANIFEST.in
 include LICENSE
-inlucde doTests
+include doTests
 recursive-include docs *
 recursive-include tests *
