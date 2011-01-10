@@ -1,6 +1,10 @@
 Stalker Changes
 ===============
 
+v0.1.0.20110110.1:
+ * added installation instructions to the documentation
+ * updated README file for PyPI
+
 v0.1.0.20110108.1:
  * Template class is renmead to TypeTemplate and moved inside
    stalker.core.models.typeEntity to prevent the name clashing with Jinja2

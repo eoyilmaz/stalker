@@ -1,0 +1,32 @@
+About
+=====
+
+Stalker is a Production Digital Asset Management (ProdAM) System licensed under
+BSD License and designed specially for Animation and VFX Studios.
+
+Features:
+ * Flexible design
+ * Designed for animation and vfx studios
+ * Default installation handles nearly all the asset management needs of an
+   animation and vfx studio
+ * Customizable with configuration scripts
+ * Customizable object model (Stalker Object Model - SOM)
+ * Integrated messaging system
+ * Integrated production planing and tracking tools
+ * PyQt/PySide user interfaces
+ * Can be connected to all the major 3d animation packages like Maya, Houdini,
+   Nuke etc. and any program that has a Python API
+ * Can work as a stand-alone application
+
+Stalker is build over these other OpenSource projects:
+ * Python
+ * SQLAlchemy
+ * Jinja2
+ * Beaker
+ * PyQt and PySide
+
+Source
+======
+The latest developer version is available in `Stalkers' Google Project page`_
+
+.. _Stalkers' Google Project page: http://code.google.com/p/stalker/

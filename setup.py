@@ -47,12 +47,16 @@ for dirpath, dirnames, filenames in os.walk(stalker_dir):
         data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
 
 
+# just use the first three number for the version
+version = '.'.join(stalker.__version__.split('.')[:3])
+
+
 
 setup(name="stalker",
-      version=stalker.__version__,
+      version=version,
       author="Erkan Ozgur Yilmaz",
       author_email="eoyilmaz@gmail.com",
-      description=("Prodcution Asset Management System (ProdAm)"),
+      description=("A Prodcution Asset Management (ProdAm) System"),
       long_description=read("README"),
       keywords=["production", "asset", "management"],
       packages = packages,

@@ -3,34 +3,45 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to stalker's documentation!
-===================================
+Stalker
+=======
 
-Stalker is an OpenSource Production Digital Asset Manager (ProdAM) licensed
-under BSD License and designed specially for Animation and VFX Studios.
+Stalker is a Production Digital Asset Management (ProdAM) System licensed under
+BSD License and designed specially for Animation and VFX Studios.
 
-Stalker consists of several parts:
- * Stalker Object Model (SOM)
- * Database Module
- * Extensions
- * UI
-
-The design of the Stalker is tried to be kept as flexible as possible. So one
-can extend Stalker as much as possible by using configuration files.
+Features:
+ * Flexible design
+ * Designed for animation and vfx studios
+ * Default installation handles nearly all the asset management needs of an
+   animation and vfx studio
+ * Customizable with configuration scripts
+ * Customizable object model (Stalker Object Model - SOM)
+ * Integrated messaging system
+ * Integrated production planing and tracking tools
+ * PyQt/PySide user interfaces
+ * Can be connected to all the major 3d animation packages like Maya, Houdini,
+   Nuke etc. and any program that has a Python API
+ * Can work as a stand-alone application
 
 Stalker is build over these other OpenSource projects:
  * Python
  * SQLAlchemy
- * PyQt or PySide (not sure for now)
- * JQuery
- * Jinja
+ * Jinja2
+ * Beaker
+ * PyQt and PySide
+
+Source
+======
+The latest developer version is available in `Stalkers' Google Project page`_
+
+.. _Stalkers' Google Project page: http://code.google.com/p/stalker/
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
    
-   install.rst
+   installation.rst
    design.rst
    contribute.rst
    roadmap.rst
