@@ -1,7 +1,11 @@
 Stalker Changes
 ===============
 
-v0.1.0.20110111:
+v0.1.1.a0:
+ * changed the versioning scheme a little bit to follow the setuptools guide
+ * 
+
+v0.1.0.20110111.1:
  * persistancy tests for Link is now fixed
  * now every table correctly has a primary_key
 

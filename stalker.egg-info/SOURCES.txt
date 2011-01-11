@@ -503,6 +503,7 @@ stalker/__init__.py
 stalker.egg-info/PKG-INFO
 stalker.egg-info/SOURCES.txt
 stalker.egg-info/dependency_links.txt
+stalker.egg-info/requires.txt
 stalker.egg-info/top_level.txt
 stalker/conf/__init__.py
 stalker/conf/defaults.py
@@ -528,7 +529,7 @@ stalker/core/models/status.py
 stalker/core/models/structure.py
 stalker/core/models/tag.py
 stalker/core/models/task.py
-stalker/core/models/typeEntity.py
+stalker/core/models/types.py
 stalker/core/models/user.py
 stalker/core/models/version.py
 stalker/db/__init__.py
@@ -540,16 +541,14 @@ stalker/ext/__init__.py
 stalker/utils/__init__.py
 tests/__init__.py
 tests/__init__.pyc
+tests/objectDeleted_error_test.pyc
 tests/test_template_idea.py
 tests/test_template_idea.pyc
-tests/testing_class.pyc
 tests/untitled-2.py
-tests/untitled-3.py
 tests/core/__init__.py
 tests/core/__init__.pyc
 tests/core/models/__init__.py
 tests/core/models/__init__.pyc
-tests/core/models/test_assetType.pyc
 tests/core/models/test_comment.py
 tests/core/models/test_comment.pyc
 tests/core/models/test_department.py
@@ -560,10 +559,8 @@ tests/core/models/test_imageFormat.py
 tests/core/models/test_imageFormat.pyc
 tests/core/models/test_link.py
 tests/core/models/test_link.pyc
-tests/core/models/test_mocker.pyc
 tests/core/models/test_pipelineStep.py
 tests/core/models/test_pipelineStep.pyc
-tests/core/models/test_reference.pyc
 tests/core/models/test_repository.py
 tests/core/models/test_repository.pyc
 tests/core/models/test_stalker.py
@@ -574,11 +571,8 @@ tests/core/models/test_structure.py
 tests/core/models/test_structure.pyc
 tests/core/models/test_tag.py
 tests/core/models/test_tag.pyc
-tests/core/models/test_template.py
-tests/core/models/test_template.pyc
-tests/core/models/test_typeEntity.py
-tests/core/models/test_typeEntity.pyc
-tests/core/models/test_unit.pyc
+tests/core/models/test_types.py
+tests/core/models/test_types.pyc
 tests/core/models/test_user.py
 tests/core/models/test_user.pyc
 tests/db/__init__.py
@@ -587,4 +581,3 @@ tests/db/test_auth.py
 tests/db/test_auth.pyc
 tests/db/test_db.py
 tests/db/test_db.pyc
-tests/db/test_setup_db.pyc

@@ -1,6 +1,6 @@
-Metadata-Version: 1.1
+Metadata-Version: 1.0
 Name: stalker
-Version: 0.1.0
+Version: 0.1.1.a0
 Summary: A Production Asset Management (ProdAm) System
 Home-page: http://code.google.com/p/stalker/
 Author: Erkan Ozgur Yilmaz
@@ -21,7 +21,7 @@ Description: About
          * Customizable object model (Stalker Object Model - SOM)
          * Integrated messaging system
          * Integrated production planing and tracking tools
-         * PyQt/PySide user interfaces
+         * PySide user interfaces
          * Can be connected to all the major 3d animation packages like Maya, Houdini,
            Nuke etc. and any program that has a Python API
          * Can work as a stand-alone application
@@ -31,14 +31,15 @@ Description: About
          * SQLAlchemy
          * Jinja2
          * Beaker
-         * PyQt and PySide
+         * PySide
         
         Source
         ======
         The latest developer version is available in `Stalkers' Google Project page`_
         
         .. _Stalkers' Google Project page: http://code.google.com/p/stalker/
-Keywords: production,asset,management
+        
+Keywords: production,asset,management,vfx,animation,mayahoudini,nuke,xsi
 Platform: any
 Classifier: Programming Language :: Python
 Classifier: License :: OSI Approved :: BSD License
@@ -50,6 +51,3 @@ Classifier: Topic :: Database
 Classifier: Topic :: Software Development
 Classifier: Topic :: Utilities
 Classifier: Topic :: Office/Business :: Scheduling
-Requires: beaker
-Requires: jinja2
-Requires: sqlalchemy

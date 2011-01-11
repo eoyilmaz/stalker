@@ -9,3 +9,5 @@ docs/doctrees/*
 docs/source/generated/*
 .coverage
 .DS_Store
+dist/*
+build/*
