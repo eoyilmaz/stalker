@@ -27,7 +27,7 @@ from stalker.core.models import (
     structure,
     tag,
     task,
-    typeEntity,
+    types,
     user,
     version
 )
@@ -226,12 +226,23 @@ def setup():
     
     
     
+    # TypeEntity
+    mapper(
+        entity.TypeEntity,
+        tables.typeEntities,
+        inherits=entity.Entity,
+        inherit_condition=tables.typeEntities.c.id==tables.entities.c.id,
+        polymorphic_identity="TypeEntity",
+    )
+    
+    
+    
     # AssetType
     mapper(
-        typeEntity.AssetType,
+        types.AssetType,
         tables.assetTypes,
-        inherits=entity.Entity,
-        inherit_condition=tables.assetTypes.c.id==tables.entities.c.id,
+        inherits=entity.TypeEntity,
+        inherit_condition=tables.assetTypes.c.id==tables.typeEntities.c.id,
         polymorphic_identity="AssetType",
         properties={
             "_steps": relationship(
@@ -240,6 +251,28 @@ def setup():
                 ),
             "steps": synonym("_steps")
         }
+    )
+    
+    
+    
+    # LinkType
+    mapper(
+        types.LinkType,
+        tables.linkTypes,
+        inherits=entity.TypeEntity,
+        inherit_condition=tables.linkTypes.c.id==tables.typeEntities.c.id,
+        polymorphic_identity="LinkType",
+    )
+    
+    
+    
+    # ProjectType
+    mapper(
+        types.ProjectType,
+        tables.projectTypes,
+        inherits=entity.TypeEntity,
+        inherit_condition=tables.projectTypes.c.id==tables.typeEntities.c.id,
+        polymorphic_identity="ProjectType",
     )
     
     
@@ -261,14 +294,87 @@ def setup():
     
     # TypeTemplate
     mapper(
-        typeEntity.TypeTemplate,
+        types.TypeTemplate,
         tables.typeTemplates,
         inherits=entity.Entity,
         inherit_condition=tables.typeTemplates.c.id==tables.entities.c.id,
         polymorphic_identity="TypeTemplate",
         properties={
-            "_template_code": tables.typeTemplates.c.template_code,
-            "template_code": synonym("_template_code")
+            "_path_code": tables.typeTemplates.c.path_code,
+            "path_code": synonym("_path_code"),
+            "_file_code": tables.typeTemplates.c.file_code,
+            "file_code": synonym("file_code"),
+            "_type": relationship(
+                entity.TypeEntity,
+                primaryjoin=\
+                    tables.typeTemplates.c.type_id==tables.typeEntities.c.id
+                ),
+            "type_": synonym("_type"),
         },
     )
+    
+    
+    
+    # Structure
+    mapper(
+        structure.Structure,
+        tables.structures,
+        inherits=entity.Entity,
+        inherit_condition=tables.structures.c.id==tables.entities.c.id,
+        polymorphic_identity="Structure",
+        properties={
+            "_project_template": tables.structures.c.project_template,
+            "project_template": synonym("_project_template"),
+            "_asset_templates": relationship(
+                entity.TypeEntity,
+                secondary=tables.structure_assetTemplates,
+                primaryjoin=\
+                    tables.structures.c.id==\
+                    tables.structure_assetTemplates.c.structure_id,
+                secondaryjoin=
+                    tables.structure_assetTemplates.c.typeTemplate_id==\
+                    tables.typeTemplates.c.id
+            ),
+            "asset_templates": synonym("_asset_templates"),
+            "_reference_templates": relationship(
+                entity.TypeEntity,
+                secondary=tables.structure_referenceTemplates,
+                primaryjoin=\
+                    tables.structures.c.id==\
+                    tables.structure_referenceTemplates.c.structure_id,
+                secondaryjoin=
+                    tables.structure_referenceTemplates.c.typeTemplate_id==\
+                    tables.typeTemplates.c.id
+            ),
+            "reference_templates": synonym("_reference_templates"),
+        },
+    )
+    
+    
+    
+    # Links
+    mapper(
+        link.Link,
+        tables.links,
+        inherits=entity.Entity,
+        inherit_condition=tables.links.c.id==tables.entities.c.id,
+        polymorphic_identity="Link",
+        properties={
+            "_path": tables.links.c.path,
+            "path": synonym("_path"),
+            "_filename": tables.links.c.filename,
+            "filename": synonym("_filename"),
+            "_type": relationship(
+                types.LinkType,
+                primaryjoin=\
+                tables.links.c.type_id==tables.linkTypes.c.id
+            ),
+            "type_": synonym("_type"),
+        },
+    )
+    
+    
+    
+    
+    
     

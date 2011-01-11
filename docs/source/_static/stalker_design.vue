@@ -1,14 +1,14 @@
-<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2011-01-09 -->
+<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2011-01-11 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Sun Jan 09 02:36:06 EET 2011 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
+<!-- Do Not Remove: Saved date Tue Jan 11 00:19:42 EET 2011 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1294533366181" size="461293"
+    <resource referenceCreated="1294697982232" size="462111"
         spec="/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
@@ -394,7 +394,7 @@
         <ctrlPoint1 x="11627.313" y="1822.4156" xsi:type="point"/>
     </child>
     <child ID="1145" label="Link" layerID="1" created="1272404675030"
-        x="11623.194" y="796.225" width="140.25" height="66.5"
+        x="11623.194" y="796.225" width="140.25" height="86.75"
         strokeWidth="1.0" autoSized="true" xsi:type="node">
         <fillColor>#ECFFD4</fillColor>
         <strokeColor>#776D6D</strokeColor>
@@ -410,8 +410,8 @@
             </metadata>
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/4140cd037f00010135ea57112130f8c4</URIString>
-        <child ID="1147" label="url | UNICODE" created="1272404693670"
-            x="34.0" y="23.0" width="90.0" height="23.0"
+        <child ID="1147" label="path | UNICODE" created="1272404693670"
+            x="34.0" y="23.0" width="100.0" height="23.0"
             strokeWidth="1.0" autoSized="true" xsi:type="node">
             <fillColor>#FDE888</fillColor>
             <strokeColor>#776D6D</strokeColor>
@@ -429,8 +429,27 @@
             <URIString>http://vue.tufts.edu/rdf/resource/4140cd037f00010135ea57117ab47786</URIString>
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
+        <child ID="2423" label="file_name | UNICODE"
+            created="1294670104378" x="34.0" y="43.25" width="131.0"
+            height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
+            <fillColor>#FDE888</fillColor>
+            <strokeColor>#776D6D</strokeColor>
+            <textColor>#000000</textColor>
+            <font>Arial-plain-12</font>
+            <metadata-list category-list-size="1" other-list-size="0"
+                ontology-list-size="0" RCategoryListSize="0">
+                <ontology-list-string></ontology-list-string>
+                <metadata xsi:type="vue-metadata-element">
+                    <value></value>
+                    <key>http://vue.tufts.edu/vue.rdfs#none</key>
+                    <type>1</type>
+                </metadata>
+            </metadata-list>
+            <URIString>http://vue.tufts.edu/rdf/resource/705bac187f0001017115e166e5c20361</URIString>
+            <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        </child>
         <child ID="2420" label="type | ONE | LINKTYPE"
-            created="1294297640237" x="34.0" y="43.25" width="134.0"
+            created="1294297640237" x="34.0" y="63.5" width="134.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
             <fillColor>#FDE888</fillColor>
             <strokeColor>#776D6D</strokeColor>
@@ -2181,10 +2200,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -2846,10 +2865,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -3487,10 +3506,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -3524,10 +3543,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -3828,7 +3847,7 @@
         <ctrlPoint1 x="12053.721" y="659.6436" xsi:type="point"/>
     </child>
     <child ID="1919" layerID="1" created="1288257693210" x="10502.108"
-        y="622.75" width="1192.0342" height="174.0" strokeWidth="1.0"
+        y="622.75" width="1192.1006" height="174.0" strokeWidth="1.0"
         autoSized="false" controlCount="2" arrowState="2" xsi:type="link">
         <strokeColor>#000000</strokeColor>
         <textColor>#000000</textColor>
@@ -3844,7 +3863,7 @@
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/f22534237f0001010d9438de69c8feac</URIString>
         <point1 x="10502.608" y="623.25"/>
-        <point2 x="11693.643" y="796.25"/>
+        <point2 x="11693.709" y="796.25"/>
         <ID1 xsi:type="node">1887</ID1>
         <ID2 xsi:type="node">1145</ID2>
         <ctrlPoint0 x="10506.833" y="752.7148" xsi:type="point"/>
@@ -4027,9 +4046,8 @@
         <ctrlPoint1 x="11288.026" y="1837.5964" xsi:type="point"/>
     </child>
     <child ID="1957" layerID="1" created="1288799345809" x="10501.802"
-        y="622.75" width="674.83594" height="173.96875"
-        strokeWidth="1.0" autoSized="false" controlCount="2"
-        arrowState="2" xsi:type="link">
+        y="622.75" width="676.5117" height="174.0" strokeWidth="1.0"
+        autoSized="false" controlCount="2" arrowState="2" xsi:type="link">
         <strokeColor>#000000</strokeColor>
         <textColor>#000000</textColor>
         <font>Arial-bold-11</font>
@@ -4044,7 +4062,7 @@
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/126dc1f67f0001014196c169c59591bf</URIString>
         <point1 x="10502.302" y="623.25"/>
-        <point2 x="11176.138" y="796.21875"/>
+        <point2 x="11177.813" y="796.25"/>
         <ID1 xsi:type="node">1887</ID1>
         <ID2 xsi:type="node">2180</ID2>
         <ctrlPoint0 x="10504.935" y="759.50385" xsi:type="point"/>
@@ -4089,10 +4107,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -4228,10 +4246,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -4296,7 +4314,7 @@
             <URIString>http://vue.tufts.edu/rdf/resource/7389b24d7f0001010b45ad3d763af44e</URIString>
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        <shape xsi:type="rectangle"/>
     </child>
     <child ID="2016" layerID="1" created="1290373841415" x="10502.081"
         y="622.75" width="453.042" height="173.96875" strokeWidth="1.0"
@@ -4473,10 +4491,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -4532,10 +4550,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -4615,10 +4633,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -4695,10 +4713,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -4774,10 +4792,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -4935,10 +4953,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 11; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 11; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 11; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 11; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 11; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 11; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -5013,10 +5031,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -5093,10 +5111,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 11; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 11; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 11; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 11; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 11; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 11; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -5175,10 +5193,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -5254,10 +5272,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -5353,10 +5371,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 11; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 11; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 11; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 11; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 11; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 11; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -5431,10 +5449,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -6076,10 +6094,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -6114,10 +6132,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -6151,10 +6169,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -6188,10 +6206,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -6226,10 +6244,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -6418,10 +6436,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -6829,10 +6847,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -6890,10 +6908,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -6908,7 +6926,7 @@
         <label>Character</label>
     </child>
     <child ID="2180" label="TypeTemplate" layerID="1"
-        created="1290430525012" x="11099.047" y="796.225" width="150.75"
+        created="1290430525012" x="11099.047" y="796.225" width="156.0"
         height="86.75" strokeWidth="1.0" autoSized="true" xsi:type="node">
         <fillColor>#9DDB53</fillColor>
         <strokeColor>#776D6D</strokeColor>
@@ -6927,7 +6945,7 @@
         <child ID="2332" label="path_code| STRING"
             created="1293710778089" x="34.0" y="23.0" width="120.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -6946,7 +6964,7 @@
         <child ID="2331" label="file_code| STRING"
             created="1293710767892" x="34.0" y="43.25" width="112.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -6962,10 +6980,10 @@
             <URIString>http://vue.tufts.edu/rdf/resource/372d244c7f000101508821007f113662</URIString>
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
-        <child ID="2396" label="type | ONE | TYPEENTITY"
-            created="1294153998161" x="34.0" y="63.5" width="148.0"
+        <child ID="2396" label="type_ | ONE | TYPEENTITY"
+            created="1294153998161" x="34.0" y="63.5" width="155.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -6981,7 +6999,7 @@
             <URIString>http://vue.tufts.edu/rdf/resource/519a2e2c7f0001017517e53bf0d1912b</URIString>
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        <shape xsi:type="rectangle"/>
     </child>
     <child ID="2198" label="BUT!!!&#xa;REASONABLE ENOUGH" layerID="1"
         created="1290435474198" x="11836.322" y="2479.0437"
@@ -7043,10 +7061,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -7081,10 +7099,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -7121,10 +7139,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -7159,10 +7177,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -7805,10 +7823,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -7902,10 +7920,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -7937,7 +7955,7 @@
 </richText>
             <label>Examples: Image ImageSequence Video Text Web ...</label>
         </child>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        <shape xsi:type="rectangle"/>
     </child>
     <child ID="2308" layerID="1" created="1293640235539" x="11330.5"
         y="820.75" width="46.411133" height="153.0" strokeWidth="1.0"
@@ -8218,10 +8236,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -8240,8 +8258,8 @@
         </child>
         <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
     </child>
-    <child ID="2365" layerID="1" created="1293718250413" x="11692.719"
-        y="653.2031" width="59.666016" height="143.79688"
+    <child ID="2365" layerID="1" created="1293718250413" x="11692.698"
+        y="653.2031" width="59.686523" height="143.29688"
         strokeWidth="1.0" autoSized="false" controlCount="2"
         arrowState="2" xsi:type="link">
         <strokeColor>#000000</strokeColor>
@@ -8257,7 +8275,7 @@
             </metadata>
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/37a30c937f000101508821001ba66b40</URIString>
-        <point1 x="11693.219" y="796.5"/>
+        <point1 x="11693.198" y="796.0"/>
         <point2 x="11751.671" y="653.7031"/>
         <ID1 xsi:type="node">1145</ID1>
         <ID2 xsi:type="node">2364</ID2>
@@ -8284,10 +8302,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -8582,7 +8600,7 @@
             </metadata>
         </metadata-list>
         <URIString>http://vue.tufts.edu/rdf/resource/519d2c637f0001017517e53b1a4782a4</URIString>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        <shape xsi:type="rectangle"/>
     </child>
     <child ID="2400" layerID="1" created="1294154236073" x="11205.348"
         y="820.75" width="126.15918" height="153.0" strokeWidth="1.0"
@@ -8644,10 +8662,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -8673,7 +8691,7 @@
 </richText>
             <label>Examples: Commercial Movie Still ...</label>
         </child>
-        <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
+        <shape xsi:type="rectangle"/>
     </child>
     <child ID="2404" layerID="1" created="1294154354307" x="11330.537"
         y="820.75" width="168.41211" height="153.0" strokeWidth="1.0"
@@ -8736,10 +8754,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -8811,10 +8829,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -8855,10 +8873,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -8918,10 +8936,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -8962,10 +8980,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-family: Arial; margin-bottom: 0px; margin-right: 0px; font-size: 12; color: #000000; margin-top: 0px; margin-left: 0px }
-        ol { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
-        p { margin-bottom: 0; margin-right: 0; color: #000000; margin-top: 0; margin-left: 0 }
-        ul { font-family: Arial; vertical-align: middle; font-size: 12; list-style-position: outside; margin-top: 6; margin-left: 30 }
+        body { font-size: 12; margin-right: 0px; color: #000000; margin-left: 0px; margin-bottom: 0px; font-family: Arial; margin-top: 0px }
+        ol { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
+        p { margin-right: 0; color: #000000; margin-left: 0; margin-bottom: 0; margin-top: 0 }
+        ul { font-size: 12; margin-left: 30; list-style-position: outside; font-family: Arial; margin-top: 6; vertical-align: middle }
       --&gt;
     &lt;/style&gt;
     
@@ -8994,7 +9012,7 @@
         <URIString>http://vue.tufts.edu/rdf/resource/5d104b32c00007d601b277f026b72230</URIString>
     </layer>
     <userZoom>1.0</userZoom>
-    <userOrigin x="8218.607" y="-150.95639"/>
+    <userOrigin x="8407.607" y="-150.95639"/>
     <presentationBackground>#202020</presentationBackground>
     <PathwayList currentPathway="-1" revealerIndex="-1"/>
     <date>2009-05-20</date>

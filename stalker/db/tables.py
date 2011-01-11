@@ -12,7 +12,8 @@ from sqlalchemy import (
     Float,
     String,
     ForeignKey,
-    DateTime
+    DateTime,
+    UniqueConstraint
 )
 from stalker.db import meta
 
@@ -25,7 +26,7 @@ metadata = meta.metadata
 simpleEntities = Table(
     "simpleEntities", metadata,
     Column("id", Integer, primary_key=True),
-    Column("name", String(256), unique=True, nullable=False),
+    Column("name", String(256), nullable=False),
     Column("description", String),
     
     Column(
@@ -43,6 +44,8 @@ simpleEntities = Table(
     Column("date_created", DateTime),
     Column("date_updated", DateTime),
     Column("entity_type", String(128), nullable=False),
+    UniqueConstraint('name', 'entity_type')
+
 )
 
 
@@ -105,7 +108,7 @@ users = Table(
         ForeignKey("departments.id")
     ),
     
-    Column("email", String(256), nullable=False),
+    Column("email", String(256), unique=True, nullable=False),
     Column("first_name", String(256), nullable=False),
     Column("last_name", String(256), nullable=True),
     Column("login_name", String(256), unique=True, nullable=False),
@@ -265,9 +268,9 @@ assetTypes = Table(
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("typeEntities.id"),
         primary_key=True,
-    )
+    ),
 )
 
 
@@ -297,7 +300,7 @@ pipelineSteps = Table(
         ForeignKey("entities.id"),
         primary_key=True,
     ),
-    Column("code", String(32)),
+    Column("code", String(32), unique=True),
 )
 
 
@@ -311,8 +314,115 @@ typeTemplates = Table(
         ForeignKey("entities.id"),
         primary_key=True,
     ),
-    Column("template_code", String(32)),
+    Column("path_code", String(32)),
+    Column("file_code", String(32)),
+    Column(
+        "type_id",
+        Integer,
+        ForeignKey("typeEntities.id"),
+    ),
 )
 
 
 
+# TYPEENTITIES
+typeEntities = Table(
+    "typeEntities", metadata,
+    Column(
+        "id",
+        Integer,
+        ForeignKey("entities.id"),
+        primary_key=True,
+    ),
+)
+
+
+
+# STRUCTURE
+structures = Table(
+    "structures", metadata,
+    Column(
+        "id",
+        Integer,
+        ForeignKey("entities.id"),
+        primary_key=True,
+    ),
+    Column("project_template", String),
+)
+
+
+
+# STRUCTURE_ASSETTEMPLATES
+structure_assetTemplates = Table(
+    "structure_assetTemplates", metadata,
+    Column(
+        "structure_id",
+        Integer,
+        ForeignKey("structures.id"),
+    ),
+    Column(
+        "typeTemplate_id",
+        Integer,
+        ForeignKey("typeTemplates.id"),
+    ),
+)
+
+
+
+# STRUCTURE_REFERENCETEMPLATES
+structure_referenceTemplates = Table(
+    "structure_referenceTemplates", metadata,
+    Column(
+        "structure_id",
+        Integer,
+        ForeignKey("structures.id"),
+    ),
+    Column(
+        "typeTemplate_id",
+        Integer,
+        ForeignKey("typeTemplates.id"),
+    ),
+)
+
+
+
+
+# LINKTYPES
+linkTypes = Table(
+    "linkTypes", metadata,
+    Column(
+        "id",
+        Integer,
+        ForeignKey("typeEntities.id"),
+    ),
+)
+
+
+
+# LINK
+links = Table(
+    "links", metadata,
+    Column(
+        "id",
+        Integer,
+        ForeignKey("entities.id"),
+    ),
+    Column("path", String),
+    Column("filename", String),
+    Column("type_id",
+           Integer,
+           ForeignKey("linkTypes.id"),
+    ),
+)
+
+
+
+# PROJECTTYPES
+projectTypes = Table(
+    "projectTypes", metadata,
+    Column(
+        "id",
+        Integer,
+        ForeignKey("typeEntities.id"),
+    ),
+)

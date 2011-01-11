@@ -675,7 +675,7 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_equality(self):
-        """test equality of two entities
+        """testing equality of two entities
         """
         
         # create two entities with same parameters and check for equality
@@ -688,7 +688,7 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_inequality(self):
-        """test inequality of two entities
+        """testing inequality of two entities
         """
         
         # change the tags and test it again, expect False
@@ -729,17 +729,31 @@ class StatusedEntityTester(mocker.MockerTestCase):
         self.expect = mocker.Expect(self.mocker)
         
         # create
-        # a mock user
+        # a mock User object
         self.mock_user = self.mocker.mock(user.User)
         
-        # a mock tag
+        # a mock Tag object
         self.mock_tag1 = self.mocker.mock(tag.Tag)
         self.mock_tag2 = self.mocker.mock(tag.Tag)
         
-        # a mock status_list
-        self.mock_status_list = self.mocker.mock(status.StatusList)
-        statusCnt = len(self.mock_status_list.statuses)
+        # a mock StatusList object
+        self.mock_status_list1 = self.mocker.mock(status.StatusList)
+        statusCnt = len(self.mock_status_list1.statuses)
         self.mocker.result(5)
+        self.mocker.count(0, None)
+        
+        # another mock StatusList object
+        self.mock_status_list2 = self.mocker.mock(status.StatusList)
+        statusCnt = len(self.mock_status_list2.statuses)
+        self.mocker.result(5)
+        self.mocker.count(0, None)
+        
+        self.mock_status_list1.__eq__(self.mock_status_list2)
+        self.mocker.result(False)
+        self.mocker.count(0, None)
+        
+        self.mock_status_list1.__ne__(self.mock_status_list2)
+        self.mocker.result(True)
         self.mocker.count(0, None)
         
         # a mock note list
@@ -757,7 +771,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
             "tags": [self.mock_tag1, self.mock_tag2],
             "created_by": self.mock_user,
             "updated_by": self.mock_user,
-            "status_list": self.mock_status_list,
+            "status_list": self.mock_status_list1,
             "status": 0,
             "date_created": self.date_created,
             "date_updated": self.date_updated,
@@ -878,7 +892,7 @@ class StatusedEntityTester(mocker.MockerTestCase):
         couldn't be set a value higher than len(statusList.statuses - 1)
         """
         
-        test_value = len(self.mock_status_list.statuses)
+        test_value = len(self.mock_status_list1.statuses)
         
         self.assertRaises(
             ValueError,
@@ -1103,29 +1117,11 @@ class StatusedEntityTester(mocker.MockerTestCase):
         
         statusedEntity1 = entity.StatusedEntity(**self.kwargs)
         
-        statusList1 = self.mocker.mock(status.StatusList)
         
-        self.expect(statusList1._status_list).\
-            result(self.mocker.mock(status.StatusList))
+        self.kwargs['status_list'] = self.mock_status_list2
+        statusedEntity2 = entity.StatusedEntity(**self.kwargs)
         
-        ##statusList1._status_list.statuses
-        ##self.mocker.result([self.mocker.mock(status.Status)])
-        #self.mocker.result([self.mocker.mock(status.Status)])
-        
-        
-        #self.mocker.result(self.mocker.mock(status.StatusList))
-        
-        #self.mocker.replay()
-        
-        ##change some arguments
-        #self.kwargs.update({
-            #'status_list': statusList1,
-            #'status': 1
-        #})
-        
-        #statusedEntity2 = entity.StatusedEntity(**self.kwargs)
-        
-        #self.assertTrue(statusedEntity1!=statusedEntity2)
+        self.assertTrue(statusedEntity1!=statusedEntity2)
     
     
     

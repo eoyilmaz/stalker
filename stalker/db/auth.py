@@ -105,7 +105,8 @@ use stalker.db.setup(), to setup the default db"))
     # try to get the given user
     userObj = db.meta.session.query(user.User).filter_by(name=username).first()
     
-    error_msg = "user name and login don't match"
+    error_msg = "user name and login don't match, %s - %s" % \
+              (username, password)
     
     if userObj is None:
         raise(error.LoginError(error_msg))

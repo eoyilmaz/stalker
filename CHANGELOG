@@ -5,6 +5,27 @@ v0.1.0.20110110.1:
  * added installation instructions to the documentation
  * updated README file for PyPI
  * added the package to PyPI
+ * fixed StatusedEntityTester test suit, now it properly creates mock
+   StatusList object for the __eq__ and __ne__ tests
+ * updated tables and mappers for stalker.core.models.typeEntity.TypeTemplate
+ * updated mappers for stalker.core.models.typeEntity.AssetType
+ * TypeEntity class is moved to entity.py, right beside the other entity
+   classes
+ * typeEntity.py renamed to types.py
+ * created tables and mappers for:
+   * structure.Structure
+   * entity.TypeEntity
+   * types.TypeTemplate
+   * types.AssetType
+   * types.LinkType
+   * types.ProjectType
+ * updated simpleEntities table, now the name by itself is not a unique
+   constraint, but added an explicit UniqueConstraint on name and entity_type
+   coloumns to allow entities with different types to have the same name, also
+   added test for that
+ * fixed all the errors in test_db.py, there are only failures left
+ * added tests for stalker.core.models.link.Link, all the test are green for
+   Link
 
 v0.1.0.20110108.1:
  * Template class is renmead to TypeTemplate and moved inside

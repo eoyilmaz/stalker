@@ -10,29 +10,7 @@ from stalker.core.models import entity, pipelineStep
 
 
 ########################################################################
-class TypeEntity(entity.Entity):
-    """TypeEntity is the entry point for types.
-    
-    It is created to group the `Type` objects, so any other classes accepting a
-    ``TypeEntity`` object can have one of the derived classes, this is done in
-    that way mainly to ease the of creation of only one
-    :class:`~stalker.core.models.typeEntity.TypeTemplate` class and let the
-    others to use this one TypeTemplate class.
-    
-    It doesn't add any new parameters to it's super.
-    """
-    
-    #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super(TypeEntity, self).__init__(**kwargs)
-
-
-
-
-
-
-########################################################################
-class AssetType(TypeEntity):
+class AssetType(entity.TypeEntity):
     """The AssetType class holds the information about the asset type.
     
     One asset type object has information about the pipeline steps that this
@@ -98,7 +76,7 @@ class AssetType(TypeEntity):
 
 
 ########################################################################
-class LinkType(TypeEntity):
+class LinkType(entity.TypeEntity):
     """The type of :class:`~stalker.core.models.link.Link` is hold in LinkType
     objects.
     
@@ -118,7 +96,7 @@ class LinkType(TypeEntity):
 
 
 ########################################################################
-class ProjectType(TypeEntity):
+class ProjectType(entity.TypeEntity):
     """Helps to create different type of
     :class:`~stalker.core.models.project.Project` objects.
     
@@ -141,7 +119,7 @@ class TypeTemplate(entity.Entity):
     """The TypeTemplate model holds templates for Types.
     
     TypeTemplate objects help to specify where to place a file related to
-    :class:`~stalker.core.models.typeEntity.TypeEntity` objects and its derived
+    :class:`~stalker.core.models.entity.TypeEntity` objects and its derived
     classes.
     
     The first very important usage of TypeTemplates is to place asset
@@ -156,7 +134,7 @@ class TypeTemplate(entity.Entity):
     :param file_code: The Jinja2 template code which specifies the file name of
       the given item
     
-    :param type: A :class:`~stalker.core.models.typeEntity.TypeEntity` object
+    :param type: A :class:`~stalker.core.models.entity.TypeEntity` object
       or any other class which is derived from Type.
     
     Examples:
@@ -165,7 +143,7 @@ class TypeTemplate(entity.Entity):
     
       from stalker import db
       from satlker.db import auth
-      from stalker.core.models import typeEntity, pipelineStep
+      from stalker.core.models import types, pipelineStep
       
       # setup the default database
       db.setup()
@@ -192,7 +170,7 @@ v{{version.version_number}}"
       )
       
       # create a "Character" AssetType with only one step
-      typeObj = typeEntity.AssetType(
+      typeObj = types.AssetType(
           name="Character",
           description="this is the character asset type",
           created_by=admin,
@@ -200,7 +178,7 @@ v{{version.version_number}}"
       )
       
       # now create our TypeTemplate
-      char_template = typeEntity.TypeTemplate(
+      char_template = types.TypeTemplate(
           name="Character",
           description="this is the template which explains how to place \
 Character assets",
@@ -239,52 +217,144 @@ Character assets",
     
     
     #----------------------------------------------------------------------
-    def __init__(self, template_code, **kwargs):
-        super(Template, self).__init__(**kwargs)
+    def __init__(self,
+                 path_code="",
+                 file_code="",
+                 type_=None,
+                 **kwargs):
+        super(TypeTemplate, self).__init__(**kwargs)
         
-        self._template_code = self._check_template_code(template_code)
+        self._path_code = self._check_path_code(path_code)
+        self._file_code = self._check_file_code(file_code)
+        self._type = self._check_type(type_)
     
     
     
     #----------------------------------------------------------------------
-    def _check_template_code(self, template_code_in):
-        """checks the given template_code attribute for several conditions
+    def _check_path_code(self, path_code_in):
+        """checks the given path_code attribute for several conditions
         """
         
         # check if it is None
-        if template_code_in is None:
-            raise(ValueError("template_code could not be None"))
-        
-        # check if it is an empty string
-        if template_code_in == "":
-            raise(ValueError("template_code could not be an empty string"))
+        if path_code_in is None:
+            raise(ValueError("path_code could not be None"))
         
         # check if it is an instance of string or unicode
-        if not isinstance(template_code_in, (str, unicode)):
-            raise(ValueError("template_code should be an instance of string \
+        if not isinstance(path_code_in, (str, unicode)):
+            raise(ValueError("path_code should be an instance of string \
             or unicode"))
         
-        return template_code_in
+        # check if it is an empty string
+        if path_code_in == "":
+            raise(ValueError("path_code could not be an empty string"))
+        
+        return path_code_in
     
     
     
     #----------------------------------------------------------------------
-    def template_code():
+    def _check_file_code(self, file_code_in):
+        """checks the given file_code attribute for several conditions
+        """
+        
+        # check if it is None
+        if file_code_in is None:
+            raise(ValueError("file_code could not be None"))
+        
+        # check if it is an instance of string or unicode
+        if not isinstance(file_code_in, (str, unicode)):
+            raise(ValueError("file_code should be an instance of string \
+            or unicode"))
+        
+        # check if it is an empty string
+        if file_code_in == "":
+            raise(ValueError("file_code could not be an empty string"))
+        
+        return file_code_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_type(self, type_in):
+        """checks the given type_ attribute for several conditions
+        """
+        
+        # check if it is None
+        if type_in is None:
+            raise(ValueError("type_ could not be None"))
+        
+        if not isinstance(type_in, entity.TypeEntity):
+            raise(ValueError("type_ should be an instance of \
+            stalker.core.models.entity.TypeEntity"))
+        
+        return type_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def path_code():
         
         def fget(self):
-            return self._template_code
+            return self._path_code
         
-        def fset(self, template_code_in):
-            self._template_code = self._check_template_code(template_code_in)
+        def fset(self, path_code_in):
+            self._path_code = self._check_path_code(path_code_in)
         
         doc = """this is the property that helps you assign values to
-        template_code attribute"""
+        path_code attribute"""
         
         return locals()
     
-    template_code = property(**template_code())
-
-
-
-
-
+    path_code = property(**path_code())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def file_code():
+        
+        def fget(self):
+            return self._file_code
+        
+        def fset(self, file_code_in):
+            self._file_code = self._check_file_code(file_code_in)
+        
+        doc = """this is the property that helps you assign values to
+        file_code attribute"""
+        
+        return locals()
+    
+    file_code = property(**file_code())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def type_():
+        
+        def fget(self):
+            return self._type
+        
+        def fset(self, type_in):
+            self._type = self._check_type(type_in)
+        
+        doc = """the target type this template should work on, should be an
+        instance of :class:`~stalker.core.models.entity.TypeEntity`"""
+        
+        return locals()
+    
+    type_ = property(**type_())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """checks the equality of the given object to this one
+        """
+        
+        return super(TypeTemplate, self).__eq__(other) and \
+               isinstance(other, TypeTemplate) and \
+               self.path_code == other.path_code and \
+               self.file_code == other.file_code and \
+               self.type_ == other.type_
+    
+    
+    

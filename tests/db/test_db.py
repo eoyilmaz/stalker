@@ -6,6 +6,7 @@ import datetime
 import unittest
 import tempfile
 from sqlalchemy.orm import clear_mappers
+from sqlalchemy.exc import IntegrityError
 from stalker.conf import defaults
 from stalker import db
 from stalker.db import auth
@@ -29,7 +30,7 @@ from stalker.core.models import (
     structure,
     tag,
     task,
-    typeEntity,
+    types,
     user,
     version
 )
@@ -51,6 +52,12 @@ class DatabaseTester(unittest.TestCase):
         # setup the database
         clear_mappers()
         db.meta.__mappers__ = []
+        
+        # just set the default admin creation to true
+        # some tests are relying on that
+        defaults.AUTO_CREATE_ADMIN = True
+        defaults.ADMIN_NAME = "admin"
+        defaults.ADMIN_PASSWORD = "admin"
         
         self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
         self.TEST_DATABASE_DIALECT = "sqlite:///"
@@ -286,7 +293,7 @@ class DatabaseTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_no_default_admin_creation(self):
-        """testing ifre is no user if default.AUTO_CREATE_ADMIN is False
+        """testing if there is no user if default.AUTO_CREATE_ADMIN is False
         """
         
         # turn down auto admin creation
@@ -305,6 +312,81 @@ class DatabaseTester(unittest.TestCase):
         self.assertTrue(db.meta.session.query(department.Department).\
                         filter_by(name=defaults.ADMIN_DEPARTMENT_NAME).\
                         first() is None)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_unique_names_on_same_entity_type(self):
+        """testing if there are unique names for same entity types
+        """
+        
+        db.setup(self.TEST_DATABASE_URI)
+        self._createdDB = True
+        
+        admin = db.auth.authenticate(defaults.ADMIN_NAME,
+                                     defaults.ADMIN_PASSWORD)
+        
+        # try to create a user with the same name
+        # expect IntegrityError
+        
+        kwargs = {
+            "name": "user1",
+            "first_name": "user1name",
+            "login_name": "user1",
+            "email": "user1@gmail.com",
+            "password": "user1",
+            "created_by": admin
+        }
+        
+        user1 = user.User(**kwargs)
+        db.meta.session.commit()
+        
+        # lets create the second user
+        kwargs.update({
+            "email": "user2@gmail.com",
+            "login_name": "user2",
+        })
+        
+        user2=user.User(**kwargs)
+        
+        self.assertRaises(IntegrityError, db.meta.session.commit)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_non_unique_names_on_different_entity_type(self):
+        """testing if there can be non-unique names for different entity types
+        """
+        
+        db.setup(self.TEST_DATABASE_URI)
+        self._createdDB = True
+        
+        admin = db.auth.authenticate(defaults.ADMIN_NAME,
+                                     defaults.ADMIN_PASSWORD)
+        
+        # try to create a user and an entity with same name
+        # expect Nothing
+        
+        kwargs = {
+            "name": "user1",
+            "created_by": admin
+        }
+        
+        entity1 = entity.Entity(**kwargs)
+        db.meta.session.commit()
+        
+        # lets create the second user
+        kwargs.update({
+            "first_name": "user1name",
+            "login_name": "user1",
+            "email": "user1@gmail.com",
+            "password": "user1",
+        })
+        
+        user1=user.User(**kwargs)
+        
+        # expect nothing, this should work without any error
+        db.meta.session.commit()
 
 
 
@@ -388,11 +470,11 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # create a couple of PipelineStep objects
         pStep1 = pipelineStep.PipelineStep(
-            name="Modeling",
-            description="This is where an asset is modeled",
+            name="Rigging",
+            description="This is where a character asset is rigged",
             created_by=admin,
             updated_by=admin,
-            code="MDL"
+            code="RIG"
         )
         
         pStep2 = pipelineStep.PipelineStep(
@@ -413,14 +495,14 @@ class DatabaseModelsTester(unittest.TestCase):
             "steps": [pStep1, pStep2],
         }
         
-        aType = typeEntity.AssetType(**kwargs)
+        aType = types.AssetType(**kwargs)
         
         # store it in the db
         db.meta.session.add(aType)
         db.meta.session.commit()
         
         # retrieve it back and check it with the first one
-        aType_DB = db.meta.session.query(typeEntity.AssetType). \
+        aType_DB = db.meta.session.query(types.AssetType). \
                  filter_by(name=kwargs["name"]).first()
         
         for i, pStep_DB in enumerate(aType_DB.steps):
@@ -703,7 +785,43 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistancy of Link
         """
         
-        self.fail("test is not implemented yet")
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        
+        # create a LinkType
+        sound_link_type = types.LinkType(
+            name="Sound",
+            created_by=admin
+        )
+        
+        #db.meta.session.add(sound_link_type)
+        db.meta.session.commit()
+        
+        # create a Link
+        kwargs = {
+            "name": "My Sound",
+            "created_by": admin,
+            "path": "M:/PROJECTS",
+            "filename": "my_movie_sound.wav",
+            "type_": sound_link_type
+        }
+        
+        new_link = link.Link(**kwargs)
+        
+        # persist it
+        db.meta.session.add(new_link)
+        db.meta.session.commit()
+        
+        print "new_link.name     : %s" % new_link.name
+        print "new_link.path     : %s" % new_link.path
+        print "new_link.filename : %s" % new_link.filename
+        
+        # retrieve it back
+        link_DB = db.meta.session.query(link.Link).\
+                filter_by(name=kwargs["name"]).\
+                filter_by(path=kwargs["path"]).\
+                filter_by(filename=kwargs["filename"]).first()
+        
+        self.assertTrue(new_link==link_DB)
     
     
     
@@ -852,10 +970,10 @@ class DatabaseModelsTester(unittest.TestCase):
         session = db.meta.session
         query = session.query
         
-        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_EMAIL)
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create pipeline steps for character
-        modeling_ptep = pipelineStep.PipelineStep(
+        modeling_pStep = pipelineStep.PipelineStep(
             name="Modeling",
             description="This is the step where all the modeling job is done",
             code="MODEL",
@@ -872,7 +990,7 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # create a new assetType
-        char_asset_type = typeEntity.AssetType(
+        char_asset_type = types.AssetType(
             name="Character Asset Type",
             description="This is the asset type which covers animated\
             charactes",
@@ -881,28 +999,31 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # create a new type template for character assets
-        assetTemplate = typeEntity.TypeTemplate(
+        assetTemplate = types.TypeTemplate(
             name="Character Asset Template",
             description="This is the template for character assets",
             path_code="ASSETS/{{asset_type.name}}/{{pipeline_step.code}}",
             file_code="{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
             v{{version.version_number}}",
-            type=char_asset_type
+            type_=char_asset_type
         )
         
         # create a new link type
-        image_link_type = typeEntity.LinkType(
+        image_link_type = types.LinkType(
             name="Image",
             description="It is used for links showing an image",
             created_by=admin
         )
         
         # create a new template for references
-        imageReferenceTemplate = typeEntity.TypeTemplate(
+        imageReferenceTemplate = types.TypeTemplate(
             name="Image Reference Template",
             description="this is the template for image references, it shows \
             where to place the image files",
-            created_by=admin
+            created_by=admin,
+            path_code="REFS/{{reference.type.name}}",
+            file_code="{{reference.file_name}}",
+            type_=image_link_type
         )
         
         # create a new structure
@@ -975,29 +1096,36 @@ class DatabaseModelsTester(unittest.TestCase):
         # get the admin
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
-        # create a TypeTemplate object
+        # create a LinkType object
+        movie_link_type = types.LinkType(
+            name="Movie",
+            created_by=admin
+        )
         
+        # create a TypeTemplate object for movie links
         kwargs = {
-            "name": "Model Asset Template",
-            "description": "this is a template to be used for models",
+            "name": "Movie Links Template",
+            "description": "this is a template to be used for links to movie\
+                files",
             "created_by": admin,
-            "template_code": "{{projects.root}}/{{project.name}}/SEQUENCES/\
-            {{sequence.name}}/SHOTS/{{shot.name}}"
+            "path_code": "REFS/{{link_type.name}}",
+            "file_code": "{{link.file_name}}",
+            "type_": movie_link_type,
         }
         
-        aTemplate = typeEntity.TypeTemplate(**kwargs)
+        aTypeTemplate = types.TypeTemplate(**kwargs)
         
         # persist it
         session = db.meta.session
-        session.add(aTemplate)
+        session.add(aTypeTemplate)
         session.commit()
         
         # get it back
-        aTemplate_DB = session.query(typeEntity.TypeTemplate).\
+        aTypeTemplate_DB = session.query(types.TypeTemplate).\
                      filter_by(name=kwargs["name"]).\
                      filter_by(description=kwargs["description"]).first()
         
-        self.assertEquals(aTemplate.template_code, aTemplate_DB.template_code)
+        self.assertTrue(aTypeTemplate==aTypeTemplate_DB)
     
     
     

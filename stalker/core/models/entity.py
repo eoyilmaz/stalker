@@ -384,8 +384,7 @@ class SimpleEntity(object):
         
         return isinstance(other, SimpleEntity) and \
            self.name == other.name and \
-           self.description == other.description and \
-           self.created_by == other.created_by
+           self.description == other.description
     
     
     
@@ -460,7 +459,9 @@ class Entity(SimpleEntity):
         """the equality operator
         """
         
-        return super(Entity, self).__eq__(other) and self.tags==other.tags
+        return super(Entity, self).__eq__(other) and \
+               isinstance(other, Entity) and \
+               self.tags==other.tags
 
 
 
@@ -658,6 +659,25 @@ class StatusedEntity(Entity):
         
         return super(StatusedEntity, self).__eq__(other) and \
                self.status_list==other.status_list
+
+
+
+
+
+
+########################################################################
+class TypeEntity(Entity):
+    """TypeEntity is the entry point for types.
     
+    It is created to group the `Type` objects, so any other classes accepting a
+    ``TypeEntity`` object can have one of the derived classes, this is done in
+    that way mainly to ease the of creation of only one
+    :class:`~stalker.core.models.types.TypeTemplate` class and let the
+    others to use this one TypeTemplate class.
     
+    It doesn't add any new parameters to it's super.
+    """
     
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(TypeEntity, self).__init__(**kwargs)

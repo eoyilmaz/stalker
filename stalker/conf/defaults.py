@@ -13,8 +13,10 @@ DATABASE = 'sqlite:///:memory:'
 # 
 DATABASE_ENGINE_SETTINGS = {
     'echo':False,
-    }
+}
 
+
+DATABASE_SESSION_SETTINGS ={}
 
 STUDIO_DATABASE= 'sqlite:///:memory:'
 PROJECT_DATABASE = 'sqlite:///:memory:'

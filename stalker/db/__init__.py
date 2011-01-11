@@ -63,7 +63,8 @@ def setup(database=None, mappers=[], engine_settings=None):
     meta.metadata.create_all(meta.engine)
     
     # create the Session class
-    Session = sessionmaker(bind=meta.engine)
+    Session = sessionmaker(bind=meta.engine,
+                           **defaults.DATABASE_SESSION_SETTINGS)
     
     # create and save session object to stalker.db.meta.sessison
     meta.session = Session()
@@ -156,10 +157,9 @@ def __create_mappers__(mappers):
     #
     
     if meta.__mappers__ == mappers:
-        print "not creating any new mapper"
-        print "current meta.__mappers__ list:"
-        print meta.__mappers__
-        
+        #print "not creating any new mapper"
+        #print "current meta.__mappers__ list:"
+        #print meta.__mappers__
         return
     
     
