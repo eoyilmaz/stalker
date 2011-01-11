@@ -38,5 +38,6 @@ class myClass(object):
         return locals()
     
     special_attr = property(**special_attr())
-    
-    
+
+
+

@@ -793,9 +793,6 @@ class DatabaseModelsTester(unittest.TestCase):
             created_by=admin
         )
         
-        #db.meta.session.add(sound_link_type)
-        db.meta.session.commit()
-        
         # create a Link
         kwargs = {
             "name": "My Sound",
@@ -808,18 +805,18 @@ class DatabaseModelsTester(unittest.TestCase):
         new_link = link.Link(**kwargs)
         
         # persist it
-        db.meta.session.add(new_link)
+        db.meta.session.add_all([sound_link_type, new_link])
         db.meta.session.commit()
         
-        print "new_link.name     : %s" % new_link.name
-        print "new_link.path     : %s" % new_link.path
-        print "new_link.filename : %s" % new_link.filename
+        print "new_link.name       : %s" % new_link.name
+        print "new_link.path       : %s" % new_link.path
+        print "new_link.filename   : %s" % new_link.filename
+        print "new_link.type_.name : %s" % new_link.type_.name
         
         # retrieve it back
         link_DB = db.meta.session.query(link.Link).\
-                filter_by(name=kwargs["name"]).\
-                filter_by(path=kwargs["path"]).\
-                filter_by(filename=kwargs["filename"]).first()
+                filter_by(name=kwargs["name"]).first()
+        print "link_DB.name        : %s" % link_DB.name
         
         self.assertTrue(new_link==link_DB)
     

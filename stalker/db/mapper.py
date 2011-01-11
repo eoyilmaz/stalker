@@ -143,7 +143,8 @@ def setup():
             "_members": relationship(
                 user.User,
                 backref="_department",
-                primaryjoin=tables.departments.c.id==tables.users.c.department_id,
+                primaryjoin=\
+                tables.departments.c.id==tables.users.c.department_id,
             ),
             "members": synonym("_members")
         },

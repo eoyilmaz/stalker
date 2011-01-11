@@ -45,7 +45,6 @@ simpleEntities = Table(
     Column("date_updated", DateTime),
     Column("entity_type", String(128), nullable=False),
     UniqueConstraint('name', 'entity_type')
-
 )
 
 
@@ -68,13 +67,15 @@ entity_tags = Table(
     Column(
         "entity_id",
         Integer,
-        ForeignKey("entities.id")
+        ForeignKey("entities.id"),
+        primary_key=True,
     ),
     
     Column(
         "tag_id",
         Integer,
-        ForeignKey("tags.id")
+        ForeignKey("tags.id"),
+        primary_key=True,
     )
 )
 
@@ -165,7 +166,7 @@ departments = Table(
         "id",
         Integer,
         ForeignKey("entities.id"),
-        primary_key=True
+        primary_key=True,
     ),
     
     #Column(
@@ -191,7 +192,7 @@ statuses = Table(
         "id",
         Integer,
         ForeignKey("entities.id"),
-        primary_key=True
+        primary_key=True,
     ),
     Column("short_name", String(32))
 )
@@ -236,7 +237,7 @@ repositories = Table(
         "id",
         Integer,
         ForeignKey("entities.id"),
-        primary_key=True
+        primary_key=True,
     ),
     Column("linux_path", String(256)),
     Column("windows_path", String(256)),
@@ -281,12 +282,14 @@ assetType_pipelineSteps = Table(
         "assetType_id",
         Integer,
         ForeignKey("assetTypes.id"),
+        primary_key=True,
     ),
     
     Column(
         "pipelineStep_id",
         Integer,
         ForeignKey("pipelineSteps.id"),
+        primary_key=True,
     ),
 )
 
@@ -325,19 +328,6 @@ typeTemplates = Table(
 
 
 
-# TYPEENTITIES
-typeEntities = Table(
-    "typeEntities", metadata,
-    Column(
-        "id",
-        Integer,
-        ForeignKey("entities.id"),
-        primary_key=True,
-    ),
-)
-
-
-
 # STRUCTURE
 structures = Table(
     "structures", metadata,
@@ -359,11 +349,13 @@ structure_assetTemplates = Table(
         "structure_id",
         Integer,
         ForeignKey("structures.id"),
+        primary_key=True,
     ),
     Column(
         "typeTemplate_id",
         Integer,
         ForeignKey("typeTemplates.id"),
+        primary_key=True,
     ),
 )
 
@@ -376,24 +368,26 @@ structure_referenceTemplates = Table(
         "structure_id",
         Integer,
         ForeignKey("structures.id"),
+        primary_key=True,
     ),
     Column(
         "typeTemplate_id",
         Integer,
         ForeignKey("typeTemplates.id"),
+        primary_key=True,
     ),
 )
 
 
 
-
-# LINKTYPES
-linkTypes = Table(
-    "linkTypes", metadata,
+# TYPEENTITIES
+typeEntities = Table(
+    "typeEntities", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("typeEntities.id"),
+        ForeignKey("entities.id"),
+        primary_key=True,
     ),
 )
 
@@ -406,6 +400,7 @@ links = Table(
         "id",
         Integer,
         ForeignKey("entities.id"),
+        primary_key=True,
     ),
     Column("path", String),
     Column("filename", String),
@@ -417,6 +412,20 @@ links = Table(
 
 
 
+# LINKTYPES
+linkTypes = Table(
+    "linkTypes", metadata,
+    Column(
+        "id",
+        Integer,
+        ForeignKey("typeEntities.id"),
+        primary_key=True,
+    ),
+)
+
+
+
+
 # PROJECTTYPES
 projectTypes = Table(
     "projectTypes", metadata,
@@ -424,5 +433,9 @@ projectTypes = Table(
         "id",
         Integer,
         ForeignKey("typeEntities.id"),
+        primary_key=True,
     ),
 )
+
+
+
