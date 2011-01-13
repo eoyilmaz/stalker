@@ -3,8 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+*******
 Stalker
-=======
+*******
+
+=====
+About
+=====
 
 Stalker is a Production Digital Asset Management (ProdAM) System designed
 specially for Animation and VFX Studios and licensed under BSD License.
@@ -42,19 +47,23 @@ have mercurial installed::
 
 .. _Google Project page of Stalker: http://code.google.com/p/stalker/
 
-Contents:
+
+
+Table of Contents
+=================
 
 .. toctree::
-   :maxdepth: 2
-   
-   installation.rst
-   tutorial.rst
-   design.rst
-   contribute.rst
-   roadmap.rst
+    :maxdepth: 2
+    
+    installation.rst
+    tutorial.rst
+    design.rst
+    contribute.rst
+    roadmap.rst
+
 
 Summary
-=======
+-------
 
 .. autosummary::
    :toctree: generated/
@@ -128,7 +137,7 @@ Summary
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

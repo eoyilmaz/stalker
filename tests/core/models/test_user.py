@@ -99,6 +99,150 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_code_argument_skipped(self):
+        """testing if a value will be set if code argument is skipped
+        """
+        
+        #code = None
+        #name = "something"
+        # code value ?
+        
+        # be sure that we don't have code keyword
+        if self.kwargs.has_key("code"):
+            self.kwargs.pop("code")
+        
+        new_user = user.User(**self.kwargs)
+        
+        # check if it is not None and not an empty string and is an instance of
+        # string or unicode
+        self.assertTrue(new_user.code is not None)
+        self.assertTrue(new_user.code != "")
+        self.assertTrue(isinstance(new_user.code, (str, unicode)))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_code_argument_None(self):
+        """testing if a value will be set if code argument is set to None
+        """
+        
+        self.kwargs["code"] = None
+        
+        new_user = user.User(**self.kwargs)
+        
+        self.assertTrue(new_user.code is not None)
+        self.assertTrue(new_user.code != "")
+        self.assertTrue(isinstance(new_user.code, (str, unicode)))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_code_argument_empty_string(self):
+        """testing if a value will be set if code argument is set to an empty
+        string
+        """
+        
+        self.kwargs["code"] = ""
+        
+        new_user = user.User(**self.kwargs)
+        
+        self.assertTrue(new_user.code is not None)
+        self.assertTrue(new_user.code != "")
+        self.assertTrue(isinstance(new_user.code, (str, unicode)))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_code_property_format_when_code_argument_skipped(self):
+        """testing if code property is formatted correctly when skipped as an
+        argument
+        """
+        
+        #code = None or ""
+        #name = "something"
+        # code format ?
+        
+        test_values = [
+            ("testCode", "TEST_CODE"),
+            ("1testCode", "TEST_CODE"),
+            ("_testCode", "TEST_CODE"),
+            ("2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
+            ("2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
+            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
+            ("SH001","SH001"),
+            ("My code is Ozgur", "MY_CODE_IS_OZGUR"),
+            (" this is another code for an asset", 
+             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
+        ]
+        
+        # set the name and check the code
+        for test_value in test_values:
+            self.kwargs["name"] = test_value[0]
+            new_user = user.User(**self.kwargs)
+            
+            self.assertEquals(new_user.code, test_value[1])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_code_property_is_set_when_both_code_and_name_is_given(self):
+        """testing if both code argument and name argument is given then it is
+        just set to the formatted version of code
+        """
+        
+        test_values = [
+            ("aName", "testCode","TEST_CODE"),
+            ("aName", "1testCode", "TEST_CODE"),
+            ("aName", "_testCode", "TEST_CODE"),
+            ("aName", "2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
+            ("aName", "2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
+            ("aName", "2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
+            ("aName", "SH001","SH001"),
+            ("aName", "My CODE is Ozgur", "MY_CODE_IS_OZGUR"),
+            ("aName", " this is another code for an asset", 
+             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
+        ]
+        
+        # set the name and code and test the code
+        for test_value in test_values:
+            self.kwargs["name"] = test_value[0]
+            self.kwargs["code"] = test_value[1]
+            
+            new_user = user.User(**self.kwargs)
+            
+            self.assertEquals(new_user.code, test_value[2])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_code_property_is_changed_after_setting_name(self):
+        """testing if code was 
+        """
+        
+        code = "something"
+        name = "some name"
+        new_name = "something new"
+        expected_new_code = "SOMETHING_NEW"
+        
+        self.kwargs["code"] = code
+        self.kwargs["name"] = name
+        
+        new_user = user.User(**self.kwargs)
+        
+        old_code = new_user.code
+        
+        # set the new name
+        new_user.name = new_name
+        
+        # first check if it is different then the old_code
+        self.assertNotEquals(new_user.code, old_code)
+        
+        # then check if it is set to the expected result
+        self.assertEquals(new_user.code, expected_new_code)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_email_argument_accepting_only_string_or_unicode(self):
         """testing if email argument accepting only string or unicode
         values

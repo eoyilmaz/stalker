@@ -1,6 +1,17 @@
 Stalker Changes
 ===============
 
+v0.1.1.a2:
+ * updated the Tutorial
+ * added *code* attribute to SimpleEntity
+ * updated the User class for the new *code* attribute, and also updated the
+   tests to add tests for *code* attribute (simply copied the test code from
+   SimpleEntityTester, bad code repetition, need to change it later, by may be
+   inheriting the test case from the other one)
+ * updated the database tables and mappers for the new *code* attribute
+ * removed the clashing *code* attribute from PipelineStep class and the tables
+   and mappers
+
 v0.1.1.a1:
  * fixed a couple of documentation errors like:
    * inheritance diagram had references to modules

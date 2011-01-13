@@ -16,9 +16,7 @@ class SimpleEntity(object):
     
     This class has the basic information about an entity which are the name,
     the description, tags and the audit information like created_by,
-    updated_by, date_created and date_updated about this entity. It also
-    creates a ``nice_name`` attribute which filters the white space around and
-    in the ``name`` attribute.
+    updated_by, date_created and date_updated about this entity.
     
     :param name: a string or unicode attribute that holds the name of this
       entity. it could not be empty, the first letter should be an alphabetic
@@ -44,6 +42,12 @@ class SimpleEntity(object):
       for newly created entities this is equal to date_created and the
       date_updated cannot be before date_created
     
+    :param code: this is the code name of this simple entity, can be omitted
+      and it will be set to the uppercase version of the nice_name attribute.
+      it accepts string or unicode values. If both the name and code arguments
+      are given the the code property will be set to code, but in any update to
+      name attribute the code also will be updated to the uppercase form of the
+      nice_name attribute
     """
     
     
@@ -56,12 +60,23 @@ class SimpleEntity(object):
                  updated_by=None,
                  date_created=datetime.datetime.now(),
                  date_updated=datetime.datetime.now(),
+                 code=None,
                  ):
+        
+        # code attribute
+        # just set it to None for now
+        self._code = ""
         
         # name and nice_name
         self._nice_name = ""
         self._name = ""
         self.name = name
+        
+        # code
+        # if the given code argument is not None
+        # use it to set the code
+        if code is not None and code is not "":
+            self._code = self._check_code(code)
         
         self._description = self._check_description(description)
         self._created_by = self._check_created_by(created_by)
@@ -111,6 +126,15 @@ class SimpleEntity(object):
     
     
     
+    def _condition_code(self, code_in):
+        """formats the given code_in value
+        """
+        
+        # just set it to the uppercase of what nice_name gives
+        return self._condition_nice_name(code_in).upper()
+    
+    
+    
     #----------------------------------------------------------------------
     def _condition_name(self, name_in):
         """conditions the name_in value
@@ -139,6 +163,9 @@ class SimpleEntity(object):
     def _condition_nice_name(self, nice_name_in):
         """conditions the given nice name
         """
+        
+        # remove unnecesary characters from the beginning
+        nice_name_in = re.sub("(^[^A-Za-z]+)", r"", nice_name_in)
         
         # remove camel case letters
         nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
@@ -182,8 +209,12 @@ class SimpleEntity(object):
         
         def fset(self, name_in):
             self._name = self._check_name(name_in)
+            
             # also set the nice_name
             self._nice_name = self._condition_nice_name(self._name)
+            
+            # set the code
+            self.code = self._name
         
         doc = """the name of the entity"""
         
@@ -199,14 +230,42 @@ class SimpleEntity(object):
         def fget(self):
             return self._nice_name
         
-        doc = "this is the nice name of the SimpleEntity, it is a string \
-        which is a little bit more formatted than the name attribute"
+        doc = """this is the ``nice name`` of the SimpleEntity. It has the same
+        value with the name (contextually) but with a different format like,
+        all the whitespaces replaced by underscores ("\_"), all the CamelCase
+        form will be expanded by underscore (\_) characters and it is always
+        lowercase.
+        
+        There is also the ``code`` attribute which is simple the uppercase form
+        of ``nice_name`` if it is not defined differently (i.e set to another
+        value).
+        """
         
         return locals()
     
     nice_name = property(**nice_name())
     
     
+    
+    #----------------------------------------------------------------------
+    def _check_code(self, code_in):
+        """checks the given code value
+        """
+        
+        # check if the code_in is empty
+        if code_in=="":
+            raise(ValueError("the code attribute can not be an empty string"))
+        
+        # check if the code_in is None
+        if code_in is None:
+            raise(ValueError("the code attribute can not be None"))
+        
+        # check if it is something other than a string
+        if not isinstance(code_in, (str, unicode)):
+            raise(ValueError("the code should be an instance of string or \
+            unicode"))
+        
+        return self._condition_code(code_in)
     
     
     
@@ -302,6 +361,18 @@ class SimpleEntity(object):
             before date_created, try setting the date_created before")
         
         return date_updated_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def code():
+        def fget(self):
+            return self._code
+        def fset(self, code_in):
+            self._code = self._check_code(code_in)
+        return locals()
+    
+    code = property(**code())
     
     
     

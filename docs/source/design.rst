@@ -1,5 +1,6 @@
+======
 Design
-******
+======
 
 The design of Stalker is mentioned in the following sections.
 

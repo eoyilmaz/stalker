@@ -525,6 +525,9 @@ class User(entity.Entity):
             # set the name attribute
             #self._login_name = self._check_name(login_name_in)
             self._login_name = self._name
+            
+            # also set the code
+            self._code = self._check_code(self._name)
         
         doc = """login name of the user, accepts string or unicode, also sets
         the name attribute"""
@@ -542,13 +545,16 @@ class User(entity.Entity):
             return self._name
         
         def fset(self, name_in):
-            #self._name = self._check_name(name_in)
             
-            # also set the login name
+            # set the login name first
             self._login_name = self._check_login_name(name_in)
             self._name = self._login_name
+            
             # also set the nice_name
             self._nice_name = self._condition_nice_name(self._name)
+            
+            # and also the code
+            self.code = name_in
         
         doc = """the name of the user object, it is the synonym for the
         login_name"""

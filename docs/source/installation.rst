@@ -1,7 +1,13 @@
 .. _installation_toplevel:
 
+======================
+Installation
+======================
+
+
 How to Install Stalker
-**********************
+======================
+
 
 This document will let you install and run Stalker.
 

@@ -27,6 +27,7 @@ metadata = db.metadata
 simpleEntities = Table(
     "simpleEntities", metadata,
     Column("id", Integer, primary_key=True),
+    Column("code", String(256), nullable=False),
     Column("name", String(256), nullable=False),
     Column("description", String),
     
@@ -304,7 +305,7 @@ pipelineSteps = Table(
         ForeignKey("entities.id"),
         primary_key=True,
     ),
-    Column("code", String(32), unique=True),
+    #Column("code", String(32), unique=True),
 )
 
 

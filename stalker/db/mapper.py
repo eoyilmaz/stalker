@@ -44,6 +44,8 @@ def setup():
         entity.SimpleEntity,
         tables.simpleEntities,
         properties={
+            "_code": tables.simpleEntities.c.code,
+            "code": synonym("_code"),
             "_name": tables.simpleEntities.c.name,
             "name": synonym("_name"),
             "_description": tables.simpleEntities.c.description,
@@ -289,10 +291,10 @@ def setup():
         inherits=entity.Entity,
         inherit_condition=tables.pipelineSteps.c.id==tables.entities.c.id,
         polymorphic_identity="PipelineStep",
-        properties={
-            "_code": tables.pipelineSteps.c.code,
-            "code": synonym("_code")
-        }
+        #properties={
+            #"_code": tables.pipelineSteps.c.code,
+            #"code": synonym("_code")
+        #}
     )
     
     

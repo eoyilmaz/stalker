@@ -1,5 +1,6 @@
+=================
 How To Contribute
-*****************
+=================
 
 Stalker started as an Open Source project with the expectation of
 contributions. The soul of the open source is to share the knowledge and
