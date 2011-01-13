@@ -15,10 +15,11 @@ from sqlalchemy import (
     DateTime,
     UniqueConstraint
 )
-from stalker.db import meta
+#from stalker.db import meta
+from stalker import db
 
 #create the metadata
-metadata = meta.metadata
+metadata = db.metadata
 
 # create tables
 
@@ -112,7 +113,7 @@ users = Table(
     Column("email", String(256), unique=True, nullable=False),
     Column("first_name", String(256), nullable=False),
     Column("last_name", String(256), nullable=True),
-    Column("login_name", String(256), unique=True, nullable=False),
+    #Column("login_name", String(256), unique=True, nullable=False),
     Column("password", String(256), nullable=False),
     
     #Column("permission_groups_id",

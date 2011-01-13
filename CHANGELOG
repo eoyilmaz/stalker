@@ -1,12 +1,36 @@
 Stalker Changes
 ===============
 
+v0.1.1.a1:
+ * fixed a couple of documentation errors like:
+   * inheritance diagram had references to modules
+   * a couple of docstring documentation errors in Structure, User and
+     TypeTemplate classes
+ * updated the installation instructions
+ * added Tutorial page to the documentation
+ * all the classes, functions from sqlalchemy are now imported to the
+   sqlalchemy namespace, this will let the Sphinx to correctly include classes,
+   functions from Stalker only
+ * removed the db.meta module, now all the functionalities supplied by db.meta
+   are supplied by db (db.meta.session --> db.session etc.)
+ * added `query` variable to db module so instead of db.session.query now
+   db.query can be used
+ * updated login_required decorator function, it now accepts a `view` function
+ * added permission_required decorator function
+ * name attribute of stalker.core.models.entity.SimpleEntity is not any more
+   forced to start with an upper case letter
+ * login_name is now a synonym for name in stalker.core.models.user.User
+   class and it is not stored in the database any more, just the name attribute
+   is stored in the database from now on
+ * to make things simpler all the properties with name "type_" is now using the
+   name "type" even though it is a Python keyword, Python is clever enough to
+   understand what is meant
+
 v0.1.1.a0:
  * changed the versioning scheme a little bit to follow the setuptools guide
- * 
 
 v0.1.0.20110111.1:
- * persistancy tests for Link is now fixed
+ * persistence tests for Link is now fixed
  * now every table correctly has a primary_key
 
 v0.1.0.20110110.1:
@@ -33,15 +57,15 @@ v0.1.0.20110110.1:
    added test for that
  * fixed all the errors in test_db.py, there are only failures left
  * added tests for stalker.core.models.link.Link, all the test are green for
-   Link except the persistancy tests
+   Link except the persistence tests
 
 v0.1.0.20110108.1:
- * Template class is renmead to TypeTemplate and moved inside
+ * Template class is renamed to TypeTemplate and moved inside
    stalker.core.models.typeEntity to prevent the name clashing with Jinja2
    Template class
  * added __eq__ to SimpleEntity and still trying to add it to the derived
    classes
- * orginized the project structure to conform setup tools for PyPI
+ * organised the project structure to conform setup tools for PyPI
 
 v0.1.0.20110107.2:
  * updating the db tests
@@ -49,7 +73,7 @@ v0.1.0.20110107.2:
    to be set None
 
 v0.1.0.20110107.1:
- * organized the existant tests
+ * organised the existent tests
 
 v0.1.0.20110106.2:
  * added nice_name property to the stalker.core.models.entity.SimpleEntity
@@ -72,14 +96,14 @@ v0.1.0.20110105:
 
 v0.1.0.20110104:
  * removed the link.Link and introduced reference.Reference and
-   typeEntity.ReferenceType classes, which I think are more orginized then the
+   typeEntity.ReferenceType classes, which I think are more organised then the
    previous design.
- * reorganized the AssetType and ReferenceType objects by introducing the new
+ * reorganised the AssetType and ReferenceType objects by introducing the new
    TypeEntity class and deriving the AssetType and ReferenceType from this
    class
  * added ProjectType class to hold different project types (like Commercial,
    Film, Still etc., it is different than having a Commercial Structure object)
- * removed AssetTemplate and ReferenceTemplate concepts and generalized the
+ * removed AssetTemplate and ReferenceTemplate concepts and generalised the
    Template class by adding a `type` parameter to it, which accepts TypeEntity
    and classes derived from TypeEntity.
 
@@ -102,11 +126,11 @@ v0.1.0.20101231:
  * updated the example in the docstring of the template.AssetTemplate
 
 v0.1.0.20101229.3:
- * generalized the Template class. Now every Entity can be assigned to a
+ * generalised the Template class. Now every Entity can be assigned to a
    template, it is not limited with Assets or References.
 
 v0.1.0.20101229.2:
- * entity.SimpleEntity.name now can have white spaces, but not at the beggining
+ * entity.SimpleEntity.name now can have white spaces, but not at the beginning
    or end, just in the middle
  * done mapping template.Template class
 
@@ -126,7 +150,7 @@ v0.1.0.20101228:
  * created the block of database tests
  * added stalker.db.meta.__mappers__ list to hold the mappers and use it to
    check if anything is already mapped
- * added tests for db initialization
+ * added tests for db initialisation
  * removed the whole stalker.models.unit module from SOM, only TimeUnit was
    usable in some cases, but in fact it is also not important, the only object
    using TimeUnit was the Project class and it can go well without it. Don't
@@ -155,8 +179,8 @@ v0.0.1.20101225:
  * user.User.last_name can now be None, to let users like admin have no last
    name
  * creating tables for catch the general inheritance of the entity classes
- * entitiy.SimpleEntity.name's first letter is not capitilized anymore
- * department.Department class now accpets Null for lead attribute (for now
+ * entitiy.SimpleEntity.name's first letter is not capitalised any more
+ * department.Department class now accepts Null for lead attribute (for now
    again)
 
 v0.0.1.20101224:
@@ -170,7 +194,7 @@ v0.0.1.20101223:
 v0.0.1.20101219:
  * started to implement:
    * a database entry point
-   * a customizable object model and database tables
+   * a customisable object model and database tables
    * an automatic mapper to map the objects and tables together according to
      user settings
    things can change a lot in this phase, I'm just trying to figure out the

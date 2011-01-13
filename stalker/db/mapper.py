@@ -123,11 +123,15 @@ def setup():
             "first_name": synonym("_first_name"),
             "_last_name": tables.users.c.last_name,
             "last_name": synonym("_last_name"),
-            "_login_name": tables.users.c.login_name,
-            "loing_name": synonym("_login_name"),
+            #"_login_name": tables.users.c.login_name,
+            #"loing_name": synonym("_login_name"),
+            "_name": tables.simpleEntities.c.name,
+            "name": synonym("_name"),
             "_password": tables.users.c.password,
             "password": synonym("_password"),
         },
+        #exclude_properties=["_login_name", "login_name"],
+        #include_properties=["_login_name", "login_name"],
     )
     
     
@@ -310,7 +314,7 @@ def setup():
                 primaryjoin=\
                     tables.typeTemplates.c.type_id==tables.typeEntities.c.id
                 ),
-            "type_": synonym("_type"),
+            "type": synonym("_type"),
         },
     )
     
@@ -370,7 +374,7 @@ def setup():
                 primaryjoin=\
                 tables.links.c.type_id==tables.linkTypes.c.id
             ),
-            "type_": synonym("_type"),
+            "type": synonym("_type"),
         },
     )
     

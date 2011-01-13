@@ -144,10 +144,30 @@ class StructureTester(mocker.MockerTestCase):
         """testing if asset_templates argument accepts empty lists
         """
         
-        # this should work properly wihtou raising an error
+        # this should work properly wihtout raising an error
         self.kwargs["asset_templates"] = []
         
         a_new_structure = structure.Structure(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_asset_templates_property_accepts_empty_list(self):
+        """testing if asset_templates property accepts empty lists
+        """
+        
+        # this should work properly without raising an error
+        self.mock_structure.asset_templates = []
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_asset_templates_property_works_correctly(self):
+        """testing if asset_templates property works properly
+        """
+        
+        self.assertEquals(self.mock_structure.asset_templates,
+                          self.kwargs["asset_templates"])
     
     
     
@@ -198,6 +218,16 @@ class StructureTester(mocker.MockerTestCase):
         self.kwargs["reference_templates"] = []
         
         a_new_structure = structure.Structure(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_reference_templates_property_accepts_empty_list(self):
+        """testing if the reference_templates property accepts empty lists
+        """
+        
+        # this should work without any error
+        self.mock_structure.reference_templates = []
     
     
     

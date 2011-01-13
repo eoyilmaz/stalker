@@ -155,8 +155,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_name_property_is_conditioned(self):
-        """testing if name is conditioned correctly
+    def test_name_property_is_formated_correctly(self):
+        """testing if name is formated correctly
         """
         
         test_values = [
@@ -183,8 +183,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_nice_name_is_formatted_correctly(self):
-        """testing if nice name is formatted correctly
+    def test_nice_name_property_is_formatted_correctly(self):
+        """testing if nice name property is formatted correctly
         """
         
         test_values = [

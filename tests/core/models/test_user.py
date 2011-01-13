@@ -66,7 +66,6 @@ class UserTest(mocker.MockerTestCase):
         # create the default values for parameters
         
         self.kwargs = {
-            "name": "ozgur",
             "first_name": "Erkan Ozgur",
             "last_name": "Yilmaz",
             "description": "this is a test user",
@@ -309,7 +308,7 @@ class UserTest(mocker.MockerTestCase):
             test_user = user.User(**self.kwargs)
             
             self.assertEquals(
-                test_user._login_name,
+                test_user.login_name,
                 valuePair[1]
             )
     
@@ -339,6 +338,64 @@ class UserTest(mocker.MockerTestCase):
                 self.mock_user.login_name,
                 valuePair[1]
             )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_login_name_argument_skipped(self):
+        """testing if skipping loing_name argument but supplying a name
+        argument will set the login_name property correctly
+        """
+        
+        self.kwargs["name"] = self.kwargs.pop("login_name")
+        new_user = user.User(**self.kwargs)
+        self.assertEquals(new_user.login_name, self.kwargs["name"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_login_name_argument_changing_name_property(self):
+        """testing if the login_name argument is actually holding the same
+        value with the name property
+        """
+        
+        # just supply login_name and check if they are holding the same value
+        new_user = user.User(**self.kwargs)
+        self.assertEquals(new_user.login_name, new_user.name)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_login_name_property_changing_name_property(self):
+        """testing if setting the login_name property sets the name property
+        """
+        
+        # give a new value to login_name and
+        self.mock_user.login_name = "newusername"
+        self.assertEquals(self.mock_user.login_name, self.mock_user.name)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_argument_changing_login_name_property(self):
+        """testing if setting the name argument sets the login_name property
+        """
+        # also checks for if the formatting of name is equal to formatting of
+        # the login name
+        self.kwargs["name"] = "EoYiLmaZ"
+        self.kwargs.pop("login_name")
+        
+        new_user_with_name = user.User(**self.kwargs)
+        self.assertEquals(new_user_with_name.login_name,
+                          new_user_with_name.name)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_property_changing_login_name_property(self):
+        """testing if setting the name property changes the login_name property 
+        """
+        
     
     
     

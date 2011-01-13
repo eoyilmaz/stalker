@@ -1,8 +1,9 @@
 {{ fullname }}
 {{ underline }}
 
-.. inheritance-diagram:: {{ fullname }}
-   :parts: 1
+.. inheritance-diagram::
+     {{ fullname }}
+     :parts: 1
 
 .. currentmodule:: {{ module }}
 

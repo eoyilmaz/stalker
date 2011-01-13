@@ -12,45 +12,7 @@ import stalker
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-
-## copied from Django
-#def fullsplit(path, result=None):
-    #"""
-    #Split a pathname into components (the opposite of os.path.join) in a
-    #platform-neutral way.
-    #"""
-    #if result is None:
-        #result = []
-    #head, tail = os.path.split(path)
-    #if head == "":
-        #return [tail] + result
-    #if head == path:
-        #return result
-    #return fullsplit(head, [tail] + result)
-
-
-## Compile the list of packages available, because distutils doesn't have
-## an easy way to do this.
-#packages, data_files = [], []
-#root_dir = os.path.dirname(__file__)
-#if root_dir != "":
-    #os.chdir(root_dir)
-#stalker_dir = "stalker"
-
-#for dirpath, dirnames, filenames in os.walk(stalker_dir):
-    ## Ignore dirnames that start with "."
-    #for i, dirname in enumerate(dirnames):
-        #if dirname.startswith("."): del dirnames[i]
-    #if "__init__.py" in filenames:
-        #packages.append(".".join(fullsplit(dirpath)))
-    #elif filenames:
-        #data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
-
-
-# just use the first three number for the version
-#version = '.'.join(stalker.__version__.split('.')[:3])
-
-
+required_packages = ["beaker", "jinja2", "sqlalchemy",]
 
 setup(name="stalker",
       version=stalker.__version__,
@@ -77,5 +39,6 @@ setup(name="stalker",
           "Topic :: Utilities",
           "Topic :: Office/Business :: Scheduling",
       ],
-      install_requires=["beaker", "jinja2", "sqlalchemy", ],
+      requires=required_packages,
+      install_requires=required_packages,
 )

@@ -14,10 +14,7 @@ from stalker.core.models import entity
 
 ########################################################################
 class User(entity.Entity):
-    """The user class is designed to hold data about a User in the system. It
-    is derived from the entity.AuditEntity class
-    
-    it adds these parameters to the AuditEntity class
+    """The user class is designed to hold data about a User in the system.
     
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
@@ -27,7 +24,10 @@ class User(entity.Entity):
     
     :param login_name: it is the login name of the user, it should be all lower
       case. Giving a string or unicode that has uppercase letters, it will be
-      converted to lower case. It can not be an empty string or None
+      converted to lower case. It can not be an empty string or None and it can
+      not contain any white space inside. login_name parameter is a synonym for
+      `name`, while creating a User object you don't need to specify both of
+      them, one is enough and if the two is given `name` will be used.
     
     :param first_name: it is the first name of the user, must be a string or
       unicode, middle name also can be added here, so it accepts white-spaces
@@ -81,7 +81,12 @@ class User(entity.Entity):
                  **kwargs
                  ):
         
-        # use
+        # use the login_name for name if there are no name attribute present
+        name = kwargs.get("name")
+        if name is None or name=="":
+            kwargs.update({"name": login_name})
+        elif isinstance(name, (str, unicode)):
+            login_name = name
         
         super(User, self).__init__(**kwargs)
         
@@ -431,8 +436,8 @@ class User(entity.Entity):
         def fset(self, department_in):
             self._department = self._check_department(department_in)
         
-        doc = """department othe user, is is a
-        :class:`~stalker.core.models.department.Department object"""
+        doc = """department of the user, it is a
+        :class:`~stalker.core.models.department.Department` object"""
         
         return locals()
     
@@ -513,16 +518,44 @@ class User(entity.Entity):
     def login_name():
         
         def fget(self):
-            return self._login_name
+            return self._name
         
         def fset(self, login_name_in):
-            self._login_name = self._check_login_name(login_name_in)
+            self._name = self._check_login_name(login_name_in)
+            # set the name attribute
+            #self._login_name = self._check_name(login_name_in)
+            self._login_name = self._name
         
-        doc = """login name of the user, accepts string or unicode"""
+        doc = """login name of the user, accepts string or unicode, also sets
+        the name attribute"""
         
         return locals()
     
     login_name = property(**login_name())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def name():
+        
+        def fget(self):
+            return self._name
+        
+        def fset(self, name_in):
+            #self._name = self._check_name(name_in)
+            
+            # also set the login name
+            self._login_name = self._check_login_name(name_in)
+            self._name = self._login_name
+            # also set the nice_name
+            self._nice_name = self._condition_nice_name(self._name)
+        
+        doc = """the name of the user object, it is the synonym for the
+        login_name"""
+        
+        return locals()
+    
+    name = property(**name())
     
     
     

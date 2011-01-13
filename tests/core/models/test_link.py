@@ -48,7 +48,7 @@ class LinkTester(mocker.MockerTestCase):
             "name": "An Image Link",
             "path": "C:/A_NEW_PROJECT/",
             "filename": "this_is_an_image.jpg",
-            "type_": self.mock_link_type1
+            "type": self.mock_link_type1
         }
         
         self.mock_link = link.Link(**self.kwargs)
@@ -240,18 +240,18 @@ class LinkTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_type_argument_being_None(self):
-        """testing if a ValueError will be raised when type_ argument is set to
+        """testing if a ValueError will be raised when type argument is set to
         None
         """
         
-        self.kwargs["type_"] = None
+        self.kwargs["type"] = None
         self.assertRaises(ValueError, link.Link, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_type_property_being_None(self):
-        """testing if a ValueError will be raised when type_ property is set to
+        """testing if a ValueError will be raised when type property is set to
         None
         """
         
@@ -259,7 +259,7 @@ class LinkTester(mocker.MockerTestCase):
             ValueError,
             setattr,
             self.mock_link,
-            "type_",
+            "type",
             None
         )
     
@@ -267,7 +267,7 @@ class LinkTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_type_argument_accepts_only_LinkType_objects(self):
-        """testing if a ValueError will be raised when type_ argument is
+        """testing if a ValueError will be raised when type argument is
         something other than a LinkType object
         """
         
@@ -275,14 +275,14 @@ class LinkTester(mocker.MockerTestCase):
                        {"another":"link type"}]
         
         for test_value in test_values:
-            self.kwargs["type_"] = test_value
+            self.kwargs["type"] = test_value
             self.assertRaises(ValueError, link.Link, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_type_property_accepts_only_LinkType_objects(self):
-        """testing if a ValueError will be raised when type_ property is
+        """testing if a ValueError will be raised when type property is
         somehting other than a LinkType object
         """
         
@@ -294,7 +294,7 @@ class LinkTester(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_link,
-                "type_",
+                "type",
                 test_value
             )
     
@@ -310,7 +310,7 @@ class LinkTester(mocker.MockerTestCase):
         self.assertTrue(self.mock_link==mock_link1)
         
         # with different parameters
-        self.kwargs["type_"] = self.mock_link_type2
+        self.kwargs["type"] = self.mock_link_type2
         mock_link2 = link.Link(**self.kwargs)
         
         self.assertFalse(self.mock_link==mock_link2)
@@ -323,7 +323,7 @@ class LinkTester(mocker.MockerTestCase):
         """
         
         # with different parameters
-        self.kwargs["type_"] = self.mock_link_type2
+        self.kwargs["type"] = self.mock_link_type2
         mock_link2 = link.Link(**self.kwargs)
         
         self.assertTrue(self.mock_link!=mock_link2)

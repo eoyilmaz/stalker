@@ -15,7 +15,6 @@ class Structure(entity.Entity):
     files are arranged in the
     :class:`~stalker.core.models.repository.Repository`.
     
-    A structure has these parameters:
     :param project_template: it is a string holding several lines of text
       showing the folder structure of the project. Whenever a project is
       created, folders are created by looking at this folder template.
@@ -23,7 +22,8 @@ class Structure(entity.Entity):
       The template string can have Jinja2 directives. These variables are given
       to the template engine:
       
-        * *project*: holds the current :class:`~stalker.core.models.project`
+        * *project*: holds the current
+          :class:`~stalker.core.models.project.Project`
           object using this structure, so you can use {{project.code}} or
           {{project.sequences}} kind of variables in the Jinja2 template
     
@@ -32,6 +32,8 @@ class Structure(entity.Entity):
       :class:`~stalker.core.models.types.AssetType` connected to its
       `type` attribute, which can help specifying templates based on the
       related :class:`~stalker.core.models.types.AssetType` object.
+      
+      Testing a second paragraph addition.
     
     :param reference_templates: holds
       :class:`~stalker.core.models.types.TypeTemplate` objects, which can

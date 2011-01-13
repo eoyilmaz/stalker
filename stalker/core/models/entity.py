@@ -21,8 +21,8 @@ class SimpleEntity(object):
     in the ``name`` attribute.
     
     :param name: a string or unicode attribute that holds the name of this
-      entity. it could not be empty, the first letter should be an upper case
-      alphabetic (not alphanumeric) and it should not contain any white space
+      entity. it could not be empty, the first letter should be an alphabetic
+      (not alphanumeric) letter and it should not contain any white space
       at the beggining and at the end of the string
     
     :param description: a string or unicode attribute that holds the

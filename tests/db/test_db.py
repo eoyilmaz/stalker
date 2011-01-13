@@ -51,7 +51,7 @@ class DatabaseTester(unittest.TestCase):
         """
         # setup the database
         clear_mappers()
-        db.meta.__mappers__ = []
+        db.__mappers__ = []
         
         # just set the default admin creation to true
         # some tests are relying on that
@@ -87,7 +87,7 @@ class DatabaseTester(unittest.TestCase):
         db.setup("sqlite:///:memory:")
         
         # try to persist a user and get it back
-        session = db.meta.session
+        session = db.session
         query = session.query
         
         # create a new user
@@ -134,7 +134,7 @@ class DatabaseTester(unittest.TestCase):
         
         # setup the database
         db.setup(self.TEST_DATABASE_URI)
-        session = db.meta.session
+        session = db.session
         query = session.query
         
         # check if the file is created
@@ -181,8 +181,8 @@ class DatabaseTester(unittest.TestCase):
         # setup without any parameter
         db.setup()
         
-        drivername = db.meta.engine.url.drivername
-        database = db.meta.engine.url.database
+        drivername = db.engine.url.drivername
+        database = db.engine.url.database
         
         full_db_url = drivername + ":///" + database
         
@@ -229,7 +229,7 @@ class DatabaseTester(unittest.TestCase):
         # and get how many admin is created, (it is imipossible to create
         # second one because the tables.simpleEntity.c.nam.unique=True
         
-        admins = db.meta.session.query(user.User). \
+        admins = db.session.query(user.User). \
                filter_by(name=defaults.ADMIN_NAME).all()
         
         self.assertFalse( len(admins) > 1 )
@@ -304,12 +304,12 @@ class DatabaseTester(unittest.TestCase):
         self._createdDB = True
         
         # check if there is a use with name admin
-        self.assertTrue(db.meta.session.query(user.User).\
+        self.assertTrue(db.session.query(user.User).\
                         filter_by(name=defaults.ADMIN_NAME).first()
                         is None )
         
         # check if there is a admins department
-        self.assertTrue(db.meta.session.query(department.Department).\
+        self.assertTrue(db.session.query(department.Department).\
                         filter_by(name=defaults.ADMIN_DEPARTMENT_NAME).\
                         first() is None)
     
@@ -339,7 +339,7 @@ class DatabaseTester(unittest.TestCase):
         }
         
         user1 = user.User(**kwargs)
-        db.meta.session.commit()
+        db.session.commit()
         
         # lets create the second user
         kwargs.update({
@@ -349,7 +349,7 @@ class DatabaseTester(unittest.TestCase):
         
         user2=user.User(**kwargs)
         
-        self.assertRaises(IntegrityError, db.meta.session.commit)
+        self.assertRaises(IntegrityError, db.session.commit)
     
     
     
@@ -373,7 +373,7 @@ class DatabaseTester(unittest.TestCase):
         }
         
         entity1 = entity.Entity(**kwargs)
-        db.meta.session.commit()
+        db.session.commit()
         
         # lets create the second user
         kwargs.update({
@@ -386,7 +386,7 @@ class DatabaseTester(unittest.TestCase):
         user1=user.User(**kwargs)
         
         # expect nothing, this should work without any error
-        db.meta.session.commit()
+        db.session.commit()
 
 
 
@@ -404,7 +404,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     Incomplete isolation is against to the logic behind unittesting, every test
     should only cover a unit of the code, and a complete isolation should be
-    created. But this can not be done in persistancy tests (AFAIK), it needs to
+    created. But this can not be done in persistence tests (AFAIK), it needs to
     be done in this way for now. Mocks can not be used because every created
     object goes to the database, so they need to be real objects.
     """
@@ -419,7 +419,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # setup the database
         clear_mappers()
-        db.meta.__mappers__ = []
+        db.__mappers__ = []
         
         # create a test database, possibly an in memory datase
         cls.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
@@ -443,7 +443,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Asset(self):
-        """testing the persistancy of Asset
+        """testing the persistence of Asset
         """
         
         self.fail("test is not implemented yet")
@@ -452,7 +452,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_AssetBase(self):
-        """testing the persistancy of AssetBase
+        """testing the persistence of AssetBase
         """
         
         self.fail("test is not implemented yet")
@@ -461,7 +461,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_AssetType(self):
-        """testing the persistancy of AssetType
+        """testing the persistence of AssetType
         """
         
         
@@ -498,11 +498,11 @@ class DatabaseModelsTester(unittest.TestCase):
         aType = types.AssetType(**kwargs)
         
         # store it in the db
-        db.meta.session.add(aType)
-        db.meta.session.commit()
+        db.session.add(aType)
+        db.session.commit()
         
         # retrieve it back and check it with the first one
-        aType_DB = db.meta.session.query(types.AssetType). \
+        aType_DB = db.session.query(types.AssetType). \
                  filter_by(name=kwargs["name"]).first()
         
         for i, pStep_DB in enumerate(aType_DB.steps):
@@ -515,7 +515,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Booking(self):
-        """testing the persistancy of Booking
+        """testing the persistence of Booking
         """
         
         self.fail("test is not implemented yet")
@@ -524,7 +524,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Comment(self):
-        """testing the persistancy of Comment
+        """testing the persistence of Comment
         """
         
         self.fail("test is not implemented yet")
@@ -533,7 +533,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Department(self):
-        """testing the persistancy of Department
+        """testing the persistence of Department
         """
         
         name = "TestDepartment_test_persisting_Department"
@@ -598,12 +598,12 @@ class DatabaseModelsTester(unittest.TestCase):
         testDepartment.lead = user1
         testDepartment.members = [user1, user2, user3]
         
-        db.meta.session.add(testDepartment)
-        db.meta.session.commit()
+        db.session.add(testDepartment)
+        db.session.commit()
         
         # lets check the data
         # first get the department from the db
-        dep_from_db = db.meta.session.query(department.Department). \
+        dep_from_db = db.session.query(department.Department). \
                     filter_by(name=testDepartment.name).first()
         
         # members
@@ -621,7 +621,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Entity(self):
-        """testing the persistancy of Entity
+        """testing the persistence of Entity
         """
         
         # create an Entity wiht a couple of tags
@@ -674,11 +674,11 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # persist it to the database
-        db.meta.session.add(testEntity)
-        db.meta.session.commit()
+        db.session.add(testEntity)
+        db.session.commit()
         
         # now try to retrieve it
-        testEntityDB = db.meta.session.query(entity.Entity). \
+        testEntityDB = db.session.query(entity.Entity). \
                      filter_by(name=name).first()
         
         # just test the entity part of the object
@@ -689,7 +689,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Group(self):
-        """testing the persistancy of Group
+        """testing the persistence of Group
         """
         
         self.fail("test is not implmented yet")
@@ -700,11 +700,11 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_ImageFormat(self):
-        """testing the persistancy of ImageFormat
+        """testing the persistence of ImageFormat
         """
         
         # get the admin
-        session = db.meta.session
+        session = db.session
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a new ImageFormat object and try to read it back
@@ -741,7 +741,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_PipelineStep(self):
-        """testing the persistancy of PipelineStep
+        """testing the persistence of PipelineStep
         """
         
         # create a new PipelineStep
@@ -758,10 +758,10 @@ class DatabaseModelsTester(unittest.TestCase):
         pStep = pipelineStep.PipelineStep(**kwargs)
         
         # save it to database
-        db.meta.session.add(pStep)
+        db.session.add(pStep)
         
         # retrieve it back
-        pStep_DB = db.meta.session.query(pipelineStep.PipelineStep). \
+        pStep_DB = db.session.query(pipelineStep.PipelineStep). \
                  filter_by(name=kwargs["name"]). \
                  filter_by(description=kwargs["description"]). \
                  first()
@@ -773,7 +773,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Project(self):
-        """testing the persistancy of Project
+        """testing the persistence of Project
         """
         
         self.fail("test is not implemented yet")
@@ -782,7 +782,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Link(self):
-        """testing the persistancy of Link
+        """testing the persistence of Link
         """
         
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
@@ -799,24 +799,18 @@ class DatabaseModelsTester(unittest.TestCase):
             "created_by": admin,
             "path": "M:/PROJECTS",
             "filename": "my_movie_sound.wav",
-            "type_": sound_link_type
+            "type": sound_link_type
         }
         
         new_link = link.Link(**kwargs)
         
         # persist it
-        db.meta.session.add_all([sound_link_type, new_link])
-        db.meta.session.commit()
-        
-        print "new_link.name       : %s" % new_link.name
-        print "new_link.path       : %s" % new_link.path
-        print "new_link.filename   : %s" % new_link.filename
-        print "new_link.type_.name : %s" % new_link.type_.name
+        db.session.add_all([sound_link_type, new_link])
+        db.session.commit()
         
         # retrieve it back
-        link_DB = db.meta.session.query(link.Link).\
+        link_DB = db.session.query(link.Link).\
                 filter_by(name=kwargs["name"]).first()
-        print "link_DB.name        : %s" % link_DB.name
         
         self.assertTrue(new_link==link_DB)
     
@@ -824,11 +818,11 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Repository(self):
-        """testing the persistancy of Repository
+        """testing the persistence of Repository
         """
         
         # get the admin
-        session = db.meta.session
+        session = db.session
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a new Repository object and try to read it back
@@ -863,7 +857,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Sequence(self):
-        """testing the persistancy of Sequence
+        """testing the persistence of Sequence
         """
         
         self.fail("test is not implemented yet")
@@ -872,7 +866,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Shot(self):
-        """testing the persistancy of Shot
+        """testing the persistence of Shot
         """
         
         self.fail("test is not implemented yet")
@@ -881,7 +875,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_SimpleEntity(self):
-        """testing the persistancy of SimpleEntity
+        """testing the persistence of SimpleEntity
         """
         
         name = "SimpleEntity_test_creating_of_a_SimpleEntity"
@@ -899,11 +893,11 @@ class DatabaseModelsTester(unittest.TestCase):
             date_updated=date_updated)
         
         # persist it to the database
-        db.meta.session.add(aSimpleEntity)
-        db.meta.session.commit()
+        db.session.add(aSimpleEntity)
+        db.session.commit()
         
         # now try to retrieve it
-        SE_from_DB = db.meta.session.query(entity.SimpleEntity). \
+        SE_from_DB = db.session.query(entity.SimpleEntity). \
             filter_by(name=name).first()
         
         self.assertEquals(aSimpleEntity.name, SE_from_DB.name)
@@ -917,7 +911,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Status(self):
-        """testing the persistancy of Status
+        """testing the persistence of Status
         """
         
         # the status
@@ -939,11 +933,11 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # persist it to the database
-        db.meta.session.add(testStatus)
-        db.meta.session.commit()
+        db.session.add(testStatus)
+        db.session.commit()
         
         # now try to retrieve it
-        testStatusDB = db.meta.session.query(status.Status).first()
+        testStatusDB = db.session.query(status.Status).first()
         
         # just test the satuts part of the object
         self.assertEquals(testStatus.short_name, testStatusDB.short_name)
@@ -952,7 +946,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_StatusList(self):
-        """testing the persistancy of StatusList
+        """testing the persistence of StatusList
         """
         
         self.fail("test is not implemented yet")
@@ -961,10 +955,10 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Structure(self):
-        """testing the persistancy of Structure
+        """testing the persistence of Structure
         """
         
-        session = db.meta.session
+        session = db.session
         query = session.query
         
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
@@ -1002,7 +996,7 @@ class DatabaseModelsTester(unittest.TestCase):
             path_code="ASSETS/{{asset_type.name}}/{{pipeline_step.code}}",
             file_code="{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
             v{{version.version_number}}",
-            type_=char_asset_type
+            type=char_asset_type
         )
         
         # create a new link type
@@ -1020,7 +1014,7 @@ class DatabaseModelsTester(unittest.TestCase):
             created_by=admin,
             path_code="REFS/{{reference.type.name}}",
             file_code="{{reference.file_name}}",
-            type_=image_link_type
+            type=image_link_type
         )
         
         # create a new structure
@@ -1042,7 +1036,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Tag(self):
-        """testing the persistancy of Tag
+        """testing the persistence of Tag
         """
         
         name = "Tag_test_creating_a_Tag"
@@ -1060,11 +1054,11 @@ class DatabaseModelsTester(unittest.TestCase):
             date_updated=date_updated)
         
         # persist it to the database
-        db.meta.session.add(aTag)
-        db.meta.session.commit()
+        db.session.add(aTag)
+        db.session.commit()
         
         # now try to retrieve it
-        tag_query = db.meta.session.query(tag.Tag)
+        tag_query = db.session.query(tag.Tag)
         Tag_from_DB = tag_query.filter_by(name=name).first()
         
         self.assertEquals(aTag.name, Tag_from_DB.name)
@@ -1078,7 +1072,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Task(self):
-        """testing the persistancy of Task
+        """testing the persistence of Task
         """
         
         self.fail("test is not implemented yet")
@@ -1087,7 +1081,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_TypeTemplate(self):
-        """testing the persistancy of TypeTemplate
+        """testing the persistence of TypeTemplate
         """
         
         # get the admin
@@ -1107,13 +1101,13 @@ class DatabaseModelsTester(unittest.TestCase):
             "created_by": admin,
             "path_code": "REFS/{{link_type.name}}",
             "file_code": "{{link.file_name}}",
-            "type_": movie_link_type,
+            "type": movie_link_type,
         }
         
         aTypeTemplate = types.TypeTemplate(**kwargs)
         
         # persist it
-        session = db.meta.session
+        session = db.session
         session.add(aTypeTemplate)
         session.commit()
         
@@ -1128,7 +1122,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_User(self):
-        """testing the persistancy of User
+        """testing the persistence of User
         """
         
         self.fail("test is not implemented yet")
@@ -1137,7 +1131,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_persisting_Version(self):
-        """testing the persistancy of Version
+        """testing the persistence of Version
         """
         
         self.fail("test is not implemented yet")

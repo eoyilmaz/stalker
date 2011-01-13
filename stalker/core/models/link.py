@@ -31,7 +31,7 @@ class Link(entity.Entity):
       "#" in place of the numerator (`Nuke`_ style). Setting filename to None
       or an empty string is not accepted and causes a ValueError to be raised.
     
-    :param type_: The type of the link. It should be an instance of
+    :param type\_: The type of the link. It should be an instance of
       :class:`~stalker.core.models.types.LinkType`, the type can not be
       None or anything other than a
       :class:`~stalker.core.models.types.LinkType` object. Specifies the link
@@ -41,12 +41,12 @@ class Link(entity.Entity):
     """
     
     #----------------------------------------------------------------------
-    def __init__(self, path="", filename="", type_=None, **kwargs):
+    def __init__(self, path="", filename="", type=None, **kwargs):
         super(Link, self).__init__(**kwargs)
         
         self._path = self._check_path(path)
         self._filename = self._check_filename(filename)
-        self._type = self._check_type(type_)
+        self._type = self._check_type(type)
     
     
     
@@ -150,7 +150,7 @@ class Link(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def type_():
+    def type():
         def fget(self):
             return self._type
         
@@ -163,7 +163,7 @@ class Link(entity.Entity):
         
         return locals()
     
-    type_ = property(**type_())
+    type = property(**type())
     
     
     
@@ -176,7 +176,7 @@ class Link(entity.Entity):
                isinstance(other, Link) and \
                self.path == other.path and \
                self.filename == other.filename and \
-               self.type_ == other.type_
+               self.type == other.type
     
     
     

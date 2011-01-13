@@ -177,14 +177,14 @@ class TypeTemplateTester(mocker.MockerTestCase):
             {{shot.code}}/{{pipeline_step.code}}/",
             "file_code": "{{shot.code}}_{{take.name}}\
             v{{version.version_number}}",
-            "type_":self.mock_type_entity1
+            "type":self.mock_type_entity1
         }
         
         self.template_obj = types.TypeTemplate(**self.kwargs)
         
         temp_kwargs = self.kwargs.copy()
         temp_kwargs.update({
-            "type_": self.mock_type_entity2
+            "type": self.mock_type_entity2
         })
         
         self.template_obj2 = types.TypeTemplate(**temp_kwargs)
@@ -441,14 +441,14 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_if_type_argument_only_accepts_TypeEntity_objects(self):
-        """testing if type_ argument accepts only TypeEntity objects and raises
+        """testing if type argument accepts only TypeEntity objects and raises
         ValueError otherwise
         """
         
         test_values = [1, 1.2, "", [""], {"a": "type entity"}]
         
         for test_value in test_values:
-            self.kwargs["type_"] = test_value
+            self.kwargs["type"] = test_value
             self.assertRaises(ValueError, types.TypeTemplate,
                               **self.kwargs)
     
@@ -456,18 +456,18 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_if_type_property_only_accepts_TypeEntity_objects(self):
-        """testing if type_ property accepts only TypeEntity objects and raises
+        """testing if type property accepts only TypeEntity objects and raises
         ValueError otherwise
         """
         test_values = [1, 1.2, "", [""], {"a": "type entity"}]
         
         for test_value in test_values:
-            self.kwargs["type_"] = test_value
+            self.kwargs["type"] = test_value
             self.assertRaises(
                 ValueError,
                 setattr,
                 self.template_obj,
-                "type_",
+                "type",
                 test_value
             )
     
@@ -475,20 +475,19 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_if_type_argument_not_accepting_None(self):
-        """testing if type_ argument doesn't accept None and raises ValueError
+        """testing if type argument doesn't accept None and raises ValueError
         """
         
-        self.kwargs["type_"] = None
+        self.kwargs["type"] = None
         self.assertRaises(ValueError, types.TypeTemplate, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_if_type_property_not_accepting_None(self):
-        """testing if type_ property doesn't accept None and raises ValueError
+        """testing if type property doesn't accept None and raises ValueError
         """
-        self.assertRaises(ValueError, setattr, self.template_obj, "type_",
-                          None)
+        self.assertRaises(ValueError, setattr, self.template_obj, "type", None)
     
     
     

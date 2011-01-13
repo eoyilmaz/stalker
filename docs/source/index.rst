@@ -6,21 +6,23 @@
 Stalker
 =======
 
-Stalker is a Production Digital Asset Management (ProdAM) System licensed under
-BSD License and designed specially for Animation and VFX Studios.
+Stalker is a Production Digital Asset Management (ProdAM) System designed
+specially for Animation and VFX Studios and licensed under BSD License.
 
 Features:
+ * Platform independent
  * Flexible design
  * Designed for animation and vfx studios
  * Default installation handles nearly all the asset management needs of an
    animation and vfx studio
- * Customizable with configuration scripts
- * Customizable object model (Stalker Object Model - SOM)
+ * Customisable with configuration scripts
+ * Customisable object model (Stalker Object Model - SOM)
  * Integrated messaging system
  * Integrated production planing and tracking tools
  * PySide user interfaces
+ * Can be used with any kind of database backend that SQLAlchmey supports
  * Can be connected to all the major 3d animation packages like Maya, Houdini,
-   Nuke etc. and any program that has a Python API
+   Nuke, XSI, Vue, Blender etc. and any application that has a Python API
  * Can work as a stand-alone application
 
 Stalker is build over these other OpenSource projects:
@@ -32,9 +34,13 @@ Stalker is build over these other OpenSource projects:
 
 Source
 ======
-The latest developer version is available in `Stalkers' Google Project page`_
+The latest development version is available in `Google Project page of
+Stalker`_ or can be directly cloned with the following command if you already
+have mercurial installed::
 
-.. _Stalkers' Google Project page: http://code.google.com/p/stalker/
+  hg clone https://stalker.googlecode.com/hg/ stalker
+
+.. _Google Project page of Stalker: http://code.google.com/p/stalker/
 
 Contents:
 
@@ -42,6 +48,7 @@ Contents:
    :maxdepth: 2
    
    installation.rst
+   tutorial.rst
    design.rst
    contribute.rst
    roadmap.rst
@@ -60,9 +67,10 @@ Summary
    stalker.db.auth.create_session
    stalker.db.auth.get_user
    stalker.db.auth.login
+   stalker.db.auth.login_required
+   stalker.db.auth.permission_required
    stalker.db.auth.logout
    stalker.db.mapper
-   stalker.db.meta
    stalker.db.tables
    stalker.db.setup
    stalker.core.models
@@ -80,6 +88,9 @@ Summary
    stalker.core.models.entity.SimpleEntity
    stalker.core.models.entity.Entity
    stalker.core.models.entity.StatusedEntity
+   stalker.core.models.entity.TypeEntity
+   stalker.core.models.error
+   stalker.core.models.error.LoginError
    stalker.core.models.group
    stalker.core.models.group.Group
    stalker.core.models.imageFormat
@@ -105,13 +116,11 @@ Summary
    stalker.core.models.tag.Tag
    stalker.core.models.task
    stalker.core.models.task.Task
-   stalker.core.models.template
-   stalker.core.models.template.Template
-   stalker.core.models.typeEntity
-   stalker.core.models.typeEntity.AssetType
-   stalker.core.models.typeEntity.LinkType
-   stalker.core.models.typeEntity.ProjectType
-   stalker.core.models.typeEntity.TypeEntity
+   stalker.core.models.types
+   stalker.core.models.types.AssetType
+   stalker.core.models.types.ProjectType
+   stalker.core.models.types.LinkType
+   stalker.core.models.types.TypeTemplate
    stalker.core.models.user
    stalker.core.models.user.User
    stalker.core.models.version

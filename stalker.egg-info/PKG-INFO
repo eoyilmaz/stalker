@@ -1,4 +1,4 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.1
 Name: stalker
 Version: 0.1.1.a0
 Summary: A Production Asset Management (ProdAm) System
@@ -9,10 +9,11 @@ License: http://www.opensource.org/licenses/bsd-license.php
 Description: About
         =====
         
-        Stalker is a Production Digital Asset Management (ProdAM) System licensed under
-        BSD License and designed specially for Animation and VFX Studios.
+        Stalker is a Production Digital Asset Management (ProdAM) System designed
+        specially for Animation and VFX Studios and licensed under BSD License.
         
         Features:
+         * Platform independent
          * Flexible design
          * Designed for animation and vfx studios
          * Default installation handles nearly all the asset management needs of an
@@ -22,8 +23,9 @@ Description: About
          * Integrated messaging system
          * Integrated production planing and tracking tools
          * PySide user interfaces
+         * Can be used with any kind of database backend that SQLAlchmey supports
          * Can be connected to all the major 3d animation packages like Maya, Houdini,
-           Nuke etc. and any program that has a Python API
+           Nuke, XSI, Vue, Blender etc. and any application that has a Python API
          * Can work as a stand-alone application
         
         Stalker is build over these other OpenSource projects:
@@ -35,9 +37,14 @@ Description: About
         
         Source
         ======
-        The latest developer version is available in `Stalkers' Google Project page`_
+        The latest development version is available in `Google Project page of
+        Stalker`_ or can be directly cloned with the following command if you already
+        have mercurial installed::
         
-        .. _Stalkers' Google Project page: http://code.google.com/p/stalker/
+          hg clone https://stalker.googlecode.com/hg/ stalker
+        
+        .. _Google Project page of Stalker: http://code.google.com/p/stalker/
+        
         
 Keywords: production,asset,management,vfx,animation,mayahoudini,nuke,xsi
 Platform: any
@@ -51,3 +58,6 @@ Classifier: Topic :: Database
 Classifier: Topic :: Software Development
 Classifier: Topic :: Utilities
 Classifier: Topic :: Office/Business :: Scheduling
+Requires: beaker
+Requires: jinja2
+Requires: sqlalchemy

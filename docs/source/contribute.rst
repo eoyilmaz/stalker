@@ -1,7 +1,7 @@
 How To Contribute
 *****************
 
-Stalker started as an Open Source project with the expactation of
+Stalker started as an Open Source project with the expectation of
 contributions. The soul of the open source is to share the knowledge and
 contribute.
 
@@ -14,14 +14,14 @@ These are the areas that you can contribute to:
 Development Style
 =================
 Stalker is developed strictly by following `TDD`_ practices. So every
-participant should follow TDD metadologly. Skipping this steps is highly
+participant should follow TDD methodology. Skipping this steps is highly
 prohibited. Every added code to the trunk should have a corresponding test and
 the tests should be written before implementing a single line of code.
 
 .. _TDD: http://en.wikipedia.org/wiki/Test-driven_development
 
 `DRY`_ is also another methodology that a participant should follow. So nothing
-should be repeated. If someting needs to be repeated, then it is a good sign
+should be repeated. If something needs to be repeated, then it is a good sign
 that this part needs to be in a special module, class or function.
 
 .. _DRY: http:http://en.wikipedia.org/wiki/Don%27t_repeat_yourself
@@ -38,7 +38,7 @@ writing down the sketches as rest files inside the docs is something very
 meaningful.
 
 The design should be followed by the tests. And the test should be followed by
-the implemantation, and the implamantation should be followed by tests again,
+the implementation, and the implementation should be followed by tests again,
 until you are confident about your code and it is rock solid. Then the
 refactoring phase can start, and because you have enough tests that will keep
 your code doing a certain thing, you can freely change your code, because you
@@ -67,7 +67,7 @@ code.
 The coverage of the tests should be kept as close as possible to %100.
 
 There is a helper script in the root of the project, called *doTests*. This is
-a shell script for linux, which runs all the neccessary tests and prints the
+a shell script for linux, which runs all the necessary tests and prints the
 tests results and the coverage table.
 
 Code Style
@@ -77,7 +77,7 @@ rules, and there are some extra rules as listed below:
  * Class names should start with an upper-case letter, function and method
    names should start with lower-case letter
  
- * The class definitions should be precided by 72 `#` characters, if you are
+ * The class definitions should be preceded by 72 `#` characters, if you are
    using `Wing IDE`_ it is trivial cause it has these kind of templates::
    
      ########################################################################
@@ -86,7 +86,7 @@ rules, and there are some extra rules as listed below:
          """
          pass
   
- * The method or function definitions should be precided by 70 `-` characters,
+ * The method or function definitions should be preceded by 70 `-` characters,
    and the line should be commented out, again if you are using `Wing IDE`_ it
    does that automatically::
    
@@ -152,7 +152,7 @@ rules, and there are some extra rules as listed below:
      pass
  
  * Any lines that may contain a code or comment can not be longer than 80
-   characters, all the longer lines should be canceled with "\\" character and
+   characters, all the longer lines should be cancelled with "\\" character and
    should continue properly from the line below::
    
      #----------------------------------------------------------------------
@@ -173,14 +173,14 @@ rules, and there are some extra rules as listed below:
          pass
  
  * Do not add docstrings to __init__ rather use the classes' own docstring.
- * The first line in the docstring should be a brief summary seperated from the
+ * The first line in the docstring should be a brief summary separated from the
    rest by a blank line.
 
 
 If you are going to add a new python file (*.py), there is an empty py file
 with the name empty_code_template_file.py under docs/_static. Before starting
-anything, dublicate this file and place it under the folder you want. This
-files has the neccessary shebang and the GPL 3 license text.
+anything, duplicate this file and place it under the folder you want. This
+files has the necessary shebang and the GPL 3 license text.
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _Wing IDE: http://www.wingware.com
@@ -188,7 +188,7 @@ files has the neccessary shebang and the GPL 3 license text.
 SCM - Mercurial (HG)
 ====================
 The choice of SCM is Mercurial. Every developer should be familiar with it. It
-is a good start to go the `Selenic Mercuial Site`_ and do the tutorial if you
+is a good start to go the `Selenic Mercurial Site`_ and do the tutorial if you
 don't feel familiar enough with hg.
 
-.. _Selenic Mercuial Site: http://mercurial.selenic.com 
+.. _Selenic Mercurial Site: http://mercurial.selenic.com 

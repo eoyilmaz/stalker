@@ -134,8 +134,8 @@ class TypeTemplate(entity.Entity):
     :param file_code: The Jinja2 template code which specifies the file name of
       the given item
     
-    :param type: A :class:`~stalker.core.models.entity.TypeEntity` object
-      or any other class which is derived from Type.
+    :param type\_: A :class:`~stalker.core.models.entity.TypeEntity` object
+      or any other class which is derived from TypeEntity.
     
     Examples:
     
@@ -149,8 +149,8 @@ class TypeTemplate(entity.Entity):
       db.setup()
       
       # store the query method for ease of use
-      session = db.meta.session
-      query = db.meta.session.query
+      session = db.session
+      query = db.session.query
       
       # login to the system as admin
       admin = auth.login("admin", "admin")
@@ -199,15 +199,15 @@ Character assets",
     :class:`~stalker.core.models.version.Version` created for a **Character**
     asset, Stalker will automatically place the related file to a certain
     folder and with a certain file name defined by the template. For example
-    the above template should render something like below for Windows:
+    the above template should render something like below for Windows::
     
-    |- M:\\\PROJECTS  --> {{repository.path}}
+      |- M:\\\PROJECTS  --> {{repository.path}}
        |- PRENSESIN_UYKUSU  --> {{project.code}}
-          |- ASSETS  --> "ASSETS"
-            |- Character  --> {{asset_type.name}}
-               |- Olum  --> {{asset.name}}
-                  |- MODEL  --> {{pipeline_step.code}}
-                     |- Olum_MAIN_MODEL_v001.ma  --> {{asset.name}}_\
+        |- ASSETS  --> "ASSETS"
+         |- Character  --> {{asset_type.name}}
+          |- Olum  --> {{asset.name}}
+           |- MODEL  --> {{pipeline_step.code}}
+            |- Olum_MAIN_MODEL_v001.ma --> {{asset.name}}_\
 {{take.name}}_{{asset_type.name}}_v{{version.version_number}}
     
     And one of the good side is you can create a version from Linux, Windows or
@@ -220,13 +220,13 @@ Character assets",
     def __init__(self,
                  path_code="",
                  file_code="",
-                 type_=None,
+                 type=None,
                  **kwargs):
         super(TypeTemplate, self).__init__(**kwargs)
         
         self._path_code = self._check_path_code(path_code)
         self._file_code = self._check_file_code(file_code)
-        self._type = self._check_type(type_)
+        self._type = self._check_type(type)
     
     
     
@@ -276,15 +276,15 @@ Character assets",
     
     #----------------------------------------------------------------------
     def _check_type(self, type_in):
-        """checks the given type_ attribute for several conditions
+        """checks the given type attribute for several conditions
         """
         
         # check if it is None
         if type_in is None:
-            raise(ValueError("type_ could not be None"))
+            raise(ValueError("type could not be None"))
         
         if not isinstance(type_in, entity.TypeEntity):
-            raise(ValueError("type_ should be an instance of \
+            raise(ValueError("type should be an instance of \
             stalker.core.models.entity.TypeEntity"))
         
         return type_in
@@ -328,7 +328,7 @@ Character assets",
     
     
     #----------------------------------------------------------------------
-    def type_():
+    def type():
         
         def fget(self):
             return self._type
@@ -341,7 +341,7 @@ Character assets",
         
         return locals()
     
-    type_ = property(**type_())
+    type = property(**type())
     
     
     
@@ -354,7 +354,7 @@ Character assets",
                isinstance(other, TypeTemplate) and \
                self.path_code == other.path_code and \
                self.file_code == other.file_code and \
-               self.type_ == other.type_
+               self.type == other.type
     
     
     

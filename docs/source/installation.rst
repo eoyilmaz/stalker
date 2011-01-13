@@ -1,3 +1,5 @@
+.. _installation_toplevel:
+
 How to Install Stalker
 **********************
 
@@ -7,67 +9,81 @@ Install Python
 ==============
 
 Stalker is completely written with Python, so it requires Python. It currently
-works with Python version 2.5 to 2.7.
+works with Python version 2.5 to 2.7. So you first need to have Python
+installed in your system. On Linux and OSX there is a system wide Python
+already installed. For Windows, you need to download the Python installer
+suitable for your Windows operating system (32 or 64 bit) from `Python.org`_
 
-Because Stalker is based on some other Python packages first you need to
-install them. Follow the links below to read their documentation about install:
-  
-  1. `Sqlalchemy`_
-  2. `Jinja2`_
-  3. `Beaker`_
+.. _Python.org: http://www.python.org/
 
-.. _Sqlalchemy: http://www.sqlalchemy.org/docs/intro.html#installing-sqlalchemy
-.. _Jinja2: http://jinja.pocoo.org/
-.. _Beaker: http://beaker.groovie.org/
+Install Stalker
+===============
 
-or for the impatient one just run these commands in the shell, these will
-install the latest versions of the packages::
-  
-  python easy_install -U sqlalchemy jinja2 beaker
+The easiest way to install the latest version of Stalker along with all its
+dependencies is to use the `setuptools`. If your system doesn't have setuptools
+(particularly Windows) you need to install `setuptools` by using `ez_setup`
+bootstrap script.
 
-To install Stalker there are couple of routes those you can choose to follow:
+Installing `setuptools` with `ez_setup`:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These steps are generally needed just for Windows. Linux and OSX users can skip
+this part.
+
+1. download `ez_setup.py`_
+2. run the following command in the command prompt/shell/terminal::
   
-  * install it from PyPI/Cheese Shop:
-    
-    Just run the following command in your system shell::
-    
-      python easy_install -U stalker
+    python ez_setup
   
-  * install it from the tarball release file:
-    
-    1. Download the most recent tarball file from `download page`_
-    
-    .. _download page: http://pypi.python.org/pypi/stalker
+  It will install or build the `setuptools` if there are no suitable installer
+  for your operating system.
+
+.. _ez_setup.py: http://peak.telecommunity.com/dist/ez_setup.py
+
+After installing the `setuptools` you can run the following command::
+
+  easy_install -U stalker
+
+Now you have installed Stalker along with all its dependencies.
+
+Checking the installation of Stalker
+====================================
+
+If everything went ok you should be able to import and check the version of
+Stalker by using the Python prompt like this::
   
-  * installing the development version
-    
-    1. install `Mercurial`_
-    2. hg clone https://stalker.googlecode.com/hg/ stalker
-    3. cd stalker
-    4. ln -s stalker /usr/lib/python2.X/site-packages
-    
-    the forth step is for linux/unix variants. As an alternative to it you can
-    add the stalker folder to PYTHONPATH environment variable both in linux and
-    Windows.
-    
-    .. _Mercurial: http://mercurial.selenic.com 
-    
+  >>> import stalker
+  >>> stalker.__version__
+  0.1.1
+
 For developers
 ==============
 
-Developers also need to install these packages:
-  
-  1. Nose
-  2. Coverage
-  3. Mocker
-  4. Sphinx
-  5. Pygments
-  
-  The following command will install them all::
-    
-    python easy_install nose coverage mocker sphinx pygments
-  
-  
+Developers can clone the latest development version of Stalker from Google
+Code. Use the following command to clone::
 
+  hg clone https://stalker.googlecode.com/hg/ stalker 
 
+Developers also need to install these Ptyhon packages:
 
+1. Nose
+2. Coverage
+3. Mocker
+4. Sphinx
+5. Pygments
+
+The following command will install them all::
+  
+  easy_install nose coverage mocker sphinx pygments
+
+Installing a Database
+=====================
+
+Stalker uses a database to store all the values in to. The only database
+backend that doesn't require any extra installation is SQLite3. You can setup
+Stalker to run with an SQLite3 database. But it is much suitable to have a
+dedicated database server in your studio.
+
+See the `SQLAlchemy documentation`_ for supported databases.
+
+.. _SQLAlchemy documentation: http://www.sqlalchemy.org/docs/core/engines.html#supported-dbapis

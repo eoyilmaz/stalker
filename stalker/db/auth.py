@@ -98,12 +98,12 @@ def authenticate(username="", password=""):
     """
     
     # check if the database is setup
-    if db.meta.session == None:
+    if db.session == None:
         raise(error.LoginError("stalker is not connected to any db right now, \
 use stalker.db.setup(), to setup the default db"))
     
     # try to get the given user
-    userObj = db.meta.session.query(user.User).filter_by(name=username).first()
+    userObj = db.session.query(user.User).filter_by(name=username).first()
     
     error_msg = "user name and login don't match, %s - %s" % \
               (username, password)
@@ -125,7 +125,7 @@ def login(user_obj):
     """
     
     user_obj.last_login = datetime.datetime.now()
-    db.meta.session.commit()
+    db.session.commit()
     
     if "user_id" not in SESSION:
         # create the session first
@@ -141,10 +141,11 @@ def logout():
     """removes the current session
     """
     
-    assert(isinstance(SESSION, beakerSession.Session))
-    
-    SESSION.delete()
-    SESSION = {}
+    try:
+        SESSION.delete()
+        SESSION = {}
+    except AttributeError:
+        return
 
 
 
@@ -154,7 +155,7 @@ def get_user():
     """
     
     # check if the database is setup
-    if db.meta.session == None:
+    if db.session == None:
         raise(error.LoginError("stalker is not connected to any db right now, \
 use stalker.db.setup(), to setup the default db"))
     
@@ -163,7 +164,7 @@ use stalker.db.setup(), to setup the default db"))
     
     if "user_id" in SESSION:
         # create the session
-        return db.meta.session.query(user.User).\
+        return db.session.query(user.User).\
                filter_by(id=SESSION["user_id"]).first()
     else:
         return None
@@ -171,11 +172,48 @@ use stalker.db.setup(), to setup the default db"))
 
 
 #----------------------------------------------------------------------
-def login_required(func):
+def login_required(view, error_message=None):
     """a decorator that implements login functionality to any function or
     method
+    
+    The view should be a function returning True or False
     """
     
-    return func
+    def wrap(func):
+        def wrapped_func(*args):
+            if view():
+                func(*args)
+            else:
+                if error_message and isinstance(error_meesage, (str, unicode)):
+                    raise(error.LoginError(error_message))
+                else:
+                    raise(error.LoginError("You should be logged in before \
+                    completing your action!"))
+        return wrapped_func
+    return wrap
+
+
+
+#----------------------------------------------------------------------
+def permission_required(permission_group, error_message=None):
+    """a decorator that implements permission checking to any function or
+    method
+    
+    Checks if the logged in user is in the given permission group and then
+    calls the decorated function
+    """
+    
+    def wrap(func):
+        def wrapped_func(*args):
+            if get_user() in permission_group:
+                func(*args)
+            else:
+                if error_message and isinstance(error_meesage, (str, unicode)):
+                    raise(error.LoginError(error_message))
+                else:
+                    raise(error.LoginError("You don't have permission to do \
+                    complete your action!"))
+        return wrapped_func
+    return wrap
 
 
