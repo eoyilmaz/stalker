@@ -765,9 +765,47 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tags_being_not_intialized(self):
+    def test_notes_argument_being_omited(self):
+        """testing if no error raised when omited the notes argument
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_notes_argument_set_to_something_other_than_a_list(self):
+        """testing if a ValueError will be raised when setting the notes
+        argument something other than a list
+        """
+        
+        self.fail("test_is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_notes_property_set_to_something_other_than_a_list(self):
+        """testing if a ValueError will be raised when setting the notes
+        argument something other than a list
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_notes_property_works_properly(self):
+        """
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tags_argument_being_omited(self):
         """testing if nothing is raised when creating an entity without setting
-        a tags parameter
+        a tags argument
         """
         
         self.kwargs.pop("tags")
@@ -777,8 +815,8 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tags_being_initialized_as_an_empty_list(self):
-        """testing if tags is initialized as an empty list
+    def test_tags_argument_being_initialized_as_an_empty_list(self):
+        """testing if nothing happends when tags argument an empty list
         """
         
         # this should work without errors
@@ -792,7 +830,7 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tags_init_with_something_other_than_a_list(self):
+    def test_tags_argument_set_to_something_other_than_a_list(self):
         """testing if a ValueError is going to be raised when initializing the
         tags with something other than a list
         """
@@ -806,8 +844,8 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tags_property_set_properly(self):
-        """testing if property is set correctly
+    def test_tags_property_works_properly(self):
+        """testing if tags property works properly
         """
         test_value = [self.mock_tag1]
         

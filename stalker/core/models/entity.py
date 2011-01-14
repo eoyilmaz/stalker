@@ -479,6 +479,9 @@ class Entity(SimpleEntity):
     
     :param tags: a list of tag objects related to this entity. tags could be an
       empty list, or when omitted it will be set to an empty list
+    
+    :param notes: a list of note objects. notes can be an empty list, or when
+      omitted it will be set to an empty list
     """
     
     

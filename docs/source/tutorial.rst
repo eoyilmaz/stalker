@@ -47,7 +47,7 @@ This command will do the following:
 .. _engine: http://www.sqlalchemy.org/docs/core/engines.html
 .. _mapping: http://www.sqlalchemy.org/docs/orm/mapper_config.html
 
-Lets continue by creating a *User* for ourselfs in the database. The first
+Lets continue by creating a **User** for ourselfs in the database. The first
 thing we need to do is to import the :class:`~stalker.core.models.user.User`
 class in to the current namespace::
 
@@ -252,7 +252,7 @@ and create a the Shot asset type::
 
 
 So by doing that we informed Stalker about the steps of one kind of asset
-(*Shot* in our case).
+(**Shot** in our case).
 
 Part IV - Task & Resource Management
 ====================================
@@ -358,6 +358,8 @@ information about the fileservers in your system. You can have several file
 servers let say one for Commercials and other one for big Movie projects. You
 can define repositories and assign projects to those repositories. Lets create
 one repository for our commercial project::
+Part V - Asset Management
+=========================
 
   from stalker.core.models.repository import Repository
   repo1 = Repository(
@@ -399,7 +401,7 @@ explain the project structure we can use the
 
   from stalker.core.models.structure import Structure
   
-  structure1 = Structure(
+  commercial_project_structure = Structure(
       name="Commercial Projects Structure",
       description="""This is a project structure, which can be used for simple
           commercial projects"""
@@ -435,7 +437,11 @@ explain the project structure we can use the
      {{ project.code }}/References
   """
   
-  structure1.project_template = project_template
+  commercial_project_structure.project_template = project_template
+  
+  # now assign this structure to our project
+  new_project.structure = commercial_project_structure
+  
   
 Now we have entered a couple of `Jinja2`_ directives as a string. This template
 will be used when creating the project structure by calling
@@ -461,21 +467,63 @@ The above template will produce the following folders for our project::
   M:/PROJECTS/FANCY_COMMERCIAL/Sequences/SEQ1/Shots/SH001
   M:/PROJECTS/FANCY_COMMERCIAL/Sequences/SEQ1/Shots/SH002
   M:/PROJECTS/FANCY_COMMERCIAL/Sequences/SEQ1/Shots/SH003
-  
-Imagine what else can be done here with that kind of template system. And you
-can use a lot of variables inside this templates.
 
 We are still not done with defining the templates. Even though Stalker now
 knows what is the project structure like, it is not aware of the placements of
-indivudual asset :class:`~stalker.core.models.version.Version` files. An asset
+indivudual asset :class:`~stalker.core.models.version.Version` files specific
+for an :class:`~stalker.core.models.types.AssetType`. An asset
 :class:`~stalker.core.models.version.Version` is an object holding information
 about every single iteration of one asset and has a connection to files in the
 repository. So before creating a new version for any kind of asset, we need to
 tell Stalker where to place the related files. This can be done by using a
 :class:`~stalker.core.models.types.TypeTemplate` object.
 
-A *TypeTemplate* object has information about the path, the filename, and the
-Type of the asset to apply this template to::
+A :class:`~stalker.core.models.types.TypeTemplate` object has information about
+the path, the filename, and the Type of the asset to apply this template to::
 
+  from stalker.core.models.types import TypeTemplate
+  
+  shot_version_template = TypeTemplate(name="Shot Template")
+  
+  
+  # lets create the templates
+  #
+  # shot = version.asset
+  # asset = version.asset
+  # if shot is not None:
+  #     sequence = shot.sequence
+  # task = version.task
+  # pipeline_step = task.pipeline_step
+  # user = auth.get_user()
+  # 
+  path_code = "Sequences/{{ sequence.code }}/Shots/{{ shot.code }}/{{ pipeline_step.code }}"
+  filename_code = "{{ shot.code }}_{{ version.take }}_{{ pipeline_step.code }}_v{{ version.version }}"
+  
+  # we can use the shot_asset_type we have previously defined
+  shot_version_template.type = shot_asset_type
+  shot_version_template.path_code = path_code
+  shot_version_template.filename_code = filename_code
+  
+  # now assign this template to our project structure
+  # do you remember the "structure1" we have created before
+  commercial_project_structure.assetTemplates.append(shot_version_template)
 
+Now Stalker knows "Kung-Fu". It can place any version related file to the
+repository and orginize your works. You can define all the templates for all
+your assetTypes independently, or you can use a common template for them etc.
 
+Part VI - Collaboration
+=======================
+
+We came a lot from the start, but what is the use of an Production Asset
+Management System if we can not communicate with our colleagues.
+
+In Stalker you can communicate with others in the system, by:
+  
+  * Leaving a :class:`~stalker.core.models.note.Note` to anything created in
+    Stalker (except to notes and tags, you can not create a note to a note and
+    a tag)
+  * Sending a :class:`~stalker.core.models.message.Message` directly to them or
+    to a group of users
+  * If you are a lead of a project or a sequence, then by placing a
+    :class:`~stalker.core.models.review.Review` to their works

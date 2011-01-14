@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: stalker
-Version: 0.1.1.a0
+Version: 0.1.1.a2
 Summary: A Production Asset Management (ProdAm) System
 Home-page: http://code.google.com/p/stalker/
 Author: Erkan Ozgur Yilmaz
@@ -18,8 +18,8 @@ Description: About
          * Designed for animation and vfx studios
          * Default installation handles nearly all the asset management needs of an
            animation and vfx studio
-         * Customizable with configuration scripts
-         * Customizable object model (Stalker Object Model - SOM)
+         * Customisable with configuration scripts
+         * Customisable object model (Stalker Object Model - SOM)
          * Integrated messaging system
          * Integrated production planing and tracking tools
          * PySide user interfaces
