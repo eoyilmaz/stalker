@@ -11,7 +11,9 @@ v0.1.1.a2:
  * updated the database tables and mappers for the new *code* attribute
  * removed the clashing *code* attribute from PipelineStep class and the tables
    and mappers
- * added *Note* class and *note* attribute to Entity class
+ * added *Note* class
+ * added *notes* table and a mapper for *Note* class
+ * added *note* attribute to Entity class
 
 v0.1.1.a1:
  * fixed a couple of documentation errors like:

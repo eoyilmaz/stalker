@@ -156,18 +156,73 @@ class TypeTemplateTester(mocker.MockerTestCase):
         """
         
         # create a mock TypeEntity object
-        self.mock_type_entity1 = self.mocker.mock(entity.TypeEntity)
-        self.mock_type_entity2 = self.mocker.mock(entity.TypeEntity)
+        #self.mock_type_entity1 = self.mocker.mock(entity.TypeEntity)
+        #self.mock_type_entity2 = self.mocker.mock(entity.TypeEntity)
+        #self.mock_type_entity3 = self.mocker.mock(entity.TypeEntity)
+        self.mock_type_entity1 = entity.TypeEntity(name="mock_Entity1")
+        self.mock_type_entity2 = entity.TypeEntity(name="mock_Entity1")
+        self.mock_type_entity3 = entity.TypeEntity(name="mock Entity2")
         
-        self.mock_type_entity1.__eq__(self.mock_type_entity2)
-        self.mocker.result(False)
-        self.mocker.count(0, None)
+        # equality
+        #self.mock_type_entity1.__eq__(self.mock_type_entity2)
+        #self.mocker.result(True)
+        #self.mocker.count(0, None)
         
-        self.mock_type_entity1.__ne__(self.mock_type_entity2)
-        self.mocker.result(True)
-        self.mocker.count(0, None)
+        #self.mock_type_entity1.__eq__(self.mock_type_entity3)
+        #self.mocker.result(False)
+        #self.mocker.count(0, None)
         
-        self.mocker.replay()
+        #self.expect(
+            #self.mock_type_entity1.__eq__(self.mock_type_entity2)
+        #).result("running this True").count(0, None)
+        
+        #self.expect(
+            #self.mock_type_entity1.__eq__(self.mock_type_entity3)
+        #).result("running this False").count(0, None)
+        
+        #self.mock_type_entity1==self.mock_type_entity2
+        #self.mocker.result(True)
+        #self.mocker.count(0, None)
+        
+        #self.mock_type_entity1==self.mock_type_entity3
+        #self.mocker.result(False)
+        #self.mocker.count(0, None)
+        
+        #self.expect(
+            #self.mock_type_entity1==self.mock_type_entity2
+        #).result(True).count(0, 1000)
+        
+        #self.expect(
+            #(self.mock_type_entity1==self.mock_type_entity3)
+        #).result(False).count(0, 1000)
+        
+        
+        # inequality
+        #self.mock_type_entity1.__ne__(self.mock_type_entity2)
+        #self.mocker.result(False)
+        #self.mocker.count(0, None)
+        
+        #self.mock_type_entity1.__ne__(self.mock_type_entity3)
+        #self.mocker.result(True)
+        #self.mocker.count(0, None)
+        
+        #self.expect(
+            #self.mock_type_entity1.__ne__(self.mock_type_entity2)
+        #).result(False).count(0, None)
+        
+        #self.expect(
+            #self.mock_type_entity1.__ne__(self.mock_type_entity3)
+        #).result(True).count(0, None)
+        
+        #self.expect(
+            #self.mock_type_entity1!=self.mock_type_entity2
+        #).result(False).count(0, None)
+        
+        #self.expect(
+            #self.mock_type_entity1!=self.mock_type_entity3
+        #).result(True).count(0, None)
+        
+        #self.mocker.replay()
         
         # create a mock TypeTemplate object
         self.kwargs = {
@@ -182,12 +237,21 @@ class TypeTemplateTester(mocker.MockerTestCase):
         
         self.template_obj = types.TypeTemplate(**self.kwargs)
         
+        
         temp_kwargs = self.kwargs.copy()
         temp_kwargs.update({
             "type": self.mock_type_entity2
         })
         
         self.template_obj2 = types.TypeTemplate(**temp_kwargs)
+        
+        
+        temp_kwargs = self.kwargs.copy()
+        temp_kwargs.update({
+            "type": self.mock_type_entity3
+        })
+        
+        self.template_obj3 = types.TypeTemplate(**temp_kwargs)
     
     
     
@@ -196,7 +260,8 @@ class TypeTemplateTester(mocker.MockerTestCase):
         """testing the equality operator
         """
         
-        self.assertFalse(self.template_obj==self.template_obj2)
+        self.assertTrue(self.template_obj==self.template_obj2)
+        self.assertFalse(self.template_obj==self.template_obj3)
     
     
     
@@ -205,7 +270,8 @@ class TypeTemplateTester(mocker.MockerTestCase):
         """testing the inequality operator
         """
         
-        self.assertTrue(self.template_obj!=self.template_obj2)
+        self.assertFalse(self.template_obj!=self.template_obj2)
+        self.assertTrue(self.template_obj!=self.template_obj3)
     
     
     

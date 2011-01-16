@@ -20,6 +20,7 @@ from stalker.core.models import (
     pipelineStep,
     project,
     link,
+    note,
     repository,
     sequence,
     shot,
@@ -102,7 +103,13 @@ def setup():
                 secondary=tables.entity_tags,
                 backref="_entities"
             ),
-            "tags": synonym("_tags")
+            "tags": synonym("_tags"),
+            "_notes": relationship(
+                note.Note,
+                primaryjoin=tables.entities.c.id==tables.notes.c.entity_id,
+                backref="entity",
+            ),
+            "notes": synonym("_notes"),
         }
     )
     
@@ -383,5 +390,16 @@ def setup():
     
     
     
-    
+    # Notes
+    mapper(
+        note.Note,
+        tables.notes,
+        inherits=entity.SimpleEntity,
+        inherit_condition=tables.notes.c.id==tables.simpleEntities.c.id,
+        polymorphic_identity="Note",
+        properties={
+            "_content": tables.notes.c.content,
+            "content": synonym("_content"),
+        }
+    )
     

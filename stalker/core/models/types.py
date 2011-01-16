@@ -349,6 +349,14 @@ Character assets",
     def __eq__(self, other):
         """checks the equality of the given object to this one
         """
+        print "running the TypeTemplate.__eq__"
+        
+        print super(TypeTemplate, self).__eq__(other)
+        print isinstance(other, TypeTemplate)
+        print self.path_code == other.path_code
+        print self.file_code == other.file_code
+        print self.type == other.type
+        
         
         return super(TypeTemplate, self).__eq__(other) and \
                isinstance(other, TypeTemplate) and \

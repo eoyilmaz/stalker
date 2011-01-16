@@ -454,8 +454,8 @@ class SimpleEntity(object):
         """
         
         return isinstance(other, SimpleEntity) and \
-           self.name == other.name and \
-           self.description == other.description
+           self.name == other.name #and \
+           #self.description == other.description
     
     
     
@@ -487,11 +487,35 @@ class Entity(SimpleEntity):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, tags=[], **kwargs):
+    def __init__(self,
+                 tags=[],
+                 notes=[],
+                 **kwargs
+                 ):
         
         super(Entity, self).__init__(**kwargs)
         
         self._tags = self._check_tags(tags)
+        self._notes = self._check_notes(notes)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _check_notes(self, notes_in):
+        """checks the given notes value
+        """
+        
+        if not isinstance(notes_in, list):
+            raise ValueError("notes should be an instance of list")
+        
+        from stalker.core.models import note
+        
+        for element in notes_in:
+            if not isinstance(element, note.Note):
+                raise ValueError("every element in notes should be an \
+                instance of stalker.core.models.note.Note class")
+        
+        return notes_in
     
     
     
@@ -507,6 +531,23 @@ class Entity(SimpleEntity):
             raise ValueError("the tags attribute should be set to a list")
         
         return tags_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def notes():
+        def fget(self):
+            return self._notes
+        def fset(self, notes_in):
+            self._notes = self._check_notes(notes_in)
+        
+        doc = """all the notes about this entity, it should be a list of Notes
+        objects or an empty list, None is not accepted
+        """
+        
+        return locals()
+    
+    notes = property(**notes())
     
     
     
@@ -534,8 +575,8 @@ class Entity(SimpleEntity):
         """
         
         return super(Entity, self).__eq__(other) and \
-               isinstance(other, Entity) and \
-               self.tags==other.tags
+               isinstance(other, Entity)# and \
+               #self.tags==other.tags
 
 
 
@@ -755,3 +796,23 @@ class TypeEntity(Entity):
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(TypeEntity, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(TypeEntity, self).__eq__(other) and \
+               isinstance(other, TypeEntity)
+    
+    
+    #----------------------------------------------------------------------
+    def __ne__(self, other):
+        """the inequality operator
+        """
+        return not self.__eq__(other)
+    
+    
+    

@@ -441,3 +441,23 @@ projectTypes = Table(
 
 
 
+
+# NOTES
+notes = Table(
+    "notes", metadata,
+    Column(
+        "id",
+        Integer,
+        ForeignKey("simpleEntities.id"),
+        primary_key=True,
+    ),
+    Column(
+        "entity_id",
+        Integer,
+        ForeignKey("entities.id"),
+    ),
+    Column("content", String),
+)
+
+
+

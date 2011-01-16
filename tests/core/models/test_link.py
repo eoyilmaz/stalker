@@ -321,11 +321,15 @@ class LinkTester(mocker.MockerTestCase):
     def test_inequality_of_two_links(self):
         """testing the inequality operator
         """
+        # with same parameters
+        mock_link1 = link.Link(**self.kwargs)
+        self.assertTrue(self.mock_link==mock_link1)
         
         # with different parameters
         self.kwargs["type"] = self.mock_link_type2
         mock_link2 = link.Link(**self.kwargs)
         
+        self.assertFalse(self.mock_link!=mock_link1)
         self.assertTrue(self.mock_link!=mock_link2)
     
     

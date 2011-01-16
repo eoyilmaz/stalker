@@ -5,8 +5,7 @@
 import unittest
 import mocker
 import datetime
-from stalker.core.models import entity, user, link, tag, status
-
+from stalker.core.models import entity, user, link, note, tag, status
 
 
 
@@ -741,11 +740,33 @@ class EntityTester(mocker.MockerTestCase):
         # create a mock user
         self.mock_user = self.mocker.mock(user.User)
         
-        # create some mock tag objects, not neccessarly needed but create them
+        # create some mock Tag objects, not neccessarly needed but create them
         self.mock_tag1 = self.mocker.mock(tag.Tag)
         self.mock_tag2 = self.mocker.mock(tag.Tag)
         
+        self.expect(self.mock_tag1.__eq__(self.mock_tag2))\
+            .result(True).count(0, None)
+        
+        self.expect(self.mock_tag1.__ne__(self.mock_tag2))\
+            .result(False).count(0, None)
+        
+        self.mock_tag3 = self.mocker.mock(tag.Tag)
+        
+        
+        self.expect(self.mock_tag1.__eq__(self.mock_tag3))\
+            .result(False).count(0, None)
+        
+        self.expect(self.mock_tag1.__ne__(self.mock_tag3))\
+            .result(True).count(0, None)
+        
         self.tags = [self.mock_tag1, self.mock_tag2]
+        
+        # create a couple of mock Note objects
+        self.mock_note1 = self.mocker.mock(note.Note)
+        self.mock_note2 = self.mocker.mock(note.Note)
+        self.mock_note3 = self.mocker.mock(note.Note)
+        
+        self.notes = [self.mock_note1, self.mock_note2]
         
         # now replay it
         self.mocker.replay()
@@ -756,11 +777,12 @@ class EntityTester(mocker.MockerTestCase):
             description for it",
             "created_by": self.mock_user,
             "updated_by": self.mock_user,
-            "tags": self.tags
+            "tags": self.tags,
+            "notes": self.notes,
         }
         
         # create a proper SimpleEntity to use it later in the tests
-        self.entity = entity.Entity(**self.kwargs)
+        self.mock_entity = entity.Entity(**self.kwargs)
     
     
     
@@ -769,7 +791,35 @@ class EntityTester(mocker.MockerTestCase):
         """testing if no error raised when omited the notes argument
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs.pop("notes")
+        new_entity = entity.Entity(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_notes_argument_is_set_to_None(self):
+        """testing if a ValueError will be raised when setting the notes
+        argument to None
+        """
+        
+        self.kwargs["notes"] = None
+        self.assertRaises(ValueError, entity.Entity, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_notes_property_is_set_to_None(self):
+        """testing if a ValueError will be raised when setting the notes
+        property to None
+        """
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_entity,
+            "notes",
+            None
+        )
     
     
     
@@ -779,7 +829,11 @@ class EntityTester(mocker.MockerTestCase):
         argument something other than a list
         """
         
-        self.fail("test_is not implemented yet")
+        test_values = [1, 1.2, "a string note"]
+        
+        for test_value in test_values:
+            self.kwargs["notes"] = test_value
+            self.assertRaises(ValueError, entity.Entity, **self.kwargs)
     
     
     
@@ -789,16 +843,58 @@ class EntityTester(mocker.MockerTestCase):
         argument something other than a list
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "a string note"]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_entity,
+                "notes",
+                test_value
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_notes_argument_set_to_a_list_of_other_objects(self):
+        """testing if a ValueError will be raised when trying to set the notes
+        argument to a list of other kind of objects than Note objects
+        """
+        
+        self.kwargs["notes"] = [1, 12.2, "this is a string",
+                                ["a list"], {"a": "note"}]
+        
+        self.assertRaises(ValueError, entity.Entity, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_notes_property_set_to_a_list_of_other_objects(self):
+        """testing if a ValueError will be raised when trying to set the notes
+        property to a list of other kind of objects than Note objects
+        """
+        
+        test_value = [1, 12.2, "this is a string", ["a list"], {"a": "note"}]
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_entity,
+            "notes",
+            test_value
+        )
     
     
     
     #----------------------------------------------------------------------
     def test_notes_property_works_properly(self):
-        """
+        """testing if the notes property works properly
         """
         
-        self.fail("test is not implemented yet")
+        test_value = [self.mock_note3]
+        self.mock_entity.notes = test_value
+        self.assertEquals(self.mock_entity.notes, test_value)
     
     
     
@@ -849,9 +945,9 @@ class EntityTester(mocker.MockerTestCase):
         """
         test_value = [self.mock_tag1]
         
-        self.entity.tags = test_value
+        self.mock_entity.tags = test_value
         
-        self.assertEquals(self.entity.tags, test_value)
+        self.assertEquals(self.mock_entity.tags, test_value)
     
     
     
@@ -864,7 +960,11 @@ class EntityTester(mocker.MockerTestCase):
         entity1 = entity.Entity(**self.kwargs)
         entity2 = entity.Entity(**self.kwargs)
         
+        self.kwargs["tags"] = [self.mock_tag3]
+        entity3 = entity.Entity(**self.kwargs)
+        
         self.assertTrue(entity1==entity2)
+        self.assertFalse(entity1==entity3)
     
     
     
@@ -875,10 +975,13 @@ class EntityTester(mocker.MockerTestCase):
         
         # change the tags and test it again, expect False
         entity1 = entity.Entity(**self.kwargs)
+        entity2 = entity.Entity(**self.kwargs)
         
-        self.kwargs['tags'] = []
+        self.kwargs["tags"] = [self.mock_tag3]
+        self.kwargs["notes"] = []
         entity3 = entity.Entity(**self.kwargs)
         
+        self.assertFalse(entity1!=entity2)
         self.assertTrue(entity1!=entity3)
 
 
