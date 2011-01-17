@@ -87,6 +87,15 @@ class SimpleEntity(object):
     
     
     #----------------------------------------------------------------------
+    def __repr__(self):
+        """the representation of the SimpleEntity
+        """
+        
+        return "<SimpleEntity (%s, %s)>" % (self.name, self.code)
+    
+    
+    
+    #----------------------------------------------------------------------
     def _check_description(self, description_in):
         """checks the given description_in value
         """
@@ -252,13 +261,13 @@ class SimpleEntity(object):
         """checks the given code value
         """
         
-        # check if the code_in is empty
-        if code_in=="":
-            raise(ValueError("the code attribute can not be an empty string"))
-        
         # check if the code_in is None
         if code_in is None:
             raise(ValueError("the code attribute can not be None"))
+        
+        # check if the code_in is empty
+        if code_in=="":
+            raise(ValueError("the code attribute can not be an empty string"))
         
         # check if it is something other than a string
         if not isinstance(code_in, (str, unicode)):
@@ -501,6 +510,15 @@ class Entity(SimpleEntity):
     
     
     #----------------------------------------------------------------------
+    def __repr__(self):
+        """the representation
+        """
+        
+        return "<Entity (%s, %s)>" % (self.name, self.code)
+    
+    
+    
+    #----------------------------------------------------------------------
     def _check_notes(self, notes_in):
         """checks the given notes value
         """
@@ -575,7 +593,7 @@ class Entity(SimpleEntity):
         """
         
         return super(Entity, self).__eq__(other) and \
-               isinstance(other, Entity)# and \
+               isinstance(other, Entity) #and \
                #self.tags==other.tags
 
 
@@ -616,6 +634,17 @@ class StatusedEntity(Entity):
         self._status = self._check_status(status)
         #self._notes = self._check_notes(notes)
         #self._thumbnail = thumbnail
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __repr__(self):
+        """the representation
+        """
+        
+        return "<StatusedEntity (%s, %s, %s)>" % (self.name, self.code,
+                                                  self.status_list[self.status]
+                                                  )
     
     
     
@@ -793,9 +822,20 @@ class TypeEntity(Entity):
     It doesn't add any new parameters to it's super.
     """
     
+    
+    
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(TypeEntity, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __repr__(self):
+        """the representation
+        """
+        
+        return "<TypeEntity (%s, %s, %s)>" % (self.name, self.code)
     
     
     
@@ -808,10 +848,12 @@ class TypeEntity(Entity):
                isinstance(other, TypeEntity)
     
     
+    
     #----------------------------------------------------------------------
     def __ne__(self, other):
         """the inequality operator
         """
+        
         return not self.__eq__(other)
     
     

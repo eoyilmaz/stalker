@@ -14,6 +14,8 @@ v0.1.1.a2:
  * added *Note* class
  * added *notes* table and a mapper for *Note* class
  * added *note* attribute to Entity class
+ * fixed EntityTester in tests
+ * added __repr__ to entity classes
 
 v0.1.1.a1:
  * fixed a couple of documentation errors like:

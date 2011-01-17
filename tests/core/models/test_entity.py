@@ -188,6 +188,38 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_code_property_set_to_empty_string(self):
+        """testing if a ValueError will be raised when trying to set the code
+        property to an empty string
+        """
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.simple_entity,
+            "code",
+            ""
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_code_property_set_to_None(self):
+        """testing if a ValueError will be raised when trying to set the code
+        property to None
+        """
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.simple_entity,
+            "code",
+            None
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_name_argument_being_empty(self):
         """testing if ValueError is raised for empty name argument
         """
@@ -384,7 +416,11 @@ class SimpleEntityTester(mocker.MockerTestCase):
         simpleEntity1 = entity.SimpleEntity(**self.kwargs)
         simpleEntity2 = entity.SimpleEntity(**self.kwargs)
         
+        self.kwargs["name"] = "a different simple entity"
+        self.kwargs["description"] = "no description"
+        simpleEntity3 = entity.SimpleEntity(**self.kwargs)
         self.assertTrue(simpleEntity1==simpleEntity2)
+        self.assertFalse(simpleEntity1==simpleEntity3)
     
     
     
@@ -396,11 +432,14 @@ class SimpleEntityTester(mocker.MockerTestCase):
         # create two simple entities with same parameters and check for
         # equality
         simpleEntity1 = entity.SimpleEntity(**self.kwargs)
-        
-        self.kwargs['description'] = ''
         simpleEntity2 = entity.SimpleEntity(**self.kwargs)
         
-        self.assertTrue(simpleEntity1!=simpleEntity2)
+        self.kwargs["name"] = "a different simple entity"
+        self.kwargs["description"] = "no description"
+        simpleEntity3 = entity.SimpleEntity(**self.kwargs)
+        
+        self.assertFalse(simpleEntity1!=simpleEntity2)
+        self.assertTrue(simpleEntity1!=simpleEntity3)
     
     
     
@@ -727,10 +766,12 @@ class SimpleEntityTester(mocker.MockerTestCase):
 
 
 
+
 ########################################################################
 class EntityTester(mocker.MockerTestCase):
     """tests the Entity class
     """
+    
     
     
     #----------------------------------------------------------------------
@@ -743,6 +784,7 @@ class EntityTester(mocker.MockerTestCase):
         # create some mock Tag objects, not neccessarly needed but create them
         self.mock_tag1 = self.mocker.mock(tag.Tag)
         self.mock_tag2 = self.mocker.mock(tag.Tag)
+        self.mock_tag3 = self.mocker.mock(tag.Tag)
         
         self.expect(self.mock_tag1.__eq__(self.mock_tag2))\
             .result(True).count(0, None)
@@ -750,7 +792,6 @@ class EntityTester(mocker.MockerTestCase):
         self.expect(self.mock_tag1.__ne__(self.mock_tag2))\
             .result(False).count(0, None)
         
-        self.mock_tag3 = self.mocker.mock(tag.Tag)
         
         
         self.expect(self.mock_tag1.__eq__(self.mock_tag3))\
@@ -960,7 +1001,9 @@ class EntityTester(mocker.MockerTestCase):
         entity1 = entity.Entity(**self.kwargs)
         entity2 = entity.Entity(**self.kwargs)
         
+        self.kwargs["name"] = "another entity"
         self.kwargs["tags"] = [self.mock_tag3]
+        self.kwargs["notes"] = []
         entity3 = entity.Entity(**self.kwargs)
         
         self.assertTrue(entity1==entity2)
@@ -977,6 +1020,7 @@ class EntityTester(mocker.MockerTestCase):
         entity1 = entity.Entity(**self.kwargs)
         entity2 = entity.Entity(**self.kwargs)
         
+        self.kwargs["name"] = "another entity"
         self.kwargs["tags"] = [self.mock_tag3]
         self.kwargs["notes"] = []
         entity3 = entity.Entity(**self.kwargs)
@@ -1407,7 +1451,59 @@ class StatusedEntityTester(mocker.MockerTestCase):
         statusedEntity2 = entity.StatusedEntity(**self.kwargs)
         
         self.assertTrue(statusedEntity1!=statusedEntity2)
+
+
+
+
+
+
+########################################################################
+class TypeEntityTester(mocker.MockerTestCase):
+    """tests the TypeEntity class
+    """
     
     
     
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """set up the test
+        """
+        
+        self.kwargs = {
+            "name": "mock type entity",
+            "description": "this is a mock type entity"
+        }
+        
+        self.mock_typeEntity = entity.TypeEntity(**self.kwargs)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing the equality operator
+        """
+        
+        new_typeEntity2 = entity.TypeEntity(**self.kwargs)
+        
+        self.kwargs["name"] = "a different typeEntity"
+        self.kwargs["description"] = "this is a different typeEntity"
+        new_typeEntity3 = entity.TypeEntity(**self.kwargs)
+        
+        self.assertTrue(self.mock_typeEntity==new_typeEntity2)
+        self.assertFalse(self.mock_typeEntity==new_typeEntity3)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing the inequality operator
+        """
+        
+        new_typeEntity2 = entity.TypeEntity(**self.kwargs)
+        
+        self.kwargs["name"] = "a different typeEntity"
+        self.kwargs["description"] = "this is a different typeEntity"
+        new_typeEntity3 = entity.TypeEntity(**self.kwargs)
+        
+        self.assertFalse(self.mock_typeEntity!=new_typeEntity2)
+        self.assertTrue(self.mock_typeEntity!=new_typeEntity3)
