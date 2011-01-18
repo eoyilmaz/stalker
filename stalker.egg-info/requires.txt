@@ -1,3 +1,0 @@
-beaker
-jinja2
-sqlalchemy

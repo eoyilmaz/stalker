@@ -11,3 +11,4 @@ docs/source/generated/*
 .DS_Store
 dist/*
 build/*
+stalker.egg-info/*
