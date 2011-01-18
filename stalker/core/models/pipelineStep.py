@@ -22,7 +22,7 @@ class PipelineStep(entity.Entity):
       * Shading
       * Previs
       * Match Move
-      * Animation
+      * Animations
       
       etc.
     
@@ -34,8 +34,16 @@ class PipelineStep(entity.Entity):
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(PipelineStep, self).__init__(**kwargs)
-
-
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(PipelineStep, self).__eq__(other) and \
+               isinstance(other, PipelineStep)
 
 
 

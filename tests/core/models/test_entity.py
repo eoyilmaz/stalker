@@ -1182,13 +1182,38 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_status_argument_set_to_None(self):
+        """testing if a ValueError will be raised when setting the status
+        argument to None
+        """
+        self.kwargs["status"] = None
+        self.assertRaises(ValueError, entity.StatusedEntity, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_status_property_set_to_None(self):
+        """testing if a ValueError will be raised when setting the status
+        property to None
+        """
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.statused_entity,
+            "status",
+            None
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_status_argument_different_than_an_int(self):
         """testing if a ValueError is going to be raised if trying to
         initialize status with something else than an integer
         """
         
         # with a string
-        test_values = ["0", [0]]
+        test_values = ["0", 1.2, [0]]
         
         for test_value in test_values:
             self.kwargs["status"] = test_value
@@ -1202,15 +1227,16 @@ class StatusedEntityTester(mocker.MockerTestCase):
         current status to something other than an integer
         """
         
-        test_value = "a string"
+        test_values = ["a string", 1.2, [1], {"a": "status"}]
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.statused_entity,
-            "status",
-            test_value
-        )
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.statused_entity,
+                "status",
+                test_value
+            )
     
     
     
@@ -1475,6 +1501,10 @@ class TypeEntityTester(mocker.MockerTestCase):
         }
         
         self.mock_typeEntity = entity.TypeEntity(**self.kwargs)
+        
+        # create another entity.Entity with the same name of the
+        # mock_typeEntity for __eq__ and __ne__ tests
+        self.entity1 = entity.Entity(**self.kwargs)
     
     
     
@@ -1491,6 +1521,7 @@ class TypeEntityTester(mocker.MockerTestCase):
         
         self.assertTrue(self.mock_typeEntity==new_typeEntity2)
         self.assertFalse(self.mock_typeEntity==new_typeEntity3)
+        self.assertFalse(self.mock_typeEntity==self.entity1)
     
     
     
@@ -1507,3 +1538,7 @@ class TypeEntityTester(mocker.MockerTestCase):
         
         self.assertFalse(self.mock_typeEntity!=new_typeEntity2)
         self.assertTrue(self.mock_typeEntity!=new_typeEntity3)
+        self.assertTrue(self.mock_typeEntity!=self.entity1)
+    
+    
+    

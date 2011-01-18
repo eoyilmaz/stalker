@@ -593,8 +593,7 @@ class Entity(SimpleEntity):
         """
         
         return super(Entity, self).__eq__(other) and \
-               isinstance(other, Entity) #and \
-               #self.tags==other.tags
+               isinstance(other, Entity)
 
 
 

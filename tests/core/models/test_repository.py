@@ -244,4 +244,50 @@ class RepositoryTester(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing the equality of two repositories
+        """
+        
+        repo1 = repository.Repository(**self.kwargs)
+        repo2 = repository.Repository(**self.kwargs)
+        
+        self.kwargs.update({
+            "name": "a repository",
+            "description": "this is the commercial repository",
+            "linux_path": "/mnt/commercialServer/Projects",
+            "osx_path": "/Volumes/commercialServer/Projects",
+            "windows_path": "Z:\\Projects"
+        })
+        
+        repo3 = repository.Repository(**self.kwargs)
+        
+        self.assertTrue(repo1==repo2)
+        self.assertFalse(repo1==repo3)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing the inequality of two repositories
+        """
+        
+        repo1 = repository.Repository(**self.kwargs)
+        repo2 = repository.Repository(**self.kwargs)
+        
+        self.kwargs.update({
+            "name": "a repository",
+            "description": "this is the commercial repository",
+            "linux_path": "/mnt/commercialServer/Projects",
+            "osx_path": "/Volumes/commercialServer/Projects",
+            "windows_path": "Z:\\Projects"
+        })
+        
+        repo3 = repository.Repository(**self.kwargs)
+        
+        self.assertFalse(repo1!=repo2)
+        self.assertTrue(repo1!=repo3)
+    
+    
+    
     

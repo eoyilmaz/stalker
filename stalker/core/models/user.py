@@ -25,9 +25,13 @@ class User(entity.Entity):
     :param login_name: it is the login name of the user, it should be all lower
       case. Giving a string or unicode that has uppercase letters, it will be
       converted to lower case. It can not be an empty string or None and it can
-      not contain any white space inside. login_name parameter is a synonym for
-      `name`, while creating a User object you don't need to specify both of
-      them, one is enough and if the two is given `name` will be used.
+      not contain any white space inside. login_name parameter will be copied
+      over name if both of them is given, if one of them given they will have
+      the same value which is the formatted login_name value. Setting the name
+      value also sets the login_name and setting the login_name property also
+      sets the name, while creating a User object you don't need to specify
+      both of them, one is enough and if the two is given `login_name` will be
+      used.
     
     :param first_name: it is the first name of the user, must be a string or
       unicode, middle name also can be added here, so it accepts white-spaces
@@ -83,10 +87,13 @@ class User(entity.Entity):
         
         # use the login_name for name if there are no name attribute present
         name = kwargs.get("name")
-        if name is None or name=="":
-            kwargs.update({"name": login_name})
-        elif isinstance(name, (str, unicode)):
+        
+        if login_name is not None and login_name != "":
+            name = login_name
+        else:
             login_name = name
+        
+        kwargs["name"] = name
         
         super(User, self).__init__(**kwargs)
         
@@ -118,6 +125,30 @@ class User(entity.Entity):
         
         return "<user.User (%s %s ('%s'))>" % \
                (self.first_name, self.last_name, self.login_name)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(User, self).__eq__(other) and \
+               isinstance(other, User) and \
+               self.email == other.email and \
+               self.login_name == other.login_name and \
+               self.first_name == other.first_name and \
+               self.last_name == other.last_name and \
+               self.name == other.name
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __ne__(self, other):
+        """the inequality operator
+        """
+        
+        return not self.__eq__(other)
     
     
     

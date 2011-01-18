@@ -231,3 +231,33 @@ class StructureTester(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_equality_operator(self):
+        """testing equality of two Structure objects
+        """
+        
+        new_structure2 = structure.Structure(**self.kwargs)
+        
+        self.kwargs["project_template"] = "a mock project template"
+        new_structure3 = structure.Structure(**self.kwargs)
+        
+        self.assertTrue(self.mock_structure==new_structure2)
+        self.assertFalse(self.mock_structure==new_structure3)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality_operator(self):
+        """testing inequality of two Structure objects
+        """
+        
+        new_structure2 = structure.Structure(**self.kwargs)
+        
+        self.kwargs["project_template"] = "a mock project template"
+        new_structure3 = structure.Structure(**self.kwargs)
+        
+        self.assertFalse(self.mock_structure!=new_structure2)
+        self.assertTrue(self.mock_structure!=new_structure3)
+    
+    
+    

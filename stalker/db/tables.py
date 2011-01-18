@@ -196,7 +196,6 @@ statuses = Table(
         ForeignKey("entities.id"),
         primary_key=True,
     ),
-    Column("short_name", String(32))
 )
 
 

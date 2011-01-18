@@ -21,3 +21,21 @@ class Tag(entity.SimpleEntity):
     
     
     
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Tag, self).__eq__(other) and isinstance(other, Tag)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __ne__(self, other):
+        """the inequality operator
+        """
+        
+        return not self.__eq__(other)
+    
+    
+    

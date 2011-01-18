@@ -58,10 +58,9 @@ class Structure(entity.Entity):
         
         self._project_template = self._check_project_template(project_template)
         self._asset_templates = self._check_asset_templates(asset_templates)
-        self._reference_template = \
+        self._reference_templates = \
             self._check_reference_templates(reference_templates)
     
-        
     
     
     #----------------------------------------------------------------------
@@ -172,4 +171,19 @@ class Structure(entity.Entity):
         return locals()
     
     project_template = property(**project_template())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Structure, self).__eq__(other) and \
+               isinstance(other, Structure) and \
+               self.project_template == other.project_template and \
+               self.reference_templates == other.reference_templates and \
+               self.asset_templates == other.asset_templates
+    
+    
     

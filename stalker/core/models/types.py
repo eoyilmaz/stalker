@@ -69,6 +69,17 @@ class AssetType(entity.TypeEntity):
         return locals()
     
     steps = property(**steps())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(AssetType, self).__eq__(other) and \
+               isinstance(other, AssetType) and \
+               self.steps == other.steps
 
 
 
@@ -86,9 +97,21 @@ class LinkType(entity.TypeEntity):
     details.
     """
     
+    
+    
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(LinkType, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(LinkType, self).__eq__(other) and \
+               isinstance(other, LinkType)
 
 
 
@@ -107,6 +130,17 @@ class ProjectType(entity.TypeEntity):
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(ProjectType, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(ProjectType, self).__eq__(other) and \
+               isinstance(other, ProjectType)
+        
 
 
 

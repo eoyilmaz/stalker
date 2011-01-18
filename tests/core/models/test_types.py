@@ -27,18 +27,40 @@ class AssetTypeTester(mocker.MockerTestCase):
         self.mock_pipeline_step2 = self.mocker.mock(pipelineStep.PipelineStep)
         self.mock_pipeline_step3 = self.mocker.mock(pipelineStep.PipelineStep)
         
-        # create a couple of tags
-        self.mock_tag1 = self.mocker.mock( tag.Tag )
-        self.mock_tag2 = self.mocker.mock( tag.Tag )
+        # the pipeline_steps will be compared to each other in equality tests
+        # (each will be used for one AssetType)
+        # __eq__
+        self.expect(
+            self.mock_pipeline_step1.__eq__(self.mock_pipeline_step2)
+            ).result(True).count(0, None)
         
+        self.expect(
+            self.mock_pipeline_step1.__eq__(self.mock_pipeline_step3)
+            ).result(False).count(0, None)
+        
+        # __ne__
+        self.expect(
+            self.mock_pipeline_step1.__ne__(self.mock_pipeline_step2)
+            ).result(False).count(0, None)
+        
+        self.expect(
+            self.mock_pipeline_step1.__ne__(self.mock_pipeline_step3)
+            ).result(True).count(0, None)
+        
+        # create a couple of tags
+        self.mock_tag1 = self.mocker.mock(tag.Tag)
+        self.mock_tag2 = self.mocker.mock(tag.Tag)
+        self.mock_tag3 = self.mocker.mock(tag.Tag)
+        
+        # let the sun shine
         self.mocker.replay()
         
-        self.pipelineStep_list = [ self.mock_pipeline_step1,
-                                   self.mock_pipeline_step2,
-                                   self.mock_pipeline_step3 ]
+        self.pipelineStep_list = [self.mock_pipeline_step1,
+                                  self.mock_pipeline_step2,
+                                  self.mock_pipeline_step3]
         
-        self.tag_list = [ self.mock_tag1,
-                          self.mock_tag2 ]
+        self.tag_list = [self.mock_tag1,
+                         self.mock_tag2]
         
         # create a proper assetType object
         self.name = "An AssetType"
@@ -64,11 +86,9 @@ class AssetTypeTester(mocker.MockerTestCase):
         self.test_attr_3 = {"a key":"a Value"}
         
         # a list of different objects than a pipelineStep objects
-        self.test_attr_4 = [
-            self.test_attr_1,
-            self.test_attr_2,
-            self.test_attr_3
-        ]
+        self.test_attr_4 = [self.test_attr_1,
+                            self.test_attr_2,
+                            self.test_attr_3]
     
     
     
@@ -136,8 +156,44 @@ class AssetTypeTester(mocker.MockerTestCase):
         self.an_assetType_obj.steps = a_new_list_of_pipelineStep_objs
         
         self.assertEquals(self.an_assetType_obj.steps,
-                          a_new_list_of_pipelineStep_objs
-                          )
+                          a_new_list_of_pipelineStep_objs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing equality of AssetType objects
+        """
+        
+        self.kwargs["steps"] = [self.mock_pipeline_step1]
+        self.kwargs["tags"] = [self.mock_tag1]
+        asset_type1 = types.AssetType(**self.kwargs)
+        asset_type2 = types.AssetType(**self.kwargs)
+        
+        self.kwargs["steps"] = [self.mock_pipeline_step3]
+        self.kwargs["tags"] = [self.mock_tag3]
+        asset_type3 = types.AssetType(**self.kwargs)
+        
+        self.assertTrue(asset_type1==asset_type2)
+        self.assertFalse(asset_type1==asset_type3)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing inequality of AssetType objects
+        """
+        
+        self.kwargs["steps"] = [self.mock_pipeline_step1]
+        asset_type1 = types.AssetType(**self.kwargs)
+        asset_type2 = types.AssetType(**self.kwargs)
+        
+        self.kwargs["steps"] = [self.mock_pipeline_step3]
+        asset_type3 = types.AssetType(**self.kwargs)
+        
+        self.assertFalse(asset_type1!=asset_type2)
+        self.assertTrue(asset_type1!=asset_type3)
+
 
 
 
@@ -554,7 +610,119 @@ class TypeTemplateTester(mocker.MockerTestCase):
         """testing if type property doesn't accept None and raises ValueError
         """
         self.assertRaises(ValueError, setattr, self.template_obj, "type", None)
+
+
+
+
+
+
+########################################################################
+class ProjectTypeTester(mocker.MockerTestCase):
+    """tests ProjectType
+    """
     
     
     
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """testing if ProjectType init works
+        """
+        # just create a ProjectType object and this is enough as a test
+        self.kwargs = {
+            "name": "Commercial",
+            "description": "This is the commercial project type",
+        }
+        
+        self.mock_project_type = types.ProjectType(**self.kwargs)
+        
+        # create a TypeEntity objejct for __eq__ or __ne__ tests
+        self.type_entity1 = entity.TypeEntity(**self.kwargs)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing equality of two ProjectType objects
+        """
+        
+        project_type1 = types.ProjectType(**self.kwargs)
+        project_type2 = types.ProjectType(**self.kwargs)
+        
+        self.kwargs["name"] = "Movie"
+        self.kwargs["description"] = "This is the movie project type"
+        
+        project_type3 = types.ProjectType(**self.kwargs)
+        
+        self.assertTrue(project_type1==project_type2)
+        self.assertFalse(project_type1==project_type3)
+        self.assertFalse(project_type1==self.type_entity1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing inequality of two ProjectType objects
+        """
+        
+        project_type1 = types.ProjectType(**self.kwargs)
+        project_type2 = types.ProjectType(**self.kwargs)
+        
+        self.kwargs["name"] = "Movie"
+        self.kwargs["description"] = "This is the movie project type"
+        
+        project_type3 = types.ProjectType(**self.kwargs)
+        
+        self.assertFalse(project_type1!=project_type2)
+        self.assertTrue(project_type1!=project_type3)
+        self.assertTrue(project_type1!=self.type_entity1)
+
+
+
+
+
+
+########################################################################
+class LinkTypeTester(mocker.MockerTestCase):
+    """tests LinkType
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """set up the tests
+        """
+        
+        # create a couple of LinkType objects
+        
+        self.link_type1 = types.LinkType(name="link_type1")
+        self.link_type2 = types.LinkType(name="link_type1")
+        self.link_type3 = types.LinkType(name="link_type3")
+        
+        # create an entity for equality test (it should return False)
+        from stalker.core.models import entity
+        self.type_entity1 = entity.TypeEntity(name="link_type1")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality_operator(self):
+        """testing equality of two link types
+        """
+        
+        self.assertTrue(self.link_type1==self.link_type2)
+        self.assertFalse(self.link_type1==self.link_type3)
+        self.assertFalse(self.link_type1==self.type_entity1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality_operator(self):
+        """testing inequality of two link types
+        """
+        
+        self.assertFalse(self.link_type1!=self.link_type2)
+        self.assertTrue(self.link_type1!=self.link_type3)
+        self.assertTrue(self.link_type1!=self.type_entity1)
+
+

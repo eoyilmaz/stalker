@@ -42,6 +42,16 @@ class Department(entity.Entity):
     
     
     #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Department, self).__eq__(other) and \
+               isinstance(other, Department)
+    
+    
+    
+    #----------------------------------------------------------------------
     def _check_members(self, members):
         """checks the given members attribute
         """

@@ -13,102 +13,55 @@ from stalker.core.models import pipelineStep
 ########################################################################
 class PipelineStepTester(mocker.MockerTestCase):
     """tests pipelineStep
-    
-    removed all the tests, no attributes anymore
     """
     
-    pass
-    ##----------------------------------------------------------------------
-    #def setUp(self):
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """setup the test
+        """
         
-        ## create a proper pipelineStep object
-        #self.kwargs = {
-            #"name": "Testing",
-            #"description": "This is a pipelineStep for testing things",
-            #"code": "TESTING"
-        #}
+        self.kwargs = {
+            "name": "Model",
+            "description": "the modeling pipelinestep"
+        }
+    
+    
+        self.pipeline_step1 = pipelineStep.PipelineStep(**self.kwargs)
+        self.pipeline_step2 = pipelineStep.PipelineStep(**self.kwargs)
         
-        #self.pStepObj = pipelineStep.PipelineStep(**self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_code_argument_being_empty(self):
-        #"""testing if a ValueError will be raised when trying to assign an
-        #empty string to the code argument
-        #"""
-        #self.kwargs["code"] = ""
-        #self.assertRaises(ValueError, pipelineStep.PipelineStep, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_code_argument_being_None(self):
-        #"""testing if a ValueError will be raised when trying to assign None
-        #to the code argument
-        #"""
-        #self.kwargs["code"] = None
-        #self.assertRaises(ValueError, pipelineStep.PipelineStep, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_code_property_being_empty(self):
-        #"""testing if a ValueError will be raised when trying to assign an
-        #empty string to the code property 
-        #"""
-        #self.kwargs["code"] = ""
-        #self.assertRaises(ValueError, pipelineStep.PipelineStep, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_code_argument_accepts_string_only(self):
-        #"""testing if code argument accepts just strings
-        #"""
-        #test_values = [1, ["TT"]]
+        self.kwargs["name"] = "Lighting"
+        self.kwargs["description"] = "the ligthing pipelinestep"
         
-        #for test_value in test_values:
-            #self.kwargs["code"] = test_value
-            ## an integer
-            #self.assertRaises(
-                #ValueError,
-                #pipelineStep.PipelineStep,
-                #**self.kwargs
-            #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_code_property_accepts_string_only(self):
-        #"""testing if code property accepts just strings
-        #"""
+        self.pipeline_step3 = pipelineStep.PipelineStep(**self.kwargs)
         
-        #test_values = [1, ["TT"]]
-        
-        #for test_value in test_values:
-            ## an integer
-            #self.assertRaises(
-                #ValueError,
-                #setattr,
-                #self.pStepObj,
-                #"code",
-                #test_value
-            #)
+        # create another entity with the same kwargs for the __eq__ and __ne__
+        # tests
+        from stalker.core.models import entity
+        self.entity = entity.Entity(**self.kwargs)
+
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_code_property_working_properly(self):
-        #"""testing if code property is working properly
-        #"""
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing equality of two PipelineStep objects
+        """
         
-        #test_value = "MM"
+        self.assertTrue(self.pipeline_step1==self.pipeline_step2)
+        self.assertFalse(self.pipeline_step1==self.pipeline_step3)
+        self.assertFalse(self.pipeline_step1==self.entity)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing inequality of two PipelineStep objects
+        """
         
-        ## just assign it and check if they are equal
-        #self.pStepObj.code = test_value
-        
-        #self.assertEquals(self.pStepObj.code, test_value)
+        self.assertFalse(self.pipeline_step1!=self.pipeline_step2)
+        self.assertTrue(self.pipeline_step1!=self.pipeline_step3)
+        self.assertTrue(self.pipeline_step1!=self.entity)
+    
     
     
     

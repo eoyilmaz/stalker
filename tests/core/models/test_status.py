@@ -8,94 +8,69 @@ from stalker.core.models import status
 
 
 ########################################################################
-class TestStatus(unittest.TestCase):
-    """testing the status class
+class StatusTest(unittest.TestCase):
+    """tests the status class
     """
     
     
     
     #----------------------------------------------------------------------
-    def test_short_name_argument_accepts_str_or_unicode_only(self):
-        """testing if a ValueError will be raised when setting the short_name
-        argument something other than a string or unicode
+    def setUp(self):
+        """setup the test
         """
         
-        test_values = [1, 1.0, ["Cmplt"], {}, ()]
+        self.kwargs = {
+            "name": "Complete",
+            "description": "use this when the object is complete",
+            "code": "CMPLT",
+        }
         
-        for test_value in test_values:
-            #----------------------------------------------------------------------
-            # the short_name should be a str or unicode
-            self.assertRaises(
-                ValueError,
-                status.Status,
-                name="Complete",
-                short_name=test_value
-            )
+        # create an entity object with same kwargs for __eq__ and __ne__ tests
+        # (it should return False for __eq__ and True for __ne__ for same
+        # kwargs)
+        from stalker.core.models import entity
+        self.entity1 = entity.Entity(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_short_name_property_accepts_str_or_unicode_only(self):
-        """testing if a ValueError will be raised when trying to assign
-        something else than a string or unicode to the short_name property
+    def test_equality(self):
+        """testing equality of two statuses
         """
         
-        # check the property
-        a_status = status.Status(name="Complete", short_name="Cmlt")
-        self.assertRaises(
-            ValueError,
-            setattr,
-            a_status,
-            "short_name",
-            1
-        )
+        status1 = status.Status(**self.kwargs)
+        status2 = status.Status(**self.kwargs)
+        
+        self.kwargs["name"] = "Work In Progress"
+        self.kwargs["description"] = "use this when the object is still in \
+        progress"
+        self.kwargs["code"] = "WIP"
+        
+        status3 = status.Status(**self.kwargs)
+        
+        self.assertTrue(status1==status2)
+        self.assertFalse(status1==status3)
+        self.assertFalse(status1==self.entity1)
     
     
     
-    #----------------------------------------------------------------------
-    def test_short_name_argument_empty_string(self):
-        """testing if a ValueError will be raised when trying to set the
-        short_name argument to an empty string
+    def test_inequality(self):
+        """testing inequality of two statuses
         """
         
-        #----------------------------------------------------------------------
-        # the short_name can not be an empty string
-        self.assertRaises(ValueError, status.Status, "Complete", "")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_short_name_property_dont_accept_empty_string(self):
-        """testing if a ValueError will be raised when trying to assing an
-        empty string to short_name property
-        """
+        status1 = status.Status(**self.kwargs)
+        status2 = status.Status(**self.kwargs)
         
-        # check the property
-        a_status = status.Status(name="Complete", short_name="Cmlt")
-        self.assertRaises(
-            ValueError,
-            setattr,
-            a_status,
-            "short_name",
-            ""
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_short_name_property_works_properly(self):
-        """testing if short_name property works properly
-        """
+        self.kwargs["name"] = "Work In Progress"
+        self.kwargs["description"] = "use this when the object is still in \
+        progress"
+        self.kwargs["code"] = "WIP"
         
-        #----------------------------------------------------------------------
-        # check if the short_name is get correctly
-        name = "Complete"
-        abbr = "Cmplt"
+        status3 = status.Status(**self.kwargs)
         
-        a_status = status.Status(name="Complete", short_name="Cmlt")
-        
-        a_status = status.Status(name=name, short_name=abbr)
-        self.assertEquals(a_status.short_name, abbr)
+        self.assertFalse(status1!=status2)
+        self.assertTrue(status1!=status3)
+        self.assertTrue(status1!=self.entity1)
 
 
 
@@ -114,19 +89,21 @@ class StatusListTest(unittest.TestCase):
         """let's create proper values for the tests
         """
         
-        # proper values
-        self.list_name = "a_status_list"
+        self.kwargs = {
+            "name": "a status list",
+            "description": "this is a status list for testing purposes",
+            "statuses": [
+                status.Status(name="Not Available", code="N/A"),
+                status.Status(name="Waiting To Start", code="WSTRT"),
+                status.Status(name="Started", code="STRT"),
+                status.Status(name="Waiting For Approve", code="WAPPR"),
+                status.Status(name="Approved", code="APPR"),
+                status.Status(name="Finished", code="FNSH"),
+                status.Status(name="On Hold", code="OH"),
+                ],
+        }
         
-        # should use Mocks in the list
-        self.a_status_list = [
-            status.Status(name="Not Available", short_name="N/A"),
-            status.Status(name="Waiting To Start", short_name="WStrt"),
-            status.Status(name="Started", short_name="Strt"),
-            status.Status(name="Waiting For Approve", short_name="WAppr"),
-            status.Status(name="Approved", short_name="Appr"),
-            status.Status(name="Finished", short_name="Fnsh"),
-            status.Status(name="On Hold", short_name="OH"),
-            ]
+        self.mock_status_list = status.StatusList(**self.kwargs)
     
     
     
@@ -144,12 +121,10 @@ class StatusListTest(unittest.TestCase):
         for test_value in test_values:
             #----------------------------------------------------------------------
             # it should only accept lists of statuses
-            self.assertRaises(
-                ValueError,
-                status.StatusList,
-                name=self.list_name,
-                statuses=test_value
-            )
+            
+            self.kwargs["statuses"] = test_value
+            
+            self.assertRaises(ValueError, status.StatusList, **self.kwargs)
     
     
     
@@ -158,10 +133,6 @@ class StatusListTest(unittest.TestCase):
         """testing the status_list property as a property and accepting
         Status objects only
         """
-        new_status_list = status.StatusList(
-            name=self.list_name,
-            statuses=self.a_status_list
-        )
         
         test_values = ["1", ["1"], 1, [1, "w"]]
         
@@ -170,7 +141,7 @@ class StatusListTest(unittest.TestCase):
             self.assertRaises(
                 ValueError,
                 setattr,
-                new_status_list,
+                self.mock_status_list,
                 "statuses",
                 test_value
             )
@@ -184,12 +155,9 @@ class StatusListTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # the list couldn't be empty
-        self.assertRaises(
-            ValueError,
-            status.StatusList,
-            name=self.list_name,
-            statuses=[]
-        )
+        self.kwargs["statuses"] = []
+        
+        self.assertRaises(ValueError, status.StatusList, **self.kwargs)
     
     
     
@@ -203,12 +171,9 @@ class StatusListTest(unittest.TestCase):
         # every element should be an object derived from Status
         a_fake_status_list = [1, 2, "a string", u"a unicode", 4.5]
         
-        self.assertRaises(
-            ValueError,
-            status.StatusList,
-            name=self.list_name,
-            statuses=a_fake_status_list
-        )
+        self.kwargs["statuses"] = a_fake_status_list
+        
+        self.assertRaises(ValueError, status.StatusList, **self.kwargs)
     
     
     
@@ -219,16 +184,58 @@ class StatusListTest(unittest.TestCase):
         
         #----------------------------------------------------------------------
         # it should be a property so check if it sets property correctly
-        a_status_list_obj = status.StatusList(
-            name=self.list_name,
-            statuses=self.a_status_list
-        )
         
         new_list_of_statutes = [
-            status.Status(name="New Status", short_name="nsts")
+            status.Status(name="New Status", code="NSTS")
         ]
         
-        a_status_list_obj.statuses = new_list_of_statutes
-        self.assertEquals( a_status_list_obj.statuses, new_list_of_statutes)
+        self.mock_status_list.statuses = new_list_of_statutes
+        self.assertEquals( self.mock_status_list.statuses,
+                           new_list_of_statutes)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality_operator(self):
+        """testing equality of two status list object
+        """
         
+        status_list1 = status.StatusList(**self.kwargs)
+        status_list2 = status.StatusList(**self.kwargs)
         
+        self.kwargs["statuses"] = [
+            status.Status(name="Started", code="STRT"),
+            status.Status(name="Waiting For Approve", code="WAPPR"),
+            status.Status(name="Approved", code="APPR"),
+            status.Status(name="Finished", code="FNSH"),
+        ]
+        
+        status_list3 = status.StatusList(**self.kwargs)
+        
+        self.assertTrue(status_list1==status_list2)
+        self.assertFalse(status_list1==status_list3)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality_operator(self):
+        """testing equality of two status list object
+        """
+        
+        status_list1 = status.StatusList(**self.kwargs)
+        status_list2 = status.StatusList(**self.kwargs)
+        
+        self.kwargs["statuses"] = [
+            status.Status(name="Started", code="STRT"),
+            status.Status(name="Waiting For Approve", code="WAPPR"),
+            status.Status(name="Approved", code="APPR"),
+            status.Status(name="Finished", code="FNSH"),
+        ]
+        
+        status_list3 = status.StatusList(**self.kwargs)
+        
+        self.assertFalse(status_list1!=status_list2)
+        self.assertTrue(status_list1!=status_list3)
+    
+    
+    

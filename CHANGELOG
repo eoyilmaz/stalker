@@ -16,6 +16,26 @@ v0.1.1.a2:
  * added *note* attribute to Entity class
  * fixed EntityTester in tests
  * added __repr__ to entity classes
+ * added tests for persistence of Note class (tests are green)
+ * added equality and inequality operators for classes:
+  * User
+  * Department
+  * Tag
+  * Status
+  * StatusList
+  * ImageFormat
+  * Repository
+  * PipelineStep
+  * Structure
+  * AssetType
+  * LinkType
+  * TypeEntity
+  * ProjectType
+ * Status classes' short_name attribute has been removed, from now on the
+   *code* attribute will be used, also updated the database tables and mappers
+ * The User.login_name is now superior to the *name* attribute, giving both of
+   them as arguments will lead the login_name to be used as both the login_name
+   and the name
 
 v0.1.1.a1:
  * fixed a couple of documentation errors like:

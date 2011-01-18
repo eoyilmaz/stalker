@@ -516,3 +516,47 @@ class ImageFormatTest(unittest.TestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing equality operator
+        """
+        
+        image_format1 = imageFormat.ImageFormat(**self.kwargs)
+        image_format2 = imageFormat.ImageFormat(**self.kwargs)
+        
+        self.kwargs.update({
+            "name": "NTSC",
+            "description": "The famous NTSC image format",
+            "width": 720,
+            "height": 480,
+            "pixel_aspect": 0.888888,
+        })
+        image_format3 = imageFormat.ImageFormat(**self.kwargs)
+        
+        self.assertTrue(image_format1==image_format2)
+        self.assertFalse(image_format1==image_format3)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing inequality operator
+        """
+        
+        image_format1 = imageFormat.ImageFormat(**self.kwargs)
+        image_format2 = imageFormat.ImageFormat(**self.kwargs)
+        
+        self.kwargs.update({
+            "name": "NTSC",
+            "description": "The famous NTSC image format",
+            "width": 720,
+            "height": 480,
+            "pixel_aspect": 0.888888,
+        })
+        image_format3 = imageFormat.ImageFormat(**self.kwargs)
+        
+        self.assertFalse(image_format1!=image_format2)
+        self.assertTrue(image_format1!=image_format3)
+    
+    
+    

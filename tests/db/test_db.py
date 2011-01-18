@@ -20,9 +20,10 @@ from stalker.core.models import (
     error,
     group,
     imageFormat,
+    link,
+    note,
     pipelineStep,
     project,
-    link,
     repository,
     sequence,
     shot,
@@ -326,11 +327,10 @@ class DatabaseTester(unittest.TestCase):
         admin = db.auth.authenticate(defaults.ADMIN_NAME,
                                      defaults.ADMIN_PASSWORD)
         
-        # try to create a user with the same name
+        # try to create a user with the same login_name
         # expect IntegrityError
         
         kwargs = {
-            "name": "user1",
             "first_name": "user1name",
             "login_name": "user1",
             "email": "user1@gmail.com",
@@ -344,7 +344,7 @@ class DatabaseTester(unittest.TestCase):
         # lets create the second user
         kwargs.update({
             "email": "user2@gmail.com",
-            "login_name": "user2",
+            "login_name": "user1",
         })
         
         user2=user.User(**kwargs)
@@ -442,7 +442,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Asset(self):
+    def test_persistence_Asset(self):
         """testing the persistence of Asset
         """
         
@@ -451,7 +451,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_AssetBase(self):
+    def test_persistence_AssetBase(self):
         """testing the persistence of AssetBase
         """
         
@@ -460,7 +460,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_AssetType(self):
+    def test_persistence_AssetType(self):
         """testing the persistence of AssetType
         """
         
@@ -514,7 +514,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Booking(self):
+    def test_persistence_Booking(self):
         """testing the persistence of Booking
         """
         
@@ -523,7 +523,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Comment(self):
+    def test_persistence_Comment(self):
         """testing the persistence of Comment
         """
         
@@ -532,11 +532,11 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Department(self):
+    def test_persistence_Department(self):
         """testing the persistence of Department
         """
         
-        name = "TestDepartment_test_persisting_Department"
+        name = "TestDepartment_test_persistence_Department"
         description = "this is for testing purposes"
         created_by = None
         updated_by = None
@@ -556,7 +556,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # user1
         user1 = user.User(
-            name="user1_test_persisting_department",
+            name="user1_test_persistence_department",
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -569,7 +569,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # user2
         user2 = user.User(
-            name="user2_test_persisting_department",
+            name="user2_test_persistence_department",
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -583,7 +583,7 @@ class DatabaseModelsTester(unittest.TestCase):
         # user3
         # create three users, one for lead and two for members
         user3 = user.User(
-            name="user3_test_persisting_department",
+            name="user3_test_persistence_department",
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -620,7 +620,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Entity(self):
+    def test_persistence_Entity(self):
         """testing the persistence of Entity
         """
         
@@ -688,7 +688,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Group(self):
+    def test_persistence_Group(self):
         """testing the persistence of Group
         """
         
@@ -699,7 +699,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_ImageFormat(self):
+    def test_persistence_ImageFormat(self):
         """testing the persistence of ImageFormat
         """
         
@@ -740,48 +740,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_PipelineStep(self):
-        """testing the persistence of PipelineStep
-        """
-        
-        # create a new PipelineStep
-        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
-        
-        kwargs = {
-            "name": "RENDER",
-            "description": "this is the step where all the assets are \
-            rendered",
-            "created_by": admin,
-            "code": "RNDR"
-        }
-        
-        pStep = pipelineStep.PipelineStep(**kwargs)
-        
-        # save it to database
-        db.session.add(pStep)
-        
-        # retrieve it back
-        pStep_DB = db.session.query(pipelineStep.PipelineStep). \
-                 filter_by(name=kwargs["name"]). \
-                 filter_by(description=kwargs["description"]). \
-                 first()
-        
-        # lets compare it
-        self.assertEquals(pStep.code, pStep_DB.code)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_persisting_Project(self):
-        """testing the persistence of Project
-        """
-        
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_persisting_Link(self):
+    def test_persistence_Link(self):
         """testing the persistence of Link
         """
         
@@ -817,7 +776,93 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Repository(self):
+    def test_persistence_Note(self):
+        """testing the persistence of Note
+        """
+        
+        # create a Note and attach it to an entity
+        
+        # create a Note object
+        note_kwargs = {
+            "name": "Note1",
+            "description": "This Note is created for the purpose of testing \
+            the Note object",
+            "content": "Please be carefull about this asset, I will fix the \
+            rig later on",
+        }
+        
+        a_note_obj = note.Note(**note_kwargs)
+        
+        # create an entity
+        entity_kwargs = {
+            "name": "Entity with Note",
+            "description": "This Entity is created for testing purposes",
+            "notes": [a_note_obj],
+        }
+        
+        an_entity_obj = entity.Entity(**entity_kwargs)
+        
+        db.session.add_all([an_entity_obj, a_note_obj])
+        db.session.commit()
+        
+        # try to get the note directly
+        
+        note_DB = db.query(note.Note).\
+                filter(note.Note.name==note_kwargs["name"]).first()
+        
+        self.assertEquals(a_note_obj, note_DB)
+        
+        # try to get the note from the entity
+        entity_DB = db.query(entity.Entity).\
+                  filter(entity.Entity.name==entity_kwargs["name"]).first()
+        
+        self.assertEquals(a_note_obj, entity_DB.notes[0])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persistence_PipelineStep(self):
+        """testing the persistence of PipelineStep
+        """
+        
+        # create a new PipelineStep
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        
+        kwargs = {
+            "name": "RENDER",
+            "description": "this is the step where all the assets are \
+            rendered",
+            "created_by": admin,
+            "code": "RNDR"
+        }
+        
+        pStep = pipelineStep.PipelineStep(**kwargs)
+        
+        # save it to database
+        db.session.add(pStep)
+        
+        # retrieve it back
+        pStep_DB = db.session.query(pipelineStep.PipelineStep). \
+                 filter_by(name=kwargs["name"]). \
+                 filter_by(description=kwargs["description"]). \
+                 first()
+        
+        # lets compare it
+        self.assertEquals(pStep.code, pStep_DB.code)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persistence_Project(self):
+        """testing the persistence of Project
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persistence_Repository(self):
         """testing the persistence of Repository
         """
         
@@ -856,7 +901,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Sequence(self):
+    def test_persistence_Sequence(self):
         """testing the persistence of Sequence
         """
         
@@ -865,7 +910,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Shot(self):
+    def test_persistence_Shot(self):
         """testing the persistence of Shot
         """
         
@@ -874,7 +919,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_SimpleEntity(self):
+    def test_persistence_SimpleEntity(self):
         """testing the persistence of SimpleEntity
         """
         
@@ -910,7 +955,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Status(self):
+    def test_persistence_Status(self):
         """testing the persistence of Status
         """
         
@@ -929,7 +974,7 @@ class DatabaseModelsTester(unittest.TestCase):
             updated_by=updated_by,
             date_created=date_created,
             date_updated=date_updated,
-            short_name="tstSt"
+            code="TSTST"
         )
         
         # persist it to the database
@@ -940,12 +985,12 @@ class DatabaseModelsTester(unittest.TestCase):
         testStatusDB = db.session.query(status.Status).first()
         
         # just test the satuts part of the object
-        self.assertEquals(testStatus.short_name, testStatusDB.short_name)
+        self.assertEquals(testStatus, testStatusDB)
     
     
     
     #----------------------------------------------------------------------
-    def test_persisting_StatusList(self):
+    def test_persistence_StatusList(self):
         """testing the persistence of StatusList
         """
         
@@ -954,7 +999,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Structure(self):
+    def test_persistence_Structure(self):
         """testing the persistence of Structure
         """
         
@@ -1035,7 +1080,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Tag(self):
+    def test_persistence_Tag(self):
         """testing the persistence of Tag
         """
         
@@ -1071,7 +1116,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Task(self):
+    def test_persistence_Task(self):
         """testing the persistence of Task
         """
         
@@ -1080,7 +1125,7 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_TypeTemplate(self):
+    def test_persistence_TypeTemplate(self):
         """testing the persistence of TypeTemplate
         """
         
@@ -1121,16 +1166,54 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persisting_User(self):
+    def test_persistence_User(self):
         """testing the persistence of User
         """
         
-        self.fail("test is not implemented yet")
+        # create a new user save and retrieve it
+        
+        # create a Department for the user
+        dep_kwargs = {
+            "name": "Test Department",
+            "description": "This department has been created for testing \
+            purposes",
+        }
+        
+        new_department = department.Department(**dep_kwargs)
+        
+        # create the user
+        user_kwargs = {
+            "login_name": "testuser",
+            "first_name": "Test",
+            "last_name": "User",
+            "email": "testuser@test.com",
+            "password": "12345",
+            "description": "This user has been created for testing purposes",
+            "department": new_department,
+        }
+        
+        new_user = user.User(**user_kwargs)
+        
+        db.session.add_all([new_user, new_department])
+        db.session.commit()
+        
+        user_DB = db.query(user.User).\
+                filter(user.User.name==user_kwargs["login_name"]).first()
+        
+        # the user itself
+        self.assertEquals(new_user, user_DB)
+        
+        # as the member of a department
+        department_db = db.query(department.Department).\
+                      filter(department.Department.name==dep_kwargs["name"]).\
+                      first()
+        
+        self.assertEquals(new_user, department_db.members[0])
     
     
     
     #----------------------------------------------------------------------
-    def test_persisting_Version(self):
+    def test_persistence_Version(self):
         """testing the persistence of Version
         """
         

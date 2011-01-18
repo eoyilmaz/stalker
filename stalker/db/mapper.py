@@ -172,10 +172,6 @@ def setup():
         inherits=entity.Entity,
         inherit_condition=tables.statuses.c.id==tables.entities.c.id,
         polymorphic_identity="Status",
-        properties={
-            "_short_name": tables.statuses.c.short_name,
-            "short_name": synonym("_short_name")
-        }
     )
     
     

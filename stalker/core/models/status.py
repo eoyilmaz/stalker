@@ -10,56 +10,25 @@ from stalker.core.models import entity
 class Status(entity.Entity):
     """The Status class
     
-    :param short_name: the short_name of the status name, keep it as simple
-      as possible, the string will be formated to have all upper-case and no
-      white spaces at the beggining and at the end of the attribute
+    No extra parameters, use the *code* attribute to give a short name for the
+    status.
     """
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self,
-                 #name=None,
-                 short_name=None,
-                 thumbnail=None,
-                 **kwargs
-                 ):
+    def __init__(self, **kwargs):
         
         super(Status,self).__init__(**kwargs)
-        
-        self._short_name = self._check_short_name(short_name)
     
     
     
     #----------------------------------------------------------------------
-    def _check_short_name(self, short_name):
-        """checks the short_name attribute
+    def __eq__(self, other):
+        """the equality operator
         """
         
-        if short_name == "" \
-           or not isinstance(short_name, (str, unicode)):
-            raise(ValueError("the short_name shouldn't be empty and it \
-            should be a str or unicode"))
-        
-        return short_name
-    
-    
-    
-    #----------------------------------------------------------------------
-    def short_name():
-        def fget(self):
-            """returns the short_name property
-            """
-            return self._short_name
-        
-        def fset(self, short_name):
-            """sets the short_name
-            """
-            self._short_name = self._check_short_name(short_name)
-        
-        return locals()
-    
-    short_name = property(**short_name())
+        return super(Status, self).__eq__(other) and isinstance(other, Status)
 
 
 
@@ -111,25 +80,6 @@ class StatusList(entity.Entity):
     
     
     
-    ##----------------------------------------------------------------------
-    #def name():
-        
-        #def fget(self):
-            #"""returns the name attribute
-            #"""
-            #return self._name
-        
-        #def fset(self, name):
-            #"""sets the name attribute
-            #"""
-            #self._name = self._check_name(name)
-        
-        #return locals()
-    
-    #name = property(**name())
-    
-    
-    
     #----------------------------------------------------------------------
     def statuses():
         
@@ -145,6 +95,17 @@ class StatusList(entity.Entity):
         return locals()
     
     statuses = property(**statuses())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(StatusList, self).__eq__(other) and \
+               isinstance(other, StatusList) and \
+               self.statuses == other.statuses
     
     
     

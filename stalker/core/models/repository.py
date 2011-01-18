@@ -156,3 +156,17 @@ class Repository(entity.Entity):
     
     
     
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Repository, self).__eq__(other) and \
+               isinstance(other, Repository) and \
+               self.linux_path == other.linux_path and \
+               self.osx_path == other.osx_path and \
+               self.windows_path == other.windows_path
+        
+    
+    
+    

@@ -35,6 +35,21 @@ class UserTest(mocker.MockerTestCase):
         # a department
         self.mock_department1 = self.mocker.mock(department.Department)
         self.mock_department2 = self.mocker.mock(department.Department)
+        self.mock_department3 = self.mocker.mock(department.Department)
+        
+        ## the __eq__
+        #self.expect(self.mock_department1.__eq__(self.mock_department2)).\
+            #result(True).count(0, None)
+        
+        #self.expect(self.mock_department1.__eq__(self.mock_department3)).\
+            #result(False).count(0, None)
+        
+        ## the __ne__
+        #self.expect(self.mock_department1.__ne__(self.mock_department2)).\
+            #result(False).count(0, None)
+        
+        #self.expect(self.mock_department1.__ne__(self.mock_department3)).\
+            #result(True).count(0, None)
         
         # a couple of permission groups
         self.mock_permission_group1 = self.mocker.mock(group.Group)
@@ -101,6 +116,9 @@ class UserTest(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_code_argument_skipped(self):
         """testing if a value will be set if code argument is skipped
+        
+        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
         """
         
         #code = None
@@ -124,6 +142,9 @@ class UserTest(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_code_argument_None(self):
         """testing if a value will be set if code argument is set to None
+        
+        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
         """
         
         self.kwargs["code"] = None
@@ -140,6 +161,9 @@ class UserTest(mocker.MockerTestCase):
     def test_code_argument_empty_string(self):
         """testing if a value will be set if code argument is set to an empty
         string
+        
+        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
         """
         
         self.kwargs["code"] = ""
@@ -156,6 +180,9 @@ class UserTest(mocker.MockerTestCase):
     def test_code_property_format_when_code_argument_skipped(self):
         """testing if code property is formatted correctly when skipped as an
         argument
+        
+        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
         """
         
         #code = None or ""
@@ -177,7 +204,7 @@ class UserTest(mocker.MockerTestCase):
         
         # set the name and check the code
         for test_value in test_values:
-            self.kwargs["name"] = test_value[0]
+            self.kwargs["login_name"] = test_value[0]
             new_user = user.User(**self.kwargs)
             
             self.assertEquals(new_user.code, test_value[1])
@@ -188,6 +215,9 @@ class UserTest(mocker.MockerTestCase):
     def test_code_property_is_set_when_both_code_and_name_is_given(self):
         """testing if both code argument and name argument is given then it is
         just set to the formatted version of code
+        
+        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
         """
         
         test_values = [
@@ -216,7 +246,10 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_code_property_is_changed_after_setting_name(self):
-        """testing if code was 
+        """testing if code is going to change after setting the name property
+        
+        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
         """
         
         code = "something"
@@ -338,7 +371,7 @@ class UserTest(mocker.MockerTestCase):
         
         test_email = "eoyilmaz@somemail.com"
         self.mock_user.email = test_email
-        self.assertEquals( self.mock_user.email, test_email)
+        self.assertEquals(self.mock_user.email, test_email)
     
     
     
@@ -521,6 +554,20 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_login_name_is_superior_to_name_argument(self):
+        """testing if login_name argument is superior to the the name argument
+        """
+        
+        self.kwargs["name"] = "anewname"
+        self.kwargs["login_name"] = "thisistheloginname"
+        
+        new_user = user.User(**self.kwargs)
+        
+        self.assertEquals(new_user.name, self.kwargs["login_name"])
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_name_argument_changing_login_name_property(self):
         """testing if setting the name argument sets the login_name property
         """
@@ -540,6 +587,9 @@ class UserTest(mocker.MockerTestCase):
         """testing if setting the name property changes the login_name property 
         """
         
+        self.mock_user.name = "EoYilmaz"
+        
+        self.assertEquals(self.mock_user.login_name, "eoyilmaz")
     
     
     
@@ -943,7 +993,7 @@ class UserTest(mocker.MockerTestCase):
         
         # try to set and get the same value back
         self.mock_user.department = self.mock_department2
-        self.assertEquals( self.mock_user.department, self.mock_department2)
+        self.assertEquals(self.mock_user.department, self.mock_department2)
         
     
     
@@ -1164,90 +1214,6 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tasks_argument_None(self):
-        """testing if a ValueError will be raised when trying to assign None
-        to the tasks argument
-        """
-        
-        self.kwargs["tasks"] = None
-        self.assertRaises(ValueError, user.User, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tasks_property_None(self):
-        """testing if a ValueError will be raised when trying to assign None
-        to the tasks argument
-        """
-        
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            "tasks",
-            None
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tasks_argument_accepts_only_list_of_task_objects(self):
-        """testing if a ValueError will be raised when trying to assign
-        anything other than a list of task objects to the tasks argument
-        """
-        
-        test_values = [ 12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
-        
-        for test_value in test_values:
-            self.kwargs["tasks"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tasks_property_accepts_only_list_of_task_objects(self):
-        """testing if a ValueError will be raised when trying to assign
-        anything other than a list of task objects to the tasks argument
-        """
-        
-        test_values = [ 12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
-        
-        for test_value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_user,
-                "tasks",
-                test_value
-            )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tasks_argument_accepts_an_empty_list(self):
-        """testing if nothing happens when trying to assing an empty list to
-        tasks argument
-        """
-        
-        self.kwargs["tasks"] = []
-        
-        # this should work without any error
-        aUserObj = user.User(**self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tasks_property_accepts_an_empty_list(self):
-        """testing if nothing happends when trying to assign an empty list to
-        tasks property
-        """
-        
-        # this should work without any error
-        self.mock_user.tasks = []
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_projects_argument_accepts_an_empty_list(self):
         """testing if projects argument accepts an empty list
         """
@@ -1446,6 +1412,21 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_projects_lead_property_working_properly(self):
+        """testing if the proejcts_lead property is working properly
+        """
+        
+        projects_lead = [self.mock_project1,
+                         self.mock_project2,
+                         self.mock_project3]
+        
+        self.mock_user.projects_lead = projects_lead
+        
+        self.assertEquals(self.mock_user.projects_lead, projects_lead)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_sequences_lead_argument_None(self):
         """testing if a ValueError will be raised when tyring to assign None to
         the sequences_lead argument
@@ -1533,6 +1514,155 @@ class UserTest(mocker.MockerTestCase):
         test_value = ["a sequence", 123123, [], {}, 12.2132 ]
         self.kwargs["sequences_lead"] = test_value
         self.assertRaises(ValueError, user.User, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_argument_None(self):
+        """testing if a ValueError will be raised when trying to assign None
+        to the tasks argument
+        """
+        
+        self.kwargs["tasks"] = None
+        self.assertRaises(ValueError, user.User, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_property_None(self):
+        """testing if a ValueError will be raised when trying to assign None
+        to the tasks argument
+        """
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_user,
+            "tasks",
+            None
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_argument_accepts_only_list_of_task_objects(self):
+        """testing if a ValueError will be raised when trying to assign
+        anything other than a list of task objects to the tasks argument
+        """
+        
+        test_values = [ 12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
+        
+        for test_value in test_values:
+            self.kwargs["tasks"] = test_value
+            self.assertRaises(ValueError, user.User, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_property_accepts_only_list_of_task_objects(self):
+        """testing if a ValueError will be raised when trying to assign
+        anything other than a list of task objects to the tasks argument
+        """
+        
+        test_values = [ 12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_user,
+                "tasks",
+                test_value
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_argument_accepts_an_empty_list(self):
+        """testing if nothing happens when trying to assing an empty list to
+        tasks argument
+        """
+        
+        self.kwargs["tasks"] = []
+        
+        # this should work without any error
+        aUserObj = user.User(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_property_accepts_an_empty_list(self):
+        """testing if nothing happends when trying to assign an empty list to
+        tasks property
+        """
+        
+        # this should work without any error
+        self.mock_user.tasks = []
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_property_works_properly(self):
+        """testing if tasks property is working properly
+        """
+        
+        tasks = [self.mock_task1,
+                 self.mock_task2,
+                 self.mock_task3,
+                 self.mock_task4]
+        
+        self.mock_user.tasks = tasks
+        
+        self.assertEquals(self.mock_user.tasks, tasks)
+        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality_operator(self):
+        """testing equality of two users
+        """
+        
+        same_user = user.User(**self.kwargs)
+        
+        self.kwargs.update({
+            "name": "a different user",
+            "description": "this is a different user",
+            "login_name": "guser",
+            "first_name": "generic",
+            "last_name": "user",
+            "email": "generic.user@generic.com",
+            "password": "verysecret",
+        })
+        
+        new_user = user.User(**self.kwargs)
+        
+        self.assertTrue(self.mock_user==same_user)
+        self.assertFalse(self.mock_user==new_user)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality_operator(self):
+        """testing inequality of two users
+        """
+        
+        same_user = user.User(**self.kwargs)
+        
+        self.kwargs.update({
+            "name": "a different user",
+            "description": "this is a different user",
+            "login_name": "guser",
+            "first_name": "generic",
+            "last_name": "user",
+            "email": "generic.user@generic.com",
+            "password": "verysecret",
+        })
+        
+        new_user = user.User(**self.kwargs)
+        
+        self.assertFalse(self.mock_user!=same_user)
+        self.assertTrue(self.mock_user!=new_user)
     
     
     

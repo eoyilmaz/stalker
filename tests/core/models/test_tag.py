@@ -20,8 +20,14 @@ class TagTest(unittest.TestCase):
         """setup the test
         """
         
-        self.name = "a test tag"
-        self.description = "this is a test tag"
+        self.kwargs = {
+            "name": "a test tag",
+            "description": "this is a test tag",
+        }
+        
+        # create another SimpleEntity with kwargs for __eq__ and __ne__ tests
+        from stalker.core.models import entity
+        self.simple_entity = entity.SimpleEntity(**self.kwargs)
     
     
     
@@ -31,7 +37,45 @@ class TagTest(unittest.TestCase):
         """
         
         # this should work without any error
-        a_tag_object = tag.Tag(
-            name=self.name,
-            description=self.description
-        )
+        a_tag_object = tag.Tag(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing the equality of two Tags
+        """
+        
+        a_tag_object1 = tag.Tag(**self.kwargs)
+        a_tag_object2 = tag.Tag(**self.kwargs)
+        
+        self.kwargs["name"] = "a new test Tag"
+        self.kwargs["description"] = "this is a new test Tag"
+        
+        a_tag_object3 = tag.Tag(**self.kwargs)
+        
+        
+        self.assertTrue(a_tag_object1==a_tag_object2)
+        self.assertFalse(a_tag_object1==a_tag_object3)
+        self.assertFalse(a_tag_object1==self.simple_entity)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing the inequality of two Tags
+        """
+        
+        a_tag_object1 = tag.Tag(**self.kwargs)
+        a_tag_object2 = tag.Tag(**self.kwargs)
+        
+        self.kwargs["name"] = "a new test Tag"
+        self.kwargs["description"] = "this is a new test Tag"
+        
+        a_tag_object3 = tag.Tag(**self.kwargs)
+        
+        self.assertFalse(a_tag_object1!=a_tag_object2)
+        self.assertTrue(a_tag_object1!=a_tag_object3)
+        self.assertTrue(a_tag_object1!=self.simple_entity)
+
+
