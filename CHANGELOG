@@ -1,6 +1,22 @@
 Stalker Changes
 ===============
 
+v0.1.1.a3:
+ * removed the accidently included *tests* from the egg build
+ * added/fixed equality and inequality operators for classes:
+  * Department
+  * StatusedEntity
+ * SimpleEntity now has a **kwargs in the __init__ so it doesn't give TypeError
+   for extra keywords
+ * added EntityMeta metaclass which adds entity_type attribute and sets its
+   value to the name of the class
+ * the SimpleEntity uses the EntityMeta metaclass to automatically add all the
+   entity_type attribute to all the derived classes
+ * all the mappers now uses the ClassName.entity_type class attribute as the
+   polymorphic identity
+ * instead of LBYL moved towar EAFP idiom for all the models in the
+   stalker.coreS
+
 v0.1.1.a2:
  * updated the Tutorial
  * added *code* attribute to SimpleEntity
@@ -19,7 +35,6 @@ v0.1.1.a2:
  * added tests for persistence of Note class (tests are green)
  * added equality and inequality operators for classes:
   * User
-  * Department
   * Tag
   * Status
   * StatusList

@@ -127,6 +127,8 @@ class ProjectType(entity.TypeEntity):
     etc.
     """
     
+    
+    
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(ProjectType, self).__init__(**kwargs)

@@ -270,32 +270,69 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     
+    ##----------------------------------------------------------------------
+    #def test_name_property_not_being_string_or_unicode(self):
+        #"""testing if ValueError is raised when trying to set the name
+        #something other than a string or unicode
+        #"""
+        
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.simple_entity,
+            #"name",
+            #10
+        #)
+    
+    
     #----------------------------------------------------------------------
     def test_name_property_not_being_string_or_unicode(self):
-        """testing if ValueError is raised when trying to set the name
-        something other than a string or unicode
+        """testing if a the name property is going to be formatted correctly
+        when the given value is not a str or unicode
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.simple_entity,
-            "name",
-            10
-        )
+        test_values = [
+            ([1,"name"], "name"),
+            ({"a", "name"}, "aname")
+        ]
+        
+        for test_value in test_values:
+            self.simple_entity.name = test_value[0]
+            self.assertEquals(self.simple_entity.name, test_value[1])
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_name_argument_not_init_as_string_or_unicode(self):
+        #"""testing if ValueError is raised when trying to initialize the name
+        #argument to something else than a string or unicode
+        #"""
+        
+        #test_values = [1, 1.2, ["a name"], {"a": "name"}]
+        #for test_value in test_values:
+            #self.kwargs["name"] = test_value
+            #self.assertRaises(ValueError, entity.SimpleEntity, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_name_argument_not_init_as_string_or_unicode(self):
-        """testing if ValueError is raised when trying to initialize the name
-        argument to something else than a string or unicode
+        """testing if a the name property is going to be formatted correctly
+        when the given value for the name argument isn't a str or unicode
         """
         
-        test_values = [1, 1.2, ["a name"], {"a": "name"}]
+        test_values = [
+            ([1,"name"], "name"),
+            ({"a", "name"}, "aname")
+        ]
+        
         for test_value in test_values:
-            self.kwargs["name"] = test_value
-            self.assertRaises(ValueError, entity.SimpleEntity, **self.kwargs)
+            self.kwargs["name"] = test_value[0]
+            
+            a_new_simple_entity = entity.SimpleEntity(**self.kwargs)
+            
+            #self.simple_entity.name = test_value[0]
+            self.assertEquals(a_new_simple_entity.name, test_value[1])
     
     
     
@@ -1382,77 +1419,6 @@ class StatusedEntityTester(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_notes_being_not_intialized(self):
-        #"""testing if nothing is raised when creating an entity without setting
-        #a notes parameter
-        #"""
-        
-        ## this should work without errors
-        #aNewEntity = entity.StatusedEntity(
-            #name=self.name,
-            #created_by=self.mock_user,
-            #updated_by=self.mock_user,
-            #status_list= self.mock_status_list
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_notes_being_initialized_as_an_empty_list(self):
-        #"""testing if notes is initialized as an empty list
-        #"""
-        
-        ## this should work without errors
-        #aNewEntity = entity.StatusedEntity(
-            #name=self.name,
-            #created_by=self.mock_user,
-            #updated_by=self.mock_user,
-            #status_list= self.mock_status_list
-        #)
-        
-        #expected_result = []
-        
-        #self.assertEquals(aNewEntity.notes, expected_result)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_notes_init_with_something_other_than_a_list(self):
-        #"""testing if a ValueError is going to be raised when initializing the
-        #notes with something other than a list
-        #"""
-        
-        #test_values = [1, 12.3, "a string", {}]
-        
-        ##-----------------------
-        ## a string
-        #for test_value in test_values:
-            #self.assertRaises(
-                #ValueError,
-                #entity.StatusedEntity,
-                #name=self.name,
-                #created_by=self.mock_user,
-                #updated_by=self.mock_user,
-                #status_list=self.mock_status_list,
-                #status=0,
-                #notes=test_value
-            #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_notes_property_working_properly(self):
-        #"""testing if notes property working properly
-        #"""
-        
-        ## assign a new note object to the notes property and check if it is
-        ## assigned correctly
-        
-        #self.fail("test not implemented yet!")
-    
-    
-    
     #----------------------------------------------------------------------
     def test_equality(self):
         """testing equality
@@ -1461,7 +1427,14 @@ class StatusedEntityTester(mocker.MockerTestCase):
         statusedEntity1 = entity.StatusedEntity(**self.kwargs)
         statusedEntity2 = entity.StatusedEntity(**self.kwargs)
         
+        entity1 = entity.Entity(**self.kwargs)
+        
+        self.kwargs["name"] = "A different Statused Entity"
+        statusedEntity3 = entity.StatusedEntity(**self.kwargs)
+        
         self.assertTrue(statusedEntity1==statusedEntity2)
+        self.assertFalse(statusedEntity1==statusedEntity3)
+        self.assertFalse(statusedEntity1==entity1)
     
     
     
@@ -1471,12 +1444,17 @@ class StatusedEntityTester(mocker.MockerTestCase):
         """
         
         statusedEntity1 = entity.StatusedEntity(**self.kwargs)
-        
-        
-        self.kwargs['status_list'] = self.mock_status_list2
         statusedEntity2 = entity.StatusedEntity(**self.kwargs)
         
-        self.assertTrue(statusedEntity1!=statusedEntity2)
+        entity1 = entity.Entity(**self.kwargs)
+        
+        self.kwargs["name"] = "A different Statused Entity"
+        statusedEntity3 = entity.StatusedEntity(**self.kwargs)
+        
+        self.assertFalse(statusedEntity1!=statusedEntity2)
+        self.assertTrue(statusedEntity1!=statusedEntity3)
+        self.assertTrue(statusedEntity1!=entity1)
+
 
 
 

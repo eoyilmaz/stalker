@@ -23,6 +23,15 @@ metadata = db.metadata
 
 # create tables
 
+
+## ENTITYTYPE_IDs
+#entity_type_ids = Table(
+    #"entity_type_ids", metadata,
+    #Column("id", Integer, primary_key=True),
+    #Column("db_entity_type", String(128), nullable=False),
+#)
+
+
 # SIMPLE ENTITY
 simpleEntities = Table(
     "simpleEntities", metadata,
@@ -45,8 +54,14 @@ simpleEntities = Table(
     
     Column("date_created", DateTime),
     Column("date_updated", DateTime),
-    Column("entity_type", String(128), nullable=False),
-    UniqueConstraint('name', 'entity_type')
+    Column("db_entity_type", String(128), nullable=False),
+    #Column(
+        #"db_entity_type",
+        #Integer,
+        #ForeignKey("entity_type_ids.id"),
+        #nullable=False
+    #),
+    UniqueConstraint("name", "db_entity_type")
 )
 
 
@@ -114,7 +129,6 @@ users = Table(
     Column("email", String(256), unique=True, nullable=False),
     Column("first_name", String(256), nullable=False),
     Column("last_name", String(256), nullable=True),
-    #Column("login_name", String(256), unique=True, nullable=False),
     Column("password", String(256), nullable=False),
     
     #Column("permission_groups_id",
@@ -210,7 +224,7 @@ statusList_statuses = Table(
         primary_key=True
     ),
     Column(
-        "status.id",
+        "status_id",
         Integer,
         ForeignKey("statuses.id"),
         primary_key=True
@@ -229,6 +243,26 @@ statusLists = Table(
         primary_key=True
     ),
 )
+
+
+
+# ENTITYTYPE_STATUSLISTS
+entity_type_statusLists = Table(
+    "entity_type_statusLists", metadata,
+    Column(
+        "entity_type",
+        String(128),
+        ForeignKey("simpleEntities.db_entity_type"),
+        primary_key=True
+    ),
+    Column(
+        "statusList_id",
+        Integer,
+        ForeignKey("statusLists.id"),
+        primary_key=True
+    )
+)
+
 
 
 # REPOSITORY

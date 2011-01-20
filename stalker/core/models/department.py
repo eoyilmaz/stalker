@@ -18,6 +18,11 @@ class Department(entity.Entity):
       * The lead of the department
       * and all the other things those are inherited from the AuditEntity class
     
+    Two Department object considered the same if they have the same name, the
+    the members list nor the lead info is important, a "Modeling" department
+    should of course be the same with another department which has the name
+    "Modeling" again.
+    
     so creating a department object needs the following parameters:
     
     :param members: it can be an empty list, so one department can be created
@@ -121,3 +126,11 @@ class Department(entity.Entity):
     
     
     
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Department, self).__eq__(other) and \
+               isinstance(other, Department)
+        

@@ -4,7 +4,7 @@
 
 import mocker
 import datetime
-from stalker.core.models import department, user
+from stalker.core.models import department, user, entity
 
 
 
@@ -190,3 +190,45 @@ class DepartmentTester(mocker.MockerTestCase):
         #self.fail("test is not implemented yet")
     
     
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing equality of two Department objects
+        """
+        
+        dep1 = department.Department(**self.kwargs)
+        dep2 = department.Department(**self.kwargs)
+        
+        entity_kwargs = self.kwargs.copy()
+        entity_kwargs.pop("members")
+        entity_kwargs.pop("lead")
+        entity1 = entity.Entity(**entity_kwargs)
+        
+        self.kwargs["name"] = "Animation"
+        dep3 = department.Department(**self.kwargs)
+        
+        self.assertTrue(dep1==dep2)
+        self.assertFalse(dep1==dep3)
+        self.assertFalse(dep1==entity1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing inequality of two Department objects
+        """
+        
+        dep1 = department.Department(**self.kwargs)
+        dep2 = department.Department(**self.kwargs)
+        
+        entity_kwargs = self.kwargs.copy()
+        entity_kwargs.pop("members")
+        entity_kwargs.pop("lead")
+        entity1 = entity.Entity(**entity_kwargs)
+        
+        self.kwargs["name"] = "Animation"
+        dep3 = department.Department(**self.kwargs)
+        
+        self.assertFalse(dep1!=dep2)
+        self.assertTrue(dep1!=dep3)
+        self.assertTrue(dep1!=entity1)

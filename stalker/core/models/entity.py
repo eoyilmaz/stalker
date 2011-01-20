@@ -8,6 +8,22 @@ import re
 
 
 
+########################################################################
+class EntityMeta(type):
+    """the metaclass for the very basic entity, just adds the name of the class
+    as the entity_type class attribute
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(cls, classname, bases, dict_):
+        setattr(cls, "entity_type", classname)
+        return type.__init__(cls, classname, bases, dict_)
+
+
+
+
 
 
 ########################################################################
@@ -17,6 +33,9 @@ class SimpleEntity(object):
     This class has the basic information about an entity which are the name,
     the description, tags and the audit information like created_by,
     updated_by, date_created and date_updated about this entity.
+    
+    Two SimpleEntities considered equal if they have the same name, the other
+    attributes doesn't matter.
     
     :param name: a string or unicode attribute that holds the name of this
       entity. it could not be empty, the first letter should be an alphabetic
@@ -51,7 +70,11 @@ class SimpleEntity(object):
     """
     
     
-
+    
+    __metaclass__ = EntityMeta
+    
+    
+    
     #----------------------------------------------------------------------
     def __init__(self,
                  name=None,
@@ -61,6 +84,7 @@ class SimpleEntity(object):
                  date_created=datetime.datetime.now(),
                  date_updated=datetime.datetime.now(),
                  code=None,
+                 **kwargs
                  ):
         
         # code attribute
@@ -474,7 +498,6 @@ class SimpleEntity(object):
         """
         
         return not self.__eq__(other)
-        
 
 
 
@@ -485,6 +508,9 @@ class SimpleEntity(object):
 class Entity(SimpleEntity):
     """This is the entity class which is derived from the SimpleEntity and adds
     only tags to the list of parameters.
+    
+    Two Entities considered equal if they have the same name. It doesn't matter
+    if they have different tags or notes.
     
     :param tags: a list of tag objects related to this entity. tags could be an
       empty list, or when omitted it will be set to an empty list
@@ -622,7 +648,6 @@ class StatusedEntity(Entity):
     def __init__(self,
                  status_list=[],
                  status=0,
-                 #notes=[],
                  **kwargs
                  ):
         super(StatusedEntity, self).__init__(**kwargs)
@@ -631,8 +656,6 @@ class StatusedEntity(Entity):
         #self._references = self._check_references(references)
         self._status_list = self._check_status_list(status_list)
         self._status = self._check_status(status)
-        #self._notes = self._check_notes(notes)
-        #self._thumbnail = thumbnail
     
     
     
@@ -659,22 +682,6 @@ class StatusedEntity(Entity):
             #raise ValueError("the lists attribute should be set to a list")
         
         #return references_in
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _check_notes(self, notes_in):
-        #"""checks the given notes_in value
-        #"""
-        
-        ## raise ValueError when:
-        
-        ## it is not an instance of list
-        #if not isinstance(notes_in, list):
-            #raise ValueError("the notes attribute should be an instance of \
-            #list")
-        
-        #return notes_in
     
     
     
@@ -777,31 +784,13 @@ class StatusedEntity(Entity):
     
     
     
-    ##----------------------------------------------------------------------
-    #def notes():
-        
-        #def fget(self):
-            #return self._notes
-        
-        #def fset(self, notes_in):
-            #self._notes = self._check_notes(notes_in)
-        
-        #doc = """notes is a list of Notes objects, it is a place to store notes
-        #about this entity"""
-        
-        #return locals()
-    
-    #notes = property(**notes())
-    
-    
-    
     #----------------------------------------------------------------------
     def __eq__(self, other):
         """the equality operator
         """
         
         return super(StatusedEntity, self).__eq__(other) and \
-               self.status_list==other.status_list
+               isinstance(other, StatusedEntity)
 
 
 

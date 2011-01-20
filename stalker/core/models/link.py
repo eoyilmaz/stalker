@@ -40,6 +40,8 @@ class Link(entity.Entity):
     .. _Nuke: http://www.thefoundry.co.uk
     """
     
+    
+    
     #----------------------------------------------------------------------
     def __init__(self, path="", filename="", type=None, **kwargs):
         super(Link, self).__init__(**kwargs)

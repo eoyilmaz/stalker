@@ -40,6 +40,9 @@ def setup():
     """setups the mapping
     """
     
+    # Entity_Type_IDs
+    
+    
     # SimpleEntity
     mapper(
         entity.SimpleEntity,
@@ -72,10 +75,10 @@ def setup():
             "_date_created": tables.simpleEntities.c.date_created,
             "date_created": synonym("_date_created"),
             "_date_updated": tables.simpleEntities.c.date_updated,
-            "date_updated": synonym("_date_updated")
+            "date_updated": synonym("_date_updated"),
         },
-        polymorphic_on=tables.simpleEntities.c.entity_type,
-        polymorphic_identity="SimpleEntity"
+        polymorphic_on=tables.simpleEntities.c.db_entity_type,
+        polymorphic_identity=entity.SimpleEntity.entity_type
     )
     
     
@@ -84,8 +87,8 @@ def setup():
     mapper(
         tag.Tag,
         tables.tags,
-        inherits=entity.SimpleEntity,
-        polymorphic_identity="Tag"
+        inherits=tag.Tag.__base__,
+        polymorphic_identity=tag.Tag.entity_type
     )
     
     
@@ -94,9 +97,9 @@ def setup():
     mapper(
         entity.Entity,
         tables.entities,
-        inherits=entity.SimpleEntity,
+        inherits=entity.Entity.__base__,
         inherit_condition=tables.entities.c.id==tables.simpleEntities.c.id,
-        polymorphic_identity="Entity",
+        polymorphic_identity=entity.Entity.entity_type,
         properties={
             "_tags": relationship(
                 tag.Tag,
@@ -119,9 +122,9 @@ def setup():
     mapper(
         user.User,
         tables.users,
-        inherits=entity.Entity,
+        inherits=user.User.__base__,
         inherit_condition=tables.users.c.id==tables.entities.c.id,
-        polymorphic_identity="User",
+        polymorphic_identity=user.User.entity_type,
         properties={
             "enitites_created": synonym("_entities_created"),
             "enitites_updated": synonym("_entities_updated"),
@@ -149,9 +152,9 @@ def setup():
     mapper(
         department.Department,
         tables.departments,
-        inherits=entity.Entity,
+        inherits=department.Department.__base__,
         inherit_condition=tables.departments.c.id==tables.entities.c.id,
-        polymorphic_identity="Department",
+        polymorphic_identity=department.Department.entity_type,
         properties={
             "_members": relationship(
                 user.User,
@@ -169,9 +172,9 @@ def setup():
     mapper(
         status.Status,
         tables.statuses,
-        inherits=entity.Entity,
+        inherits=status.Status.__base__,
         inherit_condition=tables.statuses.c.id==tables.entities.c.id,
-        polymorphic_identity="Status",
+        polymorphic_identity=status.Status.entity_type,
     )
     
     
@@ -180,9 +183,9 @@ def setup():
     mapper(
         status.StatusList,
         tables.statusLists,
-        inherits=entity.Entity,
+        inherits=status.StatusList.__base__,
         inherit_condition=tables.statusLists.c.id==tables.entities.c.id,
-        polymorphic_identity="StatusLists",
+        polymorphic_identity=status.StatusList.entity_type,
         properties={
             "_statuses": relationship(
                 status.Status,
@@ -198,9 +201,9 @@ def setup():
     mapper(
         repository.Repository,
         tables.repositories,
-        inherits=entity.Entity,
+        inherits=repository.Repository.__base__,
         inherit_condition=tables.repositories.c.id==tables.entities.c.id,
-        polymorphic_identity="Repository",
+        polymorphic_identity=repository.Repository.entity_type,
         properties={
             "_linux_path": tables.repositories.c.linux_path,
             "linux_path": synonym("_linux_path"),
@@ -218,9 +221,9 @@ def setup():
     mapper(
         imageFormat.ImageFormat,
         tables.imageFormats,
-        inherits=entity.Entity,
+        inherits=imageFormat.ImageFormat.__base__,
         inherit_condition=tables.imageFormats.c.id==tables.entities.c.id,
-        polymorphic_identity="ImageFormat",
+        polymorphic_identity=imageFormat.ImageFormat.entity_type,
         properties={
             "_width": tables.imageFormats.c.width,
             "width": synonym("_width"),
@@ -240,9 +243,9 @@ def setup():
     mapper(
         entity.TypeEntity,
         tables.typeEntities,
-        inherits=entity.Entity,
+        inherits=entity.TypeEntity.__base__,
         inherit_condition=tables.typeEntities.c.id==tables.entities.c.id,
-        polymorphic_identity="TypeEntity",
+        polymorphic_identity=entity.TypeEntity.entity_type,
     )
     
     
@@ -251,9 +254,9 @@ def setup():
     mapper(
         types.AssetType,
         tables.assetTypes,
-        inherits=entity.TypeEntity,
+        inherits=types.AssetType.__base__,
         inherit_condition=tables.assetTypes.c.id==tables.typeEntities.c.id,
-        polymorphic_identity="AssetType",
+        polymorphic_identity=types.AssetType.entity_type,
         properties={
             "_steps": relationship(
                 pipelineStep.PipelineStep,
@@ -269,9 +272,9 @@ def setup():
     mapper(
         types.LinkType,
         tables.linkTypes,
-        inherits=entity.TypeEntity,
+        inherits=types.LinkType.__base__,
         inherit_condition=tables.linkTypes.c.id==tables.typeEntities.c.id,
-        polymorphic_identity="LinkType",
+        polymorphic_identity=types.LinkType.entity_type,
     )
     
     
@@ -280,9 +283,9 @@ def setup():
     mapper(
         types.ProjectType,
         tables.projectTypes,
-        inherits=entity.TypeEntity,
+        inherits=types.ProjectType.__base__,
         inherit_condition=tables.projectTypes.c.id==tables.typeEntities.c.id,
-        polymorphic_identity="ProjectType",
+        polymorphic_identity=types.ProjectType.entity_type,
     )
     
     
@@ -291,9 +294,9 @@ def setup():
     mapper(
         pipelineStep.PipelineStep,
         tables.pipelineSteps,
-        inherits=entity.Entity,
+        inherits=pipelineStep.PipelineStep.__base__,
         inherit_condition=tables.pipelineSteps.c.id==tables.entities.c.id,
-        polymorphic_identity="PipelineStep",
+        polymorphic_identity=pipelineStep.PipelineStep.entity_type,
         #properties={
             #"_code": tables.pipelineSteps.c.code,
             #"code": synonym("_code")
@@ -306,9 +309,9 @@ def setup():
     mapper(
         types.TypeTemplate,
         tables.typeTemplates,
-        inherits=entity.Entity,
+        inherits=types.TypeTemplate.__base__,
         inherit_condition=tables.typeTemplates.c.id==tables.entities.c.id,
-        polymorphic_identity="TypeTemplate",
+        polymorphic_identity=types.TypeTemplate.entity_type,
         properties={
             "_path_code": tables.typeTemplates.c.path_code,
             "path_code": synonym("_path_code"),
@@ -329,9 +332,9 @@ def setup():
     mapper(
         structure.Structure,
         tables.structures,
-        inherits=entity.Entity,
+        inherits=structure.Structure.__base__,
         inherit_condition=tables.structures.c.id==tables.entities.c.id,
-        polymorphic_identity="Structure",
+        polymorphic_identity=structure.Structure.entity_type,
         properties={
             "_project_template": tables.structures.c.project_template,
             "project_template": synonym("_project_template"),
@@ -366,9 +369,9 @@ def setup():
     mapper(
         link.Link,
         tables.links,
-        inherits=entity.Entity,
+        inherits=link.Link.__base__,
         inherit_condition=tables.links.c.id==tables.entities.c.id,
-        polymorphic_identity="Link",
+        polymorphic_identity=link.Link.entity_type,
         properties={
             "_path": tables.links.c.path,
             "path": synonym("_path"),
@@ -390,12 +393,15 @@ def setup():
     mapper(
         note.Note,
         tables.notes,
-        inherits=entity.SimpleEntity,
+        inherits=note.Note.__base__,
         inherit_condition=tables.notes.c.id==tables.simpleEntities.c.id,
-        polymorphic_identity="Note",
+        polymorphic_identity=note.Note.entity_type,
         properties={
             "_content": tables.notes.c.content,
             "content": synonym("_content"),
         }
     )
+    
+    
+    
     

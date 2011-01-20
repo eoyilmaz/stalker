@@ -46,6 +46,8 @@ class StatusList(entity.Entity):
       different StatusList objects for different kind of entities
     """
     
+    
+    
     #----------------------------------------------------------------------
     def __init__(self,
                  #name=None,

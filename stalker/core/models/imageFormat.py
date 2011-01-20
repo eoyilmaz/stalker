@@ -29,6 +29,8 @@ class ImageFormat(entity.Entity):
     
     """
     
+    
+    
     #----------------------------------------------------------------------
     def __init__(self,
                  width=None,
