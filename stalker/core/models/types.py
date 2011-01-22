@@ -30,13 +30,13 @@ class AssetType(entity.TypeEntity):
     def __init__(self, steps=[], **kwargs):
         super(AssetType, self).__init__(**kwargs)
         
-        self._steps = self._check_steps(steps)
+        self._steps = self._validate_steps(steps)
     
     
     
     #----------------------------------------------------------------------
-    def _check_steps(self, steps_in):
-        """checks the given steps list
+    def _validate_steps(self, steps_in):
+        """validates the given steps list
         """
         
         # raise a Value error if it is not a list
@@ -61,7 +61,7 @@ class AssetType(entity.TypeEntity):
             return self._steps
         
         def fset(self, steps_in):
-            self._steps = self._check_steps(steps_in)
+            self._steps = self._validate_steps(steps_in)
         
         doc = """this is the property that lets you set and get steps attribute
         """
@@ -260,15 +260,15 @@ Character assets",
                  **kwargs):
         super(TypeTemplate, self).__init__(**kwargs)
         
-        self._path_code = self._check_path_code(path_code)
-        self._file_code = self._check_file_code(file_code)
-        self._type = self._check_type(type)
+        self._path_code = self._validate_path_code(path_code)
+        self._file_code = self._validate_file_code(file_code)
+        self._type = self._validate_type(type)
     
     
     
     #----------------------------------------------------------------------
-    def _check_path_code(self, path_code_in):
-        """checks the given path_code attribute for several conditions
+    def _validate_path_code(self, path_code_in):
+        """validates the given path_code attribute for several conditions
         """
         
         # check if it is None
@@ -289,8 +289,8 @@ Character assets",
     
     
     #----------------------------------------------------------------------
-    def _check_file_code(self, file_code_in):
-        """checks the given file_code attribute for several conditions
+    def _validate_file_code(self, file_code_in):
+        """validates the given file_code attribute for several conditions
         """
         
         # check if it is None
@@ -311,8 +311,8 @@ Character assets",
     
     
     #----------------------------------------------------------------------
-    def _check_type(self, type_in):
-        """checks the given type attribute for several conditions
+    def _validate_type(self, type_in):
+        """validates the given type attribute for several conditions
         """
         
         # check if it is None
@@ -334,7 +334,7 @@ Character assets",
             return self._path_code
         
         def fset(self, path_code_in):
-            self._path_code = self._check_path_code(path_code_in)
+            self._path_code = self._validate_path_code(path_code_in)
         
         doc = """this is the property that helps you assign values to
         path_code attribute"""
@@ -352,7 +352,7 @@ Character assets",
             return self._file_code
         
         def fset(self, file_code_in):
-            self._file_code = self._check_file_code(file_code_in)
+            self._file_code = self._validate_file_code(file_code_in)
         
         doc = """this is the property that helps you assign values to
         file_code attribute"""
@@ -370,7 +370,7 @@ Character assets",
             return self._type
         
         def fset(self, type_in):
-            self._type = self._check_type(type_in)
+            self._type = self._validate_type(type_in)
         
         doc = """the target type this template should work on, should be an
         instance of :class:`~stalker.core.models.entity.TypeEntity`"""
@@ -385,13 +385,13 @@ Character assets",
     def __eq__(self, other):
         """checks the equality of the given object to this one
         """
-        print "running the TypeTemplate.__eq__"
+        #print "running the TypeTemplate.__eq__"
         
-        print super(TypeTemplate, self).__eq__(other)
-        print isinstance(other, TypeTemplate)
-        print self.path_code == other.path_code
-        print self.file_code == other.file_code
-        print self.type == other.type
+        #print super(TypeTemplate, self).__eq__(other)
+        #print isinstance(other, TypeTemplate)
+        #print self.path_code == other.path_code
+        #print self.file_code == other.file_code
+        #print self.type == other.type
         
         
         return super(TypeTemplate, self).__eq__(other) and \

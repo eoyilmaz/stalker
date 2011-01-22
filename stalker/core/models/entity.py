@@ -40,12 +40,14 @@ class SimpleEntity(object):
     :param name: a string or unicode attribute that holds the name of this
       entity. it could not be empty, the first letter should be an alphabetic
       (not alphanumeric) letter and it should not contain any white space
-      at the beggining and at the end of the string
+      at the beggining and at the end of the string, giving an object the
+      object will be converted to string and then the resulting string will be
+      conditioned.
     
     :param description: a string or unicode attribute that holds the
       description of this entity object, it could be an empty string, and it
       could not again have white spaces at the beggining and at the end of the
-      string
+      string, again any given objects will be converted to strings
     
     :param created_by: the created_by attribute should contain a User object
       who is created this object
@@ -63,10 +65,11 @@ class SimpleEntity(object):
     
     :param code: this is the code name of this simple entity, can be omitted
       and it will be set to the uppercase version of the nice_name attribute.
-      it accepts string or unicode values. If both the name and code arguments
-      are given the the code property will be set to code, but in any update to
-      name attribute the code also will be updated to the uppercase form of the
-      nice_name attribute
+      it accepts string or unicode values and any other kind of objects will be
+      converted to string. If both the name and code arguments are given the
+      code property will be set to code, but in any update to name attribute
+      the code also will be updated to the uppercase form of the nice_name
+      attribute
     """
     
     
@@ -100,13 +103,13 @@ class SimpleEntity(object):
         # if the given code argument is not None
         # use it to set the code
         if code is not None and code is not "":
-            self._code = self._check_code(code)
+            self._code = self._validate_code(code)
         
-        self._description = self._check_description(description)
-        self._created_by = self._check_created_by(created_by)
-        self._updated_by = self._check_updated_by(updated_by)
-        self._date_created = self._check_date_created(date_created)
-        self._date_updated = self._check_date_updated(date_updated)
+        self._description = self._validate_description(description)
+        self._created_by = self._validate_created_by(created_by)
+        self._updated_by = self._validate_updated_by(updated_by)
+        self._date_created = self._validate_date_created(date_created)
+        self._date_updated = self._validate_date_updated(date_updated)
     
     
     
@@ -115,47 +118,38 @@ class SimpleEntity(object):
         """the representation of the SimpleEntity
         """
         
-        return "<SimpleEntity (%s, %s)>" % (self.name, self.code)
+        return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
     
     
     
     #----------------------------------------------------------------------
-    def _check_description(self, description_in):
-        """checks the given description_in value
+    def _validate_description(self, description_in):
+        """validates the given description_in value
         """
         
-        # raise ValueError when:
+        if description_in is None:
+            description_in = ""
         
-        # it is not an instance of string or unicode
-        if not isinstance(description_in, (str, unicode)):
-            raise ValueError("the description should be set to a string or \
-            unicode")
-        
-        return description_in
+        return str(description_in)
     
     
     
     #----------------------------------------------------------------------
-    def _check_name(self, name_in):
-        """checks the given name_in value
+    def _validate_name(self, name_in):
+        """validates the given name_in value
         """
-        
-        # raise ValueError when:
         
         # it is None
         if name_in is None:
             raise ValueError("the name couldn't be set to None")
         
+        name_in = self._condition_name(str(name_in))
+        
         # it is empty
         if name_in == "":
             raise ValueError("the name couldn't be an empty string")
         
-        # it is not an instance of string or unicode
-        if not isinstance(name_in, (str, unicode)):
-            raise ValueError("the name attribute should be set to a string \
-            or unicode")
-        
-        return self._condition_name(name_in)
+        return name_in
     
     
     
@@ -173,20 +167,11 @@ class SimpleEntity(object):
         """conditions the name_in value
         """
         
-        import re
+        # remove unnecesary characters from the string
+        name_in = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", name_in).strip()
         
-        #print name_in
-        # remove unnecesary characters from the beginning
-        name_in = re.sub("(^[^A-Za-z]+)", r"", name_in)
-        #print name_in
-        
-        # remove white spaces
-        name_in = name_in.strip()
-        #print name_in
-        
-        ## capitalize the first letter
-        #name_in = name_in[0].upper() + name_in[1:]
-        #print name_in
+        # remove all the characters which are not alpabetic
+        name_in = re.sub("(^[^a-zA-Z]+)", r"", name_in)
         
         return name_in
     
@@ -197,14 +182,17 @@ class SimpleEntity(object):
         """conditions the given nice name
         """
         
-        # remove unnecesary characters from the beginning
-        nice_name_in = re.sub("(^[^A-Za-z]+)", r"", nice_name_in)
+        ## remove unnecesary characters from the beginning
+        #nice_name_in = re.sub("(^[^A-Za-z]+)", r"", nice_name_in)
         
-        # remove camel case letters
+        # remove unnecesary characters from the string
+        nice_name_in = self._validate_name(nice_name_in)
+        
+        # replace camel case letters
         nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
         
         # replace white spaces with under score
-        nice_name_in = re.sub("([\s])+", r"_", nice_name_in)
+        nice_name_in = re.sub("([\s\-])+", r"_", nice_name_in)
         
         # remove multiple underscores
         nice_name_in = re.sub(r"([_]+)", r"_", nice_name_in)
@@ -224,7 +212,7 @@ class SimpleEntity(object):
             return self._description
         
         def fset(self, description_in):
-            self._description = self._check_description(description_in)
+            self._description = self._validate_description(description_in)
         
         doc = """the description of the entity"""
         
@@ -241,7 +229,7 @@ class SimpleEntity(object):
             return self._name
         
         def fset(self, name_in):
-            self._name = self._check_name(name_in)
+            self._name = self._validate_name(name_in)
             
             # also set the nice_name
             self._nice_name = self._condition_nice_name(self._name)
@@ -281,8 +269,8 @@ class SimpleEntity(object):
     
     
     #----------------------------------------------------------------------
-    def _check_code(self, code_in):
-        """checks the given code value
+    def _validate_code(self, code_in):
+        """validates the given code value
         """
         
         # check if the code_in is None
@@ -293,18 +281,18 @@ class SimpleEntity(object):
         if code_in=="":
             raise(ValueError("the code attribute can not be an empty string"))
         
-        # check if it is something other than a string
-        if not isinstance(code_in, (str, unicode)):
-            raise(ValueError("the code should be an instance of string or \
-            unicode"))
+        ## check if it is something other than a string
+        #if not isinstance(code_in, (str, unicode)):
+            #raise(ValueError("the code should be an instance of string or \
+            #unicode"))
         
-        return self._condition_code(code_in)
+        return self._condition_code(str(code_in))
     
     
     
     #----------------------------------------------------------------------
-    def _check_created_by(self, created_by_in):
-        """checks the given created_by_in attribute
+    def _validate_created_by(self, created_by_in):
+        """validates the given created_by_in attribute
         """
         
         #-------------------------------------------------------------------
@@ -334,8 +322,8 @@ class SimpleEntity(object):
     
     
     #----------------------------------------------------------------------
-    def _check_updated_by(self, updated_by_in):
-        """checks the given updated_by_in attribute
+    def _validate_updated_by(self, updated_by_in):
+        """validates the given updated_by_in attribute
         """
         
         from stalker.core.models import user
@@ -354,8 +342,8 @@ class SimpleEntity(object):
     
     
     #----------------------------------------------------------------------
-    def _check_date_created(self, date_created_in):
-        """checks the given date_creaetd_in
+    def _validate_date_created(self, date_created_in):
+        """validates the given date_creaetd_in
         """
         
         # raise ValueError when:
@@ -373,8 +361,8 @@ class SimpleEntity(object):
     
     
     #----------------------------------------------------------------------
-    def _check_date_updated(self, date_updated_in):
-        """checks the given date_updated_in
+    def _validate_date_updated(self, date_updated_in):
+        """validates the given date_updated_in
         """
         
         # raise ValueError when:
@@ -402,7 +390,7 @@ class SimpleEntity(object):
         def fget(self):
             return self._code
         def fset(self, code_in):
-            self._code = self._check_code(code_in)
+            self._code = self._validate_code(code_in)
         return locals()
     
     code = property(**code())
@@ -416,7 +404,7 @@ class SimpleEntity(object):
             return self._created_by
         
         def fset(self, created_by_in):
-            self._created_by = self._check_created_by(created_by_in)
+            self._created_by = self._validate_created_by(created_by_in)
         
         doc = """gets and sets the User object who has created this
         AuditEntity"""
@@ -434,7 +422,7 @@ class SimpleEntity(object):
             return self._updated_by
         
         def fset(self, updated_by_in):
-            self._updated_by = self._check_updated_by(updated_by_in)
+            self._updated_by = self._validate_updated_by(updated_by_in)
         
         doc = """gets and sets the User object who has updated this
         AuditEntity"""
@@ -452,7 +440,7 @@ class SimpleEntity(object):
             return self._date_created
         
         def fset(self, date_created_in):
-            self._date_created = self._check_date_created(date_created_in)
+            self._date_created = self._validate_date_created(date_created_in)
         
         doc = """gets and sets the datetime.datetime object which shows when
         this object has been created"""
@@ -470,7 +458,7 @@ class SimpleEntity(object):
             return self._date_updated
         
         def fset(self, date_updated_in):
-            self._date_updated = self._check_date_updated(date_updated_in)
+            self._date_updated = self._validate_date_updated(date_updated_in)
         
         doc = """gets and sets the datetime.datetime object which shows when
         this object has been updated"""
@@ -530,23 +518,23 @@ class Entity(SimpleEntity):
         
         super(Entity, self).__init__(**kwargs)
         
-        self._tags = self._check_tags(tags)
-        self._notes = self._check_notes(notes)
+        self._tags = self._validate_tags(tags)
+        self._notes = self._validate_notes(notes)
     
     
     
-    #----------------------------------------------------------------------
-    def __repr__(self):
-        """the representation
-        """
+    ##----------------------------------------------------------------------
+    #def __repr__(self):
+        #"""the representation
+        #"""
         
-        return "<Entity (%s, %s)>" % (self.name, self.code)
+        #return "<Entity (%s, %s)>" % (self.name, self.code)
     
     
     
     #----------------------------------------------------------------------
-    def _check_notes(self, notes_in):
-        """checks the given notes value
+    def _validate_notes(self, notes_in):
+        """validates the given notes value
         """
         
         if not isinstance(notes_in, list):
@@ -564,8 +552,8 @@ class Entity(SimpleEntity):
     
     
     #----------------------------------------------------------------------
-    def _check_tags(self, tags_in):
-        """checks the given tags_in value
+    def _validate_tags(self, tags_in):
+        """validates the given tags_in value
         """
         
         # raise ValueError when:
@@ -583,7 +571,7 @@ class Entity(SimpleEntity):
         def fget(self):
             return self._notes
         def fset(self, notes_in):
-            self._notes = self._check_notes(notes_in)
+            self._notes = self._validate_notes(notes_in)
         
         doc = """all the notes about this entity, it should be a list of Notes
         objects or an empty list, None is not accepted
@@ -602,7 +590,7 @@ class Entity(SimpleEntity):
             return self._tags
         
         def fset(self, tags_in):
-            self._tags = self._check_tags(tags_in)
+            self._tags = self._validate_tags(tags_in)
         
         doc = """a list of Tag objects which shows the related tags to the
         entity"""
@@ -634,15 +622,14 @@ class StatusedEntity(Entity):
     
     :param status_list: this attribute holds a status list object, which shows
       the possible statuses that this entity could be in. This attribute can
-      not be empty.
+      not be empty or None. Giving a StatusList object, the
+      StatusList.target_type should match the current class.
     
     :param status: an integer value which is the index of the status in the
       status_list attribute. So the value of this attribute couldn't be lower
       than 0 and higher than the length of the status_list object and nothing
       other than an integer
     """
-    
-    
     
     #----------------------------------------------------------------------
     def __init__(self,
@@ -653,26 +640,26 @@ class StatusedEntity(Entity):
         super(StatusedEntity, self).__init__(**kwargs)
         
         # the attributes
-        #self._references = self._check_references(references)
-        self._status_list = self._check_status_list(status_list)
-        self._status = self._check_status(status)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __repr__(self):
-        """the representation
-        """
+        #self._references = self._validate_references(references)
+        self._status_list = self._validate_status_list(status_list)
+        self._status = self._validate_status(status)
         
-        return "<StatusedEntity (%s, %s, %s)>" % (self.name, self.code,
-                                                  self.status_list[self.status]
-                                                  )
+        #self.z_entity_type = self.entity_type
     
     
     
     ##----------------------------------------------------------------------
-    #def _check_references(self, references_in):
-        #"""checks the given references_in list
+    #def __repr__(self):
+        #"""the representation
+        #"""
+        
+        #return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def _validate_references(self, references_in):
+        #"""validates the given references_in list
         #"""
         
         ## raise ValueError when:
@@ -686,8 +673,8 @@ class StatusedEntity(Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_status_list(self, status_list_in):
-        """checks the given status_list_in value
+    def _validate_status_list(self, status_list_in):
+        """validates the given status_list_in value
         """
         
         # raise ValueError when:
@@ -700,13 +687,19 @@ class StatusedEntity(Entity):
             raise ValueError("the status list should be an instance of \
             stalker.core.models.status.StatusList")
         
+        # check if the entity_type matches to the StatusList.target_entity_type
+        if self.entity_type != status_list_in.target_entity_type:
+            raise TypeError("the given StatusLists' target_entity_type is %s, \
+whereas the entity_type of this object is %s" % \
+                (status_list_in.target_entity_type, self.entity_type))
+        
         return status_list_in
     
     
     
     #----------------------------------------------------------------------
-    def _check_status(self, status_in):
-        """checks the given status_in value
+    def _validate_status(self, status_in):
+        """validates the given status_in value
         """
         
         # raise ValueError when:
@@ -726,6 +719,8 @@ class StatusedEntity(Entity):
         if status_in >= len(self._status_list.statuses):
             raise ValueError("the status can not be bigger than the length of \
             the status_list")
+        
+        return status_in
     
     
     
@@ -736,7 +731,7 @@ class StatusedEntity(Entity):
             #return self._references
         
         #def fset(self, references_in):
-            #self._references = self._check_references(references_in)
+            #self._references = self._validate_references(references_in)
         
         #doc = """this is the property that sets and returns the references \
         #attribute"""
@@ -754,7 +749,7 @@ class StatusedEntity(Entity):
             return self._status
         
         def fset(self, status_in):
-            self._status = self._check_status(status_in)
+            self._status = self._validate_status(status_in)
         
         doc = """this is the property that sets and returns the status \
         attribute"""
@@ -773,7 +768,8 @@ class StatusedEntity(Entity):
             return self._status_list
         
         def fset(self, status_list_in):
-            self._status_list = self._check_status_list(status_list_in)
+            self._status_list = \
+                self._validate_status_list(status_list_in)
         
         doc = """this is the property that sets and returns the status_list \
         attribute"""
@@ -818,12 +814,12 @@ class TypeEntity(Entity):
     
     
     
-    #----------------------------------------------------------------------
-    def __repr__(self):
-        """the representation
-        """
+    ##----------------------------------------------------------------------
+    #def __repr__(self):
+        #"""the representation
+        #"""
         
-        return "<TypeEntity (%s, %s, %s)>" % (self.name, self.code)
+        #return "<TypeEntity (%s, %s)>" % (self.name, self.code)
     
     
     

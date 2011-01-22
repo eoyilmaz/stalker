@@ -1518,6 +1518,17 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_sequence_lead_property_works_propertly(self):
+        """testing if sequence_lead property works properly
+        """
+        
+        self.assertEquals(
+            self.mock_user.sequences_lead, self.kwargs["sequences_lead"]
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_tasks_argument_None(self):
         """testing if a ValueError will be raised when trying to assign None
         to the tasks argument

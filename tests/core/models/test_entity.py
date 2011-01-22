@@ -40,6 +40,58 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         # create a proper SimpleEntity to use it later in the tests
         self.simple_entity = entity.SimpleEntity(**self.kwargs)
+        
+        
+        
+        # a couple of test values
+        
+        self.name_test_values = [
+            ("testName", "testName"),
+            ("test-Name", "test-Name"),
+            ("1testName", "testName"),
+            ("_testName", "testName"),
+            ("2423$+^^+^'%+%%&_testName", "testName"),
+            ("2423$+^^+^'%+%%&_testName_35", "testName_35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35", "testName_ 35"),
+            ("SH001","SH001"),
+            ([1,"name"], "name"),
+            ({"a": "name"}, "a name"),
+        ]
+        
+        
+        self.nice_name_test_values = [
+            ("testName", "test_name"),
+            ("1testName", "test_name"),
+            ("_testName", "test_name"),
+            ("2423$+^^+^'%+%%&_testName", "test_name"),
+            ("2423$+^^+^'%+%%&_testName_35", "test_name_35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35", "test_name_35"),
+            ("SH001","sh001"),
+            ("My name is Ozgur", "my_name_is_ozgur"),
+            
+            (" this is another name for an asset",
+             "this_is_another_name_for_an_asset"),
+            
+            
+        ]
+        
+        
+        self.code_test_values = [
+            ("testCode","TEST_CODE"),
+            ("1testCode", "TEST_CODE"),
+            ("_testCode", "TEST_CODE"),
+            ("2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
+            ("2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
+            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
+            ("SH001","SH001"),
+            ("My CODE is Ozgur", "MY_CODE_IS_OZGUR"),
+            
+            (" this is another code for an asset", 
+             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
+            
+            ([1, 3, "a", "list","for","testing",3],
+             "A_LIST_FOR_TESTING_3"),
+        ]
     
     
     
@@ -107,21 +159,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
         #name = "something"
         # code format ?
         
-        test_values = [
-            ("testCode", "TEST_CODE"),
-            ("1testCode", "TEST_CODE"),
-            ("_testCode", "TEST_CODE"),
-            ("2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
-            ("2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
-            ("SH001","SH001"),
-            ("My code is Ozgur", "MY_CODE_IS_OZGUR"),
-            (" this is another code for an asset", 
-             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
-        ]
-        
         # set the name and check the code
-        for test_value in test_values:
+        for test_value in self.code_test_values:
             self.kwargs["name"] = test_value[0]
             new_entity = entity.SimpleEntity(**self.kwargs)
             
@@ -135,27 +174,14 @@ class SimpleEntityTester(mocker.MockerTestCase):
         just set to the formatted version of code
         """
         
-        test_values = [
-            ("aName", "testCode","TEST_CODE"),
-            ("aName", "1testCode", "TEST_CODE"),
-            ("aName", "_testCode", "TEST_CODE"),
-            ("aName", "2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
-            ("aName", "2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
-            ("aName", "2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
-            ("aName", "SH001","SH001"),
-            ("aName", "My CODE is Ozgur", "MY_CODE_IS_OZGUR"),
-            ("aName", " this is another code for an asset", 
-             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
-        ]
-        
         # set the name and code and test the code
-        for test_value in test_values:
-            self.kwargs["name"] = test_value[0]
-            self.kwargs["code"] = test_value[1]
+        for test_value in self.code_test_values:
+            self.kwargs["name"] = "aName"
+            self.kwargs["code"] = test_value[0]
             
             new_entity = entity.SimpleEntity(**self.kwargs)
             
-            self.assertEquals(new_entity.code, test_value[2])
+            self.assertEquals(new_entity.code, test_value[1])
     
     
     
@@ -270,51 +296,6 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_name_property_not_being_string_or_unicode(self):
-        #"""testing if ValueError is raised when trying to set the name
-        #something other than a string or unicode
-        #"""
-        
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.simple_entity,
-            #"name",
-            #10
-        #)
-    
-    
-    #----------------------------------------------------------------------
-    def test_name_property_not_being_string_or_unicode(self):
-        """testing if a the name property is going to be formatted correctly
-        when the given value is not a str or unicode
-        """
-        
-        test_values = [
-            ([1,"name"], "name"),
-            ({"a", "name"}, "aname")
-        ]
-        
-        for test_value in test_values:
-            self.simple_entity.name = test_value[0]
-            self.assertEquals(self.simple_entity.name, test_value[1])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_name_argument_not_init_as_string_or_unicode(self):
-        #"""testing if ValueError is raised when trying to initialize the name
-        #argument to something else than a string or unicode
-        #"""
-        
-        #test_values = [1, 1.2, ["a name"], {"a": "name"}]
-        #for test_value in test_values:
-            #self.kwargs["name"] = test_value
-            #self.assertRaises(ValueError, entity.SimpleEntity, **self.kwargs)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_name_argument_not_init_as_string_or_unicode(self):
         """testing if a the name property is going to be formatted correctly
@@ -323,16 +304,27 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         test_values = [
             ([1,"name"], "name"),
-            ({"a", "name"}, "aname")
+            ({"a": "name"}, "a name")
         ]
         
         for test_value in test_values:
             self.kwargs["name"] = test_value[0]
-            
             a_new_simple_entity = entity.SimpleEntity(**self.kwargs)
-            
-            #self.simple_entity.name = test_value[0]
             self.assertEquals(a_new_simple_entity.name, test_value[1])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_argument_not_init_as_string_or_unicode_2(self):
+        """testing if a ValueError will be raised when the result of conversion
+        is an empty string for the name argument
+        """
+        
+        test_values = [1, 1.2, [1, 2]]
+        
+        for test_value in test_values:
+            self.kwargs["name"] = test_value
+            self.assertRaises(ValueError, entity.SimpleEntity, **self.kwargs)
     
     
     
@@ -341,25 +333,15 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """testing if name is formated correctly
         """
         
-        test_values = [
-            ("testName", "testName"),
-            ("1testName", "testName"),
-            ("_testName", "testName"),
-            ("2423$+^^+^'%+%%&_testName", "testName"),
-            ("2423$+^^+^'%+%%&_testName_35", "testName_35"),
-            ("2423$ +^^+^ '%+%%&_ testName_ 35", "testName_ 35"),
-            ("SH001","SH001"),
-        ]
-        
-        for test_value in test_values:
+        for test_value in self.name_test_values:
             # set the new name
             self.simple_entity.name = test_value[0]
             
             self.assertEquals(
                 self.simple_entity.name,
                 test_value[1],
-                "the name property is not correctly formatted for, " + \
-                    test_value[0] + ", " + test_value[1]
+                "the name property is not correctly formatted for, %s, %s" % \
+                    (str(test_value[0]), test_value[1])
             )
     
     
@@ -369,20 +351,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """testing if nice name property is formatted correctly
         """
         
-        test_values = [
-            ("testName", "test_name"),
-            ("1testName", "test_name"),
-            ("_testName", "test_name"),
-            ("2423$+^^+^'%+%%&_testName", "test_name"),
-            ("2423$+^^+^'%+%%&_testName_35", "test_name_35"),
-            ("2423$ +^^+^ '%+%%&_ testName_ 35", "test_name_35"),
-            ("SH001","sh001"),
-            ("My name is Ozgur", "my_name_is_ozgur"),
-            (" this is another name for an asset", 
-             "this_is_another_name_for_an_asset"),
-        ]
-        
-        for test_value in test_values:
+        for test_value in self.nice_name_test_values:
             self.simple_entity.name = test_value[0]
             
             self.assertEquals(
@@ -410,36 +379,58 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_description_argument_accepts_string_or_unicode_only(self):
-        """testing if ValueError raised when trying to initialize the
-        desription argument with something else than a string or unicode
+    def test_description_argument_None(self):
+        """testing if description proeprty will be convertod to an empty string
+        if None is given as the description argument
         """
         
-        test_values = [1, 1.2, ["a description"], {"a": "description"}]
+        self.kwargs["description"] = None
+        new_simple_entity = entity.SimpleEntity(**self.kwargs)
         
-        for test_value in test_values:
-            self.kwargs["description"] = test_value
-            
-            self.assertRaises(ValueError, entity.SimpleEntity, **self.kwargs)
+        self.assertEquals(new_simple_entity.description, "")
     
     
     
     #----------------------------------------------------------------------
-    def test_description_property_being_string_or_unicode(self):
-        """testing if ValueError raised when trying to set the description
-        property to something else then a string or unicode
+    def test_description_property_None(self):
+        """testing if description property will be converted to an empty string
+        if None is given as the description property
         """
         
-        test_values = [1, 1.2, ["a description"], {"a": "description"}]
+        self.simple_entity.description = None
+        self.assertEquals(self.simple_entity.description, "")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_description_argument_string_conversion(self):
+        """testing if description argument will be converted to string
+        correctly
+        """
+        
+        test_values = [["a description"], {"a": "description"}]
         
         for test_value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.simple_entity,
-                "description",
-                test_value
-            )
+            self.kwargs["description"] = test_value
+            new_simple_entity = entity.SimpleEntity(**self.kwargs)
+            
+            self.assertIsInstance(new_simple_entity.description,
+                                  (str, unicode))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_description_property_string_conversion(self):
+        """testing if description property will be converted to string
+        correctly
+        """
+        
+        test_values = [["a description"], {"a": "description"}]
+        
+        for test_value in test_values:
+            self.simple_entity.description = test_value
+            self.assertIsInstance(self.simple_entity.description,
+                                  (str, unicode))
     
     
     
@@ -1094,25 +1085,21 @@ class StatusedEntityTester(mocker.MockerTestCase):
         
         self.expect = mocker.Expect(self.mocker)
         
-        # create
-        # a mock User object
-        self.mock_user = self.mocker.mock(user.User)
-        
-        # a mock Tag object
-        self.mock_tag1 = self.mocker.mock(tag.Tag)
-        self.mock_tag2 = self.mocker.mock(tag.Tag)
-        
         # a mock StatusList object
         self.mock_status_list1 = self.mocker.mock(status.StatusList)
-        statusCnt = len(self.mock_status_list1.statuses)
-        self.mocker.result(5)
-        self.mocker.count(0, None)
+        self.expect(len(self.mock_status_list1.statuses)).result(5).\
+            count(0, None)
+        
+        self.expect(self.mock_status_list1.target_entity_type).\
+            result("StatusedEntity").count(0, None)
         
         # another mock StatusList object
         self.mock_status_list2 = self.mocker.mock(status.StatusList)
-        statusCnt = len(self.mock_status_list2.statuses)
-        self.mocker.result(5)
-        self.mocker.count(0, None)
+        self.expect(len(self.mock_status_list2.statuses)).result(5)\
+            .count(0, None)
+        
+        self.expect(self.mock_status_list2.target_entity_type).\
+            result("StatusedEntity").count(0, None)
         
         self.mock_status_list1.__eq__(self.mock_status_list2)
         self.mocker.result(False)
@@ -1122,25 +1109,15 @@ class StatusedEntityTester(mocker.MockerTestCase):
         self.mocker.result(True)
         self.mocker.count(0, None)
         
-        # a mock note list
-        
-        
-        
         self.mocker.replay()
         
-        self.date_created = datetime.datetime(2010, 10, 21, 3, 8, 0)
-        self.date_updated = self.date_created
+        
         
         self.kwargs = {
             "name": "Test Entity",
             "description": "Just testing the very first entity",
-            "tags": [self.mock_tag1, self.mock_tag2],
-            "created_by": self.mock_user,
-            "updated_by": self.mock_user,
             "status_list": self.mock_status_list1,
             "status": 0,
-            "date_created": self.date_created,
-            "date_updated": self.date_updated,
         }
         
         # create a proper entity object
@@ -1215,6 +1192,36 @@ class StatusedEntityTester(mocker.MockerTestCase):
         """
         self.kwargs.pop("status_list")
         self.assertRaises(ValueError, entity.StatusedEntity, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_status_list_argument_suitable_for_the_current_class(self):
+        """testing if a TypeError will be raised when the
+        Status.target_entity_class is not compatible with the current
+        StatusedEntity
+        """
+        
+        # create a new status list suitable for another class with different
+        # entity_type
+        
+        
+        new_status_list = status.StatusList(
+            name="Sequence Statuses",
+            statuses=[
+                status.Status(name="On Hold", code="OH"),
+                status.Status(name="Complete", code="CMPLT"),
+            ],
+            target_entity_type="Sequence"
+        )
+        
+        self.assertRaises(
+            TypeError,
+            setattr,
+            self.statused_entity,
+            "status_list",
+            new_status_list
+        )
     
     
     

@@ -24,13 +24,13 @@ class Note(entity.SimpleEntity):
     def __init__(self, content="", **kwargs):
         super(Note, self).__init__(**kwargs)
         
-        self._content = self._check_content(content)
+        self._content = self._validate_content(content)
     
     
     
     #----------------------------------------------------------------------
-    def _check_content(self, content_in):
-        """checks the given content
+    def _validate_content(self, content_in):
+        """validates the given content
         """
         
         
@@ -50,7 +50,7 @@ class Note(entity.SimpleEntity):
             return self._content
         
         def fset(self, content_in):
-            self._content = self._check_content(content_in)
+            self._content = self._validate_content(content_in)
         
         doc = """content is a string representing the content of this Note,
         can be given as an empty string or can be even None, but anything other

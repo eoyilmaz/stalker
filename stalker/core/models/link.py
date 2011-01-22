@@ -46,15 +46,15 @@ class Link(entity.Entity):
     def __init__(self, path="", filename="", type=None, **kwargs):
         super(Link, self).__init__(**kwargs)
         
-        self._path = self._check_path(path)
-        self._filename = self._check_filename(filename)
-        self._type = self._check_type(type)
+        self._path = self._validate_path(path)
+        self._filename = self._validate_filename(filename)
+        self._type = self._validate_type(type)
     
     
     
     #----------------------------------------------------------------------
-    def _check_path(self, path_in):
-        """checks the given path
+    def _validate_path(self, path_in):
+        """validates the given path
         """
         
         if path_in is None:
@@ -82,8 +82,8 @@ class Link(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_filename(self, filename_in):
-        """checks the given filename
+    def _validate_filename(self, filename_in):
+        """validates the given filename
         """
         
         if filename_in is None:
@@ -101,8 +101,8 @@ class Link(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_type(self, type_in):
-        """checks the given type
+    def _validate_type(self, type_in):
+        """validates the given type
         """
         
         if type_in is None:
@@ -123,7 +123,7 @@ class Link(entity.Entity):
             return self._path
         
         def fset(self, path_in):
-            self._path = self._check_path(path_in)
+            self._path = self._validate_path(path_in)
         
         doc="""the path part of the url to the link, it can not be None or an
         empty string, it should be a string or unicode"""
@@ -140,7 +140,7 @@ class Link(entity.Entity):
             return self._filename
         
         def fset(self, filename_in):
-            self._filename = self._check_filename(filename_in)
+            self._filename = self._validate_filename(filename_in)
         
         doc="""the filename part of the url to the link, it can not be None or
         an empty string, it should be a string or unicode"""
@@ -157,7 +157,7 @@ class Link(entity.Entity):
             return self._type
         
         def fset(self, type_in):
-            self._type = self._check_type(type_in)
+            self._type = self._validate_type(type_in)
         
         doc="""the type of the link, it should be a
         :class:`~stalker.core.models.types.LinkType` object and it can not be

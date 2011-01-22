@@ -411,9 +411,38 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     
+    ##----------------------------------------------------------------------
+    #@classmethod
+    #def setUpClass(cls):
+        #"""setup the test
+        #"""
+        
+        ## setup the database
+        #clear_mappers()
+        #db.__mappers__ = []
+        
+        ## create a test database, possibly an in memory datase
+        #cls.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
+        #cls.TEST_DATABASE_URI = "sqlite:///" + cls.TEST_DATABASE_FILE
+        
+        ## setup using this db
+        #db.setup(database=cls.TEST_DATABASE_URI)
+        
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@classmethod
+    #def tearDownClass(cls):
+        #"""tear-off the test
+        #"""
+        ## delete the default test database file
+        #os.remove(cls.TEST_DATABASE_FILE)
+    
+    
+    
     #----------------------------------------------------------------------
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         """setup the test
         """
         
@@ -422,22 +451,25 @@ class DatabaseModelsTester(unittest.TestCase):
         db.__mappers__ = []
         
         # create a test database, possibly an in memory datase
-        cls.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
-        cls.TEST_DATABASE_URI = "sqlite:///" + cls.TEST_DATABASE_FILE
+        #self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
+        #self.TEST_DATABASE_URI = "sqlite:///" + self.TEST_DATABASE_FILE
+        
+        self.TEST_DATABASE_FILE = ":memory:"
+        self.TEST_DATABASE_URI = "sqlite:///" + self.TEST_DATABASE_FILE
+        
         
         # setup using this db
-        db.setup(database=cls.TEST_DATABASE_URI)
-        
+        db.setup(database=self.TEST_DATABASE_URI)
     
     
     
-    #----------------------------------------------------------------------
-    @classmethod
-    def tearDownClass(cls):
-        """tear-off the test
-        """
+    ##----------------------------------------------------------------------
+    #def tearDown(self):
+        #"""tear-off the test
+        #"""
         # delete the default test database file
-        os.remove(cls.TEST_DATABASE_FILE)
+        #os.remove(self.TEST_DATABASE_FILE)
+
     
     
     
@@ -731,11 +763,7 @@ class DatabaseModelsTester(unittest.TestCase):
                 filter_by(name=kwargs["name"]).first()
         
         # just test the repository part of the attributes
-        self.assertEquals(imFormat.width, imFormat_db.width)
-        self.assertEquals(imFormat.height, imFormat_db.height)
-        self.assertEquals(imFormat.pixel_aspect, imFormat_db.pixel_aspect)
-        self.assertEquals(imFormat.print_resolution,
-                          imFormat_db.print_resolution)
+        self.assertEquals(imFormat, imFormat_db)
     
     
     
@@ -923,34 +951,22 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of SimpleEntity
         """
         
-        name = "SimpleEntity_test_creating_of_a_SimpleEntity"
-        description = "this is for testing purposes"
-        created_by = None
-        updated_by = None
-        date_created = date_updated = datetime.datetime.now()
+        kwargs = {
+            "name": "SimpleEntity_test_creating_of_a_SimpleEntity",
+            "description": "this is for testing purposes",
+        }
         
-        aSimpleEntity = entity.SimpleEntity(
-            name=name,
-            description=description,
-            created_by=created_by,
-            updated_by=updated_by,
-            date_created=date_created,
-            date_updated=date_updated)
+        aSimpleEntity = entity.SimpleEntity(**kwargs)
         
         # persist it to the database
         db.session.add(aSimpleEntity)
         db.session.commit()
         
         # now try to retrieve it
-        SE_from_DB = db.session.query(entity.SimpleEntity). \
-            filter_by(name=name).first()
+        SE_from_DB = db.session.query(entity.SimpleEntity).\
+            filter(entity.SimpleEntity.name==kwargs["name"]).first()
         
-        self.assertEquals(aSimpleEntity.name, SE_from_DB.name)
-        self.assertEquals(aSimpleEntity.description, SE_from_DB.description)
-        self.assertEquals(aSimpleEntity.created_by, SE_from_DB.created_by)
-        self.assertEquals(aSimpleEntity.updated_by, SE_from_DB.updated_by)
-        self.assertEquals(aSimpleEntity.date_created, SE_from_DB.date_created)
-        self.assertEquals(aSimpleEntity.date_updated, SE_from_DB.date_updated)
+        self.assertEquals(aSimpleEntity, SE_from_DB)
     
     
     
@@ -960,32 +976,79 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         # the status
-        name = "TestStatus_test_creating_Status"
-        description = "this is for testing purposes"
-        created_by = None
-        updated_by = None
-        date_created = datetime.datetime.now()
-        date_updated = datetime.datetime.now()
         
-        testStatus = status.Status(
-            name=name,
-            description=description,
-            created_by=created_by,
-            updated_by=updated_by,
-            date_created=date_created,
-            date_updated=date_updated,
-            code="TSTST"
-        )
+        kwargs = {
+            "name": "TestStatus_test_creating_Status",
+            "description": "this is for testing purposes",
+            "code": "TSTST",
+        }
+        
+        testStatus = status.Status(**kwargs)
         
         # persist it to the database
         db.session.add(testStatus)
         db.session.commit()
         
         # now try to retrieve it
-        testStatusDB = db.session.query(status.Status).first()
+        testStatusDB = db.query(status.Status).\
+                     filter(entity.StatusedEntity.name==kwargs["name"]).first()
         
         # just test the satuts part of the object
         self.assertEquals(testStatus, testStatusDB)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_persistence_StatuesedEntity(self):
+        """testing the persistence of StatuedEntity
+        """
+        
+        # create a couple of statuses
+        statuses = [
+            status.Status(name="Waiting To Start", code="WTS"),
+            status.Status(name="On Hold", code="OH"),
+            status.Status(name="In Progress", code="WIP"),
+            status.Status(name="Complete", code="CMPLT"),
+        ]
+        
+        project_status_list = status.StatusList(
+            name="Project Status List",
+            statuses=statuses,
+            target_entity_type="StatusedEntity",
+        )
+        
+        
+        statused_entity = entity.StatusedEntity(
+            name="Test for status lists",
+            status_list = project_status_list
+        )
+        
+        db.session.add_all(statuses)
+        db.session.add_all([project_status_list, statused_entity])
+        db.session.commit()
+        
+        # get the status list of the statused entity and check for equality
+        
+        statused_entity_DB = db.query(entity.StatusedEntity).\
+                              filter_by(name=statused_entity.name).first()
+        
+        
+        # compare the StatusedEntities
+        self.assertEquals(statused_entity, statused_entity_DB)
+        
+        # alos compare the status list
+        self.assertEquals(statused_entity.status_list,
+                          statused_entity_DB.status_list)
+        
+        # try to create another StatusedEntity and assign it the same
+        # StatusList
+        
+        new_statused_entity = entity.StatusedEntity(
+            name="Test for status lists 2",
+            status_list=project_status_list)
+        
+        db.session.add(new_statused_entity)
+        db.session.commit()
     
     
     
@@ -994,7 +1057,42 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of StatusList
         """
         
-        self.fail("test is not implemented yet")
+        # create a couple of statuses
+        
+        statuses = [
+            status.Status(name="Waiting To Start", code="WTS"),
+            status.Status(name="On Hold", code="OH"),
+            status.Status(name="In Progress", code="WIP"),
+            status.Status(name="Complete", code="CMPLT"),
+        ]
+        
+        kwargs = dict(
+            name="Sequence Status List",
+            statuses=statuses,
+            target_entity_type="Sequence"
+        )
+        
+        sequence_status_list = status.StatusList(**kwargs)
+        
+        # send it to db
+        db.session.add(sequence_status_list)
+        db.session.commit()
+        
+        # now get it back
+        sequence_status_list_DB = db.query(status.StatusList).\
+                                filter_by(name=kwargs["name"]).first()
+        
+        self.assertEquals(sequence_status_list, sequence_status_list_DB)
+        
+        # try to create another StatusList for the same target_entity_type
+        # and expect and IntegrityError
+        
+        kwargs["name"] = "new Sequence Status List"
+        new_sequence_list = status.StatusList(**kwargs)
+        
+        db.session.add(new_sequence_list)
+        
+        self.assertRaises(IntegrityError, db.session.commit)
     
     
     
@@ -1076,6 +1174,7 @@ class DatabaseModelsTester(unittest.TestCase):
         }
         
         # persist it to the database
+        self.fail("test is not implemented yet")
     
     
     
@@ -1158,10 +1257,9 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # get it back
         aTypeTemplate_DB = session.query(types.TypeTemplate).\
-                     filter_by(name=kwargs["name"]).\
-                     filter_by(description=kwargs["description"]).first()
+                     filter_by(name=kwargs["name"]).first()
         
-        self.assertTrue(aTypeTemplate==aTypeTemplate_DB)
+        self.assertEquals(aTypeTemplate, aTypeTemplate_DB)
     
     
     

@@ -191,7 +191,9 @@ def setup():
                 status.Status,
                 secondary=tables.statusList_statuses
             ),
-            "statuses": synonym("_statuses")
+            "statuses": synonym("_statuses"),
+            "_target_entity_type": tables.statusLists.c.target_entity_type,
+            "target_entity_type": synonym("_target_entity_type"),
         }
     )
     
@@ -212,7 +214,7 @@ def setup():
             "_osx_path": tables.repositories.c.osx_path,
             "osx_path": synonym("_osx_path")
         },
-        exclude_properties=["path"]
+        #exclude_properties=["path"]
     )
     
     
@@ -316,7 +318,7 @@ def setup():
             "_path_code": tables.typeTemplates.c.path_code,
             "path_code": synonym("_path_code"),
             "_file_code": tables.typeTemplates.c.file_code,
-            "file_code": synonym("file_code"),
+            "file_code": synonym("_file_code"),
             "_type": relationship(
                 entity.TypeEntity,
                 primaryjoin=\
@@ -402,6 +404,33 @@ def setup():
         }
     )
     
+    
+    
+    # StatusedEntity
+    mapper(
+        entity.StatusedEntity,
+        tables.statusedEntities,
+        inherits=entity.StatusedEntity.__base__,
+        inherit_condition=tables.statusedEntities.c.id==tables.entities.c.id,
+        polymorphic_identity=entity.StatusedEntity.entity_type,
+        properties={
+            "_status": tables.statusedEntities.c.status,
+            "status": synonym("_status"),
+            "_status_list": relationship(
+                status.StatusList,
+                secondary=tables.statusedEntity_statusLists,
+                #primaryjoin=\
+                    #tables.statusedEntities.c.z_entity_type==\
+                    #tables.entity_type_statusLists.c.entity_type,
+                #secondaryjoin=\
+                    #tables.entity_type_statusLists.c.statusList_id==\
+                    #tables.statusLists.c.id,
+                uselist=False,
+            ),
+            "status_list": synonym("_status_list"),
+            #"z_entity_type": tables.statusedEntities.c.z_entity_type,
+        },
+    )
     
     
     

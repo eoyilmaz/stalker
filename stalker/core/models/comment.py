@@ -27,14 +27,14 @@ class Comment(entity.Entity):
     def __init__(self, body="", to=None, **kwargs):
         super(Comment, self).__init__(**kwargs)
         
-        self._body = self._check_body(body)
-        self._to = self._check_to(to)
+        self._body = self._validate_body(body)
+        self._to = self._validate_to(to)
     
     
     
     #----------------------------------------------------------------------
-    def _check_body(self, body_in):
-        """checks the given body variable
+    def _validate_body(self, body_in):
+        """validates the given body variable
         """
         
         # the body could be empty
@@ -49,8 +49,8 @@ class Comment(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_to(self, to_in):
-        """checks the given to variable
+    def _validate_to(self, to_in):
+        """validates the given to variable
         """
         
         
@@ -75,7 +75,7 @@ class Comment(entity.Entity):
             return self._body
         
         def fset(self, body_in):
-            self._body = self._check_body(body_in)
+            self._body = self._validate_body(body_in)
         
         doc = """this is the property that sets and returns the body attribute
         """
@@ -92,7 +92,7 @@ class Comment(entity.Entity):
             return self._to
         
         def fset(self, to_in):
-            self._to = self._check_to(to_in)
+            self._to = self._validate_to(to_in)
         
         doc = """this is the property that sets and returns the to attribute
         """

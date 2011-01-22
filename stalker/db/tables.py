@@ -242,17 +242,18 @@ statusLists = Table(
         ForeignKey("entities.id"),
         primary_key=True
     ),
+    Column("target_entity_type", String(128), nullable=False, unique=True),
 )
 
 
 
-# ENTITYTYPE_STATUSLISTS
-entity_type_statusLists = Table(
-    "entity_type_statusLists", metadata,
+# STATUSEDENTITY_STATUSLISTS
+statusedEntity_statusLists = Table(
+    "statusedEntity_statusLists", metadata,
     Column(
-        "entity_type",
-        String(128),
-        ForeignKey("simpleEntities.db_entity_type"),
+        "statusedEntity_id",
+        Integer,
+        ForeignKey("statusedEntities.id"),
         primary_key=True
     ),
     Column(
@@ -260,8 +261,20 @@ entity_type_statusLists = Table(
         Integer,
         ForeignKey("statusLists.id"),
         primary_key=True
-    )
+    ),
 )
+
+
+
+
+# STATUSEDENTITY
+statusedEntities = Table(
+    "statusedEntities", metadata,
+    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
+    Column("status", Integer),
+    #Column("z_entity_type", String(128)),
+)
+
 
 
 
@@ -352,8 +365,8 @@ typeTemplates = Table(
         ForeignKey("entities.id"),
         primary_key=True,
     ),
-    Column("path_code", String(32)),
-    Column("file_code", String(32)),
+    Column("path_code", String),
+    Column("file_code", String),
     Column(
         "type_id",
         Integer,

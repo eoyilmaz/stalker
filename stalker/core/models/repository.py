@@ -37,15 +37,15 @@ class Repository(entity.Entity):
     def __init__(self, linux_path="", windows_path="", osx_path="", **kwargs):
         super(Repository, self).__init__(**kwargs)
         
-        self._linux_path = self._check_linux_path(linux_path)
-        self._windows_path = self._check_windows_path(windows_path)
-        self._osx_path = self._check_osx_path(osx_path)
+        self._linux_path = self._validate_linux_path(linux_path)
+        self._windows_path = self._validate_windows_path(windows_path)
+        self._osx_path = self._validate_osx_path(osx_path)
     
     
     
     #----------------------------------------------------------------------
-    def _check_linux_path(self, linux_path_in):
-        """checks the given linux path
+    def _validate_linux_path(self, linux_path_in):
+        """validates the given linux path
         """
         
         if not isinstance(linux_path_in, (str, unicode)):
@@ -57,8 +57,8 @@ class Repository(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_osx_path(self, osx_path_in):
-        """checks the given osx path
+    def _validate_osx_path(self, osx_path_in):
+        """validates the given osx path
         """
         
         if not isinstance(osx_path_in, (str, unicode)):
@@ -70,8 +70,8 @@ class Repository(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_windows_path(self, windows_path_in):
-        """checks the given windows path
+    def _validate_windows_path(self, windows_path_in):
+        """validates the given windows path
         """
         
         if not isinstance(windows_path_in, (str, unicode)):
@@ -89,7 +89,7 @@ class Repository(entity.Entity):
             return self._linux_path
         
         def fset(self, linux_path_in):
-            self._linux_path = self._check_linux_path(linux_path_in)
+            self._linux_path = self._validate_linux_path(linux_path_in)
         
         doc = """property that helps to set and get linux_path values"""
         
@@ -106,7 +106,7 @@ class Repository(entity.Entity):
             return self._osx_path
         
         def fset(self, osx_path_in):
-            self._osx_path = self._check_osx_path(osx_path_in)
+            self._osx_path = self._validate_osx_path(osx_path_in)
         
         doc = """property that helps to set and get osx_path values"""
         
@@ -123,7 +123,7 @@ class Repository(entity.Entity):
             return self._windows_path
         
         def fset(self, windows_path_in):
-            self._windows_path = self._check_windows_path(windows_path_in)
+            self._windows_path = self._validate_windows_path(windows_path_in)
         
         doc = """property that helps to set and get windows_path values"""
         

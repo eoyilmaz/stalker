@@ -41,8 +41,8 @@ class Department(entity.Entity):
     def __init__(self, members=[], lead=None, **kwargs):
         super(Department, self).__init__(**kwargs)
         
-        self._members = self._check_members(members)
-        self._lead = self._check_lead(lead)
+        self._members = self._validate_members(members)
+        self._lead = self._validate_lead(lead)
     
     
     
@@ -57,8 +57,8 @@ class Department(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_members(self, members):
-        """checks the given members attribute
+    def _validate_members(self, members):
+        """validates the given members attribute
         """
         
         from stalker.core.models import user
@@ -73,8 +73,8 @@ class Department(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_lead(self, lead):
-        """checks the given lead attribute
+    def _validate_lead(self, lead):
+        """validates the given lead attribute
         """
         
         # the lead should not be None
@@ -98,7 +98,7 @@ class Department(entity.Entity):
             return self._members
         
         def fset(self, members):
-            self._members = self._check_members(members)
+            self._members = self._validate_members(members)
         
         doc = """members are a list of users representing the members of this
         department"""
@@ -116,7 +116,7 @@ class Department(entity.Entity):
             return self._lead
         
         def fset(self, lead):
-            self._lead = self._check_lead(lead)
+            self._lead = self._validate_lead(lead)
         
         doc = """lead is the lead of this department, it is a User object"""
         

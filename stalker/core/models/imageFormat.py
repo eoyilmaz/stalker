@@ -42,11 +42,11 @@ class ImageFormat(entity.Entity):
         
         super(ImageFormat,self).__init__(**kwargs)
         
-        #self._name = self._check_name(name)
-        self._width = self._check_width(width)
-        self._height = self._check_height(height)
-        self._pixel_aspect = self._check_pixel_aspect(pixel_aspect)
-        self._print_resolution = self._check_print_resolution(print_resolution)
+        self._width = self._validate_width(width)
+        self._height = self._validate_height(height)
+        self._pixel_aspect = self._validate_pixel_aspect(pixel_aspect)
+        self._print_resolution = \
+            self._validate_print_resolution(print_resolution)
         self._device_aspect = 1.0
         
         self._update_device_aspect()
@@ -62,24 +62,9 @@ class ImageFormat(entity.Entity):
     
     
     
-    ##----------------------------------------------------------------------
-    #def _check_name(self, name):
-        #"""checks the given name
-        #"""
-        
-        #if not isinstance(name, (str, unicode)):
-            #raise(ValueError("name should be instance of str or unicode"))
-        
-        #if name == "" or len(name) < 1:
-            #raise(ValueError("name should not be an empty string"))
-        
-        #return name
-    
-    
-    
     #----------------------------------------------------------------------
-    def _check_width(self, width):
-        """checks the given width
+    def _validate_width(self, width):
+        """validates the given width
         """
         if not isinstance(width, (int, float)):
             raise(ValueError("width should be an instance of int or float"))
@@ -92,8 +77,8 @@ class ImageFormat(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_height(self, height):
-        """checks the given height
+    def _validate_height(self, height):
+        """validates the given height
         """
         if not isinstance(height, (int, float)):
             raise(ValueError("height should be an instance of int or float"))
@@ -106,8 +91,8 @@ class ImageFormat(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_pixel_aspect(self, pixel_aspect):
-        """checks the given pixel aspect
+    def _validate_pixel_aspect(self, pixel_aspect):
+        """validates the given pixel aspect
         """
         if not isinstance(pixel_aspect, (int, float)):
             raise(ValueError("pixel_aspect should be an instance of int or \
@@ -122,8 +107,8 @@ class ImageFormat(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_print_resolution(self, print_resolution):
-        """checks the print resolution
+    def _validate_print_resolution(self, print_resolution):
+        """validates the print resolution
         """
         if not isinstance(print_resolution, (int, float)):
             raise(ValueError("print resolution should be an instance of int \
@@ -137,33 +122,6 @@ class ImageFormat(entity.Entity):
     
     
     
-    ##----------------------------------------------------------------------
-    #def name():
-        #def fget(self):
-            #"""returns the name attribute
-            #"""
-            #return self._name
-        
-        #def fset(self, name):
-            #"""sets the name attribute
-            #"""
-            #self._name = self._check_name(name)
-        
-        #doc = """this is a property to set and get the name of the
-        #image_format
-        
-        #the name should be:
-        #* a string or unicode value
-        #* can not be None
-        #* can not be an empty string or empty unicode
-        #"""
-        
-        #return locals()
-    
-    #name = property(**name())
-    
-    
-    
     #----------------------------------------------------------------------
     def width():
         def fget(self):
@@ -174,7 +132,7 @@ class ImageFormat(entity.Entity):
         def fset(self, width):
             """sets the width
             """
-            self._width = self._check_width(width)
+            self._width = self._validate_width(width)
             # also update the device_aspect
             self._update_device_aspect()
         
@@ -202,7 +160,7 @@ class ImageFormat(entity.Entity):
         def fset(self, height):
             """sets the height
             """
-            self._height = self._check_height(height)
+            self._height = self._validate_height(height)
             
             # also update the device_aspect
             self._update_device_aspect()
@@ -231,7 +189,7 @@ class ImageFormat(entity.Entity):
         def fset(self, pixel_aspect):
             """sets the pixel_aspect ratio
             """
-            self._pixel_aspect = self._check_pixel_aspect(pixel_aspect)
+            self._pixel_aspect = self._validate_pixel_aspect(pixel_aspect)
             
             # also update the device_aspect
             self._update_device_aspect()
@@ -273,7 +231,8 @@ class ImageFormat(entity.Entity):
         def fset(self, print_resolution):
             """sets the print resolution
             """
-            self._print_resolution = self._check_print_resolution(print_resolution)
+            self._print_resolution = \
+                self._validate_print_resolution(print_resolution)
         
         doc = """this is a property to set and get the print_resolution of the
         ImageFormat
@@ -290,3 +249,14 @@ class ImageFormat(entity.Entity):
     
     
     
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(ImageFormat, self).__eq__(other) and \
+               isinstance(other, ImageFormat) and \
+               self.width == other.width and \
+               self.height == other.height and \
+               self.pixel_aspect == other.pixel_aspect
+        

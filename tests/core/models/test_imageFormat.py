@@ -525,8 +525,6 @@ class ImageFormatTest(unittest.TestCase):
         image_format2 = imageFormat.ImageFormat(**self.kwargs)
         
         self.kwargs.update({
-            "name": "NTSC",
-            "description": "The famous NTSC image format",
             "width": 720,
             "height": 480,
             "pixel_aspect": 0.888888,

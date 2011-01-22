@@ -14,8 +14,21 @@ v0.1.1.a3:
    entity_type attribute to all the derived classes
  * all the mappers now uses the ClassName.entity_type class attribute as the
    polymorphic identity
- * instead of LBYL moved towar EAFP idiom for all the models in the
-   stalker.coreS
+ * instead of LBYL moving toward EAFP idiom for all the models in the
+   stalker.core
+ * StatusList now supports indexing
+ * StatusList now has an target_entity_type attribute which accepts strings
+   with the class name and shows the compatible class of this StatusList
+ * StatusList.__eq__ now checks for the target_entity_type also
+ * StatusedEntity now checks for the given StatusList.target_entity_type for
+   compability with the current class
+ * all the validator methods in the stalker.core.models now has the "validate"
+   word in their name instead of "check"
+ * little fixes:
+   * the mapper of TypeTemplate was trying to setup a synonym to a parameter
+     with the same name (file_code)
+   * user.User classes _sequence_lead attribute renamed to _sequences_lead
+ * added persistence tests for StatusedEntity
 
 v0.1.1.a2:
  * updated the Tutorial

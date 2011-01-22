@@ -97,24 +97,24 @@ class User(entity.Entity):
         
         super(User, self).__init__(**kwargs)
         
-        self._department = self._check_department(department)
-        self._email = self._check_email(email)
-        self._first_name = self._check_first_name(first_name)
-        self._last_name = self._check_last_name(last_name)
-        self._login_name = self._check_login_name(login_name)
+        self._department = self._validate_department(department)
+        self._email = self._validate_email(email)
+        self._first_name = self._validate_first_name(first_name)
+        self._last_name = self._validate_last_name(last_name)
+        self._login_name = self._validate_login_name(login_name)
         
         # to be able to mangle the password do it like this
         self._password = None
         self.password = password
         
         self._permission_groups = \
-            self._check_permission_groups(permission_groups)
-        self._projects = self._check_projects(projects)
-        self._projects_lead = self._check_projects_lead(projects_lead)
-        self._sequence_lead = self._check_sequences_lead(sequences_lead)
-        self._tasks = self._check_tasks(tasks)
+            self._validate_permission_groups(permission_groups)
+        self._projects = self._validate_projects(projects)
+        self._projects_lead = self._validate_projects_lead(projects_lead)
+        self._sequences_lead = self._validate_sequences_lead(sequences_lead)
+        self._tasks = self._validate_tasks(tasks)
         
-        self._last_login = self._check_last_login(last_login)
+        self._last_login = self._validate_last_login(last_login)
     
     
     
@@ -153,8 +153,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_department(self, department_in):
-        """checks the given department value
+    def _validate_department(self, department_in):
+        """validates the given department value
         """
         
         ## check if department_in is None
@@ -174,8 +174,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_email(self, email_in):
-        """checks the given email value
+    def _validate_email(self, email_in):
+        """validates the given email value
         """
         
         # check if email_in is an instance of string or unicode
@@ -183,12 +183,12 @@ class User(entity.Entity):
             raise(ValueError("email should be an instance of string or \
             unicode"))
         
-        return self._check_email_format(email_in)
+        return self._validate_email_format(email_in)
     
     
     
     #----------------------------------------------------------------------
-    def _check_email_format(self, email_in):
+    def _validate_email_format(self, email_in):
         """formats the email
         """
         
@@ -218,8 +218,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_first_name(self, first_name_in):
-        """checks the given first_name attribute
+    def _validate_first_name(self, first_name_in):
+        """validates the given first_name attribute
         """
         
         if first_name_in is None:
@@ -232,13 +232,13 @@ class User(entity.Entity):
         if first_name_in == "":
             raise(ValueError("first_name can not be an empty string"))
         
-        return self._check_first_name_formatting(first_name_in)
+        return self._validate_first_name_formatting(first_name_in)
     
     
     
     #----------------------------------------------------------------------
-    def _check_first_name_formatting(self, first_name_in):
-        """checks the given first_name formatting
+    def _validate_first_name_formatting(self, first_name_in):
+        """validates the given first_name formatting
         """
         
         return first_name_in.strip().title()
@@ -246,8 +246,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_last_login(self, last_login_in):
-        """checks the given last_login argument
+    def _validate_last_login(self, last_login_in):
+        """validates the given last_login argument
         """
         
         if not isinstance(last_login_in, datetime.datetime) and \
@@ -260,8 +260,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_last_name(self, last_name_in):
-        """checks the given last_name attribute
+    def _validate_last_name(self, last_name_in):
+        """validates the given last_name attribute
         """
         
         #if last_name_in is None:
@@ -276,13 +276,13 @@ class User(entity.Entity):
         #if last_name_in == "":
             #raise(ValueError("last_name can not be an empty string"))
         
-        return self._check_last_name_formatting(last_name_in)
+        return self._validate_last_name_formatting(last_name_in)
     
     
     
     #----------------------------------------------------------------------
-    def _check_last_name_formatting(self, last_name_in):
-        """checks the given last_name formatting
+    def _validate_last_name_formatting(self, last_name_in):
+        """validates the given last_name formatting
         """
         
         return last_name_in.strip().title()
@@ -290,8 +290,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_login_name(self, login_name_in):
-        """checks the given login_name value
+    def _validate_login_name(self, login_name_in):
+        """validates the given login_name value
         """
         
         if login_name_in is None:
@@ -304,13 +304,13 @@ class User(entity.Entity):
         if login_name_in == "":
             raise(ValueError("login name could not be empty string"))
         
-        return self._check_login_name_formatting(login_name_in)
+        return self._validate_login_name_formatting(login_name_in)
     
     
     
     #----------------------------------------------------------------------
-    def _check_login_name_formatting(self, login_name_in):
-        """checks the given login_name formatting
+    def _validate_login_name_formatting(self, login_name_in):
+        """validates the given login_name formatting
         """
         assert(isinstance(login_name_in, str))
         login_name_in = login_name_in.strip()
@@ -324,8 +324,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_password(self, password_in):
-        """checks the given password
+    def _validate_password(self, password_in):
+        """validates the given password
         """
         
         if password_in is None:
@@ -336,7 +336,7 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_permission_groups(self, permission_groups_in):
+    def _validate_permission_groups(self, permission_groups_in):
         """check the given permission_group
         """
         
@@ -363,8 +363,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_projects(self, projects_in):
-        """checks the given projects attribute
+    def _validate_projects(self, projects_in):
+        """validates the given projects attribute
         """
         
         # projects can not be None
@@ -387,8 +387,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_projects_lead(self, projects_lead_in):
-        """checks the given projects_lead attribute
+    def _validate_projects_lead(self, projects_lead_in):
+        """validates the given projects_lead attribute
         """
         
         if projects_lead_in is None:
@@ -411,8 +411,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_sequences_lead(self, sequences_lead_in):
-        """checks the given sequences_lead attribute
+    def _validate_sequences_lead(self, sequences_lead_in):
+        """validates the given sequences_lead attribute
         """
         
         if sequences_lead_in is None:
@@ -435,8 +435,8 @@ class User(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_tasks(self, tasks_in):
-        """checks the given taks attribute
+    def _validate_tasks(self, tasks_in):
+        """validates the given taks attribute
         """
         
         if tasks_in is None:
@@ -465,7 +465,7 @@ class User(entity.Entity):
             return self._department
         
         def fset(self, department_in):
-            self._department = self._check_department(department_in)
+            self._department = self._validate_department(department_in)
         
         doc = """department of the user, it is a
         :class:`~stalker.core.models.department.Department` object"""
@@ -483,7 +483,7 @@ class User(entity.Entity):
             return self._email
         
         def fset(self, email_in):
-            self._email = self._check_email(email_in)
+            self._email = self._validate_email(email_in)
         
         doc = """email of the user, accepts strings or unicodes
         """
@@ -501,7 +501,7 @@ class User(entity.Entity):
             return self._first_name
         
         def fset(self, first_name_in):
-            self._first_name = self._check_first_name(first_name_in)
+            self._first_name = self._validate_first_name(first_name_in)
         
         doc = """first name of the user, accepts string or unicode"""
         
@@ -518,7 +518,7 @@ class User(entity.Entity):
             return self._last_login
         
         def fset(self, last_login_in):
-            self._last_login = self._check_last_login(last_login_in)
+            self._last_login = self._validate_last_login(last_login_in)
         
         doc = """last login time of the user as a datetime.datetime instance"""
         
@@ -535,7 +535,7 @@ class User(entity.Entity):
             return self._last_name
         
         def fset(self, last_name_in):
-            self._last_name = self._check_last_name(last_name_in)
+            self._last_name = self._validate_last_name(last_name_in)
         
         doc = """last name of the user, accepts string or unicode"""
         
@@ -552,13 +552,13 @@ class User(entity.Entity):
             return self._name
         
         def fset(self, login_name_in):
-            self._name = self._check_login_name(login_name_in)
+            self._name = self._validate_login_name(login_name_in)
             # set the name attribute
-            #self._login_name = self._check_name(login_name_in)
+            #self._login_name = self._validate_name(login_name_in)
             self._login_name = self._name
             
             # also set the code
-            self._code = self._check_code(self._name)
+            self._code = self._validate_code(self._name)
         
         doc = """login name of the user, accepts string or unicode, also sets
         the name attribute"""
@@ -578,7 +578,7 @@ class User(entity.Entity):
         def fset(self, name_in):
             
             # set the login name first
-            self._login_name = self._check_login_name(name_in)
+            self._login_name = self._validate_login_name(name_in)
             self._name = self._login_name
             
             # also set the nice_name
@@ -604,7 +604,7 @@ class User(entity.Entity):
         
         def fset(self, password_in):
             self._password = base64.encodestring(
-                self._check_password(password_in)
+                self._validate_password(password_in)
             )
         
         doc = """password of the user, it is scrambled before stored in the
@@ -624,7 +624,7 @@ class User(entity.Entity):
         
         def fset(self, permission_groups_in):
             self._permission_groups = \
-                self._check_permission_groups(permission_groups_in)
+                self._validate_permission_groups(permission_groups_in)
         
         doc = """permission groups that this users is a member of, accepts
         :class:`~stalker.core.models.group.Group` object"""
@@ -642,7 +642,7 @@ class User(entity.Entity):
             return self._projects
         
         def fset(self, projects_in):
-            self._projects = self._check_projects(projects_in)
+            self._projects = self._validate_projects(projects_in)
         
         doc = """projects those the current user assigned to, accepts
         :class:`~stalker.core.models.project.Project` object"""
@@ -660,7 +660,8 @@ class User(entity.Entity):
             return self._projects_lead
         
         def fset(self, projects_lead_in):
-            self._projects_lead = self._check_projects_lead(projects_lead_in)
+            self._projects_lead = \
+                self._validate_projects_lead(projects_lead_in)
         
         doc = """projects lead by this current user, accepts
         :class:`~stalker.core.models.project.Project` object"""
@@ -679,7 +680,7 @@ class User(entity.Entity):
         
         def fset(self, sequences_lead_in):
             self._sequences_lead = \
-                self._check_sequences_lead(sequences_lead_in)
+                self._validate_sequences_lead(sequences_lead_in)
         
         doc = """sequences lead by this user, accpets
         :class:`~stalker.core.models.sequence.Sequence` objects"""
@@ -697,7 +698,7 @@ class User(entity.Entity):
             return self._tasks
         
         def fset(self, tasks_in):
-            self._tasks = self._check_tasks(tasks_in)
+            self._tasks = self._validate_tasks(tasks_in)
         
         doc = """tasks assigned to the current user, accepts
         :class:`~stalker.core.models.task.Task` objects"""

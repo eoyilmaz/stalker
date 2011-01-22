@@ -56,16 +56,16 @@ class Structure(entity.Entity):
                  reference_templates=[], **kwargs):
         super(Structure, self).__init__(**kwargs)
         
-        self._project_template = self._check_project_template(project_template)
-        self._asset_templates = self._check_asset_templates(asset_templates)
+        self._project_template = self._validate_project_template(project_template)
+        self._asset_templates = self._validate_asset_templates(asset_templates)
         self._reference_templates = \
-            self._check_reference_templates(reference_templates)
+            self._validate_reference_templates(reference_templates)
     
     
     
     #----------------------------------------------------------------------
-    def _check_asset_templates(self, asset_templates_in):
-        """checks the given asset_templates list
+    def _validate_asset_templates(self, asset_templates_in):
+        """validates the given asset_templates list
         """
         
         if not isinstance(asset_templates_in, list):
@@ -82,8 +82,8 @@ class Structure(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_reference_templates(self, reference_templates_in):
-        """checks the given reference_templates list
+    def _validate_reference_templates(self, reference_templates_in):
+        """validates the given reference_templates list
         """
         
         if not isinstance(reference_templates_in, list):
@@ -100,8 +100,8 @@ class Structure(entity.Entity):
     
     
     #----------------------------------------------------------------------
-    def _check_project_template(self, project_template_in):
-        """checks the given project_template object
+    def _validate_project_template(self, project_template_in):
+        """validates the given project_template object
         """
         
         if not isinstance(project_template_in, (str, unicode)):
@@ -120,7 +120,7 @@ class Structure(entity.Entity):
         
         def fset(self, asset_templates_in):
             self._asset_templates = \
-                self._check_asset_templates(asset_templates_in)
+                self._validate_asset_templates(asset_templates_in)
         
         doc = """A list of
         :class:`~stalker.core.models.types.TypeTemplate` objects which
@@ -141,7 +141,7 @@ class Structure(entity.Entity):
         
         def fset(self, reference_templates_in):
             self._reference_templates = \
-                self._check_reference_templates(reference_templates_in)
+                self._validate_reference_templates(reference_templates_in)
         
         doc = """A list of
         :class:`~stalker.core.models.types.TypeTemplate` objects which
@@ -161,7 +161,7 @@ class Structure(entity.Entity):
         
         def fset(self, project_template_in):
             self._project_template = \
-                self._check_project_template(project_template_in)
+                self._validate_project_template(project_template_in)
         
         doc= """A string which shows the folder structure of the current
         project. It can have Jinja2 directives. See the documentation of

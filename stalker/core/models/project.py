@@ -16,4 +16,8 @@ class Project(entity.StatusedEntity):
     
     
     
-    pass
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        
+        super(Project, self).__init__(**kwargs)
+        

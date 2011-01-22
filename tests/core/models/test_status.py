@@ -89,6 +89,8 @@ class StatusListTest(unittest.TestCase):
         """let's create proper values for the tests
         """
         
+        from stalker.core.models import project
+        
         self.kwargs = {
             "name": "a status list",
             "description": "this is a status list for testing purposes",
@@ -101,6 +103,7 @@ class StatusListTest(unittest.TestCase):
                 status.Status(name="Finished", code="FNSH"),
                 status.Status(name="On Hold", code="OH"),
                 ],
+            "target_entity_type": project.Project.entity_type,
         }
         
         self.mock_status_list = status.StatusList(**self.kwargs)
@@ -203,6 +206,11 @@ class StatusListTest(unittest.TestCase):
         status_list1 = status.StatusList(**self.kwargs)
         status_list2 = status.StatusList(**self.kwargs)
         
+        
+        self.kwargs["target_entity_type"] = "SomeOtherClass"
+        
+        status_list3 = status.StatusList(**self.kwargs)
+        
         self.kwargs["statuses"] = [
             status.Status(name="Started", code="STRT"),
             status.Status(name="Waiting For Approve", code="WAPPR"),
@@ -210,10 +218,13 @@ class StatusListTest(unittest.TestCase):
             status.Status(name="Finished", code="FNSH"),
         ]
         
-        status_list3 = status.StatusList(**self.kwargs)
+        status_list4 = status.StatusList(**self.kwargs)
+        
+        
         
         self.assertTrue(status_list1==status_list2)
         self.assertFalse(status_list1==status_list3)
+        self.assertFalse(status_list1==status_list4)
     
     
     
@@ -225,6 +236,10 @@ class StatusListTest(unittest.TestCase):
         status_list1 = status.StatusList(**self.kwargs)
         status_list2 = status.StatusList(**self.kwargs)
         
+        self.kwargs["target_entity_type"] = "SomeOtherClass"
+        
+        status_list3 = status.StatusList(**self.kwargs)
+        
         self.kwargs["statuses"] = [
             status.Status(name="Started", code="STRT"),
             status.Status(name="Waiting For Approve", code="WAPPR"),
@@ -232,10 +247,110 @@ class StatusListTest(unittest.TestCase):
             status.Status(name="Finished", code="FNSH"),
         ]
         
-        status_list3 = status.StatusList(**self.kwargs)
+        status_list4 = status.StatusList(**self.kwargs)
         
         self.assertFalse(status_list1!=status_list2)
         self.assertTrue(status_list1!=status_list3)
+        self.assertTrue(status_list1!=status_list4)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_indexing_get(self):
+        """testing indexing of statuses in the statusList, get
+        """
+        # first try indexing
+        
+        # this shouldn't raise a TypeError
+        status1 = self.mock_status_list[0]
+        
+        # check the equality
+        self.assertEquals(self.mock_status_list.statuses[0], status1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_indexing_set(self):
+        """testing indexing of statuses in the statusList, set
+        """
+        # first try indexing
+        
+        # this shouldn't raise a TypeError
+        status1 = self.mock_status_list[0]
+        
+        self.mock_status_list[-1] = status1
+        
+        # check the equality
+        self.assertEquals(self.mock_status_list.statuses[-1], status1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_indexing_del(self):
+        """testing indexing of statuses in the statusList, del
+        """
+        
+        # first get the lenght
+        len_statuses = len(self.mock_status_list.statuses)
+        
+        
+        del self.mock_status_list[-1]
+        
+        self.assertEquals(len(self.mock_status_list.statuses),
+                          len_statuses-1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_indexing_len(self):
+        """testing indexing of statuses in the statusList, len
+        """
+        
+        # get the len and compare it wiht len(statuses)
+        self.assertEquals(len(self.mock_status_list.statuses),
+                          len(self.mock_status_list))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_target_entity_type_argument_being_empty_string(self):
+        """testing if a ValueError will be raised when the target_entity_type
+        argument is given as None
+        """
+        
+        self.kwargs["target_entity_type"] = ""
+        self.assertRaises(ValueError, status.StatusList, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_target_entity_type_argument_being_None(self):
+        """testing if a ValueError will be raised when the target_entity_type
+        argument is given as None
+        """
+        
+        self.kwargs["target_entity_type"] = None
+        self.assertRaises(ValueError, status.StatusList, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_target_entity_type_property_read_only(self):
+        """testing if a ValueError will be raised when the target_entity_type
+        argment is tried to be set
+        """
+        
+        # try to set the target_entity_type attribute and expect AttributeError
+        self.assertRaises(
+            AttributeError,
+            setattr,
+            self.mock_status_list,
+            "target_entity_type",
+            "Sequence"
+        )
+    
+    
+    
     
     
     
