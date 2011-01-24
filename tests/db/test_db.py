@@ -5,11 +5,15 @@ import os
 import datetime
 import unittest
 import tempfile
+
 from sqlalchemy.orm import clear_mappers
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import select
+
 from stalker.conf import defaults
+from stalker import utils
 from stalker import db
-from stalker.db import auth
+from stalker.db import auth, tables
 from stalker.core.models import (
     asset,
     assetBase,
@@ -263,35 +267,6 @@ class DatabaseTester(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_auth_login_creates_a_file_in_users_home(self):
-        #"""testing if auth.login function creates a file called logged_user
-        #in the $HOME/.stalker folder
-        #"""
-        
-        #self.fail("test is not implemented yet")
-        
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_auth_login_stores_the_information(self):
-        #"""testing if auth.login stores the information of latest login in
-        #the users $HOME/.stalker/logged_user file as a pickled object
-        #"""
-        
-        #self.fail("test is not implemented yet")
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_authentication(self):
-        #"""testing the authentication system
-        #"""
-        
-        #self.fail("test is not implemented yet")
-    
-    
-    
     #----------------------------------------------------------------------
     def test_no_default_admin_creation(self):
         """testing if there is no user if default.AUTO_CREATE_ADMIN is False
@@ -387,6 +362,79 @@ class DatabaseTester(unittest.TestCase):
         
         # expect nothing, this should work without any error
         db.session.commit()
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_entity_types_table_is_created_properly(self):
+        """testing if the entity_types table is created properly
+        """
+        
+        # check if db.metadata.tables has a table with name entity_types
+        self.assertTrue("entity_types", db.metadata.tables)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_entity_types_table_is_filled_with_the_default_classes(self):
+        """testing if the entity_types table is filled with the entity_types
+        comming from the core.classes
+        """
+        
+        db.setup()
+        #self._createdDB = True
+        
+        # get the DEFAULTS.CORE_MODEL_CLASSES and create a list containing the
+        # entity types of each of the classes
+        
+        entity_types = []
+        
+        for full_module_path in defaults.CORE_MODEL_CLASSES:
+            import_info = utils.path_to_exec(full_module_path)
+            
+            exec_ = import_info[0]
+            module = import_info[1]
+            object_ = import_info[2]
+            
+            # execute the imports
+            exec(exec_)
+            
+            # store the class.entity_names
+            entity_types.append(eval(object_ + ".entity_type"))
+        
+        # check if all the entity_types are in the table
+        
+        # get the table content
+        conn = db.engine.connect()
+        s = select([tables.entity_types.c.entity_type])
+        result = conn.execute(s)
+        
+        entity_types_DB = []
+        for row in result:
+            entity_types_DB.append( row[0] )
+        
+        result.close()
+        
+        
+        # now check for all the elements
+        self.assertTrue(
+            all([entity_type in entity_types_DB
+                 for entity_type in entity_types])
+        )
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_entity_types_table_contains_the_extension_classes(self):
+        #"""testing if the entity_types table contains the user extended classes
+        #"""
+        
+        ## create a new data type by extendind stalker.core.models (in a way
+        ## that is not implemented yet)
+        
+        ## then check if the entity_type is listed in the entity_types table
+        
+        #self.fail("test is not implemented yet")
 
 
 
@@ -1307,6 +1355,9 @@ class DatabaseModelsTester(unittest.TestCase):
                       first()
         
         self.assertEquals(new_user, department_db.members[0])
+        
+        # get the user initials and check if they are same
+        self.assertEquals(new_user.initials, user_DB.initials)
     
     
     

@@ -12,7 +12,8 @@
      stalker.core.models.group.Group
      stalker.core.models.imageFormat.ImageFormat
      stalker.core.models.link.Link
-     stalker.core.models.pipelineStep
+     stalker.core.models.message.Message
+     stalker.core.models.note.Note
      stalker.core.models.pipelineStep.PipelineStep
      stalker.core.models.project.Project
      stalker.core.models.repository.Repository
@@ -24,8 +25,8 @@
      stalker.core.models.tag.Tag
      stalker.core.models.task.Task
      stalker.core.models.types.AssetType
-     stalker.core.models.types.ProjectType
      stalker.core.models.types.LinkType
+     stalker.core.models.types.ProjectType
      stalker.core.models.types.TypeTemplate
      stalker.core.models.user.User
      stalker.core.models.version.Version

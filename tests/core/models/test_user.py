@@ -1677,3 +1677,71 @@ class UserTest(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_initials_argument_is_not_supplied(self):
+        """testing if not giving an initials argument will create no problem
+        """
+        
+        try:
+            self.kwargs.pop("initials")
+        except KeyError:
+            pass
+        
+        new_user = user.User(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_initials_argument_working_properly(self):
+        """testing the initials argument is working properly
+        """
+        
+        self.kwargs["initials"] = "eoy"
+        
+        new_user = user.User(**self.kwargs)
+        
+        self.assertEquals(new_user.initials, self.kwargs["initials"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_initials_property_calculated_properly(self):
+        """testing if not giving an initials argument, the initials works as
+        expected
+        """
+        
+        try:
+            self.kwargs.pop("initials")
+        except KeyError:
+            pass
+        
+        test_values = [
+            ["ozgur", "yilmaz", "oy"],
+            ["erkan ozgur", "yilmaz", "eoy"],
+            ["jean-michel", "bihorel", "jmb"],
+            ["Robert", "de Niro", "rdn"],
+            ["Matt", "McGregor", "mm"],
+        ]
+        
+        for test_value in test_values:
+            self.kwargs["first_name"] = test_value[0]
+            self.kwargs["last_name"] = test_value[1]
+            
+            new_user = user.User(**self.kwargs)
+            
+            self.assertEquals(new_user.initials, test_value[2], )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_initials_property_is_working_fine(self):
+        """testin if initials property working fine
+        """
+        
+        test_value = "eoy"
+        
+        self.mock_user.initials = test_value
+        self.assertEquals(self.mock_user.initials, test_value)
+    
+    
+    

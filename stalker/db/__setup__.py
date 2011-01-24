@@ -7,6 +7,7 @@ about the database (engine, session, metadata etc.)
 import sqlalchemy
 from stalker.conf import defaults
 from stalker.db import tables
+from stalker import utils
 from stalker.core.models import error, user, department
 
 
@@ -78,6 +79,8 @@ def __init_db__():
     
     if defaults.AUTO_CREATE_ADMIN:
         __create_admin__()
+    
+    __fill_entity_types_table__()
 
 
 
@@ -143,3 +146,49 @@ def __create_mappers__(mappers):
     db.__mappers__ = mappers
 
 
+
+#----------------------------------------------------------------------
+def __fill_entity_types_table__():
+    """fills the entity_types table with the entity_types defined in the
+    defaults.CORE_MODEL_CLASSES
+    """
+    
+    from stalker import db
+    
+    # insert the values if there is not any
+    
+    # get the current values in the table
+    conn = db.engine.connect()
+    s = sqlalchemy.sql.select([tables.entity_types.c.entity_type])
+    result = conn.execute(s)
+    
+    entity_types_DB = []
+    for row in result:
+        entity_types_DB.append( row[0] )
+    
+    result.close()
+    
+    # get the defaults
+    
+    default_entity_types = []
+    
+    for full_module_path in defaults.CORE_MODEL_CLASSES:
+        import_info = utils.path_to_exec(full_module_path)
+        
+        exec_ = import_info[0]
+        module = import_info[1]
+        object_ = import_info[2]
+        
+        # import the modules
+        exec(exec_)
+        
+        # get the entity_type of the object
+        default_entity_types.append( eval(object_+".entity_type") )
+    
+    # now for all the values not in the table insert them
+    for entity_type in default_entity_types:
+        if entity_type not in entity_types_DB:
+            db.engine.execute(tables.entity_types.insert(),
+                              entity_type=entity_type )
+    
+    

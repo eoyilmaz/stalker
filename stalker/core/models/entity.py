@@ -18,7 +18,7 @@ class EntityMeta(type):
     
     #----------------------------------------------------------------------
     def __init__(cls, classname, bases, dict_):
-        setattr(cls, "entity_type", classname)
+        setattr(cls, "entity_type", unicode(classname))
         return type.__init__(cls, classname, bases, dict_)
 
 

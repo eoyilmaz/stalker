@@ -19,9 +19,6 @@ class User(entity.Entity):
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
     
-    :param last_login: it is a datetime.datetime object holds the last login
-      date of the user (not implemented yet)
-    
     :param login_name: it is the login name of the user, it should be all lower
       case. Giving a string or unicode that has uppercase letters, it will be
       converted to lower case. It can not be an empty string or None and it can
@@ -64,6 +61,12 @@ class User(entity.Entity):
     
     :param sequences_lead: it is a list of Sequence objects that this
       user is the leader of, it is for back referencing purposes
+    
+    :param last_login: it is a datetime.datetime object holds the last login
+      date of the user (not implemented yet)
+    
+    :param initials: it is the initials of the users name, if nothing given it
+      will be calculated from the first and last names of the user
     """
     
     
@@ -82,6 +85,7 @@ class User(entity.Entity):
                  sequences_lead=[],
                  tasks=[],
                  last_login=None,
+                 initials="",
                  **kwargs
                  ):
         
@@ -102,6 +106,7 @@ class User(entity.Entity):
         self._first_name = self._validate_first_name(first_name)
         self._last_name = self._validate_last_name(last_name)
         self._login_name = self._validate_login_name(login_name)
+        self._initials = self._validate_initials(initials)
         
         # to be able to mangle the password do it like this
         self._password = None
@@ -242,6 +247,24 @@ class User(entity.Entity):
         """
         
         return first_name_in.strip().title()
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_initials(self, initials_in):
+        """validates the given initials
+        """
+        
+        initials_in = str(initials_in)
+        
+        if initials_in == "":
+            # derive the initials from the first and last name
+            
+            initials_in = re.sub("[^A-Z]+", "",
+                                 self.first_name.title() + " " + \
+                                 self.last_name.title()).lower()
+        
+        return initials_in
     
     
     
@@ -508,6 +531,21 @@ class User(entity.Entity):
         return locals()
     
     first_name = property(**first_name())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def initials():
+        
+        def fget(self):
+            return self._initials
+        
+        def fset(self, initials_in):
+            self._intials = self._validate_initials(initials_in)
+        
+        return locals()
+    
+    initials = property(**initials())
     
     
     

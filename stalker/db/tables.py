@@ -24,12 +24,12 @@ metadata = db.metadata
 # create tables
 
 
-## ENTITYTYPE_IDs
-#entity_type_ids = Table(
-    #"entity_type_ids", metadata,
-    #Column("id", Integer, primary_key=True),
-    #Column("db_entity_type", String(128), nullable=False),
-#)
+# ENTITYTYPES
+entity_types = Table(
+    "entity_types", metadata,
+    Column("id", Integer, primary_key=True),
+    Column("entity_type", String(128), nullable=False),
+)
 
 
 # SIMPLE ENTITY
@@ -135,6 +135,9 @@ users = Table(
            #Integer,
            #ForeignKey("groups.id")
     #),
+    
+    Column("initials", String(16)),
+    
 )
 
 

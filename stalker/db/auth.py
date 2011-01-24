@@ -48,7 +48,9 @@ The basic usage of the system is as follows::
 
 The module also introduces a decorator called
 :func:`~stalker.db.auth.login_required` to help adding the authentication
-functionality to any function or method
+functionality to any function or method. There is also another decorator called
+:func:`~stalker.db.auth.premission_required` to check if the logged in user is
+in the given permission group.
 """
 
 import os
@@ -180,9 +182,9 @@ def login_required(view, error_message=None):
     """
     
     def wrap(func):
-        def wrapped_func(*args):
+        def wrapped_func(*args, **kwargs):
             if view():
-                func(*args)
+                func(*args, **kwargs)
             else:
                 if error_message and isinstance(error_meesage, (str, unicode)):
                     raise(error.LoginError(error_message))
@@ -204,9 +206,9 @@ def permission_required(permission_group, error_message=None):
     """
     
     def wrap(func):
-        def wrapped_func(*args):
+        def wrapped_func(*args, **kwargs):
             if get_user() in permission_group:
-                func(*args)
+                func(*args, **kwargs)
             else:
                 if error_message and isinstance(error_meesage, (str, unicode)):
                     raise(error.LoginError(error_message))

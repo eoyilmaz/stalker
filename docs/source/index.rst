@@ -39,6 +39,7 @@ Stalker is build over these other OpenSource projects:
 
 Source
 ======
+
 The latest development version is available in `Google Project page of
 Stalker`_ or can be directly cloned with the following command if you already
 have mercurial installed::

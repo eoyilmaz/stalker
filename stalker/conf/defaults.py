@@ -1,5 +1,4 @@
 #-*- coding: utf-8 -*-
-import tempfile
 
 #
 # The default database addres
@@ -45,6 +44,39 @@ KEY = "stalker_default_key"
 # mappers
 #
 MAPPERS = [
-"stalker.db.mapper"
+    "stalker.db.mapper",
 ]
 
+
+CORE_MODEL_CLASSES = [
+    "stalker.core.models.asset.Asset",
+    "stalker.core.models.assetBase.AssetBase",
+    "stalker.core.models.booking.Booking",
+    "stalker.core.models.comment.Comment",
+    "stalker.core.models.department.Department",
+    "stalker.core.models.entity.SimpleEntity",
+    "stalker.core.models.entity.Entity",
+    "stalker.core.models.entity.StatusedEntity",
+    "stalker.core.models.entity.TypeEntity",
+    "stalker.core.models.group.Group",
+    "stalker.core.models.imageFormat.ImageFormat",
+    "stalker.core.models.link.Link",
+    "stalker.core.models.message.Message",
+    "stalker.core.models.note.Note",
+    "stalker.core.models.pipelineStep.PipelineStep",
+    "stalker.core.models.project.Project",
+    "stalker.core.models.repository.Repository",
+    "stalker.core.models.sequence.Sequence",
+    "stalker.core.models.shot.Shot",
+    "stalker.core.models.status.Status",
+    "stalker.core.models.status.StatusList",
+    "stalker.core.models.structure.Structure",
+    "stalker.core.models.tag.Tag",
+    "stalker.core.models.task.Task",
+    "stalker.core.models.types.AssetType",
+    "stalker.core.models.types.LinkType",
+    "stalker.core.models.types.ProjectType",
+    "stalker.core.models.types.TypeTemplate",
+    "stalker.core.models.user.User",
+    "stalker.core.models.version.Version",
+]
