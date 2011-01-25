@@ -41,6 +41,15 @@ v0.1.1.a3:
  * stalker.core.models.user.User class now has intials attribute, which is
    automatically calculated from the first and last name if there is no one
    given.
+ * started developing the message class
+ * added the stalker.core.models.mixin module which holds the common mixins
+ * added the ReferenceMixin class which gives reference abilities to mixed in
+   classes
+ * added the database part of the ReferenceMixin. Now it is possible to create
+   a new type of entity and mix it with ReferenceMixin and also persist it in
+   the database. But it needs a lot of effort before to have something usable.
+ * added examples module, which holds usage examples and recepies
+ * added an example about how to create a new mixed in entity type for SOM.
 
 v0.1.1.a2:
  * updated the Tutorial

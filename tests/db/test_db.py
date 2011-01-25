@@ -1,6 +1,8 @@
 #-*- coding: utf-8 -*-
 
 
+
+import sys
 import os
 import datetime
 import unittest
@@ -1367,4 +1369,62 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         self.fail("test is not implemented yet")
+
+
+
+
+
+
+########################################################################
+class MixinTester(unittest.TestCase):
+    """tests the Mixins
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_ReferenceMixin_setup(self):
+        """testing if the ReferenceMixin can be correctly setup with a new
+        class
+        """
+        
+        # use the examples/extending/great_entity.py
+        import os, sys
+        import stalker
+        
+        stalker_dir = os.path.sep.join(
+            stalker.__file__.split(os.path.sep)[:-2])
+        
+        example_path = "examples"
+        
+        import_path = os.path.join(stalker_dir, example_path)
+        sys.path.append(import_path)
+        
+        
+        # the actual test
+        from extending import great_entity
+        from stalker.conf import defaults
+        defaults.MAPPERS.append("extending.great_entity")
+        defaults.CORE_MODEL_CLASSES.append("examples.extending.great_entity.GreatEntity")
+        
+        from stalker import db
+        from stalker.core.models import entity, types, link
+        db.setup("sqlite:////tmp/mixin_test.db")
+        
+        newGreatEntity = great_entity.GreatEntity(name="test")
+        db.session.add(newGreatEntity)
+        db.session.commit()
+        
+        newLinkType = types.LinkType(name="Image")
+        
+        newLink = link.Link(name="TestLink",
+                            path="nopath",
+                            filename="nofilename",
+                            type=newLinkType)
+        
+        newGreatEntity.references = [newLink]
+        
+        db.session.add_all([newLink, newLinkType])
+        db.session.commit()
+        
         

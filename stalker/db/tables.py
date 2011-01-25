@@ -55,12 +55,6 @@ simpleEntities = Table(
     Column("date_created", DateTime),
     Column("date_updated", DateTime),
     Column("db_entity_type", String(128), nullable=False),
-    #Column(
-        #"db_entity_type",
-        #Integer,
-        #ForeignKey("entity_type_ids.id"),
-        #nullable=False
-    #),
     UniqueConstraint("name", "db_entity_type")
 )
 

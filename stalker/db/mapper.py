@@ -104,7 +104,7 @@ def setup():
             "_tags": relationship(
                 tag.Tag,
                 secondary=tables.entity_tags,
-                backref="_entities"
+                backref="entities"
             ),
             "tags": synonym("_tags"),
             "_notes": relationship(
@@ -158,7 +158,7 @@ def setup():
                 user.User,
                 backref="_department",
                 primaryjoin=\
-                tables.departments.c.id==tables.users.c.department_id,
+                    tables.departments.c.id==tables.users.c.department_id,
             ),
             "members": synonym("_members")
         },
@@ -417,16 +417,9 @@ def setup():
             "_status_list": relationship(
                 status.StatusList,
                 secondary=tables.statusedEntity_statusLists,
-                #primaryjoin=\
-                    #tables.statusedEntities.c.z_entity_type==\
-                    #tables.entity_type_statusLists.c.entity_type,
-                #secondaryjoin=\
-                    #tables.entity_type_statusLists.c.statusList_id==\
-                    #tables.statusLists.c.id,
                 uselist=False,
             ),
             "status_list": synonym("_status_list"),
-            #"z_entity_type": tables.statusedEntities.c.z_entity_type,
         },
     )
     
