@@ -1041,64 +1041,10 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # now try to retrieve it
         testStatusDB = db.query(status.Status).\
-                     filter(entity.StatusedEntity.name==kwargs["name"]).first()
+                     filter(status.Status.name==kwargs["name"]).first()
         
         # just test the satuts part of the object
         self.assertEquals(testStatus, testStatusDB)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_persistence_StatuesedEntity(self):
-        """testing the persistence of StatuedEntity
-        """
-        
-        # create a couple of statuses
-        statuses = [
-            status.Status(name="Waiting To Start", code="WTS"),
-            status.Status(name="On Hold", code="OH"),
-            status.Status(name="In Progress", code="WIP"),
-            status.Status(name="Complete", code="CMPLT"),
-        ]
-        
-        project_status_list = status.StatusList(
-            name="Project Status List",
-            statuses=statuses,
-            target_entity_type="StatusedEntity",
-        )
-        
-        
-        statused_entity = entity.StatusedEntity(
-            name="Test for status lists",
-            status_list = project_status_list
-        )
-        
-        db.session.add_all(statuses)
-        db.session.add_all([project_status_list, statused_entity])
-        db.session.commit()
-        
-        # get the status list of the statused entity and check for equality
-        
-        statused_entity_DB = db.query(entity.StatusedEntity).\
-                              filter_by(name=statused_entity.name).first()
-        
-        
-        # compare the StatusedEntities
-        self.assertEquals(statused_entity, statused_entity_DB)
-        
-        # alos compare the status list
-        self.assertEquals(statused_entity.status_list,
-                          statused_entity_DB.status_list)
-        
-        # try to create another StatusedEntity and assign it the same
-        # StatusList
-        
-        new_statused_entity = entity.StatusedEntity(
-            name="Test for status lists 2",
-            status_list=project_status_list)
-        
-        db.session.add(new_statused_entity)
-        db.session.commit()
     
     
     

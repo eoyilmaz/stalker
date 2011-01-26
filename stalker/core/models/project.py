@@ -2,7 +2,7 @@
 
 
 
-from stalker.core.models import entity
+from stalker.core.models import entity, mixin
 
 
 
@@ -10,7 +10,7 @@ from stalker.core.models import entity
 
 
 ########################################################################
-class Project(entity.StatusedEntity):
+class Project(entity.Entity, mixin.StatusMixin):
     """the project class
     """
     

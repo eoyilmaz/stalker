@@ -3,14 +3,14 @@
 
 
 
-from stalker.core.models import entity
+from stalker.core.models import entity, mixin
 
 
 
 
 
 ########################################################################
-class Message(entity.StatusedEntity):
+class Message(entity.Entity, mixin.StatusMixin):
     """The base of the messaging system in Stalker
     
     Messages are one of the ways to collaborate in Stalker. The model of the

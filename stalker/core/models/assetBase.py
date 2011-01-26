@@ -2,7 +2,7 @@
 
 
 
-from stalker.core.models import entity
+from stalker.core.models import entity, mixin
 
 
 
@@ -10,7 +10,7 @@ from stalker.core.models import entity
 
 
 ########################################################################
-class AssetBase(entity.StatusedEntity):
+class AssetBase(entity.Entity, mixin.StatusMixin):
     """This is the base class for Shot and Asset classes.
     """
     

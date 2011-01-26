@@ -260,7 +260,7 @@ class StatusMixinTester(mocker.MockerTestCase):
     def test_status_list_argument_suitable_for_the_current_class(self):
         """testing if a TypeError will be raised when the
         Status.target_entity_class is not compatible with the current
-        StatusedEntity
+        class
         """
         
         # create a new status list suitable for another class with different

@@ -404,25 +404,3 @@ def setup():
     
     
     
-    # StatusedEntity
-    mapper(
-        entity.StatusedEntity,
-        tables.statusedEntities,
-        inherits=entity.StatusedEntity.__base__,
-        inherit_condition=tables.statusedEntities.c.id==tables.entities.c.id,
-        polymorphic_identity=entity.StatusedEntity.entity_type,
-        properties={
-            "_status": tables.statusedEntities.c.status,
-            "status": synonym("_status"),
-            "_status_list": relationship(
-                status.StatusList,
-                primaryjoin=\
-                    tables.statusedEntities.c.status_list_id==\
-                    tables.statusLists.c.id
-            ),
-            "status_list": synonym("_status_list"),
-        },
-    )
-    
-    
-    

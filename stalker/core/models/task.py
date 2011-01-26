@@ -2,7 +2,7 @@
 
 
 
-from stalker.core.models import entity
+from stalker.core.models import entity, mixin
 
 
 
@@ -10,7 +10,7 @@ from stalker.core.models import entity
 
 
 ########################################################################
-class Task(entity.StatusedEntity):
+class Task(entity.Entity, mixin.StatusMixin):
     """the task class
     """
     

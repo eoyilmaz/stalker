@@ -1,6 +1,10 @@
 Stalker Changes
 ===============
 
+v0.1.1.a5:
+ * removed the StatusedEntity and its tests, with the introduction of
+   StatusMixin, it is not necessary any more
+
 v0.1.1.a4:
  * changed the arguments of the stalker.db.mixins.ReferenceMixin.setup
    function, to allow carrying the data from one to the next mixin (this part

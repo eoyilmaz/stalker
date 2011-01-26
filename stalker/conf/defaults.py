@@ -56,7 +56,6 @@ CORE_MODEL_CLASSES = [
     "stalker.core.models.department.Department",
     "stalker.core.models.entity.SimpleEntity",
     "stalker.core.models.entity.Entity",
-    "stalker.core.models.entity.StatusedEntity",
     "stalker.core.models.entity.TypeEntity",
     "stalker.core.models.group.Group",
     "stalker.core.models.imageFormat.ImageFormat",

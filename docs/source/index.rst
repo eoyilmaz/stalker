@@ -100,7 +100,6 @@ Summary
    stalker.core.models.entity
    stalker.core.models.entity.SimpleEntity
    stalker.core.models.entity.Entity
-   stalker.core.models.entity.StatusedEntity
    stalker.core.models.entity.TypeEntity
    stalker.core.models.error
    stalker.core.models.error.LoginError
