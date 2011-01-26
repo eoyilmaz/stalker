@@ -10,7 +10,7 @@ from stalker.core.models import entity, mixin
 
 
 ########################################################################
-class Sequence(entity.Entity, mixin.StatusMixin):
+class Sequence(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
     """the sequence class
     """
     

@@ -66,22 +66,27 @@ class DatabaseTester(unittest.TestCase):
         defaults.ADMIN_NAME = "admin"
         defaults.ADMIN_PASSWORD = "admin"
         
-        self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
-        self.TEST_DATABASE_DIALECT = "sqlite:///"
-        self.TEST_DATABASE_URI = self.TEST_DATABASE_DIALECT + \
-            self.TEST_DATABASE_FILE
+        #self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
+        #self.TEST_DATABASE_DIALECT = "sqlite:///"
+        #self.TEST_DATABASE_URI = self.TEST_DATABASE_DIALECT + \
+            #self.TEST_DATABASE_FILE
+        
+        self.TEST_DATABASE_URI = "sqlite://"
         
         self._createdDB = False
     
     
     
-    #----------------------------------------------------------------------
-    def tearDown(self):
-        """tearDown the tests
-        """
+    ##----------------------------------------------------------------------
+    #def tearDown(self):
+        #"""tearDown the tests
+        #"""
         
-        if self._createdDB:
-            os.remove(self.TEST_DATABASE_FILE)
+        #if self._createdDB:
+            #try:
+                #os.remove(self.TEST_DATABASE_FILE)
+            #except OSError:
+                #pass
     
     
     
@@ -91,7 +96,8 @@ class DatabaseTester(unittest.TestCase):
         """
         
         # create a database in memory
-        db.setup("sqlite:///:memory:")
+        #db.setup("sqlite:///:memory:")
+        db.setup("sqlite://")
         
         # try to persist a user and get it back
         session = db.session
@@ -371,6 +377,8 @@ class DatabaseTester(unittest.TestCase):
     def test_entity_types_table_is_created_properly(self):
         """testing if the entity_types table is created properly
         """
+        
+        db.setup()
         
         # check if db.metadata.tables has a table with name entity_types
         self.assertTrue("entity_types", db.metadata.tables)
@@ -1322,8 +1330,8 @@ class DatabaseModelsTester(unittest.TestCase):
 
 
 ########################################################################
-class MixinTester(unittest.TestCase):
-    """tests the Mixins
+class ExamplesTester(unittest.TestCase):
+    """tests the examples
     """
     
     
@@ -1344,21 +1352,11 @@ class MixinTester(unittest.TestCase):
             )[:-2]
         )
         
-        example_path = "examples"
+        #example_path = "examples"
+        #cls.import_path = os.path.join(stalker_dir, example_path)
+        #sys.path.append(cls.import_path)
         
-        cls.import_path = os.path.join(stalker_dir, example_path)
-        sys.path.append(cls.import_path)
-    
-    
-    
-    #----------------------------------------------------------------------
-    @classmethod
-    def tearDownClass(cls):
-        """remove the test setup
-        """
-        
-        # remove the example path from 
-        sys.path.remove(cls.import_path)
+        sys.path.append(stalker_dir)
     
     
     
@@ -1379,16 +1377,15 @@ class MixinTester(unittest.TestCase):
         class
         """
         
+        clear_mappers()
+        db.__mappers__ = []
         
         # the actual test
-        from extending import great_entity
-        from stalker.conf import defaults
-        defaults.MAPPERS.append("extending.great_entity")
+        from examples.extending import great_entity
+        defaults.MAPPERS.append("examples.extending.great_entity")
         defaults.CORE_MODEL_CLASSES.append("examples.extending.great_entity.\
 GreatEntity")
         
-        from stalker import db
-        from stalker.core.models import entity, types, link
         #db.setup("sqlite:////tmp/mixin_test.db")
         db.setup("sqlite://")
         
@@ -1415,7 +1412,7 @@ GreatEntity")
         self.assertEquals(newGreatEntity, newGreatEntity_DB)
         
         # clean up the test
-        defaults.MAPPERS.remove("extending.great_entity")
+        defaults.MAPPERS.remove("examples.extending.great_entity")
         defaults.CORE_MODEL_CLASSES.remove("examples.extending.great_entity.\
 GreatEntity")
     
@@ -1425,16 +1422,16 @@ GreatEntity")
     def test_StatusMixin_setup(self):
         """testing if the StatusMixin can be correctly setup with a new class
         """
+        clear_mappers()
+        db.__mappers__ = []
         
         # the actual test
-        from extending import statused_entity
-        from stalker.conf import defaults
-        defaults.MAPPERS.append("extending.statused_entity")
+        from examples.extending import statused_entity
+
+        defaults.MAPPERS.append("examples.extending.statused_entity")
         defaults.CORE_MODEL_CLASSES.append("examples.extending.\
 statused_entity.NewStatusedEntity")
         
-        from stalker import db
-        from stalker.core.models import entity, types, link
         #db.setup("sqlite:////tmp/mixin_test.db")
         db.setup("sqlite://")
         
@@ -1465,7 +1462,7 @@ statused_entity.NewStatusedEntity")
         self.assertEquals(aStatusedEntity, aStatusedEntity_DB)
         
         # clean up the test
-        defaults.MAPPERS.remove("extending.statused_entity")
+        defaults.MAPPERS.remove("examples.extending.statused_entity")
         defaults.CORE_MODEL_CLASSES.remove("examples.extending.\
 statused_entity.NewStatusedEntity")
 
@@ -1478,6 +1475,51 @@ statused_entity.NewStatusedEntity")
         """
         
         self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_camera_lens(self):
+        """testing the camera_lens example
+        """
+        
+        from examples.extending import camera_lens
+        defaults.MAPPERS.append("examples.extending.camera_lens")
+        defaults.CORE_MODEL_CLASSES.append("examples.extending.camera_lens.Camera")
+        defaults.CORE_MODEL_CLASSES.append("examples.extending.camera_lens.Lens")
+        
+        #db.setup("sqlite:////tmp/camera_lens.db")
+        db.setup("sqlite://")
+        
+        new_camera = camera_lens.Camera(
+            name="Nikon D300",
+            make="Nikon",
+            model="D300",
+            horizontal_film_back=23.6,
+            vertical_film_back=15.8,
+            cropping_factor=1.5,
+            web_page="http://www.nikon.com",
+        )
+        
+        
+        new_lens = camera_lens.Lens(
+            name="Nikon 50 mm Lens",
+            make="Nikon",
+            model="Nikkor 50mm 1.8",
+            min_focal_length=50,
+            max_focal_length=50,
+            web_page="http://www.nikon.com",
+        )
+        
+        db.session.add_all([new_camera, new_lens])
+        db.session.commit()
+        
+        # retrieve them from the db
+        new_camera_DB = db.query(camera_lens.Camera).first()
+        new_lens_DB = db.query(camera_lens.Lens).first()
+        
+        self.assertEquals(new_camera, new_camera_DB)
+        self.assertEquals(new_lens, new_lens_DB)
     
     
     

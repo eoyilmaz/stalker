@@ -410,5 +410,17 @@ class StatusMixinTester(mocker.MockerTestCase):
             "status",
             test_value
         )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_status_property_works_properly(self):
+        """testing if the status property works properly
+        """
+        
+        test_value = 1
+        
+        self.mock_mixed_obj.status = test_value
+        self.assertEquals(self.mock_mixed_obj.status, test_value)
 
 

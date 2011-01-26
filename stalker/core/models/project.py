@@ -10,7 +10,7 @@ from stalker.core.models import entity, mixin
 
 
 ########################################################################
-class Project(entity.Entity, mixin.StatusMixin):
+class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
     """the project class
     """
     
@@ -20,4 +20,5 @@ class Project(entity.Entity, mixin.StatusMixin):
     def __init__(self, **kwargs):
         
         super(Project, self).__init__(**kwargs)
-        
+
+

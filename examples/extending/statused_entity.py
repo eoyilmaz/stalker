@@ -1,6 +1,7 @@
+#-*- coding: utf-8 -*-
 """
 In this example we are going to extend stalker with a new entity type, which
-is also mixed in with a :mod:`~stalker.core.models.mixin`.
+is also mixed in with :class:`~stalker.core.models.mixin.StatusMixin`.
 
 To be able to use NewStatusedEntity with the rest of the stalker.core.models in
 a persistence environment, before calling anything from stalker call these in
@@ -9,7 +10,8 @@ your configuration scripts::
   from extending import statused_entity
   from stalker.conf import defaults
   defaults.MAPPERS.append("extending.statused_entity")
-  defaults.CORE_MODEL_CLASSES.append("examples.extending.statused_entity.NewStatusedEntity")
+  defaults.CORE_MODEL_CLASSES.append("examples.extending.statused_entity.\
+      NewStatusedEntity")
 
 Now Stalker nows how to extend the stalker.core.models with your class
 """

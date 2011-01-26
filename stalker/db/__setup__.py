@@ -48,10 +48,11 @@ def __setup__(database=None, mappers=[], engine_settings=None):
     
     # create engine
     db.engine = sqlalchemy.create_engine(database,
-                                           **defaults.DATABASE_ENGINE_SETTINGS)
+                                         **defaults.DATABASE_ENGINE_SETTINGS)
     
     # extend the default mappers with the given mappers list
-    defaults.MAPPERS.extend(mappers)
+    if len(mappers):
+        defaults.MAPPERS = list(set(defaults.MAPPERS.extend(mappers)))
     
     # create mappers
     __create_mappers__(defaults.MAPPERS)

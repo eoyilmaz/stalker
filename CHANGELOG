@@ -4,6 +4,10 @@ Stalker Changes
 v0.1.1.a5:
  * removed the StatusedEntity and its tests, with the introduction of
    StatusMixin, it is not necessary any more
+ * added camera_lens.py to the examples, which shows how to extend SOM in its
+   very basic form, also added tests testing this example
+ * changed the database uri for the DatabaseTester, it now uses an in memory
+   SQLite database instead a file based one.
 
 v0.1.1.a4:
  * changed the arguments of the stalker.db.mixins.ReferenceMixin.setup
