@@ -244,22 +244,22 @@ statusLists = Table(
 
 
 
-# STATUSEDENTITY_STATUSLISTS
-statusedEntity_statusLists = Table(
-    "statusedEntity_statusLists", metadata,
-    Column(
-        "statusedEntity_id",
-        Integer,
-        ForeignKey("statusedEntities.id"),
-        primary_key=True
-    ),
-    Column(
-        "statusList_id",
-        Integer,
-        ForeignKey("statusLists.id"),
-        primary_key=True
-    ),
-)
+## STATUSEDENTITY_STATUSLISTS
+#statusedEntity_statusLists = Table(
+    #"statusedEntity_statusLists", metadata,
+    #Column(
+        #"statusedEntity_id",
+        #Integer,
+        #ForeignKey("statusedEntities.id"),
+        #primary_key=True
+    #),
+    #Column(
+        #"statusList_id",
+        #Integer,
+        #ForeignKey("statusLists.id"),
+        #primary_key=True
+    #),
+#)
 
 
 
@@ -269,7 +269,7 @@ statusedEntities = Table(
     "statusedEntities", metadata,
     Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
     Column("status", Integer),
-    #Column("z_entity_type", String(128)),
+    Column("status_list_id", Integer, ForeignKey("statusLists.id"), nullable=False),
 )
 
 

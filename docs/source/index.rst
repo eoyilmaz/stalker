@@ -81,7 +81,9 @@ Summary
    stalker.db.auth.permission_required
    stalker.db.auth.logout
    stalker.db.mapper
-   stalker.db.mixin
+   stalker.db.mixins
+   stalker.db.mixins.ReferenceMixin
+   stalker.db.mixins.ReferenceMixin.setup
    stalker.db.tables
    stalker.db.setup
    stalker.core.models
@@ -110,6 +112,7 @@ Summary
    stalker.core.models.link.Link
    stalker.core.models.mixin
    stalker.core.models.mixin.ReferenceMixin
+   stalker.core.models.mixin.StatusMixin
    stalker.core.models.pipelineStep
    stalker.core.models.pipelineStep.PipelineStep
    stalker.core.models.project

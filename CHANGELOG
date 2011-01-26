@@ -1,8 +1,20 @@
 Stalker Changes
 ===============
 
+v0.1.1.a4:
+ * changed the arguments of the stalker.db.mixins.ReferenceMixin.setup
+   function, to allow carrying the data from one to the next mixin (this part
+   still needs a lot of attention)
+ * removed the unnecessary "statusedEntity_statuses" secondary table, because
+   one StatusedEntity owns just one StatusList its a many2one relation, so no
+   need to have a secondary table
+ * introduced the StatusMixin (will replace StatusedEntity soon)
+ * added a new example for the usage of StatusMixin
+ * updated the ReferenceMixin.setup function, now it takes three arguments, the
+   class, table and the mapper_options dictionary
+
 v0.1.1.a3:
- * removed the accidently included *tests* from the egg build
+ * removed the included *tests* from the egg build
  * added/fixed equality and inequality operators for classes:
   * Department
   * StatusedEntity
@@ -22,7 +34,7 @@ v0.1.1.a3:
  * StatusList.__eq__ now checks for the target_entity_type also
  * StatusedEntity now checks for the given StatusList.target_entity_type for
    compability with the current class
- * all the validator methods in the stalker.core.models now has the "validate"
+ * all the validation methods in the stalker.core.models now has the "validate"
    word in their name instead of "check"
  * little fixes:
    * the mapper of TypeTemplate was trying to setup a synonym to a parameter
@@ -33,12 +45,12 @@ v0.1.1.a3:
    to an executable python code which imports the given python object to the
    current namespace
  * added entity_types table to hold old the possible entity types in Stalker.
-   The contect of the table comes from the
-   stalker.conf.default.CORE_MODEL_CLASSES list. And possibily going to be
+   The content of the table comes from the
+   stalker.conf.default.CORE_MODEL_CLASSES list. And possibly going to be
    extended by the users.
  * added db.__setup__.__fill_entity_types_table__ which fills the entity_types
    table with default values
- * stalker.core.models.user.User class now has intials attribute, which is
+ * stalker.core.models.user.User class now has initials attribute, which is
    automatically calculated from the first and last name if there is no one
    given.
  * started developing the message class
@@ -48,7 +60,7 @@ v0.1.1.a3:
  * added the database part of the ReferenceMixin. Now it is possible to create
    a new type of entity and mix it with ReferenceMixin and also persist it in
    the database. But it needs a lot of effort before to have something usable.
- * added examples module, which holds usage examples and recepies
+ * added examples module, which holds usage examples and recipes
  * added an example about how to create a new mixed in entity type for SOM.
 
 v0.1.1.a2:

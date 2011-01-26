@@ -16,6 +16,7 @@ Now Stalker nows how to extend the stalker.core.models with your class
 
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import mapper, relationship, synonym
+
 from stalker import db
 from stalker.db import tables
 from stalker.db.mixins import ReferenceMixin as ReferenceMixinDB
@@ -48,18 +49,26 @@ def setup():
     )
     
     
-    # mix the table
-    ReferenceMixinDB_data = ReferenceMixinDB.setup(GreatEntity,
-                                                   great_entities_table)
+    # to let the mixin adds its own columns and properties we call the
+    # ReferenceMixinDB.setup
     
-    # setup the mapper with the supplied mixin properties
+    # create the mapper_arguments dictionary
+    mapper_arguments= {
+        "inherits": GreatEntity.__base__,
+        "polymorphic_identity": GreatEntity.entity_type
+    }
+    
+    # do the mixin database setup
+    ReferenceMixinDB.setup(GreatEntity, great_entities_table, mapper_arguments)
+    
+    # setup the mapper with the updated mapper_arguments
     mapper(
         GreatEntity,
         great_entities_table,
-        inherits=GreatEntity.__base__,
-        polymorphic_identity=GreatEntity.entity_type,
-        
-        # update the propreties with the one comming from mixin
-        properties=ReferenceMixinDB_data.properties,
+        **mapper_arguments
     )
+    
+    # voila now we have introduced a new type to the SOM and also mixed it
+    # with a StatusMixin
+
 

@@ -1383,33 +1383,68 @@ class MixinTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_ReferenceMixin_setup(self):
-        """testing if the ReferenceMixin can be correctly setup with a new
-        class
+    @classmethod
+    def setUpClass(cls):
+        """setup the test
         """
         
-        # use the examples/extending/great_entity.py
+        # add the stalker/examples directory to the sys.path
         import os, sys
         import stalker
         
         stalker_dir = os.path.sep.join(
-            stalker.__file__.split(os.path.sep)[:-2])
+            stalker.__file__.split(
+                os.path.sep
+            )[:-2]
+        )
         
         example_path = "examples"
         
-        import_path = os.path.join(stalker_dir, example_path)
-        sys.path.append(import_path)
+        cls.import_path = os.path.join(stalker_dir, example_path)
+        sys.path.append(cls.import_path)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @classmethod
+    def tearDownClass(cls):
+        """remove the test setup
+        """
+        
+        # remove the example path from 
+        sys.path.remove(cls.import_path)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """setup per test basis
+        """
+        
+        # setup the database
+        clear_mappers()
+        db.__mappers__ = []
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_ReferenceMixin_setup(self):
+        """testing if the ReferenceMixin can be correctly setup with a new
+        class
+        """
         
         
         # the actual test
         from extending import great_entity
         from stalker.conf import defaults
         defaults.MAPPERS.append("extending.great_entity")
-        defaults.CORE_MODEL_CLASSES.append("examples.extending.great_entity.GreatEntity")
+        defaults.CORE_MODEL_CLASSES.append("examples.extending.great_entity.\
+GreatEntity")
         
         from stalker import db
         from stalker.core.models import entity, types, link
-        db.setup("sqlite:////tmp/mixin_test.db")
+        #db.setup("sqlite:////tmp/mixin_test.db")
+        db.setup("sqlite://")
         
         newGreatEntity = great_entity.GreatEntity(name="test")
         db.session.add(newGreatEntity)
@@ -1427,4 +1462,76 @@ class MixinTester(unittest.TestCase):
         db.session.add_all([newLink, newLinkType])
         db.session.commit()
         
+        # query and check the equality
+        newGreatEntity_DB = db.query(great_entity.GreatEntity).\
+                          filter_by(name="test").first()
         
+        self.assertEquals(newGreatEntity, newGreatEntity_DB)
+        
+        # clean up the test
+        defaults.MAPPERS.remove("extending.great_entity")
+        defaults.CORE_MODEL_CLASSES.remove("examples.extending.great_entity.\
+GreatEntity")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_StatusMixin_setup(self):
+        """testing if the StatusMixin can be correctly setup with a new class
+        """
+        
+        # the actual test
+        from extending import statused_entity
+        from stalker.conf import defaults
+        defaults.MAPPERS.append("extending.statused_entity")
+        defaults.CORE_MODEL_CLASSES.append("examples.extending.\
+statused_entity.NewStatusedEntity")
+        
+        from stalker import db
+        from stalker.core.models import entity, types, link
+        #db.setup("sqlite:////tmp/mixin_test.db")
+        db.setup("sqlite://")
+        
+        newStatusList = status.StatusList(
+            name="A Status List for testing StatusMixin",
+            statuses=[
+                status.Status(name="Mixin - On Hold", code="OH"),
+                status.Status(name="Mixin - Complete", code="CMPLT")
+            ],
+            target_entity_type = statused_entity.NewStatusedEntity.entity_type
+        )
+        db.session.add(newStatusList)
+        db.session.commit()
+        
+        aStatusedEntity = statused_entity.NewStatusedEntity(
+            name="test")
+        
+        # add the status list
+        aStatusedEntity.status_list = newStatusList
+        
+        db.session.add(aStatusedEntity)
+        db.session.commit()
+        
+        # query and check the equality
+        aStatusedEntity_DB = db.query(statused_entity.NewStatusedEntity).\
+                             first()
+        
+        self.assertEquals(aStatusedEntity, aStatusedEntity_DB)
+        
+        # clean up the test
+        defaults.MAPPERS.remove("extending.statused_entity")
+        defaults.CORE_MODEL_CLASSES.remove("examples.extending.\
+statused_entity.NewStatusedEntity")
+
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_multiple_mixin_case(self):
+        """testing multiple mixin case
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    

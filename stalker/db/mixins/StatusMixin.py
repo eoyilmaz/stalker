@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-"""This module contains the database mappers and tables for ReferenceMixin.
+"""This module contains the database mappers and tables for StatusMixin.
 
 See examples/extending/great_entity.py for an example.
 """
@@ -15,7 +15,7 @@ from sqlalchemy import (
 )
 from stalker import db
 from stalker.db import tables
-from stalker.core.models import link
+from stalker.core.models import status
 
 
 
@@ -40,39 +40,30 @@ def setup(class_, class_table, mapper_arguments={}):
     
     class_name = class_.__name__
     
-    # there is no extra columns in the base table so we don't need to update
-    # the given class_table
+    # update the given class table with new columns
+    class_table.append_column(
+        Column("status", Integer, default=0),
+    )
     
-    # use the given class_name and the class_table
-    secondary_table = Table(
-        class_name.lower() + "_references", db.metadata,
+    class_table.append_column(
         Column(
-            class_name.lower() + "_id",
+            "status_list_id",
             Integer,
-            ForeignKey(class_table.c.id),
-            primary_key=True,
-        ),
-        
-        Column(
-            "reference_id",
-            Integer,
-            ForeignKey(tables.links.c.id),
-            primary_key=True,
+            ForeignKey(tables.statusLists.c.id),
+            nullable=False
         )
     )
     
     new_properties = {
-        "_references": relationship(
-            link.Link,
-            secondary=secondary_table,
+        "_status": class_table.c.status,
+        "status": synonym("_status"),
+        "_status_list": relationship(
+            status.StatusList,
             primaryjoin=\
-                class_table.c.id==\
-                eval("secondary_table.c." + class_name.lower() + "_id"),
-            secondaryjoin=\
-                secondary_table.c.reference_id==\
-                tables.links.c.id,
+            class_table.c.status_list_id==\
+            tables.statusLists.c.id
         ),
-        "references": synonym("_references"),
+        "status_list": synonym("_status_list"),
     }
     
     try:

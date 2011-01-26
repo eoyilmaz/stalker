@@ -527,3 +527,8 @@ In Stalker you can communicate with others in the system, by:
     to a group of users
   * If you are a lead of a project or a sequence, then by placing a
     :class:`~stalker.core.models.review.Review` to their works
+
+Part VII - Extending SOM (commming)
+===================================
+
+This part will be covered soon

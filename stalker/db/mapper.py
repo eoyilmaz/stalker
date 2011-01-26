@@ -380,7 +380,7 @@ def setup():
             "_type": relationship(
                 types.LinkType,
                 primaryjoin=\
-                tables.links.c.type_id==tables.linkTypes.c.id
+                    tables.links.c.type_id==tables.linkTypes.c.id
             ),
             "type": synonym("_type"),
         },
@@ -416,8 +416,9 @@ def setup():
             "status": synonym("_status"),
             "_status_list": relationship(
                 status.StatusList,
-                secondary=tables.statusedEntity_statusLists,
-                uselist=False,
+                primaryjoin=\
+                    tables.statusedEntities.c.status_list_id==\
+                    tables.statusLists.c.id
             ),
             "status_list": synonym("_status_list"),
         },

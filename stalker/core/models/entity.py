@@ -640,35 +640,8 @@ class StatusedEntity(Entity):
         super(StatusedEntity, self).__init__(**kwargs)
         
         # the attributes
-        #self._references = self._validate_references(references)
         self._status_list = self._validate_status_list(status_list)
         self._status = self._validate_status(status)
-        
-        #self.z_entity_type = self.entity_type
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def __repr__(self):
-        #"""the representation
-        #"""
-        
-        #return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _validate_references(self, references_in):
-        #"""validates the given references_in list
-        #"""
-        
-        ## raise ValueError when:
-        
-        ## it is not an instance of list
-        #if not isinstance(references_in, list):
-            #raise ValueError("the lists attribute should be set to a list")
-        
-        #return references_in
     
     
     
@@ -721,24 +694,6 @@ whereas the entity_type of this object is %s" % \
             the status_list")
         
         return status_in
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def refereneces():
-        
-        #def fget(self):
-            #return self._references
-        
-        #def fset(self, references_in):
-            #self._references = self._validate_references(references_in)
-        
-        #doc = """this is the property that sets and returns the references \
-        #attribute"""
-        
-        #return locals()
-    
-    #references = property(**references())
     
     
     

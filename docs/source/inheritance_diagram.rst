@@ -13,6 +13,8 @@
      stalker.core.models.imageFormat.ImageFormat
      stalker.core.models.link.Link
      stalker.core.models.message.Message
+     stalker.core.models.mixin.ReferenceMixin
+     stalker.core.models.mixin.StatusMixin
      stalker.core.models.note.Note
      stalker.core.models.pipelineStep.PipelineStep
      stalker.core.models.project.Project
