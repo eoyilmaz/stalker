@@ -60,7 +60,7 @@ Stalker by using the Python prompt like this::
   
   >>> import stalker
   >>> stalker.__version__
-  0.1.1
+  0.1.1.a5
 
 For developers
 ==============

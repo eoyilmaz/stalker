@@ -71,7 +71,7 @@ class DatabaseTester(unittest.TestCase):
         #self.TEST_DATABASE_URI = self.TEST_DATABASE_DIALECT + \
             #self.TEST_DATABASE_FILE
         
-        self.TEST_DATABASE_URI = "sqlite://"
+        self.TEST_DATABASE_URI = "sqlite:///:memory:"
         
         self._createdDB = False
     
@@ -96,8 +96,8 @@ class DatabaseTester(unittest.TestCase):
         """
         
         # create a database in memory
-        #db.setup("sqlite:///:memory:")
-        db.setup("sqlite://")
+        db.setup("sqlite:///:memory:")
+        #db.setup("sqlite://")
         
         # try to persist a user and get it back
         session = db.session

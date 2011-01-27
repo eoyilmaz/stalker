@@ -23,9 +23,32 @@ __mappers__ = []
 
 
 #----------------------------------------------------------------------
-def setup(database=None, mappers=[], engine_settings=None):
+def setup(database=None, mappers=[]):
+    """
+    This is a utillty function that helps to connect the system to the given
+    database.
+    
+    if the database is None then the it setups using the default database in
+    the settings file.
+    
+    These are the steps:
+     1. creates the engine, and stores it in stalker.db.engine
+     2. creates the mappers, adds the given mappers to the
+        stalker.conf.defaults.MAPPERS list
+     3. creates the session and binds the engine to it, and stores the session
+        in stalker.db.session
+    
+    :param database: The database address, default is None, and in this case it
+      uses the database defined in stalker.conf.defaults.DATABASE
+    
+    :param mappers: The additional mappers module. Use this parameter to
+      customize the whole SOM and database mapping to add your own classes to
+      SOM
+    
+    :param engine_settings: the settings for the SQLAlchemy engine
+    """
     
     from stalker.db import __setup__
-    __setup__.__setup__(database, mappers, engine_settings)
+    __setup__.__setup__(database, mappers)
 
 

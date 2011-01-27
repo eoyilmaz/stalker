@@ -522,13 +522,18 @@ In Stalker you can communicate with others in the system, by:
   
   * Leaving a :class:`~stalker.core.models.note.Note` to anything created in
     Stalker (except to notes and tags, you can not create a note to a note and
-    a tag)
+    to a tag)
   * Sending a :class:`~stalker.core.models.message.Message` directly to them or
     to a group of users
   * If you are a lead of a project or a sequence, then by placing a
     :class:`~stalker.core.models.review.Review` to their works
 
-Part VII - Extending SOM (commming)
-===================================
+Part VII - Session Management (comming)
+=======================================
+
+This part will be covered soon
+
+Part VIII - Extending SOM (commming)
+====================================
 
 This part will be covered soon

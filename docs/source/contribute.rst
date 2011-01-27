@@ -152,7 +152,7 @@ rules, and there are some extra rules as listed below:
          
      pass
  
- * Any lines that may contain a code or comment can not be longer than 80
+ * Any lines that may contain a code or comment can not be longer than 79
    characters, all the longer lines should be cancelled with "\\" character and
    should continue properly from the line below::
    
@@ -178,10 +178,12 @@ rules, and there are some extra rules as listed below:
    rest by a blank line.
 
 
-If you are going to add a new python file (*.py), there is an empty py file
-with the name empty_code_template_file.py under docs/_static. Before starting
-anything, duplicate this file and place it under the folder you want. This
-files has the necessary shebang and the GPL 3 license text.
+If you are going to add a new python file (*.py), use the following line in the
+first line::
+  
+  #-*- coding: utf-8 -*-
+  
+
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _Wing IDE: http://www.wingware.com

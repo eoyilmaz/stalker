@@ -11,7 +11,7 @@ DATABASE = "sqlite:///:memory:"
 # possible parameters
 # 
 DATABASE_ENGINE_SETTINGS = {
-    "echo":False,
+    "echo": False
 }
 
 

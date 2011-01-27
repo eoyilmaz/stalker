@@ -25,7 +25,7 @@ Features:
  * Integrated messaging system
  * Integrated production planing and tracking tools
  * PySide user interfaces
- * Can be used with any kind of database backend that SQLAlchmey supports
+ * Can be used with any kind of databases supported by SQLAlchmey
  * Can be connected to all the major 3d animation packages like Maya, Houdini,
    Nuke, XSI, Vue, Blender etc. and any application that has a Python API
  * Can work as a stand-alone application

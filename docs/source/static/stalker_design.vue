@@ -1,18 +1,18 @@
-<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2011-01-26 -->
+<!-- Tufts VUE 3.0.2 concept-map (stalker_design.vue) 2011-01-27 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Wed Jan 26 23:39:33 EET 2011 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
+<!-- Do Not Remove: Saved date Thu Jan 27 16:47:55 EET 2011 by ozgur on platform Linux 2.6.35-24-generic in JVM 1.6.0_22-b04 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built July 1 2010 at 1436 by vue on Linux 2.4.21-57.EL i386 JVM 1.5.0_06-b05(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="4290.8525" height="4686.808" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1296077973148" size="626245"
-        spec="/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue"
+    <resource referenceCreated="1296139675707" size="627284"
+        spec="/home/ozgur/Documents/development/stalker/docs/source/static/stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
-        <property key="File" value="/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue"/>
+        <property key="File" value="/home/ozgur/Documents/development/stalker/docs/source/static/stalker_design.vue"/>
     </resource>
     <fillColor>#FFFFFF</fillColor>
     <strokeColor>#404040</strokeColor>
@@ -2160,7 +2160,7 @@
         <child ID="2370" label="last_login | DATETIME"
             created="1294054995724" x="34.0" y="306.5" width="132.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
-            <fillColor>#FDE888</fillColor>
+            <fillColor>#F2AE45</fillColor>
             <strokeColor>#776D6D</strokeColor>
             <textColor>#000000</textColor>
             <font>Arial-plain-12</font>
@@ -12271,6 +12271,6 @@
     <date>2009-05-20</date>
     <mapFilterModel/>
     <modelVersion>5</modelVersion>
-    <saveLocation>/home/ozgur/Documents/development/stalker/docs/source/_static</saveLocation>
-    <saveFile>/home/ozgur/Documents/development/stalker/docs/source/_static/stalker_design.vue</saveFile>
+    <saveLocation>/home/ozgur/Documents/development/stalker/docs/source/static</saveLocation>
+    <saveFile>/home/ozgur/Documents/development/stalker/docs/source/static/stalker_design.vue</saveFile>
 </LW-MAP>

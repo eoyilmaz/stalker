@@ -13,7 +13,7 @@ from stalker.core.models import error, user, department
 
 
 #----------------------------------------------------------------------
-def __setup__(database=None, mappers=[], engine_settings=None):
+def __setup__(database=None, mappers=[]):
     """
     This is a utillty function that helps to connect the system to the given
     database.
@@ -34,17 +34,15 @@ def __setup__(database=None, mappers=[], engine_settings=None):
     :param mappers: The additional mappers module. Use this parameter to
       customize the whole SOM and database mapping to add your own classes to
       SOM
+    
+    :param engine_settings: the settings for the SQLAlchemy engine
     """
     
     from stalker import db
     
     
-    
     if database is None:
         database = defaults.DATABASE
-    
-    #if engine_settings is not None:
-        #defaults.DATABASE_ENGINE_SETTINGS.
     
     # create engine
     db.engine = sqlalchemy.create_engine(database,

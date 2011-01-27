@@ -178,7 +178,13 @@ def login_required(view, error_message=None):
     """a decorator that implements login functionality to any function or
     method
     
-    The view should be a function returning True or False
+    :param view: a function returning True or False, thus verifying the entered
+      user name and password
+    
+    :param error_message: the message to be shown in case a LoginError is
+      raised, a default message will be shown when skipped
+    
+    :returns: the decorated function
     """
     
     def wrap(func):
@@ -203,6 +209,14 @@ def permission_required(permission_group, error_message=None):
     
     Checks if the logged in user is in the given permission group and then
     calls the decorated function
+    
+    :param permission_group: a :class:`~stalker.coer.models.group.Group` object
+      showing the permision group
+    
+    :param error_message: the message to be shown in case a LoginError is
+      raised, a default message will be shown when skipped
+    
+    :returns: the decorated function
     """
     
     def wrap(func):

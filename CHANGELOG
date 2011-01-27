@@ -8,6 +8,8 @@ v0.1.1.a5:
    very basic form, also added tests testing this example
  * changed the database uri for the DatabaseTester, it now uses an in memory
    SQLite database instead a file based one.
+ * Updated the version numbers in the roadmap
+ * Added last_login attribute to User class tables and mapped it
 
 v0.1.1.a4:
  * changed the arguments of the stalker.db.mixins.ReferenceMixin.setup

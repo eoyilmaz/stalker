@@ -125,6 +125,8 @@ users = Table(
     Column("last_name", String(256), nullable=True),
     Column("password", String(256), nullable=False),
     
+    Column("last_login", DateTime),
+    
     #Column("permission_groups_id",
            #Integer,
            #ForeignKey("groups.id")
