@@ -5,3 +5,4 @@ include LICENSE
 include doTests
 recursive-include docs *
 recursive-include tests *
+recursive-include examples *
