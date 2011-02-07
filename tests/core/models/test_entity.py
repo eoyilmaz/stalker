@@ -150,8 +150,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_code_property_format_when_code_argument_skipped(self):
-        """testing if code property is formatted correctly when skipped as an
+    def test_code_attribute_format_when_code_argument_skipped(self):
+        """testing if code attribute is formatted correctly when skipped as an
         argument
         """
         
@@ -169,7 +169,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_code_property_is_set_when_both_code_and_name_is_given(self):
+    def test_code_attribute_is_set_when_both_code_and_name_is_given(self):
         """testing if both code argument and name argument is given then it is
         just set to the formatted version of code
         """
@@ -186,7 +186,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_code_property_is_changed_after_setting_name(self):
+    def test_code_attribute_is_changed_after_setting_name(self):
         """testing if code was 
         """
         
@@ -214,9 +214,9 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_code_property_set_to_empty_string(self):
+    def test_code_attribute_set_to_empty_string(self):
         """testing if a ValueError will be raised when trying to set the code
-        property to an empty string
+        attribute to an empty string
         """
         
         self.assertRaises(
@@ -230,9 +230,9 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_code_property_set_to_None(self):
+    def test_code_attribute_set_to_None(self):
         """testing if a ValueError will be raised when trying to set the code
-        property to None
+        attribute to None
         """
         
         self.assertRaises(
@@ -266,7 +266,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_name_property_for_being_empty(self):
+    def test_name_attribute_for_being_empty(self):
         """testing if ValueError is raised when trying to set the name to an
         empty string
         """
@@ -282,7 +282,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_name_property_for_being_None(self):
+    def test_name_attribute_for_being_None(self):
         """testing if ValueError is raised when trying to set the name to None
         """
         
@@ -298,7 +298,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_name_argument_not_init_as_string_or_unicode(self):
-        """testing if a the name property is going to be formatted correctly
+        """testing if a the name attribute is going to be formatted correctly
         when the given value for the name argument isn't a str or unicode
         """
         
@@ -329,7 +329,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_name_property_is_formated_correctly(self):
+    def test_name_attribute_is_formated_correctly(self):
         """testing if name is formated correctly
         """
         
@@ -340,15 +340,15 @@ class SimpleEntityTester(mocker.MockerTestCase):
             self.assertEquals(
                 self.simple_entity.name,
                 test_value[1],
-                "the name property is not correctly formatted for, %s, %s" % \
+                "the name attribute is not correctly formatted for, %s, %s" % \
                     (str(test_value[0]), test_value[1])
             )
     
     
     
     #----------------------------------------------------------------------
-    def test_nice_name_property_is_formatted_correctly(self):
-        """testing if nice name property is formatted correctly
+    def test_nice_name_attribute_is_formatted_correctly(self):
+        """testing if nice name attribute is formatted correctly
         """
         
         for test_value in self.nice_name_test_values:
@@ -357,15 +357,15 @@ class SimpleEntityTester(mocker.MockerTestCase):
             self.assertEquals(
                 self.simple_entity.nice_name,
                 test_value[1],
-                "the nice name property is not correctly formatted for, " + \
+                "the nice name attribute is not correctly formatted for, " + \
                     test_value[0] + ", " + test_value[1]
             )
     
     
     
     #----------------------------------------------------------------------
-    def test_nice_name_property_is_read_only(self):
-        """testing if nice name property is read-only
+    def test_nice_name_attribute_is_read_only(self):
+        """testing if nice name attribute is read-only
         """
         
         self.assertRaises(
@@ -392,9 +392,9 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_description_property_None(self):
-        """testing if description property will be converted to an empty string
-        if None is given as the description property
+    def test_description_attribute_None(self):
+        """testing if description attribute will be converted to an empty
+        string if None is given as the description attribute
         """
         
         self.simple_entity.description = None
@@ -420,8 +420,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_description_property_string_conversion(self):
-        """testing if description property will be converted to string
+    def test_description_attribute_string_conversion(self):
+        """testing if description attribute will be converted to string
         correctly
         """
         
@@ -495,11 +495,11 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_created_by_property_instance_of_User(self):
+    def test_created_by_attribute_instance_of_User(self):
         """testing if ValueError is raised when assigned anything other than a
-        stalker.modles.User object to created_by **property**
+        stalker.modles.User object to created_by attribute
         """
-        # the created_by property should be an instance of User class, in any
+        # the created_by attribute should be an instance of User class, in any
         # other case it should raise a ValueError
         test_value = "A User Name"
         
@@ -539,7 +539,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     ##----------------------------------------------------------------------
-    #def test_created_by_property_empty(self):
+    #def test_created_by_attribute_empty(self):
         #"""testing if ValueError is raised when the created_by is tried to be
         #set to None
         #"""
@@ -583,11 +583,11 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_updated_by_property_instance_of_User(self):
+    def test_updated_by_attribute_instance_of_User(self):
         """testing if ValueError is raised when assigned anything other than a
-        stalker.modles.User object to update_by **property**
+        stalker.modles.User object to update_by attribute
         """
-        # the updated_by property should be an instance of User class, in any
+        # the updated_by attribute should be an instance of User class, in any
         # other case it should raise a ValueError
         test_value = "A User Name"
         
@@ -630,7 +630,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     ##----------------------------------------------------------------------
-    #def test_created_by_property_empty(self):
+    #def test_created_by_attribute_empty(self):
         #"""testing if ValueError is raised when the created_by is tried to be
         #set to None
         #"""
@@ -676,12 +676,12 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_date_created_property_accepts_datetime_only(self):
-        """testing if ValueError raises when the date_created property is set
+    def test_date_created_attribute_accepts_datetime_only(self):
+        """testing if ValueError raises when the date_created attribute is set
         to something else than a datetime.datetime object
         """
         
-        # the date_created property should be an instance of datetime.datetime
+        # the date_created attribute should be an instance of datetime.datetime
         
         # try to set something else and expect a ValueError
         
@@ -701,8 +701,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_date_created_property_being_empty(self):
-        """testing if ValueError is raised when the date_created property is
+    def test_date_created_attribute_being_empty(self):
+        """testing if ValueError is raised when the date_created attribute is
         set to None
         """
         
@@ -739,8 +739,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_date_updated_property_being_datetime(self):
-        """testing if ValueError raises when the date_updated property is set
+    def test_date_updated_attribute_being_datetime(self):
+        """testing if ValueError raises when the date_updated attribute is set
         to something else than a datetime.datetime object
         """
         
@@ -761,8 +761,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_date_updated_property_being_empty(self):
-        """testing if ValueError is raised when the date_updated property is
+    def test_date_updated_attribute_being_empty(self):
+        """testing if ValueError is raised when the date_updated attribute is
         set to None
         """
         
@@ -877,9 +877,9 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_notes_property_is_set_to_None(self):
+    def test_notes_attribute_is_set_to_None(self):
         """testing if a ValueError will be raised when setting the notes
-        property to None
+        attribute to None
         """
         
         self.assertRaises(
@@ -907,7 +907,7 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_notes_property_set_to_something_other_than_a_list(self):
+    def test_notes_attribute_set_to_something_other_than_a_list(self):
         """testing if a ValueError will be raised when setting the notes
         argument something other than a list
         """
@@ -939,9 +939,9 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_notes_property_set_to_a_list_of_other_objects(self):
+    def test_notes_attribute_set_to_a_list_of_other_objects(self):
         """testing if a ValueError will be raised when trying to set the notes
-        property to a list of other kind of objects than Note objects
+        attribute to a list of other kind of objects than Note objects
         """
         
         test_value = [1, 12.2, "this is a string", ["a list"], {"a": "note"}]
@@ -957,8 +957,8 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_notes_property_works_properly(self):
-        """testing if the notes property works properly
+    def test_notes_attribute_works_properly(self):
+        """testing if the notes attribute works properly
         """
         
         test_value = [self.mock_note3]
@@ -1009,8 +1009,8 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tags_property_works_properly(self):
-        """testing if tags property works properly
+    def test_tags_attribute_works_properly(self):
+        """testing if tags attribute works properly
         """
         test_value = [self.mock_tag1]
         

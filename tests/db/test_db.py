@@ -1485,8 +1485,10 @@ statused_entity.NewStatusedEntity")
         
         from examples.extending import camera_lens
         defaults.MAPPERS.append("examples.extending.camera_lens")
-        defaults.CORE_MODEL_CLASSES.append("examples.extending.camera_lens.Camera")
-        defaults.CORE_MODEL_CLASSES.append("examples.extending.camera_lens.Lens")
+        defaults.CORE_MODEL_CLASSES.append(
+            "examples.extending.camera_lens.Camera")
+        defaults.CORE_MODEL_CLASSES.append(
+            "examples.extending.camera_lens.Lens")
         
         #db.setup("sqlite:////tmp/camera_lens.db")
         db.setup("sqlite://")

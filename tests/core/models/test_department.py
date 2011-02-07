@@ -69,8 +69,8 @@ class DepartmentTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_members_property_accepts_an_empy_list(self):
-        """testing if members property accepts an empty list
+    def test_members_attribute_accepts_an_empy_list(self):
+        """testing if members attribute accepts an empty list
         """
         
         # this should work without raising any error
@@ -96,8 +96,8 @@ class DepartmentTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_members_property_accepts_only_a_list_of_user_objects(self):
-        """testing if members property accepts only a list of user objects
+    def test_members_attribute_accepts_only_a_list_of_user_objects(self):
+        """testing if members attribute accepts only a list of user objects
         """
         
         test_value = [1, 2.3, [], {}]
@@ -132,8 +132,8 @@ class DepartmentTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_lead_property_accepts_only_user_objects(self):
-        """testing if lead property accepts only user objects
+    def test_lead_attribute_accepts_only_user_objects(self):
+        """testing if lead attribute accepts only user objects
         """
         
         test_values = ["", 1, 2.3, [], {}]
@@ -166,9 +166,9 @@ class DepartmentTester(mocker.MockerTestCase):
     
     
     ##----------------------------------------------------------------------
-    #def test_lead_property_being_None(self):
+    #def test_lead_attribute_being_None(self):
         #"""testing if a ValueError will be raised when trying to assing None to
-        #lead property
+        #lead attribute
         #"""
         
         #self.assertRaises(

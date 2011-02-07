@@ -81,8 +81,8 @@ class CommentTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_body_property_being_string_or_unicode(self):
-        """testing if a ValueError raised if the body **property** is set to
+    def test_body_attribute_being_string_or_unicode(self):
+        """testing if a ValueError raised if the body attribute is set to
         anything other than a string or unicode
         """
         
@@ -101,8 +101,8 @@ class CommentTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_body_property_is_set_properly(self):
-        """testing if body property is set properly
+    def test_body_attribute_is_set_properly(self):
+        """testing if body attribute is set properly
         """
         
         new_body = "This is a new comment body"
@@ -136,12 +136,12 @@ class CommentTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_to_property_being_none(self):
-        """testing if a ValueError will be raised if the to **property** tried
-        to be set to a None value
+    def test_to_attribute_being_none(self):
+        """testing if a ValueError will be raised if the to attribute tried to
+        be set to a None value
         """
         
-        # try to set the to property to none
+        # try to set the to attribute to none
         
         self.assertRaises(
             ValueError,
@@ -173,12 +173,12 @@ class CommentTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_to_property_being_set_to_other_than_entity(self):
-        """testing if a ValueError will be raised if the **to** **property**
-        tried to be set to a something other than an entity object
+    def test_to_attribute_being_set_to_other_than_entity(self):
+        """testing if a ValueError will be raised if the to attribute tried to
+        be set to a something other than an entity object
         """
         
-        # try to set the to property to something other than an entity object
+        # try to set the to attribute to something other than an entity object
         self.assertRaises(
             ValueError,
             setattr,
@@ -206,8 +206,8 @@ class CommentTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_to_property_is_set_properly(self):
-        """testing if to property is set properly
+    def test_to_attribute_is_set_properly(self):
+        """testing if to attribute is set properly
         """
         
         new_to = self.mock_entity2

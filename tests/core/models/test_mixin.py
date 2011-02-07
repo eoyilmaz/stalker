@@ -44,8 +44,8 @@ class ReferenceMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_references_property_accepting_empty_list(self):
-        """testing if references property accepting empty lists
+    def test_references_attribute_accepting_empty_list(self):
+        """testing if references attribute accepting empty lists
         """
         
         self.mock_foo_obj.references = []
@@ -53,8 +53,8 @@ class ReferenceMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_references_property_accepting_only_lists_with_link_instances(self):
-        """testing if references property accepting only lists with Link
+    def test_references_attribute_accepting_only_lists_with_link_instances(self):
+        """testing if references attribute accepting only lists with Link
         instances
         """
         
@@ -71,8 +71,8 @@ class ReferenceMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_references_property_working_properly(self):
-        """testing if references property working properly
+    def test_references_attribute_working_properly(self):
+        """testing if references attribute working properly
         """
         
         self.mock_foo_obj.references = self.mock_links
@@ -95,7 +95,8 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         myGreatEntity.references
         
         image_link_type = types.LinkType(name="Image")
-        new_link = link.Link(name="NewTestLink", path="nopath", filename="nofilename", type=image_link_type)
+        new_link = link.Link(name="NewTestLink", path="nopath",
+                             filename="nofilename", type=image_link_type)
         
         test_value = [new_link]
         
@@ -210,7 +211,7 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_list_property_set_to_something_other_than_StatusList(self):
+    def test_status_list_attribute_set_to_something_other_than_StatusList(self):
         """testing if ValueError is going to be raised when trying to set the
         status_list to something else than a StatusList object
         """
@@ -230,7 +231,7 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_list_property_set_to_None(self):
+    def test_status_list_attribute_set_to_None(self):
         """testing if ValueError is going to be raised when trying to set the
         status_list to None
         """
@@ -310,9 +311,9 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_property_set_to_None(self):
+    def test_status_attribute_set_to_None(self):
         """testing if a ValueError will be raised when setting the status
-        property to None
+        attribute to None
         """
         self.assertRaises(
             ValueError,
@@ -341,7 +342,7 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_property_set_to_other_than_int(self):
+    def test_status_attribute_set_to_other_than_int(self):
         """testing if ValueError going to be raised when trying to set the
         current status to something other than an integer
         """
@@ -360,7 +361,7 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_property_set_to_too_high(self):
+    def test_status_attribute_set_to_too_high(self):
         """testing if a ValueError is going to be raised when trying to set the
         current status to something higher than it is allowd to, that is it
         couldn't be set a value higher than len(statusList.statuses - 1)
@@ -379,10 +380,10 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_property_set_before_status_list(self):
+    def test_status_attribute_set_before_status_list(self):
         """testing if a ValueError will be raised when trying to set the status
-        property to some value before having a StatusList object in status_list
-        property
+        attribute to some value before having a StatusList object in
+        status_list attribute
         """
         
         self.assertRaises(
@@ -396,7 +397,7 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_property_set_to_too_low(self):
+    def test_status_attribute_set_to_too_low(self):
         """testing if a ValueError is going to be raised when trying to set the
         current status to something lower than it is allowed to, that is it
         couldn't be set to value lower than 0
@@ -414,8 +415,8 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_property_works_properly(self):
-        """testing if the status property works properly
+    def test_status_attribute_works_properly(self):
+        """testing if the status attribute works properly
         """
         
         test_value = 1

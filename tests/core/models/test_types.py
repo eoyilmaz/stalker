@@ -117,8 +117,8 @@ class AssetTypeTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_steps_property_for_being_pipelineStep_objects(self):
-        """testing if steps `property` accepts just PipelineStep objects
+    def test_steps_attribute_for_being_pipelineStep_objects(self):
+        """testing if steps `attribute` accepts just PipelineStep objects
         """
         
         # lets try to assign them to a newly created AssetType object
@@ -142,8 +142,8 @@ class AssetTypeTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_steps_property_working_properly(self):
-        """testing if steps `property` is working properly
+    def test_steps_attribute_working_properly(self):
+        """testing if steps `attribute` is working properly
         """
         
         # lets create a new list of pipelineStep objects
@@ -344,12 +344,12 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_path_code_property_not_accepting_empty_strings(self):
+    def test_if_path_code_attribute_not_accepting_empty_strings(self):
         """testing if assigning an empty string to path_code argument will
         raise a ValueError
         """
         
-        # try to assign "" to the path_code property
+        # try to assign "" to the path_code attribute
         self.assertRaises(
             ValueError,
             setattr,
@@ -371,10 +371,10 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_path_code_property_not_accepting_None(self):
+    def test_if_path_code_attribute_not_accepting_None(self):
         """testing if assigning None to path_code raises a ValueError
         """
-        # try to assign "" to the path_code property
+        # try to assign "" to the path_code attribute
         self.assertRaises(
             ValueError,
             setattr,
@@ -407,8 +407,8 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_path_code_property_accepts_only_strings(self):
-        """testing if path_code property is only accepting string or
+    def test_if_path_code_attribute_accepts_only_strings(self):
+        """testing if path_code attribute is only accepting string or
         unicode values
         """
         
@@ -431,8 +431,8 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_path_code_property_works(self):
-        """testing if path_code property works correctly
+    def test_if_path_code_attribute_works(self):
+        """testing if path_code attribute works correctly
         """
         
         test_value = "{{project.name}}/SEQs/{{sequence.name}}/SHOTS/ \
@@ -459,12 +459,12 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_file_code_property_not_accepting_empty_strings(self):
+    def test_if_file_code_attribute_not_accepting_empty_strings(self):
         """testing if assigning an empty string to file_code argument will
         raise a ValueError
         """
         
-        # try to assign "" to the file_code property
+        # try to assign "" to the file_code attribute
         self.assertRaises(
             ValueError,
             setattr,
@@ -486,10 +486,10 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_file_code_property_not_accepting_None(self):
+    def test_if_file_code_attribute_not_accepting_None(self):
         """testing if assigning None to file_code raises a ValueError
         """
-        # try to assign "" to the file_code property
+        # try to assign "" to the file_code attribute
         self.assertRaises(
             ValueError,
             setattr,
@@ -522,8 +522,8 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_file_code_property_accepts_only_strings(self):
-        """testing if file_code property is only accepting string or
+    def test_if_file_code_attribute_accepts_only_strings(self):
+        """testing if file_code attribute is only accepting string or
         unicode values
         """
         
@@ -546,8 +546,8 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_file_code_property_works(self):
-        """testing if file_code property works correctly
+    def test_if_file_code_attribute_works(self):
+        """testing if file_code attribute works correctly
         """
         
         test_value = "{{project.name}}/SEQs/{{sequence.name}}/SHOTS/ \
@@ -577,8 +577,8 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_type_property_only_accepts_TypeEntity_objects(self):
-        """testing if type property accepts only TypeEntity objects and raises
+    def test_if_type_attribute_only_accepts_TypeEntity_objects(self):
+        """testing if type attribute accepts only TypeEntity objects and raises
         ValueError otherwise
         """
         test_values = [1, 1.2, "", [""], {"a": "type entity"}]
@@ -606,8 +606,8 @@ class TypeTemplateTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_if_type_property_not_accepting_None(self):
-        """testing if type property doesn't accept None and raises ValueError
+    def test_if_type_attribute_not_accepting_None(self):
+        """testing if type attribute doesn't accept None and raises ValueError
         """
         self.assertRaises(ValueError, setattr, self.template_obj, "type", None)
 

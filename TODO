@@ -1,0 +1,29 @@
+TODO:
+=====
+
+ * All the attributes that has a back reference on other objects should reset
+   the back reference value to Null or to the default value whenever they are
+   set to None or empty list. For example, when the Project objects sequences
+   attribute is set to an empty list or None, the referring Sequence objects
+   project attribute should be set to None, also there are tons of this kind of
+   relations in the system. SQLAlchemy handles them automatically but Stalker
+   should do it too, to allow others who are not willing to use SQLAlchemy as
+   their ORM to be able to have this property automatically.
+
+
+DONE:
+=====
+
+ * for an object which stores a list of other objects, stalker is validating if
+   the list is gathered from the correct type of objects, for example,
+   StatusList objects only accepts a list of Status objects. Stalker is able to
+   check if the elements in a list are Status objects when a list is assigned
+   to the StatusList.statuses attribute, but it can not check anything if the
+   list element is changed individually afterwards. This behaviour should be
+   extended with a validating system which is able to track changes on list
+   elements.
+   
+   SOLUTION:
+     
+     Added the ValidatedList list variant which does all the necessary things
+     explained in the problem.

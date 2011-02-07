@@ -118,7 +118,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if a value will be set if code argument is skipped
         
         THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
         """
         
         #code = None
@@ -144,7 +144,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if a value will be set if code argument is set to None
         
         THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
         """
         
         self.kwargs["code"] = None
@@ -163,7 +163,7 @@ class UserTest(mocker.MockerTestCase):
         string
         
         THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
         """
         
         self.kwargs["code"] = ""
@@ -177,12 +177,12 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_code_property_format_when_code_argument_skipped(self):
-        """testing if code property is formatted correctly when skipped as an
+    def test_code_attribute_format_when_code_argument_skipped(self):
+        """testing if code attribute is formatted correctly when skipped as an
         argument
         
         THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
         """
         
         #code = None or ""
@@ -212,12 +212,12 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_code_property_is_set_when_both_code_and_name_is_given(self):
+    def test_code_attribute_is_set_when_both_code_and_name_is_given(self):
         """testing if both code argument and name argument is given then it is
         just set to the formatted version of code
         
         THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
         """
         
         test_values = [
@@ -245,11 +245,11 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_code_property_is_changed_after_setting_name(self):
-        """testing if code is going to change after setting the name property
+    def test_code_attribute_is_changed_after_setting_name(self):
+        """testing if code is going to change after setting the name attribute
         
         THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME PROPERTY
+        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
         """
         
         code = "something"
@@ -291,8 +291,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_email_property_accepting_only_string_or_unicode(self):
-        """testing if email property accepting only string or unicode
+    def test_email_attribute_accepting_only_string_or_unicode(self):
+        """testing if email attribute accepting only string or unicode
         values
         """
         
@@ -340,7 +340,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_email_property_format(self):
+    def test_email_attribute_format(self):
         """testing if given an email in wrong format will raise a ValueError 
         """
         
@@ -365,8 +365,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_email_property_works_properly(self):
-        """testing if email property works properly
+    def test_email_attribute_works_properly(self):
+        """testing if email attribute works properly
         """
         
         test_email = "eoyilmaz@somemail.com"
@@ -389,8 +389,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_login_name_property_accepts_only_strings(self):
-        """testing if login_name property accepts only strings or unicode
+    def test_login_name_attribute_accepts_only_strings(self):
+        """testing if login_name attribute accepts only strings or unicode
         """
         
         test_values = [12312, 132.123123, ["aloginname"], {}, []]
@@ -418,9 +418,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_login_name_property_for_empty_string(self):
+    def test_login_name_attribute_for_empty_string(self):
         """testing if a ValueError will be raised when trying to assign an
-        empty string to login_name property
+        empty string to login_name attribute
         """
         
         self.assertRaises(
@@ -445,9 +445,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_login_name_property_for_None(self):
+    def test_login_name_attribute_for_None(self):
         """testing if a ValueError will be raised when trying to assign None
-        to login_name property
+        to login_name attribute
         """
         
         self.assertRaises(
@@ -492,8 +492,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_login_name_property_formatted_correctly(self):
-        """testing if loing_name property formatted correctly
+    def test_login_name_attribute_formatted_correctly(self):
+        """testing if loing_name attribute formatted correctly
         """
         
         #                 input       expected
@@ -521,7 +521,7 @@ class UserTest(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_login_name_argument_skipped(self):
         """testing if skipping loing_name argument but supplying a name
-        argument will set the login_name property correctly
+        argument will set the login_name attribute correctly
         """
         
         self.kwargs["name"] = self.kwargs.pop("login_name")
@@ -531,9 +531,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_login_name_argument_changing_name_property(self):
+    def test_login_name_argument_changing_name_attribute(self):
         """testing if the login_name argument is actually holding the same
-        value with the name property
+        value with the name attribute
         """
         
         # just supply login_name and check if they are holding the same value
@@ -543,8 +543,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_login_name_property_changing_name_property(self):
-        """testing if setting the login_name property sets the name property
+    def test_login_name_attribute_changing_name_attribute(self):
+        """testing if setting the login_name attribute sets the name attribute
         """
         
         # give a new value to login_name and
@@ -568,8 +568,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_name_argument_changing_login_name_property(self):
-        """testing if setting the name argument sets the login_name property
+    def test_name_argument_changing_login_name_attribute(self):
+        """testing if setting the name argument sets the login_name attribute
         """
         # also checks for if the formatting of name is equal to formatting of
         # the login name
@@ -583,8 +583,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_name_property_changing_login_name_property(self):
-        """testing if setting the name property changes the login_name property 
+    def test_name_attribute_changing_login_name_attribute(self):
+        """testing if setting the name attribute changes the login_name
+        attribute
         """
         
         self.mock_user.name = "EoYilmaz"
@@ -610,9 +611,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_first_name_property_None(self):
+    def test_first_name_attribute_None(self):
         """testing if a ValueError will be raised when trying to assign None to
-        first_name property
+        first_name attribute
         """
         
         self.assertRaises(
@@ -638,9 +639,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_first_name_property_empty(self):
+    def test_first_name_attribute_empty(self):
         """testing if a ValueError will be raised when trying to assign an
-        empty string to first_name property
+        empty string to first_name attribute
         """
         
         self.assertRaises(
@@ -678,8 +679,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_first_name_property_formatted_correctly(self):
-        """testing if first_name property is formatted correctly
+    def test_first_name_attribute_formatted_correctly(self):
+        """testing if first_name attribute is formatted correctly
         """
         
         #                 input       expected
@@ -726,8 +727,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_first_name_property_accepts_only_strings(self):
-        """testing if first_name property accepts only strings or unicode
+    def test_first_name_attribute_accepts_only_strings(self):
+        """testing if first_name attribute accepts only strings or unicode
         """
         
         test_values = [12412, ["Erkan Ozgur"]]
@@ -758,8 +759,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_last_login_property_None(self):
-        """testing if nothing happens when the last login property is set to
+    def test_last_login_attribute_None(self):
+        """testing if nothing happens when the last login attribute is set to
         None
         """
         
@@ -798,10 +799,10 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_last_login_property_accepts_only_datetime_instance_or_None(self):
+    def test_last_login_attribute_accepts_only_datetime_instance_or_None(self):
         """testing if a ValueError will be raised for values other than
         datetime.datetime instances tried to be assigned to last_login
-        property
+        attribute
         """
         
         test_values = [1, 2.3, "login time", ["last login time"],
@@ -831,9 +832,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_last_name_property_None(self):
+    def test_last_name_attribute_None(self):
         """testing if it will be converted to an empty string if None is
-        assigned to last_name property
+        assigned to last_name attribute
         """
         
         self.mock_user.last_name = None
@@ -871,8 +872,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_last_name_property_formatted_correctly(self):
-        """testing if last_name property is formatted correctly
+    def test_last_name_attribute_formatted_correctly(self):
+        """testing if last_name attribute is formatted correctly
         """
         
         #                 input       expected
@@ -904,8 +905,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_last_name_property_accepts_only_strings(self):
-        """testing if last_name property accepts only strings or unicode
+    def test_last_name_attribute_accepts_only_strings(self):
+        """testing if last_name attribute accepts only strings or unicode
         """
         
         test_values = [123123, ["a last name"], {},(), 234.23423]
@@ -934,12 +935,12 @@ class UserTest(mocker.MockerTestCase):
     
     
     ##----------------------------------------------------------------------
-    #def test_department_property_None(self):
+    #def test_department_attribute_None(self):
         #"""testing if a ValueError will be raised when trying to assign None
-        #for the department property
+        #for the department attribute
         #"""
         
-        ## try to assign None to the department property
+        ## try to assign None to the department attribute
         
         #self.assertRaises(
             #ValueError,
@@ -968,9 +969,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_department_property_only_accepts_department_objects(self):
+    def test_department_attribute_only_accepts_department_objects(self):
         """testing if a ValueError will be raised when trying to assign
-        anything other than a Department object to department property
+        anything other than a Department object to department attribute
         """
         
         # try to assign something other than a department
@@ -987,8 +988,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_department_property_works_properly(self):
-        """testing if department property works properly
+    def test_department_attribute_works_properly(self):
+        """testing if department attribute works properly
         """
         
         # try to set and get the same value back
@@ -1010,9 +1011,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_password_property_being_None(self):
+    def test_password_attribute_being_None(self):
         """testing if a ValueError will be raised when tyring to assign None
-        to the password property
+        to the password attribute
         """
         
         self.assertRaises(
@@ -1026,8 +1027,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_password_property_works_properly(self):
-        """testing if password property works properly
+    def test_password_attribute_works_properly(self):
+        """testing if password attribute works properly
         """
         
         test_password = "a new test password"
@@ -1049,7 +1050,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_password_property_being_scrambled(self):
+    def test_password_attribute_being_scrambled(self):
         """testing if password is scrambled when trying to store it
         """
         
@@ -1071,8 +1072,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     ##----------------------------------------------------------------------
-    #def test_password_property_retrieved_back_correctly(self):
-        #"""testing if password property decoded and retrieved correctly
+    #def test_password_attribute_retrieved_back_correctly(self):
+        #"""testing if password attribute decoded and retrieved correctly
         #"""
         
         #self.fail("test not implemented yet")
@@ -1091,9 +1092,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_permission_groups_property_for_None(self):
+    def test_permission_groups_attribute_for_None(self):
         """testing if a ValueError will be raised when trying to assign None to
-        permission_groups property
+        permission_groups attribute
         """
         
         self.assertRaises(
@@ -1146,9 +1147,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     ##----------------------------------------------------------------------
-    #def test_permission_groups_property_for_empty_list(self):
+    #def test_permission_groups_attribute_for_empty_list(self):
         #"""testing if a ValueError will be raised when trying to assign an
-        #empty list to the permission_groups property
+        #empty list to the permission_groups attribute
         #"""
         
         #self.assertRaises(
@@ -1180,9 +1181,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_perimssion_groups_property_accepts_only_group_objects(self):
+    def test_perimssion_groups_attribute_accepts_only_group_objects(self):
         """testing if a ValueError will be raised when trying to assign
-        anything other then a Group object to the permission_group property
+        anything other then a Group object to the permission_group attribute
         """
         
         test_values = [23123,
@@ -1203,8 +1204,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_permission_groups_property_works_properly(self):
-        """testing if permission_groups property works properly
+    def test_permission_groups_attribute_works_properly(self):
+        """testing if permission_groups attribute works properly
         """
         
         test_pg = [self.mock_permission_group3]
@@ -1226,8 +1227,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_property_accepts_an_empty_list(self):
-        """testing if projects property accepts an empty list
+    def test_projects_attribute_accepts_an_empty_list(self):
+        """testing if projects attribute accepts an empty list
         """
         
         # this should work properly
@@ -1247,9 +1248,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_property_None(self):
+    def test_projects_attribute_None(self):
         """testing if a ValueError will be raised when trying to assign None
-        to the projects property
+        to the projects attribute
         """
         
         self.assertRaises(
@@ -1277,9 +1278,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_property_accepts_only_a_list_of_project_objs(self):
+    def test_projects_attribute_accepts_only_a_list_of_project_objs(self):
         """testing if a ValueError will be raised when trying to assign a list
-        of other objects to projects property
+        of other objects to projects attribute
         """
         
         test_values = [ 123123, 1231.2132, ["a_project1", "a_project2"] ]
@@ -1307,9 +1308,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_lead_property_None(self):
+    def test_projects_lead_attribute_None(self):
         """testing if a ValueError will be raised when tyring to assign None to
-        the projects_lead property
+        the projects_lead attribute
         """
         
         self.assertRaises(
@@ -1335,8 +1336,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_lead_property_accepts_empty_list(self):
-        """testing if projects_lead property accepts an empty list
+    def test_projects_lead_attribute_accepts_empty_list(self):
+        """testing if projects_lead attribute accepts an empty list
         """
         
         # this should work without any problem
@@ -1373,10 +1374,10 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_lead_property_accepts_only_lits(self):
+    def test_projects_lead_attribute_accepts_only_lits(self):
         """testing if a ValueError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
-        projects_lead property
+        projects_lead attribute
         """
         
         test_values = ["a project", 123123, {}, 12.2132 ]
@@ -1396,7 +1397,7 @@ class UserTest(mocker.MockerTestCase):
     def test_projects_lead_prop_accepts_only_list_of_project_obj(self):
         """testing if a ValueError will be raised when trying to assing a list
         of other object than a list of Project objects to the
-        projects_lead property
+        projects_lead attribute
         """
         
         test_value = ["a project", 123123, [], {}, 12.2132 ]
@@ -1412,8 +1413,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_lead_property_working_properly(self):
-        """testing if the proejcts_lead property is working properly
+    def test_projects_lead_attribute_working_properly(self):
+        """testing if the proejcts_lead attribute is working properly
         """
         
         projects_lead = [self.mock_project1,
@@ -1439,9 +1440,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_sequences_lead_property_None(self):
+    def test_sequences_lead_attribute_None(self):
         """testing if a ValueError will be raised when tyring to assign None to
-        the sequences_lead property
+        the sequences_lead attribute
         """
         
         self.assertRaises(
@@ -1467,8 +1468,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_sequences_lead_property_accepts_empty_list(self):
-        """testing if sequences_lead property accepts an empty list
+    def test_sequences_lead_attribute_accepts_empty_list(self):
+        """testing if sequences_lead attribute accepts an empty list
         """
         
         # this should work without any error
@@ -1505,10 +1506,10 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_sequences_lead_property_accepts_only_list_of_project_obj(self):
+    def test_sequences_lead_attribute_accepts_only_list_of_project_obj(self):
         """testing if a ValueError will be raised when trying to assing a list
         of other object than a list of Project objects to the
-        sequences_lead property
+        sequences_lead attribute
         """
         
         test_value = ["a sequence", 123123, [], {}, 12.2132 ]
@@ -1518,8 +1519,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_sequence_lead_property_works_propertly(self):
-        """testing if sequence_lead property works properly
+    def test_sequence_lead_attribute_works_propertly(self):
+        """testing if sequence_lead attribute works properly
         """
         
         self.assertEquals(
@@ -1540,7 +1541,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tasks_property_None(self):
+    def test_tasks_attribute_None(self):
         """testing if a ValueError will be raised when trying to assign None
         to the tasks argument
         """
@@ -1570,7 +1571,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tasks_property_accepts_only_list_of_task_objects(self):
+    def test_tasks_attribute_accepts_only_list_of_task_objects(self):
         """testing if a ValueError will be raised when trying to assign
         anything other than a list of task objects to the tasks argument
         """
@@ -1602,9 +1603,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tasks_property_accepts_an_empty_list(self):
+    def test_tasks_attribute_accepts_an_empty_list(self):
         """testing if nothing happends when trying to assign an empty list to
-        tasks property
+        tasks attribute
         """
         
         # this should work without any error
@@ -1613,8 +1614,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tasks_property_works_properly(self):
-        """testing if tasks property is working properly
+    def test_tasks_attribute_works_properly(self):
+        """testing if tasks attribute is working properly
         """
         
         tasks = [self.mock_task1,
@@ -1705,7 +1706,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_initials_property_calculated_properly(self):
+    def test_initials_attribute_calculated_properly(self):
         """testing if not giving an initials argument, the initials works as
         expected
         """
@@ -1734,8 +1735,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_initials_property_is_working_fine(self):
-        """testin if initials property working fine
+    def test_initials_attribute_is_working_fine(self):
+        """testin if initials attribute working fine
         """
         
         test_value = "eoy"

@@ -122,7 +122,7 @@ class StatusListTest(unittest.TestCase):
         test_values = ["a str", {}, 1, 1.0]
         
         for test_value in test_values:
-            #----------------------------------------------------------------------
+            #----------------------------------------
             # it should only accept lists of statuses
             
             self.kwargs["statuses"] = test_value
@@ -132,14 +132,13 @@ class StatusListTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_list_property_accepting_only_statuses(self):
-        """testing the status_list property as a property and accepting
-        Status objects only
+    def test_status_list_attribute_accepting_only_statuses(self):
+        """testing the status_list attribute accepting Status objects only
         """
         
         test_values = ["1", ["1"], 1, [1, "w"]]
         
-        # check the property
+        # check the attribute
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
@@ -170,7 +169,7 @@ class StatusListTest(unittest.TestCase):
         class
         """
         
-        #----------------------------------------------------------------------
+        #------------------------------------------------------
         # every element should be an object derived from Status
         a_fake_status_list = [1, 2, "a string", u"a unicode", 4.5]
         
@@ -181,12 +180,9 @@ class StatusListTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_statusList_property(self):
-        """testing status_list as being property
+    def test_statusList_attribute_works_properly(self):
+        """testing if status_list attribute is working properly
         """
-        
-        #----------------------------------------------------------------------
-        # it should be a property so check if it sets property correctly
         
         new_list_of_statutes = [
             status.Status(name="New Status", code="NSTS")
@@ -335,7 +331,7 @@ class StatusListTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_target_entity_type_property_read_only(self):
+    def test_target_entity_type_attribute_is_read_only(self):
         """testing if a ValueError will be raised when the target_entity_type
         argment is tried to be set
         """

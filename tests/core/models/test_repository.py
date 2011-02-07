@@ -65,8 +65,8 @@ class RepositoryTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_linux_path_property_accepts_only_strings(self):
-        """testing if linux_path property accepts only string or unicode
+    def test_linux_path_attribute_accepts_only_strings(self):
+        """testing if linux_path attribute accepts only string or unicode
         values
         """
         
@@ -84,8 +84,8 @@ class RepositoryTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_linux_path_property_works_properly(self):
-        """testing if linux_path property works properly
+    def test_linux_path_attribute_works_properly(self):
+        """testing if linux_path attribute works properly
         """
         
         test_value = "~/newRepoPath/Projects"
@@ -109,8 +109,8 @@ class RepositoryTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_windows_path_property_accepts_only_strings(self):
-        """testing if windows_path property accepts only string or unicode
+    def test_windows_path_attribute_accepts_only_strings(self):
+        """testing if windows_path attribute accepts only string or unicode
         values
         """
         
@@ -128,8 +128,8 @@ class RepositoryTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_windows_path_property_works_properly(self):
-        """testing if windows_path property works properly
+    def test_windows_path_attribute_works_properly(self):
+        """testing if windows_path attribute works properly
         """
         
         test_value = "~/newRepoPath/Projects"
@@ -153,8 +153,8 @@ class RepositoryTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_osx_path_property_accepts_only_strings(self):
-        """testing if osx_path property accepts only string or unicode
+    def test_osx_path_attribute_accepts_only_strings(self):
+        """testing if osx_path attribute accepts only string or unicode
         values
         """
         
@@ -172,8 +172,8 @@ class RepositoryTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_osx_path_property_works_properly(self):
-        """testing if osx_path property works properly
+    def test_osx_path_attribute_works_properly(self):
+        """testing if osx_path attribute works properly
         """
         
         test_value = "~/newRepoPath/Projects"

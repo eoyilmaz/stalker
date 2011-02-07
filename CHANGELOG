@@ -10,6 +10,11 @@ v0.1.1.a5:
    SQLite database instead a file based one.
  * Updated the version numbers in the roadmap
  * Added last_login attribute to User class tables and mapped it
+ * because it was taking too much space in the diffs the VUE file which shows
+   the design sketches has been removed from the trunk
+ * added the ValidatedList class which is a list derivative that accepts only
+   one type of object.
+ * started to block the tests of the Project class
 
 v0.1.1.a4:
  * changed the arguments of the stalker.db.mixins.ReferenceMixin.setup

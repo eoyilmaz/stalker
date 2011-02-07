@@ -56,8 +56,8 @@ class NoteTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_content_property_is_set_to_None(self):
-        """testing if nothing is going to happen when content property is set
+    def test_content_attribute_is_set_to_None(self):
+        """testing if nothing is going to happen when content attribute is set
         to None
         """
         
@@ -78,7 +78,7 @@ class NoteTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_content_property_is_set_to_empty_string(self):
+    def test_content_attribute_is_set_to_empty_string(self):
         """testing if nothing is goin to happen when content argument is set to
         an empty string
         """
@@ -103,9 +103,9 @@ class NoteTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_content_property_is_set_to_something_other_than_a_string(self):
+    def test_content_attribute_is_set_to_something_other_than_a_string(self):
         """testing if a ValueError will be raised when trying to set the
-        content property to something other than a string or unicode
+        content attribute to something other than a string or unicode
         """
         
         test_values = [1, 1.24, ["content"], {"a": "Content"}]
@@ -123,8 +123,8 @@ class NoteTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_content_property_is_working_properly(self):
-        """testing if the content property is working properly
+    def test_content_attribute_is_working_properly(self):
+        """testing if the content attribute is working properly
         """
         
         new_content = "This is my new content for the note, and I expect it to\

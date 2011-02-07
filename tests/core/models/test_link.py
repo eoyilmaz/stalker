@@ -69,8 +69,8 @@ class LinkTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_path_property_accpets_string_or_unicode_only(self):
-        """testing if path property accepts string or unicode only and raises
+    def test_path_attribute_accpets_string_or_unicode_only(self):
+        """testing if path attribute accepts string or unicode only and raises
         ValueError otherwise
         """
         
@@ -99,8 +99,8 @@ class LinkTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_path_property_being_empty(self):
-        """testing if setting the path property to an empty string raises a
+    def test_path_attribute_being_empty(self):
+        """testing if setting the path attribute to an empty string raises a
         ValueError
         """
         
@@ -125,8 +125,8 @@ class LinkTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_path_property_being_None(self):
-        """testing if setting the path property to None raises a ValueError
+    def test_path_attribute_being_None(self):
+        """testing if setting the path attribute to None raises a ValueError
         """
         
         self.assertRaises(
@@ -168,8 +168,8 @@ class LinkTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_filename_property_accpets_string_or_unicode_only(self):
-        """testing if filename property accepts string or unicode only and
+    def test_filename_attribute_accpets_string_or_unicode_only(self):
+        """testing if filename attribute accepts string or unicode only and
         raises ValueError otherwise
         """
         
@@ -198,9 +198,9 @@ class LinkTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_filename_property_being_empty(self):
-        """testing if setting the filename property to an empty string raises a
-        ValueError
+    def test_filename_attribute_being_empty(self):
+        """testing if setting the filename attribute to an empty string raises
+        a ValueError
         """
         
         self.assertRaises(
@@ -224,8 +224,9 @@ class LinkTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_filename_property_being_None(self):
-        """testing if setting the filename property to None raises a ValueError
+    def test_filename_attribute_being_None(self):
+        """testing if setting the filename attribute to None raises a
+        ValueError
         """
         
         self.assertRaises(
@@ -250,8 +251,8 @@ class LinkTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_type_property_being_None(self):
-        """testing if a ValueError will be raised when type property is set to
+    def test_type_attribute_being_None(self):
+        """testing if a ValueError will be raised when type attribute is set to
         None
         """
         
@@ -281,8 +282,8 @@ class LinkTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_type_property_accepts_only_LinkType_objects(self):
-        """testing if a ValueError will be raised when type property is
+    def test_type_attribute_accepts_only_LinkType_objects(self):
+        """testing if a ValueError will be raised when type attribute is
         somehting other than a LinkType object
         """
         

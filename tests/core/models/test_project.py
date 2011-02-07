@@ -81,9 +81,9 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_start_property_is_not_a_date_object(self):
+    def test_start_attribute_is_not_a_date_object(self):
         """testing if a ValueError will be raised when trying to set the
-        start property to something other than a datetime.date object
+        start attribute to something other than a datetime.date object
         """
         
         self.fail("test is not implemented yet")
@@ -91,9 +91,9 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_start_argument_is_given_as_None(self):
-        """testing if nothing will happen when trying to set the start argument
-        to None
+    def test_start_date_argument_is_given_as_None_use_the_default_value(self):
+        """testing if the start_date argument is given as None, will use the
+        today as the start date
         """
         
         self.fail("test is not implemented yet")
@@ -101,9 +101,9 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_start_property_is_set_to_None(self):
-        """testing if no error will be raised when trying to set the start
-        property to None
+    def test_start_date_attribute_is_set_to_None_use_the_default_value(self):
+        """testing if setting the start_date attribute to None will update the
+        start_date to today
         """
         
         self.fail("test is not implemented yet")
@@ -111,16 +111,15 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_start_property_works_properly(self):
+    def test_start_date_attribute_works_properly(self):
         """testing if the start propertly is working properly
         """
         
         self.fail("test is not implemented yet")
     
     
-    
     #----------------------------------------------------------------------
-    def test_due_argument_is_not_a_date_object(self):
+    def test_due_date_argument_is_not_a_date_or_timedelta_object(self):
         """testing if a ValueError will be raised when trying to set the due
         date something other than a datetime.date object
         """
@@ -130,9 +129,9 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_due_property_is_not_a_date_object(self):
+    def test_due_date_attribute_is_not_a_date_or_timedelta_object(self):
         """testing if a ValueError will be raised when trying to set the due
-        property is to something other than a datetime.date object
+        attribute is to something other than a datetime.date object
         """
         
         self.fail("test is not implemented yet")
@@ -140,9 +139,9 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_due_argument_is_set_to_None(self):
-        """testing if no error will be raised when trying to set the due
-        argument to None
+    def test_due_date_argument_is_set_to_None_will_use_the_default_value(self):
+        """testing if given the due_date argument given as None will use the
+        default value, which is 10 days after the start_date
         """
         
         self.fail("test is not implemented yet")
@@ -150,9 +149,9 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_due_property_is_set_to_None(self):
-        """testing if no error will be raised when trying to set the due
-        property to None
+    def test_due_date_attribute_is_set_to_None_will_use_the_default_value(self):
+        """testing if setting the due_date attribute to None will use the
+        default value, which is 10 days after the start_date
         """
         
         self.fail("test is not implemented yet")
@@ -160,7 +159,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_due_argument_is_given_as_timedelta_converted_to_datetime(self):
+    def test_due_date_argument_is_given_as_timedelta_converted_to_datetime(self):
         """testing if due date attribute is converted to a proper
         datetime.date object when due argument is given as a datetime.timedelta
         """
@@ -170,9 +169,9 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_due_property_is_given_as_timedelta_converted_to_datetime(self):
+    def test_due_date_attribute_is_set_to_timedelta_converted_to_datetime(self):
         """testing if due date attribute is converted to a proper datetime.date
-        object when the due property is set to datetime.timedelta
+        object when the due attribute is set to datetime.timedelta
         """
         
         self.fail("test is not implemented yet")
@@ -180,37 +179,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_due_argument_is_given_as_timedelta_and_start_as_None(self):
-        """testing if the due date attribute is kept as timedelta when the
-        start attribute is None
-        """
-        
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_due_property_is_given_as_timedelta_and_start_as_None(self):
-        """testing if the due date attribute is kept as timedelta when the
-        start attribute is None
-        """
-        
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_due_attribute_is_converted_to_timedelta_when_start_set_to_None(self):
-        """testing if the due date attribute is converted to timedelta when the
-        start attribute is set to None
-        """
-        
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_due_argument_is_tried_to_set_to_a_time_before_start(self):
+    def test_due_date_argument_is_tried_to_set_to_a_time_before_start_date(self):
         """testing if a ValueError will be raised when the due argument is
         given as a value which is a date before start
         """
@@ -220,8 +189,8 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_due_property_is_tried_to_set_to_a_time_before_start(self):
-        """testing if a ValueError will be raised when the due property is
+    def test_due_date_attribute_is_tried_to_set_to_a_time_before_start_date(self):
+        """testing if a ValueError will be raised when the due attribute is
         tried to be set to a date before start
         """
         
@@ -230,19 +199,9 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_due_argument_is_date_and_start_is_None_converted_to_timedelta(self):
-        """testing if the due is converted to timedelta when the start is given
-        as None, and the timedelta value is calculated from now
-        """
-        
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_due_property_is_date_and_start_is_None_converted_to_timedelta(self):
-        """testing if the due attribute is converted to timedelta when the
-        start is given as None, and the timedelta value is calculated from now
+    def test_due_date_attribute_is_shifted_when_start_date_passes_it(self):
+        """testing if due_date attribute will be shifted when the start_date
+        attribute passes it
         """
         
         self.fail("test is not implemented yet")
@@ -260,8 +219,8 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_lead_property_is_given_as_None(self):
-        """testing if no error will be raised when the lead property is set to
+    def test_lead_attribute_is_given_as_None(self):
+        """testing if no error will be raised when the lead attribute is set to
         None
         """
         
@@ -280,8 +239,8 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_lead_property_is_set_to_something_other_than_a_user(self):
-        """testing if a ValueError will be raised when the lead property is
+    def test_lead_attribute_is_set_to_something_other_than_a_user(self):
+        """testing if a ValueError will be raised when the lead attribute is
         set to something other than a user.User object
         """
         
@@ -289,13 +248,92 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     
+    
     #----------------------------------------------------------------------
-    def test_users_is_set_to_None(self):
-        """testing if no error will be raised when the 
+    def test_users_argument_is_set_to_None(self):
+        """testing if no error will be raised when the users argument is given
+        as None
         """
         
-
-
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_users_attribute_is_set_to_None(self):
+        """testing if no error will be raised when the users attribute is set
+        to None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_users_argument_given_as_None_converted_to_empty_list(self):
+        """testing if users argument is converted to an empty list when given
+        as None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_users_attribute_set_to_None_converted_to_empty_list(self):
+        """testing if users attribute is converted to an empty list when set to
+        None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_users_argument_is_given_as_a_list_of_other_objects_then_user(self):
+        """testing if a ValueError will be raised when the users argument is
+        given as a list containing objects other than user.User
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_users_attribute_is_given_as_a_list_of_other_objects_then_user(self):
+        """testing if a ValueError will be raised when the users attribute is
+        given as a list containing objects other than user.User
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_seuqences_argument_is_given_as_an_empty_list(self):
+        """testing if nothing happens when the sequences argument is given as
+        an empty list
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_attribute_is_set_to_an_empty_list(self):
+        """testing if nothing happens when the seuqences attribute is set to an
+        empty list
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_(self):
+        #"""
+        #"""
+        
 
 
 

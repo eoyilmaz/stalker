@@ -52,8 +52,8 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_width_property_int_or_float(self):
-        """testing the width property against not being an integer or float
+    def test_width_attribute_int_or_float(self):
+        """testing the width attribute against not being an integer or float
         """
         
         test_values = ["1920", [1920], {}, ()]
@@ -84,8 +84,8 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_width_property_float_to_int_conversion(self):
-        """testing the width property against being converted to int
+    def test_width_attribute_float_to_int_conversion(self):
+        """testing the width attribute against being converted to int
         successfuly
         """
         
@@ -108,11 +108,11 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_width_property_being_zero(self):
-        """testing the width property against being zero
+    def test_width_attribute_being_zero(self):
+        """testing the width attribute against being zero
         """
         
-        # also test the property for this
+        # also test the attribute for this
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
                           "width", 0)
     
@@ -129,11 +129,11 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_width_property_being_negative(self):
-        """testing the width property against being negative
+    def test_width_attribute_being_negative(self):
+        """testing the width attribute against being negative
         """
         
-        # also test the property for this
+        # also test the attribute for this
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
                           "width", -100)
     
@@ -154,11 +154,11 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_height_property_int_or_float(self):
-        """testing the height property against not being an integer or float
+    def test_height_attribute_int_or_float(self):
+        """testing the height attribute against not being an integer or float
         """
         
-        # test also the property
+        # test also the attribute
         for test_value in ["1080", [1080]]:
             self.assertRaises(
                 ValueError, setattr, self.mock_imageFormat, "height", "1080")
@@ -179,12 +179,12 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_height_property_float_to_int_conversion(self):
-        """testing the height property against being converted to int
+    def test_height_attribute_float_to_int_conversion(self):
+        """testing the height attribute against being converted to int
         successfuly
         """
         
-        # also test the property for this
+        # also test the attribute for this
         self.mock_imageFormat.height = 1080.0
         self.assertTrue(isinstance(self.mock_imageFormat.height, int))
     
@@ -201,8 +201,8 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_height_property_being_zero(self):
-        """testing the height property against being zero
+    def test_height_attribute_being_zero(self):
+        """testing the height attribute against being zero
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
@@ -220,8 +220,8 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_height_property_being_negative(self):
-        """testing the height property against being negative
+    def test_height_attribute_being_negative(self):
+        """testing the height attribute against being negative
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
@@ -230,8 +230,8 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_device_aspect_property_float(self):
-        """testing the device aspect ratio property against not being a float
+    def test_device_aspect_attribute_float(self):
+        """testing the device aspect ratio attribute against not being a float
         value
         """
         
@@ -261,7 +261,8 @@ class ImageFormatTest(unittest.TestCase):
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         
         # the device aspect for this setup should be around 1.7778
-        self.assertEquals( "%1.4g" % an_image_format.device_aspect, "%1.4g" % 1.7778 )
+        self.assertEquals("%1.4g" % an_image_format.device_aspect,
+                          "%1.4g" % 1.7778 )
         
         
         #----------------------------------------------------------------------
@@ -277,14 +278,15 @@ class ImageFormatTest(unittest.TestCase):
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         
         # the device aspect for this setup should be around 4/3
-        self.assertEquals("%1.4g" % an_image_format.device_aspect, "%1.4g" % 1.3333)
+        self.assertEquals("%1.4g" % an_image_format.device_aspect,
+                          "%1.4g" % 1.3333)
     
     
     
     #----------------------------------------------------------------------
-    def test_device_aspect_property_updates(self):
-        """testing device_aspect_ratio property being updated on changes to any
-        of the witdh, height or pixel_aspect
+    def test_device_aspect_attribute_updates(self):
+        """testing device_aspect_ratio attribute being updated on changes to
+        any of the witdh, height or pixel_aspect
         """
         
         #----------------------------------------------------------------------
@@ -317,8 +319,8 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_device_aspect_property_write_protected(self):
-        """testing if device_aspect property is write protected
+    def test_device_aspect_attribute_write_protected(self):
+        """testing if device_aspect attribute is write protected
         """
         
         #----------------------------------------------------------------------
@@ -378,8 +380,8 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_pixel_aspect_property_zero(self):
-        """testing the pixel_aspect property against being zero
+    def test_pixel_aspect_attribute_zero(self):
+        """testing the pixel_aspect attribute against being zero
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
@@ -404,11 +406,11 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_pixel_aspect_property_negative(self):
-        """testing pixel_aspect property against being negative
+    def test_pixel_aspect_attribute_negative(self):
+        """testing pixel_aspect attribute against being negative
         """
         
-        # also test the property
+        # also test the attribute
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
                           "pixel_aspect", -1.0 )
         
@@ -418,8 +420,8 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_pixel_aspect_property_if_being_initialized_correctly(self):
-        """testing if pixel_aspect property is correctly initialized to its
+    def test_pixel_aspect_attribute_if_being_initialized_correctly(self):
+        """testing if pixel_aspect attribute is correctly initialized to its
         default value when omitted
         """
         
@@ -478,11 +480,11 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_print_resolution_property_zero(self):
-        """testing the print_resolution property being zero
+    def test_print_resolution_attribute_zero(self):
+        """testing the print_resolution attribute being zero
         """
         
-        # also test the property
+        # also test the attribute
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
                           "print_resolution", 0)
     
@@ -504,8 +506,8 @@ class ImageFormatTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_print_resolution_property_negative(self):
-        """testing the print_resolution property being negative
+    def test_print_resolution_attribute_negative(self):
+        """testing the print_resolution attribute being negative
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,

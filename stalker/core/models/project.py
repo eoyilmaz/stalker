@@ -16,23 +16,37 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
     Project is one of the main classes that will direct the others. A project
     in Stalker is a gathering point.
     
+    The date attributes like start_date and due_date can be managed with
+    timezones. Follow the Python idioms shown in the `help files of datetime`_
+    
+    .. _help files of datetime: http://docs.python.org/library/datetime.html
+    
     It is mixed with :class:`~stalker.core.models.mixin.ReferenceMixin` and
     :class:`~stalker.core.models.mixin.StatusMixin` to give reference and
     status abilities.
     
-    :param start: the start date of the project, should be an datetime.date
-      instance
     
-    :param due: the due date of the project, should be a datetime.date
-      instance, if given as a datetime.timedelta, then it will be converted to
-      date by adding the timedelta to the start attribute, when the start is
-      set to None, then the due is converted to timedelta.
+    :param start_date: the start date of the project, should be a datetime.date
+      instance, when given as None or tried to be set to None, it is to set to
+      today, setting the start date also effects due date, if the new
+      start_date passes the due_date the due_date is also changed to a date to
+      keep the timedelta between dates. The default value is
+      datetime.date.today()
+    
+    :param due_date: the due_date of the project, should be a datetime.date or
+      datetime.timedelta instance, if given as a datetime.timedelta, then it
+      will be converted to date by adding the timedelta to the start_date
+      attribute, when the start_date is changed to a date passing the due_date,
+      then the due_date is also changed to a later date so the timedelta is
+      kept between the dates. The default value is 10 days given as
+      datetime.timedelta
     
     :param lead: the lead of the project, should be an instance of
       :class:`~stalker.core.models.user.User`
     
     :param users: the users assigned to this project, should be a list of
-      :class:`~stalker.core.models.user.User` instances
+      :class:`~stalker.core.models.user.User` instances, if set to None it is
+      converted to an empty list.
     
     :param sequences: the sequences of the project, it should be a list of
       :class:`~stalker.core.models.sequence.Sequence` instances

@@ -83,8 +83,8 @@ class StructureTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_project_template_property_accepts_string_only(self):
-        """testing if project_template property accepts string or unicodes
+    def test_project_template_attribute_accepts_string_only(self):
+        """testing if project_template attribute accepts string or unicodes
         """
         
         test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
@@ -119,7 +119,7 @@ class StructureTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_property_accepts_list_of_templates_only(self):
+    def test_asset_templates_attribute_accepts_list_of_templates_only(self):
         """testing if asset_templates argument accepts list of
         :class:`~stalker.core.models.types.TypeTemplate` objects only
         """
@@ -152,8 +152,8 @@ class StructureTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_property_accepts_empty_list(self):
-        """testing if asset_templates property accepts empty lists
+    def test_asset_templates_attribute_accepts_empty_list(self):
+        """testing if asset_templates attribute accepts empty lists
         """
         
         # this should work properly without raising an error
@@ -162,8 +162,8 @@ class StructureTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_property_works_correctly(self):
-        """testing if asset_templates property works properly
+    def test_asset_templates_attribute_works_correctly(self):
+        """testing if asset_templates attribute works properly
         """
         
         self.assertEquals(self.mock_structure.asset_templates,
@@ -189,7 +189,7 @@ class StructureTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_reference_templates_property_accepts_list_of_templates_only(self):
+    def test_reference_templates_attribute_accepts_list_of_templates_only(self):
         """testing if reference_templates argument accepts list of
         :class:`~stalker.core.models.types.TypeTemplate` objects only
         """
@@ -222,8 +222,8 @@ class StructureTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_reference_templates_property_accepts_empty_list(self):
-        """testing if the reference_templates property accepts empty lists
+    def test_reference_templates_attribute_accepts_empty_list(self):
+        """testing if the reference_templates attribute accepts empty lists
         """
         
         # this should work without any error
