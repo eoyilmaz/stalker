@@ -6,7 +6,7 @@ import re
 import base64
 import datetime
 from stalker.core.models import entity
-
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -381,7 +381,7 @@ class User(entity.Entity):
             #raise(ValueError("users should be assigned at least to one \
             #permission_group"))
         
-        return permission_groups_in
+        return ValidatedList(permission_groups_in, group.Group)
     
     
     
@@ -405,7 +405,7 @@ class User(entity.Entity):
                 raise(ValueError("any element in projects should be an \
                 instance of stalker.core.models.project.Project"))
         
-        return projects_in
+        return ValidatedList(projects_in, project.Project)
         
     
     
@@ -429,7 +429,7 @@ class User(entity.Entity):
                 raise(ValueError("any element in projects_lead should be an \
                 instance of stalker.core.models.project.Project class"))
         
-        return projects_lead_in
+        return ValidatedList(projects_lead_in, project.Project)
     
     
     
@@ -453,7 +453,7 @@ class User(entity.Entity):
                 raise(ValueError("any element in sequences_lead should be an \
                 instance of stalker.core.models.sequence.Sequence class"))
         
-        return sequences_lead_in
+        return ValidatedList(sequences_lead_in, sequence.Sequence)
     
     
     
@@ -477,7 +477,7 @@ class User(entity.Entity):
                 raise(ValueError("any element in tasks should be an instance \
                 of stalker.core.models.task.Task class"))
         
-        return tasks_in
+        return ValidatedList(tasks_in, task.Task)
     
     
     

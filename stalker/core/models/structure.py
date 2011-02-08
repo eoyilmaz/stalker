@@ -3,7 +3,7 @@
 
 
 from stalker.core.models import entity, types
-
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -77,7 +77,7 @@ class Structure(entity.Entity):
                 instances of stalker.core.models.types.TypeTemplate \
                 objects"))
         
-        return asset_templates_in
+        return ValidatedList(asset_templates_in)
     
     
     
@@ -95,7 +95,7 @@ class Structure(entity.Entity):
                 instances of stalker.core.models.types.TypeTemplate \
                 objects"))
         
-        return reference_templates_in
+        return ValidatedList(reference_templates_in)
     
     
     

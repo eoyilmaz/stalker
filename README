@@ -2,7 +2,7 @@ About
 =====
 
 Stalker is a Production Digital Asset Management (ProdAM) System designed
-specially for Animation and VFX Studios and licensed under BSD License.
+specifically for Animation and VFX Studios and licensed under BSD License.
 
 Features:
  * Platform independent
@@ -29,6 +29,7 @@ Stalker is build over these other OpenSource projects:
 
 Source
 ======
+
 The latest development version is available in `Google Project page of
 Stalker`_ or can be directly cloned with the following command if you already
 have mercurial installed::
@@ -36,4 +37,3 @@ have mercurial installed::
   hg clone https://stalker.googlecode.com/hg/ stalker
 
 .. _Google Project page of Stalker: http://code.google.com/p/stalker/
-

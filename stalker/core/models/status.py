@@ -3,6 +3,10 @@
 
 
 from stalker.core.models import entity
+from stalker.ext.validatedList import ValidatedList
+
+
+
 
 
 
@@ -108,7 +112,7 @@ class StatusList(entity.Entity):
                 #raise(ValueError(self.__err_status))
             self._validate_status(status)
         
-        return statuses
+        return ValidatedList(statuses)
     
     
     

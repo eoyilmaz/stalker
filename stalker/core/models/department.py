@@ -3,6 +3,7 @@
 
 
 from stalker.core.models import entity
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -68,7 +69,7 @@ class Department(entity.Entity):
                 raise(ValueError("every element in the members list should be \
                 an instance of stalker.core.models.user.User class"))
         
-        return members
+        return ValidatedList(members, user.User)
     
     
     

@@ -4,7 +4,7 @@
 
 import mocker
 from stalker.core.models import entity, types, pipelineStep, tag
-
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -73,7 +73,7 @@ class AssetTypeTester(mocker.MockerTestCase):
             "steps": self.pipelineStep_list
         }
         
-        self.an_assetType_obj = types.AssetType(**self.kwargs)
+        self.mock_assetType = types.AssetType(**self.kwargs)
         
         # create a couple of different object
         # a string
@@ -134,7 +134,7 @@ class AssetTypeTester(mocker.MockerTestCase):
             self.assertRaises(
                 ValueError,
                 setattr,
-                self.an_assetType_obj,
+                self.mock_assetType,
                 "steps",
                 test_value
             )
@@ -153,10 +153,42 @@ class AssetTypeTester(mocker.MockerTestCase):
         ]
         
         # lets assign it to the assetType and check if they are same
-        self.an_assetType_obj.steps = a_new_list_of_pipelineStep_objs
+        self.mock_assetType.steps = a_new_list_of_pipelineStep_objs
         
-        self.assertEquals(self.an_assetType_obj.steps,
+        self.assertEquals(self.mock_assetType.steps,
                           a_new_list_of_pipelineStep_objs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_steps_attribute_is_a_ValidatedList_instance(self):
+        """testing if the steps attribute is an instance of ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_assetType.steps, ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_steps_attribute_elements_accepts_Template_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a PipelineStep object to the steps list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_assetType.steps.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_assetType.steps.__setitem__,
+            0,
+            0
+        )
     
     
     

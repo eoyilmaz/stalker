@@ -15,6 +15,15 @@ v0.1.1.a5:
  * added the ValidatedList class which is a list derivative that accepts only
    one type of object.
  * started to block the tests of the Project class
+ * these SOM classes listed below uses ValidetedList in their list attributes
+   requiring spesific types of objects to be assigned:
+   * entity.Entity
+   * status.StatusList
+   * structure.Structure
+   * types.AssetType
+   * department.Department
+   * user.User
+   * mixin.ReferenceMixin
 
 v0.1.1.a4:
  * changed the arguments of the stalker.db.mixins.ReferenceMixin.setup

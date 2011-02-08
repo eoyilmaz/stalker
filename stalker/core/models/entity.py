@@ -4,7 +4,7 @@
 
 import datetime
 import re
-
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -302,8 +302,8 @@ class SimpleEntity(object):
         # just try to import the module as late as possible
         # 
         # ref:
-        # http://docs.python.org/faq/programming.html#what-are-the-best-
-        #                               practices-for-using-import-in-a-module
+        # http://docs.python.org/faq/programming.html#
+        #     what-are-the-best-practices-for-using-import-in-a-module
         #-------------------------------------------------------------------
         from stalker.core.models import user
         
@@ -523,15 +523,6 @@ class Entity(SimpleEntity):
     
     
     
-    ##----------------------------------------------------------------------
-    #def __repr__(self):
-        #"""the representation
-        #"""
-        
-        #return "<Entity (%s, %s)>" % (self.name, self.code)
-    
-    
-    
     #----------------------------------------------------------------------
     def _validate_notes(self, notes_in):
         """validates the given notes value
@@ -547,7 +538,7 @@ class Entity(SimpleEntity):
                 raise ValueError("every element in notes should be an \
                 instance of stalker.core.models.note.Note class")
         
-        return notes_in
+        return ValidatedList(notes_in)
     
     
     
@@ -556,13 +547,11 @@ class Entity(SimpleEntity):
         """validates the given tags_in value
         """
         
-        # raise ValueError when:
-        
         # it is not an instance of list
         if not isinstance(tags_in, list):
             raise ValueError("the tags attribute should be set to a list")
         
-        return tags_in
+        return ValidatedList(tags_in)
     
     
     

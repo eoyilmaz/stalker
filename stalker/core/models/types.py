@@ -3,6 +3,7 @@
 
 
 from stalker.core.models import entity, pipelineStep
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -50,7 +51,7 @@ class AssetType(entity.TypeEntity):
             raise ValueError("all of the elements of the given list should be \
             instance of stalker.pipelineStep.PipelineStep class")
         
-        return steps_in
+        return ValidatedList(steps_in)
     
     
     

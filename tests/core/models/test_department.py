@@ -5,6 +5,7 @@
 import mocker
 import datetime
 from stalker.core.models import department, user, entity
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -114,6 +115,39 @@ class DepartmentTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_members_attribute_is_a_ValidatedList_instance(self):
+        """testing if the members attribute is an instance of ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_department.members,
+                                   ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_members_attribute_elements_accepts_User_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a User object to the members list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_department.members.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_department.members.__setitem__,
+            0,
+            0
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_lead_argument_accepts_only_user_objects(self):
         """testing if lead argument accepts only user objects
         """
@@ -147,37 +181,6 @@ class DepartmentTester(mocker.MockerTestCase):
                 "lead",
                 test_value
             )
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_lead_argument_being_None(self):
-        #"""testing if a ValueError will be raised when trying to assing None to
-        #the lead argument
-        #"""
-        
-        #self.kwargs["lead"] = None
-        #self.assertRaises(
-            #ValueError,
-            #department.Department,
-            #**self.kwargs
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_lead_attribute_being_None(self):
-        #"""testing if a ValueError will be raised when trying to assing None to
-        #lead attribute
-        #"""
-        
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_department,
-            #"lead",
-            #None
-        #)
     
     
     

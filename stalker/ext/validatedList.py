@@ -4,45 +4,75 @@
 
 ########################################################################
 class ValidatedList(list):
-    """A list variant which accepts only one type of element and validates the
-    elements in regular list actions. Uses the type of the first assigned
-    element.
+    """A list variant which accepts only one type of element.
+    
+    A ValidatedList is a regular Python list with overriden methods which helps
+    validating the elements in regular list actions. Uses the type of the first
+    assigned element if no type\_ is defined.
+    
+    Reduces the given list\_ to elements with the same type of the first
+    element if the type\_ argument is None or uses the type\_ argument if
+    given.
+    
+    :param list\_: the list to initialize this ValidatedList instance, simply
+      all the data will be copied to the current ValidatedList instance. Also
+      sets the type that this ValidatedList instance works on if no type\_
+      argument is given and the given list will be reduced to the same type of
+      objects defined with the first elements type or with the given type\_
+      argument, default value is an empty list.
+    
+    :param type\_: if given, the ValidatedList will accept only this type of
+      objects. If both the list\_ and the type\_ arguments are given the the
+      type\_ will be used as the forced type.
     """
     
     
     #----------------------------------------------------------------------
-    def __init__(self, original_list=[]):
-        """
-        """
+    def __init__(self, list_=[], type_=None):
         
-        self.__type__ = None
+        self.__type__ = type_
         self.__type_as_str__ = ""
         self.__error_message__ = ""
-        self.extend(original_list)
         
-        if original_list and len(original_list):
+        if list_ and len(list_):
+            
             # store the first element type
-            self.__set_type__(original_list[0])
+            if self.__type__ is None:
+                self.__set_type__(type(list_[0]))
+            else:
+                self.__set_type__(self.__type__)
+            
+            # remove the other type of objects
+            reduced_list = [x for x in list_
+                            if isinstance(x, self.__type__)]
+            
+            self.extend(reduced_list)
+
     
     
     
     #----------------------------------------------------------------------
-    def __set_type__(self, value):
-            self.__type__ = type(value)
-            self.__type_as_str__ = str(self.__type__).split("'")[1]
-            self.__error_message__ = "the type of the given value is not \
+    def __set_type__(self, type_):
+        """sets the type which the list is allowed to work on
+        """
+        
+        self.__type__ = type_
+        self.__type_as_str__ = str(self.__type__).split("'")[1]
+        self.__error_message__ = "the type of the given value is not \
 correct, please supply an %s instance" % self.__type_as_str__
+        
     
     
     
     #----------------------------------------------------------------------
     def __setitem__(self, key, value):
-        """overriden __setitem__ method
+        """x.__setitem__(i, y) <==> x[i]=y
         
-        checks if the given value is in correct type
-        """
+        This is the overriden version of the original method.
+        """ + super(ValidatedList, self).__setitem__.__doc__
+        
         if not self.__type__:
-            self.__set_type__(value)
+            self.__set_type__(type(value))
         
         if isinstance(value, self.__type__):
             super(ValidatedList, self).__setitem__(key, value)
@@ -54,7 +84,11 @@ correct, please supply an %s instance" % self.__type_as_str__
     
     #----------------------------------------------------------------------
     def __setslice__(self, i, j, sequence):
-        """overriden __setslice__ method
+        """x.__setslice__(i, j, y) <==> x[i:j]=y
+        
+        Use  of negative indices is not supported.
+        
+        This is the overriden version of the original method.
         """
         
         for element in sequence:
@@ -67,11 +101,13 @@ correct, please supply an %s instance" % self.__type_as_str__
     
     #----------------------------------------------------------------------
     def append(self, object):
-        """the overriden append method
+        """L.append(object) -- append object to end
+        
+        This is the overriden version of the original method.
         """
         
         if self.__type__ is None:
-            self.__set_type__(object)
+            self.__set_type__(type(object))
         else:
             if not isinstance(object, self.__type__):
                 raise ValueError(self.__error_message__)
@@ -82,12 +118,14 @@ correct, please supply an %s instance" % self.__type_as_str__
     
     #----------------------------------------------------------------------
     def extend(self, iterable):
-        """the overriden extend method
+        """L.extend(iterable) -- extend list by appending elements from the iterable
+        
+        This is the overriden version of the original method.
         """
         
         if self.__type__ is None:
             try:
-                self.__set_type__(iterable[0])
+                self.__set_type__(type(iterable[0]))
             except IndexError:
                 pass
         else:
@@ -101,11 +139,13 @@ correct, please supply an %s instance" % self.__type_as_str__
     
     #----------------------------------------------------------------------
     def insert(self, index, object):
-        """the overriden insert method
+        """L.insert(index, object) -- insert object before index
+        
+        This is the overriden version of the original method.
         """
         
         if self.__type__ is None:
-            self.__set_type__(object)
+            self.__set_type__(type(object))
         else:
             if not isinstance(object, self.__type__):
                 raise ValueError(self.__error_message__)
@@ -116,12 +156,14 @@ correct, please supply an %s instance" % self.__type_as_str__
     
     #----------------------------------------------------------------------
     def __add__(self, other):
-        """the overriden __add__ method
+        """x.__add__(y) <==> x+y
+        
+        This is the overriden version of the original method.
         """
         
         if self.__type__ is None:
             try:
-                self.__set_type__(other[0])
+                self.__set_type__(type(other[0]))
             except IndexError:
                 pass
         else:
@@ -135,12 +177,14 @@ correct, please supply an %s instance" % self.__type_as_str__
     
     #----------------------------------------------------------------------
     def __iadd__(self, other):
-        """the overriden __iadd__ method
+        """x.__iadd__(y) <==> x+=y
+        
+        This is the overriden version of the original method.
         """
         
         if self.__type__ is None:
             try:
-                self.__set_type__(other[0])
+                self.__set_type__(type(other[0]))
             except IndexError:
                 pass
         else:

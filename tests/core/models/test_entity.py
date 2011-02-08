@@ -6,6 +6,7 @@ import unittest
 import mocker
 import datetime
 from stalker.core.models import entity, user, link, note, tag, status
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -968,6 +969,32 @@ class EntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_notes_attribute_is_converted_to_a_ValidatedList(self):
+        """testing if the notes attribute is converted to a
+        stalker.ext.validatedList.ValidatedList instance
+        """
+        
+        self.mock_entity.notes = []
+        self.assertTrue(isinstance(self.mock_entity.notes, ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_notes_attribute_element_is_set_to_something_other_than_a_note_object(self):
+        """testing if a ValueError will be raised when trying to assign an
+        element to the notes list which is not an instance of Note
+        """
+        
+        self.assertRaises(
+            ValueError,
+            self.mock_entity.notes.__setitem__,
+            0,
+            0
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_tags_argument_being_omited(self):
         """testing if nothing is raised when creating an entity without setting
         a tags argument
@@ -1017,6 +1044,32 @@ class EntityTester(mocker.MockerTestCase):
         self.mock_entity.tags = test_value
         
         self.assertEquals(self.mock_entity.tags, test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tags_attribute_is_converted_to_a_ValidatedList(self):
+        """testing if the tags attribute is converted to a
+        stalker.ext.validatedList.ValidatedList instance
+        """
+        
+        self.mock_entity.tags = []
+        self.assertTrue(isinstance(self.mock_entity.tags, ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tags_attribute_element_is_set_to_something_other_than_a_tag_object(self):
+        """testing if a ValueError will be raised when trying to assign an
+        element to the tags list which is not an instance of Tag
+        """
+        
+        self.assertRaises(
+            ValueError,
+            self.mock_entity.tags.__setitem__,
+            0,
+            0
+        )
     
     
     

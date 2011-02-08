@@ -4,7 +4,7 @@
 
 import mocker
 from stalker.core.models import user, structure, types
-
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -172,6 +172,32 @@ class StructureTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_asset_templates_attribute_is_converted_to_ValidatedList(self):
+        """testing if asset_templates attribute converted to a ValidatedList
+        instance
+        """
+        
+        self.assertTrue(isinstance(self.mock_structure.asset_templates,
+                                   ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_asset_templates_attribute_elements_set_to_other_objects_than_Templates(self):
+        """testing if a ValueError will be raised when trying to change an
+        individual element in the asset_templates list
+        """
+        
+        self.assertRaises(
+            ValueError,
+            self.mock_structure.asset_templates.__setitem__,
+            0,
+            0
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_reference_templates_argument_accepts_list_of_templates_only(self):
         """testing if reference_templates argument accepts list of
         :class:`~stalker.core.models.types.TypeTemplate` objects only
@@ -181,9 +207,7 @@ class StructureTester(mocker.MockerTestCase):
         
         # these all should raise ValueErrors
         for test_value in test_values:
-            
             self.kwargs["reference_templates"] = test_value
-            
             self.assertRaises(ValueError, structure.Structure, **self.kwargs)
     
     
@@ -228,6 +252,32 @@ class StructureTester(mocker.MockerTestCase):
         
         # this should work without any error
         self.mock_structure.reference_templates = []
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_reference_templates_attribute_is_a_ValidatedList_instance(self):
+        """testing if the reference_template attribute is an instance of
+        ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_structure.reference_templates,
+                                   ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_reference_templates_attribute_elements_accepts_Template_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a Template object to the reference_templates list
+        """
+        
+        self.assertRaises(
+            ValueError,
+            self.mock_structure.reference_templates.__setitem__,
+            0,
+            0
+        )
     
     
     

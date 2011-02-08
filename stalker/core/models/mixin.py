@@ -13,7 +13,7 @@ and mappers.
 
 
 from stalker.core.models import link, status
-
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -32,7 +32,7 @@ class ReferenceMixin(object):
     
     
     
-    _references = []
+    _references = ValidatedList([], link.Link)
     
     
     
@@ -51,7 +51,7 @@ class ReferenceMixin(object):
             raise ValueError("all the elements should be instances of \
 :class:`~stalker.core.models.link.Link`")
         
-        return references_in
+        return ValidatedList(references_in, link.Link)
     
     
     

@@ -4,7 +4,7 @@
 
 import mocker
 from stalker.core.models import entity, mixin, link, status
-
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -78,6 +78,39 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         self.mock_foo_obj.references = self.mock_links
         
         self.assertEquals(self.mock_foo_obj.references, self.mock_links)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_references_attribute_is_a_ValidatedList_instance(self):
+        """testing if the references attribute is an instance of ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_foo_obj.references,
+                                   ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_references_attribute_elements_accepts_Link_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a Link object to the references list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_foo_obj.references.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_foo_obj.references.__setitem__,
+            0,
+            0
+        )
     
     
     

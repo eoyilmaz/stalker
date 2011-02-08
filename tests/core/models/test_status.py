@@ -4,6 +4,7 @@
 
 import unittest
 from stalker.core.models import status
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -111,7 +112,7 @@ class StatusListTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_list_argument_accepts_statuses_only(self):
+    def test_statuses_argument_accepts_statuses_only(self):
         """testing if statuses list argument accepts list of statuses only
         """
         
@@ -132,7 +133,7 @@ class StatusListTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_list_attribute_accepting_only_statuses(self):
+    def test_statuses_attribute_accepting_only_statuses(self):
         """testing the status_list attribute accepting Status objects only
         """
         
@@ -151,7 +152,7 @@ class StatusListTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_status_list_being_empty(self):
+    def test_statuses_being_empty(self):
         """testing status_list against being empty
         """
         
@@ -164,7 +165,7 @@ class StatusListTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_statusList_list_elements_being_status_objects(self):
+    def test_statuses_elements_being_status_objects(self):
         """testing status_list elements against not being derived from Status
         class
         """
@@ -180,7 +181,7 @@ class StatusListTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_statusList_attribute_works_properly(self):
+    def test_statuses_attribute_works_properly(self):
         """testing if status_list attribute is working properly
         """
         
@@ -191,6 +192,33 @@ class StatusListTest(unittest.TestCase):
         self.mock_status_list.statuses = new_list_of_statutes
         self.assertEquals( self.mock_status_list.statuses,
                            new_list_of_statutes)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_statuses_attributes_elements_changed_to_none_status_objects(self):
+        """testing if a ValueError will be raised when trying to set an
+        individual element in the statuses list to an object which is not a
+        Status instance
+        """
+        
+        self.assertRaises(
+            ValueError,
+            self.mock_status_list.statuses.__setitem__,
+            0,
+            0
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_statuses_attribute_is_converted_to_ValidatedList(self):
+        """testing if the statuses attribute is converted to a ValidetedList
+        instance
+        """
+        
+        self.assertTrue(isinstance(self.mock_status_list.statuses,
+                                   ValidatedList))
     
     
     

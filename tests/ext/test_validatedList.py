@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.utils import validatedList
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -16,13 +16,12 @@ class ValidetedListTester(unittest.TestCase):
     #----------------------------------------------------------------------
     def setUp(self):
         
-        
         # create a mock ValidetedList
         
         self.normal_list = [1, 2, 3, 4, 5]
         
-        self.mock_valideted_list1 = validatedList.ValidatedList(self.normal_list)
-        self.mock_valideted_list2 = validatedList.ValidatedList()
+        self.mock_valideted_list1 = ValidatedList(self.normal_list)
+        self.mock_valideted_list2 = ValidatedList()
         
         # now append something to the second list which is not initialized with
         # a list
@@ -37,14 +36,101 @@ class ValidetedListTester(unittest.TestCase):
         
         test_value = "a string value"
         
-        mock_valideted_list3 = validatedList.ValidatedList()
-        mock_valideted_list3.append(test_value)
+        mock_valideted_list = ValidatedList()
+        mock_valideted_list.append(test_value)
         
         # check if the __type__ is set to str
-        self.assertEquals(mock_valideted_list3.__type__, type(test_value))
+        self.assertEquals(mock_valideted_list.__type__, type(test_value))
         
         # check if the __type_as_str__ is set to str
-        self.assertEquals(mock_valideted_list3.__type_as_str__, "str")
+        self.assertEquals(mock_valideted_list.__type_as_str__, "str")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___init__2(self):
+        """testing initialization with a list of different kind of objects will
+        reduce the list to a list containing the objects of the type of first
+        element
+        """
+        
+        test_list = [1, 2, "ozgur", 3.2, 4, 5]
+        test_expected_list = [1, 2, 4, 5]
+        
+        mock_validated_list = ValidatedList(test_list)
+        
+        self.assertEquals(mock_validated_list, test_expected_list)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___init__with_only_type_argument(self):
+        """testing initialization with the type argument sticks the type to
+        given type
+        """
+        
+        # create a new ValidatedList with no list given
+        vList1 = ValidatedList([], int)
+        
+        self.assertRaises(
+            ValueError,
+            vList1.append,
+            "a string"
+        )
+        
+        # no error
+        vList1.append(10)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___init__with_list_and_matching_type_argument(self):
+        """testing initialization with a list and a type argument sticks the
+        type to given type with the list elements is also matching the type
+        """
+        
+        # create a new ValidatedList with list
+        vList1 = ValidatedList([0, 1, 2, 3], int)
+        
+        self.assertRaises(
+            ValueError,
+            vList1.append,
+            "a string"
+        )
+        
+        # no error
+        vList1.append(4)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___init__with_list_and_non_matching_type_argument(self):
+        """testing initialization with a list and a type argument sticks the 
+        type to given type with list elements is not matching the given type
+        """
+        
+        # create a new ValidatedList with list
+        vList1 = ValidatedList([0, 1, 2, 3], str)
+        
+        self.assertRaises(
+            ValueError,
+            vList1.append,
+            0
+        )
+        
+        # no error
+        vList1.append("4")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___init__with_list_and_non_mathcing_type_argument_2(self):
+        """testing initialization with a list and non matching type will filter
+        the non-matching elements in the list
+        """
+        
+        vList1 = ValidatedList(["str", 1, 2.3, 2, 3, "another str", 4], int)
+        self.assertEquals(vList1, [1, 2, 3, 4])
     
     
     

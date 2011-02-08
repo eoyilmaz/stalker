@@ -31,4 +31,5 @@
      stalker.core.models.types.TypeTemplate
      stalker.core.models.user.User
      stalker.core.models.version.Version
+     stalker.ext.validatedList.ValidatedList
      :parts: 1

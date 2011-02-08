@@ -12,7 +12,7 @@ About
 =====
 
 Stalker is a Production Digital Asset Management (ProdAM) System designed
-specially for Animation and VFX Studios and licensed under BSD License.
+specifically for Animation and VFX Studios and licensed under BSD License.
 
 Features:
  * Platform independent
@@ -140,7 +140,8 @@ Summary
    stalker.core.models.user.User
    stalker.core.models.version
    stalker.core.models.version.Version
-
+   stalker.ext.validatedList
+   stalker.ext.validatedList.ValidatedList
 
 Indices and tables
 ------------------

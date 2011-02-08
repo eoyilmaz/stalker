@@ -12,7 +12,7 @@ from stalker.core.models import (
     project,
     sequence
 )
-
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -596,7 +596,7 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_first_name_argument_None(self):
-        """testing if a ValuError will be raised when trying to assing None to
+        """testing if a ValuError will be raised when trying to assign None to
         first_name argument
         """
         
@@ -1215,6 +1215,40 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_permission_groups_attribute_is_a_ValidatedList_instance(self):
+        """testing if the permission_groups attribute is an instance of
+        ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_user.permission_groups,
+                                   ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_permission_groups_attribute_elements_accepts_Group_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a Group object to the permission_groups list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_user.permission_groups.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_user.permission_groups.__setitem__,
+            0,
+            0
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_projects_argument_accepts_an_empty_list(self):
         """testing if projects argument accepts an empty list
         """
@@ -1259,6 +1293,38 @@ class UserTest(mocker.MockerTestCase):
             self.mock_user,
             "projects",
             None
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_projects_attribute_is_a_ValidatedList_instance(self):
+        """testing if the projects attribute is an instance of ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_user.projects, ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_projects_attribute_elements_accepts_Project_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a Project object to the projects list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_user.projects.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_user.projects.__setitem__,
+            0,
+            0
         )
     
     
@@ -1395,7 +1461,7 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_projects_lead_prop_accepts_only_list_of_project_obj(self):
-        """testing if a ValueError will be raised when trying to assing a list
+        """testing if a ValueError will be raised when trying to assign a list
         of other object than a list of Project objects to the
         projects_lead attribute
         """
@@ -1424,6 +1490,40 @@ class UserTest(mocker.MockerTestCase):
         self.mock_user.projects_lead = projects_lead
         
         self.assertEquals(self.mock_user.projects_lead, projects_lead)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_projects_lead_attribute_is_a_ValidatedList_instance(self):
+        """testing if the projects_lead attribute is an instance of
+        ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_user.projects_lead,
+                                   ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_projects_lead_attribute_elements_accepts_Project_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a Project object to the projects_lead list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_user.projects.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_user.projects.__setitem__,
+            0,
+            0
+        )
     
     
     
@@ -1507,7 +1607,7 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_sequences_lead_attribute_accepts_only_list_of_project_obj(self):
-        """testing if a ValueError will be raised when trying to assing a list
+        """testing if a ValueError will be raised when trying to assign a list
         of other object than a list of Project objects to the
         sequences_lead attribute
         """
@@ -1525,6 +1625,40 @@ class UserTest(mocker.MockerTestCase):
         
         self.assertEquals(
             self.mock_user.sequences_lead, self.kwargs["sequences_lead"]
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_lead_attribute_is_a_ValidatedList_instance(self):
+        """testing if the sequences_lead attribute is an instance of
+        ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_user.sequences_lead,
+                                   ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_lead_attribute_elements_accepts_Project_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a Sequence object to the sequence_lead list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_user.sequences_lead.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_user.sequences_lead.__setitem__,
+            0,
+            0
         )
     
     
@@ -1591,7 +1725,7 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tasks_argument_accepts_an_empty_list(self):
-        """testing if nothing happens when trying to assing an empty list to
+        """testing if nothing happens when trying to assign an empty list to
         tasks argument
         """
         
@@ -1626,7 +1760,38 @@ class UserTest(mocker.MockerTestCase):
         self.mock_user.tasks = tasks
         
         self.assertEquals(self.mock_user.tasks, tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_attribute_is_a_ValidatedList_instance(self):
+        """testing if the tasks attribute is an instance of ValidatedList
+        """
         
+        self.assertTrue(isinstance(self.mock_user.tasks, ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_attribute_elements_accepts_Tasks_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a Task object to the tasks list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_user.tasks.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_user.tasks.__setitem__,
+            0,
+            0
+        )
     
     
     
