@@ -10,7 +10,6 @@ TODO:
    should do it too, to allow others who are not willing to use SQLAlchemy as
    their ORM to be able to have this property automatically.
 
-
 DONE:
 =====
 

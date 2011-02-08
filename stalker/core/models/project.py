@@ -80,7 +80,7 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
     :param display_width: the width of the display that the output of the
       project is going to be displayed (very unnecessary if you are not using
       stereo 3D setup). Should be an int or float value, negative values
-      converted to the default value, default value is 0.
+      converted to the positive values, default value is 1.
     
     """
     

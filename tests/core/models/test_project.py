@@ -65,8 +65,12 @@ class ProjectTester(mocker.MockerTestCase):
             "structure": self.mock_project_structure,
             "repository": self.mock_repo,
             "is_stereoscopic": False,
-            "display_width": 15
+            "display_width": 15,
+            "start_date": self.start_date,
+            "due_date": self.due_date,
         }
+        
+        self.mock_project = project.Project(**self.kwargs)
     
     
     
@@ -76,7 +80,12 @@ class ProjectTester(mocker.MockerTestCase):
         something other than a datetime.date object
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "str", ["a", "date"]]
+        
+        for test_value in test_values:
+            self.kwargs["start_date"] = test_value
+            
+            self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -86,7 +95,16 @@ class ProjectTester(mocker.MockerTestCase):
         start attribute to something other than a datetime.date object
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "str", ["a", "date"]]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_project,
+                "start_date",
+                test_value
+            )
     
     
     
@@ -96,7 +114,9 @@ class ProjectTester(mocker.MockerTestCase):
         today as the start date
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["start_date"] = None
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.start_date, datetime.date.today())
     
     
     
@@ -106,7 +126,8 @@ class ProjectTester(mocker.MockerTestCase):
         start_date to today
         """
         
-        self.fail("test is not implemented yet")
+        self.mock_project.start_date = None
+        self.assertEquals(self.mock_project.start_date, datetime.date.today())
     
     
     
@@ -115,7 +136,10 @@ class ProjectTester(mocker.MockerTestCase):
         """testing if the start propertly is working properly
         """
         
-        self.fail("test is not implemented yet")
+        test_value = datetime.date(year=2011, month=1, day=1)
+        self.mock_project.start_date = test_value
+        self.assertEquals(self.mock_project.start_date, test_value)
+    
     
     
     #----------------------------------------------------------------------
@@ -124,7 +148,11 @@ class ProjectTester(mocker.MockerTestCase):
         date something other than a datetime.date object
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "str", ["a", "date"]]
+        
+        for test_value in test_values:
+            self.kwargs["due_date"] = test_value
+            self.assertRaises(ValuError, project.Project, **self.kwargs)
     
     
     
@@ -134,7 +162,16 @@ class ProjectTester(mocker.MockerTestCase):
         attribute is to something other than a datetime.date object
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "str", ["a", "date"]]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_project,
+                "due_date",
+                test_value
+            )
     
     
     
@@ -144,7 +181,9 @@ class ProjectTester(mocker.MockerTestCase):
         default value, which is 10 days after the start_date
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["due_date"] = None
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.due_date - new_project.start_date, 10)
     
     
     
@@ -154,7 +193,9 @@ class ProjectTester(mocker.MockerTestCase):
         default value, which is 10 days after the start_date
         """
         
-        self.fail("test is not implemented yet")
+        self.mock_project.due_date = None
+        self.assertEquals(
+            self.mock_project.due_date - self.mock_project.start_date, 10)
     
     
     
@@ -164,7 +205,16 @@ class ProjectTester(mocker.MockerTestCase):
         datetime.date object when due argument is given as a datetime.timedelta
         """
         
-        self.fail("test is not implemented yet")
+        test_value = datetime.timedelta(days=20)
+        self.kwargs["due_date"] = test_value
+        new_project = project.Project(**self.kwargs)
+        
+        self.assertTrue(isinstance(new_project.due_date, datetime.date))
+        
+        self.assertEquals(
+            new_project.due_date - new_project.start_date,
+            test_value
+        )
     
     
     
@@ -174,7 +224,15 @@ class ProjectTester(mocker.MockerTestCase):
         object when the due attribute is set to datetime.timedelta
         """
         
-        self.fail("test is not implemented yet")
+        test_value = datetime.timedelta(days=20)
+        self.mock_project.due_date = test_value
+        
+        self.assertTrue(isinstance(self.mock_project, datetime.date))
+        
+        self.assertEquals(
+            self.mock_project.due_date - self.mock_project.start_date,
+            test_value
+        )
     
     
     
@@ -184,7 +242,10 @@ class ProjectTester(mocker.MockerTestCase):
         given as a value which is a date before start
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["due_date"] = self.kwargs["start_date"] - \
+            datetime.timedelta(days=10)
+        
+        self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -194,7 +255,16 @@ class ProjectTester(mocker.MockerTestCase):
         tried to be set to a date before start
         """
         
-        self.fail("test is not implemented yet")
+        new_due_date = self.mock_project.start_date - \
+                     datetime.timedelta(days=10)
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_project,
+            "due_date",
+            new_due_date
+        )
     
     
     
@@ -204,7 +274,13 @@ class ProjectTester(mocker.MockerTestCase):
         attribute passes it
         """
         
-        self.fail("test is not implemented yet")
+        time_delta = self.mock_project.due_date - self.mock_project.start_date
+        self.mock_project.start_date += 2 * time_delta
+        
+        self.assertEquals(
+            self.mock_project.due_date - self.mock_project.start_date,
+            time_delta
+        )
     
     
     
@@ -214,17 +290,18 @@ class ProjectTester(mocker.MockerTestCase):
         as None
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["lead"] = None
+        new_project = project.Project(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_lead_attribute_is_given_as_None(self):
+    def test_lead_attribute_is_set_to_None(self):
         """testing if no error will be raised when the lead attribute is set to
         None
         """
         
-        self.fail("test is not implemented yet")
+        self.mock_project.lead = None
     
     
     
@@ -234,7 +311,15 @@ class ProjectTester(mocker.MockerTestCase):
         given as something other than a user.User object
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        
+        for test_value in test_values:
+            self.kwargs["lead"] = test_value
+            self.assertRaises(
+                ValueError,
+                project.Project,
+                **self.kwargs
+            )
     
     
     
@@ -244,8 +329,16 @@ class ProjectTester(mocker.MockerTestCase):
         set to something other than a user.User object
         """
         
-        self.fail("test is not implemented yet")
-    
+        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_project,
+                "lead",
+                test_value
+            )
     
     
     
@@ -255,7 +348,8 @@ class ProjectTester(mocker.MockerTestCase):
         as None
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["users"] = None
+        new_project = project.Project(**self.kwargs)
     
     
     
@@ -265,7 +359,7 @@ class ProjectTester(mocker.MockerTestCase):
         to None
         """
         
-        self.fail("test is not implemented yet")
+        self.mock_project.users = None
     
     
     
@@ -275,7 +369,9 @@ class ProjectTester(mocker.MockerTestCase):
         as None
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["users"] = None
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.users, [])
     
     
     
@@ -285,7 +381,8 @@ class ProjectTester(mocker.MockerTestCase):
         None
         """
         
-        self.fail("test is not implemented yet")
+        self.mock_project.users = None
+        self.assertEquals(self.mock_project.users, [])
     
     
     
@@ -295,7 +392,9 @@ class ProjectTester(mocker.MockerTestCase):
         given as a list containing objects other than user.User
         """
         
-        self.fail("test is not implemented yet")
+        test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        self.kwargs["users"] = test_value
+        self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -305,11 +404,18 @@ class ProjectTester(mocker.MockerTestCase):
         given as a list containing objects other than user.User
         """
         
-        self.fail("test is not implemented yet")
+        test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_project,
+            "users",
+            test_value
+        )
     
     
     
-        #----------------------------------------------------------------------
+    #----------------------------------------------------------------------
     def test_users_attribute_is_a_ValidatedList_instance(self):
         """testing if the users attribute is an instance of ValidatedList
         """
@@ -347,7 +453,8 @@ class ProjectTester(mocker.MockerTestCase):
         an empty list
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["sequences"] = []
+        new_project = project.Project(**self.kwargs)
     
     
     
@@ -357,7 +464,20 @@ class ProjectTester(mocker.MockerTestCase):
         empty list
         """
         
-        self.fail("test is not implemented yet")
+        self.mock_project.sequences = []
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_argument_is_given_as_a_list_containing_non_Sequence_objects(self):
+        """testing if a ValueError will be raised when trying the given
+        sequences argument is a list containing objects other than Sequence
+        instances
+        """
+        
+        test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        self.kwargs["sequences"] = test_value
+        self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -368,8 +488,14 @@ class ProjectTester(mocker.MockerTestCase):
         instances
         """
         
-        self.fail("test is not implemented yet")
-        
+        test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_project,
+            "sequences",
+            test_value
+        )
     
     
     
@@ -411,7 +537,8 @@ class ProjectTester(mocker.MockerTestCase):
         an empty list
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["assets"] = []
+        new_project = project.Project(self.kwargs)
     
     
     
@@ -421,7 +548,19 @@ class ProjectTester(mocker.MockerTestCase):
         empty list
         """
         
-        self.fail("test is not implemented yet")
+        self.mock_project.assets = []
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_argument_is_a_list_containing_non_Asset_objects(self):
+        """testing if a ValueError will be raised when the assets argument is
+        given as a list containing objects other than Assets instances
+        """
+        
+        test_value = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        self.kwargs["assets"] = test_value
+        self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -431,7 +570,15 @@ class ProjectTester(mocker.MockerTestCase):
         assets list to a list containing objects other than Assets instances
         """
         
-        self.fail("test is not implemented yet")
+        test_value = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_project,
+            "assets",
+            test_value
+        )
     
     
     
@@ -473,7 +620,8 @@ class ProjectTester(mocker.MockerTestCase):
         argument is None
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["image_format"] = None
+        self.assertRaises(ValueError, project.Project, self.kwargs)
     
     
     
@@ -483,7 +631,13 @@ class ProjectTester(mocker.MockerTestCase):
         attribute is set to None
         """
         
-        self.fail("test is not implemented yet")
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_project,
+            "image_format",
+            None
+        )
     
     
     
@@ -493,7 +647,15 @@ class ProjectTester(mocker.MockerTestCase):
         argument is given as another type then ImageFormat
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        
+        for test_value in test_values:
+            self.kwargs["image_format"] = test_value
+            self.assertRaises(ValueError, project.Project, **self.kwargs)
+        
+        # and a proper image format
+        self.kwargs["image_format"] = self.mock_imageFormat
+        new_project = project.Project(**self.kwargs)
     
     
     
@@ -504,7 +666,19 @@ class ProjectTester(mocker.MockerTestCase):
         instance
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_project,
+                "image_format",
+                test_value
+            )
+        
+        # and a proper image format
+        self.mock_project.image_format = self.mock_imageFormat
     
     
     
@@ -513,7 +687,8 @@ class ProjectTester(mocker.MockerTestCase):
         """testing if a ValueError will be raised the fps argument is skipped
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs.pop("fps")
+        self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -523,7 +698,8 @@ class ProjectTester(mocker.MockerTestCase):
         to None
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["fps"] = None
+        self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -533,7 +709,15 @@ class ProjectTester(mocker.MockerTestCase):
         given as a value other than a float or integer
         """
         
-        self.fail("test is not implemented yet")
+        test_values = ["a str", ["a", "list"], {"a": "list"}]
+        
+        for test_value in test_values:
+            self.kwargs["fps"] = test_value
+            self.assertRaises(
+                ValueError,
+                project.Project,
+                **self.kwargs
+            )
     
     
     
@@ -543,7 +727,16 @@ class ProjectTester(mocker.MockerTestCase):
         set to a value other than a float or integer
         """
         
-        self.fail("test is not implemented yet")
+        test_values = ["a str", ["a", "list"], {"a": "list"}]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_project,
+                "fps",
+                test_value
+            )
     
     
     
@@ -553,7 +746,12 @@ class ProjectTester(mocker.MockerTestCase):
         argument is given as an integer
         """
         
-        self.fail("test is not implemented yet")
+        test_value = 1
+        
+        self.kwargs["fps"] = test_value
+        new_project = project.Project(**self.kwargs)
+        self.assertTrue(isinstance(new_project.fps, float))
+        self.assertEquals(new_project.fps, float(test_value))
     
     
     
@@ -563,7 +761,11 @@ class ProjectTester(mocker.MockerTestCase):
         an integer value
         """
         
-        self.fail("test is not implemented yet")
+        test_value = 1
+        
+        self.mock_project.fps = test_value
+        self.assertTrue(isinstance(self.mock_project.fps, float))
+        self.assertEquals(self.mock_project.fps, float(test_value))
     
     
     
@@ -573,7 +775,8 @@ class ProjectTester(mocker.MockerTestCase):
         to None
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["type"] = None
+        self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -583,7 +786,13 @@ class ProjectTester(mocker.MockerTestCase):
         to None
         """
         
-        self.fail("test is not implemented yet")
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_project,
+            "type",
+            None
+        )
     
     
     
@@ -593,7 +802,11 @@ class ProjectTester(mocker.MockerTestCase):
         given as something other than a ProjectType object
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        
+        for test_value in test_values:
+            self.kwargs["type"] = test_value
+            self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -603,7 +816,16 @@ class ProjectTester(mocker.MockerTestCase):
         set to something other than a ProjectType object
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_project,
+                "type",
+                test_value
+            )
     
     
     
@@ -613,7 +835,8 @@ class ProjectTester(mocker.MockerTestCase):
         is given as None
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["structure"] = None
+        self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -623,7 +846,13 @@ class ProjectTester(mocker.MockerTestCase):
         is set to None
         """
         
-        self.fail("test is not implemented yet")
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_project,
+            "structure",
+            None
+        )
     
     
     
@@ -633,7 +862,8 @@ class ProjectTester(mocker.MockerTestCase):
         is None
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs["repository"] = None
+        self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -643,7 +873,13 @@ class ProjectTester(mocker.MockerTestCase):
         is set to None
         """
         
-        self.fail("test is not implemented yet")
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_project,
+            "repository",
+            None
+        )
     
     
     
@@ -653,7 +889,10 @@ class ProjectTester(mocker.MockerTestCase):
         is given as something other than a Repository object
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        for test_value in test_values:
+            self.kwargs["repository"] = test_value
+            self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -663,7 +902,15 @@ class ProjectTester(mocker.MockerTestCase):
         is tried to be set to something other than a Repository object
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_project,
+                "repository",
+                test_value
+            )
     
     
     
@@ -673,7 +920,9 @@ class ProjectTester(mocker.MockerTestCase):
         False
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs.pop("stereoscopic")
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.is_stereoscopic, False)
     
     
     
@@ -683,7 +932,12 @@ class ProjectTester(mocker.MockerTestCase):
         converted to a bool value correctly
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [0, 1, 1.2, "", "str", ["a", "list"]]
+        
+        for test_value in test_values:
+            self.kwargs["is_stereoscopic"] = test_value
+            new_project = project.Project(**self.kwargs)
+            self.assertEquals(new_project.is_stereoscopic, bool(test_value))
     
     
     
@@ -693,27 +947,41 @@ class ProjectTester(mocker.MockerTestCase):
         be converted to a bool value correctly
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [0, 1, 1.2, "", "str", ["a", "list"]]
+        
+        for test_value in test_values:
+            self.mock_project.is_stereoscopic = test_value
+            self.assertEquals(
+                self.mock_project.is_stereoscopic,
+                bool(test_value)
+            )
     
     
     
     #----------------------------------------------------------------------
     def test_display_width_argument_is_skipped(self):
-        """testing if the display_width attribute will be set to the defualt
+        """testing if the display_width attribute will be set to the default
         value when the display_width argument is skipped
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs.pop("display_width")
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.display_width, 1.0)
     
     
     
     #----------------------------------------------------------------------
     def test_display_width_argument_float_conversion(self):
-        """tetsing if the display_width attribute is converted to float
+        """testing if the display_width attribute is converted to float
         correctly for various display_width arguments
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 2, 3, 4]
+        for test_value in test_values:
+            self.kwargs["display_width"] = test_value
+            new_project = project.Project(**self.kwargs)
+            self.assertTrue(isinstance(new_project.display_width, float))
+            self.assertEquals(new_project.display_width, float(test_value))
     
     
     
@@ -723,17 +991,25 @@ class ProjectTester(mocker.MockerTestCase):
         correctly
         """
         
-        self.fail("test is not implemented yet")
+        test_values = [1, 2, 3, 4]
+        for test_value in test_values:
+            self.mock_project.display_width = test_value
+            self.assertTrue(isinstance(self.mock_project.display_width, float))
+            self.assertEquals(self.mock_project.display_width,
+                              float(test_value))
     
     
     
     #----------------------------------------------------------------------
     def test_display_width_argument_is_given_as_a_negative_value(self):
-        """testing if the display_width attribute is set to default value when
-        the display_width argument is given as negative value
+        """testing if the display_width attribute is set to the absolute value
+        of the given negative display_width argument
         """
         
-        self.fail("test is not implemented yet")
+        test_value = -1.0
+        self.kwargs["display_width"] = test_value
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.display_width, abs(test_value))
     
     
     
@@ -743,7 +1019,9 @@ class ProjectTester(mocker.MockerTestCase):
         it is set to a negative value
         """
         
-        self.fail("test is not implemented yet")
+        test_value = -1.0
+        self.mock_project.display_width = test_value
+        self.assertEquals(self.mock_project.display_width, abs(test_value))
     
     
     
