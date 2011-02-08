@@ -14,7 +14,6 @@ v0.1.1.a5:
    the design sketches has been removed from the trunk
  * added the ValidatedList class which is a list derivative that accepts only
    one type of object.
- * started to block the tests of the Project class
  * these SOM classes listed below uses ValidetedList in their list attributes
    requiring spesific types of objects to be assigned:
    * entity.Entity
@@ -24,6 +23,7 @@ v0.1.1.a5:
    * department.Department
    * user.User
    * mixin.ReferenceMixin
+ * blocked out the tests of the Project class
 
 v0.1.1.a4:
  * changed the arguments of the stalker.db.mixins.ReferenceMixin.setup

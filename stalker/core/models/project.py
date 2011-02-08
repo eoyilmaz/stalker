@@ -55,26 +55,32 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
       instances of :class:`~stalker.core.models.asset.Asset`
     
     :param image_format: the output image format of the project, it should be
-      an instance of :class:`~stalker.core.models.imageFormat.ImageFormat`
+      an instance of :class:`~stalker.core.models.imageFormat.ImageFormat`,
+      can not be skipped in init
       
     :param fps: the FPS of the project, it should be a float number.
     
     :param type: the type of the project, it should be an instance of
-      :class:`~stalker.core.models.types.ProjectType`
+      :class:`~stalker.core.models.types.ProjectType`, can not be skipped in
+      init
     
     :param structure: the structure of the project, it should be an instance of
-      :class:`~stalker.core.models.structure.Structure`
+      :class:`~stalker.core.models.structure.Structure`, can not be None, can
+      be an empty string, can be skipped in init, anything other than a string
+      will be converted to string.
     
     :param repository: the repository that the project files are going to be
       stored in, it should be an instance of
       :class:`~stalker.core.models.repository.Reporsitory`
     
     :param is_stereoscopic: a bool value (True or False), showing if the
-      project is going to be a stereo 3D project
+      project is going to be a stereo 3D project, default is False, anything
+      given as the argument will be converted to True or False.
     
     :param display_width: the width of the display that the output of the
       project is going to be displayed (very unnecessary if you are not using
-      stereo 3D setup)
+      stereo 3D setup). Should be an int or float value, negative values
+      converted to the default value, default value is 0.
     
     """
     

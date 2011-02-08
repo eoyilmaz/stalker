@@ -4,7 +4,7 @@
 import datetime
 import mocker
 from stalker.core.models import (user, sequence, asset, imageFormat, types,
-                                 structure, repository)
+                                 project, structure, repository)
 
 
 
@@ -309,6 +309,38 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     
+        #----------------------------------------------------------------------
+    def test_users_attribute_is_a_ValidatedList_instance(self):
+        """testing if the users attribute is an instance of ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_project.users, ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_users_attribute_elements_accepts_User_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a User object to the users list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_project.users.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_project.users.__setitem__,
+            0,
+            0
+        )
+    
+    
+    
     #----------------------------------------------------------------------
     def test_seuqences_argument_is_given_as_an_empty_list(self):
         """testing if nothing happens when the sequences argument is given as
@@ -329,11 +361,389 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_(self):
-        #"""
-        #"""
+    #----------------------------------------------------------------------
+    def test_sequences_attribute_is_set_to_a_list_containing_non_Sequence_objects(self):
+        """testing if a ValueError will be raised when trying to set the
+        sequences list to a list containing objects other than Sequence
+        instances
+        """
         
-
-
-
+        self.fail("test is not implemented yet")
+        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_attribute_is_a_ValidatedList_instance(self):
+        """testing if the sequences attribute is an instance of ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_project.sequences, ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_attribute_elements_accepts_Sequence_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a Sequence object to the sequences list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_project.sequences.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_project.sequences.__setitem__,
+            0,
+            0
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_argument_is_given_as_an_empty_list(self):
+        """testing if nothing happens when the assets argument is given as
+        an empty list
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_set_to_an_empty_list(self):
+        """testing if nothing happens when the assets attribute is set to an
+        empty list
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_set_to_a_list_containing_non_Asset_objects(self):
+        """testing if a ValueError will be raised when trying to set the
+        assets list to a list containing objects other than Assets instances
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_a_ValidatedList_instance(self):
+        """testing if the assets attribute is an instance of ValidatedList
+        """
+        
+        self.assertTrue(isinstance(self.mock_project.assets, ValidatedList))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_elements_accepts_Asset_only(self):
+        """testing if a ValueError will be raised when trying to assign
+        something other than a Asset instance to the assets list
+        """
+        
+        # append
+        self.assertRaises(
+            ValueError,
+            self.mock_project.assets.append,
+            0
+        )
+        
+        # __setitem__
+        self.assertRaises(
+            ValueError,
+            self.mock_project.assets.__setitem__,
+            0,
+            0
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_image_format_argument_is_None(self):
+        """testing if a ValueError will be raised when the image_format
+        argument is None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_image_format_attribute_is_set_to_None(self):
+        """testing if a ValueError will be raised when the image_format
+        attribute is set to None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_image_format_argument_accepts_ImageFormat_only(self):
+        """testing if a ValueError will be raised when the image_format
+        argument is given as another type then ImageFormat
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_image_format_attribute_accepts_ImageFormat_only(self):
+        """testing if a ValueError will be raised when the image_format
+        attribute is tried to be set to something other than a ImageFormat
+        instance
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_argument_is_skipped(self):
+        """testing if a ValueError will be raised the fps argument is skipped
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_attribute_is_set_to_None(self):
+        """testing if a ValueError will be raised when the fps attribute is set
+        to None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_argument_is_given_as_non_float_or_integer(self):
+        """testing if a ValueError will be raised when the fps argument is
+        given as a value other than a float or integer
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_attribute_is_given_as_non_float_or_integer(self):
+        """testing if a ValueError will be raised when the fps attribute is
+        set to a value other than a float or integer
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_attribute_float_conversion(self):
+        """testing if the fps attribute is converted to float when the float
+        argument is given as an integer
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_attribute_float_conversion_2(self):
+        """testing if the fps attribute is converted to float when it is set to
+        an integer value
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_type_argument_is_None(self):
+        """testing if a ValueError will be raised when the type argument is set
+        to None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_type_attribute_is_set_to_None(self):
+        """testing if a ValueError will be raised when the type argument is set
+        to None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_type_argument_is_given_as_non_ProjectType_object(self):
+        """testing if a ValueError will be raised when the type argument is
+        given as something other than a ProjectType object
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_type_attribute_is_set_to_non_ProjectType_object(self):
+        """testing if a ValueError will be raised when the type attribute is
+        set to something other than a ProjectType object
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_structure_argument_is_None(self):
+        """testing if a ValueError will be raised when the structure argument
+        is given as None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_structure_attribute_is_set_to_None(self):
+        """testing if a ValueError will be raised when the structure argument
+        is set to None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_repository_argument_is_None(self):
+        """testing if a ValueError will be raised when the repository argument
+        is None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_repository_attribute_is_set_to_None(self):
+        """testing if a ValueError will be raised when the repository argument
+        is set to None
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_repository_argument_is_non_Repository_object(self):
+        """testing if a ValueError will be raised when the repository argument
+        is given as something other than a Repository object
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_repository_attribute_is_set_to_non_Repository_object(self):
+        """testing if a ValueErorr will be raised when the repository attribute
+        is tried to be set to something other than a Repository object
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_is_stereoscopic_argument_skipped(self):
+        """testing if is_stereoscopic will set the is_stereoscopic attribute to
+        False
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_is_stereoscopic_argument_bool_conversion(self):
+        """testing if all the given values for is_stereoscopic argument will be
+        converted to a bool value correctly
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_is_stereoscopic_attribute_bool_conversion(self):
+        """testing if all the given values for is_stereoscopic attribute will
+        be converted to a bool value correctly
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_display_width_argument_is_skipped(self):
+        """testing if the display_width attribute will be set to the defualt
+        value when the display_width argument is skipped
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_display_width_argument_float_conversion(self):
+        """tetsing if the display_width attribute is converted to float
+        correctly for various display_width arguments
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_display_width_attribute_float_conversion(self):
+        """testing if the display_width attribute is converted to float
+        correctly
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_display_width_argument_is_given_as_a_negative_value(self):
+        """testing if the display_width attribute is set to default value when
+        the display_width argument is given as negative value
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_display_width_attribute_is_set_to_a_negative_value(self):
+        """testing if the display_width attribute is set to default value when
+        it is set to a negative value
+        """
+        
+        self.fail("test is not implemented yet")
+    
+    
+    
