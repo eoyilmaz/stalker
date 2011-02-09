@@ -21,7 +21,7 @@ from sqlalchemy.orm import mapper, relationship, synonym
 
 from stalker import db
 from stalker.db import tables
-from stalker.db.mixins import StatusMixin as StatusMixinDB
+from stalker.db.mixin import StatusMixinDB
 from stalker.core.models.mixin import StatusMixin
 from stalker.core.models import entity
 

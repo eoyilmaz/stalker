@@ -27,7 +27,6 @@ class ReferenceMixin(object):
     outside information to the attached objects. The aim of the References are
     generally to give more info to direct the evolution of the objects,
     generally these objects are :class:`~stalker.core.models.asset.Asset`\ s.
-    
     """
     
     

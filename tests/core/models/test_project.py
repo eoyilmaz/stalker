@@ -4,7 +4,7 @@
 import datetime
 import mocker
 from stalker.core.models import (user, sequence, asset, imageFormat, types,
-                                 project, structure, repository)
+                                 project, structure, repository, entity)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -53,7 +53,6 @@ class ProjectTester(mocker.MockerTestCase):
         self.mocker.replay()
         
         # create a project object
-        
         self.kwargs = {
             "name": "Test Project",
             "description": "This is a project object for testing purposes",
@@ -1113,6 +1112,37 @@ class ProjectTester(mocker.MockerTestCase):
                 test_value
             )
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing the equality of two projects
+        """
+        
+        # create a new project with the same arguments
+        new_project = project.Project(**self.kwargs)
+        
+        # create a new entity with the same arguments
+        new_entity = entity.Entity(**self.kwargs)
+        
+        self.assertTrue(self.mock_project==new_project)
+        self.assertFalse(self.mock_project==new_entity)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing the inequality of two projects
+        """
+        
+        # create a new project with the same arguments
+        new_project = project.Project(**self.kwargs)
+        
+        # create a new entity with the same arguments
+        new_entity = entity.Entity(**self.kwargs)
+        
+        self.assertFalse(self.mock_project!=new_project)
+        self.assertTrue(self.mock_project!=new_entity)
     
     
     

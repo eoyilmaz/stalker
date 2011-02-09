@@ -8,6 +8,7 @@ You can use your also use your own mappers. See the docs.
 
 from sqlalchemy.orm import mapper, relationship, backref, synonym
 from stalker.db import tables
+from stalker.db.mixin import ReferenceMixinDB, StatusMixinDB
 from stalker.core.models import (
     asset,
     assetBase,
@@ -20,6 +21,7 @@ from stalker.core.models import (
     pipelineStep,
     project,
     link,
+    mixin,
     note,
     repository,
     sequence,
@@ -60,7 +62,7 @@ def setup():
                 primaryjoin=tables.simpleEntities.c.created_by_id== \
                             tables.users.c.id,
                 post_update=True,
-                uselist=False
+                #uselist=False
             ),
             "created_by": synonym("_created_by"),
             "_updated_by": relationship(
@@ -69,7 +71,7 @@ def setup():
                 primaryjoin=tables.simpleEntities.c.updated_by_id== \
                             tables.users.c.id,
                 post_update=True,
-                uselist=False
+                #uselist=False
             ),
             "updated_by": synonym("_updated_by"),
             "_date_created": tables.simpleEntities.c.date_created,
@@ -406,3 +408,38 @@ def setup():
     
     
     
+    ## Project - also the first class uses the mixins
+    #project_mapper_arguments = {
+        #"inherits": project.Project.__base__,
+        #"polymorphic_identity": project.Project.entity_type,
+        #"properties": {
+            #"_start_date": tables.projects.c.start_date,
+            #"start_date": synonym("_start_date"),
+            #"_due_date": tables.projects.c.due_date,
+            #"due_date": synonym("_due_date"),
+            #"_lead": relationship(
+                #user.User,
+                #primaryjoin=tables.projects.c.lead_id==tables.users.c.id,
+            #),
+            #"lead": synonym("_lead"),
+            #"_repository": relationship(repository.Repository),
+            #"repository": synonym("repository"),
+            #"_type": relationship(types.ProjectType),
+            #"type": synonym("_type"),
+            #"_structure": relationship(structure.Structure),
+            #"structure": synonym("_structure"),
+            #"_image_format": relationship(imageFormat.ImageFormat),
+            #"image_format": synonym("_image_format"),
+            #"_fps": tables.projects.c.fps,
+            #"fps": synonym("_fps"),
+            #"_is_stereoscopic": tables.projects.c.is_stereoscopic,
+            #"is_stereoscopic": synonym("_is_stereoscopic"),
+            #"_display_width": tables.projects.c.display_width,
+            #"display_width": synonym("_display_width"),
+        #}
+    #}
+    
+    # give it to reference mixin first
+    
+    
+    #mapper(

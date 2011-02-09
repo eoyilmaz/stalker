@@ -943,8 +943,63 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of Project
         """
         
-        self.fail("test is not implemented yet")
-    
+        # create mock objects
+        start_date = datetime.date.today()
+        due_date = start_date + datetime.timedelta(days=20)
+        
+        lead = user.User(login_name="lead", first_name="lead",
+                                   last_name="lead", email="lead@lead.com")
+        
+        user1 = user.User(login_name="user1", first_name="user1",
+                          last_name="user1", email="user1@user1.com")
+        user2 = user.User(login_name="user2", first_name="user2",
+                          last_name="user2", email="user1@user2.com")
+        user3 = user.User(login_name="user3", first_name="user3",
+                          last_name="user3", email="user3@user3.com")
+        
+        image_format = imageFormat.ImageFormat(name="HD", width=1920,
+                                               height=1080)
+        
+        project_type = types.ProjectType(name="Commercial")
+        
+        project_structure = structure.Structure(name="Commercial Structure",
+                                                project_template="")
+        
+        repo = repository.Repository(name="Commercials Repository",
+                                     linux_path="/mnt/Projects",
+                                     windows_path="M:\\Projects",
+                                     osx_path="/Volumes/Projects")
+        
+        # create a project object
+        
+        kwargs = {
+            "name": "Test Project",
+            "description": "This is a project object for testing purposes",
+            "lead": lead,
+            "users": [user1, user2, user3],
+            "image_format": image_format,
+            "fps": 25,
+            "type": project_type,
+            "structure": project_structure,
+            "repository": repo,
+            "is_stereoscopic": False,
+            "display_width": 1.0,
+            "start_date": start_date,
+            "due_date": due_date,
+        }
+        
+        new_project = project.Project(**kwargs)
+        
+        # persist it in the database
+        db.session.add(new_project)
+        db.session.commit()
+        
+        # now get it
+        new_project_DB = db.query(project.Project).\
+                       filter_by(name=kwargs["name"]).first()
+        
+        self.assertEquals(new_project, new_project_DB)
+        
     
     
     #----------------------------------------------------------------------
@@ -1351,10 +1406,6 @@ class ExamplesTester(unittest.TestCase):
                 os.path.sep
             )[:-2]
         )
-        
-        #example_path = "examples"
-        #cls.import_path = os.path.join(stalker_dir, example_path)
-        #sys.path.append(cls.import_path)
         
         sys.path.append(stalker_dir)
     

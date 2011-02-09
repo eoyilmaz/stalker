@@ -27,6 +27,11 @@ v0.1.1.a5:
  * completed the first implementation of the Project class
  * to be able to use assertIsInstance method of mocker.MockerTestCase all the
    unittest.TestCase test classes are converted to mocker.MockerTestCase
+ * changed the design of the db.mixins.ReferenceMixin.setup and
+   db.mixins.StatusMixin.setup to orginize the mixin classes' database setup
+   helper functions, now they are converted to classes with a
+   classmethod called setup doing all the functionality of the previous setup
+   function and placed them under the db.mixin module.
 
 v0.1.1.a4:
  * changed the arguments of the stalker.db.mixins.ReferenceMixin.setup

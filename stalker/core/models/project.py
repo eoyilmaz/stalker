@@ -541,3 +541,13 @@ stalker.core.models.types.ProjectType")
     
     
     
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Project, self).__eq__(other) and \
+               isinstance(other, Project)
+    
+    
+    
