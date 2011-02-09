@@ -115,7 +115,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         # string or unicode
         self.assertTrue(new_simple_entity.code is not None)
         self.assertTrue(new_simple_entity.code != "")
-        self.assertTrue(isinstance(new_simple_entity.code, (str, unicode)))
+        self.assertIsInstance(new_simple_entity.code, (str, unicode))
     
     
     
@@ -130,7 +130,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         self.assertTrue(new_simple_entity.code is not None)
         self.assertTrue(new_simple_entity.code != "")
-        self.assertTrue(isinstance(new_simple_entity.code, (str, unicode)))
+        self.assertIsInstance(new_simple_entity.code, (str, unicode))
     
     
     
@@ -146,7 +146,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         self.assertTrue(new_simple_entity.code is not None)
         self.assertTrue(new_simple_entity.code != "")
-        self.assertTrue(isinstance(new_simple_entity.code, (str, unicode)))
+        self.assertIsInstance(new_simple_entity.code, (str, unicode))
     
     
     
@@ -975,7 +975,7 @@ class EntityTester(mocker.MockerTestCase):
         """
         
         self.mock_entity.notes = []
-        self.assertTrue(isinstance(self.mock_entity.notes, ValidatedList))
+        self.assertIsInstance(self.mock_entity.notes, ValidatedList)
     
     
     
@@ -1054,7 +1054,7 @@ class EntityTester(mocker.MockerTestCase):
         """
         
         self.mock_entity.tags = []
-        self.assertTrue(isinstance(self.mock_entity.tags, ValidatedList))
+        self.assertIsInstance(self.mock_entity.tags, ValidatedList)
     
     
     

@@ -86,8 +86,7 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         """testing if the references attribute is an instance of ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_foo_obj.references,
-                                   ValidatedList))
+        self.assertIsInstance(self.mock_foo_obj.references, ValidatedList)
     
     
     

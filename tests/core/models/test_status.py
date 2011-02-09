@@ -2,14 +2,14 @@
 
 
 
-import unittest
+import mocker
 from stalker.core.models import status
 from stalker.ext.validatedList import ValidatedList
 
 
 
 ########################################################################
-class StatusTest(unittest.TestCase):
+class StatusTest(mocker.MockerTestCase):
     """tests the status class
     """
     
@@ -79,7 +79,7 @@ class StatusTest(unittest.TestCase):
 
 
 ########################################################################
-class StatusListTest(unittest.TestCase):
+class StatusListTest(mocker.MockerTestCase):
     """testing the StatusList class
     """
     
@@ -217,8 +217,8 @@ class StatusListTest(unittest.TestCase):
         instance
         """
         
-        self.assertTrue(isinstance(self.mock_status_list.statuses,
-                                   ValidatedList))
+        self.assertIsInstance(self.mock_status_list.statuses,
+                                   ValidatedList)
     
     
     

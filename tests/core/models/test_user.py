@@ -135,7 +135,7 @@ class UserTest(mocker.MockerTestCase):
         # string or unicode
         self.assertTrue(new_user.code is not None)
         self.assertTrue(new_user.code != "")
-        self.assertTrue(isinstance(new_user.code, (str, unicode)))
+        self.assertIsInstance(new_user.code, (str, unicode))
     
     
     
@@ -153,7 +153,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.assertTrue(new_user.code is not None)
         self.assertTrue(new_user.code != "")
-        self.assertTrue(isinstance(new_user.code, (str, unicode)))
+        self.assertIsInstance(new_user.code, (str, unicode))
     
     
     
@@ -172,7 +172,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.assertTrue(new_user.code is not None)
         self.assertTrue(new_user.code != "")
-        self.assertTrue(isinstance(new_user.code, (str, unicode)))
+        self.assertIsInstance(new_user.code, (str, unicode))
     
     
     
@@ -1220,8 +1220,7 @@ class UserTest(mocker.MockerTestCase):
         ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_user.permission_groups,
-                                   ValidatedList))
+        self.assertIsInstance(self.mock_user.permission_groups, ValidatedList)
     
     
     
@@ -1302,7 +1301,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if the projects attribute is an instance of ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_user.projects, ValidatedList))
+        self.assertIsInstance(self.mock_user.projects, ValidatedList)
     
     
     
@@ -1499,8 +1498,7 @@ class UserTest(mocker.MockerTestCase):
         ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_user.projects_lead,
-                                   ValidatedList))
+        self.assertIsInstance(self.mock_user.projects_lead, ValidatedList)
     
     
     
@@ -1635,8 +1633,7 @@ class UserTest(mocker.MockerTestCase):
         ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_user.sequences_lead,
-                                   ValidatedList))
+        self.assertIsInstance(self.mock_user.sequences_lead, ValidatedList)
     
     
     
@@ -1768,7 +1765,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if the tasks attribute is an instance of ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_user.tasks, ValidatedList))
+        self.assertIsInstance(self.mock_user.tasks, ValidatedList)
     
     
     

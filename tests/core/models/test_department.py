@@ -119,8 +119,7 @@ class DepartmentTester(mocker.MockerTestCase):
         """testing if the members attribute is an instance of ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_department.members,
-                                   ValidatedList))
+        self.assertIsInstance(self.mock_department.members, ValidatedList)
     
     
     

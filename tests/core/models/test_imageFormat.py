@@ -2,7 +2,7 @@
 
 
 
-import unittest
+import mocker
 from stalker.core.models import imageFormat
 
 
@@ -10,7 +10,7 @@ from stalker.core.models import imageFormat
 
 
 ########################################################################
-class ImageFormatTest(unittest.TestCase):
+class ImageFormatTest(mocker.MockerTestCase):
     """the test case for the image format
     """
     
@@ -79,7 +79,7 @@ class ImageFormatTest(unittest.TestCase):
         # the given floats should be converted to integer
         self.kwargs["width"] = 1920.0
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
-        self.assertTrue(isinstance(an_image_format.width, int))
+        self.assertIsInstance(an_image_format.width, int)
     
     
     
@@ -92,7 +92,7 @@ class ImageFormatTest(unittest.TestCase):
         #----------------------------------------------------------------------
         # the given floats should be converted to integer
         self.mock_imageFormat.width = 1920.0
-        self.assertTrue(isinstance(self.mock_imageFormat.width, int))
+        self.assertIsInstance(self.mock_imageFormat.width, int)
     
     
     
@@ -174,7 +174,7 @@ class ImageFormatTest(unittest.TestCase):
         self.kwargs["height"] = 1080.0
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
         
-        self.assertTrue(isinstance(an_image_format.height, int))
+        self.assertIsInstance(an_image_format.height, int)
     
     
     
@@ -186,7 +186,7 @@ class ImageFormatTest(unittest.TestCase):
         
         # also test the attribute for this
         self.mock_imageFormat.height = 1080.0
-        self.assertTrue(isinstance(self.mock_imageFormat.height, int))
+        self.assertIsInstance(self.mock_imageFormat.height, int)
     
     
     
@@ -235,7 +235,7 @@ class ImageFormatTest(unittest.TestCase):
         value
         """
         
-        self.assertTrue(isinstance(self.mock_imageFormat.device_aspect, float))
+        self.assertIsInstance(self.mock_imageFormat.device_aspect, float)
     
     
     
@@ -362,7 +362,7 @@ class ImageFormatTest(unittest.TestCase):
         # the returned pixel aspect ratio should be a float
         self.kwargs["pixel_aspect"] = 1
         an_image_format = imageFormat.ImageFormat(**self.kwargs)
-        self.assertTrue(isinstance(an_image_format.pixel_aspect, float))
+        self.assertIsInstance(an_image_format.pixel_aspect, float)
     
     
     
@@ -445,7 +445,7 @@ class ImageFormatTest(unittest.TestCase):
         print_resolution = an_image_format.print_resolution
         
         # and the default value should be a float instance
-        self.assertTrue(isinstance(an_image_format.print_resolution, float))
+        self.assertIsInstance(an_image_format.print_resolution, float)
     
     
     

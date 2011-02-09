@@ -165,7 +165,7 @@ class AssetTypeTester(mocker.MockerTestCase):
         """testing if the steps attribute is an instance of ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_assetType.steps, ValidatedList))
+        self.assertIsInstance(self.mock_assetType.steps, ValidatedList)
     
     
     

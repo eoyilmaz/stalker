@@ -177,8 +177,8 @@ class StructureTester(mocker.MockerTestCase):
         instance
         """
         
-        self.assertTrue(isinstance(self.mock_structure.asset_templates,
-                                   ValidatedList))
+        self.assertIsInstance(self.mock_structure.asset_templates,
+                              ValidatedList)
     
     
     
@@ -261,8 +261,8 @@ class StructureTester(mocker.MockerTestCase):
         ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_structure.reference_templates,
-                                   ValidatedList))
+        self.assertIsInstance(self.mock_structure.reference_templates,
+                                   ValidatedList)
     
     
     

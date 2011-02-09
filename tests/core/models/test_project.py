@@ -5,7 +5,7 @@ import datetime
 import mocker
 from stalker.core.models import (user, sequence, asset, imageFormat, types,
                                  project, structure, repository)
-
+from stalker.ext.validatedList import ValidatedList
 
 
 
@@ -49,6 +49,8 @@ class ProjectTester(mocker.MockerTestCase):
         self.mock_project_structure = self.mocker.mock(structure.Structure)
         
         self.mock_repo = self.mocker.mock(repository.Repository)
+        
+        self.mocker.replay()
         
         # create a project object
         
@@ -152,7 +154,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["due_date"] = test_value
-            self.assertRaises(ValuError, project.Project, **self.kwargs)
+            self.assertRaises(ValueError, project.Project, **self.kwargs)
     
     
     
@@ -183,7 +185,8 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs["due_date"] = None
         new_project = project.Project(**self.kwargs)
-        self.assertEquals(new_project.due_date - new_project.start_date, 10)
+        self.assertEquals(new_project.due_date - new_project.start_date,
+                          datetime.timedelta(days=10))
     
     
     
@@ -195,7 +198,9 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.mock_project.due_date = None
         self.assertEquals(
-            self.mock_project.due_date - self.mock_project.start_date, 10)
+            self.mock_project.due_date - self.mock_project.start_date,
+            datetime.timedelta(days=10)
+        )
     
     
     
@@ -209,7 +214,7 @@ class ProjectTester(mocker.MockerTestCase):
         self.kwargs["due_date"] = test_value
         new_project = project.Project(**self.kwargs)
         
-        self.assertTrue(isinstance(new_project.due_date, datetime.date))
+        self.assertIsInstance(new_project.due_date, datetime.date)
         
         self.assertEquals(
             new_project.due_date - new_project.start_date,
@@ -227,7 +232,7 @@ class ProjectTester(mocker.MockerTestCase):
         test_value = datetime.timedelta(days=20)
         self.mock_project.due_date = test_value
         
-        self.assertTrue(isinstance(self.mock_project, datetime.date))
+        self.assertIsInstance(self.mock_project.due_date, datetime.date)
         
         self.assertEquals(
             self.mock_project.due_date - self.mock_project.start_date,
@@ -420,7 +425,7 @@ class ProjectTester(mocker.MockerTestCase):
         """testing if the users attribute is an instance of ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_project.users, ValidatedList))
+        self.assertIsInstance(self.mock_project.users, ValidatedList)
     
     
     
@@ -446,9 +451,31 @@ class ProjectTester(mocker.MockerTestCase):
         )
     
     
+    #----------------------------------------------------------------------
+    def test_sequences_argument_is_given_as_None(self):
+        """testing if sequence attribute is set to an empty list when the
+        sequences argument is given as None
+        """
+        
+        self.kwargs["sequences"] = None
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.sequences, [])
+    
+    
     
     #----------------------------------------------------------------------
-    def test_seuqences_argument_is_given_as_an_empty_list(self):
+    def test_sequences_attribute_is_set_to_None_converted_to_empty_list(self):
+        """testing if sequence attribute is set to an empty list when it is set
+        to None
+        """
+        
+        self.mock_project.sequences = None
+        self.assertEquals(self.mock_project.sequences, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_argument_is_given_as_an_empty_list(self):
         """testing if nothing happens when the sequences argument is given as
         an empty list
         """
@@ -504,7 +531,7 @@ class ProjectTester(mocker.MockerTestCase):
         """testing if the sequences attribute is an instance of ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_project.sequences, ValidatedList))
+        self.assertIsInstance(self.mock_project.sequences, ValidatedList)
     
     
     
@@ -530,6 +557,40 @@ class ProjectTester(mocker.MockerTestCase):
         )
     
     
+    #----------------------------------------------------------------------
+    def test_assets_argument_is_given_as_None(self):
+        """testing if assets attribute is set to an empty list when the assets
+        argument is given as None
+        """
+        
+        self.kwargs["assets"] = None
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.assets, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_set_to_None_converted_to_empty_list(self):
+        """testing if assets attribute is set to an empty list when it is set
+        to None
+        """
+        
+        self.mock_project.assets = None
+        self.assertEquals(self.mock_project.assets, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_argument_skipped_and_intializied_as_an_empty_list(self):
+        """testing if skipping the assets list argument will initialize the
+        assets attribute to an empty list
+        """
+        
+        self.kwargs.pop("assets")
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.assets, [])
+    
+    
     
     #----------------------------------------------------------------------
     def test_assets_argument_is_given_as_an_empty_list(self):
@@ -538,7 +599,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["assets"] = []
-        new_project = project.Project(self.kwargs)
+        new_project = project.Project(**self.kwargs)
     
     
     
@@ -587,7 +648,7 @@ class ProjectTester(mocker.MockerTestCase):
         """testing if the assets attribute is an instance of ValidatedList
         """
         
-        self.assertTrue(isinstance(self.mock_project.assets, ValidatedList))
+        self.assertIsInstance(self.mock_project.assets, ValidatedList)
     
     
     
@@ -684,37 +745,47 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_fps_argument_is_skipped(self):
-        """testing if a ValueError will be raised the fps argument is skipped
+        """testing if the default value will be used when fps is skipped
         """
         
         self.kwargs.pop("fps")
-        self.assertRaises(ValueError, project.Project, **self.kwargs)
+        new_project = project.Project(**self.kwargs)
+        self.assertEquals(new_project.fps, 25.0)
     
     
     
     #----------------------------------------------------------------------
     def test_fps_attribute_is_set_to_None(self):
-        """testing if a ValueError will be raised when the fps attribute is set
+        """testing if a TypeError will be raised when the fps attribute is set
         to None
         """
         
         self.kwargs["fps"] = None
-        self.assertRaises(ValueError, project.Project, **self.kwargs)
+        self.assertRaises(TypeError, project.Project, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_fps_argument_is_given_as_non_float_or_integer(self):
         """testing if a ValueError will be raised when the fps argument is
-        given as a value other than a float or integer
+        given as a value other than a float or integer, or a string which is
+        convertable to float
         """
         
-        test_values = ["a str", ["a", "list"], {"a": "list"}]
-        
+        test_values = ["a str"]
         for test_value in test_values:
             self.kwargs["fps"] = test_value
             self.assertRaises(
                 ValueError,
+                project.Project,
+                **self.kwargs
+            )
+        
+        test_values = [["a", "list"], {"a": "list"}]
+        for test_value in test_values:
+            self.kwargs["fps"] = test_value
+            self.assertRaises(
+                TypeError,
                 project.Project,
                 **self.kwargs
             )
@@ -724,10 +795,10 @@ class ProjectTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_fps_attribute_is_given_as_non_float_or_integer(self):
         """testing if a ValueError will be raised when the fps attribute is
-        set to a value other than a float or integer
+        set to a value other than a float, integer or valid string literals
         """
         
-        test_values = ["a str", ["a", "list"], {"a": "list"}]
+        test_values = ["a str"]
         
         for test_value in test_values:
             self.assertRaises(
@@ -737,6 +808,46 @@ class ProjectTester(mocker.MockerTestCase):
                 "fps",
                 test_value
             )
+        
+        test_values = [["a", "list"], {"a": "list"}]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                TypeError,
+                setattr,
+                self.mock_project,
+                "fps",
+                test_value
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_argument_string_to_float_conversion(self):
+        """testing if valid string literals of fps argument will be converted
+        to float correctly
+        """
+        
+        test_values = [("1", 1.0), ("2.3", 2.3)]
+        
+        for test_value in test_values:
+            self.kwargs["fps"] = test_value[0]
+            new_project = project.Project(**self.kwargs)
+            self.assertAlmostEquals(new_project.fps, test_value[1]) 
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_fps_attribute_string_to_float_conversion(self):
+        """testing if valid string literals of fps attribute will be converted
+        to float correctly
+        """
+        
+        test_values = [("1", 1.0), ("2.3", 2.3)]
+        
+        for test_value in test_values:
+            self.mock_project.fps = test_value[0]
+            self.assertAlmostEquals(self.mock_project.fps, test_value[1]) 
     
     
     
@@ -750,7 +861,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs["fps"] = test_value
         new_project = project.Project(**self.kwargs)
-        self.assertTrue(isinstance(new_project.fps, float))
+        self.assertIsInstance(new_project.fps, float)
         self.assertEquals(new_project.fps, float(test_value))
     
     
@@ -764,35 +875,8 @@ class ProjectTester(mocker.MockerTestCase):
         test_value = 1
         
         self.mock_project.fps = test_value
-        self.assertTrue(isinstance(self.mock_project.fps, float))
+        self.assertIsInstance(self.mock_project.fps, float)
         self.assertEquals(self.mock_project.fps, float(test_value))
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_type_argument_is_None(self):
-        """testing if a ValueError will be raised when the type argument is set
-        to None
-        """
-        
-        self.kwargs["type"] = None
-        self.assertRaises(ValueError, project.Project, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_type_attribute_is_set_to_None(self):
-        """testing if a ValueError will be raised when the type argument is set
-        to None
-        """
-        
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_project,
-            "type",
-            None
-        )
     
     
     
@@ -802,7 +886,7 @@ class ProjectTester(mocker.MockerTestCase):
         given as something other than a ProjectType object
         """
         
-        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        test_values = [None, 1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         
         for test_value in test_values:
             self.kwargs["type"] = test_value
@@ -816,7 +900,7 @@ class ProjectTester(mocker.MockerTestCase):
         set to something other than a ProjectType object
         """
         
-        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        test_values = [None, 1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         
         for test_value in test_values:
             self.assertRaises(
@@ -826,33 +910,6 @@ class ProjectTester(mocker.MockerTestCase):
                 "type",
                 test_value
             )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_structure_argument_is_None(self):
-        """testing if a ValueError will be raised when the structure argument
-        is given as None
-        """
-        
-        self.kwargs["structure"] = None
-        self.assertRaises(ValueError, project.Project, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_structure_attribute_is_set_to_None(self):
-        """testing if a ValueError will be raised when the structure argument
-        is set to None
-        """
-        
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_project,
-            "structure",
-            None
-        )
     
     
     
@@ -920,7 +977,7 @@ class ProjectTester(mocker.MockerTestCase):
         False
         """
         
-        self.kwargs.pop("stereoscopic")
+        self.kwargs.pop("is_stereoscopic")
         new_project = project.Project(**self.kwargs)
         self.assertEquals(new_project.is_stereoscopic, False)
     
@@ -980,7 +1037,7 @@ class ProjectTester(mocker.MockerTestCase):
         for test_value in test_values:
             self.kwargs["display_width"] = test_value
             new_project = project.Project(**self.kwargs)
-            self.assertTrue(isinstance(new_project.display_width, float))
+            self.assertIsInstance(new_project.display_width, float)
             self.assertEquals(new_project.display_width, float(test_value))
     
     
@@ -994,7 +1051,7 @@ class ProjectTester(mocker.MockerTestCase):
         test_values = [1, 2, 3, 4]
         for test_value in test_values:
             self.mock_project.display_width = test_value
-            self.assertTrue(isinstance(self.mock_project.display_width, float))
+            self.assertIsInstance(self.mock_project.display_width, float)
             self.assertEquals(self.mock_project.display_width,
                               float(test_value))
     
@@ -1022,6 +1079,40 @@ class ProjectTester(mocker.MockerTestCase):
         test_value = -1.0
         self.mock_project.display_width = test_value
         self.assertEquals(self.mock_project.display_width, abs(test_value))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def tets_structure_argument_not_instance_of_Structure(self):
+        """testing if a ValueError will be raised when the structure argument
+        is not an instance of Structure
+        """
+        
+        test_values = [None, 1, 1.2, "a str", ["a", "list"]]
+        
+        for test_value in test_values:
+            self.kwargs["structure"] = test_value
+            self.assertRaises(ValueError, project.Project, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_structure_attribute_not_instance_of_Structure(self):
+        """testing if a ValueError will be raised when the structure attribute
+        is not an instance of Structure
+        """
+        
+        test_values = [None, 1, 1.2, "a str", ["a", "list"]]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_project,
+                "structure",
+                test_value
+            )
+    
     
     
     
