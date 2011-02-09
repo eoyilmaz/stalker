@@ -8,6 +8,7 @@ import datetime
 import unittest
 import tempfile
 
+import sqlalchemy
 from sqlalchemy.orm import clear_mappers
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import select
@@ -56,10 +57,6 @@ class DatabaseTester(unittest.TestCase):
     def setUp(self):
         """setup the tests
         """
-        # setup the database
-        clear_mappers()
-        db.__mappers__ = []
-        
         # just set the default admin creation to true
         # some tests are relying on that
         defaults.AUTO_CREATE_ADMIN = True
@@ -77,16 +74,19 @@ class DatabaseTester(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def tearDown(self):
-        #"""tearDown the tests
-        #"""
+    #----------------------------------------------------------------------
+    def tearDown(self):
+        """tearDown the tests
+        """
         
         #if self._createdDB:
             #try:
                 #os.remove(self.TEST_DATABASE_FILE)
             #except OSError:
                 #pass
+        
+        clear_mappers()
+        db.__mappers__ = []
     
     
     
@@ -469,23 +469,29 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
+    #----------------------------------------------------------------------
     #@classmethod
     #def setUpClass(cls):
         #"""setup the test
         #"""
         
-        ## setup the database
-        #clear_mappers()
-        #db.__mappers__ = []
+        ### setup the database
+        ##clear_mappers()
+        ##db.__mappers__ = []
         
-        ## create a test database, possibly an in memory datase
-        #cls.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
+        ### create a test database, possibly an in memory datase
+        ##cls.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
+        ##cls.TEST_DATABASE_URI = "sqlite:///" + cls.TEST_DATABASE_FILE
+        
+        ### setup using this db
+        ##db.setup(database=cls.TEST_DATABASE_URI)
+        
+        #cls.TEST_DATABASE_FILE = ":memory:"
         #cls.TEST_DATABASE_URI = "sqlite:///" + cls.TEST_DATABASE_FILE
+        
         
         ## setup using this db
         #db.setup(database=cls.TEST_DATABASE_URI)
-        
     
     
     
@@ -504,30 +510,30 @@ class DatabaseModelsTester(unittest.TestCase):
         """setup the test
         """
         
-        # setup the database
-        clear_mappers()
-        db.__mappers__ = []
-        
-        # create a test database, possibly an in memory datase
+        ## create a test database, possibly an in memory datase
         #self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
         #self.TEST_DATABASE_URI = "sqlite:///" + self.TEST_DATABASE_FILE
         
         self.TEST_DATABASE_FILE = ":memory:"
         self.TEST_DATABASE_URI = "sqlite:///" + self.TEST_DATABASE_FILE
         
-        
         # setup using this db
         db.setup(database=self.TEST_DATABASE_URI)
     
     
     
-    ##----------------------------------------------------------------------
-    #def tearDown(self):
-        #"""tear-off the test
-        #"""
-        # delete the default test database file
+    #----------------------------------------------------------------------
+    def tearDown(self):
+        """tear-off the test
+        """
+        ## delete the default test database file
         #os.remove(self.TEST_DATABASE_FILE)
-
+        
+        db.metadata.drop_all(db.engine)
+        clear_mappers()
+        db.engine.dispose()
+        db.session.close()
+        db.__mappers__ = []
     
     
     
@@ -970,8 +976,19 @@ class DatabaseModelsTester(unittest.TestCase):
                                      windows_path="M:\\Projects",
                                      osx_path="/Volumes/Projects")
         
-        # create a project object
+        project_status_list = status.StatusList(
+            name="A Status List for testing project.Project",
+            statuses=[
+                status.Status(name="On Hold", code="OH"),
+                status.Status(name="Complete", code="CMPLT")
+            ],
+            target_entity_type = project.Project.entity_type
+        )
         
+        db.session.add(project_status_list)
+        db.session.commit()
+        
+        # create a project object
         kwargs = {
             "name": "Test Project",
             "description": "This is a project object for testing purposes",
@@ -986,6 +1003,8 @@ class DatabaseModelsTester(unittest.TestCase):
             "display_width": 1.0,
             "start_date": start_date,
             "due_date": due_date,
+            "status_list": project_status_list,
+            "status": 0
         }
         
         new_project = project.Project(**kwargs)
@@ -999,7 +1018,7 @@ class DatabaseModelsTester(unittest.TestCase):
                        filter_by(name=kwargs["name"]).first()
         
         self.assertEquals(new_project, new_project_DB)
-        
+    
     
     
     #----------------------------------------------------------------------

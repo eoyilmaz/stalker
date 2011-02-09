@@ -4,7 +4,8 @@
 import datetime
 import mocker
 from stalker.core.models import (user, sequence, asset, imageFormat, types,
-                                 project, structure, repository, entity)
+                                 project, structure, repository, entity,
+                                 status)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -50,6 +51,12 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.mock_repo = self.mocker.mock(repository.Repository)
         
+        
+        self.mock_status_list = self.mocker.mock(status.StatusList)
+        self.expect(self.mock_status_list.target_entity_type).\
+            result(project.Project.entity_type).count(0, None)
+        self.expect(len(self.mock_status_list.statuses)).result(5).count(0,None)
+        
         self.mocker.replay()
         
         # create a project object
@@ -69,6 +76,7 @@ class ProjectTester(mocker.MockerTestCase):
             "display_width": 15,
             "start_date": self.start_date,
             "due_date": self.due_date,
+            "status_list": self.mock_status_list,
         }
         
         self.mock_project = project.Project(**self.kwargs)

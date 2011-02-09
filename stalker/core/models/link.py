@@ -58,14 +58,13 @@ class Link(entity.Entity):
         """
         
         if path_in is None:
-            raise(ValueError("path can not be None"))
+            raise ValueError("path can not be None")
         
         if not isinstance(path_in, (str, unicode)):
-            raise(ValueError("path should be an instance of string or \
-            unicode"))
+            raise ValueError("path should be an instance of string or unicode")
         
         if path_in=="":
-            raise(ValueError("path can not be an empty string"))
+            raise ValueError("path can not be an empty string")
         
         return self._format_path(path_in)
     
@@ -87,14 +86,14 @@ class Link(entity.Entity):
         """
         
         if filename_in is None:
-            raise(ValueError("filename can not be None"))
+            raise ValueError("filename can not be None")
         
         if not isinstance(filename_in, (str, unicode)):
-            raise(ValueError("filename should be an instance of string or \
-            unicode"))
+            raise ValueError("filename should be an instance of string or "
+                             "unicode")
         
         if filename_in=="":
-            raise(ValueError("filename can not be an empty string"))
+            raise ValueError("filename can not be an empty string")
         
         return filename_in
     
@@ -106,12 +105,12 @@ class Link(entity.Entity):
         """
         
         if type_in is None:
-            raise(ValueError("type can not be None, set it to a \
-            stalker.core.models.types.LinkType object"))
+            raise ValueError("type can not be None, set it to a "
+                             "stalker.core.models.types.LinkType object")
         
         if not isinstance(type_in, types.LinkType):
-            raise(ValueError("type should be an instance of \
-            stalker.core.models.types.LinkType object"))
+            raise ValueError("type should be an instance of "
+                             "stalker.core.models.types.LinkType object")
         
         return type_in
     

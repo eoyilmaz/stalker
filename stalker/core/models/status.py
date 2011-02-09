@@ -102,14 +102,14 @@ class StatusList(entity.Entity):
         """
         
         if not isinstance(statuses, list):
-            raise(ValueError("statuses should be an instance of list"))
+            raise ValueError("statuses should be an instance of list")
         
         if len(statuses) < 1:
-            raise(ValueError("statuses should not be an empty list"))
+            raise ValueError("statuses should not be an empty list")
         
         for status in statuses:
             #if not isinstance(status, Status):
-                #raise(ValueError(self.__err_status))
+                #raise ValueError(self.__err_status)
             self._validate_status(status)
         
         return ValidatedList(statuses)
@@ -138,8 +138,8 @@ class StatusList(entity.Entity):
         """
         
         if not isinstance(status_in, Status):
-            raise ValueError("all elements must be an object of Status in \
-the given statuses list")
+            raise ValueError("all elements must be an object of Status in "
+                             "the given statuses list")
         
         return status_in
     

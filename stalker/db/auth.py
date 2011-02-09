@@ -101,8 +101,9 @@ def authenticate(username="", password=""):
     
     # check if the database is setup
     if db.session == None:
-        raise(error.LoginError("stalker is not connected to any db right now, \
-use stalker.db.setup(), to setup the default db"))
+        raise error.LoginError("stalker is not connected to any db right now, "
+                               "use stalker.db.setup(), to setup the default "
+                               "db")
     
     # try to get the given user
     userObj = db.session.query(user.User).filter_by(name=username).first()
@@ -111,10 +112,10 @@ use stalker.db.setup(), to setup the default db"))
               (username, password)
     
     if userObj is None:
-        raise(error.LoginError(error_msg))
+        raise error.LoginError(error_msg)
     
     if userObj.password != password:
-        raise(error.LoginError(error_msg))
+        raise error.LoginError(error_msg)
     
     return userObj
 
@@ -158,8 +159,9 @@ def get_user():
     
     # check if the database is setup
     if db.session == None:
-        raise(error.LoginError("stalker is not connected to any db right now, \
-use stalker.db.setup(), to setup the default db"))
+        raise error.LoginError("stalker is not connected to any db right now, "
+                               "use stalker.db.setup(), to setup the default "
+                               "db")
     
     # create the session dictionary
     create_session()
@@ -193,10 +195,10 @@ def login_required(view, error_message=None):
                 func(*args, **kwargs)
             else:
                 if error_message and isinstance(error_meesage, (str, unicode)):
-                    raise(error.LoginError(error_message))
+                    raise error.LoginError(error_message)
                 else:
-                    raise(error.LoginError("You should be logged in before \
-                    completing your action!"))
+                    raise error.LoginError("You should be logged in before "
+                                           "completing your action!")
         return wrapped_func
     return wrap
 
@@ -225,10 +227,10 @@ def permission_required(permission_group, error_message=None):
                 func(*args, **kwargs)
             else:
                 if error_message and isinstance(error_meesage, (str, unicode)):
-                    raise(error.LoginError(error_message))
+                    raise error.LoginError(error_message)
                 else:
-                    raise(error.LoginError("You don't have permission to do \
-                    complete your action!"))
+                    raise error.LoginError("You don't have permission to do "
+                                           "complete your action!")
         return wrapped_func
     return wrap
 

@@ -275,16 +275,16 @@ class SimpleEntity(object):
         
         # check if the code_in is None
         if code_in is None:
-            raise(ValueError("the code attribute can not be None"))
+            raise ValueError("the code attribute can not be None")
         
         # check if the code_in is empty
         if code_in=="":
-            raise(ValueError("the code attribute can not be an empty string"))
+            raise ValueError("the code attribute can not be an empty string")
         
         ## check if it is something other than a string
         #if not isinstance(code_in, (str, unicode)):
-            #raise(ValueError("the code should be an instance of string or \
-            #unicode"))
+            #raise ValueError("the code should be an instance of string or "
+            #                 "unicode")
         
         return self._condition_code(str(code_in))
     
@@ -314,8 +314,8 @@ class SimpleEntity(object):
         
         if created_by_in is not None:
             if not isinstance(created_by_in, user.User):
-                raise ValueError("the created_by attribute should be an \
-                instance of stalker.core.models.user.User")
+                raise ValueError("the created_by attribute should be an "
+                                 "instance of stalker.core.models.user.User")
         
         return created_by_in
     
@@ -334,8 +334,8 @@ class SimpleEntity(object):
         
         if updated_by_in is not None:
             if not isinstance(updated_by_in, user.User):
-                raise ValueError("the updated_by attribute should be an \
-                instance of stalker.core.models.user.User")
+                raise ValueError("the updated_by attribute should be an "
+                                 "instance of stalker.core.models.user.User")
         
         return updated_by_in
     
@@ -353,8 +353,8 @@ class SimpleEntity(object):
             raise ValueError("the date_created could not be None")
         
         if not isinstance(date_created_in, datetime.datetime):
-            raise ValueError("the date_created should be an instance of \
-            datetime.datetime")
+            raise ValueError("the date_created should be an instance of "
+                             "datetime.datetime")
         
         return date_created_in
     
@@ -373,13 +373,14 @@ class SimpleEntity(object):
         
         # it is not an instance of datetime.datetime
         if not isinstance(date_updated_in, datetime.datetime):
-            raise ValueError("the date_updated should be an instance of \
-            datetime.datetime")
+            raise ValueError("the date_updated should be an instance of "
+                             "datetime.datetime")
         
         # lower than date_created
         if date_updated_in < self.date_created:
-            raise ValueError("the date_updated could not be set to a date \
-            before date_created, try setting the date_created before")
+            raise ValueError("the date_updated could not be set to a date "
+                             "before date_created, try setting the "
+                             "date_created before")
         
         return date_updated_in
     
@@ -535,8 +536,9 @@ class Entity(SimpleEntity):
         
         for element in notes_in:
             if not isinstance(element, note.Note):
-                raise ValueError("every element in notes should be an \
-                instance of stalker.core.models.note.Note class")
+                raise ValueError("every element in notes should be an "
+                                 "instance of stalker.core.models.note.Note "
+                                 "class")
         
         return ValidatedList(notes_in)
     

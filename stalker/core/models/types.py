@@ -48,8 +48,10 @@ class AssetType(entity.TypeEntity):
         # objects
         if not all([ isinstance(obj, pipelineStep.PipelineStep)
                  for obj in steps_in]):
-            raise ValueError("all of the elements of the given list should be \
-            instance of stalker.pipelineStep.PipelineStep class")
+            raise ValueError(
+                "all of the elements of the given list should be instance of "
+                "stalker.pipelineStep.PipelineStep class"
+            )
         
         return ValidatedList(steps_in)
     
@@ -274,16 +276,16 @@ Character assets",
         
         # check if it is None
         if path_code_in is None:
-            raise(ValueError("path_code could not be None"))
+            raise ValueError("path_code could not be None")
         
         # check if it is an instance of string or unicode
         if not isinstance(path_code_in, (str, unicode)):
-            raise(ValueError("path_code should be an instance of string \
-            or unicode"))
+            raise ValueError("path_code should be an instance of string "
+                             "or unicode")
         
         # check if it is an empty string
         if path_code_in == "":
-            raise(ValueError("path_code could not be an empty string"))
+            raise ValueError("path_code could not be an empty string")
         
         return path_code_in
     
@@ -296,16 +298,16 @@ Character assets",
         
         # check if it is None
         if file_code_in is None:
-            raise(ValueError("file_code could not be None"))
+            raise ValueError("file_code could not be None")
         
         # check if it is an instance of string or unicode
         if not isinstance(file_code_in, (str, unicode)):
-            raise(ValueError("file_code should be an instance of string \
-            or unicode"))
+            raise ValueError("file_code should be an instance of string "
+                             "or unicode")
         
         # check if it is an empty string
         if file_code_in == "":
-            raise(ValueError("file_code could not be an empty string"))
+            raise ValueError("file_code could not be an empty string")
         
         return file_code_in
     
@@ -318,11 +320,11 @@ Character assets",
         
         # check if it is None
         if type_in is None:
-            raise(ValueError("type could not be None"))
+            raise ValueError("type could not be None")
         
         if not isinstance(type_in, entity.TypeEntity):
-            raise(ValueError("type should be an instance of \
-            stalker.core.models.entity.TypeEntity"))
+            raise ValueError("type should be an instance of "
+                             "stalker.core.models.entity.TypeEntity")
         
         return type_in
     

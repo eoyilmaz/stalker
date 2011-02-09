@@ -15,7 +15,7 @@ v0.1.1.a5:
  * added the ValidatedList class which is a list derivative that accepts only
    one type of object.
  * these SOM classes listed below uses ValidetedList in their list attributes
-   requiring spesific types of objects to be assigned:
+   requiring specific types of objects to be assigned:
    * entity.Entity
    * status.StatusList
    * structure.Structure
@@ -28,10 +28,14 @@ v0.1.1.a5:
  * to be able to use assertIsInstance method of mocker.MockerTestCase all the
    unittest.TestCase test classes are converted to mocker.MockerTestCase
  * changed the design of the db.mixins.ReferenceMixin.setup and
-   db.mixins.StatusMixin.setup to orginize the mixin classes' database setup
+   db.mixins.StatusMixin.setup to organise the mixin classes' database setup
    helper functions, now they are converted to classes with a
    classmethod called setup doing all the functionality of the previous setup
    function and placed them under the db.mixin module.
+ * added persistence tests project.Project
+ * fixed secondary table generation for mixin.ReferenceMixin, the table is now
+   created only if it doesn't exists already, and it is retrieved from
+   db.metadata if it exists
 
 v0.1.1.a4:
  * changed the arguments of the stalker.db.mixins.ReferenceMixin.setup

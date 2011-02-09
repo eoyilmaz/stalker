@@ -41,8 +41,8 @@ class Comment(entity.Entity):
         # but it should be an instance of string or unicode
         
         if not isinstance(body_in, (str, unicode)):
-            raise(ValueError, "the body attribute should be an instance of \
-            string or unicode")
+            raise ValueError("the body attribute should be an instance of "
+                              "string or unicode")
         
         return body_in
     
@@ -59,11 +59,11 @@ class Comment(entity.Entity):
         # - an instance of entity.Entity object
         
         if to_in is None:
-            raise(ValueError, "the to attribute could not be empty")
+            raise ValueError("the to attribute could not be empty")
         
         if not isinstance(to_in, entity.Entity):
-            raise(ValueError, "the to attibute should be an instance of \
-            entity.Entity class")
+            raise ValueError("the to attibute should be an instance of "
+                             "entity.Entity class")
         
         return to_in
     

@@ -164,15 +164,15 @@ class User(entity.Entity):
         
         ## check if department_in is None
         #if department_in is None:
-            #raise(ValueError("department could not be None"))
+            #raise ValueError("department could not be None")
         
         from stalker.core.models import department
         
         # check if it is intance of Department object
         if department_in is not None:
             if not isinstance(department_in, department.Department):
-                raise(ValueError("department should be instance of \
-                stalker.core.models.department.Department"))
+                raise ValueError("department should be instance of "
+                                 "stalker.core.models.department.Department")
         
         return department_in
     
@@ -185,8 +185,8 @@ class User(entity.Entity):
         
         # check if email_in is an instance of string or unicode
         if not isinstance(email_in, (str, unicode)):
-            raise(ValueError("email should be an instance of string or \
-            unicode"))
+            raise ValueError("email should be an instance of string or "
+                             "unicode")
         
         return self._validate_email_format(email_in)
     
@@ -203,20 +203,19 @@ class User(entity.Entity):
         
         # there should be one and only one @ sign
         if len_splits > 2:
-            raise(ValueError("check the email formatting, there are more than \
-            one @ sign"))
+            raise ValueError("check the email formatting, there are more than "
+                             "one @ sign")
         
         if len_splits < 2:
-            raise(ValueError("check the email formatting, there are no @ \
-            sign"))
+            raise ValueError("check the email formatting, there are no @ sign")
         
         if splits[0] == "":
-            raise(ValueError("check the email formatting, the name part is \
-            missing"))
+            raise ValueError("check the email formatting, the name part is "
+                             "missing")
         
         if splits[1] == "":
-            raise(ValueError("check the email formatting, the domain part is \
-            missing"))
+            raise ValueError("check the email formatting, the domain part is "
+                             "missing")
         
         return email_in
     
@@ -228,14 +227,14 @@ class User(entity.Entity):
         """
         
         if first_name_in is None:
-            raise(ValueError("first_name cannot be none"))
+            raise ValueError("first_name cannot be none")
         
         if not isinstance(first_name_in, (str, unicode)):
-            raise(ValueError("first_name should be instance of string or \
-            unicode"))
+            raise ValueError("first_name should be instance of string or "
+                             "unicode")
         
         if first_name_in == "":
-            raise(ValueError("first_name can not be an empty string"))
+            raise ValueError("first_name can not be an empty string")
         
         return self._validate_first_name_formatting(first_name_in)
     
@@ -275,8 +274,8 @@ class User(entity.Entity):
         
         if not isinstance(last_login_in, datetime.datetime) and \
            last_login_in is not None:
-            raise(ValueError("last_login should be an instance of \
-            datetime.datetime or None"))
+            raise ValueError("last_login should be an instance of "
+                             "datetime.datetime or None")
         
         return last_login_in
     
@@ -288,16 +287,16 @@ class User(entity.Entity):
         """
         
         #if last_name_in is None:
-            #raise(ValueError("last_name cannot be none"))
+            #raise ValueError("last_name cannot be none")
         if last_name_in is not None:
             if not isinstance(last_name_in, (str, unicode)):
-                raise(ValueError("last_name should be instance of string or \
-                unicode"))
+                raise ValueError("last_name should be instance of string or "
+                                 "unicode")
         else:
             last_name_in = ""
         
         #if last_name_in == "":
-            #raise(ValueError("last_name can not be an empty string"))
+            #raise ValueError("last_name can not be an empty string")
         
         return self._validate_last_name_formatting(last_name_in)
     
@@ -318,14 +317,14 @@ class User(entity.Entity):
         """
         
         if login_name_in is None:
-            raise(ValueError("login name could not be None"))
+            raise ValueError("login name could not be None")
         
         if not isinstance(login_name_in, (str, unicode)):
-            raise(ValueError("login_name should be instance of string or \
-            unicode"))
+            raise ValueError("login_name should be instance of string or "
+                             "unicode")
         
         if login_name_in == "":
-            raise(ValueError("login name could not be empty string"))
+            raise ValueError("login name could not be empty string")
         
         return self._validate_login_name_formatting(login_name_in)
     
@@ -352,7 +351,7 @@ class User(entity.Entity):
         """
         
         if password_in is None:
-            raise(ValueError("password cannot be None"))
+            raise ValueError("password cannot be None")
         
         return password_in
     
@@ -364,22 +363,22 @@ class User(entity.Entity):
         """
         
         if permission_groups_in is None:
-            raise(ValueError("permission_groups attribute can not be None"))
+            raise ValueError("permission_groups attribute can not be None")
         
         if not isinstance(permission_groups_in, list):
-            raise(ValueError("permission_groups should be a list of group \
-            objects"))
+            raise ValueError("permission_groups should be a list of group "
+                             "objects")
         
         from stalker.core.models import group
         
         for permission_group in permission_groups_in:
             if not isinstance(permission_group, group.Group):
-                raise(ValueError("any group in permission_groups should be \
-                an instance of stalker.core.models.group.Group"))
+                raise ValueError("any group in permission_groups should be an "
+                                 "instance of stalker.core.models.group.Group")
         
         #if len(permission_groups_in) == 0:
-            #raise(ValueError("users should be assigned at least to one \
-            #permission_group"))
+            #raise ValueError("users should be assigned at least to one "
+            #                 "permission_group")
         
         return ValidatedList(permission_groups_in, group.Group)
     
@@ -392,18 +391,20 @@ class User(entity.Entity):
         
         # projects can not be None
         if projects_in is None:
-            raise(ValueError("projects can not be None"))
+            raise ValueError("projects can not be None")
         
         if not isinstance(projects_in, list):
-            raise(ValueError("projects should be a list of \
-            stalker.core.models.project.Project objects"))
+            raise ValueError("projects should be a list of "
+                             "stalker.core.models.project.Project objects")
         
         from stalker.core.models import project
         
         for a_project in projects_in:
             if not isinstance(a_project, project.Project):
-                raise(ValueError("any element in projects should be an \
-                instance of stalker.core.models.project.Project"))
+                raise ValueError(
+                    "any element in projects should be an instance of "
+                    "stalker.core.models.project.Project"
+                )
         
         return ValidatedList(projects_in, project.Project)
         
@@ -415,19 +416,20 @@ class User(entity.Entity):
         """
         
         if projects_lead_in is None:
-            raise(ValueError("projects_lead attribute could not be None, try \
-            setting it to an empty list"))
+            raise ValueError("projects_lead attribute could not be None, try "
+                             "setting it to an empty list")
         
         if not isinstance(projects_lead_in, list):
-            raise(ValueError("projects_lead should be a list of \
-            stalker.core.models.project.Project objects"))
+            raise ValueError("projects_lead should be a list of "
+                             "stalker.core.models.project.Project objects")
         
         from stalker.core.models import project
         
         for a_project in projects_lead_in:
             if not isinstance(a_project, project.Project):
-                raise(ValueError("any element in projects_lead should be an \
-                instance of stalker.core.models.project.Project class"))
+                raise ValueError(
+                    "any element in projects_lead should be an instance of "
+                    "stalker.core.models.project.Project class")
         
         return ValidatedList(projects_lead_in, project.Project)
     
@@ -439,19 +441,21 @@ class User(entity.Entity):
         """
         
         if sequences_lead_in is None:
-            raise(ValueError("sequences_lead attribute could not be None, try \
-            setting it to an empty list"))
+            raise ValueError("sequences_lead attribute could not be None, try "
+                             "setting it to an empty list")
         
         if not isinstance(sequences_lead_in, list):
-            raise(ValueError("sequences_lead should be a list of \
-            stalker.core.models.sequence.Sequence objects"))
+            raise ValueError("sequences_lead should be a list of "
+                             "stalker.core.models.sequence.Sequence objects")
         
         from stalker.core.models import sequence
         
         for a_sequence in sequences_lead_in:
             if not isinstance(a_sequence, sequence.Sequence):
-                raise(ValueError("any element in sequences_lead should be an \
-                instance of stalker.core.models.sequence.Sequence class"))
+                raise ValueError(
+                    "any element in sequences_lead should be an instance of "
+                    "stalker.core.models.sequence.Sequence class"
+                )
         
         return ValidatedList(sequences_lead_in, sequence.Sequence)
     
@@ -463,19 +467,20 @@ class User(entity.Entity):
         """
         
         if tasks_in is None:
-            raise(ValueError("tasks attribute could not be None, try setting \
-            it to an empty list"))
+            raise ValueError("tasks attribute could not be None, try setting "
+                             "it to an empty list")
         
         if not isinstance(tasks_in, list):
-            raise(ValueError("tasks should be a list of \
-            stalker.core.models.task.Task objects"))
+            raise ValueError("tasks should be a list of "
+                             "stalker.core.models.task.Task objects")
         
         from stalker.core.models import task
         
         for a_task in tasks_in:
             if not isinstance(a_task, task.Task):
-                raise(ValueError("any element in tasks should be an instance \
-                of stalker.core.models.task.Task class"))
+                raise ValueError(
+                    "any element in tasks should be an instance of "
+                    "stalker.core.models.task.Task class")
         
         return ValidatedList(tasks_in, task.Task)
     
