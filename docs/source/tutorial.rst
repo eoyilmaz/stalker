@@ -358,15 +358,14 @@ information about the fileservers in your system. You can have several file
 servers let say one for Commercials and other one for big Movie projects. You
 can define repositories and assign projects to those repositories. Lets create
 one repository for our commercial project::
-Part V - Asset Management
-=========================
 
   from stalker.core.models.repository import Repository
   repo1 = Repository(
       name="Commercial Repository",
       description="""This is where the commercial projects are going to be
-                     stored"""
+      stored"""
   )
+
 
 A Repository object could show the root path of the repository according to
 your operating system. Lets enter the paths for all the major operating

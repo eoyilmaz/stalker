@@ -10,7 +10,7 @@ from stalker.core.models import entity
 
 ########################################################################
 class Comment(entity.Entity):
-    """The Comment data model which derives from the entity.AuditEntity
+    """User reviews and comments about other entities.
     
     :param body: the body of the comment, it is a string or unicode variable,
       it can be empty but it is then meaningles to have an empty comment.

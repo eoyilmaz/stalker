@@ -495,7 +495,9 @@ class SimpleEntity(object):
 
 ########################################################################
 class Entity(SimpleEntity):
-    """This is the entity class which is derived from the SimpleEntity and adds
+    """Another base data class that adds tags and notes to the attributes list.
+    
+    This is the entity class which is derived from the SimpleEntity and adds
     only tags to the list of parameters.
     
     Two Entities considered equal if they have the same name. It doesn't matter
@@ -607,7 +609,7 @@ class Entity(SimpleEntity):
 
 ########################################################################
 class TypeEntity(Entity):
-    """TypeEntity is the entry point for types.
+    """The entry point for types.
     
     It is created to group the `Type` objects, so any other classes accepting a
     ``TypeEntity`` object can have one of the derived classes, this is done in

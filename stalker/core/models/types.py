@@ -12,17 +12,20 @@ from stalker.ext.validatedList import ValidatedList
 
 ########################################################################
 class AssetType(entity.TypeEntity):
-    """The AssetType class holds the information about the asset type.
+    """Holds the information about the asset types.
     
-    One asset type object has information about the pipeline steps that this
-    type of asset needs.
+    One AssetType object has information about the pipeline steps that this
+    type of asset has.
     
-    So for example one can create a "Chracter" asset type and then link
-    "Design", "Modeling", "Rig", "Shading" pipeline steps to this asset type
-    object. And then have a "Environment" asset type and then just link
-    "Design", "Modeling", "Shading" pipeline steps to it.
+    So for example one can create a "Chracter" AssetType and then link
+    "Design", "Modeling", "Rig", "Shading"
+    :class:`~stalker.core.model.pipelineStep.PipelineStep`\ s to this AssetType
+    object. And then have an "Environment" AssetType and then just link
+    "Design", "Modeling", "Shading"
+    :class:`~stalker.core.model.pipelineStep.PipelineStep`\ s to it.
     
-    :param steps: This is a list of PipelineStep objects.
+    :param steps: This is a list of
+      :class:`~stalker.core.model.pipelineStep.PipelineStep` objects.
     """
     
     
@@ -123,8 +126,7 @@ class LinkType(entity.TypeEntity):
 
 ########################################################################
 class ProjectType(entity.TypeEntity):
-    """Helps to create different type of
-    :class:`~stalker.core.models.project.Project` objects.
+    """Helps to create different type of :class:`~stalker.core.models.project.Project` objects.
     
     Can be used to create different type projects like Commercial, Movie, Still
     etc.

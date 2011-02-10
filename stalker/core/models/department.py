@@ -12,8 +12,9 @@ from stalker.ext.validatedList import ValidatedList
 
 ########################################################################
 class Department(entity.Entity):
-    """A department holds information about a studios departments. The
-    informations that a Department object holds is like:
+    """The departments that forms the studio itself.
+    
+    The informations that a Department object holds is like:
     
       * The members of the department
       * The lead of the department

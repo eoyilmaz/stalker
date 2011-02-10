@@ -12,7 +12,7 @@ from stalker.ext.validatedList import ValidatedList
 
 ########################################################################
 class Status(entity.Entity):
-    """The Status class
+    """Defins object statutes.
     
     No extra parameters, use the *code* attribute to give a short name for the
     status.
