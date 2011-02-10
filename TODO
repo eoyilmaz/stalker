@@ -5,14 +5,19 @@ TODO:
    the back reference value to Null or to the default value whenever they are
    set to None or empty list. For example, when the Project objects sequences
    attribute is set to an empty list or None, the referring Sequence objects
-   project attribute should be set to None, also there are tons of this kind of
-   relations in the system. SQLAlchemy handles them automatically but Stalker
-   should do it too, to allow others who are not willing to use SQLAlchemy as
-   their ORM to be able to have this property automatically.
+   project attribute should also be set to None, also there are tons of this
+   kind of relations in the system. SQLAlchemy handles them automatically but
+   Stalker should do it too, to allow others who are not willing to use
+   SQLAlchemy as their ORM to be able to have this property automatically.
+ 
+ * A Status in StatusList should be accessed by its name used as the index
 
 DONE:
 =====
 
+ * A status should be comparable with a string like project.status=="complete"
+   or project.status=="cmplt"
+ 
  * for an object which stores a list of other objects, stalker is validating if
    the list is gathered from the correct type of objects, for example,
    StatusList objects only accepts a list of Status objects. Stalker is able to

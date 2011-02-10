@@ -46,11 +46,13 @@ class ProjectTester(mocker.MockerTestCase):
         self.mock_imageFormat = self.mocker.mock(imageFormat.ImageFormat)
         
         self.mock_project_type = self.mocker.mock(types.ProjectType)
+        self.mock_project_type2 = self.mocker.mock(types.ProjectType)
         
         self.mock_project_structure = self.mocker.mock(structure.Structure)
+        self.mock_project_structure2 = self.mocker.mock(structure.Structure)
         
         self.mock_repo = self.mocker.mock(repository.Repository)
-        
+        self.mock_repo2 = self.mocker.mock(repository.Repository)
         
         self.mock_status_list = self.mocker.mock(status.StatusList)
         self.expect(self.mock_status_list.target_entity_type).\
@@ -351,6 +353,16 @@ class ProjectTester(mocker.MockerTestCase):
                 "lead",
                 test_value
             )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_lead_attribute_works_properly(self):
+        """testing if the lead attribute works properly
+        """
+        
+        self.mock_project.lead = self.mock_user1
+        self.assertEquals(self.mock_project.lead, self.mock_user1)
     
     
     
@@ -751,6 +763,24 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_image_format_attribute_works_properly(self):
+        """testing if the image_format attribute is working properly
+        """
+        
+        new_image_format = imageFormat.ImageFormat(
+            name="Foo Image Format",
+            width=10,
+            height=10
+        )
+        
+        self.mocker.replay()
+        
+        self.mock_project.image_format = new_image_format
+        self.assertEquals(self.mock_project.image_format, new_image_format)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_fps_argument_is_skipped(self):
         """testing if the default value will be used when fps is skipped
         """
@@ -921,6 +951,16 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_type_attribute_is_working_properly(self):
+        """testing if the type attribute is working properly
+        """
+        
+        self.mock_project.type = self.mock_project_type2
+        self.assertEquals(self.mock_project.type, self.mock_project_type2)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_repository_argument_is_None(self):
         """testing if a ValueError will be raised when the repository argument
         is None
@@ -975,6 +1015,16 @@ class ProjectTester(mocker.MockerTestCase):
                 "repository",
                 test_value
             )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_repository_attribute_is_working_properly(self):
+        """testin if the repository attribute is working properly
+        """
+        
+        self.mock_project.repository = self.mock_repo2
+        self.assertEquals(self.mock_project.repository, self.mock_repo2)
     
     
     
@@ -1119,6 +1169,17 @@ class ProjectTester(mocker.MockerTestCase):
                 "structure",
                 test_value
             )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_structure_attribute_is_working_properly(self):
+        """testing if the structure attribute is working properly
+        """
+        
+        self.mock_project.structure = self.mock_project_structure2
+        self.assertEquals(self.mock_project.structure,
+                          self.mock_project_structure2)
     
     
     

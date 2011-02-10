@@ -55,6 +55,41 @@ class StatusTest(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_status_and_string_equality_in_status_name(self):
+        """testing a status can be compared with a string and returns True if
+        the string matches the name and vice versa
+        """
+        
+        a_status = status.Status(**self.kwargs)
+        self.assertTrue(a_status==self.kwargs["name"])
+        self.assertTrue(a_status==self.kwargs["name"].lower())
+        self.assertTrue(a_status==self.kwargs["name"].upper())
+        self.assertTrue(a_status==unicode(self.kwargs["name"]))
+        self.assertTrue(a_status==unicode(self.kwargs["name"].lower()))
+        self.assertTrue(a_status==unicode(self.kwargs["name"].upper()))
+        self.assertFalse(a_status=="another name")
+        self.assertFalse(a_status==u"another name")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_status_and_string_equality_in_status_code(self):
+        """testing a status can be compared with a string and returns True if
+        the string matches the code and vice versa
+        """
+        
+        a_status = status.Status(**self.kwargs)
+        self.assertTrue(a_status==self.kwargs["code"])
+        self.assertTrue(a_status==self.kwargs["code"].lower())
+        self.assertTrue(a_status==self.kwargs["code"].upper())
+        self.assertTrue(a_status==unicode(self.kwargs["code"]))
+        self.assertTrue(a_status==unicode(self.kwargs["code"].lower()))
+        self.assertTrue(a_status==unicode(self.kwargs["code"].upper()))
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_inequality(self):
         """testing inequality of two statuses
         """
@@ -72,6 +107,41 @@ class StatusTest(mocker.MockerTestCase):
         self.assertFalse(status1!=status2)
         self.assertTrue(status1!=status3)
         self.assertTrue(status1!=self.entity1)
+    
+    
+    #----------------------------------------------------------------------
+    def test_status_and_string_inequality_in_status_name(self):
+        """testing a status can be compared with a string and returns False if
+        the string matches the name and vice versa
+        """
+        
+        a_status = status.Status(**self.kwargs)
+        self.assertFalse(a_status!=self.kwargs["name"])
+        self.assertFalse(a_status!=self.kwargs["name"].lower())
+        self.assertFalse(a_status!=self.kwargs["name"].upper())
+        self.assertFalse(a_status!=unicode(self.kwargs["name"]))
+        self.assertFalse(a_status!=unicode(self.kwargs["name"].lower()))
+        self.assertFalse(a_status!=unicode(self.kwargs["name"].upper()))
+        self.assertTrue(a_status!="another name")
+        self.assertTrue(a_status!=u"another name")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_status_and_string_inequality_in_status_code(self):
+        """testing a status can be compared with a string and returns False if
+        the string matches the code and vice versa
+        """
+        
+        a_status = status.Status(**self.kwargs)
+        self.assertFalse(a_status!=self.kwargs["code"])
+        self.assertFalse(a_status!=self.kwargs["code"].lower())
+        self.assertFalse(a_status!=self.kwargs["code"].upper())
+        self.assertFalse(a_status!=unicode(self.kwargs["code"]))
+        self.assertFalse(a_status!=unicode(self.kwargs["code"].lower()))
+        self.assertFalse(a_status!=unicode(self.kwargs["code"].upper()))
+
+
 
 
 
@@ -316,7 +386,6 @@ class StatusListTest(mocker.MockerTestCase):
         
         # first get the lenght
         len_statuses = len(self.mock_status_list.statuses)
-        
         
         del self.mock_status_list[-1]
         

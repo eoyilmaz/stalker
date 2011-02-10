@@ -53,6 +53,25 @@ class ReferenceMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_references_attribute_only_accepts_listlike_objects(self):
+        """testing if references attribute accepts only list-like objects,
+        (objects with __setitem__, __getitem__ methods
+        """
+        
+        test_values = [1, 1.2, "a string"]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_foo_obj,
+                "references",
+                test_value
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_references_attribute_accepting_only_lists_with_link_instances(self):
         """testing if references attribute accepting only lists with Link
         instances

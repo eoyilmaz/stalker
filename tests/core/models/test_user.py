@@ -820,6 +820,17 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_last_login_attribute_works_properly(self):
+        """testing if the last_login attribute works properly
+        """
+        
+        test_value = datetime.datetime.now()
+        self.mock_user.last_login = test_value
+        self.assertEquals(self.mock_user.last_login, test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_last_name_argument_None(self):
         """testing if it will be converted to an empty string if None is
         assigned to last_name argument
@@ -1905,6 +1916,21 @@ class UserTest(mocker.MockerTestCase):
         
         self.mock_user.initials = test_value
         self.assertEquals(self.mock_user.initials, test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___repr__(self):
+        """testing the representation
+        """
+        
+        self.assertEquals(
+            self.mock_user.__repr__(),
+            "<User (%s %s ('%s'))>" % (
+                self.mock_user.first_name,
+                self.mock_user.last_name,
+                self.mock_user.login_name)
+        )
     
     
     

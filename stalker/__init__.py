@@ -6,7 +6,7 @@ and vfx studios. See docs for more information.
 
 
 
-__version__ = "0.1.1.a5"
+__version__ = "0.1.1.a6"
 
 
 

@@ -128,7 +128,7 @@ class User(entity.Entity):
         """return the representation of the current User
         """
         
-        return "<user.User (%s %s ('%s'))>" % \
+        return "<User (%s %s ('%s'))>" % \
                (self.first_name, self.last_name, self.login_name)
     
     

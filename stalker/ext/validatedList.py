@@ -68,10 +68,7 @@ class ValidatedList(list):
         """x.__setitem__(i, y) <==> x[i]=y
         
         This is the overriden version of the original method.
-        """ + super(ValidatedList, self).__setitem__.__doc__
-        
-        if not self.__type__:
-            self.__set_type__(type(value))
+        """
         
         if isinstance(value, self.__type__):
             super(ValidatedList, self).__setitem__(key, value)

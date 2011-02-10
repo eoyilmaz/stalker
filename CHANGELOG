@@ -1,5 +1,9 @@
 Stalker Changes
 ===============
+v0.1.1.a6:
+ * updated/fixed tests for ValidatedList
+ * updated a couple of tests to increase tests coverage
+ * Status class instances now can be compared to string or unicode values
 
 v0.1.1.a5:
  * removed the StatusedEntity and its tests, with the introduction of

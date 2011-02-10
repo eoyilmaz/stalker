@@ -184,7 +184,7 @@ class ValidetedListTester(unittest.TestCase):
             ValueError,
             self.mock_valideted_list1.__setslice__,
             0,
-            1,
+            3,
             "string value"
         )
     
@@ -199,7 +199,7 @@ class ValidetedListTester(unittest.TestCase):
             ValueError,
             self.mock_valideted_list2.__setslice__,
             0,
-            1,
+            3,
             "string value"
         )
     
@@ -244,6 +244,21 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_append_3(self):
+        """testing if append method with newly created un-inialized class fills
+        the self.__type__
+        """
+        
+        new_list = ValidatedList()
+        
+        self.assertTrue(new_list.__type__ is None)
+        
+        new_list.append(1)
+        self.assertEquals(new_list.__type__, type(1))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_append_4(self):
         """testing append functionality
         """
         
@@ -281,6 +296,16 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_extend_3(self):
+        """testing extend with zero length list
+        """
+        
+        new_list = ValidatedList()
+        new_list.extend([])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_extend_4(self):
         """testing extend functionality
         """
         
@@ -321,6 +346,24 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_insert_3(self):
+        """testing insert method with newly created un-initialized class
+        """
+        
+        new_list = ValidatedList()
+        # check if the __type__ is None
+        self.assertTrue(new_list.__type__ is None)
+        
+        # insert element
+        test_value = 1
+        new_list.insert(0, test_value)
+        
+        # check the type is now set to type(test_value)
+        self.assertEquals(new_list.__type__, type(test_value))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_insert_4(self):
         """testing insert functionality
         """
         
@@ -362,6 +405,21 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test___add__3(self):
+        """testing __add__ with newly created un-initialized list and an empty
+        list
+        """
+        
+        new_list = ValidatedList()
+        # check if the __type__ is None
+        self.assertTrue(new_list.__type__ is None)
+        
+        # add element
+        new_list = new_list + []
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___add__4(self):
         """testing __add__ functionality
         """
         
@@ -403,6 +461,21 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test___iadd__3(self):
+        """testing __iadd__ with newly created un-initialized list and an empty
+        list
+        """
+        
+        new_list = ValidatedList()
+        # check if the __type__ is None
+        self.assertTrue(new_list.__type__ is None)
+        
+        # iadd element
+        new_list += []
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___iadd__4(self):
         """testing __iadd__ functionality
         """
         

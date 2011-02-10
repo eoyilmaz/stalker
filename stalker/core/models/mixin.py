@@ -41,7 +41,8 @@ class ReferenceMixin(object):
         """
         
         # it should be an object supporting indexing, not necessarily a list
-        if not hasattr(references_in, "__setitem__"):
+        if not (hasattr(references_in, "__setitem__") and \
+                hasattr(references_in, "__getitem__")):
             raise ValueError("the references_in should support indexing")
         
         # all the elements should be instance of stalker.core.models.link.Link
