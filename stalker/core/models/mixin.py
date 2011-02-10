@@ -47,8 +47,8 @@ class ReferenceMixin(object):
         # all the elements should be instance of stalker.core.models.link.Link
         if not all([isinstance(element, link.Link)
                     for element in references_in]):
-            raise ValueError("all the elements should be instances of \
-:class:`~stalker.core.models.link.Link`")
+            raise ValueError("all the elements should be instances of "
+                             ":class:`~stalker.core.models.link.Link`")
         
         return ValidatedList(references_in, link.Link)
     
@@ -121,14 +121,15 @@ class StatusMixin(object):
         
         # it is not an instance of status_list
         if not isinstance(status_list_in, status.StatusList):
-            raise ValueError("the status list should be an instance of \
-            stalker.core.models.status.StatusList")
+            raise ValueError("the status list should be an instance of "
+                             "stalker.core.models.status.StatusList")
         
         # check if the entity_type matches to the StatusList.target_entity_type
         if self.entity_type != status_list_in.target_entity_type:
-            raise TypeError("the given StatusLists' target_entity_type is %s, \
-whereas the entity_type of this object is %s" % \
-                (status_list_in.target_entity_type, self.entity_type))
+            raise TypeError("the given StatusLists' target_entity_type is %s, "
+                            "whereas the entity_type of this object is %s" % \
+                            (status_list_in.target_entity_type,
+                             self.entity_type))
         
         return status_list_in
     
@@ -147,8 +148,8 @@ whereas the entity_type of this object is %s" % \
         
         # it is set to None
         if status_in is None:
-            raise ValueError("the status couldn't be None, set it to a \
-            non-negative integer")
+            raise ValueError("the status couldn't be None, set it to a "
+                             "non-negative integer")
         
         # it is not an instance of int
         if not isinstance(status_in, int):
@@ -159,8 +160,8 @@ whereas the entity_type of this object is %s" % \
             raise ValueError("the status must be a non-negative integer")
         
         if status_in >= len(self._status_list.statuses):
-            raise ValueError("the status can not be bigger than the length of \
-            the status_list")
+            raise ValueError("the status can not be bigger than the length of "
+                             "the status_list")
         
         return status_in
     
@@ -175,7 +176,7 @@ whereas the entity_type of this object is %s" % \
         def fset(self, status_in):
             self._status = self._validate_status(status_in)
         
-        doc = """this is the property that sets and returns the status \
+        doc = """this is the property that sets and returns the status
         attribute"""
         
         return locals()
@@ -192,10 +193,9 @@ whereas the entity_type of this object is %s" % \
             return self._status_list
         
         def fset(self, status_list_in):
-            self._status_list = \
-                self._validate_status_list(status_list_in)
+            self._status_list = self._validate_status_list(status_list_in)
         
-        doc = """this is the property that sets and returns the status_list \
+        doc = """this is the property that sets and returns the status_list
         attribute"""
         
         return locals()

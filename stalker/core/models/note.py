@@ -37,8 +37,8 @@ class Note(entity.SimpleEntity):
         
         if content_in is not None and \
            not isinstance(content_in, (str, unicode)):
-            raise(ValueError("content should be an instance of string or \
-            unicode"))
+            raise ValueError("content should be an instance of string or "
+                             "unicode")
         
         return content_in
     

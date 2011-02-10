@@ -12,17 +12,20 @@ from stalker.ext.validatedList import ValidatedList
 
 ########################################################################
 class AssetType(entity.TypeEntity):
-    """The AssetType class holds the information about the asset type.
+    """Holds the information about the asset types.
     
-    One asset type object has information about the pipeline steps that this
-    type of asset needs.
+    One AssetType object has information about the pipeline steps that this
+    type of asset has.
     
-    So for example one can create a "Chracter" asset type and then link
-    "Design", "Modeling", "Rig", "Shading" pipeline steps to this asset type
-    object. And then have a "Environment" asset type and then just link
-    "Design", "Modeling", "Shading" pipeline steps to it.
+    So for example one can create a "Chracter" AssetType and then link
+    "Design", "Modeling", "Rig", "Shading"
+    :class:`~stalker.core.model.pipelineStep.PipelineStep`\ s to this AssetType
+    object. And then have an "Environment" AssetType and then just link
+    "Design", "Modeling", "Shading"
+    :class:`~stalker.core.model.pipelineStep.PipelineStep`\ s to it.
     
-    :param steps: This is a list of PipelineStep objects.
+    :param steps: This is a list of
+      :class:`~stalker.core.model.pipelineStep.PipelineStep` objects.
     """
     
     
@@ -48,8 +51,10 @@ class AssetType(entity.TypeEntity):
         # objects
         if not all([ isinstance(obj, pipelineStep.PipelineStep)
                  for obj in steps_in]):
-            raise ValueError("all of the elements of the given list should be \
-            instance of stalker.pipelineStep.PipelineStep class")
+            raise ValueError(
+                "all of the elements of the given list should be instance of "
+                "stalker.pipelineStep.PipelineStep class"
+            )
         
         return ValidatedList(steps_in)
     
@@ -121,8 +126,7 @@ class LinkType(entity.TypeEntity):
 
 ########################################################################
 class ProjectType(entity.TypeEntity):
-    """Helps to create different type of
-    :class:`~stalker.core.models.project.Project` objects.
+    """Helps to create different type of :class:`~stalker.core.models.project.Project` objects.
     
     Can be used to create different type projects like Commercial, Movie, Still
     etc.
@@ -274,16 +278,16 @@ Character assets",
         
         # check if it is None
         if path_code_in is None:
-            raise(ValueError("path_code could not be None"))
+            raise ValueError("path_code could not be None")
         
         # check if it is an instance of string or unicode
         if not isinstance(path_code_in, (str, unicode)):
-            raise(ValueError("path_code should be an instance of string \
-            or unicode"))
+            raise ValueError("path_code should be an instance of string "
+                             "or unicode")
         
         # check if it is an empty string
         if path_code_in == "":
-            raise(ValueError("path_code could not be an empty string"))
+            raise ValueError("path_code could not be an empty string")
         
         return path_code_in
     
@@ -296,16 +300,16 @@ Character assets",
         
         # check if it is None
         if file_code_in is None:
-            raise(ValueError("file_code could not be None"))
+            raise ValueError("file_code could not be None")
         
         # check if it is an instance of string or unicode
         if not isinstance(file_code_in, (str, unicode)):
-            raise(ValueError("file_code should be an instance of string \
-            or unicode"))
+            raise ValueError("file_code should be an instance of string "
+                             "or unicode")
         
         # check if it is an empty string
         if file_code_in == "":
-            raise(ValueError("file_code could not be an empty string"))
+            raise ValueError("file_code could not be an empty string")
         
         return file_code_in
     
@@ -318,11 +322,11 @@ Character assets",
         
         # check if it is None
         if type_in is None:
-            raise(ValueError("type could not be None"))
+            raise ValueError("type could not be None")
         
         if not isinstance(type_in, entity.TypeEntity):
-            raise(ValueError("type should be an instance of \
-            stalker.core.models.entity.TypeEntity"))
+            raise ValueError("type should be an instance of "
+                             "stalker.core.models.entity.TypeEntity")
         
         return type_in
     

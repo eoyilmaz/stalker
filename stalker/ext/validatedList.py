@@ -58,9 +58,8 @@ class ValidatedList(list):
         
         self.__type__ = type_
         self.__type_as_str__ = str(self.__type__).split("'")[1]
-        self.__error_message__ = "the type of the given value is not \
-correct, please supply an %s instance" % self.__type_as_str__
-        
+        self.__error_message__ = "the type of the given value is not " + \
+            "correct, please supply an %s instance" % self.__type_as_str__
     
     
     

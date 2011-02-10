@@ -12,8 +12,9 @@ from stalker.ext.validatedList import ValidatedList
 
 ########################################################################
 class Department(entity.Entity):
-    """A department holds information about a studios departments. The
-    informations that a Department object holds is like:
+    """The departments that forms the studio itself.
+    
+    The informations that a Department object holds is like:
     
       * The members of the department
       * The lead of the department
@@ -66,8 +67,9 @@ class Department(entity.Entity):
         
         for member in members:
             if not isinstance(member, user.User):
-                raise(ValueError("every element in the members list should be \
-                an instance of stalker.core.models.user.User class"))
+                raise ValueError("every element in the members list should be "
+                                 "an instance of stalker.core.models.user.User"
+                                 " class")
         
         return ValidatedList(members, user.User)
     
@@ -80,13 +82,14 @@ class Department(entity.Entity):
         
         # the lead should not be None
         #if lead is None:
-            #raise(ValueError("lead could not be set to None"))
+            #raise ValueError("lead could not be set to None")
         
         if lead is not None:
             from stalker.core.models import user
             # the lead should be an instance of user.User class
             if not isinstance(lead, user.User):
-                raise(ValueError("lead should be an instance of user.User class"))
+                raise ValueError("lead should be an instance of "
+                                 "satlker.core.models.user.User")
         
         return lead
     

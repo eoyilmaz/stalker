@@ -69,13 +69,14 @@ class Structure(entity.Entity):
         """
         
         if not isinstance(asset_templates_in, list):
-            raise(ValueError("asset_templates should be a list object"))
+            raise ValueError("asset_templates should be a list object")
         
         for element in asset_templates_in:
             if not isinstance(element, types.TypeTemplate):
-                raise(ValueError("asset_templates should only contain \
-                instances of stalker.core.models.types.TypeTemplate \
-                objects"))
+                raise ValueError(
+                    "asset_templates should only contain instances of "
+                    "stalker.core.models.types.TypeTemplate objects"
+                )
         
         return ValidatedList(asset_templates_in)
     
@@ -87,13 +88,14 @@ class Structure(entity.Entity):
         """
         
         if not isinstance(reference_templates_in, list):
-            raise(ValueError("reference_templates should be a list object"))
+            raise ValueError("reference_templates should be a list object")
         
         for element in reference_templates_in:
             if not isinstance(element, types.TypeTemplate):
-                raise(ValueError("reference_templates should only contain \
-                instances of stalker.core.models.types.TypeTemplate \
-                objects"))
+                raise ValueError(
+                    "reference_templates should only contain instances of "
+                    "stalker.core.models.types.TypeTemplate objects"
+                )
         
         return ValidatedList(reference_templates_in)
     
@@ -105,8 +107,9 @@ class Structure(entity.Entity):
         """
         
         if not isinstance(project_template_in, (str, unicode)):
-            raise(ValueError("project_template should be an instance of string \
-            or unicode"))
+            raise ValueError(
+                "project_template should be an instance of string or unicode"
+            )
         
         return project_template_in
     

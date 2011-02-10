@@ -10,7 +10,7 @@ from stalker.core.models import entity
 
 ########################################################################
 class ImageFormat(entity.Entity):
-    """the image format class
+    """Common image formats for the projects.
     
     adds up this parameters to the SimpleEntity:
     
@@ -67,10 +67,10 @@ class ImageFormat(entity.Entity):
         """validates the given width
         """
         if not isinstance(width, (int, float)):
-            raise(ValueError("width should be an instance of int or float"))
+            raise ValueError("width should be an instance of int or float")
         
         if width <= 0:
-            raise(ValueError("width shouldn't be zero or negative"))
+            raise ValueError("width shouldn't be zero or negative")
         
         return int(width)
     
@@ -81,10 +81,10 @@ class ImageFormat(entity.Entity):
         """validates the given height
         """
         if not isinstance(height, (int, float)):
-            raise(ValueError("height should be an instance of int or float"))
+            raise ValueError("height should be an instance of int or float")
         
         if height <= 0:
-            raise(ValueError("height shouldn't be zero or negative"))
+            raise ValueError("height shouldn't be zero or negative")
         
         return int(height)
     
@@ -95,12 +95,12 @@ class ImageFormat(entity.Entity):
         """validates the given pixel aspect
         """
         if not isinstance(pixel_aspect, (int, float)):
-            raise(ValueError("pixel_aspect should be an instance of int or \
-            float"))
+            raise ValueError("pixel_aspect should be an instance of int or "
+                             "float")
         
         if pixel_aspect <= 0:
-            raise(ValueError("pixel_aspect can not be zero or a negative \
-            value"))
+            raise ValueError("pixel_aspect can not be zero or a negative "
+                             "value")
         
         return float(pixel_aspect)
     
@@ -111,12 +111,12 @@ class ImageFormat(entity.Entity):
         """validates the print resolution
         """
         if not isinstance(print_resolution, (int, float)):
-            raise(ValueError("print resolution should be an instance of int \
-            or float"))
+            raise ValueError("print resolution should be an instance of int "
+                             "or float")
         
         if print_resolution <= 0:
-            raise(ValueError("print resolution should not be zero or \
-            negative"))
+            raise ValueError("print resolution should not be zero or "
+                             "negative")
         
         return float(print_resolution)
     

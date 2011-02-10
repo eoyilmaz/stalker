@@ -475,60 +475,48 @@ notes = Table(
 
 
 
-## PROJECT_REFERENCES
-#project_references = Table(
-    #"project_references", metadata,
-    #Column(
-        #"project_id",
-        #Integer,
-        #ForeignKey("projects.id"),
-        #primary_key=True,
-    #),
-    #Column(
-        #"reference_id",
-        #Integer,
-        #ForeignKey("links.id"),
-        #primary_key=True,
-    #)
-#)
-
-
-## PROJECT_USERS
-#project_users = Table(
-    #"project_users", metadata,
-    #Column(
-        #"project_id",
-        #Integer,
-        #ForeignKey("projects.id"),
-        #primary_key=True,
-    #),
-    #Column(
-        #"user_id",
-        #Integer,
-        #ForeignKey("users.id"),
-        #primary_key=True,
-    #)
-#)
+# PROJECT_USERS
+project_users = Table(
+    "project_users", metadata,
+    Column(
+        "project_id",
+        Integer,
+        ForeignKey("projects.id"),
+        primary_key=True,
+    ),
+    Column(
+        "user_id",
+        Integer,
+        ForeignKey("users.id"),
+        primary_key=True,
+    )
+)
 
 
 
-## PROJECT
-#projects = Table(
-    #"project", metadata,
-    #Column(
-        #"id",
-        #Integer,
-        #ForeignKey("entities.id"),
-        #primary_key=True,
-    #),
-    #Column("start_date", Date),
-    #Column("due_date", Date),
-    #Column("lead_id", Integer, ForeignKey("users.id")),
-    #Column("repository_id", Integer, ForeignKey("repositories.id")),
-    #Column("type_id", Integer, ForeignKey("projectTypes.id")),
-    #Column("structure_id", Integer, ForeignKey("structures.id")),
-    #Column("image_format_id", Integer, ForeignKey("imageFormats.id")),
-    #Column("fps", Float(precision=3)),
-    #Column("is_stereoscopic", Boolean),
-    #Column("display_width", Float(precision=3)),
-#)
+# PROJECT
+projects = Table(
+    "projects", metadata,
+    Column(
+        "id",
+        Integer,
+        ForeignKey("entities.id"),
+        primary_key=True,
+    ),
+    Column("start_date", Date),
+    Column("due_date", Date),
+    Column("lead_id", Integer, ForeignKey("users.id")),
+    Column("repository_id", Integer, ForeignKey("repositories.id")),
+    Column("type_id", Integer, ForeignKey("projectTypes.id")),
+    Column("structure_id", Integer, ForeignKey("structures.id")),
+    Column("image_format_id", Integer, ForeignKey("imageFormats.id")),
+    Column("fps", Float(precision=3)),
+    Column("is_stereoscopic", Boolean),
+    Column("display_width", Float(precision=3)),
+)
+
+
+
+
+
+

@@ -50,8 +50,8 @@ class Repository(entity.Entity):
         """
         
         if not isinstance(linux_path_in, (str, unicode)):
-            raise(ValueError("linux_path should be an instance of string or \
-            unicode"))
+            raise ValueError("linux_path should be an instance of string or "
+                             "unicode")
         
         return linux_path_in
     
@@ -63,8 +63,8 @@ class Repository(entity.Entity):
         """
         
         if not isinstance(osx_path_in, (str, unicode)):
-            raise(ValueError("osx_path should be an instance of string or \
-            unicode"))
+            raise ValueError("osx_path should be an instance of string or "
+                             "unicode")
         
         return osx_path_in
     
@@ -76,8 +76,8 @@ class Repository(entity.Entity):
         """
         
         if not isinstance(windows_path_in, (str, unicode)):
-            raise(ValueError("windows_path should be an instance of string or \
-            unicode"))
+            raise ValueError("windows_path should be an instance of string or "
+                             "unicode")
         
         return windows_path_in
     

@@ -104,6 +104,9 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
                  fps=25.0,
                  is_stereoscopic=False,
                  display_width=1.0,
+                 status_list=None,
+                 status=0,
+                 references=[],
                  **kwargs):
         
         super(Project, self).__init__(**kwargs)
@@ -125,6 +128,11 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
         self._fps = self._validate_fps(fps)
         self._is_stereoscopic = bool(is_stereoscopic)
         self._display_width = self._validate_display_width(display_width)
+        
+        # update the mixin side of the project class (status and references)
+        self.status_list = status_list
+        self.status = status
+        self.references = references
     
     
     
@@ -138,8 +146,8 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
         
         if not all([isinstance(element, asset.Asset)
                     for element in assets_in]):
-            raise ValueError("the elements in assets lists should be all \
-stalker.core.models.asset.Asset instances")
+            raise ValueError("the elements in assets lists should be all "
+                             "stalker.core.models.asset.Asset instances")
         
         return ValidatedList(assets_in)
     
@@ -163,13 +171,14 @@ stalker.core.models.asset.Asset instances")
             due_date_in = datetime.timedelta(days=10)
         
         if not isinstance(due_date_in, (datetime.date, datetime.timedelta)):
-            raise ValueError("the due_date should be an instance of \
-datetime.date or datetime.timedelta")
+            raise ValueError("the due_date should be an instance of "
+                             "datetime.date or datetime.timedelta")
         
         if isinstance(due_date_in, datetime.date) and \
            self.start_date > due_date_in:
-            raise ValueError("the due_date should be set to a date passing \
-the start_date, or should be set to a datetime.timedelta")
+            raise ValueError("the due_date should be set to a date passing "
+                             "the start_date, or should be set to a "
+                             "datetime.timedelta")
         
         if isinstance(due_date_in, datetime.timedelta):
             due_date_in = self._start_date + due_date_in
@@ -195,8 +204,8 @@ the start_date, or should be set to a datetime.timedelta")
         """
         
         if not isinstance(image_format_in, imageFormat.ImageFormat):
-            raise ValueError("the image_format should be an instance of \
-stalker.core.models.imageFormat.ImageFormat")
+            raise ValueError("the image_format should be an instance of "
+                             "stalker.core.models.imageFormat.ImageFormat")
         
         return image_format_in
     
@@ -209,8 +218,8 @@ stalker.core.models.imageFormat.ImageFormat")
         
         if lead_in is not None:
             if not isinstance(lead_in, user.User):
-                raise ValueError("lead must be an instance of \
-stalker.core.models.user.User")
+                raise ValueError("lead must be an instance of "
+                                 "stalker.core.models.user.User")
         
         return lead_in
     
@@ -222,8 +231,8 @@ stalker.core.models.user.User")
         """
         
         if not isinstance(repository_in, repository.Repository):
-            raise ValueError("the repsoitory should be an instance of \
-stalker.core.models.repository.Repository")
+            raise ValueError("the repsoitory should be an instance of "
+                             "stalker.core.models.repository.Repository")
         
         return repository_in
     
@@ -239,8 +248,8 @@ stalker.core.models.repository.Repository")
         
         if not all([isinstance(seq, sequence.Sequence)
                     for seq in sequences_in]):
-            raise ValueError("sequences should be a list of \
-stalker.core.models.sequence.Sequence instances")
+            raise ValueError("sequences should be a list of "
+                             "stalker.core.models.sequence.Sequence instances")
         
         return ValidatedList(sequences_in, sequence.Sequence)
     
@@ -255,8 +264,8 @@ stalker.core.models.sequence.Sequence instances")
             start_date_in = datetime.date.today()
         
         if not isinstance(start_date_in, datetime.date):
-            raise ValueError("start_date shouldbe an instance of \
-datetime.date")
+            raise ValueError("start_date shouldbe an instance of "
+                             "datetime.date")
         
         return start_date_in
     
@@ -268,8 +277,8 @@ datetime.date")
         """
         
         if not isinstance(structure_in, structure.Structure):
-            raise ValueError("structure should be an instance of \
-stalker.core.models.structure.Structure")
+            raise ValueError("structure should be an instance of "
+                             "stalker.core.models.structure.Structure")
         
         return structure_in
     
@@ -281,8 +290,8 @@ stalker.core.models.structure.Structure")
         """
         
         if not isinstance(type_in, types.ProjectType):
-            raise ValueError("type should be an instance of \
-stalker.core.models.types.ProjectType")
+            raise ValueError("type should be an instance of "
+                             "stalker.core.models.types.ProjectType")
         
         return type_in
     
@@ -298,8 +307,8 @@ stalker.core.models.types.ProjectType")
         
         if not all([isinstance(element, user.User) \
                     for element in users_in]):
-            raise ValueError("users should be a list containing instances of \
-:class:`~stalker.core.models.user.User`")
+            raise ValueError("users should be a list containing instances of "
+                             ":class:`~stalker.core.models.user.User`")
         
         return ValidatedList(users_in)
     

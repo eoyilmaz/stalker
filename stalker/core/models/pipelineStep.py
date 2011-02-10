@@ -12,7 +12,9 @@ from stalker.core.models import entity
 
 ########################################################################
 class PipelineStep(entity.Entity):
-    """A PipelineStep object represents the general pipeline steps which are
+    """Common and differet steps for different types of assets.
+    
+    A PipelineStep object represents the general pipeline steps which are
     used around the studio. A couple of examples are:
     
       * Design

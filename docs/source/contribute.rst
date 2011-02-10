@@ -14,6 +14,7 @@ These are the areas that you can contribute to:
 
 Development Style
 =================
+
 Stalker is developed strictly by following `TDD`_ practices. So every
 participant should follow TDD methodology. Skipping this steps is highly
 prohibited. Every added code to the trunk should have a corresponding test and
@@ -73,8 +74,10 @@ tests results and the coverage table.
 
 Code Style
 ==========
+
 For the general coding style every participant should strictly follow `PEP 8`_
 rules, and there are some extra rules as listed below:
+ 
  * Class names should start with an upper-case letter, function and method
    names should start with lower-case letter
  
@@ -178,7 +181,7 @@ rules, and there are some extra rules as listed below:
    rest by a blank line.
 
 
-If you are going to add a new python file (*.py), use the following line in the
+If you are going to add a new python file (\*.py), use the following line in the
 first line::
   
   #-*- coding: utf-8 -*-
@@ -190,6 +193,7 @@ first line::
 
 SCM - Mercurial (HG)
 ====================
+
 The choice of SCM is Mercurial. Every developer should be familiar with it. It
 is a good start to go the `Selenic Mercurial Site`_ and do the tutorial if you
 don't feel familiar enough with hg.

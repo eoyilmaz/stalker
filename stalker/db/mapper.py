@@ -408,38 +408,60 @@ def setup():
     
     
     
-    ## Project - also the first class uses the mixins
-    #project_mapper_arguments = {
-        #"inherits": project.Project.__base__,
-        #"polymorphic_identity": project.Project.entity_type,
-        #"properties": {
-            #"_start_date": tables.projects.c.start_date,
-            #"start_date": synonym("_start_date"),
-            #"_due_date": tables.projects.c.due_date,
-            #"due_date": synonym("_due_date"),
-            #"_lead": relationship(
-                #user.User,
-                #primaryjoin=tables.projects.c.lead_id==tables.users.c.id,
-            #),
-            #"lead": synonym("_lead"),
-            #"_repository": relationship(repository.Repository),
-            #"repository": synonym("repository"),
-            #"_type": relationship(types.ProjectType),
-            #"type": synonym("_type"),
-            #"_structure": relationship(structure.Structure),
-            #"structure": synonym("_structure"),
-            #"_image_format": relationship(imageFormat.ImageFormat),
-            #"image_format": synonym("_image_format"),
-            #"_fps": tables.projects.c.fps,
-            #"fps": synonym("_fps"),
-            #"_is_stereoscopic": tables.projects.c.is_stereoscopic,
-            #"is_stereoscopic": synonym("_is_stereoscopic"),
-            #"_display_width": tables.projects.c.display_width,
-            #"display_width": synonym("_display_width"),
-        #}
-    #}
+    # Project - also the first class uses the mixins
+    project_mapper_arguments = {
+        "inherits": project.Project.__base__,
+        "polymorphic_identity": project.Project.entity_type,
+        "properties": {
+            "_start_date": tables.projects.c.start_date,
+            "start_date": synonym("_start_date"),
+            "_due_date": tables.projects.c.due_date,
+            "due_date": synonym("_due_date"),
+            "_lead": relationship(
+                user.User,
+                primaryjoin=tables.projects.c.lead_id==tables.users.c.id,
+            ),
+            "lead": synonym("_lead"),
+            "_repository": relationship(
+                repository.Repository,
+                primaryjoin=tables.projects.c.repository_id==\
+                            tables.repositories.c.id
+            ),
+            "repository": synonym("repository"),
+            "_type": relationship(
+                types.ProjectType,
+                primaryjoin=tables.projects.c.type_id==tables.projectTypes.c.id
+            ),
+            "type": synonym("_type"),
+            "_structure": relationship(
+                structure.Structure,
+                primaryjoin=tables.projects.c.structure_id==\
+                            tables.structures.c.id
+            ),
+            "structure": synonym("_structure"),
+            "_image_format": relationship(
+                imageFormat.ImageFormat,
+                primaryjoin=tables.projects.c.image_format_id==\
+                            tables.imageFormats.c.id
+            ),
+            "image_format": synonym("_image_format"),
+            "_fps": tables.projects.c.fps,
+            "fps": synonym("_fps"),
+            "_is_stereoscopic": tables.projects.c.is_stereoscopic,
+            "is_stereoscopic": synonym("_is_stereoscopic"),
+            "_display_width": tables.projects.c.display_width,
+            "display_width": synonym("_display_width"),
+        }
+    }
     
-    # give it to reference mixin first
+    # give it to ReferenceMixin first
+    ReferenceMixinDB.setup(project.Project, tables.projects, project_mapper_arguments)
     
+    # then to the StatusMixin
+    StatusMixinDB.setup(project.Project, tables.projects, project_mapper_arguments)
     
-    #mapper(
+    mapper(
+        project.Project,
+        tables.projects,
+        **project_mapper_arguments
+    )

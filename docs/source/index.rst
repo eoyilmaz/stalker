@@ -70,7 +70,6 @@ Summary
    :toctree: generated/
    :nosignatures:
    
-   stalker
    stalker.db
    stalker.db.auth
    stalker.db.auth.authenticate

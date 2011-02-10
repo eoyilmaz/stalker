@@ -38,8 +38,8 @@ class ReferenceMixinDB(object):
         
         use the returning dictionary (mapper_arguments) in your mapper
         
-        :param class_: the mixed in class, in other words the class which will be
-          extended with the mixin functionalities
+        :param class_: the mixed in class, in other words the class which will
+          be extended with the mixin functionalities
          
         :param class_table: the table holding the information about the class
         
@@ -56,22 +56,29 @@ class ReferenceMixinDB(object):
         # the given class_table
         
         # use the given class_name and the class_table
-        secondary_table = Table(
-            class_name.lower() + "_references", db.metadata,
-            Column(
-                class_name.lower() + "_id",
-                Integer,
-                ForeignKey(class_table.c.id),
-                primary_key=True,
-            ),
-            
-            Column(
-                "reference_id",
-                Integer,
-                ForeignKey(tables.links.c.id),
-                primary_key=True,
+        secondary_table_name = class_name.lower() + "_references"
+        secondary_table = None
+        
+        # check if the table is already defined
+        if secondary_table_name not in db.metadata:
+            secondary_table = Table(
+                class_name.lower() + "_references", db.metadata,
+                Column(
+                    class_name.lower() + "_id",
+                    Integer,
+                    ForeignKey(class_table.c.id),
+                    primary_key=True,
+                ),
+                
+                Column(
+                    "reference_id",
+                    Integer,
+                    ForeignKey(tables.links.c.id),
+                    primary_key=True,
+                )
             )
-        )
+        else:
+            secondary_table = db.metadata.tables[secondary_table_name]
         
         new_properties = {
             "_references": relationship(
@@ -119,8 +126,8 @@ class StatusMixinDB(object):
         
         use the returning dictionary (mapper_arguments) in your mapper
         
-        :param class_: the mixed in class, in other words the class which will be
-          extended with the mixin functionalities
+        :param class_: the mixed in class, in other words the class which will
+          be extended with the mixin functionalities
          
         :param class_table: the table holding the information about the class
         
