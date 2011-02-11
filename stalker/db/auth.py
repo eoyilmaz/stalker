@@ -1,4 +1,3 @@
-#-*- coding: utf-8 -*-
 """This is the authentication system of Stalker. Uses Beaker for the session
 management.
 
@@ -10,14 +9,16 @@ the database without login.
 The user information is going to be used in the database to store who created,
 updated, read or delete the data.
 
-There are two functions to log a user in, first one is
+There are three functions to log a user in, first one is
+:func:`~stalker.db.auth.session` that create the session and if there where user
+entry in session it return true else return false
 :func:`~stalker.db.auth.authenticate`, which accepts username and password and
 returns a :class:`~stalker.core.models.user.User` object::
     
     from stalker.db import auth
     userObj = auth.authenticate("username", "password")
 
-The second one is the :func:`~stalker.db.auth.login` which uses a given
+The third one is the :func:`~stalker.db.auth.login` which uses a given
 :class:`~stalker.core.models.user.User` object and creates a Beaker Session and
 stores the logged in user id in that session.
 
@@ -26,32 +27,23 @@ logged in :class:`~stalker.core.models.user.User` object.
 
 The basic usage of the system is as follows::
     
-    from stalker import db
-    from stalker.db import auth
-    from stalker.core.models import user
-    
-    # directly get the user from the database if there is a user_id
-    # in the current auth.SESSION
-    # 
-    # in this way we prevent asking the user for login information all the time
-    if "user_id" in auth.SESSION:
-        userObj = auth.get_user()
-    else:
-        # ask the username and password of the user
-        # then authenticate the given user
-        username, password = the_interface_for_login()
-        userObj = auth.authenticate(username, password)
-    
-    # login with the given user.User object, this will also create the session
-    # if there is no one defined
-    auth.login(userObj)
+    	from stalker import db
+	from stalker.db import auth
+	from stalker.core.models import user
+    	
+	if session():
+		# user has login data 
+		login()
+	else
+		#user doesn't have login data get them with login prompt
+		get_user_data()
+		login(username,password)
 
 The module also introduces a decorator called
 :func:`~stalker.db.auth.login_required` to help adding the authentication
-functionality to any function or method. There is also another decorator called
-:func:`~stalker.db.auth.premission_required` to check if the logged in user is
-in the given permission group.
+functionality to any function or method
 """
+
 
 import os
 import tempfile
@@ -63,32 +55,65 @@ from stalker.core.models import error, user
 
 
 
-SESSION = {}
-SESSION_KEY = "stalker_key"
-SESSION_VALIDATE_KEY = "stalker_validate_key"
-
-
+SESSION={}
+SESSION_KEY = "stalker"
 
 #----------------------------------------------------------------------
-def create_session():
-    """creates the session
-    """
-    
-    tempdir = tempfile.gettempdir()
-    
-    session_options = {
-        "id": "0",
-        "type": "file",
-        "cookie_expires": False,
-        "data_dir": os.path.sep.join([tempdir, "stalker_cache", "data"]),
-        "lock_dir": os.path.sep.join([tempdir, "stalker_cache", "lock"]),
-        "key": SESSION_KEY,
-        "validate_key": SESSION_VALIDATE_KEY,
-    }
-    
-    SESSION = beakerSession.Session({}, **session_options)
-    SESSION.save()
+def session():
+	"""create the session and if there was user data entry in the 
+	cookie return true
+	"""
 
+	tempdir = tempfile.gettempdir()
+	
+	returnVal = False
+	
+	# loading session
+	session_options = {"id":"stalker",
+			"key":SESSION_KEY,
+			"type":"file",
+			"cookie_expires": False,
+			"data_dir": os.path.sep.join([tempdir, "stalker_cache", "data"]),
+			"lock_dir": os.path.sep.join([tempdir, "stalker_cache", "lock"]),
+			}
+
+	SESSION = beakerSession.Session({},**session_options)
+	
+	# checking user data
+	returnVal = 'user_id' in SESSION and 'password' in SESSION
+	return returnVal
+	
+#----------------------------------------------------------------------
+def login():
+	"""use this function if session function return true
+	it gets the user data and use it to connect to database
+	"""
+
+	if SESSION is not None:
+		
+		username = SESSION['user_id']
+		password = SESSION['password']
+		
+		if authenticate(username,password) :
+			SESSION.save()
+			user_obj.last_login = datetime.datetime.now()
+			db.session.commit()
+		
+#----------------------------------------------------------------------
+def login(username,password):
+	"""use this function if session return false. you should
+	feed this function with username and password because it uses
+	them to connect to database.
+	it alse write this data to a cookie file for farther use.
+	"""
+
+	if authenticate( username, password):
+		
+		SESSION['user_id'] = username
+		SESSION['password'] =  password
+		SESSION.save()
+		user_obj.last_login = datetime.datetime.now()
+		db.session.commit()
 
 
 #----------------------------------------------------------------------
@@ -101,9 +126,8 @@ def authenticate(username="", password=""):
     
     # check if the database is setup
     if db.session == None:
-        raise error.LoginError("stalker is not connected to any db right now, "
-                               "use stalker.db.setup(), to setup the default "
-                               "db")
+        raise(error.LoginError("stalker is not connected to any db right now, \
+use stalker.db.setup(), to setup the default db"))
     
     # try to get the given user
     userObj = db.session.query(user.User).filter_by(name=username).first()
@@ -112,31 +136,12 @@ def authenticate(username="", password=""):
               (username, password)
     
     if userObj is None:
-        raise error.LoginError(error_msg)
+        raise(error.LoginError(error_msg))
     
     if userObj.password != password:
-        raise error.LoginError(error_msg)
+        raise(error.LoginError(error_msg))
     
     return userObj
-
-
-
-#----------------------------------------------------------------------
-def login(user_obj):
-    """Persist a user id in the session. This way a user doesn't have to
-    reauthenticate on every request
-    """
-    
-    user_obj.last_login = datetime.datetime.now()
-    db.session.commit()
-    
-    if "user_id" not in SESSION:
-        # create the session first
-        create_session()
-    
-    SESSION.update({"user_id": user_obj.id})
-    SESSION.save()
-
 
 
 #----------------------------------------------------------------------
@@ -146,92 +151,7 @@ def logout():
     
     try:
         SESSION.delete()
-        SESSION = {}
+        SESSION.clear()
     except AttributeError:
         return
-
-
-
-#----------------------------------------------------------------------
-def get_user():
-    """returns the user from stored session
-    """
-    
-    # check if the database is setup
-    if db.session == None:
-        raise error.LoginError("stalker is not connected to any db right now, "
-                               "use stalker.db.setup(), to setup the default "
-                               "db")
-    
-    # create the session dictionary
-    create_session()
-    
-    if "user_id" in SESSION:
-        # create the session
-        return db.session.query(user.User).\
-               filter_by(id=SESSION["user_id"]).first()
-    else:
-        return None
-
-
-
-#----------------------------------------------------------------------
-def login_required(view, error_message=None):
-    """a decorator that implements login functionality to any function or
-    method
-    
-    :param view: a function returning True or False, thus verifying the entered
-      user name and password
-    
-    :param error_message: the message to be shown in case a LoginError is
-      raised, a default message will be shown when skipped
-    
-    :returns: the decorated function
-    """
-    
-    def wrap(func):
-        def wrapped_func(*args, **kwargs):
-            if view():
-                func(*args, **kwargs)
-            else:
-                if error_message and isinstance(error_meesage, (str, unicode)):
-                    raise error.LoginError(error_message)
-                else:
-                    raise error.LoginError("You should be logged in before "
-                                           "completing your action!")
-        return wrapped_func
-    return wrap
-
-
-
-#----------------------------------------------------------------------
-def permission_required(permission_group, error_message=None):
-    """a decorator that implements permission checking to any function or
-    method
-    
-    Checks if the logged in user is in the given permission group and then
-    calls the decorated function
-    
-    :param permission_group: a :class:`~stalker.coer.models.group.Group` object
-      showing the permision group
-    
-    :param error_message: the message to be shown in case a LoginError is
-      raised, a default message will be shown when skipped
-    
-    :returns: the decorated function
-    """
-    
-    def wrap(func):
-        def wrapped_func(*args, **kwargs):
-            if get_user() in permission_group:
-                func(*args, **kwargs)
-            else:
-                if error_message and isinstance(error_meesage, (str, unicode)):
-                    raise error.LoginError(error_message)
-                else:
-                    raise error.LoginError("You don't have permission to do "
-                                           "complete your action!")
-        return wrapped_func
-    return wrap
-
 

@@ -1,38 +1,57 @@
-#from stalker.db import auth
-
-#@auth.login_required
-#def test_func( input1, input2):
-    #print "inside the original func"
-    #print input1, input2
-    #print "original function ended"
-
-#test_func("ozgur", "yilmaz")
 
 
 
-#########################################################################
-#class AClass(object):
-    #"""for testing methods requiring login
-    #"""
+
+import unittest
+import os
+import tempfile
+import datetime
+import functools
+from beaker import session as beakerSession
+import auth
+
+
+class Auth_TestCase(unittest.TestCase):
     
-    ##----------------------------------------------------------------------
-    #def __init__(self, value1, value2):
-        
-        #self._value1 = value1
-        #self._value2 = value2
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@auth.login_required
-    #def calculate(self, value1, value2):
-        #print "inside class method"
-        #print value1, value2
-        #print "ended class method"
-    
+	
 
+	
+	def setUp(self):
+		
+		
+		tempdir = tempfile.gettempdir()
+		
+		session_options = {"id":"stalker",
+				"key":"stalker",
+				"type":"file",
+				"cookie_expires": False,
+				"data_dir": os.path.sep.join([tempdir, "stalker_cache", "data"]),
+				"lock_dir": os.path.sep.join([tempdir, "stalker_cache", "lock"]),
+				}
 
-#a_class_inst = AClass("ozgur", "yilmaz")
+		self.SESSION = beakerSession.Session({},**session_options) 
+		#self.SESSION.save()
+		
+	def test_session_function_True(self):
 
-#a_class_inst.calculate("ozgur2", "yilmaz2")
+		self.SESSION['user_id'] = "name"
+		self.SESSION['password'] =  "pass"
+		self.SESSION.save()
+
+		self.failUnless(auth.session() == True)
+
+	def test_session_function_False(self):
+
+		del self.SESSION['user_id']
+		del self.SESSION['password']
+		self.SESSION.save()
+
+		self.failUnless(auth.session() == False)
+	
+	def test_logout_function(self):
+
+		auth.session()
+		auth.logout()
+		self.failUnless(len(auth.SESSION) == 0 )
+
 
