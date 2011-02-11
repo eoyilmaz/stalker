@@ -1,3 +1,5 @@
+.. _roadmap_toplevel:
+
 ===========================
 Stalker Development Roadmap
 ===========================
@@ -19,7 +21,7 @@ Below you can find the roadmap based on the version
 
 0.1.3:
 ------
- * Ability to extend SOM
+ * Ability to extend SOM with database mappers and tables
 
 0.1.5:
 ------
@@ -27,7 +29,7 @@ Below you can find the roadmap based on the version
 
 0.2.0:
 ------
- * PyQt/PySide interfaces
+ * PySide interfaces
 
 0.5.0:
 ------
@@ -35,4 +37,4 @@ Below you can find the roadmap based on the version
 
 1.0.0:
 ------
- * New feature that I can't really see right now.
+ * New features that I can't really see right now.

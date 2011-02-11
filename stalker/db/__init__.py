@@ -47,14 +47,12 @@ def setup(database=None, mappers=[]):
       uses the database defined in stalker.conf.defaults.DATABASE
     
     :param mappers: The additional mappers module. Use this parameter to
-      customize the whole SOM and database mapping to add your own classes to
-      SOM
+      customize SOM and database mapping to add your own classes to SOM
     
     :param engine_settings: the settings for the SQLAlchemy engine
     """
     
     from stalker import db
-    
     
     if database is None:
         database = defaults.DATABASE

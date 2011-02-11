@@ -1,3 +1,5 @@
+.. _tutorial_toplevel:
+
 ========
 Tutorial
 ========
@@ -35,7 +37,7 @@ testing purposes. To be able to get more out of Stalker we should give a proper
 database information. The most basic setup is to use a file based SQLite3
 database::
 
-  db.setup("sqlite:///M:\\studio.db") # assumed Windows
+  db.setup("sqlite:///C:\\studio.db") # assumed Windows
 
 This command will do the following:
  1. setup the database connection, by creating an `engine`_
@@ -47,7 +49,7 @@ This command will do the following:
 .. _engine: http://www.sqlalchemy.org/docs/core/engines.html
 .. _mapping: http://www.sqlalchemy.org/docs/orm/mapper_config.html
 
-Lets continue by creating a **User** for ourselfs in the database. The first
+Lets continue by creating a **User** for ourself in the database. The first
 thing we need to do is to import the :class:`~stalker.core.models.user.User`
 class in to the current namespace::
 
@@ -74,14 +76,14 @@ Now add your user to the department::
 
   tds_department.members.append(myUser)
 
-We have created succesfully a :class:`~stalker.core.models.user.User` and a
+We have created successfully a :class:`~stalker.core.models.user.User` and a
 :class:`~stalker.core.models.department.Department` and we assigned the user as
-one of the member of the **TDs Department**.
+one of the member of the *TDs Department*.
 
 For now, because we didn't tell Stalker to commit the changes, no data has been
 saved to the database yet. But it doesn't keep us using Stalker, as if these
 information are in the database already. Lets show this by querying all the
-departments, then getting the first one and gettings its first members name::
+departments, then getting the first one and getting its first members name::
 
   all_departments = db.query(Department).all()
   all_members_of_dep = all_departments[0].members
@@ -99,12 +101,16 @@ So lets send all these data to database::
 
 Now all the data is persisted in the database.
 
-Part II - Creating Simple Data
-==============================
+Part II/A - Creating Simple Data
+================================
 
-Lets say that we have this new project comming and you want to start using
-Stalker with it. So create a :class:`~stalker.core.models.project.Project`
-object to hold data about it::
+Lets say that we have this new project coming and you want to start using
+Stalker with it. So we need to create a
+:class:`~stalker.core.models.project.Project` object to hold data about it::
+
+A repository is a file path, preferably a path
+which is mapped or mounted to the same path on every computer in our studio.
+Now create the project, and attach it to our new commercial repository::
 
   from stalker.core.models.project import Project
   new_project = Project(name="Fancy Commercial")
@@ -115,7 +121,7 @@ Lets enter more information about this new project::
   from stalker.core.models.imageFormat import ImageFormat
   
   new_project.description = """The commercial is about this fancy product. The
-                               client want us to have a shinny look with their
+                               client want us to have a shiny look with their
                                product bla bla bla..."""
   new_project.image_format = ImageFormat(name="HD 1080", width=1920, height=1080)
   new_project.fps = 25
@@ -137,7 +143,7 @@ To save all the data to the database::
   db.session.add(new_project)
   db.session.commit()
 
-Eventhough we have created multiple objects (new_project,
+Even though we have created multiple objects (new_project,
 commercial_project_type) we've just added the ``new_project`` object, don't
 worry Stalker is smart enough to add all the connected objects to the database.
 
@@ -154,12 +160,46 @@ And a Sequence generally has :class:`~stalker.core.models.shot.Shot`\ s::
 
   from stalker.core.models.shot import Shot
   
-  sh001 = Shot(name="Shot 1", code="SH001")
-  sh002 = Shot(name="Shot 2", code="SH002")
-  sh003 = Shot(name="Shot 3", code="SH003")
+  sh001 = Shot(code="SH001")
+  sh002 = Shot(code="SH002")
+  sh003 = Shot(code="SH003")
   
   # assign them to the sequence
   seq1.shots.extend([sh001, sh002, sh003])
+
+Part II/B - Querying, Updating and Deleting Data
+================================================
+
+So far we always created some simple data. What about updating them. Let say
+that we created a new shot with wrong info::
+
+  sh004 = Shot(code="SH005)
+  db.session.add(sh004)
+
+and you figured out that you have created and committed a wrong info and you
+want to correct it::
+  
+  # first find the data
+  wrong_shot = db.query(Shot).filter_by(code="SH005").first()
+  
+  # now update it
+  wrong_shot.code = "SH004"
+  
+  # commit the changes to the database
+  db.session.commit()
+
+and let say that you decided to delete the data::
+
+  db.session.delete(wrong_shot)
+  db.session.commit()
+  
+  # or with a shortcut
+  db.query(Shot).filter_by(code="SH005").delete()
+
+for more info about update and delete options (like cascades) in SQLAlchemy
+please see the `SQLAlchemy documentation`_.
+
+.. _SQLAlchemy documentation: http://www.sqlalchemy.org/docs/orm/session.html
 
 Part III - Pipeline
 ===================
@@ -218,7 +258,7 @@ and create a the Shot asset type::
   # 
   # instead of writing down shot1.type = shot_asset_type
   # we are going to do something more interesting
-  # (eventhough it is inefficient)
+  # (even though it is inefficient)
   
   for shot in seq1.shots:
       shot.type = shot_asset_type
@@ -226,7 +266,7 @@ and create a the Shot asset type::
   
   
   
-.. this part is make things complex
+.. this part is making things complex
   from stalker.core.models.types import AssetType
   
   # the order of the PipelineSteps are not important
@@ -330,7 +370,7 @@ them, so Stalker nows which job should be done before the others::
   # lighting can not be done before the layout is finished
   light_task.depends = [layout_task]
 
-Now Stalker nows the hierarchy of the tasks. Next versions of Stalker will have
+Now Stalker knows the hierarchy of the tasks. Next versions of Stalker will have
 a ``Scheduler`` included to solve the task timings and create data for things
 like Gantt Charts.
 
@@ -352,12 +392,20 @@ of things. For example, it doesn't know how to handle your asset versions
 (:class:`~stalker.core.models.version.Version`) namely it doesn't know how to
 store your data that you are going to create while completing this tasks.
 
-A fileserver in Stalkers' term is called a
-:class:`~stalker.core.models.repository.Repository`. Repositories stores the
-information about the fileservers in your system. You can have several file
-servers let say one for Commercials and other one for big Movie projects. You
-can define repositories and assign projects to those repositories. Lets create
-one repository for our commercial project::
+So what we need to define is a place in our file structure. It doesn't need to
+be a network shared directory but if you are not working alone than it means
+that everyone needs to reach your data and the simplest way to do this is to
+place your files in a network share, there are other alternatives like storing
+your files locally and sharing your revisions with a Software Configuration
+Management (SCM) system. We are going to see the first alternative, which uses
+a network share in our fileserver, and this network share is called a
+:class:`~stalker.core.models.repository.Reposiory` in Stalker.
+
+A repository is a file path, preferably a path which is mapped or mounted to
+the same path on every computer in our studio. You can have several
+repositories let say one for Commercials and another one for big Movie
+projects. You can define repositories and assign projects to those
+repositories. Lets create one repository for our commercial project::
 
   from stalker.core.models.repository import Repository
   repo1 = Repository(
@@ -366,36 +414,34 @@ one repository for our commercial project::
       stored"""
   )
 
-
 A Repository object could show the root path of the repository according to
 your operating system. Lets enter the paths for all the major operating
 systems::
   
-  repo1.windows_path = "M:\\PROJECTS"
+  repo1.windows_path = "M:/PROJECTS"
   repo1.linux_path   = "/mnt/M"
   repo1.osx_path     = "/Volumes/M"
 
-And if you ask a repository object for the path of the repository it will
-always give the correct answer accroding to your operating system::
+And if you ask for the path to a repository object it will always give the
+correct answer according to your operating system::
 
   print repo1.path
   # outputs:
-  # if you are running the command on a computer with Windows it will output:
+  # if you are running in Windows it will output:
   #
   # M:\PROJECTS
   # 
-  # and for Linux:
+  # in Linux and variants:
   # /mnt/M 
   # 
-  # for OSX:
+  # and in OSX:
   # /Volumes/M
   #
 
-Assigning this repository to our project or vice versa is not enough, Stalker
-still doesn't know about the project
-:class:`~stalker.core.models.structure.Structure`\ , or in other words it
-doesn't have information about the folder structure about your project. To
-explain the project structure we can use the
+Assigning this repository to our project is not enough, Stalker still doesn't
+know about the project :class:`~stalker.core.models.structure.Structure`\ , or
+in other words it doesn't have information about the folder structure about
+your project. To explain the project structure we can use the
 :class:`~stalker.core.models.structure.Structure` object::
 
   from stalker.core.models.structure import Structure
@@ -469,7 +515,7 @@ The above template will produce the following folders for our project::
 
 We are still not done with defining the templates. Even though Stalker now
 knows what is the project structure like, it is not aware of the placements of
-indivudual asset :class:`~stalker.core.models.version.Version` files specific
+individual asset :class:`~stalker.core.models.version.Version` files specific
 for an :class:`~stalker.core.models.types.AssetType`. An asset
 :class:`~stalker.core.models.version.Version` is an object holding information
 about every single iteration of one asset and has a connection to files in the
@@ -508,11 +554,11 @@ the path, the filename, and the Type of the asset to apply this template to::
   commercial_project_structure.assetTemplates.append(shot_version_template)
 
 Now Stalker knows "Kung-Fu". It can place any version related file to the
-repository and orginize your works. You can define all the templates for all
+repository and organise your works. You can define all the templates for all
 your assetTypes independently, or you can use a common template for them etc.
 
-Part VI - Collaboration
-=======================
+Part VI - Collaboration (coming)
+================================
 
 We came a lot from the start, but what is the use of an Production Asset
 Management System if we can not communicate with our colleagues.
@@ -527,12 +573,110 @@ In Stalker you can communicate with others in the system, by:
   * If you are a lead of a project or a sequence, then by placing a
     :class:`~stalker.core.models.review.Review` to their works
 
-Part VII - Session Management (comming)
-=======================================
+Part VII - Session Management (coming)
+======================================
 
 This part will be covered soon
 
-Part VIII - Extending SOM (commming)
-====================================
+Part VIII - Extending SOM (coming)
+==================================
 
 This part will be covered soon
+
+
+.. PART REMOVED FROM THE DESIGN DOCUMENTATION! (filter and remove):
+  
+  Usage Examples
+  --------------
+  
+  Let's dance with Stalker a little bit.
+  
+  When you first setup Stalker you will have nothing but an empty database. So
+  lets create some data and store them in the database.
+  
+  First import some modules:
+  
+  First of all import and setup the default database (an in-memory SQLite
+  database)
+  
+  >>> from stalker import db # the database module
+  >>> db.setup()
+  
+  By calling the :func:`~stalker.db.setup` we have created all the mappings for
+  SOM and also we have created the ``session`` object
+  which is stored under ``stalker.db.meta.session`` (this is used to have a
+  Singleton SQLAlchemy metadata).
+  
+  Lets import the SOM which is stalker.core.models
+  
+  >>> from stalker.core.models.user import User
+  
+  Stalker comes with an *admin* user already defined in to it. To create other
+  things in the database we need to have the admin user by querying it.
+  
+  >>> dbSession = db.meta.session
+  >>> admin = dbSession.query(User).filter_by(name="admin").first()
+  
+  Lets create another user
+  
+  >>> newUser = User(name="eoyilmaz",
+                     login_name="eoyilmaz",
+                     first_name="Erkan Ozgur",
+                     last_name="Yilmaz",
+                     password="secret",
+                     email="eoyilmaz@gmail.com")
+  
+  Save the data to the database
+  
+  >>> session.add(newUser)
+  >>> session.commit()
+  
+  Create a query for users:
+  
+  >>> query = session.query(user.User)
+  
+  Get all the users:
+  
+  >>> users = query.all()
+  
+  or select a couple of users by filters:
+  
+  >>> users = query.filter_by(name="Ozgur")
+  
+  or select the first user matching query criteria:
+  
+  >>> user_ozgur = query.filter_by(name="Ozgur").first()
+  
+  
+  ***** UPDATE BELOW *****
+  
+  Now add them to the project:
+  
+  >>> newProject.users.append(users)
+  
+  Save the new project to the database:
+  
+  >>> db.session.add(newProject)
+  >>> db.session.commit()
+  
+  Let's ask the tasks of one user:
+  
+  >>> ozgur = query.filter_by(name="ozgur").first()
+  >>> tasks = ozgur.tasks
+  
+  Get the on going tasks of this user:
+  
+  >>> onGoingTasks = [task for task in ozgur.tasks if not task.isComplete]
+  
+  Get the on going tasks of this user by using the database:
+  
+  >>> taskQuery = mapper.sessison.query(user.User).filter_by(name="ozgur").join(task.Task).filter_by(status!="complete")
+  >>> onGoingTasks = taskQuery.all()
+  
+  Get the "rig" tasks of ozgur:
+  
+  >>> rigTasks =  taskQuery.join(PipelineStep).filter(PipelineStep.name="Rig").all()
+  
+  As you see all the functionalities of SQLAlchemy is fully supported. At the end
+  all the models are plain old python objects (POPO) and the persistence part is
+  handled with SQLAlchemy.

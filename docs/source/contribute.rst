@@ -1,3 +1,5 @@
+.. _contribute_toplevel:
+
 =================
 How To Contribute
 =================

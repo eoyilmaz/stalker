@@ -1,3 +1,5 @@
+.. _design_toplevel:
+
 ======
 Design
 ======
@@ -155,100 +157,7 @@ Features:
  
  11. The messaging system allows the users collaborate more efficiently.
 
-Usage Examples
---------------
-
-Let's dance with Stalker a little bit.
-
-When you first setup Stalker you will have nothing but an empty database. So
-lets create some data and store them in the database.
-
-First import some modules:
-
-First of all import and setup the default database (an in-memory SQLite
-database)
-
->>> from stalker import db # the database module
->>> db.setup()
-
-By calling the :func:`~stalker.db.setup` we have created all the mappings for
-SOM and also we have created the ``session`` object
-which is stored under ``stalker.db.meta.session`` (this is used to have a
-Singleton SQLAlchemy metadata).
-
-Lets import the SOM which is stalker.core.models
-
->>> from stalker.core.models.user import User
-
-Stalker comes with an *admin* user already defined in to it. To create other
-things in the database we need to have the admin user by querying it.
-
->>> dbSession = db.meta.session
->>> admin = dbSession.query(User).filter_by(name="admin").first()
-
-Lets create another user
-
->>> newUser = User(name="eoyilmaz",
-                   login_name="eoyilmaz",
-                   first_name="Erkan Ozgur",
-                   last_name="Yilmaz",
-                   password="secret",
-                   email="eoyilmaz@gmail.com")
-
-Save the data to the database
-
->>> session.add(newUser)
->>> session.commmit()
-
-Create a query for users:
-
->>> query = session.query(user.User)
-
-Get all the users:
-
->>> users = query.all()
-
-or select a couple of users by filters:
-
->>> users = query.filter_by(name="Ozgur")
-
-or select the first user matching query criteria:
-
->>> user_ozgur = query.filter_by(name="Ozgur").first()
-
-
-***** UPDATE BELOW *****
-
-Now add them to the project:
-
->>> newProject.users.append(users)
-
-Save the new project to the database:
-
->>> mapper.session.save(newProject)
->>> mapper.session.flush()
-
-Let's ask the tasks of one user:
-
->>> ozgur = query.filter_by(name="ozgur")
->>> tasks = ozgur.tasks
-
-Get the on going tasks of this user:
-
->>> onGoingTasks = [task for task in ozgur.tasks if not task.isComplete]
-
-Get the on going tasks of this user by using the database:
-
->>> taskQuery = mapper.sessison.query(user.User).filter_by(name="ozgur").join(task.Task).filter_by(status!="complete")
->>> onGoingTasks = taskQuery.all()
-
-Get the "rig" tasks of ozgur:
-
->>> rigTasks =  taskQuery.join(pipelineStep.pipelineStep).filter_by(name="Rig").all()
-
-As you see all the functionalities of SQLAlchemy is fully supported. At the end
-all the models are plain old python objects (POPO) and the persistancy part is
-handled with SQLAlchemy.
+For usage exmamples see :ref:`tutorial_toplevel`
 
 How To Customize Stalker
 ========================

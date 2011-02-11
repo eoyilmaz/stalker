@@ -19,58 +19,60 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
     Project is one of the main classes that will direct the others. A project
     in Stalker is a gathering point.
     
-    The date attributes like start_date and due_date can be managed with
-    timezones. Follow the Python idioms shown in the `help files of datetime`_
-    
-    .. _help files of datetime: http://docs.python.org/library/datetime.html
-    
     It is mixed with :class:`~stalker.core.models.mixin.ReferenceMixin`,
     :class:`~stalker.core.models.mixin.StatusMixin` and
     :class:`~stalker.core.models.mixin.ScheduleMixin` to give reference, status
     and schedule abilities.
     
-    :param lead: the lead of the project, should be an instance of
-      :class:`~stalker.core.models.user.User`, can be skipped
+    :param lead: The lead of the project. Default value is None.
     
-    :param users: the users assigned to this project, should be a list of
+    :type lead: :class:`~stalker.core.models.user.User`
+    
+    :param list users: The users assigned to this project, should be a list of
       :class:`~stalker.core.models.user.User` instances, if set to None it is
-      converted to an empty list.
+      converted to an empty list. Default value is an empty list.
     
-    :param sequences: the sequences of the project, it should be a list of
-      :class:`~stalker.core.models.sequence.Sequence` instances, the default
-      value is an empty list
+    :param list sequences: The sequences of the project, it should be a list of
+      :class:`~stalker.core.models.sequence.Sequence` instances, if set to None
+      it is converted to an empty list. Default value is an empty list.
     
-    :param assets: the assets used in this project, it should be a list of
-      :class:`~stalker.core.models.asset.Asset` instances, the default value is
-      an empty list
+    :param list assets: The assets used in this project, it should be a list of
+      :class:`~stalker.core.models.asset.Asset` instances, if set to None it is
+      converted to an empty list. Default value is an empty list.
     
-    :param image_format: the output image format of the project, it should be
-      an instance of :class:`~stalker.core.models.imageFormat.ImageFormat`,
-      can not be skipped in init
-      
-    :param fps: the FPS of the project, it should be a integer or float number,
-      or a string literal which can be correctly converted to a float, the
-      default value is 25.0.
+    :param image_format: The output image format of the project. Default
+      value is None.
     
-    :param type: the type of the project, it should be an instance of
-      :class:`~stalker.core.models.types.ProjectType`, can not be skipped in
-      init
+    :type image_format: :class:`~stalker.core.models.imageFormat.ImageFormat`
     
-    :param structure: the structure of the project, it should be an instance of
-      :class:`~stalker.core.models.structure.Structure`.
+    :param float fps: The FPS of the project, it should be a integer or float
+      number, or a string literal which can be correctly converted to a float.
+      Default value is 25.0.
     
-    :param repository: the repository that the project files are going to be
-      stored in, it should be an instance of
-      :class:`~stalker.core.models.repository.Reporsitory`
+    :param type: The type of the project. Default value is None.
     
-    :param is_stereoscopic: a bool value (True or False), showing if the
-      project is going to be a stereo 3D project, default value is False,
-      anything given as the argument will be converted to True or False.
+    :type type: :class:`~stalker.core.models.types.ProjectType`
     
-    :param display_width: the width of the display that the output of the
+    :param structure: The structure of the project. Default value is None
+    
+    :type structure: :class:`~stalker.core.models.structure.Structure`
+    
+    :param repository: The repository that the project files are going to be
+      stored in. You can not create the project folder structure if the project
+      doesn't have a connection to a
+      :class:`~stalker.core.models.repository.Repository`. Default value is
+      None.
+    
+    :type repository: :class:`~stalker.core.models.repository.Repository`.
+    
+    :param bool is_stereoscopic: a bool value, showing if the project is going
+      to be a stereo 3D project, anything given as the argument will be
+      converted to True or False. Default value is False.
+    
+    :param float display_width: the width of the display that the output of the
       project is going to be displayed (very unnecessary if you are not using
       stereo 3D setup). Should be an int or float value, negative values
-      converted to the positive values, default value is 1.
+      converted to the positive values. Default value is 1.
     """
     
     
@@ -166,7 +168,8 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
         """validates the given image format
         """
         
-        if not isinstance(image_format_in, imageFormat.ImageFormat):
+        if image_format_in is not None and \
+           not isinstance(image_format_in, imageFormat.ImageFormat):
             raise ValueError("the image_format should be an instance of "
                              "stalker.core.models.imageFormat.ImageFormat")
         
@@ -193,7 +196,8 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
         """validates the given repository_in value
         """
         
-        if not isinstance(repository_in, repository.Repository):
+        if repository_in is not None and \
+           not isinstance(repository_in, repository.Repository):
             raise ValueError("the repsoitory should be an instance of "
                              "stalker.core.models.repository.Repository")
         
@@ -236,7 +240,7 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
         """validates the given type_in value
         """
         
-        if not isinstance(type_in, types.ProjectType):
+        if type_in is not None and not isinstance(type_in, types.ProjectType):
             raise ValueError("type should be an instance of "
                              "stalker.core.models.types.ProjectType")
         

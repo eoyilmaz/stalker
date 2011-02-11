@@ -223,6 +223,11 @@ class ScheduleMixin(object):
     The schedule is the right mixin for entities which needs schedule
     information like ``start_date``, ``due_date`` and ``duration``
     
+    The date attributes can be managed with timezones. Follow the Python idioms
+    shown in the `documentation of datetime`_
+    
+    .. _documentation of datetime: http://docs.python.org/library/datetime.html
+    
     :param start_date: the start date of the entity, should be a datetime.date
       instance, when given as None or tried to be set to None, it is to set to
       today, setting the start date also effects due date, if the new

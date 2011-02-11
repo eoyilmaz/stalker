@@ -483,28 +483,22 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_image_format_argument_is_None(self):
-        """testing if a ValueError will be raised when the image_format
-        argument is None
+        """testing if nothing is going to happen when the image_format is set
+        to None
         """
         
         self.kwargs["image_format"] = None
-        self.assertRaises(ValueError, project.Project, self.kwargs)
+        new_project = project.Project(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_image_format_attribute_is_set_to_None(self):
-        """testing if a ValueError will be raised when the image_format
-        attribute is set to None
+        """testing if nothing will happen when the image_format attribute is
+        set to None
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_project,
-            "image_format",
-            None
-        )
+        self.mock_project.image_format = None
     
     
     
@@ -703,16 +697,45 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_type_argument_is_skipped(self):
+        """testing if nothing happens when the type argument is skipped
+        """
+        
+        self.kwargs.pop("type")
+        new_project = project.Project(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_type_argument_is_None(self):
+        """testing if nothing happens when the type argument is set to None
+        """
+        
+        self.kwargs["type"] = None
+        new_project = project.Project(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_type_argument_is_given_as_non_ProjectType_object(self):
         """testing if a ValueError will be raised when the type argument is
         given as something other than a ProjectType object
         """
         
-        test_values = [None, 1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         
         for test_value in test_values:
             self.kwargs["type"] = test_value
             self.assertRaises(ValueError, project.Project, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_type_attribute_is_set_None(self):
+        """testing if nothing happens when the type attribute is set to None
+        """
+        
+        self.mock_project.type = None
     
     
     
@@ -722,7 +745,7 @@ class ProjectTester(mocker.MockerTestCase):
         set to something other than a ProjectType object
         """
         
-        test_values = [None, 1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         
         for test_value in test_values:
             self.assertRaises(
@@ -747,28 +770,22 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_repository_argument_is_None(self):
-        """testing if a ValueError will be raised when the repository argument
-        is None
+        """testing if nothing happens when repository is set to None
         """
         
         self.kwargs["repository"] = None
-        self.assertRaises(ValueError, project.Project, **self.kwargs)
+        #self.assertRaises(ValueError, project.Project, **self.kwargs)
+        new_project = project.Project(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_repository_attribute_is_set_to_None(self):
-        """testing if a ValueError will be raised when the repository argument
-        is set to None
+        """testing if nothing happens when setting the repository attribute to
+        None
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_project,
-            "repository",
-            None
-        )
+        self.mock_project.repository = None
     
     
     
@@ -925,7 +942,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def tets_structure_argument_not_instance_of_Structure(self):
+    def test_structure_argument_not_instance_of_Structure(self):
         """testing if a ValueError will be raised when the structure argument
         is not an instance of Structure
         """
