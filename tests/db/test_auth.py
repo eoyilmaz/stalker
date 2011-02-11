@@ -71,6 +71,6 @@ class AuthTest(unittest.TestCase):
         
         auth.session()
         auth.logout()
-        self.AssertEquals(len(auth.SESSION), 0)
+        self.assertEquals(len(auth.SESSION), 0)
 
 

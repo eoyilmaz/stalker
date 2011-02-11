@@ -11,7 +11,9 @@ v0.1.1.a6:
    due_date and duration to the mixed in class.
  * Removed some parts of the Project class which are now satisfied by the
    ScheduleMixin
- * Completed the implementation of the db.auth module
+ * Imporeved the implementation of the db.auth module
+ * removed the db.__setup__ module which were helping to reference the
+   variables in db module but it is not needed anymore
 
 v0.1.1.a5:
  * removed the StatusedEntity and its tests, with the introduction of
