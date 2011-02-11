@@ -1,9 +1,16 @@
 Stalker Changes
 ===============
+
 v0.1.1.a6:
  * updated/fixed tests for ValidatedList
  * updated a couple of tests to increase tests coverage
  * Status class instances now can be compared to string or unicode values
+ * A Status object in a StatusList can now be accessed by its name as the index
+   in StatusList only while getting the item.
+ * Added ScheduleMixin which introduces date variables like, start_date,
+   due_date and duration to the mixed in class.
+ * Removed some parts of the Project class which are now satisfied by the
+   ScheduleMixin
 
 v0.1.1.a5:
  * removed the StatusedEntity and its tests, with the introduction of

@@ -503,8 +503,6 @@ projects = Table(
         ForeignKey("entities.id"),
         primary_key=True,
     ),
-    Column("start_date", Date),
-    Column("due_date", Date),
     Column("lead_id", Integer, ForeignKey("users.id")),
     Column("repository_id", Integer, ForeignKey("repositories.id")),
     Column("type_id", Integer, ForeignKey("projectTypes.id")),

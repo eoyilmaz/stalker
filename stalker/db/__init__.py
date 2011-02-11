@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-"""This is the database module of Stalker.
+"""Database module of Stalker.
 
 Whenever stalker.db or something under it imported, the
 :func:`~stalker.db.setup` becomes available to let one setup the database.
@@ -24,9 +24,7 @@ __mappers__ = []
 
 #----------------------------------------------------------------------
 def setup(database=None, mappers=[]):
-    """
-    This is a utillty function that helps to connect the system to the given
-    database.
+    """Utillty function that helps to connect the system to the given database.
     
     if the database is None then the it setups using the default database in
     the settings file.

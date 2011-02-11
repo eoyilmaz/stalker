@@ -8,8 +8,9 @@ from sqlalchemy.orm import relationship, synonym
 from sqlalchemy import (
     Table,
     Column,
-    Integer,
+    Date,
     ForeignKey,
+    Integer,
 )
 from stalker import db
 from stalker.db import tables
@@ -164,6 +165,72 @@ class StatusMixinDB(object):
                 tables.statusLists.c.id
             ),
             "status_list": synonym("_status_list"),
+        }
+        
+        try:
+            mapper_arguments["properties"].update(new_properties)
+        except KeyError:
+            mapper_arguments["properties"] = new_properties
+        
+        return mapper_arguments
+
+
+
+
+
+
+########################################################################
+class ScheduleMixinDB(object):
+    """A helper class for ScheduleMixin table and mapper setup.
+    
+    Helps setting up tables and mappers for classes mixed in with
+    :class:`~stalker.core.models.mixin.ScheduleMixin`
+    
+    For now there is no exmaple for it, but it is pretty similiar to the other
+    mixin classes.
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    @classmethod
+    def setup(cls, class_, class_table, mapper_arguments={}):
+        """creates the necessary tables and properties for the mappers for the
+        mixed in class
+        
+        use the returning dictionary (mapper_arguments) in your mapper
+        
+        :param class_: the mixed in class, in other words the class which will
+          be extended with the mixin functionalities
+         
+        :param class_table: the table holding the information about the class
+        
+        :param mapper_arguments: incoming mapper arugments for the
+          SQLAlchemy.Orm.Mapper, it will be updated with the properties of the
+          current mixin
+        
+        :type mapper_arguments: dict
+        
+        :returns: a dictionary holding the mapper_arguments
+        """
+        
+        class_name = class_.__name__
+        
+        # update the given class table with new columns
+        class_table.append_column(
+            Column("start_date", Date),
+        )
+        
+        class_table.append_column(
+            Column("due_date", Date),
+        )
+        
+        
+        new_properties = {
+            "_start_date": class_table.c.start_date,
+            "start_date": synonym("_start_date"),
+            "_due_date": class_table.c.due_date,
+            "due_date": synonym("_due_date"),
         }
         
         try:

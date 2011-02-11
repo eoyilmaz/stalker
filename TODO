@@ -9,12 +9,12 @@ TODO:
    kind of relations in the system. SQLAlchemy handles them automatically but
    Stalker should do it too, to allow others who are not willing to use
    SQLAlchemy as their ORM to be able to have this property automatically.
- 
- * A Status in StatusList should be accessed by its name used as the index
 
 DONE:
 =====
 
+ * A Status in StatusList should be accessed by its name used as the index
+ 
  * A status should be comparable with a string like project.status=="complete"
    or project.status=="cmplt"
  

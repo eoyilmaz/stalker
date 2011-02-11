@@ -12,7 +12,8 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
+class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
+              mixin.ScheduleMixin):
     """All the information about a Project in Stalker is hold in this class.
     
     Project is one of the main classes that will direct the others. A project
@@ -23,25 +24,10 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
     
     .. _help files of datetime: http://docs.python.org/library/datetime.html
     
-    It is mixed with :class:`~stalker.core.models.mixin.ReferenceMixin` and
-    :class:`~stalker.core.models.mixin.StatusMixin` to give reference and
-    status abilities.
-    
-    
-    :param start_date: the start date of the project, should be a datetime.date
-      instance, when given as None or tried to be set to None, it is to set to
-      today, setting the start date also effects due date, if the new
-      start_date passes the due_date the due_date is also changed to a date to
-      keep the timedelta between dates. The default value is
-      datetime.date.today()
-    
-    :param due_date: the due_date of the project, should be a datetime.date or
-      datetime.timedelta instance, if given as a datetime.timedelta, then it
-      will be converted to date by adding the timedelta to the start_date
-      attribute, when the start_date is changed to a date passing the due_date,
-      then the due_date is also changed to a later date so the timedelta is
-      kept between the dates. The default value is 10 days given as
-      datetime.timedelta
+    It is mixed with :class:`~stalker.core.models.mixin.ReferenceMixin`,
+    :class:`~stalker.core.models.mixin.StatusMixin` and
+    :class:`~stalker.core.models.mixin.ScheduleMixin` to give reference, status
+    and schedule abilities.
     
     :param lead: the lead of the project, should be an instance of
       :class:`~stalker.core.models.user.User`, can be skipped
@@ -133,6 +119,8 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
         self.status_list = status_list
         self.status = status
         self.references = references
+        self.start_date = start_date
+        self.due_date = due_date
     
     
     
@@ -159,31 +147,6 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
         """
         
         return abs(float(display_width_in))
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_due_date(self, due_date_in):
-        """validates the given due_date_in value
-        """
-        
-        if due_date_in is None:
-            due_date_in = datetime.timedelta(days=10)
-        
-        if not isinstance(due_date_in, (datetime.date, datetime.timedelta)):
-            raise ValueError("the due_date should be an instance of "
-                             "datetime.date or datetime.timedelta")
-        
-        if isinstance(due_date_in, datetime.date) and \
-           self.start_date > due_date_in:
-            raise ValueError("the due_date should be set to a date passing "
-                             "the start_date, or should be set to a "
-                             "datetime.timedelta")
-        
-        if isinstance(due_date_in, datetime.timedelta):
-            due_date_in = self._start_date + due_date_in
-        
-        return due_date_in
     
     
     
@@ -252,22 +215,6 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
                              "stalker.core.models.sequence.Sequence instances")
         
         return ValidatedList(sequences_in, sequence.Sequence)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_start_date(self, start_date_in):
-        """validates the given start_date_in value
-        """
-        
-        if start_date_in is None:
-            start_date_in = datetime.date.today()
-        
-        if not isinstance(start_date_in, datetime.date):
-            raise ValueError("start_date shouldbe an instance of "
-                             "datetime.date")
-        
-        return start_date_in
     
     
     
@@ -349,29 +296,6 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
     
     
     #----------------------------------------------------------------------
-    def due_date():
-        def fget(self):
-            return self._due_date
-        
-        def fset(self, due_date_in):
-            self._due_date = self._validate_due_date(due_date_in)
-            
-            # update the _project_duration
-            self._project_duration = self._due_date - self._start_date
-        
-        doc = """The date that the project should be delivered, can be set to a
-        datetime.timedelta and in this case it will be calculated as an offset
-        from the start_date and converted to datetime.date again. Setting the
-        start_date to a date passing the due_date will also set the due_date so
-        the timedelta between them is preserved, default value is 10 days"""
-        
-        return locals()
-    
-    due_date = property(**due_date())
-    
-    
-    
-    #----------------------------------------------------------------------
     def fps():
         def fget(self):
             return self._fps
@@ -392,7 +316,7 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
         def fget(self):
             return self._image_format
         def fset(self, image_format_in):
-            self._image_format_in = \
+            self._image_format = \
                 self._validate_image_format(image_format_in)
         
         doc = """the image format of the current project. This value defines
@@ -468,35 +392,6 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
         return locals()
     
     sequences = property(**sequences())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def start_date():
-        def fget(self):
-            return self._start_date
-        
-        def fset(self, start_date_in):
-            self._start_date = self._validate_start_date(start_date_in)
-            
-            # check if start_date is passing due_date and offset due_date
-            # accordingly
-            if self._start_date > self._due_date:
-                self._due_date = self._start_date + self._project_duration
-            
-            # update the project duration
-            self._project_duration = self._due_date - self._start_date
-        
-        doc = """The date that this project should start. Also effects the
-        due_date in certain conditions, if the start_date is set to a time
-        passing the due_date it will also offset the due_date to keep the time
-        difference between the start_date and due_date. start_date should be an
-        instance of datetime.date and the default value is
-        datetime.date.today()"""
-        
-        return locals()
-    
-    start_date = property(**start_date())
     
     
     
