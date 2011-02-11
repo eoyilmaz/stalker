@@ -8,7 +8,7 @@ You can use your also use your own mappers. See the docs.
 
 from sqlalchemy.orm import mapper, relationship, backref, synonym
 from stalker.db import tables
-from stalker.db.mixin import ReferenceMixinDB, StatusMixinDB
+from stalker.db.mixin import ReferenceMixinDB, StatusMixinDB, ScheduleMixinDB
 from stalker.core.models import (
     asset,
     assetBase,
@@ -413,10 +413,6 @@ def setup():
         "inherits": project.Project.__base__,
         "polymorphic_identity": project.Project.entity_type,
         "properties": {
-            "_start_date": tables.projects.c.start_date,
-            "start_date": synonym("_start_date"),
-            "_due_date": tables.projects.c.due_date,
-            "due_date": synonym("_due_date"),
             "_lead": relationship(
                 user.User,
                 primaryjoin=tables.projects.c.lead_id==tables.users.c.id,
@@ -459,6 +455,9 @@ def setup():
     
     # then to the StatusMixin
     StatusMixinDB.setup(project.Project, tables.projects, project_mapper_arguments)
+    
+    # the to the ScheduleMixin
+    ScheduleMixinDB.setup(project.Project, tables.projects, project_mapper_arguments)
     
     mapper(
         project.Project,

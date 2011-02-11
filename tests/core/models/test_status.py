@@ -364,6 +364,24 @@ class StatusListTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_indexing_get_string_indexes(self):
+        """testing indexing of statuses in the statusList, get with string
+        """
+        
+        status1 = status.Status(name="Complete", code="CMPLT")
+        status2 = status.Status(name="Work in Progress", code="WIP")
+        status3 = status.Status(name="Pending Review", code="PRev")
+        
+        a_status_list = status.StatusList(name="Asset Status List",
+                                          statuses=[status1, status2, status3],
+                                          target_entity_type="Asset")
+        
+        self.assertEquals(a_status_list[0], a_status_list["complete"])
+        self.assertEquals(a_status_list[1], a_status_list["wip"])
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_indexing_set(self):
         """testing indexing of statuses in the statusList, set
         """

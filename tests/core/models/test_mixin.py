@@ -2,6 +2,7 @@
 
 
 
+import datetime
 import mocker
 from stalker.core.models import entity, mixin, link, status
 from stalker.ext.validatedList import ValidatedList
@@ -476,3 +477,289 @@ class StatusMixinTester(mocker.MockerTestCase):
         self.assertEquals(self.mock_mixed_obj.status, test_value)
 
 
+
+
+
+
+########################################################################
+class ScheduleMixinTester(mocker.MockerTestCase):
+    """Tests the ScheduleMixin
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """setup the test
+        """
+        
+        # create mock objects
+        
+        self.start_date = datetime.date.today()
+        self.due_date = self.start_date + datetime.timedelta(days=20)
+        
+        self.kwargs = {
+            "name": "Test Schedule Mixin",
+            "description": "This is a simple entity object for testing " +
+                           "ScheduleMixin",
+            "start_date": self.start_date,
+            "due_date": self.due_date,
+        }
+        
+        class Bar(object):
+            pass
+        
+        class FooMixedInClass(entity.SimpleEntity, mixin.ScheduleMixin):
+            pass
+        
+        class FooMixedInClass_without_init(Bar, mixin.ScheduleMixin):
+            pass
+        
+        self.FooMixedInClass = FooMixedInClass
+        self.FooMixedInClass_without_init = FooMixedInClass_without_init
+        
+        self.mock_foo_obj = FooMixedInClass(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_start_argument_is_not_a_date_object(self):
+        """testing if a ValueError will be raised when the start is given as
+        something other than a datetime.date object
+        """
+        
+        test_values = [1, 1.2, "str", ["a", "date"]]
+        
+        for test_value in test_values:
+            self.kwargs["start_date"] = test_value
+            
+            self.assertRaises(ValueError, self.FooMixedInClass_without_init,
+                              **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_start_attribute_is_not_a_date_object(self):
+        """testing if a ValueError will be raised when trying to set the
+        start attribute to something other than a datetime.date object
+        """
+        
+        test_values = [1, 1.2, "str", ["a", "date"]]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_foo_obj,
+                "start_date",
+                test_value
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_start_date_argument_is_given_as_None_use_the_default_value(self):
+        """testing if the start_date argument is given as None, will use the
+        today as the start date
+        """
+        
+        self.kwargs["start_date"] = None
+        new_foo_obj = self.FooMixedInClass_without_init(**self.kwargs)
+        self.assertEquals(new_foo_obj.start_date, datetime.date.today())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_start_date_attribute_is_set_to_None_use_the_default_value(self):
+        """testing if setting the start_date attribute to None will update the
+        start_date to today
+        """
+        
+        self.mock_foo_obj.start_date = None
+        self.assertEquals(self.mock_foo_obj.start_date, datetime.date.today())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_start_date_attribute_works_properly(self):
+        """testing if the start propertly is working properly
+        """
+        
+        test_value = datetime.date(year=2011, month=1, day=1)
+        self.mock_foo_obj.start_date = test_value
+        self.assertEquals(self.mock_foo_obj.start_date, test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_due_date_argument_is_not_a_date_or_timedelta_object(self):
+        """testing if a ValueError will be raised when trying to set the due
+        date something other than a datetime.date object
+        """
+        
+        test_values = [1, 1.2, "str", ["a", "date"]]
+        
+        for test_value in test_values:
+            self.kwargs["due_date"] = test_value
+            self.assertRaises(ValueError, self.FooMixedInClass_without_init,
+                              **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_due_date_attribute_is_not_a_date_or_timedelta_object(self):
+        """testing if a ValueError will be raised when trying to set the due
+        attribute is to something other than a datetime.date object
+        """
+        
+        test_values = [1, 1.2, "str", ["a", "date"]]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_foo_obj,
+                "due_date",
+                test_value
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_due_date_argument_is_set_to_None_will_use_the_default_value(self):
+        """testing if given the due_date argument given as None will use the
+        default value, which is 10 days after the start_date
+        """
+        
+        self.kwargs["due_date"] = None
+        new_foo_obj = self.FooMixedInClass_without_init(**self.kwargs)
+        self.assertEquals(new_foo_obj.due_date - new_foo_obj.start_date,
+                          datetime.timedelta(days=10))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_due_date_attribute_is_set_to_None_will_use_the_default_value(self):
+        """testing if setting the due_date attribute to None will use the
+        default value, which is 10 days after the start_date
+        """
+        
+        self.mock_foo_obj.due_date = None
+        self.assertEquals(
+            self.mock_foo_obj.due_date - self.mock_foo_obj.start_date,
+            datetime.timedelta(days=10)
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_due_date_argument_is_given_as_timedelta_converted_to_datetime(self):
+        """testing if due date attribute is converted to a proper
+        datetime.date object when due argument is given as a datetime.timedelta
+        """
+        
+        test_value = datetime.timedelta(days=20)
+        self.kwargs["due_date"] = test_value
+        new_foo_obj = self.FooMixedInClass_without_init(**self.kwargs)
+        
+        self.assertIsInstance(new_foo_obj.due_date, datetime.date)
+        
+        self.assertEquals(
+            new_foo_obj.due_date - new_foo_obj.start_date,
+            test_value
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_due_date_attribute_is_set_to_timedelta_converted_to_datetime(self):
+        """testing if due date attribute is converted to a proper datetime.date
+        object when the due attribute is set to datetime.timedelta
+        """
+        
+        test_value = datetime.timedelta(days=20)
+        self.mock_foo_obj.due_date = test_value
+        
+        self.assertIsInstance(self.mock_foo_obj.due_date, datetime.date)
+        
+        self.assertEquals(
+            self.mock_foo_obj.due_date - self.mock_foo_obj.start_date,
+            test_value
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_due_date_argument_is_tried_to_set_to_a_time_before_start_date(self):
+        """testing if a ValueError will be raised when the due argument is
+        given as a value which is a date before start
+        """
+        
+        self.kwargs["due_date"] = self.kwargs["start_date"] - \
+            datetime.timedelta(days=10)
+        
+        self.assertRaises(ValueError, self.FooMixedInClass_without_init,
+                          **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_due_date_attribute_is_tried_to_set_to_a_time_before_start_date(self):
+        """testing if a ValueError will be raised when the due attribute is
+        tried to be set to a date before start
+        """
+        
+        new_due_date = self.mock_foo_obj.start_date - \
+                     datetime.timedelta(days=10)
+        
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_foo_obj,
+            "due_date",
+            new_due_date
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_due_date_attribute_is_shifted_when_start_date_passes_it(self):
+        """testing if due_date attribute will be shifted when the start_date
+        attribute passes it
+        """
+        
+        time_delta = self.mock_foo_obj.due_date - self.mock_foo_obj.start_date
+        self.mock_foo_obj.start_date += 2 * time_delta
+        
+        self.assertEquals(
+            self.mock_foo_obj.due_date - self.mock_foo_obj.start_date,
+            time_delta
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_duration_attribute_is_calculated_correctly(self):
+        """testing if the duration attribute is calculated correctly
+        """
+        
+        new_foo_entity = self.FooMixedInClass(self.kwargs)
+        new_foo_entity.start_date = datetime.date.today()
+        new_foo_entity.due_date = datetime.timedelta(201)
+        
+        self.assertEquals(new_foo_entity.duration, datetime.timedelta(201))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_duration_attribute_is_read_only(self):
+        """testing if the duration attribute is read-only
+        """
+        
+        new_foo_entity = self.FooMixedInClass(self.kwargs)
+        self.assertRaises(
+            AttributeError, setattr, new_foo_entity, "duration", 10
+        )
+    
+    
+    

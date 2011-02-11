@@ -214,7 +214,7 @@ class SimpleEntity(object):
         def fset(self, description_in):
             self._description = self._validate_description(description_in)
         
-        doc = """the description of the entity"""
+        doc = """description of this object"""
         
         return locals()
     
@@ -237,7 +237,7 @@ class SimpleEntity(object):
             # set the code
             self.code = self._name
         
-        doc = """the name of the entity"""
+        doc = """name of this object"""
         
         return locals()
     
@@ -251,16 +251,15 @@ class SimpleEntity(object):
         def fget(self):
             return self._nice_name
         
-        doc = """this is the ``nice name`` of the SimpleEntity. It has the same
+        doc = """this is the ``nice name`` of this object. It has the same
         value with the name (contextually) but with a different format like,
-        all the whitespaces replaced by underscores ("\_"), all the CamelCase
+        all the white spaces replaced by underscores ("\_"), all the CamelCase
         form will be expanded by underscore (\_) characters and it is always
-        lowercase.
+        lower case.
         
-        There is also the ``code`` attribute which is simple the uppercase form
-        of ``nice_name`` if it is not defined differently (i.e set to another
-        value).
-        """
+        There is also the ``code`` attribute which is simply the upper case
+        form of ``nice_name`` if it is not defined differently (i.e set to
+        another value). """
         
         return locals()
     
@@ -392,6 +391,10 @@ class SimpleEntity(object):
             return self._code
         def fset(self, code_in):
             self._code = self._validate_code(code_in)
+        
+        doc = """the code of this object, if not given it will be evaluated
+        from the ``name`` attribute"""
+        
         return locals()
     
     code = property(**code())
@@ -407,8 +410,8 @@ class SimpleEntity(object):
         def fset(self, created_by_in):
             self._created_by = self._validate_created_by(created_by_in)
         
-        doc = """gets and sets the User object who has created this
-        AuditEntity"""
+        doc = """the :class:`~stalker.core.models.user.User` object who has
+        created this object"""
         
         return locals()
     
@@ -425,8 +428,8 @@ class SimpleEntity(object):
         def fset(self, updated_by_in):
             self._updated_by = self._validate_updated_by(updated_by_in)
         
-        doc = """gets and sets the User object who has updated this
-        AuditEntity"""
+        doc = """the :class:`~stalker.core.models.user.User` object who has
+        updated this object"""
         
         return locals()
     
@@ -443,8 +446,8 @@ class SimpleEntity(object):
         def fset(self, date_created_in):
             self._date_created = self._validate_date_created(date_created_in)
         
-        doc = """gets and sets the datetime.datetime object which shows when
-        this object has been created"""
+        doc = """a :class:`datetime.datetime` instance showing the creation
+        date and time of this object"""
         
         return locals()
     
@@ -461,8 +464,8 @@ class SimpleEntity(object):
         def fset(self, date_updated_in):
             self._date_updated = self._validate_date_updated(date_updated_in)
         
-        doc = """gets and sets the datetime.datetime object which shows when
-        this object has been updated"""
+        doc = """a :class:`datetime.datetime` instance showing the update
+        date and time of this object"""
         
         return locals()
     

@@ -83,6 +83,7 @@ Summary
    stalker.db.mixin
    stalker.db.mixin.ReferenceMixinDB
    stalker.db.mixin.StatusMixinDB
+   stalker.db.mixin.ScheduleMixinDB
    stalker.db.tables
    stalker.db.setup
    stalker.core.models
@@ -110,6 +111,7 @@ Summary
    stalker.core.models.link.Link
    stalker.core.models.mixin
    stalker.core.models.mixin.ReferenceMixin
+   stalker.core.models.mixin.ScheduleMixin
    stalker.core.models.mixin.StatusMixin
    stalker.core.models.pipelineStep
    stalker.core.models.pipelineStep.PipelineStep

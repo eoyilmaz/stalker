@@ -4,7 +4,7 @@
 Mixins are, you know, things that we love. Ok I don't have anything to write,
 just use and love them.
 
-By the way, for SQLAlchemy part of the mixins (tables and mappers) refer to the
+For SQLAlchemy part of the mixins (tables and mappers) refer to the
 :mod:`~stalker.db.mixin`. There is a corresponding type for every mixin
 implemented in this module. Also the documentation explains how to mixin tables
 and mappers.
@@ -12,6 +12,7 @@ and mappers.
 
 
 
+import datetime
 from stalker.core.models import link, status
 from stalker.ext.validatedList import ValidatedList
 
@@ -177,8 +178,12 @@ class StatusMixin(object):
         def fset(self, status_in):
             self._status = self._validate_status(status_in)
         
-        doc = """this is the property that sets and returns the status
-        attribute"""
+        doc = """The current status index of the object.
+        
+        This is an integer value and shows the index of the
+        :class:`~stalker.core.models.status.Status` object in the
+        :class:`~stalker.core.models.status.StatusList` of this object.
+        """
         
         return locals()
     
@@ -196,9 +201,180 @@ class StatusMixin(object):
         def fset(self, status_list_in):
             self._status_list = self._validate_status_list(status_list_in)
         
-        doc = """this is the property that sets and returns the status_list
-        attribute"""
+        doc = """The list of statuses that this object has.
+        
+        This is the property that sets and returns the status_list
+        attribute
+        """
         
         return locals()
     
     status_list = property(**status_list())
+
+
+
+
+
+
+########################################################################
+class ScheduleMixin(object):
+    """Adds schedule info to the mixed in class.
+    
+    The schedule is the right mixin for entities which needs schedule
+    information like ``start_date``, ``due_date`` and ``duration``
+    
+    :param start_date: the start date of the entity, should be a datetime.date
+      instance, when given as None or tried to be set to None, it is to set to
+      today, setting the start date also effects due date, if the new
+      start_date passes the due_date the due_date is also changed to a date to
+      keep the timedelta between dates. The default value is
+      datetime.date.today()
+    
+    :type start_date: :class:`datetime.datetime`
+    
+    :param due_date: the due_date of the entity, should be a datetime.date or
+      datetime.timedelta instance, if given as a datetime.timedelta, then it
+      will be converted to date by adding the timedelta to the start_date
+      attribute, when the start_date is changed to a date passing the due_date,
+      then the due_date is also changed to a later date so the timedelta is
+      kept between the dates. The default value is 10 days given as
+      datetime.timedelta
+    
+    :type due_date: :class:`datetime.datetime` or :class:`datetime.timedelta`
+    
+    """
+    
+    
+    _start_date = datetime.date.today()
+    _due_date = _start_date + datetime.timedelta(days=10)
+    _duration = _due_date - _start_date
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 start_date=datetime.date.today(),
+                 due_date=datetime.timedelta(days=10),
+                 **kwargs
+                 ):
+        
+        self._start_date = self._validate_start_date(start_date)
+        self._due_date = self._validate_due_date(due_date)
+        self._duration = self.due_date - self.start_date
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_due_date(self, due_date_in):
+        """validates the given due_date_in value
+        """
+        
+        if due_date_in is None:
+            due_date_in = datetime.timedelta(days=10)
+        
+        if not isinstance(due_date_in, (datetime.date, datetime.timedelta)):
+            raise ValueError("the due_date should be an instance of "
+                             "datetime.date or datetime.timedelta")
+        
+        if isinstance(due_date_in, datetime.date) and \
+           self.start_date > due_date_in:
+            raise ValueError("the due_date should be set to a date passing "
+                             "the start_date, or should be set to a "
+                             "datetime.timedelta")
+        
+        if isinstance(due_date_in, datetime.timedelta):
+            due_date_in = self._start_date + due_date_in
+        
+        return due_date_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_start_date(self, start_date_in):
+        """validates the given start_date_in value
+        """
+        
+        if start_date_in is None:
+            start_date_in = datetime.date.today()
+        
+        if not isinstance(start_date_in, datetime.date):
+            raise ValueError("start_date shouldbe an instance of "
+                             "datetime.date")
+        
+        return start_date_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def due_date():
+        def fget(self):
+            return self._due_date
+        
+        def fset(self, due_date_in):
+            self._due_date = self._validate_due_date(due_date_in)
+            
+            # update the _project_duration
+            self._duration = self._due_date - self._start_date
+        
+        doc = """The date that the entity should be delivered.
+        
+        The due_date can be set to a datetime.timedelta and in this case it
+        will be calculated as an offset from the start_date and converted to
+        datetime.date again. Setting the start_date to a date passing the
+        due_date will also set the due_date so the timedelta between them is
+        preserved, default value is 10 days"""
+        
+        return locals()
+    
+    due_date = property(**due_date())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def start_date():
+        def fget(self):
+            return self._start_date
+        
+        def fset(self, start_date_in):
+            self._start_date = self._validate_start_date(start_date_in)
+            
+            # check if start_date is passing due_date and offset due_date
+            # accordingly
+            if self._start_date > self._due_date:
+                self._due_date = self._start_date + self._duration
+            
+            # update the project duration
+            self._duration = self._due_date - self._start_date
+        
+        doc = """The date that this entity should start.
+        
+        Also effects the due_date in certain conditions, if the start_date is
+        set to a time passing the due_date it will also offset the due_date to
+        keep the time difference between the start_date and due_date.
+        start_date should be an instance of datetime.date and the default value
+        is datetime.date.today()"""
+        
+        return locals()
+    
+    start_date = property(**start_date())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def duration():
+        def fget(self):
+            return self._duration
+        
+        doc = """Duration of the project.
+        
+        The duration is calculated by subtracting start_date from the due_date,
+        so it is a datetime.timedelta, for now it is read-only
+        """
+        
+        return locals()
+    
+    duration = property(**duration())
+    
+    
+    
+

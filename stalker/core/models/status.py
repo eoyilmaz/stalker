@@ -29,7 +29,7 @@ class Status(entity.Entity):
     True
     >>> a_status == "oh"
     True
-    >>> a_status == "another name"
+    >>> a_status == "another status"
     False
     """
     
@@ -69,6 +69,24 @@ class StatusList(entity.Entity):
     A StatusList can only be assigned to only one entity type. So a Project can
     only have a suitable StatusList object which is designed for Project
     entities.
+    
+    The list of statuses in StatusList can be accessed by using a list like
+    indexing and it also supports string indexes only for getting the item,
+    you can not set an item with string indices:
+    
+    >>> from stalker.core.models.status import Status, StatusList
+    >>> status1 = Status(name="Complete", code="CMPLT")
+    >>> status2 = Status(name="Work in Progress", code="WIP")
+    >>> status3 = Status(name="Pending Review", code="PRev")
+    >>> a_status_list = StatusList(name="Asset Status List",
+                                   statuses=[status1, status2, status3],
+                                   target_entity_type="Asset")
+    >>> a_status_list[0]
+    <Status (Complete, CMPLT)>
+    >>> a_status_list["complete"]
+    <Status (Complete, CMPLT)>
+    >>> a_status_list["wip"]
+    <Status (Work in Progress, WIP)>
     
     :param statuses: this is a list of status objects, so you can prepare
       different StatusList objects for different kind of entities
@@ -174,8 +192,8 @@ class StatusList(entity.Entity):
         def fset(self, statuses):
             self._statuses = self._validate_statuses(statuses)
         
-        doc = """this is the property that sets and returns the statuses, or
-        namely the status list of this StatusList object"""
+        doc = """list of :class:`~stalker.core.models.status.Status` objects,
+        showing the possible statuses"""
         
         return locals()
     
@@ -189,7 +207,17 @@ class StatusList(entity.Entity):
         def fget(self):
             return self._target_entity_type
         
-        doc="""the target_entity_type which this StatusList is valid for"""
+        doc="""the entity type which this StatusList is valid for, usally it
+        is set to the TargetClass.entity_type class attribute of the target
+        class::
+          
+          from stalker.core.models import status, asset
+          
+          # now create a StatusList valid only for assets
+          status1 = status.Status(name="Waiting To Start", code="WTS")
+          status2 = status.Status(name="Work In Progress", code="WIP")
+          status3 = status.Status(name="Complete", code="CMPLT")
+        """
         
         return locals()
     
@@ -213,8 +241,12 @@ class StatusList(entity.Entity):
     def __getitem__(self, key):
         """the indexing attributes for getting item
         """
-        
-        return self._statuses[key]
+        if isinstance(key, (str, unicode)):
+            for item in self._statuses:
+                if item==key:
+                    return item
+        else:
+            return self._statuses[key]
     
     
     #----------------------------------------------------------------------
