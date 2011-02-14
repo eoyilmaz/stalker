@@ -37,4 +37,5 @@ Below you can find the roadmap based on the version
 
 1.0.0:
 ------
+ * Complete Project Management capabilities.
  * New features that I can't really see right now.

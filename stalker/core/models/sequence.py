@@ -42,6 +42,8 @@ class Sequence(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
                  **kwargs
                  ):
         
+        super(Sequence, self).__init__(**kwargs)
+        
         self._project = self._validate_project(project)
         self._lead = self._validate_lead(lead)
         self._shots = self._validate_shots(shots)
@@ -146,5 +148,16 @@ class Sequence(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
         return locals()
     
     shots = property(**shots())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Sequence, self).__eq__(other) and \
+               isinstance(other, Sequence)
+    
     
     

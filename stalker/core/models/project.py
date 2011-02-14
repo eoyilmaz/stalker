@@ -227,9 +227,10 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
         """validates the given structure_in vlaue
         """
         
-        if not isinstance(structure_in, structure.Structure):
-            raise ValueError("structure should be an instance of "
-                             "stalker.core.models.structure.Structure")
+        if structure_in is not None:
+            if not isinstance(structure_in, structure.Structure):
+                raise ValueError("structure should be an instance of "
+                                 "stalker.core.models.structure.Structure")
         
         return structure_in
     

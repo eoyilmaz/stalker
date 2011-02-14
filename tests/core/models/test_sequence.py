@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import sequence, project, user, shot
+from stalker.core.models import sequence, project, user, shot, entity
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -317,6 +317,44 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.assertIsInstance(self.mock_sequence.shots, ValidatedList)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing the equality of sequences
+        """
+        
+        
+        new_seq1 = sequence.Sequence(**self.kwargs)
+        new_seq2 = sequence.Sequence(**self.kwargs)
+        new_entity = entity.Entity(**self.kwargs)
+        
+        self.kwargs["name"] = "a different sequence"
+        new_seq3 = sequence.Sequence(**self.kwargs)
+        
+        self.assertTrue(new_seq1==new_seq2)
+        self.assertFalse(new_seq1==new_seq3)
+        self.assertFalse(new_seq1==new_entity)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing the inequality of sequences
+        """
+        
+        
+        new_seq1 = sequence.Sequence(**self.kwargs)
+        new_seq2 = sequence.Sequence(**self.kwargs)
+        new_entity = entity.Entity(**self.kwargs)
+        
+        self.kwargs["name"] = "a different sequence"
+        new_seq3 = sequence.Sequence(**self.kwargs)
+        
+        self.assertFalse(new_seq1!=new_seq2)
+        self.assertTrue(new_seq1!=new_seq3)
+        self.assertTrue(new_seq1!=new_entity)
     
     
     

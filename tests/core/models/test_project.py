@@ -942,12 +942,32 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_structure_argument_is_None(self):
+        """testing if nothing happens when the structure argument is None
+        """
+        
+        self.kwargs["structure"] = None
+        new_project = project.Project(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_structure_attirbute_is_None(self):
+        """testing if nothing happends when the structure attribute is set to
+        None
+        """
+        
+        self.mock_project.structure = None
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_structure_argument_not_instance_of_Structure(self):
         """testing if a ValueError will be raised when the structure argument
         is not an instance of Structure
         """
         
-        test_values = [None, 1, 1.2, "a str", ["a", "list"]]
+        test_values = [1, 1.2, "a str", ["a", "list"]]
         
         for test_value in test_values:
             self.kwargs["structure"] = test_value
@@ -961,7 +981,7 @@ class ProjectTester(mocker.MockerTestCase):
         is not an instance of Structure
         """
         
-        test_values = [None, 1, 1.2, "a str", ["a", "list"]]
+        test_values = [1, 1.2, "a str", ["a", "list"]]
         
         for test_value in test_values:
             self.assertRaises(
@@ -991,12 +1011,17 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         # create a new project with the same arguments
-        new_project = project.Project(**self.kwargs)
+        new_project1 = project.Project(**self.kwargs)
         
         # create a new entity with the same arguments
         new_entity = entity.Entity(**self.kwargs)
         
-        self.assertTrue(self.mock_project==new_project)
+        # create another project with different name
+        self.kwargs["name"] = "a different project"
+        new_project2 = project.Project(**self.kwargs)
+        
+        self.assertTrue(self.mock_project==new_project1)
+        self.assertFalse(self.mock_project==new_project2)
         self.assertFalse(self.mock_project==new_entity)
     
     
@@ -1007,12 +1032,17 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         # create a new project with the same arguments
-        new_project = project.Project(**self.kwargs)
+        new_project1 = project.Project(**self.kwargs)
         
         # create a new entity with the same arguments
         new_entity = entity.Entity(**self.kwargs)
         
-        self.assertFalse(self.mock_project!=new_project)
+        # create another project with different name
+        self.kwargs["name"] = "a different project"
+        new_project2 = project.Project(**self.kwargs)
+        
+        self.assertFalse(self.mock_project!=new_project1)
+        self.assertTrue(self.mock_project!=new_project2)
         self.assertTrue(self.mock_project!=new_entity)
     
     

@@ -1064,8 +1064,50 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_Sequence(self):
         """testing the persistence of Sequence
         """
+        status1 = status.Status(name="On Hold", code="OH")
+        status2 = status.Status(name="Work In Progress", code="WIP")
+        status3 = status.Status(name="Finished", code="FIN")
         
-        self.fail("test is not implemented yet")
+        project_status_list = status.StatusList(
+            name="Project Status List",
+            statuses=[status1, status2, status3],
+            target_entity_type = project.Project.entity_type
+        )
+        
+        sequence_status_list = status.StatusList(
+            name="Sequence Status List",
+            statuses=[status1, status2, status3],
+            target_entity_type = sequence.Sequence.entity_type
+        )
+        
+        project1 = project.Project(name="Test project",
+                                   status_list=project_status_list)
+        
+        lead = user.User(login_name="lead", email="lead@lead.com",
+                         first_name="lead", last_name="lead")
+        
+        shot1 = shot.Shot(code="SH001")
+        shot2 = shot.Shot(code="SH002")
+        shot3 = shot.Shot(code="SH003")
+        
+        kwargs = {
+            "name": "Test seuqence",
+            "description": "this is a test sequence",
+            "project": project1,
+            "lead": lead,
+            "shots": [shot1, shot2, shot3],
+            "status_list": sequence_status_list,
+        }
+        
+        test_sequence = sequence.Sequence(**kwargs)
+        
+        db.session.add(test_sequence)
+        db.session.commit()
+        
+        test_sequence_DB = db.query(sequence.Sequence).\
+                         filter_by(name=kwargs["name"]).one()
+        
+        self.assertEquals(test_sequence, test_sequence_DB)
     
     
     
