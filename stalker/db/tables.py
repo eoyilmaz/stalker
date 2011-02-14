@@ -497,12 +497,7 @@ project_users = Table(
 # PROJECT
 projects = Table(
     "projects", metadata,
-    Column(
-        "id",
-        Integer,
-        ForeignKey("entities.id"),
-        primary_key=True,
-    ),
+    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
     Column("lead_id", Integer, ForeignKey("users.id")),
     Column("repository_id", Integer, ForeignKey("repositories.id")),
     Column("type_id", Integer, ForeignKey("projectTypes.id")),
@@ -515,6 +510,47 @@ projects = Table(
 
 
 
+# TASK - WARNING: It is a temprorary table, will be completed later
+tasks = Table(
+    "tasks", metadata,
+    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
+)
+
+
+
+# ASSETBASE_TASKS
+assetBase_tasks = Table(
+    "assetBase_tasks", metadata,
+    Column(
+        "assetBase_id",
+        Integer,
+        ForeignKey("assetBases.id"),
+        primary_key=True
+    ),
+    Column(
+        "task_id",
+        Integer,
+        ForeignKey("tasks.id"),
+        primary_key=True
+    )
+)
+
+
+
+# ASSETBASE
+assetBases = Table(
+    "assetBases", metadata,
+    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
+    Column("type_id", Integer, ForeignKey("assetTypes.id")),
+)
+
+
+
+# SHOT - WARNING: It is a temprorary table, will be completed later
+shots = Table(
+    "shots", metadata,
+    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
+)
 
 
 

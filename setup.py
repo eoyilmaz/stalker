@@ -18,7 +18,7 @@ setup(name="stalker",
       version=stalker.__version__,
       author="Erkan Ozgur Yilmaz",
       author_email="eoyilmaz@gmail.com",
-      description=("A Production Asset Management (ProdAm) System"),
+      description=("A Production Asset Management (ProdAM) System"),
       long_description=read("README"),
       keywords=["production", "asset", "management", "vfx", "animation", "maya"
                 "houdini", "nuke", "xsi"],

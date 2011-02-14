@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import assetBase, types, task
+from stalker.core.models import assetBase, types, task, entity
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -215,6 +215,54 @@ class AssetBaseTester(mocker.MockerTestCase):
         """
         
         self.assertIsInstance(self.mock_asset_base.tasks, ValidatedList)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing equality of two AssetBase objects
+        """
+        
+        new_assetBase1 = assetBase.AssetBase(**self.kwargs)
+        new_assetBase2 = assetBase.AssetBase(**self.kwargs)
+        
+        new_entity1 = entity.Entity(**self.kwargs)
+        
+        self.kwargs["type"] = self.mock_type2
+        new_assetBase3 = assetBase.AssetBase(**self.kwargs)
+        
+        self.kwargs["name"] = "another name"
+        new_assetBase4 = assetBase.AssetBase(**self.kwargs)
+        
+        self.assertTrue(new_assetBase1==new_assetBase2)
+        self.assertFalse(new_assetBase1==new_assetBase3)
+        self.assertFalse(new_assetBase1==new_assetBase4)
+        self.assertFalse(new_assetBase3==new_assetBase4)
+        self.assertFalse(new_assetBase1==new_entity1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing inequality of two AssetBase objects
+        """
+        
+        new_assetBase1 = assetBase.AssetBase(**self.kwargs)
+        new_assetBase2 = assetBase.AssetBase(**self.kwargs)
+        
+        new_entity1 = entity.Entity(**self.kwargs)
+        
+        self.kwargs["type"] = self.mock_type2
+        new_assetBase3 = assetBase.AssetBase(**self.kwargs)
+        
+        self.kwargs["name"] = "another name"
+        new_assetBase4 = assetBase.AssetBase(**self.kwargs)
+        
+        self.assertFalse(new_assetBase1!=new_assetBase2)
+        self.assertTrue(new_assetBase1!=new_assetBase3)
+        self.assertTrue(new_assetBase1!=new_assetBase4)
+        self.assertTrue(new_assetBase3!=new_assetBase4)
+        self.assertTrue(new_assetBase1!=new_entity1)
     
     
     

@@ -25,6 +25,13 @@ v0.1.1.a6:
  * improved Project equality tests
  * Implemented stalker.core.models.assetBase.AssetBase class along with its
    tests
+ * The index.rst of the documentation now references the README from the
+   project root.
+ * added the basic implementation of stalker.core.models.task.Task and
+   stalker.core.models.shot.Shot and mapped them simply to be able to test the
+   dependent classes like stalker.core.models.assetBase.AssetBase and
+   stalker.core.models.sequence.Sequence
+ * Added mappers and tables for stalker.core.models.assetBase.AssetBase
 
 v0.1.1.a5:
  * removed the StatusedEntity and its tests, with the introduction of

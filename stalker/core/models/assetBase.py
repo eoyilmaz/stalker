@@ -102,5 +102,16 @@ class AssetBase(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin):
         return locals()
     
     type = property(**type())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(AssetBase, self).__eq__(other) and \
+               isinstance(other, AssetBase) and self.type == other.type
+        
 
 

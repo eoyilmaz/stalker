@@ -11,10 +11,14 @@ from stalker.core.models import assetBase
 
 ########################################################################
 class Shot(assetBase.AssetBase):
-    """The Shot class to manage Shot data.
+    """Manage Shot related data.
+    
+    WARNING: (obviously) not implemented yet!
     """
     
     
     
-    pass
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(Shot, self).__init__(**kwargs)
 

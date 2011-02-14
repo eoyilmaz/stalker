@@ -408,11 +408,12 @@ def setup():
     
     
     
-    # Project - also the first class uses the mixins
-    project_mapper_arguments = {
-        "inherits": project.Project.__base__,
-        "polymorphic_identity": project.Project.entity_type,
-        "properties": {
+    # Project - also the first implemented class using the mixins
+    project_mapper_arguments = dict(
+        inherits=project.Project.__base__,
+        polymorphic_identity=project.Project.entity_type,
+        inherit_condition=tables.projects.c.id==tables.entities.c.id,
+        properties={
             "_lead": relationship(
                 user.User,
                 primaryjoin=tables.projects.c.lead_id==tables.users.c.id,
@@ -448,9 +449,9 @@ def setup():
             "_display_width": tables.projects.c.display_width,
             "display_width": synonym("_display_width"),
         }
-    }
+    )
     
-    # give it to ReferenceMixin first
+    # mix it with ReferenceMixin first
     ReferenceMixinDB.setup(project.Project, tables.projects, project_mapper_arguments)
     
     # then to the StatusMixin
@@ -464,3 +465,79 @@ def setup():
         tables.projects,
         **project_mapper_arguments
     )
+    
+    
+    
+    # Task
+    # WARNING: Not finished, it is a temporary implementation, created to be
+    # able to test other classes
+    
+    task_mapper_arguments = dict(
+        inherits=task.Task.__base__,
+        polymorphic_identity=task.Task.entity_type,
+        inherit_condition=tables.tasks.c.id==tables.entities.c.id
+    )
+    
+    # mix it with StatusMixin
+    StatusMixinDB.setup(task.Task, tables.tasks, task_mapper_arguments)
+    
+    # and then ScheduleMixin
+    ScheduleMixinDB.setup(task.Task, tables.tasks, task_mapper_arguments)
+    
+    mapper(
+        task.Task,
+        tables.tasks,
+        **task_mapper_arguments
+    )
+    
+    
+    
+    # AssetBase
+    assetBase_mapper_arguments = dict(
+        inherits=assetBase.AssetBase.__base__,
+        polymorphic_identity=assetBase.AssetBase.entity_type,
+        inherit_condition=tables.assetBases.c.id==tables.entities.c.id,
+        properties={
+            "_type": relationship(
+                types.AssetType,
+                primaryjoin=\
+                    tables.assetBases.c.type_id==tables.assetTypes.c.id
+            ),
+            "type": synonym("_type"),
+            "_tasks": relationship(
+                task.Task,
+                secondary=tables.assetBase_tasks,
+            ),
+            "tasks": synonym("_tasks"),
+        }
+    )
+    
+    
+    # mix it with ReferenceMixin
+    ReferenceMixinDB.setup(assetBase.AssetBase, tables.assetBases,
+                           assetBase_mapper_arguments)
+    
+    # then with StatusMixin
+    StatusMixinDB.setup(assetBase.AssetBase, tables.assetBases,
+                        assetBase_mapper_arguments)
+    
+    # complete mapping
+    mapper(assetBase.AssetBase, tables.assetBases,
+           **assetBase_mapper_arguments)
+    
+    
+    
+    # Shot
+    # WARNING: Not finished, it is a temporary implementation, created to be
+    # able to test other classes
+    
+    mapper(
+        shot.Shot,
+        tables.shots,
+        inherits=shot.Shot.__base__,
+        inherit_condition=tables.shots.c.id==tables.entities.c.id,
+        polymorphic_identity=shot.Shot.entity_type
+    )
+    
+    
+    

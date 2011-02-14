@@ -551,7 +551,49 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of AssetBase
         """
         
-        self.fail("test is not implemented yet")
+        asset_type = types.AssetType(name="A new AssetType")
+        
+        status1 = status.Status(name="On Hold", code="OH")
+        status2 = status.Status(name="Completed", code="CMPLT")
+        status3 = status.Status(name="Work In Progress", code="WIP")
+        
+        task_status_list = status.StatusList(
+            name="Task Status List",
+            statuses=[status1, status2, status3],
+            target_entity_type=task.Task.entity_type
+        )
+        
+        mock_task1 = task.Task(name="test task 1")
+        mock_task2 = task.Task(name="test task 2")
+        mock_task3 = task.Task(name="test task 3")
+        
+        mock_task1.status_list = task_status_list
+        mock_task2.status_list = task_status_list
+        mock_task3.status_list = task_status_list
+        
+        assetBase_statusList = status.StatusList(
+            name="AssetBase Status List",
+            statuses=[status1, status2, status3],
+            target_entity_type=assetBase.AssetBase.entity_type
+        )
+        
+        kwargs = {
+            "name": "Test AssetBase",
+            "description": "This is a test AssetBase object",
+            "type": asset_type,
+            "tasks": [mock_task1, mock_task2, mock_task3],
+        }
+        
+        asset_base = assetBase.AssetBase(**kwargs)
+        asset_base.status_list = assetBase_statusList
+        
+        db.session.add(asset_base)
+        db.session.commit()
+        
+        asset_base_DB = db.query(assetBase.AssetBase).\
+                      filter_by(name=kwargs["name"]).one()
+        
+        self.assertEquals(asset_base, asset_base_DB)
     
     
     
