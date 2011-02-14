@@ -25,7 +25,7 @@ Features:
  * Integrated messaging system
  * Integrated production planing and tracking tools
  * PySide user interfaces
- * Can be used with any kind of databases supported by SQLAlchmey
+ * Can be used with any kind of databases supported by SQLAlchemy
  * Can be connected to all the major 3d animation packages like Maya, Houdini,
    Nuke, XSI, Vue, Blender etc. and any application that has a Python API
  * Can work as a stand-alone application
@@ -73,8 +73,7 @@ Summary
    stalker.db
    stalker.db.auth
    stalker.db.auth.authenticate
-   stalker.db.auth.create_session
-   stalker.db.auth.get_user
+   stalker.db.auth.session
    stalker.db.auth.login
    stalker.db.auth.login_required
    stalker.db.auth.permission_required

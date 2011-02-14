@@ -37,39 +37,46 @@ class SimpleEntity(object):
     Two SimpleEntities considered equal if they have the same name, the other
     attributes doesn't matter.
     
-    :param name: a string or unicode attribute that holds the name of this
-      entity. it could not be empty, the first letter should be an alphabetic
-      (not alphanumeric) letter and it should not contain any white space
-      at the beggining and at the end of the string, giving an object the
-      object will be converted to string and then the resulting string will be
-      conditioned.
+    :param string name: A string or unicode value that holds the name of this
+      entity. It can not be empty, the first letter should be an alphabetic
+      ([a-zA-z]) (not alphanumeric [a-zA-Z0-9]) letter and it should not
+      contain any white space at the beggining and at the end of the string,
+      giving an object the object will be converted to string and then the
+      resulting string will be conditioned.
     
-    :param description: a string or unicode attribute that holds the
+    :param str description: A string or unicode attribute that holds the
       description of this entity object, it could be an empty string, and it
       could not again have white spaces at the beggining and at the end of the
       string, again any given objects will be converted to strings
     
-    :param created_by: the created_by attribute should contain a User object
-      who is created this object
+    :param created_by: The :class:`~stalker.core.models.user.User` who has
+      created this object
     
-    :param updated_by: the updated_by attribute should contain a User object
-      who is updated the user lastly. the created_by and updated_by attributes
-      should point the same object if this entity is just created
+    :type created_by: :class:`~stalker.core.models.user.User`
     
-    :param date_created: the date that this object is created. it should be a
-      time before now
+    :param updated_by: The :class:`~stalker.core.models.user.User` who has
+      updated this object lastly. The created_by and updated_by attributes
+      point the same object if this object is just created.
     
-    :param date_updated: this is the date that this object is updated lastly.
-      for newly created entities this is equal to date_created and the
-      date_updated cannot be before date_created
+    :param date_created: The date that this object is created.
     
-    :param code: this is the code name of this simple entity, can be omitted
-      and it will be set to the uppercase version of the nice_name attribute.
-      it accepts string or unicode values and any other kind of objects will be
-      converted to string. If both the name and code arguments are given the
-      code property will be set to code, but in any update to name attribute
-      the code also will be updated to the uppercase form of the nice_name
-      attribute
+    :type date_created: :class:`datetime.datetime`
+    
+    :param date_updated: The date that this object is updated lastly. For newly
+      created entities this is equal to date_created and thedate_updated cannot
+      point a date which is before date_created.
+    
+    :type date_updated: :class:`datetime.datetime`
+    
+    :param str code: The code name of this object. It accepts string or unicode
+      values and any other kind of objects will be converted to string. Can be
+      omitted and it will be set to the uppercase version of the nice_name
+      attribute. If both the name and code arguments are given the code
+      attribute will be set to code, but in any update to name attribute the
+      code also will be updated to the uppercase form of the nice_name
+      attribute. The default value is the upper case form of the nice_name
+    
+    
     """
     
     
@@ -214,7 +221,7 @@ class SimpleEntity(object):
         def fset(self, description_in):
             self._description = self._validate_description(description_in)
         
-        doc = """description of this object"""
+        doc = """Description of this object."""
         
         return locals()
     
@@ -251,15 +258,16 @@ class SimpleEntity(object):
         def fget(self):
             return self._nice_name
         
-        doc = """this is the ``nice name`` of this object. It has the same
-        value with the name (contextually) but with a different format like,
-        all the white spaces replaced by underscores ("\_"), all the CamelCase
-        form will be expanded by underscore (\_) characters and it is always
-        lower case.
+        doc = """The ``nice name`` of this object.
+        
+        It has the same value with the name (contextually) but with a different
+        format like, all the white spaces replaced by underscores ("\_"), all
+        the CamelCase form will be expanded by underscore (\_) characters and
+        it is always lower case.
         
         There is also the ``code`` attribute which is simply the upper case
         form of ``nice_name`` if it is not defined differently (i.e set to
-        another value). """
+        another value)."""
         
         return locals()
     
@@ -272,18 +280,10 @@ class SimpleEntity(object):
         """validates the given code value
         """
         
-        # check if the code_in is None
-        if code_in is None:
-            raise ValueError("the code attribute can not be None")
-        
-        # check if the code_in is empty
-        if code_in=="":
-            raise ValueError("the code attribute can not be an empty string")
-        
-        ## check if it is something other than a string
-        #if not isinstance(code_in, (str, unicode)):
-            #raise ValueError("the code should be an instance of string or "
-            #                 "unicode")
+        # check if the code_in is None or empty string
+        if code_in is None or code_in=="":
+            # restore the value from nice_name and let it be reformatted
+            code_in = self.nice_name
         
         return self._condition_code(str(code_in))
     
@@ -392,8 +392,15 @@ class SimpleEntity(object):
         def fset(self, code_in):
             self._code = self._validate_code(code_in)
         
-        doc = """the code of this object, if not given it will be evaluated
-        from the ``name`` attribute"""
+        doc = """The code name of this object.
+        
+        It accepts string or unicode values and any other kind of objects will
+        be converted to string. In any update to the name attribute the code
+        also will be updated to the uppercase form of the nice_name attribute.
+        If the not initialized or given as None, it will be set to the
+        uppercase version of the nice_name attribute. Setting the code
+        attribute to None will reset it to the default value. The default value
+        is the upper case form of the nice_name. """
         
         return locals()
     
@@ -410,8 +417,8 @@ class SimpleEntity(object):
         def fset(self, created_by_in):
             self._created_by = self._validate_created_by(created_by_in)
         
-        doc = """the :class:`~stalker.core.models.user.User` object who has
-        created this object"""
+        doc = """The :class:`~stalker.core.models.user.User` who has created
+        this object."""
         
         return locals()
     
@@ -428,8 +435,9 @@ class SimpleEntity(object):
         def fset(self, updated_by_in):
             self._updated_by = self._validate_updated_by(updated_by_in)
         
-        doc = """the :class:`~stalker.core.models.user.User` object who has
-        updated this object"""
+        doc = """The :class:`~stalker.core.models.user.User` who has updated
+        this object."""
+
         
         return locals()
     
@@ -446,8 +454,8 @@ class SimpleEntity(object):
         def fset(self, date_created_in):
             self._date_created = self._validate_date_created(date_created_in)
         
-        doc = """a :class:`datetime.datetime` instance showing the creation
-        date and time of this object"""
+        doc = """A :class:`datetime.datetime` instance showing the creation
+        date and time of this object."""
         
         return locals()
     
@@ -464,8 +472,8 @@ class SimpleEntity(object):
         def fset(self, date_updated_in):
             self._date_updated = self._validate_date_updated(date_updated_in)
         
-        doc = """a :class:`datetime.datetime` instance showing the update
-        date and time of this object"""
+        doc = """A :class:`datetime.datetime` instance showing the update
+        date and time of this object."""
         
         return locals()
     

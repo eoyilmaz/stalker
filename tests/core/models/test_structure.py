@@ -44,7 +44,7 @@ class StructureTester(mocker.MockerTestCase):
         # keyword arguments
         self.kwargs = {
             "name": "Test Structure",
-            "description": "This is a tets structure",
+            "description": "This is a test structure",
             "created_by": self.mock_user,
             "project_template": "some template which is not important",
             "asset_templates": self.asset_templates,

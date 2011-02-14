@@ -188,9 +188,11 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_code_attribute_is_changed_after_setting_name(self):
-        """testing if code was 
+        """testing if code attribute is changed and reformatted after the name
+        attribute has changed
         """
         
+        # create a SimpleEntity with code and name has values in it
         code = "something"
         name = "some name"
         new_name = "something new"
@@ -201,6 +203,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         new_simple_entity = entity.SimpleEntity(**self.kwargs)
         
+        # store the old code
         old_code = new_simple_entity.code
         
         # set the new name
@@ -216,33 +219,23 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_code_attribute_set_to_empty_string(self):
-        """testing if a ValueError will be raised when trying to set the code
-        attribute to an empty string
+        """testing if the code attribute will be restored from the nice_name
+        attribute when it is set to an empty string
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_simple_entity,
-            "code",
-            ""
-        )
+        self.mock_simple_entity.code = ""
+        self.assertEquals(self.mock_simple_entity.code, "TEST_ENTITY")
     
     
     
     #----------------------------------------------------------------------
     def test_code_attribute_set_to_None(self):
-        """testing if a ValueError will be raised when trying to set the code
-        attribute to None
+        """testing if the code is evauluated from the nice_name attribute when
+        set to None.
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_simple_entity,
-            "code",
-            None
-        )
+        self.mock_simple_entity.code = None
+        self.assertEquals(self.mock_simple_entity.code, "TEST_ENTITY")
     
     
     

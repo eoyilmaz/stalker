@@ -11,12 +11,16 @@ v0.1.1.a6:
    due_date and duration to the mixed in class.
  * Removed some parts of the Project class which are now satisfied by the
    ScheduleMixin
- * Imporeved the implementation of the db.auth module
+ * Improved the implementation of the db.auth module
  * removed the db.__setup__ module which were helping to reference the
-   variables in db module but it is not needed anymore
- * It is now possible to initialize a Project object without a Repository, or
+   variables in db module but it is not needed any more
+ * It is now possible to initialise a Project object without a Repository, or
    an ImageFormat or a type
  * Updated the Tutorial
+ * From now on, in a SimpleEntity, setting the code attribute to None or empty
+   string will not raise any ValueErrors but will re-initialise the code value
+   from the nice_name attribute.
+ * Implemented stalker.core.models.sequence.Sequence class along with its tests
 
 v0.1.1.a5:
  * removed the StatusedEntity and its tests, with the introduction of
