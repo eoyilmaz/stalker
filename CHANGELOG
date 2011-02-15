@@ -1,9 +1,11 @@
 Stalker Changes
 ===============
 
-v0.1.1.a7
----------
+v0.1.1.a7:
+----------
 
+ * updated the :ref:`roadmap_toplevel` to reflect the current development
+   history and cycle
  * Merged all the model classes which were previously in seperate files in to
   :mod:`stalker.core.models` module, to make it easy to use (and possibly hard
   to develop)
