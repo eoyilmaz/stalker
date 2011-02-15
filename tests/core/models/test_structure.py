@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import user, structure, types
+from stalker.core.models import User, Structure, TypeTemplate
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -12,7 +12,7 @@ from stalker.ext.validatedList import ValidatedList
 
 ########################################################################
 class StructureTester(mocker.MockerTestCase):
-    """tests the stalker.core.models.structure.Structure class
+    """tests the stalker.core.models.Structure class
     """
     
     
@@ -25,16 +25,16 @@ class StructureTester(mocker.MockerTestCase):
         # create mocks
         
         # mock_user
-        self.mock_user = self.mocker.mock(user.User)
+        self.mock_user = self.mocker.mock(User)
         
         # mock type templates
-        self.asset_template1 = self.mocker.mock(types.TypeTemplate)
-        self.asset_template2 = self.mocker.mock(types.TypeTemplate)
+        self.asset_template1 = self.mocker.mock(TypeTemplate)
+        self.asset_template2 = self.mocker.mock(TypeTemplate)
         
         self.asset_templates = [self.asset_template1, self.asset_template2]
         
-        self.reference_template1 = self.mocker.mock(types.TypeTemplate)
-        self.reference_template2 = self.mocker.mock(types.TypeTemplate)
+        self.reference_template1 = self.mocker.mock(TypeTemplate)
+        self.reference_template2 = self.mocker.mock(TypeTemplate)
         
         self.reference_templates = [self.reference_template1,
                                     self.reference_template2]
@@ -51,7 +51,7 @@ class StructureTester(mocker.MockerTestCase):
             "reference_templates": self.reference_templates,
         }
         
-        self.mock_structure = structure.Structure(**self.kwargs)
+        self.mock_structure = Structure(**self.kwargs)
     
     
     
@@ -66,7 +66,7 @@ class StructureTester(mocker.MockerTestCase):
             
             self.kwargs["project_template"] = test_value
             
-            self.assertRaises(ValueError, structure.Structure, **self.kwargs)
+            self.assertRaises(ValueError, Structure, **self.kwargs)
     
     
     
@@ -78,7 +78,7 @@ class StructureTester(mocker.MockerTestCase):
         self.kwargs["project_template"] = ""
         
         # should't raise any errors
-        new_structure = structure.Structure(**self.kwargs)
+        new_structure = Structure(**self.kwargs)
     
     
     
@@ -104,7 +104,7 @@ class StructureTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_asset_templates_argument_accepts_list_of_templates_only(self):
         """testing if asset_templates argument accepts list of
-        :class:`~stalker.core.models.types.TypeTemplate` objects only
+        :class:`~stalker.core.models.TypeTemplate` objects only
         """
         
         test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
@@ -114,14 +114,14 @@ class StructureTester(mocker.MockerTestCase):
             
             self.kwargs["asset_templates"] = test_value
             
-            self.assertRaises(ValueError, structure.Structure, **self.kwargs)
+            self.assertRaises(ValueError, Structure, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_asset_templates_attribute_accepts_list_of_templates_only(self):
         """testing if asset_templates argument accepts list of
-        :class:`~stalker.core.models.types.TypeTemplate` objects only
+        :class:`~stalker.core.models.TypeTemplate` objects only
         """
         
         test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
@@ -147,7 +147,7 @@ class StructureTester(mocker.MockerTestCase):
         # this should work properly wihtout raising an error
         self.kwargs["asset_templates"] = []
         
-        a_new_structure = structure.Structure(**self.kwargs)
+        a_new_structure = Structure(**self.kwargs)
     
     
     
@@ -200,7 +200,7 @@ class StructureTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_reference_templates_argument_accepts_list_of_templates_only(self):
         """testing if reference_templates argument accepts list of
-        :class:`~stalker.core.models.types.TypeTemplate` objects only
+        :class:`~stalker.core.models.TypeTemplate` objects only
         """
         
         test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
@@ -208,14 +208,14 @@ class StructureTester(mocker.MockerTestCase):
         # these all should raise ValueErrors
         for test_value in test_values:
             self.kwargs["reference_templates"] = test_value
-            self.assertRaises(ValueError, structure.Structure, **self.kwargs)
+            self.assertRaises(ValueError, Structure, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_reference_templates_attribute_accepts_list_of_templates_only(self):
         """testing if reference_templates argument accepts list of
-        :class:`~stalker.core.models.types.TypeTemplate` objects only
+        :class:`~stalker.core.models.TypeTemplate` objects only
         """
         
         test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
@@ -241,7 +241,7 @@ class StructureTester(mocker.MockerTestCase):
         # this should work properly wihtou raising an error
         self.kwargs["reference_templates"] = []
         
-        a_new_structure = structure.Structure(**self.kwargs)
+        a_new_structure = Structure(**self.kwargs)
     
     
     
@@ -286,10 +286,10 @@ class StructureTester(mocker.MockerTestCase):
         """testing equality of two Structure objects
         """
         
-        new_structure2 = structure.Structure(**self.kwargs)
+        new_structure2 = Structure(**self.kwargs)
         
         self.kwargs["project_template"] = "a mock project template"
-        new_structure3 = structure.Structure(**self.kwargs)
+        new_structure3 = Structure(**self.kwargs)
         
         self.assertTrue(self.mock_structure==new_structure2)
         self.assertFalse(self.mock_structure==new_structure3)
@@ -301,10 +301,10 @@ class StructureTester(mocker.MockerTestCase):
         """testing inequality of two Structure objects
         """
         
-        new_structure2 = structure.Structure(**self.kwargs)
+        new_structure2 = Structure(**self.kwargs)
         
         self.kwargs["project_template"] = "a mock project template"
-        new_structure3 = structure.Structure(**self.kwargs)
+        new_structure3 = Structure(**self.kwargs)
         
         self.assertFalse(self.mock_structure!=new_structure2)
         self.assertTrue(self.mock_structure!=new_structure3)

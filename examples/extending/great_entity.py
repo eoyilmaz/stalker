@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 In this example we are going to extend stalker with a new entity type, which
-is also mixed in with a :mod:`~stalker.core.models.mixin.ReferenceMixin`.
+is also mixed in with a :mod:`~stalker.core.models.ReferenceMixin`.
 
 To be able to use GreatEntity with the rest of the stalker.core.models in a
 persistence environment, before calling anything from stalker call these in
@@ -22,12 +22,11 @@ from sqlalchemy.orm import mapper, relationship, synonym
 from stalker import db
 from stalker.db import tables
 from stalker.db.mixin import ReferenceMixinDB
-from stalker.core.models.mixin import ReferenceMixin
-from stalker.core.models import entity
+from stalker.core.models import SimpleEntity, ReferenceMixin
 
 
 
-class GreatEntity(entity.SimpleEntity, ReferenceMixin):
+class GreatEntity(SimpleEntity, ReferenceMixin):
     """The new great entity class, which is a new simpleEntity with
     ReferenceMixin
     """

@@ -14,7 +14,7 @@ from sqlalchemy import (
 )
 from stalker import db
 from stalker.db import tables
-from stalker.core.models import link, status
+from stalker.core.models import Link, Status, StatusList
 
 
 
@@ -26,7 +26,7 @@ class ReferenceMixinDB(object):
     """A helper class for ReferenceMixin table and mapper setup.
     
     Helps setting up tables and mappers for classes mixed in with
-    :class:`~stalker.core.models.mixin.ReferenceMixin`
+    :class:`~stalker.core.models.ReferenceMixin`
     
     See examples/extending/great_entity.py for an example.
     """
@@ -83,7 +83,7 @@ class ReferenceMixinDB(object):
         
         new_properties = {
             "_references": relationship(
-                link.Link,
+                Link,
                 secondary=secondary_table,
                 primaryjoin=\
                     class_table.c.id==\
@@ -112,7 +112,7 @@ class StatusMixinDB(object):
     """A helper class for StatusMixin table and mapper setup.
     
     Helps setting up tables and mappers for classes mixed in with
-    :class:`~stalker.core.models.mixin.StatusMixin`
+    :class:`~stalker.core.models.StatusMixin`
     
     See examples/extending/statused_entity.py for an example.
     """
@@ -159,7 +159,7 @@ class StatusMixinDB(object):
             "_status": class_table.c.status,
             "status": synonym("_status"),
             "_status_list": relationship(
-                status.StatusList,
+                StatusList,
                 primaryjoin=\
                 class_table.c.status_list_id==\
                 tables.statusLists.c.id
@@ -184,7 +184,7 @@ class ScheduleMixinDB(object):
     """A helper class for ScheduleMixin table and mapper setup.
     
     Helps setting up tables and mappers for classes mixed in with
-    :class:`~stalker.core.models.mixin.ScheduleMixin`
+    :class:`~stalker.core.models.ScheduleMixin`
     
     For now there is no exmaple for it, but it is pretty similiar to the other
     mixin classes.

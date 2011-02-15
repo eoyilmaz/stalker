@@ -14,23 +14,23 @@ There are three functions to log a user in, first one is
 :func:`~stalker.db.auth.session` that create the session and if there where
 user entry in session it return true else return false, the second one is
 :func:`~stalker.db.auth.authenticate`, which accepts username and password and
-returns a :class:`~stalker.core.models.user.User` object::
+returns a :class:`~stalker.core.models.User` object::
 
     from stalker.db import auth
     user_obj = auth.authenticate("username", "password")
 
 The third one is the :func:`~stalker.db.auth.login` which uses a given
-:class:`~stalker.core.models.user.User` object and creates a Beaker Session and
+:class:`~stalker.core.models.User` object and creates a Beaker Session and
 stores the logged in user id in that session.
 
 The :func:`~stalker.db.auth.get_user` can be used to get the authenticated and
-logged in :class:`~stalker.core.models.user.User` object.
+logged in :class:`~stalker.core.models.User` object.
 
 The basic usage of the system is as follows::
   
   from stalker import db
   from stalker.db import auth
-  from stalker.core.models import user
+  from stalker.core.models import User
   
   if auth.session():
       # user has login data 
@@ -53,7 +53,7 @@ import tempfile
 import datetime
 from beaker import session as beakerSession
 from stalker import db
-from stalker.core.models import error, user
+from stalker.core.models import LoginError, User
 
 
 
@@ -136,28 +136,28 @@ def login(username=None, password=None):
 #----------------------------------------------------------------------
 def authenticate(username="", password=""):
     """Authenticates the given username and password, returns a
-    stalker.core.models.user.User object
-
+    stalker.core.models.User object
+    
     There needs to be a already setup database for the authentication to hapen.
     """
     
     # check if the database is setup
     if db.session == None:
-        raise error.LoginError("stalker is not connected to any db right now, "
+        raise LoginError("stalker is not connected to any db right now, "
                                "use stalker.db.setup(), to setup the default"
                                "db")
     
     # try to get the given user
-    user_obj = db.session.query(user.User).filter_by(name=username).first()
+    user_obj = db.session.query(User).filter_by(name=username).first()
     
     error_msg = "user name and login don't match, %s - %s" % \
               (username, password)
     
     if user_obj is None:
-        raise(error.LoginError(error_msg))
+        raise(LoginError(error_msg))
     
     if user_obj.password != password:
-        raise(error.LoginError(error_msg))
+        raise(LoginError(error_msg))
     
     return user_obj
 
@@ -197,9 +197,9 @@ def login_required(view, error_message=None):
                 func(*args, **kwargs)
             else:
                 if error_message and isinstance(error_meesage, (str, unicode)):
-                    raise error.LoginError(error_message)
+                    raise LoginError(error_message)
                 else:
-                    raise error.LoginError("You should be logged in before "
+                    raise LoginError("You should be logged in before "
                                            "completing your action!")
         return wrapped_func
     return wrap
@@ -229,9 +229,9 @@ def permission_required(permission_group, error_message=None):
                 func(*args, **kwargs)
             else:
                 if error_message and isinstance(error_meesage, (str, unicode)):
-                    raise error.LoginError(error_message)
+                    raise LoginError(error_message)
                 else:
-                    raise error.LoginError("You don't have permission to do "
+                    raise LoginError("You don't have permission to do "
                                            "complete your action!")
         return wrapped_func
     return wrap

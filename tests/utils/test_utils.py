@@ -20,10 +20,10 @@ class UtilsTester(unittest.TestCase):
         """testing if a correct string will be returned with path_to_exec
         """
         
-        full_path = "stalker.core.models.asset.Asset"
+        full_path = "stalker.core.models.Asset"
         
-        expected_result = ("from stalker.core.models.asset import Asset",
-                           "stalker.core.models.asset",
+        expected_result = ("from stalker.core.models import Asset",
+                           "stalker.core.models",
                            "Asset")
         
         self.assertEquals(

@@ -4,8 +4,12 @@
 
 import datetime
 import mocker
-from stalker.core.models import entity, mixin, link, status
+from stalker.core.models import (SimpleEntity, ReferenceMixin, StatusMixin,
+                                 ScheduleMixin, Link, LinkType, Status,
+                                 StatusList)
 from stalker.ext.validatedList import ValidatedList
+
+
 
 
 
@@ -22,10 +26,10 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         """
         
         # create a couple of mock Link objects
-        self.mock_link1 = self.mocker.mock(link.Link)
-        self.mock_link2 = self.mocker.mock(link.Link)
-        self.mock_link3 = self.mocker.mock(link.Link)
-        self.mock_link4 = self.mocker.mock(link.Link)
+        self.mock_link1 = self.mocker.mock(Link)
+        self.mock_link2 = self.mocker.mock(Link)
+        self.mock_link3 = self.mocker.mock(Link)
+        self.mock_link4 = self.mocker.mock(Link)
         
         self.mocker.replay()
         
@@ -37,7 +41,7 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         ]
         
         # create a SimpleEntitty and mix it with the ReferenceMixin
-        class Foo(entity.SimpleEntity, mixin.ReferenceMixin):
+        class Foo(SimpleEntity, ReferenceMixin):
             pass
         
         self.mock_foo_obj = Foo(name="Ref Mixin Test")
@@ -138,17 +142,15 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         """testing an example of ReferenceMixin usage
         """
         
-        from stalker.core.models import mixin, entity, link, types
-        
-        class GreatEntity(entity.SimpleEntity, mixin.ReferenceMixin):
+        class GreatEntity(SimpleEntity, ReferenceMixin):
             pass
         
         myGreatEntity = GreatEntity(name="Test")
         myGreatEntity.references
         
-        image_link_type = types.LinkType(name="Image")
-        new_link = link.Link(name="NewTestLink", path="nopath",
-                             filename="nofilename", type=image_link_type)
+        image_link_type = LinkType(name="Image")
+        new_link = Link(name="NewTestLink", path="nopath",
+                        filename="nofilename", type=image_link_type)
         
         test_value = [new_link]
         
@@ -176,7 +178,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         assert(isinstance(self.mocker, mocker.Mocker))
         
         # a mock StatusList object
-        self.mock_status_list1 = self.mocker.mock(status.StatusList)
+        self.mock_status_list1 = self.mocker.mock(StatusList)
         self.expect(len(self.mock_status_list1.statuses)).result(5).\
             count(0, None)
         
@@ -184,7 +186,7 @@ class StatusMixinTester(mocker.MockerTestCase):
             result("Dummy").count(0, None)
         
         # another mock StatusList object
-        self.mock_status_list2 = self.mocker.mock(status.StatusList)
+        self.mock_status_list2 = self.mocker.mock(StatusList)
         self.expect(len(self.mock_status_list2.statuses)).result(5)\
             .count(0, None)
         
@@ -220,10 +222,10 @@ class StatusMixinTester(mocker.MockerTestCase):
             pass
         
         
-        class MixedClass(Dummy, mixin.StatusMixin):
+        class MixedClass(Dummy, StatusMixin):
             pass
         
-        class MixedClass_with_MixinInit(DummyWithoutInit, mixin.StatusMixin):
+        class MixedClass_with_MixinInit(DummyWithoutInit, StatusMixin):
             pass
         
         self.mock_class_for_init_test = MixedClass_with_MixinInit
@@ -320,11 +322,11 @@ class StatusMixinTester(mocker.MockerTestCase):
         # entity_type
         
         
-        new_status_list = status.StatusList(
+        new_status_list = StatusList(
             name="Sequence Statuses",
             statuses=[
-                status.Status(name="On Hold", code="OH"),
-                status.Status(name="Complete", code="CMPLT"),
+                Status(name="On Hold", code="OH"),
+                Status(name="Complete", code="CMPLT"),
             ],
             target_entity_type="Sequence"
         )
@@ -337,11 +339,11 @@ class StatusMixinTester(mocker.MockerTestCase):
             new_status_list
         )
         
-        new_suitable_list = status.StatusList(
+        new_suitable_list = StatusList(
             name="Suitable Statuses",
             statuses=[
-                status.Status(name="On Hold", code="OH"),
-                status.Status(name="Complete", code="CMPLT"),
+                Status(name="On Hold", code="OH"),
+                Status(name="Complete", code="CMPLT"),
             ],
             target_entity_type="Dummy"
         )
@@ -509,10 +511,10 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         class Bar(object):
             pass
         
-        class FooMixedInClass(entity.SimpleEntity, mixin.ScheduleMixin):
+        class FooMixedInClass(SimpleEntity, ScheduleMixin):
             pass
         
-        class FooMixedInClass_without_init(Bar, mixin.ScheduleMixin):
+        class FooMixedInClass_without_init(Bar, ScheduleMixin):
             pass
         
         self.FooMixedInClass = FooMixedInClass

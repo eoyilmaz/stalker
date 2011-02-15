@@ -14,14 +14,14 @@ def path_to_exec(full_module_path):
       
       from stalker import utils
       
-      full_path = "stalker.core.models.asset.Asset"
+      full_path = "stalker.core.models.Asset"
       
       command = utils.path_to_exec(full_path)
       
       print command
       
       # will print the result
-      # ("from stalker.core.models.asset import Asset",
+      # ("from stalker.core.models import Asset",
       #  "stalker.core.models.asset",
       #  "Asset")
     

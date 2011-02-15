@@ -3,7 +3,8 @@
 
 
 import mocker
-from stalker.core.models import imageFormat
+from stalker.core.models import ImageFormat
+
 
 
 
@@ -30,7 +31,7 @@ class ImageFormatTest(mocker.MockerTestCase):
             "print_resolution": 300,
         }
         
-        self.mock_imageFormat = imageFormat.ImageFormat(**self.kwargs)
+        self.mock_imageFormat = ImageFormat(**self.kwargs)
     
     
     
@@ -46,7 +47,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["width"] = test_value
-            self.assertRaises(ValueError, imageFormat.ImageFormat,
+            self.assertRaises(ValueError, ImageFormat,
                               **self.kwargs)
     
     
@@ -78,7 +79,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         #----------------------------------------------------------------------
         # the given floats should be converted to integer
         self.kwargs["width"] = 1920.0
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         self.assertIsInstance(an_image_format.width, int)
     
     
@@ -104,7 +105,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         #----------------------------------------------------------------------
         # could not be zero
         self.kwargs["width"] = 0
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
     
     
     #----------------------------------------------------------------------
@@ -124,7 +125,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         """
         
         self.kwargs["width"] = -10
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
     
     
     
@@ -148,7 +149,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["height"] = test_value
-            self.assertRaises(ValueError, imageFormat.ImageFormat,
+            self.assertRaises(ValueError, ImageFormat,
                               **self.kwargs)
     
     
@@ -172,7 +173,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         """
         
         self.kwargs["height"] = 1080.0
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         
         self.assertIsInstance(an_image_format.height, int)
     
@@ -196,7 +197,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         """
         
         self.kwargs["height"] = 0
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
     
     
     
@@ -215,7 +216,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         """testing the height argument against being negative
         """
         self.kwargs["height"] = -10
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
     
     
     
@@ -258,7 +259,7 @@ class ImageFormatTest(mocker.MockerTestCase):
             "print_resolution": 300
         })
         
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         
         # the device aspect for this setup should be around 1.7778
         self.assertEquals("%1.4g" % an_image_format.device_aspect,
@@ -275,7 +276,7 @@ class ImageFormatTest(mocker.MockerTestCase):
             "print_resolution": 300
         })
         
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         
         # the device aspect for this setup should be around 4/3
         self.assertEquals("%1.4g" % an_image_format.device_aspect,
@@ -302,7 +303,7 @@ class ImageFormatTest(mocker.MockerTestCase):
             "print_resolution": 300
         })
         
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         
         previous_device_aspect = an_image_format.device_aspect
         
@@ -340,15 +341,15 @@ class ImageFormatTest(mocker.MockerTestCase):
         
         # any other variable type than int and float is not ok
         self.kwargs["pixel_aspect"] = "1.0"
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
         
         # float is ok
         self.kwargs["pixel_aspect"] = 1.0
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         
         # int is ok
         self.kwargs["pixel_aspect"] = 2
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
     
     
     
@@ -361,7 +362,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         # given an integer for the pixel aspect ratio,
         # the returned pixel aspect ratio should be a float
         self.kwargs["pixel_aspect"] = 1
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         self.assertIsInstance(an_image_format.pixel_aspect, float)
     
     
@@ -375,7 +376,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         #----------------------------------------------------------------------
         # the pixel aspect ratio can not be zero
         self.kwargs["pixel_aspect"] = 0
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
     
     
     
@@ -398,10 +399,10 @@ class ImageFormatTest(mocker.MockerTestCase):
         #----------------------------------------------------------------------
         # the pixel aspect ratio can not be negative
         self.kwargs["pixel_aspect"] = -1.0
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
         
         self.kwargs["pixel_aspect"] = -1
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
     
     
     
@@ -426,7 +427,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("pixel_aspect")
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         default_value = 1.0
         self.assertEquals(an_image_format.pixel_aspect, default_value)
     
@@ -440,7 +441,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         #----------------------------------------------------------------------
         # the print resolution can be ommited
         self.kwargs.pop("print_resolution")
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         
         print_resolution = an_image_format.print_resolution
         
@@ -458,13 +459,13 @@ class ImageFormatTest(mocker.MockerTestCase):
         # the print resolution should be initialized with an integer or a float
         self.kwargs["print_resolution"] = "300.0"
         
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
         
         self.kwargs["print_resolution"] = 300
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
         
         self.kwargs["print_resolution"] = 300.0
-        an_image_format = imageFormat.ImageFormat(**self.kwargs)
+        an_image_format = ImageFormat(**self.kwargs)
     
     
     
@@ -475,7 +476,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         self.kwargs["print_resolution"] = 0
         #----------------------------------------------------------------------
         # the print resolution can not be zero
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
     
     
     
@@ -498,10 +499,10 @@ class ImageFormatTest(mocker.MockerTestCase):
         #----------------------------------------------------------------------
         # the print resolution can not be negative
         self.kwargs["print_resolution"] = -300
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
         
         self.kwargs["print_resolution"] = -300.0
-        self.assertRaises(ValueError, imageFormat.ImageFormat, **self.kwargs)
+        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
     
     
     
@@ -523,15 +524,15 @@ class ImageFormatTest(mocker.MockerTestCase):
         """testing equality operator
         """
         
-        image_format1 = imageFormat.ImageFormat(**self.kwargs)
-        image_format2 = imageFormat.ImageFormat(**self.kwargs)
+        image_format1 = ImageFormat(**self.kwargs)
+        image_format2 = ImageFormat(**self.kwargs)
         
         self.kwargs.update({
             "width": 720,
             "height": 480,
             "pixel_aspect": 0.888888,
         })
-        image_format3 = imageFormat.ImageFormat(**self.kwargs)
+        image_format3 = ImageFormat(**self.kwargs)
         
         self.assertTrue(image_format1==image_format2)
         self.assertFalse(image_format1==image_format3)
@@ -543,8 +544,8 @@ class ImageFormatTest(mocker.MockerTestCase):
         """testing inequality operator
         """
         
-        image_format1 = imageFormat.ImageFormat(**self.kwargs)
-        image_format2 = imageFormat.ImageFormat(**self.kwargs)
+        image_format1 = ImageFormat(**self.kwargs)
+        image_format2 = ImageFormat(**self.kwargs)
         
         self.kwargs.update({
             "name": "NTSC",
@@ -553,7 +554,7 @@ class ImageFormatTest(mocker.MockerTestCase):
             "height": 480,
             "pixel_aspect": 0.888888,
         })
-        image_format3 = imageFormat.ImageFormat(**self.kwargs)
+        image_format3 = ImageFormat(**self.kwargs)
         
         self.assertFalse(image_format1!=image_format2)
         self.assertTrue(image_format1!=image_format3)

@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import status
+from stalker.core.models import Entity, Status, StatusList, Project
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -29,8 +29,7 @@ class StatusTest(mocker.MockerTestCase):
         # create an entity object with same kwargs for __eq__ and __ne__ tests
         # (it should return False for __eq__ and True for __ne__ for same
         # kwargs)
-        from stalker.core.models import entity
-        self.entity1 = entity.Entity(**self.kwargs)
+        self.entity1 = Entity(**self.kwargs)
     
     
     
@@ -39,15 +38,15 @@ class StatusTest(mocker.MockerTestCase):
         """testing equality of two statuses
         """
         
-        status1 = status.Status(**self.kwargs)
-        status2 = status.Status(**self.kwargs)
+        status1 = Status(**self.kwargs)
+        status2 = Status(**self.kwargs)
         
         self.kwargs["name"] = "Work In Progress"
         self.kwargs["description"] = "use this when the object is still in \
         progress"
         self.kwargs["code"] = "WIP"
         
-        status3 = status.Status(**self.kwargs)
+        status3 = Status(**self.kwargs)
         
         self.assertTrue(status1==status2)
         self.assertFalse(status1==status3)
@@ -61,7 +60,7 @@ class StatusTest(mocker.MockerTestCase):
         the string matches the name and vice versa
         """
         
-        a_status = status.Status(**self.kwargs)
+        a_status = Status(**self.kwargs)
         self.assertTrue(a_status==self.kwargs["name"])
         self.assertTrue(a_status==self.kwargs["name"].lower())
         self.assertTrue(a_status==self.kwargs["name"].upper())
@@ -79,7 +78,7 @@ class StatusTest(mocker.MockerTestCase):
         the string matches the code and vice versa
         """
         
-        a_status = status.Status(**self.kwargs)
+        a_status = Status(**self.kwargs)
         self.assertTrue(a_status==self.kwargs["code"])
         self.assertTrue(a_status==self.kwargs["code"].lower())
         self.assertTrue(a_status==self.kwargs["code"].upper())
@@ -94,15 +93,15 @@ class StatusTest(mocker.MockerTestCase):
         """testing inequality of two statuses
         """
         
-        status1 = status.Status(**self.kwargs)
-        status2 = status.Status(**self.kwargs)
+        status1 = Status(**self.kwargs)
+        status2 = Status(**self.kwargs)
         
         self.kwargs["name"] = "Work In Progress"
         self.kwargs["description"] = "use this when the object is still in \
         progress"
         self.kwargs["code"] = "WIP"
         
-        status3 = status.Status(**self.kwargs)
+        status3 = Status(**self.kwargs)
         
         self.assertFalse(status1!=status2)
         self.assertTrue(status1!=status3)
@@ -115,7 +114,7 @@ class StatusTest(mocker.MockerTestCase):
         the string matches the name and vice versa
         """
         
-        a_status = status.Status(**self.kwargs)
+        a_status = Status(**self.kwargs)
         self.assertFalse(a_status!=self.kwargs["name"])
         self.assertFalse(a_status!=self.kwargs["name"].lower())
         self.assertFalse(a_status!=self.kwargs["name"].upper())
@@ -133,7 +132,7 @@ class StatusTest(mocker.MockerTestCase):
         the string matches the code and vice versa
         """
         
-        a_status = status.Status(**self.kwargs)
+        a_status = Status(**self.kwargs)
         self.assertFalse(a_status!=self.kwargs["code"])
         self.assertFalse(a_status!=self.kwargs["code"].lower())
         self.assertFalse(a_status!=self.kwargs["code"].upper())
@@ -160,24 +159,22 @@ class StatusListTest(mocker.MockerTestCase):
         """let's create proper values for the tests
         """
         
-        from stalker.core.models import project
-        
         self.kwargs = {
             "name": "a status list",
             "description": "this is a status list for testing purposes",
             "statuses": [
-                status.Status(name="Not Available", code="N/A"),
-                status.Status(name="Waiting To Start", code="WSTRT"),
-                status.Status(name="Started", code="STRT"),
-                status.Status(name="Waiting For Approve", code="WAPPR"),
-                status.Status(name="Approved", code="APPR"),
-                status.Status(name="Finished", code="FNSH"),
-                status.Status(name="On Hold", code="OH"),
+                Status(name="Not Available", code="N/A"),
+                Status(name="Waiting To Start", code="WSTRT"),
+                Status(name="Started", code="STRT"),
+                Status(name="Waiting For Approve", code="WAPPR"),
+                Status(name="Approved", code="APPR"),
+                Status(name="Finished", code="FNSH"),
+                Status(name="On Hold", code="OH"),
                 ],
-            "target_entity_type": project.Project.entity_type,
+            "target_entity_type": Project.entity_type,
         }
         
-        self.mock_status_list = status.StatusList(**self.kwargs)
+        self.mock_status_list = StatusList(**self.kwargs)
     
     
     
@@ -198,7 +195,7 @@ class StatusListTest(mocker.MockerTestCase):
             
             self.kwargs["statuses"] = test_value
             
-            self.assertRaises(ValueError, status.StatusList, **self.kwargs)
+            self.assertRaises(ValueError, StatusList, **self.kwargs)
     
     
     
@@ -230,7 +227,7 @@ class StatusListTest(mocker.MockerTestCase):
         # the list couldn't be empty
         self.kwargs["statuses"] = []
         
-        self.assertRaises(ValueError, status.StatusList, **self.kwargs)
+        self.assertRaises(ValueError, StatusList, **self.kwargs)
     
     
     
@@ -246,7 +243,7 @@ class StatusListTest(mocker.MockerTestCase):
         
         self.kwargs["statuses"] = a_fake_status_list
         
-        self.assertRaises(ValueError, status.StatusList, **self.kwargs)
+        self.assertRaises(ValueError, StatusList, **self.kwargs)
     
     
     
@@ -256,7 +253,7 @@ class StatusListTest(mocker.MockerTestCase):
         """
         
         new_list_of_statutes = [
-            status.Status(name="New Status", code="NSTS")
+            Status(name="New Status", code="NSTS")
         ]
         
         self.mock_status_list.statuses = new_list_of_statutes
@@ -297,22 +294,22 @@ class StatusListTest(mocker.MockerTestCase):
         """testing equality of two status list object
         """
         
-        status_list1 = status.StatusList(**self.kwargs)
-        status_list2 = status.StatusList(**self.kwargs)
+        status_list1 = StatusList(**self.kwargs)
+        status_list2 = StatusList(**self.kwargs)
         
         
         self.kwargs["target_entity_type"] = "SomeOtherClass"
         
-        status_list3 = status.StatusList(**self.kwargs)
+        status_list3 = StatusList(**self.kwargs)
         
         self.kwargs["statuses"] = [
-            status.Status(name="Started", code="STRT"),
-            status.Status(name="Waiting For Approve", code="WAPPR"),
-            status.Status(name="Approved", code="APPR"),
-            status.Status(name="Finished", code="FNSH"),
+            Status(name="Started", code="STRT"),
+            Status(name="Waiting For Approve", code="WAPPR"),
+            Status(name="Approved", code="APPR"),
+            Status(name="Finished", code="FNSH"),
         ]
         
-        status_list4 = status.StatusList(**self.kwargs)
+        status_list4 = StatusList(**self.kwargs)
         
         
         
@@ -327,21 +324,21 @@ class StatusListTest(mocker.MockerTestCase):
         """testing equality of two status list object
         """
         
-        status_list1 = status.StatusList(**self.kwargs)
-        status_list2 = status.StatusList(**self.kwargs)
+        status_list1 = StatusList(**self.kwargs)
+        status_list2 = StatusList(**self.kwargs)
         
         self.kwargs["target_entity_type"] = "SomeOtherClass"
         
-        status_list3 = status.StatusList(**self.kwargs)
+        status_list3 = StatusList(**self.kwargs)
         
         self.kwargs["statuses"] = [
-            status.Status(name="Started", code="STRT"),
-            status.Status(name="Waiting For Approve", code="WAPPR"),
-            status.Status(name="Approved", code="APPR"),
-            status.Status(name="Finished", code="FNSH"),
+            Status(name="Started", code="STRT"),
+            Status(name="Waiting For Approve", code="WAPPR"),
+            Status(name="Approved", code="APPR"),
+            Status(name="Finished", code="FNSH"),
         ]
         
-        status_list4 = status.StatusList(**self.kwargs)
+        status_list4 = StatusList(**self.kwargs)
         
         self.assertFalse(status_list1!=status_list2)
         self.assertTrue(status_list1!=status_list3)
@@ -368,11 +365,11 @@ class StatusListTest(mocker.MockerTestCase):
         """testing indexing of statuses in the statusList, get with string
         """
         
-        status1 = status.Status(name="Complete", code="CMPLT")
-        status2 = status.Status(name="Work in Progress", code="WIP")
-        status3 = status.Status(name="Pending Review", code="PRev")
+        status1 = Status(name="Complete", code="CMPLT")
+        status2 = Status(name="Work in Progress", code="WIP")
+        status3 = Status(name="Pending Review", code="PRev")
         
-        a_status_list = status.StatusList(name="Asset Status List",
+        a_status_list = StatusList(name="Asset Status List",
                                           statuses=[status1, status2, status3],
                                           target_entity_type="Asset")
         
@@ -430,7 +427,7 @@ class StatusListTest(mocker.MockerTestCase):
         """
         
         self.kwargs["target_entity_type"] = ""
-        self.assertRaises(ValueError, status.StatusList, **self.kwargs)
+        self.assertRaises(ValueError, StatusList, **self.kwargs)
     
     
     
@@ -441,7 +438,7 @@ class StatusListTest(mocker.MockerTestCase):
         """
         
         self.kwargs["target_entity_type"] = None
-        self.assertRaises(ValueError, status.StatusList, **self.kwargs)
+        self.assertRaises(ValueError, StatusList, **self.kwargs)
     
     
     

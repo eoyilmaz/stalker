@@ -18,29 +18,30 @@ from stalker import utils
 from stalker import db
 from stalker.db import auth, tables
 from stalker.core.models import (
-    asset,
-    assetBase,
-    booking,
-    comment,
-    department,
-    entity,
-    error,
-    group,
-    imageFormat,
-    link,
-    note,
-    pipelineStep,
-    project,
-    repository,
-    sequence,
-    shot,
-    status,
-    structure,
-    tag,
-    task,
-    types,
-    user,
-    version
+    Asset,
+    AssetBase,
+    Booking,
+    Comment,
+    Department,
+    Entity,
+    SimpleEntity,
+    LoginError,
+    Group,
+    ImageFormat,
+    Link,
+    Note,
+    PipelineStep,
+    Project,
+    Repository,
+    Sequence,
+    Shot,
+    Status, StatusList,
+    Structure,
+    Tag,
+    Task,
+    AssetType, LinkType, ProjectType, TypeTemplate,
+    User,
+    Version
 )
 
 
@@ -115,13 +116,13 @@ class DatabaseTester(unittest.TestCase):
             "created_by": admin,
         }
         
-        newUser = user.User(**kwargs)
+        newUser = User(**kwargs)
         
         session.add(newUser)
         session.commit()
         
         # now check if the newUser is there
-        newUser_DB = query(user.User).\
+        newUser_DB = query(User).\
                    filter_by(name=kwargs["name"]).\
                    filter_by(first_name=kwargs["first_name"]).\
                    filter_by(last_name=kwargs["last_name"]).\
@@ -165,7 +166,7 @@ class DatabaseTester(unittest.TestCase):
             "created_by": admin,
         }
         
-        newUser = user.User(**kwargs)
+        newUser = User(**kwargs)
         
         session.add(newUser)
         session.commit()
@@ -173,7 +174,7 @@ class DatabaseTester(unittest.TestCase):
         # now reconnect and check if the newUser is there
         db.setup(self.TEST_DATABASE_URI)
         
-        newUser_DB = query(user.User).\
+        newUser_DB = query(User).\
                    filter_by(name=kwargs["name"]).\
                    filter_by(first_name=kwargs["first_name"]).\
                    filter_by(last_name=kwargs["last_name"]).\
@@ -242,7 +243,7 @@ class DatabaseTester(unittest.TestCase):
         # and get how many admin is created, (it is imipossible to create
         # second one because the tables.simpleEntity.c.nam.unique=True
         
-        admins = db.session.query(user.User). \
+        admins = db.session.query(User). \
                filter_by(name=defaults.ADMIN_NAME).all()
         
         self.assertFalse( len(admins) > 1 )
@@ -251,7 +252,7 @@ class DatabaseTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_auth_authenticate_LogginError_raised(self):
-        """testing if stalker.core.models.error.LoginError will be raised when
+        """testing if stalker.core.models.LoginError will be raised when
         authentication information is wrong
         """
         
@@ -267,7 +268,7 @@ class DatabaseTester(unittest.TestCase):
         
         for user_name, password in test_datas:
             self.assertRaises(
-                error.LoginError,
+                LoginError,
                 auth.authenticate,
                 user_name,
                 password
@@ -288,12 +289,12 @@ class DatabaseTester(unittest.TestCase):
         self._createdDB = True
         
         # check if there is a use with name admin
-        self.assertTrue(db.session.query(user.User).\
+        self.assertTrue(db.session.query(User).\
                         filter_by(name=defaults.ADMIN_NAME).first()
                         is None )
         
         # check if there is a admins department
-        self.assertTrue(db.session.query(department.Department).\
+        self.assertTrue(db.session.query(Department).\
                         filter_by(name=defaults.ADMIN_DEPARTMENT_NAME).\
                         first() is None)
     
@@ -321,7 +322,7 @@ class DatabaseTester(unittest.TestCase):
             "created_by": admin
         }
         
-        user1 = user.User(**kwargs)
+        user1 = User(**kwargs)
         db.session.commit()
         
         # lets create the second user
@@ -330,7 +331,7 @@ class DatabaseTester(unittest.TestCase):
             "login_name": "user1",
         })
         
-        user2=user.User(**kwargs)
+        user2=User(**kwargs)
         
         self.assertRaises(IntegrityError, db.session.commit)
     
@@ -355,7 +356,7 @@ class DatabaseTester(unittest.TestCase):
             "created_by": admin
         }
         
-        entity1 = entity.Entity(**kwargs)
+        entity1 = Entity(**kwargs)
         db.session.commit()
         
         # lets create the second user
@@ -366,7 +367,7 @@ class DatabaseTester(unittest.TestCase):
             "password": "user1",
         })
         
-        user1=user.User(**kwargs)
+        user1=User(**kwargs)
         
         # expect nothing, this should work without any error
         db.session.commit()
@@ -551,30 +552,30 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of AssetBase
         """
         
-        asset_type = types.AssetType(name="A new AssetType")
+        asset_type = AssetType(name="A new AssetType")
         
-        status1 = status.Status(name="On Hold", code="OH")
-        status2 = status.Status(name="Completed", code="CMPLT")
-        status3 = status.Status(name="Work In Progress", code="WIP")
+        status1 = Status(name="On Hold", code="OH")
+        status2 = Status(name="Completed", code="CMPLT")
+        status3 = Status(name="Work In Progress", code="WIP")
         
-        task_status_list = status.StatusList(
+        task_status_list = StatusList(
             name="Task Status List",
             statuses=[status1, status2, status3],
-            target_entity_type=task.Task.entity_type
+            target_entity_type=Task.entity_type
         )
         
-        mock_task1 = task.Task(name="test task 1")
-        mock_task2 = task.Task(name="test task 2")
-        mock_task3 = task.Task(name="test task 3")
+        mock_task1 = Task(name="test task 1")
+        mock_task2 = Task(name="test task 2")
+        mock_task3 = Task(name="test task 3")
         
         mock_task1.status_list = task_status_list
         mock_task2.status_list = task_status_list
         mock_task3.status_list = task_status_list
         
-        assetBase_statusList = status.StatusList(
+        assetBase_statusList = StatusList(
             name="AssetBase Status List",
             statuses=[status1, status2, status3],
-            target_entity_type=assetBase.AssetBase.entity_type
+            target_entity_type=AssetBase.entity_type
         )
         
         kwargs = {
@@ -584,13 +585,13 @@ class DatabaseModelsTester(unittest.TestCase):
             "tasks": [mock_task1, mock_task2, mock_task3],
         }
         
-        asset_base = assetBase.AssetBase(**kwargs)
+        asset_base = AssetBase(**kwargs)
         asset_base.status_list = assetBase_statusList
         
         db.session.add(asset_base)
         db.session.commit()
         
-        asset_base_DB = db.query(assetBase.AssetBase).\
+        asset_base_DB = db.query(AssetBase).\
                       filter_by(name=kwargs["name"]).one()
         
         self.assertEquals(asset_base, asset_base_DB)
@@ -607,7 +608,7 @@ class DatabaseModelsTester(unittest.TestCase):
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a couple of PipelineStep objects
-        pStep1 = pipelineStep.PipelineStep(
+        pStep1 = PipelineStep(
             name="Rigging",
             description="This is where a character asset is rigged",
             created_by=admin,
@@ -615,7 +616,7 @@ class DatabaseModelsTester(unittest.TestCase):
             code="RIG"
         )
         
-        pStep2 = pipelineStep.PipelineStep(
+        pStep2 = PipelineStep(
             name="Lighting",
             description="lighting done in this stage, don't mix it with \
             shading",
@@ -633,14 +634,14 @@ class DatabaseModelsTester(unittest.TestCase):
             "steps": [pStep1, pStep2],
         }
         
-        aType = types.AssetType(**kwargs)
+        aType = AssetType(**kwargs)
         
         # store it in the db
         db.session.add(aType)
         db.session.commit()
         
         # retrieve it back and check it with the first one
-        aType_DB = db.session.query(types.AssetType). \
+        aType_DB = db.session.query(AssetType). \
                  filter_by(name=kwargs["name"]).first()
         
         for i, pStep_DB in enumerate(aType_DB.steps):
@@ -681,7 +682,7 @@ class DatabaseModelsTester(unittest.TestCase):
         date_created = datetime.datetime.now()
         date_updated = datetime.datetime.now()
         
-        testDepartment = department.Department(
+        testDepartment = Department(
             name=name,
             description=description,
             created_by=created_by,
@@ -693,7 +694,7 @@ class DatabaseModelsTester(unittest.TestCase):
         # create three users, one for lead and two for members
         
         # user1
-        user1 = user.User(
+        user1 = User(
             name="user1_test_persistence_department",
             description="this is for testing purposes",
             created_by=None,
@@ -706,7 +707,7 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # user2
-        user2 = user.User(
+        user2 = User(
             name="user2_test_persistence_department",
             description="this is for testing purposes",
             created_by=None,
@@ -720,7 +721,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # user3
         # create three users, one for lead and two for members
-        user3 = user.User(
+        user3 = User(
             name="user3_test_persistence_department",
             description="this is for testing purposes",
             created_by=None,
@@ -741,7 +742,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # lets check the data
         # first get the department from the db
-        dep_from_db = db.session.query(department.Department). \
+        dep_from_db = db.session.query(Department). \
                     filter_by(name=testDepartment.name).first()
         
         # members
@@ -771,7 +772,7 @@ class DatabaseModelsTester(unittest.TestCase):
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        tag1 = tag.Tag(
+        tag1 = Tag(
             name=name,
             description=description,
             created_by=created_by,
@@ -786,7 +787,7 @@ class DatabaseModelsTester(unittest.TestCase):
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        tag2 = tag.Tag(
+        tag2 = Tag(
             name=name,
             description=description,
             created_by=created_by,
@@ -801,7 +802,7 @@ class DatabaseModelsTester(unittest.TestCase):
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        testEntity = entity.Entity(
+        testEntity = Entity(
             name=name,
             description=description,
             created_by=created_by,
@@ -816,7 +817,7 @@ class DatabaseModelsTester(unittest.TestCase):
         db.session.commit()
         
         # now try to retrieve it
-        testEntityDB = db.session.query(entity.Entity). \
+        testEntityDB = db.session.query(Entity). \
                      filter_by(name=name).first()
         
         # just test the entity part of the object
@@ -858,14 +859,14 @@ class DatabaseModelsTester(unittest.TestCase):
         }
         
         # create the ImageFormat object
-        imFormat = imageFormat.ImageFormat(**kwargs)
+        imFormat = ImageFormat(**kwargs)
         
         # persist it
         session.add(imFormat)
         session.commit()
         
         # get it back
-        imFormat_db = session.query(imageFormat.ImageFormat). \
+        imFormat_db = session.query(ImageFormat). \
                 filter_by(name=kwargs["name"]).first()
         
         # just test the repository part of the attributes
@@ -881,7 +882,7 @@ class DatabaseModelsTester(unittest.TestCase):
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a LinkType
-        sound_link_type = types.LinkType(
+        sound_link_type = LinkType(
             name="Sound",
             created_by=admin
         )
@@ -895,14 +896,14 @@ class DatabaseModelsTester(unittest.TestCase):
             "type": sound_link_type
         }
         
-        new_link = link.Link(**kwargs)
+        new_link = Link(**kwargs)
         
         # persist it
         db.session.add_all([sound_link_type, new_link])
         db.session.commit()
         
         # retrieve it back
-        link_DB = db.session.query(link.Link).\
+        link_DB = db.session.query(Link).\
                 filter_by(name=kwargs["name"]).first()
         
         self.assertTrue(new_link==link_DB)
@@ -925,7 +926,7 @@ class DatabaseModelsTester(unittest.TestCase):
             rig later on",
         }
         
-        a_note_obj = note.Note(**note_kwargs)
+        a_note_obj = Note(**note_kwargs)
         
         # create an entity
         entity_kwargs = {
@@ -934,21 +935,21 @@ class DatabaseModelsTester(unittest.TestCase):
             "notes": [a_note_obj],
         }
         
-        an_entity_obj = entity.Entity(**entity_kwargs)
+        an_entity_obj = Entity(**entity_kwargs)
         
         db.session.add_all([an_entity_obj, a_note_obj])
         db.session.commit()
         
         # try to get the note directly
         
-        note_DB = db.query(note.Note).\
-                filter(note.Note.name==note_kwargs["name"]).first()
+        note_DB = db.query(Note).\
+                filter(Note.name==note_kwargs["name"]).first()
         
         self.assertEquals(a_note_obj, note_DB)
         
         # try to get the note from the entity
-        entity_DB = db.query(entity.Entity).\
-                  filter(entity.Entity.name==entity_kwargs["name"]).first()
+        entity_DB = db.query(Entity).\
+                  filter(Entity.name==entity_kwargs["name"]).first()
         
         self.assertEquals(a_note_obj, entity_DB.notes[0])
     
@@ -970,13 +971,13 @@ class DatabaseModelsTester(unittest.TestCase):
             "code": "RNDR"
         }
         
-        pStep = pipelineStep.PipelineStep(**kwargs)
+        pStep = PipelineStep(**kwargs)
         
         # save it to database
         db.session.add(pStep)
         
         # retrieve it back
-        pStep_DB = db.session.query(pipelineStep.PipelineStep). \
+        pStep_DB = db.session.query(PipelineStep). \
                  filter_by(name=kwargs["name"]). \
                  filter_by(description=kwargs["description"]). \
                  first()
@@ -995,36 +996,36 @@ class DatabaseModelsTester(unittest.TestCase):
         start_date = datetime.date.today()
         due_date = start_date + datetime.timedelta(days=20)
         
-        lead = user.User(login_name="lead", first_name="lead",
+        lead = User(login_name="lead", first_name="lead",
                                    last_name="lead", email="lead@lead.com")
         
-        user1 = user.User(login_name="user1", first_name="user1",
+        user1 = User(login_name="user1", first_name="user1",
                           last_name="user1", email="user1@user1.com")
-        user2 = user.User(login_name="user2", first_name="user2",
+        user2 = User(login_name="user2", first_name="user2",
                           last_name="user2", email="user1@user2.com")
-        user3 = user.User(login_name="user3", first_name="user3",
+        user3 = User(login_name="user3", first_name="user3",
                           last_name="user3", email="user3@user3.com")
         
-        image_format = imageFormat.ImageFormat(name="HD", width=1920,
+        image_format = ImageFormat(name="HD", width=1920,
                                                height=1080)
         
-        project_type = types.ProjectType(name="Commercial")
+        project_type = ProjectType(name="Commercial")
         
-        project_structure = structure.Structure(name="Commercial Structure",
-                                                project_template="")
+        project_structure = Structure(name="Commercial Structure",
+                                      project_template="")
         
-        repo = repository.Repository(name="Commercials Repository",
-                                     linux_path="/mnt/Projects",
-                                     windows_path="M:\\Projects",
-                                     osx_path="/Volumes/Projects")
+        repo = Repository(name="Commercials Repository",
+                          linux_path="/mnt/Projects",
+                          windows_path="M:\\Projects",
+                          osx_path="/Volumes/Projects")
         
-        project_status_list = status.StatusList(
-            name="A Status List for testing project.Project",
+        project_status_list = StatusList(
+            name="A Status List for testing Project",
             statuses=[
-                status.Status(name="On Hold", code="OH"),
-                status.Status(name="Complete", code="CMPLT")
+                Status(name="On Hold", code="OH"),
+                Status(name="Complete", code="CMPLT")
             ],
-            target_entity_type = project.Project.entity_type
+            target_entity_type = Project.entity_type
         )
         
         db.session.add(project_status_list)
@@ -1049,14 +1050,14 @@ class DatabaseModelsTester(unittest.TestCase):
             "status": 0
         }
         
-        new_project = project.Project(**kwargs)
+        new_project = Project(**kwargs)
         
         # persist it in the database
         db.session.add(new_project)
         db.session.commit()
         
         # now get it
-        new_project_DB = db.query(project.Project).\
+        new_project_DB = db.query(Project).\
                        filter_by(name=kwargs["name"]).first()
         
         self.assertEquals(new_project, new_project_DB)
@@ -1084,15 +1085,16 @@ class DatabaseModelsTester(unittest.TestCase):
         }
         
         # create the repository object
-        repo = repository.Repository(**kwargs)
+        repo = Repository(**kwargs)
         
         # persist it
         session.add(repo)
         session.commit()
         
         # get it back
-        repo_db = session.query(repository.Repository). \
-                filter_by(name=kwargs["name"]).first()
+        repo_db = session.query(Repository).\
+                  filter_by(name=kwargs["name"]).\
+                  first()
         
         # just test the repository part of the attributes
         self.assertEquals(repo.linux_path, repo_db.linux_path)
@@ -1107,37 +1109,37 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of Sequence
         """
         
-        status1 = status.Status(name="On Hold", code="OH")
-        status2 = status.Status(name="Work In Progress", code="WIP")
-        status3 = status.Status(name="Finished", code="FIN")
+        status1 = Status(name="On Hold", code="OH")
+        status2 = Status(name="Work In Progress", code="WIP")
+        status3 = Status(name="Finished", code="FIN")
         
-        project_status_list = status.StatusList(
+        project_status_list = StatusList(
             name="Project Status List",
             statuses=[status1, status2, status3],
-            target_entity_type = project.Project.entity_type
+            target_entity_type = Project.entity_type
         )
         
-        sequence_status_list = status.StatusList(
+        sequence_status_list = StatusList(
             name="Sequence Status List",
             statuses=[status1, status2, status3],
-            target_entity_type = sequence.Sequence.entity_type
+            target_entity_type = Sequence.entity_type
         )
         
-        shot_status_list = status.StatusList(
+        shot_status_list = StatusList(
             name="Shot Status List",
             statuses=[status1, status2, status3],
-            target_entity_type = shot.Shot.entity_type
+            target_entity_type = Shot.entity_type
         )
         
-        project1 = project.Project(name="Test project",
+        project1 = Project(name="Test project",
                                    status_list=project_status_list)
         
-        lead = user.User(login_name="lead", email="lead@lead.com",
+        lead = User(login_name="lead", email="lead@lead.com",
                          first_name="lead", last_name="lead")
         
-        shot1 = shot.Shot(code="SH001")
-        shot2 = shot.Shot(code="SH002")
-        shot3 = shot.Shot(code="SH003")
+        shot1 = Shot(code="SH001")
+        shot2 = Shot(code="SH002")
+        shot3 = Shot(code="SH003")
         
         shot1.status_list = shot_status_list
         shot2.status_list = shot_status_list
@@ -1160,12 +1162,12 @@ class DatabaseModelsTester(unittest.TestCase):
             "status_list": sequence_status_list,
         }
         
-        test_sequence = sequence.Sequence(**kwargs)
+        test_sequence = Sequence(**kwargs)
         
         db.session.add(test_sequence)
         db.session.commit()
         
-        test_sequence_DB = db.query(sequence.Sequence).\
+        test_sequence_DB = db.query(Sequence).\
                          filter_by(name=kwargs["name"]).one()
         
         self.assertEquals(test_sequence, test_sequence_DB)
@@ -1191,15 +1193,15 @@ class DatabaseModelsTester(unittest.TestCase):
             "description": "this is for testing purposes",
         }
         
-        aSimpleEntity = entity.SimpleEntity(**kwargs)
+        aSimpleEntity = SimpleEntity(**kwargs)
         
         # persist it to the database
         db.session.add(aSimpleEntity)
         db.session.commit()
         
         # now try to retrieve it
-        SE_from_DB = db.session.query(entity.SimpleEntity).\
-            filter(entity.SimpleEntity.name==kwargs["name"]).first()
+        SE_from_DB = db.session.query(SimpleEntity).\
+            filter(SimpleEntity.name==kwargs["name"]).first()
         
         self.assertEquals(aSimpleEntity, SE_from_DB)
     
@@ -1218,15 +1220,15 @@ class DatabaseModelsTester(unittest.TestCase):
             "code": "TSTST",
         }
         
-        testStatus = status.Status(**kwargs)
+        testStatus = Status(**kwargs)
         
         # persist it to the database
         db.session.add(testStatus)
         db.session.commit()
         
         # now try to retrieve it
-        testStatusDB = db.query(status.Status).\
-                     filter(status.Status.name==kwargs["name"]).first()
+        testStatusDB = db.query(Status).\
+                     filter(Status.name==kwargs["name"]).first()
         
         # just test the satuts part of the object
         self.assertEquals(testStatus, testStatusDB)
@@ -1241,10 +1243,10 @@ class DatabaseModelsTester(unittest.TestCase):
         # create a couple of statuses
         
         statuses = [
-            status.Status(name="Waiting To Start", code="WTS"),
-            status.Status(name="On Hold", code="OH"),
-            status.Status(name="In Progress", code="WIP"),
-            status.Status(name="Complete", code="CMPLT"),
+            Status(name="Waiting To Start", code="WTS"),
+            Status(name="On Hold", code="OH"),
+            Status(name="In Progress", code="WIP"),
+            Status(name="Complete", code="CMPLT"),
         ]
         
         kwargs = dict(
@@ -1253,14 +1255,14 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type="Sequence"
         )
         
-        sequence_status_list = status.StatusList(**kwargs)
+        sequence_status_list = StatusList(**kwargs)
         
         # send it to db
         db.session.add(sequence_status_list)
         db.session.commit()
         
         # now get it back
-        sequence_status_list_DB = db.query(status.StatusList).\
+        sequence_status_list_DB = db.query(StatusList).\
                                 filter_by(name=kwargs["name"]).first()
         
         self.assertEquals(sequence_status_list, sequence_status_list_DB)
@@ -1269,7 +1271,7 @@ class DatabaseModelsTester(unittest.TestCase):
         # and expect and IntegrityError
         
         kwargs["name"] = "new Sequence Status List"
-        new_sequence_list = status.StatusList(**kwargs)
+        new_sequence_list = StatusList(**kwargs)
         
         db.session.add(new_sequence_list)
         
@@ -1288,14 +1290,14 @@ class DatabaseModelsTester(unittest.TestCase):
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create pipeline steps for character
-        modeling_pStep = pipelineStep.PipelineStep(
+        modeling_pStep = PipelineStep(
             name="Modeling",
             description="This is the step where all the modeling job is done",
             code="MODEL",
             created_by=admin
         )
         
-        animation_pStep = pipelineStep.PipelineStep(
+        animation_pStep = PipelineStep(
             name="Animation",
             description="This is the step where all the animation job is " + \
                         "done it is not limited with characters, other " + \
@@ -1305,7 +1307,7 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # create a new assetType
-        char_asset_type = types.AssetType(
+        char_asset_type = AssetType(
             name="Character Asset Type",
             description="This is the asset type which covers animated " + \
                         "charactes",
@@ -1314,7 +1316,7 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # create a new type template for character assets
-        assetTemplate = types.TypeTemplate(
+        assetTemplate = TypeTemplate(
             name="Character Asset Template",
             description="This is the template for character assets",
             path_code="ASSETS/{{asset_type.name}}/{{pipeline_step.code}}",
@@ -1324,14 +1326,14 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # create a new link type
-        image_link_type = types.LinkType(
+        image_link_type = LinkType(
             name="Image",
             description="It is used for links showing an image",
             created_by=admin
         )
         
         # create a new template for references
-        imageReferenceTemplate = types.TypeTemplate(
+        imageReferenceTemplate = TypeTemplate(
             name="Image Reference Template",
             description="this is the template for image references, it " + \
                         "shows where to place the image files",
@@ -1370,7 +1372,7 @@ class DatabaseModelsTester(unittest.TestCase):
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        aTag = tag.Tag(
+        aTag = Tag(
             name=name,
             description=description,
             created_by=created_by,
@@ -1383,7 +1385,7 @@ class DatabaseModelsTester(unittest.TestCase):
         db.session.commit()
         
         # now try to retrieve it
-        tag_query = db.session.query(tag.Tag)
+        tag_query = db.session.query(Tag)
         Tag_from_DB = tag_query.filter_by(name=name).first()
         
         self.assertEquals(aTag.name, Tag_from_DB.name)
@@ -1413,7 +1415,7 @@ class DatabaseModelsTester(unittest.TestCase):
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a LinkType object
-        movie_link_type = types.LinkType(
+        movie_link_type = LinkType(
             name="Movie",
             created_by=admin
         )
@@ -1429,7 +1431,7 @@ class DatabaseModelsTester(unittest.TestCase):
             "type": movie_link_type,
         }
         
-        aTypeTemplate = types.TypeTemplate(**kwargs)
+        aTypeTemplate = TypeTemplate(**kwargs)
         
         # persist it
         session = db.session
@@ -1437,7 +1439,7 @@ class DatabaseModelsTester(unittest.TestCase):
         session.commit()
         
         # get it back
-        aTypeTemplate_DB = session.query(types.TypeTemplate).\
+        aTypeTemplate_DB = session.query(TypeTemplate).\
                      filter_by(name=kwargs["name"]).first()
         
         self.assertEquals(aTypeTemplate, aTypeTemplate_DB)
@@ -1458,7 +1460,7 @@ class DatabaseModelsTester(unittest.TestCase):
             purposes",
         }
         
-        new_department = department.Department(**dep_kwargs)
+        new_department = Department(**dep_kwargs)
         
         # create the user
         user_kwargs = {
@@ -1471,20 +1473,20 @@ class DatabaseModelsTester(unittest.TestCase):
             "department": new_department,
         }
         
-        new_user = user.User(**user_kwargs)
+        new_user = User(**user_kwargs)
         
         db.session.add_all([new_user, new_department])
         db.session.commit()
         
-        user_DB = db.query(user.User).\
-                filter(user.User.name==user_kwargs["login_name"]).first()
+        user_DB = db.query(User).\
+                filter(User.name==user_kwargs["login_name"]).first()
         
         # the user itself
         self.assertEquals(new_user, user_DB)
         
         # as the member of a department
-        department_db = db.query(department.Department).\
-                      filter(department.Department.name==dep_kwargs["name"]).\
+        department_db = db.query(Department).\
+                      filter(Department.name==dep_kwargs["name"]).\
                       first()
         
         self.assertEquals(new_user, department_db.members[0])
@@ -1566,12 +1568,10 @@ class ExamplesTester(unittest.TestCase):
         db.session.add(newGreatEntity)
         db.session.commit()
         
-        newLinkType = types.LinkType(name="Image")
+        newLinkType = LinkType(name="Image")
         
-        newLink = link.Link(name="TestLink",
-                            path="nopath",
-                            filename="nofilename",
-                            type=newLinkType)
+        newLink = Link(name="TestLink", path="nopath", filename="nofilename",
+                       type=newLinkType)
         
         newGreatEntity.references = [newLink]
         
@@ -1608,11 +1608,11 @@ class ExamplesTester(unittest.TestCase):
         #db.setup("sqlite:////tmp/mixin_test.db")
         db.setup("sqlite://")
         
-        newStatusList = status.StatusList(
+        newStatusList = StatusList(
             name="A Status List for testing StatusMixin",
             statuses=[
-                status.Status(name="Mixin - On Hold", code="OH"),
-                status.Status(name="Mixin - Complete", code="CMPLT")
+                Status(name="Mixin - On Hold", code="OH"),
+                Status(name="Mixin - Complete", code="CMPLT")
             ],
             target_entity_type = statused_entity.NewStatusedEntity.entity_type
         )

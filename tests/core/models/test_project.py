@@ -3,9 +3,9 @@
 
 import datetime
 import mocker
-from stalker.core.models import (user, sequence, asset, imageFormat, types,
-                                 project, structure, repository, entity,
-                                 status)
+from stalker.core.models import (User, Sequence, Asset, ImageFormat,
+                                 Project, ProjectType, Structure, Repository,
+                                 Entity, Status, StatusList)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -29,34 +29,34 @@ class ProjectTester(mocker.MockerTestCase):
         self.start_date = datetime.date.today()
         self.due_date = self.start_date + datetime.timedelta(days=20)
         
-        self.mock_lead = self.mocker.mock(user.User)
+        self.mock_lead = self.mocker.mock(User)
         
-        self.mock_user1 = self.mocker.mock(user.User)
-        self.mock_user2 = self.mocker.mock(user.User)
-        self.mock_user3 = self.mocker.mock(user.User)
+        self.mock_user1 = self.mocker.mock(User)
+        self.mock_user2 = self.mocker.mock(User)
+        self.mock_user3 = self.mocker.mock(User)
         
-        self.mock_seq1 = self.mocker.mock(sequence.Sequence)
-        self.mock_seq2 = self.mocker.mock(sequence.Sequence)
-        self.mock_seq3 = self.mocker.mock(sequence.Sequence)
+        self.mock_seq1 = self.mocker.mock(Sequence)
+        self.mock_seq2 = self.mocker.mock(Sequence)
+        self.mock_seq3 = self.mocker.mock(Sequence)
         
-        self.mock_asset1 = self.mocker.mock(asset.Asset)
-        self.mock_asset2 = self.mocker.mock(asset.Asset)
-        self.mock_asset3 = self.mocker.mock(asset.Asset)
+        self.mock_asset1 = self.mocker.mock(Asset)
+        self.mock_asset2 = self.mocker.mock(Asset)
+        self.mock_asset3 = self.mocker.mock(Asset)
         
-        self.mock_imageFormat = self.mocker.mock(imageFormat.ImageFormat)
+        self.mock_imageFormat = self.mocker.mock(ImageFormat)
         
-        self.mock_project_type = self.mocker.mock(types.ProjectType)
-        self.mock_project_type2 = self.mocker.mock(types.ProjectType)
+        self.mock_project_type = self.mocker.mock(ProjectType)
+        self.mock_project_type2 = self.mocker.mock(ProjectType)
         
-        self.mock_project_structure = self.mocker.mock(structure.Structure)
-        self.mock_project_structure2 = self.mocker.mock(structure.Structure)
+        self.mock_project_structure = self.mocker.mock(Structure)
+        self.mock_project_structure2 = self.mocker.mock(Structure)
         
-        self.mock_repo = self.mocker.mock(repository.Repository)
-        self.mock_repo2 = self.mocker.mock(repository.Repository)
+        self.mock_repo = self.mocker.mock(Repository)
+        self.mock_repo2 = self.mocker.mock(Repository)
         
-        self.mock_status_list = self.mocker.mock(status.StatusList)
+        self.mock_status_list = self.mocker.mock(StatusList)
         self.expect(self.mock_status_list.target_entity_type).\
-            result(project.Project.entity_type).count(0, None)
+            result(Project.entity_type).count(0, None)
         self.expect(len(self.mock_status_list.statuses)).result(5).count(0,None)
         
         self.mocker.replay()
@@ -81,7 +81,7 @@ class ProjectTester(mocker.MockerTestCase):
             "status_list": self.mock_status_list,
         }
         
-        self.mock_project = project.Project(**self.kwargs)
+        self.mock_project = Project(**self.kwargs)
     
     
     
@@ -92,7 +92,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["lead"] = None
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -109,7 +109,7 @@ class ProjectTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_lead_argument_is_given_as_something_other_than_a_user(self):
         """testing if a ValueError will be raised when the lead argument is
-        given as something other than a user.User object
+        given as something other than a User object
         """
         
         test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
@@ -118,7 +118,7 @@ class ProjectTester(mocker.MockerTestCase):
             self.kwargs["lead"] = test_value
             self.assertRaises(
                 ValueError,
-                project.Project,
+                Project,
                 **self.kwargs
             )
     
@@ -127,7 +127,7 @@ class ProjectTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_lead_attribute_is_set_to_something_other_than_a_user(self):
         """testing if a ValueError will be raised when the lead attribute is
-        set to something other than a user.User object
+        set to something other than a User object
         """
         
         test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
@@ -160,7 +160,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["users"] = None
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -181,7 +181,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["users"] = None
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
         self.assertEquals(new_project.users, [])
     
     
@@ -200,19 +200,19 @@ class ProjectTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_users_argument_is_given_as_a_list_of_other_objects_then_user(self):
         """testing if a ValueError will be raised when the users argument is
-        given as a list containing objects other than user.User
+        given as a list containing objects other than User
         """
         
         test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
         self.kwargs["users"] = test_value
-        self.assertRaises(ValueError, project.Project, **self.kwargs)
+        self.assertRaises(ValueError, Project, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_users_attribute_is_given_as_a_list_of_other_objects_then_user(self):
         """testing if a ValueError will be raised when the users attribute is
-        given as a list containing objects other than user.User
+        given as a list containing objects other than User
         """
         
         test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
@@ -264,7 +264,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["sequences"] = None
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
         self.assertEquals(new_project.sequences, [])
     
     
@@ -287,7 +287,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["sequences"] = []
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -310,7 +310,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
         self.kwargs["sequences"] = test_value
-        self.assertRaises(ValueError, project.Project, **self.kwargs)
+        self.assertRaises(ValueError, Project, **self.kwargs)
     
     
     
@@ -370,7 +370,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["assets"] = None
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
         self.assertEquals(new_project.assets, [])
     
     
@@ -393,7 +393,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("assets")
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
         self.assertEquals(new_project.assets, [])
     
     
@@ -405,7 +405,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["assets"] = []
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -427,7 +427,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         test_value = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         self.kwargs["assets"] = test_value
-        self.assertRaises(ValueError, project.Project, **self.kwargs)
+        self.assertRaises(ValueError, Project, **self.kwargs)
     
     
     
@@ -488,7 +488,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["image_format"] = None
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -512,11 +512,11 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["image_format"] = test_value
-            self.assertRaises(ValueError, project.Project, **self.kwargs)
+            self.assertRaises(ValueError, Project, **self.kwargs)
         
         # and a proper image format
         self.kwargs["image_format"] = self.mock_imageFormat
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -548,7 +548,7 @@ class ProjectTester(mocker.MockerTestCase):
         """testing if the image_format attribute is working properly
         """
         
-        new_image_format = imageFormat.ImageFormat(
+        new_image_format = ImageFormat(
             name="Foo Image Format",
             width=10,
             height=10
@@ -565,7 +565,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("fps")
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
         self.assertEquals(new_project.fps, 25.0)
     
     
@@ -577,7 +577,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["fps"] = None
-        self.assertRaises(TypeError, project.Project, **self.kwargs)
+        self.assertRaises(TypeError, Project, **self.kwargs)
     
     
     
@@ -593,7 +593,7 @@ class ProjectTester(mocker.MockerTestCase):
             self.kwargs["fps"] = test_value
             self.assertRaises(
                 ValueError,
-                project.Project,
+                Project,
                 **self.kwargs
             )
         
@@ -602,7 +602,7 @@ class ProjectTester(mocker.MockerTestCase):
             self.kwargs["fps"] = test_value
             self.assertRaises(
                 TypeError,
-                project.Project,
+                Project,
                 **self.kwargs
             )
     
@@ -648,7 +648,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["fps"] = test_value[0]
-            new_project = project.Project(**self.kwargs)
+            new_project = Project(**self.kwargs)
             self.assertAlmostEquals(new_project.fps, test_value[1]) 
     
     
@@ -676,7 +676,7 @@ class ProjectTester(mocker.MockerTestCase):
         test_value = 1
         
         self.kwargs["fps"] = test_value
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
         self.assertIsInstance(new_project.fps, float)
         self.assertEquals(new_project.fps, float(test_value))
     
@@ -702,7 +702,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("type")
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -712,7 +712,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["type"] = None
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -726,7 +726,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["type"] = test_value
-            self.assertRaises(ValueError, project.Project, **self.kwargs)
+            self.assertRaises(ValueError, Project, **self.kwargs)
     
     
     
@@ -774,8 +774,8 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["repository"] = None
-        #self.assertRaises(ValueError, project.Project, **self.kwargs)
-        new_project = project.Project(**self.kwargs)
+        #self.assertRaises(ValueError, Project, **self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -798,7 +798,7 @@ class ProjectTester(mocker.MockerTestCase):
         test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         for test_value in test_values:
             self.kwargs["repository"] = test_value
-            self.assertRaises(ValueError, project.Project, **self.kwargs)
+            self.assertRaises(ValueError, Project, **self.kwargs)
     
     
     
@@ -837,7 +837,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("is_stereoscopic")
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
         self.assertEquals(new_project.is_stereoscopic, False)
     
     
@@ -852,7 +852,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["is_stereoscopic"] = test_value
-            new_project = project.Project(**self.kwargs)
+            new_project = Project(**self.kwargs)
             self.assertEquals(new_project.is_stereoscopic, bool(test_value))
     
     
@@ -881,7 +881,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("display_width")
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
         self.assertEquals(new_project.display_width, 1.0)
     
     
@@ -895,7 +895,7 @@ class ProjectTester(mocker.MockerTestCase):
         test_values = [1, 2, 3, 4]
         for test_value in test_values:
             self.kwargs["display_width"] = test_value
-            new_project = project.Project(**self.kwargs)
+            new_project = Project(**self.kwargs)
             self.assertIsInstance(new_project.display_width, float)
             self.assertEquals(new_project.display_width, float(test_value))
     
@@ -924,7 +924,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         test_value = -1.0
         self.kwargs["display_width"] = test_value
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
         self.assertEquals(new_project.display_width, abs(test_value))
     
     
@@ -947,7 +947,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["structure"] = None
-        new_project = project.Project(**self.kwargs)
+        new_project = Project(**self.kwargs)
     
     
     
@@ -971,7 +971,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["structure"] = test_value
-            self.assertRaises(ValueError, project.Project, **self.kwargs)
+            self.assertRaises(ValueError, Project, **self.kwargs)
     
     
     
@@ -1011,14 +1011,14 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         # create a new project with the same arguments
-        new_project1 = project.Project(**self.kwargs)
+        new_project1 = Project(**self.kwargs)
         
         # create a new entity with the same arguments
-        new_entity = entity.Entity(**self.kwargs)
+        new_entity = Entity(**self.kwargs)
         
         # create another project with different name
         self.kwargs["name"] = "a different project"
-        new_project2 = project.Project(**self.kwargs)
+        new_project2 = Project(**self.kwargs)
         
         self.assertTrue(self.mock_project==new_project1)
         self.assertFalse(self.mock_project==new_project2)
@@ -1032,14 +1032,14 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         # create a new project with the same arguments
-        new_project1 = project.Project(**self.kwargs)
+        new_project1 = Project(**self.kwargs)
         
         # create a new entity with the same arguments
-        new_entity = entity.Entity(**self.kwargs)
+        new_entity = Entity(**self.kwargs)
         
         # create another project with different name
         self.kwargs["name"] = "a different project"
-        new_project2 = project.Project(**self.kwargs)
+        new_project2 = Project(**self.kwargs)
         
         self.assertFalse(self.mock_project!=new_project1)
         self.assertTrue(self.mock_project!=new_project2)

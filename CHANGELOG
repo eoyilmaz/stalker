@@ -1,6 +1,13 @@
 Stalker Changes
 ===============
 
+v0.1.1.a7
+---------
+
+ * Merged all the model classes which were previously in seperate files in to
+  :mod:`stalker.core.models` module, to make it easy to use (and possibly hard
+  to develop)
+
 v0.1.1.a6
 ---------
 
@@ -481,10 +488,10 @@ v0.0.1.20101219
 ---------------
 
  * started to implement:
-   * a database entry point
-   * a customisable object model and database tables
-   * an automatic mapper to map the objects and tables together according to
-     user settings
+    * a database entry point
+    * a customisable object model and database tables
+    * an automatic mapper to map the objects and tables together according to
+      user settings
    things can change a lot in this phase, I'm just trying to figure out the
    best possible way to do it.
  * added a new entity type called TaggedEntity which derives from SimpleEntity,
@@ -504,12 +511,12 @@ v0.0.1.20101209
 
  * added the inheritance diagram as an rst page to reference it anywhere needed
  * added the empty classes for:
-   * Asset
-   * AssetBase
-   * Booking
-   * Shot
-   * Structure
-   * Template
-   * Version
+    * Asset
+    * AssetBase
+    * Booking
+    * Shot
+    * Structure
+    * Template
+    * Version
  * added the Department class
  * added inheritance diagrams to the autosummary pages of the classes

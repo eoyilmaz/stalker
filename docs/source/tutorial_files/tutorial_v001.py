@@ -4,7 +4,7 @@ db.setup()
 
 db.setup("sqlite:////tmp/studio.db")
 
-from stalker.core.models.user import User
+from stalker.core.models import User
 
 
 myUser = User(first_name="Erkan Ozgur",
@@ -15,7 +15,7 @@ myUser = User(first_name="Erkan Ozgur",
               description="This is me")
 
 
-from satlker.core.models.department import Department
+from satlker.core.models import Department
 tds_department = Department(name="TDs",
                             description="This is the TDs department")
 
@@ -30,11 +30,11 @@ db.session.add(myUser)
 db.session.add(tds_department)
 db.session.commit()
 
-from stalker.core.models.project import Project
+from stalker.core.models import Project
 new_project = Project(name="Fancy Commercial")
 
 from datetime import datetime
-from stalker.core.models.imageFormat import ImageFormat
+from stalker.core.models import ImageFormat
 
 new_project.description = """The commercial is about this fancy product. The
                              client want us to have a shinny look with their
@@ -44,7 +44,7 @@ new_project.fps = 25
 new_project.due = datetime(2011,2,15)
 new_project.lead = myUser
 
-from stalker.core.models.types import ProjectType
+from stalker.core.models import ProjectType
 
 commercial_project_type = ProjectType(name="Commercial")
 new_project.type = commercial_project_type
@@ -53,13 +53,13 @@ db.session.add(new_project)
 db.session.commit()
 
 
-from stalker.core.models.sequence import Sequence
+from stalker.core.models import Sequence
 seq1 = Sequence(name="Sequence 1", code="SEQ1")
 
 # add it to the project
 new_project.sequences.append(seq1)
 
-from stalker.core.models.shot import Shot
+from stalker.core.models import Shot
 
 sh001 = Shot(name="Shot 1", code="SH001")
 sh002 = Shot(name="Shot 2", code="SH002")
@@ -69,7 +69,7 @@ sh003 = Shot(name="Shot 3", code="SH003")
 seq1.shots.extend([sh001, sh002, sh003])
 
 
-from stalker.core.models.pipelineStep import PipelineStep
+from stalker.core.models import PipelineStep
 
 previs      = PipelineStep(name="Previs"     , code="PREVIS")
 matchmove   = PipelineStep(name="Match Move" , code="MM")
@@ -80,7 +80,7 @@ comp        = PipelineStep(name="Compositing", code="COMP")
 
 
 
-from stalker.core.models.types import AssetType
+from stalker.core.models import AssetType
 
 # the order of the PipelineSteps are not important
 shot_pSteps = [previs, match, anim, layout, light, comp]
@@ -99,7 +99,7 @@ for shot in seq1.shots:
 
 
 from datetime import timedelta
-from stalker.core.models.task import Task
+from stalker.core.models import Task
 
 previs_task = Task(
                   name="Previs",
@@ -163,7 +163,7 @@ light_task.depends = [layout_task]
 session.commit()
 
 
-from stalker.core.models.repository import Repository
+from stalker.core.models import Repository
 repo1 = Repository(
     name="Commercial Repository",
     description="""This is where the commercial projects are going to be
@@ -187,7 +187,7 @@ print repo1.path
 # /Volumes/M
 #
 
-from stalker.core.models.structure import Structure
+from stalker.core.models import Structure
 
 structure1 = Structure(
     name="Commercial Projects Structure",

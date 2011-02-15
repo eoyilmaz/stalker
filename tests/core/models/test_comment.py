@@ -4,7 +4,7 @@
 
 import mocker
 import datetime
-from stalker.core.models import comment, entity, user, tag
+from stalker.core.models import Comment, Entity, User, Tag
 
 
 
@@ -27,19 +27,19 @@ class CommentTest(mocker.MockerTestCase):
         # a couple of mock tag objects
         
         # a couple of mock tags
-        self.mock_tag1 = self.mocker.mock(tag.Tag)
-        self.mock_tag2 = self.mocker.mock(tag.Tag)
+        self.mock_tag1 = self.mocker.mock(Tag)
+        self.mock_tag2 = self.mocker.mock(Tag)
         
         # a mock entity object
-        self.mock_entity = self.mocker.mock(entity.Entity)
-        self.mock_entity2 = self.mocker.mock(entity.Entity)
+        self.mock_entity = self.mocker.mock(Entity)
+        self.mock_entity2 = self.mocker.mock(Entity)
         
         # creation and update dates
         self.date_created = datetime.datetime.now()
         self.date_updated = self.date_created
         
         # a mock user object
-        self.mock_user = self.mocker.mock(user.User)
+        self.mock_user = self.mocker.mock(User)
         
         self.mocker.replay()
         
@@ -55,7 +55,7 @@ class CommentTest(mocker.MockerTestCase):
             "to": self.mock_entity
         }
         
-        self.comment = comment.Comment(**self.kwargs)
+        self.mock_comment = Comment(**self.kwargs)
     
     
     
@@ -74,7 +74,7 @@ class CommentTest(mocker.MockerTestCase):
             self.kwargs["body"] = test_value
             self.assertRaises(
                 ValueError,
-                comment.Comment,
+                Comment,
                 **self.kwargs
             )
     
@@ -93,7 +93,7 @@ class CommentTest(mocker.MockerTestCase):
             self.assertRaises(
                 ValueError,
                 setattr,
-                self.comment,
+                self.mock_comment,
                 "body",
                 test_value
             )
@@ -106,8 +106,8 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         new_body = "This is a new comment body"
-        self.comment.body = new_body
-        self.assertEquals(new_body, self.comment.body)
+        self.mock_comment.body = new_body
+        self.assertEquals(new_body, self.mock_comment.body)
     
     
     
@@ -119,7 +119,7 @@ class CommentTest(mocker.MockerTestCase):
         
         # creating a new comment and skipping the body should work fine
         self.kwargs.pop("body")
-        a_new_comment =  comment.Comment(**self.kwargs)
+        a_new_comment =  Comment(**self.kwargs)
     
     
     
@@ -131,7 +131,7 @@ class CommentTest(mocker.MockerTestCase):
         
         # create a new comment with no "to" argument
         self.kwargs["to"] = None
-        self.assertRaises(ValueError, comment.Comment, **self.kwargs)
+        self.assertRaises(ValueError, Comment, **self.kwargs)
     
     
     
@@ -146,7 +146,7 @@ class CommentTest(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.comment,
+            self.mock_comment,
             "to",
             None
         )
@@ -166,7 +166,7 @@ class CommentTest(mocker.MockerTestCase):
             
             self.assertRaises(
                 ValueError,
-                comment.Comment,
+                Comment,
                 **self.kwargs
             )
     
@@ -182,7 +182,7 @@ class CommentTest(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.comment,
+            self.mock_comment,
             "to",
             "an Entity"
         )
@@ -199,7 +199,7 @@ class CommentTest(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            comment.Comment,
+            Comment,
             **self.kwargs
         )
     
@@ -211,8 +211,8 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         new_to = self.mock_entity2
-        self.comment.to = new_to
-        self.assertEquals(new_to, self.comment.to)
+        self.mock_comment.to = new_to
+        self.assertEquals(new_to, self.mock_comment.to)
     
     
     

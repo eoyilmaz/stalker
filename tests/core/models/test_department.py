@@ -4,7 +4,7 @@
 
 import mocker
 import datetime
-from stalker.core.models import department, user, entity
+from stalker.core.models import Department, User, Entity
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -24,10 +24,10 @@ class DepartmentTester(mocker.MockerTestCase):
         """
         
         # create a couple of mock users
-        self.mock_user1 = self.mocker.mock(user.User)
-        self.mock_user2 = self.mocker.mock(user.User)
-        self.mock_user3 = self.mocker.mock(user.User)
-        self.mock_user4 = self.mocker.mock(user.User)
+        self.mock_user1 = self.mocker.mock(User)
+        self.mock_user2 = self.mocker.mock(User)
+        self.mock_user3 = self.mocker.mock(User)
+        self.mock_user4 = self.mocker.mock(User)
         
         self.members_list = [self.mock_user1,
                              self.mock_user2,
@@ -35,7 +35,7 @@ class DepartmentTester(mocker.MockerTestCase):
                              self.mock_user4,
                              ]
         
-        self.mock_admin = self.mocker.mock(user.User)
+        self.mock_admin = self.mocker.mock(User)
         
         self.mocker.replay()
         
@@ -53,7 +53,7 @@ class DepartmentTester(mocker.MockerTestCase):
         }
         
         # create a default department object
-        self.mock_department = department.Department(**self.kwargs)
+        self.mock_department = Department(**self.kwargs)
     
     
     
@@ -65,7 +65,7 @@ class DepartmentTester(mocker.MockerTestCase):
         # this should work without raising any error
         self.kwargs["members"] = []
         
-        aNewDepartment = department.Department(**self.kwargs)
+        aNewDepartment = Department(**self.kwargs)
     
     
     
@@ -90,7 +90,7 @@ class DepartmentTester(mocker.MockerTestCase):
         # this should raise a ValueError
         self.assertRaises(
             ValueError,
-            department.Department,
+            Department,
             **self.kwargs
         )
     
@@ -158,7 +158,7 @@ class DepartmentTester(mocker.MockerTestCase):
             self.kwargs["lead"] = test_value
             self.assertRaises(
                 ValueError,
-                department.Department,
+                Department,
                 **self.kwargs
             )
     
@@ -198,16 +198,16 @@ class DepartmentTester(mocker.MockerTestCase):
         """testing equality of two Department objects
         """
         
-        dep1 = department.Department(**self.kwargs)
-        dep2 = department.Department(**self.kwargs)
+        dep1 = Department(**self.kwargs)
+        dep2 = Department(**self.kwargs)
         
         entity_kwargs = self.kwargs.copy()
         entity_kwargs.pop("members")
         entity_kwargs.pop("lead")
-        entity1 = entity.Entity(**entity_kwargs)
+        entity1 = Entity(**entity_kwargs)
         
         self.kwargs["name"] = "Animation"
-        dep3 = department.Department(**self.kwargs)
+        dep3 = Department(**self.kwargs)
         
         self.assertTrue(dep1==dep2)
         self.assertFalse(dep1==dep3)
@@ -220,16 +220,16 @@ class DepartmentTester(mocker.MockerTestCase):
         """testing inequality of two Department objects
         """
         
-        dep1 = department.Department(**self.kwargs)
-        dep2 = department.Department(**self.kwargs)
+        dep1 = Department(**self.kwargs)
+        dep2 = Department(**self.kwargs)
         
         entity_kwargs = self.kwargs.copy()
         entity_kwargs.pop("members")
         entity_kwargs.pop("lead")
-        entity1 = entity.Entity(**entity_kwargs)
+        entity1 = Entity(**entity_kwargs)
         
         self.kwargs["name"] = "Animation"
-        dep3 = department.Department(**self.kwargs)
+        dep3 = Department(**self.kwargs)
         
         self.assertFalse(dep1!=dep2)
         self.assertTrue(dep1!=dep3)

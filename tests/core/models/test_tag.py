@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.core.models import tag
+from stalker.core.models import Tag, SimpleEntity
 
 
 
@@ -26,8 +26,7 @@ class TagTest(unittest.TestCase):
         }
         
         # create another SimpleEntity with kwargs for __eq__ and __ne__ tests
-        from stalker.core.models import entity
-        self.simple_entity = entity.SimpleEntity(**self.kwargs)
+        self.simple_entity = SimpleEntity(**self.kwargs)
     
     
     
@@ -37,7 +36,7 @@ class TagTest(unittest.TestCase):
         """
         
         # this should work without any error
-        a_tag_object = tag.Tag(**self.kwargs)
+        a_tag_object = Tag(**self.kwargs)
     
     
     
@@ -46,13 +45,13 @@ class TagTest(unittest.TestCase):
         """testing the equality of two Tags
         """
         
-        a_tag_object1 = tag.Tag(**self.kwargs)
-        a_tag_object2 = tag.Tag(**self.kwargs)
+        a_tag_object1 = Tag(**self.kwargs)
+        a_tag_object2 = Tag(**self.kwargs)
         
         self.kwargs["name"] = "a new test Tag"
         self.kwargs["description"] = "this is a new test Tag"
         
-        a_tag_object3 = tag.Tag(**self.kwargs)
+        a_tag_object3 = Tag(**self.kwargs)
         
         
         self.assertTrue(a_tag_object1==a_tag_object2)
@@ -66,13 +65,13 @@ class TagTest(unittest.TestCase):
         """testing the inequality of two Tags
         """
         
-        a_tag_object1 = tag.Tag(**self.kwargs)
-        a_tag_object2 = tag.Tag(**self.kwargs)
+        a_tag_object1 = Tag(**self.kwargs)
+        a_tag_object2 = Tag(**self.kwargs)
         
         self.kwargs["name"] = "a new test Tag"
         self.kwargs["description"] = "this is a new test Tag"
         
-        a_tag_object3 = tag.Tag(**self.kwargs)
+        a_tag_object3 = Tag(**self.kwargs)
         
         self.assertFalse(a_tag_object1!=a_tag_object2)
         self.assertTrue(a_tag_object1!=a_tag_object3)

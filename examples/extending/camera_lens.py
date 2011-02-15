@@ -2,7 +2,7 @@
 """
 In this example we are going to extend the Stalker Object Model (SOM) with two
 new type of classes which are derived from the
-:class:`~stalker.core.models.entity.Entity` class.
+:class:`~stalker.core.models.Entity` class.
 
 One of our new classes is going to hold information about Camera, or more
 spesifically it will hold the information of the Camera used on the set for a
@@ -33,10 +33,10 @@ explained in other examples, we are going to use simple STRINGs for the web
 page links.
 
 And because we don't want to again make things complex we are not
-going to touch the :class:`~stalker.core.models.shot.Shot` class which probably
+going to touch the :class:`~stalker.core.models.Shot` class which probably
 will benefit these two classes. In normal circumstances we would like to
 introduce a new class which derives from the original
-:class:`~stalker.core.models.shot.Shot` and add these Camera and Lens
+:class:`~stalker.core.models.Shot` and add these Camera and Lens
 relations to it. But again to not to make things complex we are just going to
 settle with these two.
 
@@ -55,7 +55,7 @@ from sqlalchemy.orm import mapper, relationship
 
 from stalker import db
 from stalker.db import tables
-from stalker.core.models.entity import Entity
+from stalker.core.models import Entity
 
 
 

@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import repository, tag
+from stalker.core.models import Repository, Tag
 
 
 
@@ -12,7 +12,7 @@ from stalker.core.models import repository, tag
 
 ########################################################################
 class RepositoryTester(mocker.MockerTestCase):
-    """tests the repository.Repository class
+    """tests the Repository class
     """
     
     
@@ -23,8 +23,8 @@ class RepositoryTester(mocker.MockerTestCase):
         """
         
         # create a couple of mock tags
-        self.mock_tag1 = self.mocker.mock(tag.Tag)
-        self.mock_tag2 = self.mocker.mock(tag.Tag)
+        self.mock_tag1 = self.mocker.mock(Tag)
+        self.mock_tag2 = self.mocker.mock(Tag)
         
         # ------------
         # replace platform
@@ -46,7 +46,7 @@ class RepositoryTester(mocker.MockerTestCase):
             "windows_path": "M:\\Projects"
         }
         
-        self.mock_repo = repository.Repository(**self.kwargs)
+        self.mock_repo = Repository(**self.kwargs)
     
     
     
@@ -60,7 +60,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["linux_path"] = test_value
-            self.assertRaises(ValueError, repository.Repository, **self.kwargs)
+            self.assertRaises(ValueError, Repository, **self.kwargs)
     
     
     
@@ -104,7 +104,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["windows_path"] = test_value
-            self.assertRaises(ValueError, repository.Repository, **self.kwargs)
+            self.assertRaises(ValueError, Repository, **self.kwargs)
     
     
     
@@ -148,7 +148,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["osx_path"] = test_value
-            self.assertRaises(ValueError, repository.Repository, **self.kwargs)
+            self.assertRaises(ValueError, Repository, **self.kwargs)
     
     
     
@@ -200,7 +200,7 @@ class RepositoryTester(mocker.MockerTestCase):
         #import platform
         #self.assertEquals(platform.system(), "Windows")
         
-        new_mock_repo = repository.Repository(**self.kwargs)
+        new_mock_repo = Repository(**self.kwargs)
         
         self.assertEquals(new_mock_repo.path, new_mock_repo.windows_path)
     
@@ -249,8 +249,8 @@ class RepositoryTester(mocker.MockerTestCase):
         """testing the equality of two repositories
         """
         
-        repo1 = repository.Repository(**self.kwargs)
-        repo2 = repository.Repository(**self.kwargs)
+        repo1 = Repository(**self.kwargs)
+        repo2 = Repository(**self.kwargs)
         
         self.kwargs.update({
             "name": "a repository",
@@ -260,7 +260,7 @@ class RepositoryTester(mocker.MockerTestCase):
             "windows_path": "Z:\\Projects"
         })
         
-        repo3 = repository.Repository(**self.kwargs)
+        repo3 = Repository(**self.kwargs)
         
         self.assertTrue(repo1==repo2)
         self.assertFalse(repo1==repo3)
@@ -272,8 +272,8 @@ class RepositoryTester(mocker.MockerTestCase):
         """testing the inequality of two repositories
         """
         
-        repo1 = repository.Repository(**self.kwargs)
-        repo2 = repository.Repository(**self.kwargs)
+        repo1 = Repository(**self.kwargs)
+        repo2 = Repository(**self.kwargs)
         
         self.kwargs.update({
             "name": "a repository",
@@ -283,7 +283,7 @@ class RepositoryTester(mocker.MockerTestCase):
             "windows_path": "Z:\\Projects"
         })
         
-        repo3 = repository.Repository(**self.kwargs)
+        repo3 = Repository(**self.kwargs)
         
         self.assertFalse(repo1!=repo2)
         self.assertTrue(repo1!=repo3)

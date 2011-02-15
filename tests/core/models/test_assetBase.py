@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import assetBase, types, task, entity
+from stalker.core.models import AssetBase, AssetType, Task, Entity
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -23,12 +23,12 @@ class AssetBaseTester(mocker.MockerTestCase):
         """setup the test
         """
         
-        self.mock_type1 = self.mocker.mock(types.AssetType)
-        self.mock_type2 = self.mocker.mock(types.AssetType)
+        self.mock_type1 = self.mocker.mock(AssetType)
+        self.mock_type2 = self.mocker.mock(AssetType)
         
-        self.mock_task1 = self.mocker.mock(task.Task)
-        self.mock_task2 = self.mocker.mock(task.Task)
-        self.mock_task3 = self.mocker.mock(task.Task)
+        self.mock_task1 = self.mocker.mock(Task)
+        self.mock_task2 = self.mocker.mock(Task)
+        self.mock_task3 = self.mocker.mock(Task)
         
         self.mocker.replay()
         
@@ -39,7 +39,7 @@ class AssetBaseTester(mocker.MockerTestCase):
             "tasks": [self.mock_task1, self.mock_task2, self.mock_task3],
         }
         
-        self.mock_asset_base = assetBase.AssetBase(**self.kwargs)
+        self.mock_asset_base = AssetBase(**self.kwargs)
     
     
     
@@ -49,7 +49,7 @@ class AssetBaseTester(mocker.MockerTestCase):
         """
         
         self.kwargs["type"] = None
-        new_assetBase = assetBase.AssetBase(**self.kwargs)
+        new_assetBase = AssetBase(**self.kwargs)
     
     
     
@@ -65,21 +65,21 @@ class AssetBaseTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_type_argument_is_not_AssetType_instance(self):
         """testing if a ValueError will be raised when the type argument is not
-        an instance of types.AssetType
+        an instance of AssetType
         """
         
         test_values = [1, 1.2, "a str", ["a", "str"]]
         
         for test_value in test_values:
             self.kwargs["type"] = test_value
-            self.assertRaises(ValueError, assetBase.AssetBase, **self.kwargs)
+            self.assertRaises(ValueError, AssetBase, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_type_attribute_is_not_AssetType_instance(self):
         """testing if a ValueError will be raised when the type attribute is
-        tried to be set to something other than a types.AssetType instance
+        tried to be set to something other than a AssetType instance
         """
         
         test_values = [1, 1.2, "a str", ["a", "str"]]
@@ -112,7 +112,7 @@ class AssetBaseTester(mocker.MockerTestCase):
         """
         
         self.kwargs["tasks"] = None
-        new_assetBase = assetBase.AssetBase(**self.kwargs)
+        new_assetBase = AssetBase(**self.kwargs)
         self.assertEquals(new_assetBase.tasks, [])
     
     
@@ -138,7 +138,7 @@ class AssetBaseTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["tasks"] = test_value
-            self.assertRaises(ValueError, assetBase.AssetBase, **self.kwargs)
+            self.assertRaises(ValueError, AssetBase, **self.kwargs)
     
     
     
@@ -169,7 +169,7 @@ class AssetBaseTester(mocker.MockerTestCase):
         
         test_value = [1, 1.2, "a str", ["a", "list"]]
         self.kwargs["tasks"] = test_value
-        self.assertRaises(ValueError, assetBase.AssetBase, **self.kwargs)
+        self.assertRaises(ValueError, AssetBase, **self.kwargs)
     
     
     
@@ -194,7 +194,7 @@ class AssetBaseTester(mocker.MockerTestCase):
     def test_tasks_element_attributes_are_set_to_other_object_than_Task(self):
         """testing if a ValueError will be raised when trying to set the
         individual elements in the tasks attribute to other objects than a
-        task.Task instance
+        Task instance
         """
         
         test_values = [1, 1.2, "a str"]
@@ -223,16 +223,16 @@ class AssetBaseTester(mocker.MockerTestCase):
         """testing equality of two AssetBase objects
         """
         
-        new_assetBase1 = assetBase.AssetBase(**self.kwargs)
-        new_assetBase2 = assetBase.AssetBase(**self.kwargs)
+        new_assetBase1 = AssetBase(**self.kwargs)
+        new_assetBase2 = AssetBase(**self.kwargs)
         
-        new_entity1 = entity.Entity(**self.kwargs)
+        new_entity1 = Entity(**self.kwargs)
         
         self.kwargs["type"] = self.mock_type2
-        new_assetBase3 = assetBase.AssetBase(**self.kwargs)
+        new_assetBase3 = AssetBase(**self.kwargs)
         
         self.kwargs["name"] = "another name"
-        new_assetBase4 = assetBase.AssetBase(**self.kwargs)
+        new_assetBase4 = AssetBase(**self.kwargs)
         
         self.assertTrue(new_assetBase1==new_assetBase2)
         self.assertFalse(new_assetBase1==new_assetBase3)
@@ -247,16 +247,16 @@ class AssetBaseTester(mocker.MockerTestCase):
         """testing inequality of two AssetBase objects
         """
         
-        new_assetBase1 = assetBase.AssetBase(**self.kwargs)
-        new_assetBase2 = assetBase.AssetBase(**self.kwargs)
+        new_assetBase1 = AssetBase(**self.kwargs)
+        new_assetBase2 = AssetBase(**self.kwargs)
         
-        new_entity1 = entity.Entity(**self.kwargs)
+        new_entity1 = Entity(**self.kwargs)
         
         self.kwargs["type"] = self.mock_type2
-        new_assetBase3 = assetBase.AssetBase(**self.kwargs)
+        new_assetBase3 = AssetBase(**self.kwargs)
         
         self.kwargs["name"] = "another name"
-        new_assetBase4 = assetBase.AssetBase(**self.kwargs)
+        new_assetBase4 = AssetBase(**self.kwargs)
         
         self.assertFalse(new_assetBase1!=new_assetBase2)
         self.assertTrue(new_assetBase1!=new_assetBase3)

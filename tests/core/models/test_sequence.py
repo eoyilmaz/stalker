@@ -3,7 +3,8 @@
 
 
 import mocker
-from stalker.core.models import sequence, project, user, shot, entity, status
+from stalker.core.models import (Sequence, Project, User, Shot, Entity, Status,
+                                 StatusList)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -25,22 +26,22 @@ class SequenceTester(mocker.MockerTestCase):
         
         # create a mock project, user and a couple of shots
         
-        self.mock_project = self.mocker.mock(project.Project)
-        self.mock_project2 = self.mocker.mock(project.Project)
-        self.mock_lead = self.mocker.mock(user.User)
-        self.mock_lead2 = self.mocker.mock(user.User)
+        self.mock_project = self.mocker.mock(Project)
+        self.mock_project2 = self.mocker.mock(Project)
+        self.mock_lead = self.mocker.mock(User)
+        self.mock_lead2 = self.mocker.mock(User)
         
-        self.mock_shot1 = self.mocker.mock(shot.Shot)
-        self.mock_shot2 = self.mocker.mock(shot.Shot)
-        self.mock_shot3 = self.mocker.mock(shot.Shot)
+        self.mock_shot1 = self.mocker.mock(Shot)
+        self.mock_shot2 = self.mocker.mock(Shot)
+        self.mock_shot3 = self.mocker.mock(Shot)
         
-        self.mock_status1 = self.mocker.mock(status.Status)
-        self.mock_status2 = self.mocker.mock(status.Status)
-        self.mock_status3 = self.mocker.mock(status.Status)
+        self.mock_status1 = self.mocker.mock(Status)
+        self.mock_status2 = self.mocker.mock(Status)
+        self.mock_status3 = self.mocker.mock(Status)
         
-        self.mock_status_list1 = self.mocker.mock(status.StatusList)
+        self.mock_status_list1 = self.mocker.mock(StatusList)
         self.expect(self.mock_status_list1.target_entity_type).\
-            result(sequence.Sequence.entity_type).count(0, None)
+            result(Sequence.entity_type).count(0, None)
         self.expect(self.mock_status_list1.statuses).result(
             [self.mock_status1, self.mock_status2, self.mock_status3]).\
             count(0, None)
@@ -58,7 +59,7 @@ class SequenceTester(mocker.MockerTestCase):
         }
         
         # the mock seuqence
-        self.mock_sequence = sequence.Sequence(**self.kwargs)
+        self.mock_sequence = Sequence(**self.kwargs)
     
     
     
@@ -69,7 +70,7 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("project")
-        new_sequence = sequence.Sequence(**self.kwargs)
+        new_sequence = Sequence(**self.kwargs)
         self.assertEquals(new_sequence.project, None)
     
     
@@ -80,7 +81,7 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.kwargs["project"] = None
-        new_sequence = sequence.Sequence(**self.kwargs)
+        new_sequence = Sequence(**self.kwargs)
     
     
     
@@ -103,7 +104,7 @@ class SequenceTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["project"] = test_value
-            self.assertRaises(ValueError, sequence.Sequence, **self.kwargs)
+            self.assertRaises(ValueError, Sequence, **self.kwargs)
     
     
     
@@ -143,7 +144,7 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("lead")
-        new_sequence = sequence.Sequence(**self.kwargs)
+        new_sequence = Sequence(**self.kwargs)
         self.assertEquals(new_sequence.lead, None)
     
     
@@ -155,7 +156,7 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.kwargs["lead"] = None
-        new_sequence = sequence.Sequence(**self.kwargs)
+        new_sequence = Sequence(**self.kwargs)
     
     
     
@@ -172,21 +173,21 @@ class SequenceTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_lead_argument_is_not_User(self):
         """testing if a ValueError will be raised when the lead argument is not
-        an instance of user.User
+        an instance of User
         """
         
         test_values = [1, 1.2, "a user", ["a", "list", "as", "user"]]
         
         for test_value in test_values:
             self.kwargs["lead"] = test_value
-            self.assertRaises(ValueError, sequence.Sequence, **self.kwargs)
+            self.assertRaises(ValueError, Sequence, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_lead_attribute_is_not_User(self):
         """testing if a ValueError will be raised when the lead attribute is
-        set to something other than a user.User
+        set to something other than a User
         """
         
         test_values = [1, 1.2, "a user", ["a", "list", "as", "user"]]
@@ -217,7 +218,7 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("shots")
-        new_sequence = sequence.Sequence(**self.kwargs)
+        new_sequence = Sequence(**self.kwargs)
         self.assertEquals(new_sequence.shots, [])
     
     
@@ -229,7 +230,7 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.kwargs["shots"] = None
-        new_sequence = sequence.Sequence(**self.kwargs)
+        new_sequence = Sequence(**self.kwargs)
         self.assertEquals(new_sequence.shots, [])
     
     
@@ -254,7 +255,7 @@ class SequenceTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["shots"] = test_value
-            self.assertRaises(ValueError, sequence.Sequence, **self.kwargs)
+            self.assertRaises(ValueError, Sequence, **self.kwargs)
     
     
     
@@ -285,7 +286,7 @@ class SequenceTester(mocker.MockerTestCase):
         
         test_value = [1, 1.2, "a string"]
         self.kwargs["shots"] = test_value
-        self.assertRaises(ValueError, sequence.Sequence, **self.kwargs)
+        self.assertRaises(ValueError, Sequence, **self.kwargs)
     
     
     
@@ -338,12 +339,12 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         
-        new_seq1 = sequence.Sequence(**self.kwargs)
-        new_seq2 = sequence.Sequence(**self.kwargs)
-        new_entity = entity.Entity(**self.kwargs)
+        new_seq1 = Sequence(**self.kwargs)
+        new_seq2 = Sequence(**self.kwargs)
+        new_entity = Entity(**self.kwargs)
         
         self.kwargs["name"] = "a different sequence"
-        new_seq3 = sequence.Sequence(**self.kwargs)
+        new_seq3 = Sequence(**self.kwargs)
         
         self.assertTrue(new_seq1==new_seq2)
         self.assertFalse(new_seq1==new_seq3)
@@ -357,12 +358,12 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         
-        new_seq1 = sequence.Sequence(**self.kwargs)
-        new_seq2 = sequence.Sequence(**self.kwargs)
-        new_entity = entity.Entity(**self.kwargs)
+        new_seq1 = Sequence(**self.kwargs)
+        new_seq2 = Sequence(**self.kwargs)
+        new_entity = Entity(**self.kwargs)
         
         self.kwargs["name"] = "a different sequence"
-        new_seq3 = sequence.Sequence(**self.kwargs)
+        new_seq3 = Sequence(**self.kwargs)
         
         self.assertFalse(new_seq1!=new_seq2)
         self.assertTrue(new_seq1!=new_seq3)

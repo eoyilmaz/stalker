@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import note
+from stalker.core.models import Note
 
 
 
@@ -29,7 +29,7 @@ class NoteTester(mocker.MockerTestCase):
         }
         
         # create a Note object
-        self.mock_note = note.Note(**self.kwargs)
+        self.mock_note = Note(**self.kwargs)
     
     
     
@@ -40,7 +40,7 @@ class NoteTester(mocker.MockerTestCase):
         """
         
         self.kwargs.pop("content")
-        new_note = note.Note(**self.kwargs)
+        new_note = Note(**self.kwargs)
     
     
     
@@ -51,7 +51,7 @@ class NoteTester(mocker.MockerTestCase):
         """
         
         self.kwargs["content"] = None
-        new_note = note.Note(**self.kwargs)
+        new_note = Note(**self.kwargs)
     
     
     
@@ -73,7 +73,7 @@ class NoteTester(mocker.MockerTestCase):
         """
         
         self.kwargs["content"] = ""
-        new_note = note.Note(**self.kwargs)
+        new_note = Note(**self.kwargs)
     
     
     
@@ -98,7 +98,7 @@ class NoteTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["content"] = test_value
-            self.assertRaises(ValueError, note.Note, **self.kwargs)
+            self.assertRaises(ValueError, Note, **self.kwargs)
     
     
     
@@ -141,11 +141,11 @@ class NoteTester(mocker.MockerTestCase):
         """testing equality operator
         """
         
-        note1 = note.Note(**self.kwargs)
-        note2 = note.Note(**self.kwargs)
+        note1 = Note(**self.kwargs)
+        note2 = Note(**self.kwargs)
         
         self.kwargs["content"] = "this is a different content"
-        note3 = note.Note(**self.kwargs)
+        note3 = Note(**self.kwargs)
         
         self.assertTrue(note1==note2)
         self.assertFalse(note1==note3)
@@ -157,11 +157,11 @@ class NoteTester(mocker.MockerTestCase):
         """testing inequality operator
         """
         
-        note1 = note.Note(**self.kwargs)
-        note2 = note.Note(**self.kwargs)
+        note1 = Note(**self.kwargs)
+        note2 = Note(**self.kwargs)
         
         self.kwargs["content"] = "this is a different content"
-        note3 = note.Note(**self.kwargs)
+        note3 = Note(**self.kwargs)
         
         self.assertFalse(note1!=note2)
         self.assertTrue(note1!=note3)

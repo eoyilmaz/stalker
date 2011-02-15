@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 In this example we are going to extend stalker with a new entity type, which
-is also mixed in with :class:`~stalker.core.models.mixin.StatusMixin`.
+is also mixed in with :class:`~stalker.core.models.StatusMixin`.
 
 To be able to use NewStatusedEntity with the rest of the stalker.core.models in
 a persistence environment, before calling anything from stalker call these in
@@ -22,12 +22,11 @@ from sqlalchemy.orm import mapper, relationship, synonym
 from stalker import db
 from stalker.db import tables
 from stalker.db.mixin import StatusMixinDB
-from stalker.core.models.mixin import StatusMixin
-from stalker.core.models import entity
+from stalker.core.models import SimpleEntity, StatusMixin
 
 
 
-class NewStatusedEntity(entity.SimpleEntity, StatusMixin):
+class NewStatusedEntity(SimpleEntity, StatusMixin):
     """The new statused entity class, which is a new simpleEntity with status
     abilities
     """

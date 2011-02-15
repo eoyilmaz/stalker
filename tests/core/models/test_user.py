@@ -5,12 +5,12 @@
 import datetime
 import mocker
 from stalker.core.models import (
-    user,
-    department,
-    group,
-    task,
-    project,
-    sequence
+    User,
+    Department,
+    Group,
+    Task,
+    Project,
+    Sequence
 )
 from stalker.ext.validatedList import ValidatedList
 
@@ -33,9 +33,9 @@ class UserTest(mocker.MockerTestCase):
         assert(isinstance(self.mocker, mocker.Mocker))
         
         # a department
-        self.mock_department1 = self.mocker.mock(department.Department)
-        self.mock_department2 = self.mocker.mock(department.Department)
-        self.mock_department3 = self.mocker.mock(department.Department)
+        self.mock_department1 = self.mocker.mock(Department)
+        self.mock_department2 = self.mocker.mock(Department)
+        self.mock_department3 = self.mocker.mock(Department)
         
         ## the __eq__
         #self.expect(self.mock_department1.__eq__(self.mock_department2)).\
@@ -52,29 +52,29 @@ class UserTest(mocker.MockerTestCase):
             #result(True).count(0, None)
         
         # a couple of permission groups
-        self.mock_permission_group1 = self.mocker.mock(group.Group)
-        self.mock_permission_group2 = self.mocker.mock(group.Group)
-        self.mock_permission_group3 = self.mocker.mock(group.Group)
+        self.mock_permission_group1 = self.mocker.mock(Group)
+        self.mock_permission_group2 = self.mocker.mock(Group)
+        self.mock_permission_group3 = self.mocker.mock(Group)
         
         # a couple of tasks
-        self.mock_task1 = self.mocker.mock(task.Task)
-        self.mock_task2 = self.mocker.mock(task.Task)
-        self.mock_task3 = self.mocker.mock(task.Task)
-        self.mock_task4 = self.mocker.mock(task.Task)
+        self.mock_task1 = self.mocker.mock(Task)
+        self.mock_task2 = self.mocker.mock(Task)
+        self.mock_task3 = self.mocker.mock(Task)
+        self.mock_task4 = self.mocker.mock(Task)
         
         # a couple of projects
-        self.mock_project1 = self.mocker.mock(project.Project)
-        self.mock_project2 = self.mocker.mock(project.Project)
-        self.mock_project3 = self.mocker.mock(project.Project)
+        self.mock_project1 = self.mocker.mock(Project)
+        self.mock_project2 = self.mocker.mock(Project)
+        self.mock_project3 = self.mocker.mock(Project)
         
         # a couple of sequences
-        self.mock_sequence1 = self.mocker.mock(sequence.Sequence)
-        self.mock_sequence2 = self.mocker.mock(sequence.Sequence)
-        self.mock_sequence3 = self.mocker.mock(sequence.Sequence)
-        self.mock_sequence4 = self.mocker.mock(sequence.Sequence)
+        self.mock_sequence1 = self.mocker.mock(Sequence)
+        self.mock_sequence2 = self.mocker.mock(Sequence)
+        self.mock_sequence3 = self.mocker.mock(Sequence)
+        self.mock_sequence4 = self.mocker.mock(Sequence)
         
         # a mock user
-        self.mock_admin = self.mocker.mock(user.User)
+        self.mock_admin = self.mocker.mock(User)
         
         self.mocker.replay()
         
@@ -109,7 +109,7 @@ class UserTest(mocker.MockerTestCase):
         }
         
         # create a proper user object
-        self.mock_user = user.User(**self.kwargs)
+        self.mock_user = User(**self.kwargs)
     
     
     
@@ -129,7 +129,7 @@ class UserTest(mocker.MockerTestCase):
         if self.kwargs.has_key("code"):
             self.kwargs.pop("code")
         
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         
         # check if it is not None and not an empty string and is an instance of
         # string or unicode
@@ -149,7 +149,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.kwargs["code"] = None
         
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         
         self.assertTrue(new_user.code is not None)
         self.assertTrue(new_user.code != "")
@@ -168,7 +168,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.kwargs["code"] = ""
         
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         
         self.assertTrue(new_user.code is not None)
         self.assertTrue(new_user.code != "")
@@ -205,7 +205,7 @@ class UserTest(mocker.MockerTestCase):
         # set the name and check the code
         for test_value in test_values:
             self.kwargs["login_name"] = test_value[0]
-            new_user = user.User(**self.kwargs)
+            new_user = User(**self.kwargs)
             
             self.assertEquals(new_user.code, test_value[1])
     
@@ -238,7 +238,7 @@ class UserTest(mocker.MockerTestCase):
             self.kwargs["name"] = test_value[0]
             self.kwargs["code"] = test_value[1]
             
-            new_user = user.User(**self.kwargs)
+            new_user = User(**self.kwargs)
             
             self.assertEquals(new_user.code, test_value[2])
     
@@ -260,7 +260,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["code"] = code
         self.kwargs["name"] = name
         
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         
         old_code = new_user.code
         
@@ -286,7 +286,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["email"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -335,7 +335,7 @@ class UserTest(mocker.MockerTestCase):
         # any of this values should raise a ValueError
         for test_value in test_values:
             self.kwargs["email"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -384,7 +384,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["login_name"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -413,7 +413,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.kwargs["login_name"] = ""
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -440,7 +440,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.kwargs["login_name"] = None
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -482,7 +482,7 @@ class UserTest(mocker.MockerTestCase):
             
             self.kwargs["login_name"] = valuePair[0]
             
-            test_user = user.User(**self.kwargs)
+            test_user = User(**self.kwargs)
             
             self.assertEquals(
                 test_user.login_name,
@@ -525,7 +525,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.kwargs["name"] = self.kwargs.pop("login_name")
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         self.assertEquals(new_user.login_name, self.kwargs["name"])
     
     
@@ -537,7 +537,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # just supply login_name and check if they are holding the same value
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         self.assertEquals(new_user.login_name, new_user.name)
     
     
@@ -561,7 +561,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["name"] = "anewname"
         self.kwargs["login_name"] = "thisistheloginname"
         
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         
         self.assertEquals(new_user.name, self.kwargs["login_name"])
     
@@ -576,7 +576,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["name"] = "EoYiLmaZ"
         self.kwargs.pop("login_name")
         
-        new_user_with_name = user.User(**self.kwargs)
+        new_user_with_name = User(**self.kwargs)
         self.assertEquals(new_user_with_name.login_name,
                           new_user_with_name.name)
     
@@ -604,7 +604,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.assertRaises(
             ValueError,
-            user.User,
+            User,
             **self.kwargs
         )
     
@@ -634,7 +634,7 @@ class UserTest(mocker.MockerTestCase):
         
         # try to assign None to the first_name argument
         self.kwargs["first_name"] = ""
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -673,7 +673,7 @@ class UserTest(mocker.MockerTestCase):
         for valuePair in test_values:
             # set the input and expect the expected output
             self.kwargs["first_name"] = valuePair[0]
-            test_user = user.User(**self.kwargs)
+            test_user = User(**self.kwargs)
             self.assertEquals(test_user._first_name, valuePair[1])
     
     
@@ -720,7 +720,7 @@ class UserTest(mocker.MockerTestCase):
             
             self.assertRaises(
                 ValueError,
-                user.User,
+                User,
                 self.kwargs
             )
     
@@ -754,7 +754,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["last_login"] = None
         
         # nothing should happen
-        a_new_user = user.User(**self.kwargs)
+        a_new_user = User(**self.kwargs)
     
     
     
@@ -778,7 +778,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["last_login"] = datetime.datetime.now()
         
         # nothing should happen
-        a_new_user = user.User(**self.kwargs)
+        a_new_user = User(**self.kwargs)
     
     
     
@@ -794,7 +794,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["last_login"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -837,7 +837,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.kwargs["last_name"] = None
-        aNewUser = user.User(**self.kwargs)
+        aNewUser = User(**self.kwargs)
         self.assertEquals(aNewUser.last_name, "")
     
     
@@ -873,7 +873,7 @@ class UserTest(mocker.MockerTestCase):
             
             self.kwargs["last_name"] = valuePair[0]
             
-            test_user = user.User(**self.kwargs)
+            test_user = User(**self.kwargs)
             
             self.assertEquals(
                 test_user._last_name,
@@ -911,7 +911,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["last_name"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -941,7 +941,7 @@ class UserTest(mocker.MockerTestCase):
         
         ##try to assign None to department
         #self.kwargs["department"] = None
-        #self.assertRaises(ValueError, user.User, **self.kwargs)
+        #self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -975,7 +975,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["department"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1017,7 +1017,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.kwargs["password"] = None
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1055,7 +1055,7 @@ class UserTest(mocker.MockerTestCase):
         
         test_password = "a new test password"
         self.kwargs["password"] = test_password
-        aNew_user = user.User(**self.kwargs)
+        aNew_user = User(**self.kwargs)
         self.assertNotEquals(test_password, aNew_user._password)
     
     
@@ -1098,7 +1098,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.kwargs["permission_groups"] = None
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1128,7 +1128,7 @@ class UserTest(mocker.MockerTestCase):
         
         #self.assertRaises(
             #ValueError,
-            #user.User,
+            #User,
             #name=self.name,
             #first_name=self.first_name,
             #last_name=self.last_name,
@@ -1187,7 +1187,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["permission_groups"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1266,7 +1266,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["projects"] = []
         
         # this should work properly
-        user.User(**self.kwargs)
+        User(**self.kwargs)
     
     
     
@@ -1287,7 +1287,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.kwargs["projects"] = None
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1349,7 +1349,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["projects"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1379,7 +1379,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.kwargs["projects_lead"] = None
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1407,7 +1407,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["projects_lead"] = []
         
         # this should work without any problems
-        self.mock_user = user.User(**self.kwargs)
+        self.mock_user = User(**self.kwargs)
     
     
     
@@ -1432,7 +1432,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["projects_lead"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1445,7 +1445,7 @@ class UserTest(mocker.MockerTestCase):
         
         test_value = ["a project", 123123, [], {}, 12.2132 ]
         self.kwargs["projects_lead"] = test_value
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1544,7 +1544,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.kwargs["sequences_lead"] = None
         
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1572,7 +1572,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["sequences_lead"] = []
         
         #this should work
-        a_user = user.User(**self.kwargs)
+        a_user = User(**self.kwargs)
     
     
     
@@ -1597,7 +1597,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["sequences_lead"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1610,7 +1610,7 @@ class UserTest(mocker.MockerTestCase):
         
         test_value = ["a sequence", 123123, [], {}, 12.2132 ]
         self.kwargs["sequences_lead"] = test_value
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1623,7 +1623,7 @@ class UserTest(mocker.MockerTestCase):
         
         test_value = ["a sequence", 123123, [], {}, 12.2132 ]
         self.kwargs["sequences_lead"] = test_value
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1678,7 +1678,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.kwargs["tasks"] = None
-        self.assertRaises(ValueError, user.User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1708,7 +1708,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["tasks"] = test_value
-            self.assertRaises(ValueError, user.User, **self.kwargs)
+            self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -1740,7 +1740,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["tasks"] = []
         
         # this should work without any error
-        aUserObj = user.User(**self.kwargs)
+        aUserObj = User(**self.kwargs)
     
     
     
@@ -1808,7 +1808,7 @@ class UserTest(mocker.MockerTestCase):
         """testing equality of two users
         """
         
-        same_user = user.User(**self.kwargs)
+        same_user = User(**self.kwargs)
         
         self.kwargs.update({
             "name": "a different user",
@@ -1820,7 +1820,7 @@ class UserTest(mocker.MockerTestCase):
             "password": "verysecret",
         })
         
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         
         self.assertTrue(self.mock_user==same_user)
         self.assertFalse(self.mock_user==new_user)
@@ -1832,7 +1832,7 @@ class UserTest(mocker.MockerTestCase):
         """testing inequality of two users
         """
         
-        same_user = user.User(**self.kwargs)
+        same_user = User(**self.kwargs)
         
         self.kwargs.update({
             "name": "a different user",
@@ -1844,7 +1844,7 @@ class UserTest(mocker.MockerTestCase):
             "password": "verysecret",
         })
         
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         
         self.assertFalse(self.mock_user!=same_user)
         self.assertTrue(self.mock_user!=new_user)
@@ -1861,7 +1861,7 @@ class UserTest(mocker.MockerTestCase):
         except KeyError:
             pass
         
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
     
     
     
@@ -1872,7 +1872,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.kwargs["initials"] = "eoy"
         
-        new_user = user.User(**self.kwargs)
+        new_user = User(**self.kwargs)
         
         self.assertEquals(new_user.initials, self.kwargs["initials"])
     
@@ -1901,7 +1901,7 @@ class UserTest(mocker.MockerTestCase):
             self.kwargs["first_name"] = test_value[0]
             self.kwargs["last_name"] = test_value[1]
             
-            new_user = user.User(**self.kwargs)
+            new_user = User(**self.kwargs)
             
             self.assertEquals(new_user.initials, test_value[2], )
     

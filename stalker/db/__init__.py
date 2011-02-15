@@ -10,7 +10,7 @@ Whenever stalker.db or something under it imported, the
 import sqlalchemy
 from stalker.conf import defaults
 from stalker import utils
-from stalker.core.models import error, user, department
+from stalker.core.models import LoginError, User, Department
 
 
 
@@ -103,18 +103,18 @@ def __create_admin__():
     from stalker import db
     
     # check if there is already an admin in the database
-    if len(db.session.query(user.User). \
+    if len(db.session.query(User). \
            filter_by(name=defaults.ADMIN_NAME).all()) > 0:
         #there should be an admin user do nothing
         #print "there is an admin already"
         return
     
     # create the admin department
-    adminDep = department.Department(name=defaults.ADMIN_DEPARTMENT_NAME)
+    adminDep = Department(name=defaults.ADMIN_DEPARTMENT_NAME)
     db.session.add(adminDep)
     
     # create the admin user
-    admin = user.User(
+    admin = User(
         name=defaults.ADMIN_NAME,
         first_name=defaults.ADMIN_NAME,
         login_name=defaults.ADMIN_NAME,

@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import pipelineStep
+from stalker.core.models import Entity, PipelineStep
 
 
 
@@ -26,18 +26,17 @@ class PipelineStepTester(mocker.MockerTestCase):
         }
     
     
-        self.pipeline_step1 = pipelineStep.PipelineStep(**self.kwargs)
-        self.pipeline_step2 = pipelineStep.PipelineStep(**self.kwargs)
+        self.pipeline_step1 = PipelineStep(**self.kwargs)
+        self.pipeline_step2 = PipelineStep(**self.kwargs)
         
         self.kwargs["name"] = "Lighting"
         self.kwargs["description"] = "the ligthing pipelinestep"
         
-        self.pipeline_step3 = pipelineStep.PipelineStep(**self.kwargs)
+        self.pipeline_step3 = PipelineStep(**self.kwargs)
         
         # create another entity with the same kwargs for the __eq__ and __ne__
         # tests
-        from stalker.core.models import entity
-        self.entity = entity.Entity(**self.kwargs)
+        self.entity = Entity(**self.kwargs)
 
     
     

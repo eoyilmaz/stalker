@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import types, link
+from stalker.core.models import Link, LinkType
 
 
 
@@ -12,7 +12,7 @@ from stalker.core.models import types, link
 
 ########################################################################
 class LinkTester(mocker.MockerTestCase):
-    """tests the :class:`~stalker.core.models.link.Link` class
+    """tests the :class:`~stalker.core.models.Link` class
     """
     
     
@@ -24,8 +24,8 @@ class LinkTester(mocker.MockerTestCase):
         assert(isinstance(self.mocker, mocker.Mocker))
         
         # create a mock LinkType object
-        self.mock_link_type1 = self.mocker.mock(types.LinkType)
-        self.mock_link_type2 = self.mocker.mock(types.LinkType)
+        self.mock_link_type1 = self.mocker.mock(LinkType)
+        self.mock_link_type2 = self.mocker.mock(LinkType)
         
         # for __eq__
         self.mock_link_type1.__eq__(self.mock_link_type2)
@@ -51,7 +51,7 @@ class LinkTester(mocker.MockerTestCase):
             "type": self.mock_link_type1
         }
         
-        self.mock_link = link.Link(**self.kwargs)
+        self.mock_link = Link(**self.kwargs)
     
     
     #----------------------------------------------------------------------
@@ -64,7 +64,7 @@ class LinkTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["path"] = test_value
-            self.assertRaises(ValueError, link.Link, **self.kwargs)
+            self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
@@ -94,7 +94,7 @@ class LinkTester(mocker.MockerTestCase):
         """
         
         self.kwargs["path"] = ""
-        self.assertRaises(ValueError, link.Link, **self.kwargs)
+        self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
@@ -120,7 +120,7 @@ class LinkTester(mocker.MockerTestCase):
         """
         
         self.kwargs["path"] = None
-        self.assertRaises(ValueError, link.Link, **self.kwargs)
+        self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
@@ -163,7 +163,7 @@ class LinkTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["filename"] = test_value
-            self.assertRaises(ValueError, link.Link, **self.kwargs)
+            self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
@@ -193,7 +193,7 @@ class LinkTester(mocker.MockerTestCase):
         """
         
         self.kwargs["filename"] = ""
-        self.assertRaises(ValueError, link.Link, **self.kwargs)
+        self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
@@ -219,7 +219,7 @@ class LinkTester(mocker.MockerTestCase):
         """
         
         self.kwargs["filename"] = None
-        self.assertRaises(ValueError, link.Link, **self.kwargs)
+        self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
@@ -246,7 +246,7 @@ class LinkTester(mocker.MockerTestCase):
         """
         
         self.kwargs["type"] = None
-        self.assertRaises(ValueError, link.Link, **self.kwargs)
+        self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
@@ -277,7 +277,7 @@ class LinkTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["type"] = test_value
-            self.assertRaises(ValueError, link.Link, **self.kwargs)
+            self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
@@ -307,12 +307,12 @@ class LinkTester(mocker.MockerTestCase):
         """
         
         # with same parameters
-        mock_link1 = link.Link(**self.kwargs)
+        mock_link1 = Link(**self.kwargs)
         self.assertTrue(self.mock_link==mock_link1)
         
         # with different parameters
         self.kwargs["type"] = self.mock_link_type2
-        mock_link2 = link.Link(**self.kwargs)
+        mock_link2 = Link(**self.kwargs)
         
         self.assertFalse(self.mock_link==mock_link2)
     
@@ -323,12 +323,12 @@ class LinkTester(mocker.MockerTestCase):
         """testing the inequality operator
         """
         # with same parameters
-        mock_link1 = link.Link(**self.kwargs)
+        mock_link1 = Link(**self.kwargs)
         self.assertTrue(self.mock_link==mock_link1)
         
         # with different parameters
         self.kwargs["type"] = self.mock_link_type2
-        mock_link2 = link.Link(**self.kwargs)
+        mock_link2 = Link(**self.kwargs)
         
         self.assertFalse(self.mock_link!=mock_link1)
         self.assertTrue(self.mock_link!=mock_link2)

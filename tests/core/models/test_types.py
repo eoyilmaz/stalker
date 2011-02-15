@@ -3,8 +3,10 @@
 
 
 import mocker
-from stalker.core.models import entity, types, pipelineStep, tag
+from stalker.core.models import (LinkType, TypeEntity, AssetType, ProjectType,
+                                 TypeTemplate, PipelineStep, Tag)
 from stalker.ext.validatedList import ValidatedList
+
 
 
 
@@ -23,9 +25,9 @@ class AssetTypeTester(mocker.MockerTestCase):
         """
         
         # we need a couple of mocke PipelineStep objects
-        self.mock_pipeline_step1 = self.mocker.mock(pipelineStep.PipelineStep)
-        self.mock_pipeline_step2 = self.mocker.mock(pipelineStep.PipelineStep)
-        self.mock_pipeline_step3 = self.mocker.mock(pipelineStep.PipelineStep)
+        self.mock_pipeline_step1 = self.mocker.mock(PipelineStep)
+        self.mock_pipeline_step2 = self.mocker.mock(PipelineStep)
+        self.mock_pipeline_step3 = self.mocker.mock(PipelineStep)
         
         # the pipeline_steps will be compared to each other in equality tests
         # (each will be used for one AssetType)
@@ -48,9 +50,9 @@ class AssetTypeTester(mocker.MockerTestCase):
             ).result(True).count(0, None)
         
         # create a couple of tags
-        self.mock_tag1 = self.mocker.mock(tag.Tag)
-        self.mock_tag2 = self.mocker.mock(tag.Tag)
-        self.mock_tag3 = self.mocker.mock(tag.Tag)
+        self.mock_tag1 = self.mocker.mock(Tag)
+        self.mock_tag2 = self.mocker.mock(Tag)
+        self.mock_tag3 = self.mocker.mock(Tag)
         
         # let the sun shine
         self.mocker.replay()
@@ -73,7 +75,7 @@ class AssetTypeTester(mocker.MockerTestCase):
             "steps": self.pipelineStep_list
         }
         
-        self.mock_assetType = types.AssetType(**self.kwargs)
+        self.mock_assetType = AssetType(**self.kwargs)
         
         # create a couple of different object
         # a string
@@ -110,7 +112,7 @@ class AssetTypeTester(mocker.MockerTestCase):
             
             self.assertRaises(
                 ValueError,
-                types.AssetType,
+                AssetType,
                 **self.kwargs
             )
     
@@ -199,12 +201,12 @@ class AssetTypeTester(mocker.MockerTestCase):
         
         self.kwargs["steps"] = [self.mock_pipeline_step1]
         self.kwargs["tags"] = [self.mock_tag1]
-        asset_type1 = types.AssetType(**self.kwargs)
-        asset_type2 = types.AssetType(**self.kwargs)
+        asset_type1 = AssetType(**self.kwargs)
+        asset_type2 = AssetType(**self.kwargs)
         
         self.kwargs["steps"] = [self.mock_pipeline_step3]
         self.kwargs["tags"] = [self.mock_tag3]
-        asset_type3 = types.AssetType(**self.kwargs)
+        asset_type3 = AssetType(**self.kwargs)
         
         self.assertTrue(asset_type1==asset_type2)
         self.assertFalse(asset_type1==asset_type3)
@@ -217,11 +219,11 @@ class AssetTypeTester(mocker.MockerTestCase):
         """
         
         self.kwargs["steps"] = [self.mock_pipeline_step1]
-        asset_type1 = types.AssetType(**self.kwargs)
-        asset_type2 = types.AssetType(**self.kwargs)
+        asset_type1 = AssetType(**self.kwargs)
+        asset_type2 = AssetType(**self.kwargs)
         
         self.kwargs["steps"] = [self.mock_pipeline_step3]
-        asset_type3 = types.AssetType(**self.kwargs)
+        asset_type3 = AssetType(**self.kwargs)
         
         self.assertFalse(asset_type1!=asset_type2)
         self.assertTrue(asset_type1!=asset_type3)
@@ -244,73 +246,9 @@ class TypeTemplateTester(mocker.MockerTestCase):
         """
         
         # create a mock TypeEntity object
-        #self.mock_type_entity1 = self.mocker.mock(entity.TypeEntity)
-        #self.mock_type_entity2 = self.mocker.mock(entity.TypeEntity)
-        #self.mock_type_entity3 = self.mocker.mock(entity.TypeEntity)
-        self.mock_type_entity1 = entity.TypeEntity(name="mock_Entity1")
-        self.mock_type_entity2 = entity.TypeEntity(name="mock_Entity1")
-        self.mock_type_entity3 = entity.TypeEntity(name="mock Entity2")
-        
-        # equality
-        #self.mock_type_entity1.__eq__(self.mock_type_entity2)
-        #self.mocker.result(True)
-        #self.mocker.count(0, None)
-        
-        #self.mock_type_entity1.__eq__(self.mock_type_entity3)
-        #self.mocker.result(False)
-        #self.mocker.count(0, None)
-        
-        #self.expect(
-            #self.mock_type_entity1.__eq__(self.mock_type_entity2)
-        #).result("running this True").count(0, None)
-        
-        #self.expect(
-            #self.mock_type_entity1.__eq__(self.mock_type_entity3)
-        #).result("running this False").count(0, None)
-        
-        #self.mock_type_entity1==self.mock_type_entity2
-        #self.mocker.result(True)
-        #self.mocker.count(0, None)
-        
-        #self.mock_type_entity1==self.mock_type_entity3
-        #self.mocker.result(False)
-        #self.mocker.count(0, None)
-        
-        #self.expect(
-            #self.mock_type_entity1==self.mock_type_entity2
-        #).result(True).count(0, 1000)
-        
-        #self.expect(
-            #(self.mock_type_entity1==self.mock_type_entity3)
-        #).result(False).count(0, 1000)
-        
-        
-        # inequality
-        #self.mock_type_entity1.__ne__(self.mock_type_entity2)
-        #self.mocker.result(False)
-        #self.mocker.count(0, None)
-        
-        #self.mock_type_entity1.__ne__(self.mock_type_entity3)
-        #self.mocker.result(True)
-        #self.mocker.count(0, None)
-        
-        #self.expect(
-            #self.mock_type_entity1.__ne__(self.mock_type_entity2)
-        #).result(False).count(0, None)
-        
-        #self.expect(
-            #self.mock_type_entity1.__ne__(self.mock_type_entity3)
-        #).result(True).count(0, None)
-        
-        #self.expect(
-            #self.mock_type_entity1!=self.mock_type_entity2
-        #).result(False).count(0, None)
-        
-        #self.expect(
-            #self.mock_type_entity1!=self.mock_type_entity3
-        #).result(True).count(0, None)
-        
-        #self.mocker.replay()
+        self.mock_type_entity1 = TypeEntity(name="mock_Entity1")
+        self.mock_type_entity2 = TypeEntity(name="mock_Entity1")
+        self.mock_type_entity3 = TypeEntity(name="mock Entity2")
         
         # create a mock TypeTemplate object
         self.kwargs = {
@@ -323,7 +261,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
             "type":self.mock_type_entity1
         }
         
-        self.template_obj = types.TypeTemplate(**self.kwargs)
+        self.template_obj = TypeTemplate(**self.kwargs)
         
         
         temp_kwargs = self.kwargs.copy()
@@ -331,7 +269,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
             "type": self.mock_type_entity2
         })
         
-        self.template_obj2 = types.TypeTemplate(**temp_kwargs)
+        self.template_obj2 = TypeTemplate(**temp_kwargs)
         
         
         temp_kwargs = self.kwargs.copy()
@@ -339,7 +277,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
             "type": self.mock_type_entity3
         })
         
-        self.template_obj3 = types.TypeTemplate(**temp_kwargs)
+        self.template_obj3 = TypeTemplate(**temp_kwargs)
     
     
     
@@ -371,7 +309,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
         
         # try to create a new template object with wrong values
         self.kwargs["path_code"] = ""
-        self.assertRaises(ValueError, types.TypeTemplate, **self.kwargs)
+        self.assertRaises(ValueError, TypeTemplate, **self.kwargs)
     
     
     
@@ -398,7 +336,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
         """
         # try to create a new TypeTemplate object with wrong values
         self.kwargs["path_code"] = None
-        self.assertRaises(ValueError, types.TypeTemplate, **self.kwargs)
+        self.assertRaises(ValueError, TypeTemplate, **self.kwargs)
     
     
     
@@ -428,13 +366,13 @@ class TypeTemplateTester(mocker.MockerTestCase):
         for test_value in test_values:
             self.kwargs["path_code"] = test_value
             # an integer value
-            self.assertRaises(ValueError, types.TypeTemplate,
+            self.assertRaises(ValueError, TypeTemplate,
                               **self.kwargs)
         
         # this should work without errors
         self.kwargs["path_code"] = "{{project.name}}/SEQs/{{sequence.name}}/\
         SHOTS/{{shot.code}}/{{assetType.code}}"
-        a_new_type_template = types.TypeTemplate(**self.kwargs)
+        a_new_type_template = TypeTemplate(**self.kwargs)
     
     
     
@@ -486,7 +424,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
         
         # try to create a new template object with wrong values
         self.kwargs["file_code"] = ""
-        self.assertRaises(ValueError, types.TypeTemplate, **self.kwargs)
+        self.assertRaises(ValueError, TypeTemplate, **self.kwargs)
     
     
     
@@ -513,7 +451,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
         """
         # try to create a new TypeTemplate object with wrong values
         self.kwargs["file_code"] = None
-        self.assertRaises(ValueError, types.TypeTemplate, **self.kwargs)
+        self.assertRaises(ValueError, TypeTemplate, **self.kwargs)
     
     
     
@@ -543,13 +481,13 @@ class TypeTemplateTester(mocker.MockerTestCase):
         for test_value in test_values:
             self.kwargs["file_code"] = test_value
             # an integer value
-            self.assertRaises(ValueError, types.TypeTemplate,
+            self.assertRaises(ValueError, TypeTemplate,
                               **self.kwargs)
         
         # this should work without errors
         self.kwargs["file_code"] = "{{project.name}}/SEQs/{{sequence.name}}/\
         SHOTS/{{shot.code}}/{{assetType.code}}"
-        a_new_type_template = types.TypeTemplate(**self.kwargs)
+        a_new_type_template = TypeTemplate(**self.kwargs)
     
     
     
@@ -603,7 +541,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["type"] = test_value
-            self.assertRaises(ValueError, types.TypeTemplate,
+            self.assertRaises(ValueError, TypeTemplate,
                               **self.kwargs)
     
     
@@ -633,7 +571,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
         """
         
         self.kwargs["type"] = None
-        self.assertRaises(ValueError, types.TypeTemplate, **self.kwargs)
+        self.assertRaises(ValueError, TypeTemplate, **self.kwargs)
     
     
     
@@ -665,10 +603,10 @@ class ProjectTypeTester(mocker.MockerTestCase):
             "description": "This is the commercial project type",
         }
         
-        self.mock_project_type = types.ProjectType(**self.kwargs)
+        self.mock_project_type = ProjectType(**self.kwargs)
         
         # create a TypeEntity objejct for __eq__ or __ne__ tests
-        self.type_entity1 = entity.TypeEntity(**self.kwargs)
+        self.type_entity1 = TypeEntity(**self.kwargs)
     
     
     
@@ -677,13 +615,13 @@ class ProjectTypeTester(mocker.MockerTestCase):
         """testing equality of two ProjectType objects
         """
         
-        project_type1 = types.ProjectType(**self.kwargs)
-        project_type2 = types.ProjectType(**self.kwargs)
+        project_type1 = ProjectType(**self.kwargs)
+        project_type2 = ProjectType(**self.kwargs)
         
         self.kwargs["name"] = "Movie"
         self.kwargs["description"] = "This is the movie project type"
         
-        project_type3 = types.ProjectType(**self.kwargs)
+        project_type3 = ProjectType(**self.kwargs)
         
         self.assertTrue(project_type1==project_type2)
         self.assertFalse(project_type1==project_type3)
@@ -696,13 +634,13 @@ class ProjectTypeTester(mocker.MockerTestCase):
         """testing inequality of two ProjectType objects
         """
         
-        project_type1 = types.ProjectType(**self.kwargs)
-        project_type2 = types.ProjectType(**self.kwargs)
+        project_type1 = ProjectType(**self.kwargs)
+        project_type2 = ProjectType(**self.kwargs)
         
         self.kwargs["name"] = "Movie"
         self.kwargs["description"] = "This is the movie project type"
         
-        project_type3 = types.ProjectType(**self.kwargs)
+        project_type3 = ProjectType(**self.kwargs)
         
         self.assertFalse(project_type1!=project_type2)
         self.assertTrue(project_type1!=project_type3)
@@ -727,13 +665,12 @@ class LinkTypeTester(mocker.MockerTestCase):
         
         # create a couple of LinkType objects
         
-        self.link_type1 = types.LinkType(name="link_type1")
-        self.link_type2 = types.LinkType(name="link_type1")
-        self.link_type3 = types.LinkType(name="link_type3")
+        self.link_type1 = LinkType(name="link_type1")
+        self.link_type2 = LinkType(name="link_type1")
+        self.link_type3 = LinkType(name="link_type3")
         
         # create an entity for equality test (it should return False)
-        from stalker.core.models import entity
-        self.type_entity1 = entity.TypeEntity(name="link_type1")
+        self.type_entity1 = TypeEntity(name="link_type1")
     
     
     

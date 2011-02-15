@@ -57,28 +57,27 @@ Lets look at how a simple studio works and try to create our asset management
 concepts around it.
 
 An animation/vfx studios duty is to complete a
-:class:`~stalker.core.models.project.Project`. A project, generally is about to
-create a :class:`~stalker.core.models.sequence.Sequence` of
-:class:`~stalker.core.models.shot.Shot`\ s which are a series of images those
-at the end converts to a movie. So a sequence in general contains Shots. Shots
-are a special type of :class:`~stalker.core.models.asset.Asset`\ s which are
-related to a range of time. So basically to complete a project the studio
-should complete the sequences thus the shots and assets.
+:class:`~stalker.core.models.Project`. A project, generally is about to create
+a :class:`~stalker.core.models.Sequence` of :class:`~stalker.core.models.Shot`\
+s which are a series of images those at the end converts to a movie. So a
+sequence in general contains Shots. Shots are a special type of
+:class:`~stalker.core.models.Asset`\ s which are related to a range of time. So
+basically to complete a project the studio should complete the sequences thus
+the shots and assets.
 
 We have considered Shots as a special form or *type* of assets, so assets have
-:class:`~stalker.core.models.assetType.AssetType`\ s showing this relationship,
-thus it is :class:`~stalker.core.models.shot.Shot` for a Shot asset, and lets
+:class:`~stalker.core.models.AssetType`\ s showing this relationship,
+thus it is :class:`~stalker.core.models.Shot` for a Shot asset, and lets
 say, it is *Character* for a character asset, or *Vehicle* for a vehicle asset
 (pretty straight).
 
-AssetType also defines the
-:class:`~stalker.core.models.pipelineStep.PipelineStep`\ s of that special
-asset type. For example a Shot can have steps like *Animation*, *FX*, *Layout*,
-*Lighting*, *Compositing* etc. and a character can have *Design*, *Model*,
-*Rig*, *Shading* steps. All these steps defines differentiable **Tasks** those
-need to be done sequentially or in parallel to complete that shot or asset.
-Again, an asset or shot has an asset type, which defines the steps thus tasks
-those needs to be done.
+AssetType also defines the :class:`~stalker.core.models.PipelineStep`\ s of
+that special asset type. For example a Shot can have steps like *Animation*,
+*FX*, *Layout*, *Lighting*, *Compositing* etc. and a character can have
+*Design*, *Model*, *Rig*, *Shading* steps. All these steps defines
+differentiable **Tasks** those need to be done sequentially or in parallel to
+complete that shot or asset. Again, an asset or shot has an asset type, which
+defines the steps thus tasks those needs to be done.
 
 A Task relates to a work, a work is a quantity of time spend or going to be
 spend for that specific task. The time spend on the course of completion of a
