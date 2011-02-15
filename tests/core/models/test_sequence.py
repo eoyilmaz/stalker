@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import sequence, project, user, shot, entity
+from stalker.core.models import sequence, project, user, shot, entity, status
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -34,6 +34,17 @@ class SequenceTester(mocker.MockerTestCase):
         self.mock_shot2 = self.mocker.mock(shot.Shot)
         self.mock_shot3 = self.mocker.mock(shot.Shot)
         
+        self.mock_status1 = self.mocker.mock(status.Status)
+        self.mock_status2 = self.mocker.mock(status.Status)
+        self.mock_status3 = self.mocker.mock(status.Status)
+        
+        self.mock_status_list1 = self.mocker.mock(status.StatusList)
+        self.expect(self.mock_status_list1.target_entity_type).\
+            result(sequence.Sequence.entity_type).count(0, None)
+        self.expect(self.mock_status_list1.statuses).result(
+            [self.mock_status1, self.mock_status2, self.mock_status3]).\
+            count(0, None)
+        
         self.mocker.replay()
         
         # the parameters
@@ -43,6 +54,7 @@ class SequenceTester(mocker.MockerTestCase):
             "project": self.mock_project,
             "lead": self.mock_lead,
             "shots": [self.mock_shot1, self.mock_shot2, self.mock_shot3],
+            "status_list": self.mock_status_list1
         }
         
         # the mock seuqence

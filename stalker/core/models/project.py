@@ -92,12 +92,14 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
                  fps=25.0,
                  is_stereoscopic=False,
                  display_width=1.0,
-                 status_list=None,
-                 status=0,
                  references=[],
                  **kwargs):
         
         super(Project, self).__init__(**kwargs)
+        # call the mixin __init__ methods
+        mixin.ReferenceMixin.__init__(self, **kwargs)
+        mixin.StatusMixin.__init__(self, **kwargs)
+        mixin.ScheduleMixin.__init__(self, **kwargs)
         
         self._start_date = self._validate_start_date(start_date)
         self._due_date = self._validate_due_date(due_date)
@@ -117,12 +119,12 @@ class Project(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
         self._is_stereoscopic = bool(is_stereoscopic)
         self._display_width = self._validate_display_width(display_width)
         
-        # update the mixin side of the project class (status and references)
-        self.status_list = status_list
-        self.status = status
-        self.references = references
-        self.start_date = start_date
-        self.due_date = due_date
+        ## update the mixin side of the project class (status and references)
+        #self.status_list = status_list
+        #self.status = status
+        #self.references = references
+        #self.start_date = start_date
+        #self.due_date = due_date
     
     
     

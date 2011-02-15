@@ -1106,6 +1106,7 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_Sequence(self):
         """testing the persistence of Sequence
         """
+        
         status1 = status.Status(name="On Hold", code="OH")
         status2 = status.Status(name="Work In Progress", code="WIP")
         status3 = status.Status(name="Finished", code="FIN")
@@ -1122,6 +1123,12 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type = sequence.Sequence.entity_type
         )
         
+        shot_status_list = status.StatusList(
+            name="Shot Status List",
+            statuses=[status1, status2, status3],
+            target_entity_type = shot.Shot.entity_type
+        )
+        
         project1 = project.Project(name="Test project",
                                    status_list=project_status_list)
         
@@ -1131,6 +1138,18 @@ class DatabaseModelsTester(unittest.TestCase):
         shot1 = shot.Shot(code="SH001")
         shot2 = shot.Shot(code="SH002")
         shot3 = shot.Shot(code="SH003")
+        
+        shot1.status_list = shot_status_list
+        shot2.status_list = shot_status_list
+        shot3.status_list = shot_status_list
+        
+        #db.session.add_all(
+            #[status1, status2, status3,
+             #project_status_list, sequence_status_list, shot_status_list,
+             #project1, lead,
+             #shot1, shot2, shot3]
+        #)
+        #db.session.commit()
         
         kwargs = {
             "name": "Test seuqence",

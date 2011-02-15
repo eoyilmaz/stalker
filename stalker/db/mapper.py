@@ -536,8 +536,40 @@ def setup():
         tables.shots,
         inherits=shot.Shot.__base__,
         inherit_condition=tables.shots.c.id==tables.entities.c.id,
-        polymorphic_identity=shot.Shot.entity_type
+        polymorphic_identity=shot.Shot.entity_type,
     )
     
     
     
+    # Sequence
+    sequence_mapper_arguments = dict(
+        inherits=sequence.Sequence.__base__,
+        polymorphic_identity=sequence.Sequence.entity_type,
+        inherit_condition=tables.sequences.c.id==tables.entities.c.id,
+        properties={
+            "_project": relationship(
+                project.Project,
+                primaryjoin=tables.sequences.c.project_id==\
+                    tables.projects.c.id
+            ),
+            "project": synonym("project"),
+            "_shots": relationship(
+                shot.Shot,
+                primaryjoin=tables.shots.c.sequence_id==\
+                    tables.sequences.c.id,
+                uselist=True,
+            )
+        }
+    )
+    
+    # mix it with ReferenceMixin, StatusMixin and ScheduleMixin
+    ReferenceMixinDB.setup(sequence.Sequence, tables.sequences,
+                           sequence_mapper_arguments)
+    
+    StatusMixinDB.setup(sequence.Sequence, tables.sequences,
+                        sequence_mapper_arguments)
+    
+    ScheduleMixinDB.setup(sequence.Sequence, tables.sequences,
+                          sequence_mapper_arguments)
+    
+    mapper(sequence.Sequence, tables.sequences, **sequence_mapper_arguments)

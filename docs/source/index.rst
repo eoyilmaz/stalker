@@ -18,8 +18,10 @@ Table of Contents
     installation.rst
     tutorial.rst
     design.rst
+    inheritance_diagram.rst
     contribute.rst
     roadmap.rst
+    changelog.rst
 
 
 Summary
@@ -37,12 +39,16 @@ Summary
    stalker.db.auth.login_required
    stalker.db.auth.permission_required
    stalker.db.auth.logout
+   stalker.db.engine
    stalker.db.mapper
+   stalker.db.metadata
    stalker.db.mixin
    stalker.db.mixin.ReferenceMixinDB
    stalker.db.mixin.StatusMixinDB
    stalker.db.mixin.ScheduleMixinDB
    stalker.db.tables
+   stalker.db.query
+   stalker.db.session
    stalker.db.setup
    stalker.core.models
    stalker.core.models.asset
@@ -101,6 +107,7 @@ Summary
    stalker.core.models.version.Version
    stalker.ext.validatedList
    stalker.ext.validatedList.ValidatedList
+   stalker.utils.path_to_exec
 
 Indices and tables
 ------------------

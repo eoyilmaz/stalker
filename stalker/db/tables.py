@@ -550,7 +550,27 @@ assetBases = Table(
 shots = Table(
     "shots", metadata,
     Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
+    Column("sequence_id", Integer, ForeignKey("sequences.id")),
 )
 
 
 
+# SEQUENCES
+sequences = Table(
+    "sequences", metadata,
+    Column(
+        "id",
+        Integer,
+        ForeignKey("entities.id"), primary_key=True
+    ),
+    Column(
+        "project_id",
+        Integer,
+        ForeignKey("projects.id"),
+    ),
+    Column(
+        "lead",
+        Integer,
+        ForeignKey("users.id"),
+    ),
+)

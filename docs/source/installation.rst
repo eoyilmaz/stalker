@@ -1,8 +1,8 @@
 .. _installation_toplevel:
 
-======================
+============
 Installation
-======================
+============
 
 
 How to Install Stalker

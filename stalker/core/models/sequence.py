@@ -44,6 +44,11 @@ class Sequence(entity.Entity, mixin.ReferenceMixin, mixin.StatusMixin,
         
         super(Sequence, self).__init__(**kwargs)
         
+        # call the mixin __init__ methods
+        mixin.ReferenceMixin.__init__(self, **kwargs)
+        mixin.StatusMixin.__init__(self, **kwargs)
+        mixin.ScheduleMixin.__init__(self, **kwargs)
+        
         self._project = self._validate_project(project)
         self._lead = self._validate_lead(lead)
         self._shots = self._validate_shots(shots)

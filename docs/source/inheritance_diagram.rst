@@ -1,5 +1,8 @@
 .. _inheritance_diagram_toplevel:
 
+Inheritance Diagram
+===================
+
 .. inheritance-diagram::
      stalker.core.models.asset.Asset
      stalker.core.models.assetBase.AssetBase

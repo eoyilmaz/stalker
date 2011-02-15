@@ -37,6 +37,15 @@ class ReferenceMixin(object):
     
     
     #----------------------------------------------------------------------
+    def __init__(self,
+                 references=ValidatedList([], link.Link),
+                 **kwargs):
+        
+        self._validate_references(references)
+    
+    
+    
+    #----------------------------------------------------------------------
     def _validate_references(self, references_in):
         """validates the given references_in
         """
@@ -107,7 +116,7 @@ class StatusMixin(object):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, status=0, status_list=None):
+    def __init__(self, status=0, status_list=None, **kwargs):
         
         self._status_list = self._validate_status_list(status_list)
         self._status = self._validate_status(status)
