@@ -183,21 +183,25 @@ class UserTest(mocker.MockerTestCase):
         #name = "something"
         # code format ?
         
-        test_values = [
-            ("testCode", "TEST_CODE"),
-            ("1testCode", "TEST_CODE"),
-            ("_testCode", "TEST_CODE"),
-            ("2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
-            ("2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
+        code_test_values = [
+            ("testCode","TESTCODE"),
+            ("1testCode", "TESTCODE"),
+            ("_testCode", "TESTCODE"),
+            ("2423$+^^+^'%+%%&_testCode", "TESTCODE"),
+            ("2423$+^^+^'%+%%&_testCode_35", "TESTCODE35"),
+            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "TESTCODE35"),
             ("SH001","SH001"),
-            ("My code is Ozgur", "MY_CODE_IS_OZGUR"),
+            ("My CODE is Ozgur", "MYCODEISOZGUR"),
+            
             (" this is another code for an asset", 
-             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
+             "THISISANOTHERCODEFORANASSET"),
+            
+            ([1, 3, "a", "list","for","testing",3],
+             "ALISTFORTESTING3"),
         ]
         
         # set the name and check the code
-        for test_value in test_values:
+        for test_value in code_test_values:
             self.kwargs["login_name"] = test_value[0]
             new_user = User(**self.kwargs)
             
@@ -215,16 +219,16 @@ class UserTest(mocker.MockerTestCase):
         """
         
         test_values = [
-            ("aName", "testCode","TEST_CODE"),
-            ("aName", "1testCode", "TEST_CODE"),
-            ("aName", "_testCode", "TEST_CODE"),
-            ("aName", "2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
-            ("aName", "2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
-            ("aName", "2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
+            ("aName", "testCode","testCode"),
+            ("aName", "1testCode", "testCode"),
+            ("aName", "_testCode", "testCode"),
+            ("aName", "2423$+^^+^'%+%%&_testCode", "testCode"),
+            ("aName", "2423$+^^+^'%+%%&_testCode_35", "testCode_35"),
+            ("aName", "2423$ +^^+^ '%+%%&_ testCode_ 35", "testCode_35"),
             ("aName", "SH001","SH001"),
-            ("aName", "My CODE is Ozgur", "MY_CODE_IS_OZGUR"),
+            ("aName", "My CODE is Ozgur", "My_CODE_is_Ozgur"),
             ("aName", " this is another code for an asset", 
-             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
+             "this_is_another_code_for_an_asset"),
         ]
         
         # set the name and code and test the code
@@ -249,7 +253,7 @@ class UserTest(mocker.MockerTestCase):
         code = "something"
         name = "some name"
         new_name = "something new"
-        expected_new_code = "SOMETHING_NEW"
+        expected_new_code = "SOMETHINGNEW"
         
         self.kwargs["code"] = code
         self.kwargs["name"] = name
@@ -370,11 +374,12 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_login_name_argument_accepts_only_strings(self):
-        """testing if login_name argument accepts only strings or unicode
+    def test_login_name_argument_conversion_to_strings(self):
+        """testing if a ValueError will be raised when the given objects
+        conversion to string results an empty string
         """
         
-        test_values = [23412, ["a_user_login_name"] , [], {}, 3234.12312]
+        test_values = [23411,]
         
         for test_value in test_values:
             self.kwargs["login_name"] = test_value
@@ -382,21 +387,21 @@ class UserTest(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_login_name_attribute_accepts_only_strings(self):
-        """testing if login_name attribute accepts only strings or unicode
-        """
+    ##----------------------------------------------------------------------
+    #def test_login_name_attribute_accepts_only_strings(self):
+        #"""testing if login_name attribute accepts only strings or unicode
+        #"""
         
-        test_values = [12312, 132.123123, ["aloginname"], {}, []]
+        #test_values = [12312, 132.123123, ["aloginname"], {}, []]
         
-        for test_value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_user,
-                "login_name",
-                test_value
-            )
+        #for test_value in test_values:
+            #self.assertRaises(
+                #ValueError,
+                #setattr,
+                #self.mock_user,
+                #"login_name",
+                #test_value
+            #)
     
     
     

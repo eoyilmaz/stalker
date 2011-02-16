@@ -77,9 +77,11 @@ class SimpleEntity(object):
       values and any other kind of objects will be converted to string. Can be
       omitted and it will be set to the uppercase version of the nice_name
       attribute. If both the name and code arguments are given the code
-      attribute will be set to code, but in any update to name attribute the
-      code also will be updated to the uppercase form of the nice_name
-      attribute. The default value is the upper case form of the nice_name
+      attribute will be set to the given code argument value, but in any update
+      to name attribute the code also will be updated to the uppercase form of
+      the nice_name attribute. When the code is directly edited the code will
+      not be formated other than removing any illegal characters. The default
+      value is the upper case form of the nice_name.
     """
     
     
@@ -168,7 +170,19 @@ class SimpleEntity(object):
         """
         
         # just set it to the uppercase of what nice_name gives
-        return self._condition_nice_name(code_in).upper()
+        # remove unnecesary characters from the string
+        code_in = self._validate_name(code_in)
+        
+        # replace camel case letters
+        #code_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", code_in)
+        
+        # replace white spaces with under score
+        code_in = re.sub("([\s\-])+", r"_", code_in)
+        
+        # remove multiple underscores
+        code_in = re.sub(r"([_]+)", r"_", code_in)
+        
+        return code_in
     
     
     
@@ -245,7 +259,7 @@ class SimpleEntity(object):
             self._nice_name = self._condition_nice_name(self._name)
             
             # set the code
-            self.code = self._name
+            self.code = self._nice_name.upper()
         
         doc = """Name of this object"""
         
@@ -286,7 +300,7 @@ class SimpleEntity(object):
         # check if the code_in is None or empty string
         if code_in is None or code_in=="":
             # restore the value from nice_name and let it be reformatted
-            code_in = self.nice_name
+            code_in = self.nice_name.upper()
         
         return self._condition_code(str(code_in))
     
@@ -1054,10 +1068,9 @@ class StatusMixin(object):
         def fset(self, status_list_in):
             self._status_list = self._validate_status_list(status_list_in)
         
-        doc = """The list of statuses that this object has.
+        doc = """The list of statuses that this object can have.
         
-        This is the property that sets and returns the status_list
-        attribute
+        
         """
         
         return locals()
@@ -2814,8 +2827,15 @@ class Shot(AssetBase):
     But there is no such rule for the code attribute, which should be used to
     give shot codes to individual shots.
     
-    :param sequence: The :class:`stalker.core.models.Sequence` that this shot
-      blengs to
+    :param sequence: The :class:`~stalker.core.models.Sequence` that this shot
+      blengs to.
+    
+    :type sequence: :class:`stalker.core.models.Sequence`
+    
+    :param assets: The list of :class:`~stalker.core.models.Asset`\ s used in
+      this shot.
+    
+    :type assets: list of :class:`stalker.core.models.Asset` instances
     """
     
     
@@ -3731,6 +3751,23 @@ Character assets",
 class User(Entity):
     """The user class is designed to hold data about a User in the system.
     
+    There are a couple of points to take your attention to:
+     
+     * The :attr:`~stalker.core.models.User.code` attribute is derived from
+       the :attr:`~stalker.core.models.User.nice_name` as it is in a
+       :class:`~stalker.core.models.SimpleEntity`, but the
+       :attr:`~stalker.core.models.User.nice_name` is derived from the
+       :attr:`~stalker.core.models.User.login_name` instead of the
+       :attr:`~stalker.core.models.User.name` attribute, so the
+       :attr:`~stalker.core.models.User.code` of a
+       :class:`~stalker.core.models.User` and a
+       :class:`~stalker.core.models.SimpleEntity` will be different then each
+       other.
+    
+     * The :attr:`~stalker.core.models.User.name` is a synonym of the
+       :attr:`~stalker.core.models.User.login_name`, so changing one of them
+       will change the other.
+    
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
     
@@ -3953,13 +3990,13 @@ class User(Entity):
         if first_name_in == "":
             raise ValueError("first_name can not be an empty string")
         
-        return self._validate_first_name_formatting(first_name_in)
+        return self._format_first_name(first_name_in)
     
     
     
     #----------------------------------------------------------------------
-    def _validate_first_name_formatting(self, first_name_in):
-        """validates the given first_name formatting
+    def _format_first_name(self, first_name_in):
+        """formats the given first_name
         """
         
         return first_name_in.strip().title()
@@ -4015,13 +4052,13 @@ class User(Entity):
         #if last_name_in == "":
             #raise ValueError("last_name can not be an empty string")
         
-        return self._validate_last_name_formatting(last_name_in)
+        return self._format_last_name(last_name_in)
     
     
     
     #----------------------------------------------------------------------
-    def _validate_last_name_formatting(self, last_name_in):
-        """validates the given last_name formatting
+    def _format_last_name(self, last_name_in):
+        """formats the given last_name
         """
         
         return last_name_in.strip().title()
@@ -4032,30 +4069,42 @@ class User(Entity):
     def _validate_login_name(self, login_name_in):
         """validates the given login_name value
         """
-        
         if login_name_in is None:
             raise ValueError("login name could not be None")
         
-        if not isinstance(login_name_in, (str, unicode)):
-            raise ValueError("login_name should be instance of string or "
-                             "unicode")
+        #if not isinstance(login_name_in, (str, unicode)):
+            #raise ValueError("login_name should be instance of string or "
+                             #"unicode")
+        login_name_in = self._format_login_name(str(login_name_in))
         
         if login_name_in == "":
             raise ValueError("login name could not be empty string")
         
-        return self._validate_login_name_formatting(login_name_in)
+        return login_name_in
     
     
     
     #----------------------------------------------------------------------
-    def _validate_login_name_formatting(self, login_name_in):
-        """validates the given login_name formatting
+    def _format_login_name(self, login_name_in):
+        """formats the given login_name
         """
-        assert(isinstance(login_name_in, str))
+        
+        # be sure it is a string
+        login_name_in = str(login_name_in)
+        
+        # strip white spaces from start and end
         login_name_in = login_name_in.strip()
+        
+        # remove all the spaces
         login_name_in = login_name_in.replace(" ","")
+        
+        # make it lowercase
         login_name_in = login_name_in.lower()
-        login_name_in = re.sub( "[^\\(a-zA-Z1-9)]+", "", login_name_in)
+        
+        # remove any illegal characters
+        login_name_in = re.sub( "[^\\(a-zA-Z0-9)]+", "", login_name_in)
+        
+        # remove any number at the begining
         login_name_in = re.sub( "^[0-9]+", "", login_name_in)
         
         return login_name_in
@@ -4360,7 +4409,7 @@ class User(Entity):
             self._nice_name = self._condition_nice_name(self._name)
             
             # and also the code
-            self.code = name_in
+            self.code = self._nice_name.upper()
         
         doc = """The name of this user.
         

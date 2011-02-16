@@ -46,10 +46,14 @@ v0.1.1.a7
  * Fixed the :attr:`~stalker.core.models.User.last_login` attribute in the
    database mapper, it was set as a *synonym* for it self.
 
- * Removed the tearDown methods in :mod:`tests.db.test_db`, there are problems
-   with cleaning the mappers and disposing the engine, so instead of killing
-   them the db.setup is called over and over again with different in memory
-   databases.
+ * Removed the ``tearDown`` methods in :mod:`tests.db.test_db`, there are
+   problems with cleaning the mappers and disposing the engine, so instead of
+   killing them the db.setup is called over and over again with different in
+   memory databases.
+
+ * From now on the :attr:`~stalker.core.models.SimpleEntity.code` attribute
+   doesn't format the given string value too heavily, to allow more individual
+   naming conventions to work with Stalker.
 
 v0.1.1.a6
 ---------

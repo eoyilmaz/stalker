@@ -80,22 +80,22 @@ class SimpleEntityTester(mocker.MockerTestCase):
         ]
         
         
-        self.code_test_values = [
-            ("testCode","TEST_CODE"),
-            ("1testCode", "TEST_CODE"),
-            ("_testCode", "TEST_CODE"),
-            ("2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
-            ("2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
-            ("SH001","SH001"),
-            ("My CODE is Ozgur", "MY_CODE_IS_OZGUR"),
+        #self.code_test_values = [
+            #("testCode","TEST_CODE"),
+            #("1testCode", "TEST_CODE"),
+            #("_testCode", "TEST_CODE"),
+            #("2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
+            #("2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
+            #("2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
+            #("SH001","SH001"),
+            #("My CODE is Ozgur", "MY_CODE_IS_OZGUR"),
             
-            (" this is another code for an asset", 
-             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
+            #(" this is another code for an asset", 
+             #"THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
             
-            ([1, 3, "a", "list","for","testing",3],
-             "A_LIST_FOR_TESTING_3"),
-        ]
+            #([1, 3, "a", "list","for","testing",3],
+             #"A_LIST_FOR_TESTING_3"),
+        #]
     
     
     
@@ -164,7 +164,24 @@ class SimpleEntityTester(mocker.MockerTestCase):
         # code format ?
         
         # set the name and check the code
-        for test_value in self.code_test_values:
+        code_test_values = [
+            ("testCode","TEST_CODE"),
+            ("1testCode", "TEST_CODE"),
+            ("_testCode", "TEST_CODE"),
+            ("2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
+            ("2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
+            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
+            ("SH001","SH001"),
+            ("My CODE is Ozgur", "MY_CODE_IS_OZGUR"),
+            
+            (" this is another code for an asset", 
+             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
+            
+            ([1, 3, "a", "list","for","testing",3],
+             "A_LIST_FOR_TESTING_3"),
+        ]
+        
+        for test_value in code_test_values:
             self.kwargs["name"] = test_value[0]
             new_entity = SimpleEntity(**self.kwargs)
             
@@ -178,8 +195,26 @@ class SimpleEntityTester(mocker.MockerTestCase):
         just set to the formatted version of code
         """
         
+        code_test_values = [
+            ("testCode","testCode"),
+            ("1testCode", "testCode"),
+            ("_testCode", "testCode"),
+            ("2423$+^^+^'%+%%&_testCode", "testCode"),
+            ("2423$+^^+^'%+%%&_testCode_35", "testCode_35"),
+            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "testCode_35"),
+            ("SH001","SH001"),
+            ("My CODE is Ozgur", "My_CODE_is_Ozgur"),
+            
+            (" this is another code for an asset", 
+             "this_is_another_code_for_an_asset"),
+            
+            ([1, 3, "a", "list","for","testing",3],
+             "a_list_for_testing_3"),
+        ]
+
+        
         # set the name and code and test the code
-        for test_value in self.code_test_values:
+        for test_value in code_test_values:
             self.kwargs["name"] = "aName"
             self.kwargs["code"] = test_value[0]
             
