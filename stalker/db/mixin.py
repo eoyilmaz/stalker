@@ -26,7 +26,7 @@ class ReferenceMixinDB(object):
     """A helper class for ReferenceMixin table and mapper setup.
     
     Helps setting up tables and mappers for classes mixed in with
-    :class:`~stalker.core.models.ReferenceMixin`
+    :class:`stalker.core.models.ReferenceMixin`
     
     See examples/extending/great_entity.py for an example.
     """
@@ -112,7 +112,7 @@ class StatusMixinDB(object):
     """A helper class for StatusMixin table and mapper setup.
     
     Helps setting up tables and mappers for classes mixed in with
-    :class:`~stalker.core.models.StatusMixin`
+    :class:`stalker.core.models.StatusMixin`
     
     See examples/extending/statused_entity.py for an example.
     """
@@ -184,7 +184,7 @@ class ScheduleMixinDB(object):
     """A helper class for ScheduleMixin table and mapper setup.
     
     Helps setting up tables and mappers for classes mixed in with
-    :class:`~stalker.core.models.ScheduleMixin`
+    :class:`stalker.core.models.ScheduleMixin`
     
     For now there is no exmaple for it, but it is pretty similiar to the other
     mixin classes.

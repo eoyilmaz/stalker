@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 In this example we are going to extend stalker with a new entity type, which
-is also mixed in with :class:`~stalker.core.models.StatusMixin`.
+is also mixed in with :class:`stalker.core.models.StatusMixin`.
 
 To be able to use NewStatusedEntity with the rest of the stalker.core.models in
 a persistence environment, before calling anything from stalker call these in

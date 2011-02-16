@@ -21,7 +21,7 @@ setup(name="stalker",
       description=("A Production Asset Management (ProdAM) System"),
       long_description=read("README"),
       keywords=["production", "asset", "management", "vfx", "animation", "maya"
-                "houdini", "nuke", "xsi"],
+                "houdini", "nuke", "xsi", "blender", "vue"],
       packages=find_packages(exclude=["tests*"]),
       platforms=["any"],
       url="http://code.google.com/p/stalker/",

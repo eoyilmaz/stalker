@@ -2,7 +2,7 @@
 """Database module of Stalker.
 
 Whenever stalker.db or something under it imported, the
-:func:`~stalker.db.setup` becomes available to let one setup the database.
+:func:`stalker.db.setup` becomes available to let one setup the database.
 """
 
 

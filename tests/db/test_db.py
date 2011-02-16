@@ -16,7 +16,8 @@ from sqlalchemy.sql import select
 from stalker.conf import defaults
 from stalker import utils
 from stalker import db
-from stalker.db import auth, tables
+from stalker.db import tables
+from stalker.ext import auth
 from stalker.core.models import (
     Asset,
     AssetBase,
@@ -86,8 +87,8 @@ class DatabaseTester(unittest.TestCase):
             #except OSError:
                 #pass
         
-        clear_mappers()
-        db.__mappers__ = []
+        #clear_mappers()
+        #db.__mappers__ = []
     
     
     
@@ -114,6 +115,7 @@ class DatabaseTester(unittest.TestCase):
             "login_name": "eoyilmaz",
             "email": "eoyilmaz@gmail.com",
             "created_by": admin,
+            "password": "password",
         }
         
         newUser = User(**kwargs)
@@ -164,6 +166,7 @@ class DatabaseTester(unittest.TestCase):
             "login_name": "eoyilmaz",
             "email": "eoyilmaz@gmail.com",
             "created_by": admin,
+            "password": "password",
         }
         
         newUser = User(**kwargs)
@@ -308,8 +311,7 @@ class DatabaseTester(unittest.TestCase):
         db.setup(self.TEST_DATABASE_URI)
         self._createdDB = True
         
-        admin = db.auth.authenticate(defaults.ADMIN_NAME,
-                                     defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # try to create a user with the same login_name
         # expect IntegrityError
@@ -345,8 +347,7 @@ class DatabaseTester(unittest.TestCase):
         db.setup(self.TEST_DATABASE_URI)
         self._createdDB = True
         
-        admin = db.auth.authenticate(defaults.ADMIN_NAME,
-                                     defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # try to create a user and an entity with same name
         # expect Nothing
@@ -523,18 +524,19 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def tearDown(self):
-        """tear-off the test
-        """
-        ## delete the default test database file
-        #os.remove(self.TEST_DATABASE_FILE)
+    ##----------------------------------------------------------------------
+    #def tearDown(self):
+        #"""tear-off the test
+        #"""
+        ### delete the default test database file
+        ##os.remove(self.TEST_DATABASE_FILE)
         
-        db.metadata.drop_all(db.engine)
-        clear_mappers()
-        db.engine.dispose()
-        db.session.close()
-        db.__mappers__ = []
+        #db.metadata.drop_all(db.engine)
+        #clear_mappers()
+        #db.engine.dispose()
+        #db.session.close()
+        #db.__mappers__ = []
+        
     
     
     
@@ -602,7 +604,6 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_AssetType(self):
         """testing the persistence of AssetType
         """
-        
         
         # first get the admin
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
@@ -703,7 +704,8 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user1_first_name",
             last_name="user1_last_name",
             email="user1@department.com",
-            department=testDepartment
+            department=testDepartment,
+            password="password",
         )
         
         # user2
@@ -716,7 +718,8 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user2_first_name",
             last_name="user2_last_name",
             email="user2@department.com",
-            department=testDepartment
+            department=testDepartment,
+            password="password",
         )
         
         # user3
@@ -730,7 +733,8 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user3_first_name",
             last_name="user3_last_name",
             email="user3@department.com",
-            department=testDepartment
+            department=testDepartment,
+            password="password",
         )
         
         # add as the members and the lead
@@ -996,15 +1000,15 @@ class DatabaseModelsTester(unittest.TestCase):
         start_date = datetime.date.today()
         due_date = start_date + datetime.timedelta(days=20)
         
-        lead = User(login_name="lead", first_name="lead",
-                                   last_name="lead", email="lead@lead.com")
+        lead = User(login_name="lead", first_name="lead", last_name="lead",
+                    email="lead@lead.com", password="password")
         
-        user1 = User(login_name="user1", first_name="user1",
-                          last_name="user1", email="user1@user1.com")
-        user2 = User(login_name="user2", first_name="user2",
-                          last_name="user2", email="user1@user2.com")
-        user3 = User(login_name="user3", first_name="user3",
-                          last_name="user3", email="user3@user3.com")
+        user1 = User(login_name="user1", first_name="user1", last_name="user1",
+                     email="user1@user1.com", password="password")
+        user2 = User(login_name="user2", first_name="user2", last_name="user2",
+                     email="user1@user2.com", password="password")
+        user3 = User(login_name="user3", first_name="user3", last_name="user3",
+                     email="user3@user3.com", password="password")
         
         image_format = ImageFormat(name="HD", width=1920,
                                                height=1080)
@@ -1070,7 +1074,6 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         # get the admin
-        session = db.session
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a new Repository object and try to read it back
@@ -1088,11 +1091,11 @@ class DatabaseModelsTester(unittest.TestCase):
         repo = Repository(**kwargs)
         
         # persist it
-        session.add(repo)
-        session.commit()
+        db.session.add(repo)
+        db.session.commit()
         
         # get it back
-        repo_db = session.query(Repository).\
+        repo_db = db.query(Repository).\
                   filter_by(name=kwargs["name"]).\
                   first()
         
@@ -1135,7 +1138,7 @@ class DatabaseModelsTester(unittest.TestCase):
                                    status_list=project_status_list)
         
         lead = User(login_name="lead", email="lead@lead.com",
-                         first_name="lead", last_name="lead")
+                    first_name="lead", last_name="lead", password="password")
         
         shot1 = Shot(code="SH001")
         shot2 = Shot(code="SH002")

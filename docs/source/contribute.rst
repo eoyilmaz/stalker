@@ -48,14 +48,21 @@ refactoring phase can start, and because you have enough tests that will keep
 your code doing a certain thing, you can freely change your code, because you
 know that you code will do the same thing if it passes all the tests.
 
-The first tests written should always fail by having:
+The first tests written should always fail by having::
 
-  ::
-    
     self.fail("the test is not implemented yet")
 
 failures. This is something good to have. This will inform us that the test is
-not written yet. So lets start adding the code that will pass the tests.
+not written yet. After blocking all the tests and you are confident about the
+tests are covering all the aspects of your design sketches, you can start
+writing the tests.
+
+Another very important note about the tests are the docstrings of the test
+methods. You should explain what is this test method testing, and what you
+expect as a result of the test. It 
+
+After finishing implementing the tests you can start adding the code that will
+pass the tests.
 
 The test framework of Stalker is unitTest and nose to help testing.
 
@@ -171,6 +178,8 @@ rules, and there are some extra rules as listed below:
              str or unicode"))
          
          return name.title()
+   
+   This rule is not followed for the first line of the docstrings.
  
  * If anything is going to be checked against being None you should do it in
    this way::
@@ -183,12 +192,10 @@ rules, and there are some extra rules as listed below:
    rest by a blank line.
 
 
-If you are going to add a new python file (\*.py), use the following line in the
-first line::
+If you are going to add a new python file (\*.py), use the following line in
+the first line::
   
   #-*- coding: utf-8 -*-
-  
-
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _Wing IDE: http://www.wingware.com

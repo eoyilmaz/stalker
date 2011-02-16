@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 In this example we are going to extend stalker with a new entity type, which
-is also mixed in with a :mod:`~stalker.core.models.ReferenceMixin`.
+is also mixed in with a :mod:`stalker.core.models.ReferenceMixin`.
 
 To be able to use GreatEntity with the rest of the stalker.core.models in a
 persistence environment, before calling anything from stalker call these in
@@ -13,7 +13,7 @@ your configuration scripts::
   defaults.CORE_MODEL_CLASSES.append("examples.extending.great_entity.\
       GreatEntity")
 
-Now Stalker nows how to extend the stalker.core.models with your class
+Now Stalker nows how to extend the :mod:`stalker.core.models` with your class
 """
 
 from sqlalchemy import Table, Column, Integer, ForeignKey

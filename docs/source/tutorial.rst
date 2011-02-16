@@ -108,10 +108,6 @@ Lets say that we have this new project coming and you want to start using
 Stalker with it. So we need to create a
 :class:`~stalker.core.models.Project` object to hold data about it::
 
-A repository is a file path, preferably a path
-which is mapped or mounted to the same path on every computer in our studio.
-Now create the project, and attach it to our new commercial repository::
-
   from stalker.core.models import Project
   new_project = Project(name="Fancy Commercial")
 

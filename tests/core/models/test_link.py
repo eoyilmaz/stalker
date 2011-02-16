@@ -12,7 +12,7 @@ from stalker.core.models import Link, LinkType
 
 ########################################################################
 class LinkTester(mocker.MockerTestCase):
-    """tests the :class:`~stalker.core.models.Link` class
+    """tests the :class:`stalker.core.models.Link` class
     """
     
     

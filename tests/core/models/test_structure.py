@@ -104,7 +104,7 @@ class StructureTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_asset_templates_argument_accepts_list_of_templates_only(self):
         """testing if asset_templates argument accepts list of
-        :class:`~stalker.core.models.TypeTemplate` objects only
+        :class:`stalker.core.models.TypeTemplate` objects only
         """
         
         test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
@@ -121,7 +121,7 @@ class StructureTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_asset_templates_attribute_accepts_list_of_templates_only(self):
         """testing if asset_templates argument accepts list of
-        :class:`~stalker.core.models.TypeTemplate` objects only
+        :class:`stalker.core.models.TypeTemplate` objects only
         """
         
         test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
@@ -200,7 +200,7 @@ class StructureTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_reference_templates_argument_accepts_list_of_templates_only(self):
         """testing if reference_templates argument accepts list of
-        :class:`~stalker.core.models.TypeTemplate` objects only
+        :class:`stalker.core.models.TypeTemplate` objects only
         """
         
         test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
@@ -215,7 +215,7 @@ class StructureTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_reference_templates_attribute_accepts_list_of_templates_only(self):
         """testing if reference_templates argument accepts list of
-        :class:`~stalker.core.models.TypeTemplate` objects only
+        :class:`stalker.core.models.TypeTemplate` objects only
         """
         
         test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]

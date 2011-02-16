@@ -4,14 +4,8 @@
 
 import datetime
 import mocker
-from stalker.core.models import (
-    User,
-    Department,
-    Group,
-    Task,
-    Project,
-    Sequence
-)
+from stalker.core.models import (User, Department, Group, Task, Project,
+                                 Sequence)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -1044,7 +1038,7 @@ class UserTest(mocker.MockerTestCase):
         
         test_password = "a new test password"
         self.mock_user.password = test_password
-        self.assertEquals(self.mock_user.password, test_password)
+        self.assertNotEquals(self.mock_user.password, test_password)
     
     
     
@@ -1056,7 +1050,7 @@ class UserTest(mocker.MockerTestCase):
         test_password = "a new test password"
         self.kwargs["password"] = test_password
         aNew_user = User(**self.kwargs)
-        self.assertNotEquals(test_password, aNew_user._password)
+        self.assertNotEquals(aNew_user.password, test_password)
     
     
     
@@ -1069,25 +1063,26 @@ class UserTest(mocker.MockerTestCase):
         self.mock_user.password = test_password
         
         # test if they are not the same any more
-        self.assertNotEquals(test_password, self.mock_user._password)
+        self.assertNotEquals(self.mock_user.password, test_password)
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_password_argument_retrieved_back_correctly(self):
-        #"""testing if password argument decoded and retrieved correctly
-        #"""
+    #----------------------------------------------------------------------
+    def test_check_password_works_properly(self):
+        """testing if check_password method works properly
+        """
         
-        #self.fail("test not implemented yet")
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_password_attribute_retrieved_back_correctly(self):
-        #"""testing if password attribute decoded and retrieved correctly
-        #"""
+        test_password = "a new test password"
+        self.mock_user.password = test_password
         
-        #self.fail("test not implemented yet")
+        # check if it is scrambled
+        self.assertNotEquals(self.mock_user.password, test_password)
+        
+        # check if check_password returns True
+        self.assertTrue(self.mock_user.check_password(test_password))
+        
+        # check if check_password returns False
+        self.assertFalse(self.mock_user.check_password("wrong pass"))
     
     
     

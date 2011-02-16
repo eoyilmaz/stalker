@@ -152,7 +152,7 @@ def setup():
             "_password": tables.users.c.password,
             "password": synonym("_password"),
             "_last_login": tables.users.c.last_login,
-            "last_login": synonym("last_login"),
+            "last_login": synonym("_last_login"),
         },
     )
     

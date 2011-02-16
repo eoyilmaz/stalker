@@ -18,7 +18,6 @@ Table of Contents
     installation.rst
     tutorial.rst
     design.rst
-    inheritance_diagram.rst
     contribute.rst
     roadmap.rst
     changelog.rst
@@ -32,13 +31,6 @@ Summary
    :nosignatures:
    
    stalker.db
-   stalker.db.auth
-   stalker.db.auth.authenticate
-   stalker.db.auth.session
-   stalker.db.auth.login
-   stalker.db.auth.login_required
-   stalker.db.auth.permission_required
-   stalker.db.auth.logout
    stalker.db.engine
    stalker.db.mapper
    stalker.db.metadata
@@ -53,35 +45,46 @@ Summary
    stalker.core.models
    stalker.core.models.Asset
    stalker.core.models.AssetBase
+   stalker.core.models.AssetType
    stalker.core.models.Booking
    stalker.core.models.Comment
    stalker.core.models.Department
-   stalker.core.models.SimpleEntity
    stalker.core.models.Entity
-   stalker.core.models.TypeEntity
-   stalker.core.models.LoginError
    stalker.core.models.Group
    stalker.core.models.ImageFormat
    stalker.core.models.Link
-   stalker.core.models.ReferenceMixin
-   stalker.core.models.ScheduleMixin
-   stalker.core.models.StatusMixin
+   stalker.core.models.LinkType
+   stalker.core.models.LoginError
+   stalker.core.models.Message
+   stalker.core.models.Note
    stalker.core.models.PipelineStep
    stalker.core.models.Project
+   stalker.core.models.ProjectType
+   stalker.core.models.ReferenceMixin
    stalker.core.models.Repository
+   stalker.core.models.ScheduleMixin
    stalker.core.models.Sequence
    stalker.core.models.Shot
+   stalker.core.models.SimpleEntity
    stalker.core.models.Status
    stalker.core.models.StatusList
+   stalker.core.models.StatusMixin
    stalker.core.models.Structure
    stalker.core.models.Tag
    stalker.core.models.Task
-   stalker.core.models.AssetType
-   stalker.core.models.ProjectType
-   stalker.core.models.LinkType
+   stalker.core.models.TypeEntity
    stalker.core.models.TypeTemplate
    stalker.core.models.User
    stalker.core.models.Version
+   stalker.ext.auth
+   stalker.ext.auth.authenticate
+   stalker.ext.auth.check_password
+   stalker.ext.auth.create_session
+   stalker.ext.auth.login
+   stalker.ext.auth.login_required
+   stalker.ext.auth.logout
+   stalker.ext.auth.permission_required
+   stalker.ext.auth.set_password
    stalker.ext.validatedList
    stalker.ext.validatedList.ValidatedList
    stalker.utils.path_to_exec
