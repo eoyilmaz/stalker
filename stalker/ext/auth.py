@@ -68,8 +68,6 @@ from stalker.core.models import LoginError, User
 SESSION={}
 SESSION_KEY = "stalker"
 
-
-
 #----------------------------------------------------------------------
 def create_session():
     """Creates the beaker.session object.
@@ -119,7 +117,7 @@ def login(username=None, password=None):
         if user_obj is not None:
             
             auth.SESSION['user_id'] = username
-            auth.SESSION['password'] =  password
+            auth.SESSION['password'] =  set_password(password)
             auth.SESSION.save()
             
             
@@ -143,32 +141,27 @@ def login(username=None, password=None):
 #----------------------------------------------------------------------
 def authenticate(username="", password=""):
     """Authenticates the given username and password, returns a
-    stalker.core.models.User object
-    
+    stalker.core.models.user.User object
+
     There needs to be a already setup database for the authentication to hapen.
     """
     
+
+    user_obj = None
+    
     # check if the database is setup
     if db.session == None:
-        raise LoginError("stalker is not connected to any db right now, use "
-                         "stalker.db.setup(), to setup the default database")
-    
+        raise error.LoginError("stalker is not connected to any db right now, "
+                               "use stalker.db.setup(), to setup the default"
+                               "db")
+    	
     # try to get the given user
     user_obj = db.session.query(User).filter_by(name=username).first()
     
-    error_msg = "user name and login don't match, %s" % username
-    
-    if user_obj is None:
-        raise LoginError(error_msg)
-    
-    #print "password: %s" % password
-    #print "user_obj.password: %s" % user_obj.password
-    #print "check_password: %s" % check_password(password, user_obj.password)
-    
-    if not check_password(password, user_obj.password):
-        raise LoginError(error_msg)
-    
-    return user_obj
+    if user_obj != None and user_obj.password != set_password(password):
+        return None
+    else:
+        return user_obj
 
 
 
