@@ -15,7 +15,7 @@ myUser = User(first_name="Erkan Ozgur",
               description="This is me")
 
 
-from satlker.core.models import Department
+from stalker.core.models import Department
 tds_department = Department(name="TDs",
                             description="This is the TDs department")
 
