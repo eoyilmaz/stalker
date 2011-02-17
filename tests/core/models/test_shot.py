@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import Shot, Entity
+from stalker.core.models import Entity, Shot, Sequence, AssetType, Task
 
 
 
@@ -22,7 +22,13 @@ class ShotTester(mocker.MockerTestCase):
         """setup the test
         """
         
-        pass
+        # create a Sequence
+        self.mock_sequence = self.mocker.mock(Sequence)
         
+        # create an AssetType
+        self.assetType = self.mocker.mock(AssetType)
+        
+        # create mock Tasks
+        #self.
     
     

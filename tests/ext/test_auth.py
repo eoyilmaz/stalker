@@ -12,7 +12,7 @@ from stalker.ext import auth
 
 #########################################################################
 #class AuthTest(unittest.TestCase):
-    #"""Tests the stlaker.ext.auth module
+    #"""Tests the stalker.ext.auth module
     #"""
     
     

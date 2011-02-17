@@ -1319,7 +1319,7 @@ class AssetBase(Entity, ReferenceMixin, StatusMixin):
         def fset(self, task_in):
             self._tasks = self._validate_tasks(task_in)
         
-        doc = """The list of :class:`~stakler.core.models.Task` instances.
+        doc = """The list of :class:`~stalker.core.models.Task` instances.
         """
         
         return locals()
@@ -1549,7 +1549,7 @@ class Department(Entity):
             # the lead should be an instance of User class
             if not isinstance(lead, User):
                 raise ValueError("lead should be an instance of "
-                                 "satlker.core.models.User")
+                                 "stalker.core.models.User")
         
         return lead
     
@@ -2003,11 +2003,11 @@ class Note(SimpleEntity):
 
 
 ########################################################################
-class PipelineStep(Entity):
-    """Common and differet steps for different types of assets.
+class TaskType(TypeEntity):
+    """Defines the type of the a :class:`~stalker.core.models.Task`.
     
-    A PipelineStep object represents the general pipeline steps which are
-    used around the studio. A couple of examples are:
+    A TaskType object represents the general steps which are used around the
+    studio. A couple of examples are:
     
       * Design
       * Model
@@ -2027,7 +2027,7 @@ class PipelineStep(Entity):
     
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
-        super(PipelineStep, self).__init__(**kwargs)
+        super(TaskType, self).__init__(**kwargs)
     
     
     
@@ -2036,8 +2036,8 @@ class PipelineStep(Entity):
         """the equality operator
         """
         
-        return super(PipelineStep, self).__eq__(other) and \
-               isinstance(other, PipelineStep)
+        return super(TaskType, self).__eq__(other) and \
+               isinstance(other, TaskType)
 
 
 
@@ -2820,9 +2820,9 @@ class Shot(AssetBase):
     Because most of the shots in different projects are going to have the same
     name, which is a kind of code like SH001, SH012A etc., and in Stalker you
     can not have two entities with the same name if their types are also
-    matching, to guarantee all the shots are going to have different names so
-    the name attribute of the Shot instances are automatically set to a
-    generated uuid sequence.
+    matching, to guarantee all the shots are going to have different names the
+    :attr:`~stalker.core.models.Shot.name` attribute of the Shot instances are
+    automatically set to a generated uuid sequence.
     
     But there is no such rule for the code attribute, which should be used to
     give shot codes to individual shots.
@@ -2836,6 +2836,12 @@ class Shot(AssetBase):
       this shot.
     
     :type assets: list of :class:`stalker.core.models.Asset` instances
+    
+    :param integer cut_in: The in frame number that this shot starts.
+    
+    :param integer cut_out: The out frame number taht this shot ends.
+    
+    :param integer cut_duration: The duration of this shot in frames.
     """
     
     
@@ -3354,67 +3360,94 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 class AssetType(TypeEntity):
     """Holds the information about the asset types.
     
-    One AssetType object has information about the pipeline steps that this
-    type of asset has.
+    One AssetType object gives information about the
+    :class:`~stalker.core.models.TaskType`\ s that this type of asset
+    can intially have.
     
-    So for example one can create a "Chracter" AssetType and then link
-    "Design", "Modeling", "Rig", "Shading"
-    :class:`stalker.core.model.PipelineStep`\ s to this AssetType
-    object. And then have an "Environment" AssetType and then just link
-    "Design", "Modeling", "Shading"
-    :class:`stalker.core.model.PipelineStep`\ s to it.
+    So for example one can create a "Character"
+    :class:`~stalker.core.models.AssetType` and then link "Design", "Modeling",
+    "Rig", "Shading" :class:`stalker.core.model.TaskType`\ s to this
+    :class:`~stalker.core.models.AssetType`. And then have an "Environment"
+    :class:`~stalker.core.models.AssetType` and then just link "Design",
+    "Modeling", "Shading" :class:`stalker.core.model.TaskType`\ s to it.
     
-    :param steps: This is a list of
-      :class:`stalker.core.model.PipelineStep` objects.
+    The idea behind :class:`~stalker.core.models.AssetType` is to have an
+    initial list of :class:`~stalker.core.mddels.TaskType`\ s instances which
+    are going to be used to define the automatically created
+    :class:`~stalker.core.models.Task`\ s for this
+    :class:`~stalker.core.models.AssetType`.
+    
+    It is still possible to add a new type of
+    :class:`~stalker.core.models.Task` to the list of tasks of one
+    :class:`~stalker.core.models.Asset` object. The
+    :class:`~stalker.core.models.AssetType` and the related
+    :class:`~stalker.core.models.TaskType`\ s will only be used to create a
+    list of :class:`~stalker.core.models.Task`\ s intially with the
+    :class:`~stalker.core.models.AssetBase` (thus for the inherited classes
+    like :class:`~stalker.core.models.Asset` and
+    :class:`~stalker.core.models.Shot`) it self.
+    
+    :param task_types: A list of :class:`~stalker.core.models.TaskType`
+      instances showing the initial :class:`~stalker.core.models.TaskType`\ s
+      available for this :class:`~stalker.core.models.AssetType`.
+    
+    :type task_types: a :class:`stalker.ext.validatedList.ValidatedList` of
+      :class:`stalker.core.models.TaskType` instances.
     """
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self, steps=[], **kwargs):
+    def __init__(self, task_types=[], **kwargs):
         super(AssetType, self).__init__(**kwargs)
         
-        self._steps = self._validate_steps(steps)
+        self._task_types = self._validate_task_types(task_types)
     
     
     
     #----------------------------------------------------------------------
-    def _validate_steps(self, steps_in):
-        """validates the given steps list
+    def _validate_task_types(self, task_types_in):
+        """validates the given task_types list
         """
         
         # raise a Value error if it is not a list
-        if not isinstance(steps_in, list):
-            raise ValueError("steps should be an instance of list")
+        if not isinstance(task_types_in, list):
+            raise ValueError("task_types should be an instance of list")
         
         # raise a Value error if not all of the elements are pipelineStep
         # objects
-        if not all([ isinstance(obj, PipelineStep)
-                 for obj in steps_in]):
+        if not all([ isinstance(obj, TaskType)
+                 for obj in task_types_in]):
             raise ValueError(
                 "all of the elements of the given list should be instance of "
-                "stalker.core.models.PipelineStep class"
+                "stalker.core.models.TaskType class"
             )
         
-        return ValidatedList(steps_in)
+        return ValidatedList(task_types_in)
     
     
     
     #----------------------------------------------------------------------
-    def steps():
+    def task_types():
         
         def fget(self):
-            return self._steps
+            return self._task_types
         
-        def fset(self, steps_in):
-            self._steps = self._validate_steps(steps_in)
+        def fset(self, task_types_in):
+            self._task_types = self._validate_task_types(task_types_in)
         
-        doc = """this is the property that lets you set and get steps attribute
+        doc = """task_types of this AssetType object.
+        
+        task_types is a list of :class:`stalker.core.models.TaskType` objects,
+        showing the list of possible :class:`~stalker.core.models.TaskType`\ s
+        that this kind of :class:`~stalker.core.models.Asset`\ s can have. Its
+        main use is to create a default :class:`~stalker.core.models.Task`\ s
+        list which can be later on edited.
         """
         
         return locals()
     
-    steps = property(**steps())
+    task_types = property(**task_types())
     
     
     
@@ -3425,7 +3458,7 @@ class AssetType(TypeEntity):
         
         return super(AssetType, self).__eq__(other) and \
                isinstance(other, AssetType) and \
-               self.steps == other.steps
+               self.task_types == other.task_types
 
 
 
@@ -3521,7 +3554,7 @@ class TypeTemplate(Entity):
     A template for asset versions can have this parameters::
     
       from stalker import db
-      from satlker.ext import auth
+      from stalker.ext import auth
       from stalker.core.models import AssetTypes, TypeTemplate, PipelineStep
       
       # setup the default database
@@ -3535,7 +3568,7 @@ class TypeTemplate(Entity):
       admin = auth.login("admin", "admin")
       
       # create a couple of variables
-      path_code = "ASSETS/{{asset_type.name}}/{{pipeline_step.code}}"
+      path_code = "ASSETS/{{asset_type.name}}/{{task_type.code}}"
       
       file_code = "{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
 v{{version.version_number}}"
@@ -3553,7 +3586,7 @@ v{{version.version_number}}"
           name="Character",
           description="this is the character asset type",
           created_by=admin,
-          steps=[modelingStep]
+          task_types=[modelingStep]
       )
       
       # now create our TypeTemplate
@@ -3585,7 +3618,7 @@ Character assets",
         |- ASSETS  --> "ASSETS"
          |- Character  --> {{asset_type.name}}
           |- Olum  --> {{asset.name}}
-           |- MODEL  --> {{pipeline_step.code}}
+           |- MODEL  --> {{task_type.code}}
             |- Olum_MAIN_MODEL_v001.ma --> {{asset.name}}_\
 {{take.name}}_{{asset_type.name}}_v{{version.version_number}}
     

@@ -208,3 +208,92 @@ is a good start to go the `Selenic Mercurial Site`_ and do the tutorial if you
 don't feel familiar enough with hg.
 
 .. _Selenic Mercurial Site: http://mercurial.selenic.com 
+
+Adding Changes
+==============
+
+If you want to do changes in Stalker, the basic pipeline is as follows:
+
+ * When you first start to develop, clone the repository to your computer (it
+   should be done only once) by using the following command::
+
+     hg clone https://stalker.googlecode.com/hg/ stalker
+
+ * Note the changeset that you have started to make new additions::
+   
+     hg identify
+     
+     aee27d8c6820+ tip
+   
+   Note the **aee27d8c6820** to somewhere, it will be needed when you are going
+   to create the bundle file.
+
+ * Do your addition, run your tests, and be sure that your part doesn't have
+   any errors or failures, in stalker root directory run this command:
+   
+     Linux/Mac::
+       
+       ./doTests
+     
+     Windows::
+     
+       doTests.bat
+
+ * Commit your changes::
+   
+     hg ci -m "I did this and that"
+   
+   You can use the text you have written in the CHANGELOG.
+
+ * Before creating a bundle check if there are new revisions in the
+   google repository::
+   
+     hg pull
+
+ * If there are changes and mercurial pulled them update your repository::
+   
+     hg update
+
+ * If there are conflicts where mercurial is waiting for you to solve them,
+   solve the conflicts by using your text editor and opening the file which has
+   conflicts. You will see lines like ">>>>>>>>> their version" and
+   "<<<<<<<<<<<<< your version", showing the conflicting code. Clean the code
+   and save the file, and inform mercurial that you have resolved the conflicts
+   by::
+
+     hg resolve -m the_conflicting_source_file.py
+
+ * Delete the file with \*.orig extension::
+
+   Linux/Mac:
+   
+     rm the_conflicting_source_file.py.orig
+   
+   Windows:
+   
+     del the_conflicting_source_file.py.orig
+   
+   Or use your favourite file browser.
+
+ * Do the tests again:
+   
+     Linux/Mac::
+       
+       ./doTests
+     
+     Windows::
+     
+       doTests.bat
+   
+   If there are problems in your part of the code, solve the errors/failures.
+
+ * Commit your changes::
+   
+     hg ci -m "Pulled changes from the server and merged..."
+
+ * Create a bundle::
+   
+     hg bundle --base aee27d8c6820 ~/my.bundle
+  
+  and send it to eoyilmaz@gmail.com. I also accept, diffs in git format.
+

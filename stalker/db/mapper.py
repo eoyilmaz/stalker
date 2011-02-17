@@ -12,32 +12,32 @@ from stalker.db.mixin import ReferenceMixinDB, StatusMixinDB, ScheduleMixinDB
 from stalker.core.models import (
     Asset,
     AssetBase,
+    AssetType,
     Booking,
     Comment,
     Department,
-    SimpleEntity,
     Entity,
-    TypeEntity,
     Group,
     ImageFormat,
-    PipelineStep,
-    Project,
     Link,
+    LinkType,
+    Note,
+    Project,
+    ProjectType,
     ReferenceMixin,
+    Repository,
     ScheduleMixin,
     StatusMixin,
-    Note,
-    Repository,
     Sequence,
     Shot,
+    SimpleEntity,
     Status,
     StatusList,
     Structure,
     Tag,
     Task,
-    AssetType,
-    ProjectType,
-    LinkType,
+    TaskType,
+    TypeEntity,
     TypeTemplate,
     User,
     Version
@@ -270,11 +270,11 @@ def setup():
         inherit_condition=tables.assetTypes.c.id==tables.typeEntities.c.id,
         polymorphic_identity=AssetType.entity_type,
         properties={
-            "_steps": relationship(
-                PipelineStep,
-                secondary=tables.assetType_pipelineSteps
+            "_task_types": relationship(
+                TaskType,
+                secondary=tables.assetType_taskTypes
                 ),
-            "steps": synonym("_steps")
+            "task_types": synonym("_task_types")
         }
     )
     
@@ -302,17 +302,13 @@ def setup():
     
     
     
-    # PipelineStep
+    # TaskType
     mapper(
-        PipelineStep,
-        tables.pipelineSteps,
-        inherits=PipelineStep.__base__,
-        inherit_condition=tables.pipelineSteps.c.id==tables.entities.c.id,
-        polymorphic_identity=PipelineStep.entity_type,
-        #properties={
-            #"_code": tables.pipelineSteps.c.code,
-            #"code": synonym("_code")
-        #}
+        TaskType,
+        tables.taskTypes,
+        inherits=TaskType.__base__,
+        inherit_condition=tables.taskTypes.c.id==tables.entities.c.id,
+        polymorphic_identity=TaskType.entity_type,
     )
     
     
@@ -351,7 +347,7 @@ def setup():
             "_project_template": tables.structures.c.project_template,
             "project_template": synonym("_project_template"),
             "_asset_templates": relationship(
-                TypeEntity,
+                TypeTemplate,
                 secondary=tables.structure_assetTemplates,
                 primaryjoin=\
                     tables.structures.c.id==\
@@ -362,7 +358,7 @@ def setup():
             ),
             "asset_templates": synonym("_asset_templates"),
             "_reference_templates": relationship(
-                TypeEntity,
+                TypeTemplate,
                 secondary=tables.structure_referenceTemplates,
                 primaryjoin=\
                     tables.structures.c.id==\

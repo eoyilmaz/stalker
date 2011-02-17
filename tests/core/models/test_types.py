@@ -3,8 +3,8 @@
 
 
 import mocker
-from stalker.core.models import (LinkType, TypeEntity, AssetType, ProjectType,
-                                 TypeTemplate, PipelineStep, Tag)
+from stalker.core.models import (TypeEntity, AssetType, LinkType, ProjectType,
+                                 TaskType, TypeTemplate, Tag)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -24,29 +24,29 @@ class AssetTypeTester(mocker.MockerTestCase):
         """lets setup the test
         """
         
-        # we need a couple of mocke PipelineStep objects
-        self.mock_pipeline_step1 = self.mocker.mock(PipelineStep)
-        self.mock_pipeline_step2 = self.mocker.mock(PipelineStep)
-        self.mock_pipeline_step3 = self.mocker.mock(PipelineStep)
+        # we need a couple of mocke TaskType objects
+        self.mock_task_type1 = self.mocker.mock(TaskType)
+        self.mock_task_type2 = self.mocker.mock(TaskType)
+        self.mock_task_type3 = self.mocker.mock(TaskType)
         
-        # the pipeline_steps will be compared to each other in equality tests
+        # the task_types will be compared to each other in equality tests
         # (each will be used for one AssetType)
         # __eq__
         self.expect(
-            self.mock_pipeline_step1.__eq__(self.mock_pipeline_step2)
+            self.mock_task_type1.__eq__(self.mock_task_type2)
             ).result(True).count(0, None)
         
         self.expect(
-            self.mock_pipeline_step1.__eq__(self.mock_pipeline_step3)
+            self.mock_task_type1.__eq__(self.mock_task_type3)
             ).result(False).count(0, None)
         
         # __ne__
         self.expect(
-            self.mock_pipeline_step1.__ne__(self.mock_pipeline_step2)
+            self.mock_task_type1.__ne__(self.mock_task_type2)
             ).result(False).count(0, None)
         
         self.expect(
-            self.mock_pipeline_step1.__ne__(self.mock_pipeline_step3)
+            self.mock_task_type1.__ne__(self.mock_task_type3)
             ).result(True).count(0, None)
         
         # create a couple of tags
@@ -57,9 +57,9 @@ class AssetTypeTester(mocker.MockerTestCase):
         # let the sun shine
         self.mocker.replay()
         
-        self.pipelineStep_list = [self.mock_pipeline_step1,
-                                  self.mock_pipeline_step2,
-                                  self.mock_pipeline_step3]
+        self.task_type_list = [self.mock_task_type1,
+                               self.mock_task_type2,
+                               self.mock_task_type3]
         
         self.tag_list = [self.mock_tag1,
                          self.mock_tag2]
@@ -72,7 +72,7 @@ class AssetTypeTester(mocker.MockerTestCase):
             "name": self.name,
             "description": self.description,
             "tags": self.tag_list,
-            "steps": self.pipelineStep_list
+            "task_types": self.task_type_list
         }
         
         self.mock_assetType = AssetType(**self.kwargs)
@@ -87,7 +87,7 @@ class AssetTypeTester(mocker.MockerTestCase):
         # a dict obj
         self.test_attr_3 = {"a key":"a Value"}
         
-        # a list of different objects than a pipelineStep objects
+        # a list of different objects than a TaskType objects
         self.test_attr_4 = [self.test_attr_1,
                             self.test_attr_2,
                             self.test_attr_3]
@@ -95,8 +95,8 @@ class AssetTypeTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_steps_argument_accepts_pipelineStep_objects_only(self):
-        """testing if steps argument accepts just PipelineStep objects
+    def test_task_types_argument_accepts_TaskType_objects_only(self):
+        """testing if task_types argument accepts just TaskType objects
         """
         
         # lets try to assign them to a newly created AssetType object
@@ -108,19 +108,15 @@ class AssetTypeTester(mocker.MockerTestCase):
                        self.test_attr_4]
         
         for test_value in test_values:
-            self.kwargs["steps"] = test_value
+            self.kwargs["task_types"] = test_value
             
-            self.assertRaises(
-                ValueError,
-                AssetType,
-                **self.kwargs
-            )
+            self.assertRaises( ValueError, AssetType, **self.kwargs )
     
     
     
     #----------------------------------------------------------------------
-    def test_steps_attribute_for_being_pipelineStep_objects(self):
-        """testing if steps `attribute` accepts just PipelineStep objects
+    def test_task_types_attribute_for_being_TaskType_objects(self):
+        """testing if task_types attribute accepts just TaskType objects
         """
         
         # lets try to assign them to a newly created AssetType object
@@ -137,57 +133,57 @@ class AssetTypeTester(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_assetType,
-                "steps",
+                "task_types",
                 test_value
             )
     
     
     
     #----------------------------------------------------------------------
-    def test_steps_attribute_working_properly(self):
-        """testing if steps `attribute` is working properly
+    def test_task_types_attribute_working_properly(self):
+        """testing if task_types attribute is working properly
         """
         
-        # lets create a new list of pipelineStep objects
-        a_new_list_of_pipelineStep_objs = [
-            self.mock_pipeline_step1,
-            self.mock_pipeline_step2
+        # lets create a new list of TaskType objects
+        a_new_list_of_task_type_objs = [
+            self.mock_task_type1,
+            self.mock_task_type2
         ]
         
-        # lets assign it to the assetType and check if they are same
-        self.mock_assetType.steps = a_new_list_of_pipelineStep_objs
+        # lets assign it to the AssetType and check if they are same
+        self.mock_assetType.task_types = a_new_list_of_task_type_objs
         
-        self.assertEquals(self.mock_assetType.steps,
-                          a_new_list_of_pipelineStep_objs)
+        self.assertEquals(self.mock_assetType.task_types,
+                          a_new_list_of_task_type_objs)
     
     
     
     #----------------------------------------------------------------------
-    def test_steps_attribute_is_a_ValidatedList_instance(self):
-        """testing if the steps attribute is an instance of ValidatedList
+    def test_task_type_attribute_is_a_ValidatedList_instance(self):
+        """testing if the task_types attribute is an instance of ValidatedList
         """
         
-        self.assertIsInstance(self.mock_assetType.steps, ValidatedList)
+        self.assertIsInstance(self.mock_assetType.task_types, ValidatedList)
     
     
     
     #----------------------------------------------------------------------
-    def test_steps_attribute_elements_accepts_Template_only(self):
+    def test_task_types_attribute_elements_accepts_Template_only(self):
         """testing if a ValueError will be raised when trying to assign
-        something other than a PipelineStep object to the steps list
+        something other than a TaskType object to the task_types list
         """
         
         # append
         self.assertRaises(
             ValueError,
-            self.mock_assetType.steps.append,
+            self.mock_assetType.task_types.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
             ValueError,
-            self.mock_assetType.steps.__setitem__,
+            self.mock_assetType.task_types.__setitem__,
             0,
             0
         )
@@ -199,12 +195,12 @@ class AssetTypeTester(mocker.MockerTestCase):
         """testing equality of AssetType objects
         """
         
-        self.kwargs["steps"] = [self.mock_pipeline_step1]
+        self.kwargs["task_types"] = [self.mock_task_type1]
         self.kwargs["tags"] = [self.mock_tag1]
         asset_type1 = AssetType(**self.kwargs)
         asset_type2 = AssetType(**self.kwargs)
         
-        self.kwargs["steps"] = [self.mock_pipeline_step3]
+        self.kwargs["task_types"] = [self.mock_task_type3]
         self.kwargs["tags"] = [self.mock_tag3]
         asset_type3 = AssetType(**self.kwargs)
         
@@ -218,11 +214,11 @@ class AssetTypeTester(mocker.MockerTestCase):
         """testing inequality of AssetType objects
         """
         
-        self.kwargs["steps"] = [self.mock_pipeline_step1]
+        self.kwargs["task_types"] = [self.mock_task_type1]
         asset_type1 = AssetType(**self.kwargs)
         asset_type2 = AssetType(**self.kwargs)
         
-        self.kwargs["steps"] = [self.mock_pipeline_step3]
+        self.kwargs["task_types"] = [self.mock_task_type3]
         asset_type3 = AssetType(**self.kwargs)
         
         self.assertFalse(asset_type1!=asset_type2)
@@ -695,3 +691,62 @@ class LinkTypeTester(mocker.MockerTestCase):
         self.assertTrue(self.link_type1!=self.type_entity1)
 
 
+
+
+
+
+########################################################################
+class TaskTypeTester(mocker.MockerTestCase):
+    """tests TaskType class
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """setup the test
+        """
+        
+        self.kwargs = {
+            "name": "Model",
+            "description": "the modeling TaskType"
+        }
+    
+    
+        self.task_type1 = TaskType(**self.kwargs)
+        self.task_type2 = TaskType(**self.kwargs)
+        
+        self.kwargs["name"] = "Lighting"
+        self.kwargs["description"] = "the ligthing task type"
+        
+        self.task_type3 = TaskType(**self.kwargs)
+        
+        # create another TypeEntity with the same kwargs for the __eq__ and
+        # __ne__ tests
+        self.type_entity = TypeEntity(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_equality(self):
+        """testing equality of two TaskType objects
+        """
+        
+        self.assertTrue(self.task_type1==self.task_type2)
+        self.assertFalse(self.task_type1==self.task_type3)
+        self.assertFalse(self.task_type1==self.type_entity)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_inequality(self):
+        """testing inequality of two TaskType objects
+        """
+        
+        self.assertFalse(self.task_type1!=self.task_type2)
+        self.assertTrue(self.task_type1!=self.task_type3)
+        self.assertTrue(self.task_type1!=self.type_entity)
+    
+    
+    
+    
