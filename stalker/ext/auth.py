@@ -11,49 +11,57 @@ The user information is going to be used in the database to store who created,
 updated, read or delete the data.
 
 There are three functions to log a user in, first one is
-:func:`~stalker.db.auth.session` that create the session and if there where
+:func:`stalker.ext.auth.session` that create the session and if there where
 user entry in session it return true else return false, the second one is
-:func:`~stalker.db.auth.authenticate`, which accepts username and password and
-returns a :class:`~stalker.core.models.user.User` object::
+:func:`stalker.ext.auth.authenticate`, which accepts username and password and
+returns a :class:`stalker.core.models.User` object::
 
-    from stalker.db import auth
+    from stalker.ext import auth
     user_obj = auth.authenticate("username", "password")
 
-The third one is the :func:`~stalker.db.auth.login` which uses a given
-:class:`~stalker.core.models.user.User` object and creates a Beaker Session and
+The third one is the :func:`stalker.ext.auth.login` which uses a given
+:class:`stalker.core.models.User` object and creates a Beaker Session and
 stores the logged in user id in that session.
 
-The :func:`~stalker.db.auth.get_user` can be used to get the authenticated and
-logged in :class:`~stalker.core.models.user.User` object.
+The :func:`stalker.ext.auth.get_user` can be used to get the authenticated and
+logged in :class:`stalker.core.models.User` object.
 
 The basic usage of the system is as follows::
-
+  
   from stalker import db
-  from stalker.db import auth
-  from stalker.core.models import user
-
-  if auth.session():
+  from stalker.ext import auth
+  from stalker.core.models import User
+  
+  if "user_id" in auth.SESSION:
       # user has login data 
       auth.login()
   else
       #user doesn't have login data get them with login prompt
       get_user_data()
-      login(username, password)
+      auth.login(username, password)
 
 The module also introduces a decorator called
-:func:`~stalker.db.auth.login_required` to help adding the authentication
+:func:`stalker.ext.auth.login_required` to help adding the authentication
 functionality to any function or method. There is also another decorator called
-:func:`~stalker.db.auth.premission_required` to check if the logged in user is
+:func:`stalker.ext.auth.premission_required` to check if the logged in user is
 in the given permission group.
+
+There are also two utility functions two check and set passwords.
+:func:`stalker.ext.auth.check_password` and
+:func:`stalker.ext.auth.set_password`.
 """
+
 
 
 import os
 import tempfile
 import datetime
+import base64
+
 from beaker import session as beakerSession
+
 from stalker import db
-from stalker.core.models import User
+from stalker.core.models import LoginError, User
 
 
 
@@ -63,15 +71,18 @@ SESSION_KEY = "stalker"
 
 
 #----------------------------------------------------------------------
-def session():
-    """create the session and if there was user data entry in the cookie return
-    true
+def create_session():
+    """Creates the beaker.session object.
+    
+    Stalker creates a session to store currently logged in user data. This
+    function creates the session and stores it in the
+    :const:`stalker.ext.auth.SESSION` dictionary.
     """
 
     from stalker.ext import auth
-
+    
     tempdir = tempfile.gettempdir()
-
+    
     # loading session
     session_options = {
         "id":"stalker",
@@ -81,43 +92,39 @@ def session():
         "data_dir": os.path.sep.join([tempdir, "stalker_cache", "data"]),
         "lock_dir": os.path.sep.join([tempdir, "stalker_cache", "lock"]),
     }
-
+    
     auth.SESSION = beakerSession.Session({},**session_options)
-
-    # checking user data
-    return 'user_id' in auth.SESSION and \
-           'password' in auth.SESSION
 
 
 
 #----------------------------------------------------------------------
 def login(username=None, password=None):
-    """use this function if session function return true it gets the user data
+    """Use this function if session function return true it gets the user data
     and use it to connect to database
-
+    
     use this function if session return false. you should feed this function
     with username and password because it uses them to connect to database. it
     alse write this data to a cookie file for farther use.
 
-    This method also return true if the login process happened successfully
+    :returns: True if the login process happened successfully.
     """
-
+    
     from stalker.ext import auth
-
+    
     if "user_id" not in auth.SESSION:
-        session()
-
-    # username and password has been feed to the functiond
+        create_session()
+    
     if username and password:
-
+        
         user_obj = authenticate(username, password)
-
+        
         if user_obj is not None:
-
+            
             auth.SESSION['user_id'] = username
             auth.SESSION['password'] =  password
             auth.SESSION.save()
-
+            
+            
             user_obj.last_login = datetime.datetime.now()
             db.session.commit()
 
@@ -128,10 +135,10 @@ def login(username=None, password=None):
     # the username and password should be given from cookie file
     else:
         if auth.SESSION is not None:
-
+            
             username = auth.SESSION['user_id']
             password = auth.SESSION['password']
-
+            
             user_obj = authenticate(username,password)
             if user_obj is not None:
                 auth.SESSION.save()
@@ -148,27 +155,32 @@ def login(username=None, password=None):
 #----------------------------------------------------------------------
 def authenticate(username="", password=""):
     """Authenticates the given username and password, returns a
-    stalker.core.models.user.User object
-
+    stalker.core.models.User object
+    
     There needs to be a already setup database for the authentication to hapen.
     """
+    
 
 
     user_obj = None
-
+    
     # check if the database is setup
     if db.session == None:
-        raise error.LoginError("stalker is not connected to any db right now, "
-                               "use stalker.db.setup(), to setup the default"
-                               "db")
-
+        raise LoginError("stalker is not connected to any db right now, use "
+                         "stalker.db.setup(), to setup the default database")
+    
     # try to get the given user
     user_obj = db.session.query(User).filter_by(name=username).first()
-
-    if user_obj != None and user_obj.password != password:
-        return None
-    else:
-        return user_obj
+    
+    error_msg = "user name and login don't match, %s" % username
+    
+    if user_obj is None:
+        raise LoginError(error_msg)
+    
+    if not check_password(password, user_obj.password):
+        raise LoginError(error_msg)
+    
+    return user_obj
 
 
 
@@ -177,20 +189,12 @@ def logout():
     """removes the current session
     """
     from stalker.ext import auth
-
+    
     try:
         auth.SESSION.delete()
         auth.SESSION.clear()
     except AttributeError:
         return
-
-#----------------------------------------------------------------------
-def set_password(password_in):
-    """a function to encrypt password of the user
-    """
-
-
-    return password_in
 
 
 
@@ -214,10 +218,10 @@ def login_required(view, error_message=None):
                 func(*args, **kwargs)
             else:
                 if error_message and isinstance(error_meesage, (str, unicode)):
-                    raise error.LoginError(error_message)
+                    raise LoginError(error_message)
                 else:
-                    raise error.LoginError("You should be logged in before "
-                                           "completing your action!")
+                    raise LoginError("You should be logged in before "
+                                     "completing your action!")
         return wrapped_func
     return wrap
 
@@ -231,7 +235,7 @@ def permission_required(permission_group, error_message=None):
     Checks if the logged in user is in the given permission group and then
     calls the decorated function
 
-    :param permission_group: a :class:`~stalker.coer.models.group.Group` object
+    :param permission_group: a :class:`~stalker.core.models.Group` object
       showing the permision group
 
     :param error_message: the message to be shown in case a LoginError is
@@ -246,9 +250,48 @@ def permission_required(permission_group, error_message=None):
                 func(*args, **kwargs)
             else:
                 if error_message and isinstance(error_meesage, (str, unicode)):
-                    raise error.LoginError(error_message)
+                    raise LoginError(error_message)
                 else:
-                    raise error.LoginError("You don't have permission to do "
-                                           "complete your action!")
+                    raise LoginError("You don't have permission to complete "
+                                     "your action!")
         return wrapped_func
     return wrap
+
+
+
+#----------------------------------------------------------------------
+def check_password(raw_password, enc_password):
+    """Checks the given raw password.
+    
+    Checks the given raw password with the given encrypted password. Handles
+    the encryption process behind the scene.
+    
+    :param raw_password: The password.
+    
+    :param enc_password: The encrypted password.
+    
+    :returns: bool
+    """
+    
+    return enc_password == base64.encodestring(str(raw_password))
+
+
+
+#----------------------------------------------------------------------
+def set_password(raw_password):
+    """Returns an encrypted version of the given password.
+    
+    :param string raw_password: The raw password to be encrypted. The
+      raw_password attribute can not be None or empty string.
+    
+    :returns: string
+    """
+    
+    if raw_password is None or raw_password == "":
+        raise ValueError("raw_password can not be None or empty string")
+    
+    return base64.encodestring(raw_password)
+
+
+
+

@@ -19,14 +19,14 @@ from stalker.core.models import User
 class AuthTester(unittest.TestCase):
     """Tests the stlaker.ext.auth module
     """
-
-
+    
+    
     #----------------------------------------------------------------------
     def setUp(self):
         """setup the test
         """
         tempdir = tempfile.gettempdir()
-
+        
         session_options = {
             "id":"stalker",
             "key":"stalker",
@@ -35,45 +35,24 @@ class AuthTester(unittest.TestCase):
             "data_dir": os.path.sep.join([tempdir, "stalker_cache", "data"]),
             "lock_dir": os.path.sep.join([tempdir, "stalker_cache", "lock"]),
         }
-
+        
         self.SESSION = beakerSession.Session({},**session_options) 
-        #self.SESSION.save()
-
-
-
+    
     #----------------------------------------------------------------------
-    def test_session_function_True(self):
-        """Tests the behavior of the session function when there is   
-        username and password in the cookiw file
+    def test_create_session(self):
+        """tests create_session function
         """
-
-        self.SESSION['user_id'] = "name"
-        self.SESSION['password'] =  "pass"
-        self.SESSION.save()
-
-        self.assertTrue(auth.session())
-
-
-
-    #----------------------------------------------------------------------
-    def test_session_function_False(self):
-        """Tests the behavior of the session function when there is not
-        username and password in the cookie file
-        """
-        del self.SESSION['user_id']
-        del self.SESSION['password']
-        self.SESSION.save()
-
-        self.assertFalse(auth.session())
-
-
-
+	
+	auth.create_session()
+	self.assertTrue(auth.SESSION != {})
+    
+    
     #----------------------------------------------------------------------
     def test_logout_function(self):
         """tests logout function
         """
-
-        auth.session()
+    
+        auth.create_session()
         auth.logout()
         self.assertEquals(len(auth.SESSION), 0)
 
@@ -86,7 +65,7 @@ class AuthTester(unittest.TestCase):
 
         # remove db file 
         if os.path.exists(dbFileAddr):
-            os.remove(  dbFileAddr) 
+            os.remove(dbFileAddr) 
 
         # setup a new db 
         db.setup( "sqlite:///" + dbFileAddr )
@@ -103,26 +82,26 @@ class AuthTester(unittest.TestCase):
         if user_obj == None:
             db.session.add(testUser)
             db.session.commit()
-
+        
         # now the test user is in db and we can authenticate it
         self.assertTrue(auth.authenticate("testuser","test") != None)
-
+    
     #-----------------------------------------------------------------------
     def test_autenticate_user_not_exist(self):
         """tests the authenticate function when there isn't proper user
         """
         tempdir = tempfile.gettempdir()
-        dbFileAddr = tempdir + "/studio1.db"
-
+        dbFileAddr = tempdir + "/studio1.db"	
+        
         # remove db file 
         if os.path.exists(dbFileAddr):
             os.remove(  dbFileAddr) 
 
-
-        # create a fresh db
-        db.setup("sqlite:///" + dbFileAddr)
-        self.assertTrue(auth.authenticate("testuser","test") == None)
-
+        
+    	# create a fresh db
+	    db.setup("sqlite:///" + dbFileAddr)
+        self.assertTrue(auth.authenticate("testuser",auth.set_password("test")) == None)
+        
     #-----------------------------------------------------------------------
     def test_autenticate_password_isnot_correct(self):
         """tests the authenticate function when the user's password
@@ -130,15 +109,15 @@ class AuthTester(unittest.TestCase):
         """
         tempdir = tempfile.gettempdir()
         dbFileAddr = tempdir + "/studio2.db"
-
+        
         # remove db file 
         if os.path.exists(dbFileAddr):
             os.remove(  dbFileAddr) 
 
-
+        
         # create a fresh db
         db.setup("sqlite:///" + dbFileAddr)
-
+        
         testUser = User(first_name="tu",
                         last_name="tu",
                         login_name="testuser", 
@@ -151,8 +130,8 @@ class AuthTester(unittest.TestCase):
         if user_obj == None:
             db.session.add(testUser)
             db.session.commit()
-
-
+        
+        
         # use incorrect password 
         self.assertTrue(auth.authenticate("testuser","tes") == None)
 
@@ -227,11 +206,12 @@ class AuthTester(unittest.TestCase):
         # now the test user exist in db so the login method should work
         # without any error. Also the user data should be written in cookie
 
-        self.assertTrue( auth.login("testuser","test"))
+        auth.login("testuser","test")
+        self.assertTrue(user_obj != None )
 
 
 
-        #-----------------------------------------------------------------------
+    #-----------------------------------------------------------------------
     def test_login_with_params_cookie_register(self):
         """tests the login function to see the ability of writing user
         data in the cookie file for further use
