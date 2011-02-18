@@ -27,11 +27,11 @@ The :func:`~stalker.db.auth.get_user` can be used to get the authenticated and
 logged in :class:`~stalker.core.models.user.User` object.
 
 The basic usage of the system is as follows::
-  
+
   from stalker import db
   from stalker.db import auth
   from stalker.core.models import user
-  
+
   if auth.session():
       # user has login data 
       auth.login()
@@ -67,11 +67,11 @@ def session():
     """create the session and if there was user data entry in the cookie return
     true
     """
-    
+
     from stalker.ext import auth
-    
+
     tempdir = tempfile.gettempdir()
-    
+
     # loading session
     session_options = {
         "id":"stalker",
@@ -81,9 +81,9 @@ def session():
         "data_dir": os.path.sep.join([tempdir, "stalker_cache", "data"]),
         "lock_dir": os.path.sep.join([tempdir, "stalker_cache", "lock"]),
     }
-    
+
     auth.SESSION = beakerSession.Session({},**session_options)
-    
+
     # checking user data
     return 'user_id' in auth.SESSION and \
            'password' in auth.SESSION
@@ -94,55 +94,55 @@ def session():
 def login(username=None, password=None):
     """use this function if session function return true it gets the user data
     and use it to connect to database
-    
+
     use this function if session return false. you should feed this function
     with username and password because it uses them to connect to database. it
     alse write this data to a cookie file for farther use.
 
     This method also return true if the login process happened successfully
     """
-    
+
     from stalker.ext import auth
-    
+
     if "user_id" not in auth.SESSION:
         session()
-    
+
     # username and password has been feed to the functiond
     if username and password:
-        
+
         user_obj = authenticate(username, password)
-        
+
         if user_obj is not None:
-            
+
             auth.SESSION['user_id'] = username
             auth.SESSION['password'] =  password
             auth.SESSION.save()
-            
+
             user_obj.last_login = datetime.datetime.now()
             db.session.commit()
 
-	    return True
-    	else:
-	    return False
+            return True
+        else:
+            return False
 
     # the username and password should be given from cookie file
     else:
         if auth.SESSION is not None:
-            
+
             username = auth.SESSION['user_id']
             password = auth.SESSION['password']
-            
+
             user_obj = authenticate(username,password)
             if user_obj is not None:
                 auth.SESSION.save()
                 user_obj.last_login = datetime.datetime.now()
                 db.session.commit()
 
-		return True
-	    else:
-		return False
-	else:
-		return False
+                return True
+            else:
+                return False
+        else:
+            return False
 
 
 #----------------------------------------------------------------------
@@ -152,19 +152,19 @@ def authenticate(username="", password=""):
 
     There needs to be a already setup database for the authentication to hapen.
     """
-    
+
 
     user_obj = None
-    
+
     # check if the database is setup
     if db.session == None:
         raise error.LoginError("stalker is not connected to any db right now, "
                                "use stalker.db.setup(), to setup the default"
                                "db")
-    	
+
     # try to get the given user
     user_obj = db.session.query(User).filter_by(name=username).first()
-    
+
     if user_obj != None and user_obj.password != password:
         return None
     else:
@@ -177,7 +177,7 @@ def logout():
     """removes the current session
     """
     from stalker.ext import auth
-    
+
     try:
         auth.SESSION.delete()
         auth.SESSION.clear()
@@ -186,11 +186,11 @@ def logout():
 
 #----------------------------------------------------------------------
 def set_password(password_in):
-	"""a function to encrypt password of the user
-	"""
-	
-	
-	return password_in
+    """a function to encrypt password of the user
+    """
+
+
+    return password_in
 
 
 

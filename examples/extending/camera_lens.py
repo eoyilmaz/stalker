@@ -28,7 +28,7 @@ information:
  * The web page of the product if available
 
 To make this example simple and to not introduce the
-:class:`~stakler.core.models.mixin.ReferenceMixin` in this example, which is
+:class:`~stalker.core.models.mixin.ReferenceMixin` in this example, which is
 explained in other examples, we are going to use simple STRINGs for the web
 page links.
 

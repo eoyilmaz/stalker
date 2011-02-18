@@ -33,6 +33,7 @@ Inheritance Diagram
      stalker.core.models.Structure
      stalker.core.models.Tag
      stalker.core.models.Task
+     stalker.core.models.TaskType
      stalker.core.models.TypeEntity
      stalker.core.models.TypeTemplate
      stalker.core.models.User

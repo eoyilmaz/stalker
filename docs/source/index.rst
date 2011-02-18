@@ -57,7 +57,6 @@ Summary
    stalker.core.models.LoginError
    stalker.core.models.Message
    stalker.core.models.Note
-   stalker.core.models.PipelineStep
    stalker.core.models.Project
    stalker.core.models.ProjectType
    stalker.core.models.ReferenceMixin
@@ -72,6 +71,7 @@ Summary
    stalker.core.models.Structure
    stalker.core.models.Tag
    stalker.core.models.Task
+   stalker.core.models.TaskType
    stalker.core.models.TypeEntity
    stalker.core.models.TypeTemplate
    stalker.core.models.User

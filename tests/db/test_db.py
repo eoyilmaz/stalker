@@ -20,6 +20,7 @@ from stalker.db import tables
 from stalker.ext import auth
 from stalker.core.models import (
     Asset,
+    AssetType,
     AssetBase,
     Booking,
     Comment,
@@ -30,17 +31,20 @@ from stalker.core.models import (
     Group,
     ImageFormat,
     Link,
+    LinkType,
     Note,
-    PipelineStep,
     Project,
+    ProjectType,
     Repository,
     Sequence,
     Shot,
-    Status, StatusList,
+    Status,
+    StatusList,
     Structure,
     Tag,
     Task,
-    AssetType, LinkType, ProjectType, TypeTemplate,
+    TaskType,
+    TypeTemplate,
     User,
     Version
 )
@@ -609,7 +613,7 @@ class DatabaseModelsTester(unittest.TestCase):
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create a couple of PipelineStep objects
-        pStep1 = PipelineStep(
+        tType1 = TaskType(
             name="Rigging",
             description="This is where a character asset is rigged",
             created_by=admin,
@@ -617,7 +621,7 @@ class DatabaseModelsTester(unittest.TestCase):
             code="RIG"
         )
         
-        pStep2 = PipelineStep(
+        tType2 = TaskType(
             name="Lighting",
             description="lighting done in this stage, don't mix it with \
             shading",
@@ -632,7 +636,7 @@ class DatabaseModelsTester(unittest.TestCase):
             "description": "this is a test asset type",
             "created_by": admin,
             "updated_by": admin,
-            "steps": [pStep1, pStep2],
+            "task_types": [tType1, tType2],
         }
         
         aType = AssetType(**kwargs)
@@ -645,10 +649,10 @@ class DatabaseModelsTester(unittest.TestCase):
         aType_DB = db.session.query(AssetType). \
                  filter_by(name=kwargs["name"]).first()
         
-        for i, pStep_DB in enumerate(aType_DB.steps):
-            self.assertEquals(aType.steps[i].name, pStep_DB.name)
-            self.assertEquals(aType.steps[i].description, pStep_DB.description) 
-        
+        #for i, pStep_DB in enumerate(aType_DB.steps):
+            #self.assertEquals(aType.steps[i].name, pStep_DB.name)
+            #self.assertEquals(aType.steps[i].description, pStep_DB.description)
+        self.assertEquals(aType, aType_DB)
         
     
     
@@ -960,11 +964,11 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persistence_PipelineStep(self):
-        """testing the persistence of PipelineStep
+    def test_persistence_TaskType(self):
+        """testing the persistence of TaskType
         """
         
-        # create a new PipelineStep
+        # create a new TaskType
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         kwargs = {
@@ -975,19 +979,20 @@ class DatabaseModelsTester(unittest.TestCase):
             "code": "RNDR"
         }
         
-        pStep = PipelineStep(**kwargs)
+        tType = TaskType(**kwargs)
         
         # save it to database
-        db.session.add(pStep)
+        db.session.add(tType)
         
         # retrieve it back
-        pStep_DB = db.session.query(PipelineStep). \
+        tType_DB = db.session.query(TaskType). \
                  filter_by(name=kwargs["name"]). \
                  filter_by(description=kwargs["description"]). \
                  first()
         
         # lets compare it
-        self.assertEquals(pStep.code, pStep_DB.code)
+        #self.assertEquals(pStep.code, pStep_DB.code)
+        self.assertEquals(tType, tType_DB)
     
     
     
@@ -1293,14 +1298,14 @@ class DatabaseModelsTester(unittest.TestCase):
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         # create pipeline steps for character
-        modeling_pStep = PipelineStep(
+        modeling_tType = TaskType(
             name="Modeling",
             description="This is the step where all the modeling job is done",
             code="MODEL",
             created_by=admin
         )
         
-        animation_pStep = PipelineStep(
+        animation_tType = TaskType(
             name="Animation",
             description="This is the step where all the animation job is " + \
                         "done it is not limited with characters, other " + \
@@ -1315,7 +1320,7 @@ class DatabaseModelsTester(unittest.TestCase):
             description="This is the asset type which covers animated " + \
                         "charactes",
             created_by=admin,
-            steps= [modeling_pStep, animation_pStep]
+            task_types= [modeling_tType, animation_tType]
         )
         
         # create a new type template for character assets
@@ -1359,8 +1364,17 @@ class DatabaseModelsTester(unittest.TestCase):
             "reference_template": [imageReferenceTemplate]
         }
         
-        # persist it to the database
-        self.fail("test is not implemented yet")
+        new_structure = Structure(**kwargs)
+        
+        db.session.add(new_structure)
+        db.session.commit()
+        
+        new_structure_DB = db.query(Structure).\
+                         filter_by(name=kwargs["name"]).first()
+        
+        self.assertEquals(new_structure, new_structure_DB)
+        
+        #self.fail("test is not implemented yet")
     
     
     

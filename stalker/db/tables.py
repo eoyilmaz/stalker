@@ -293,9 +293,9 @@ assetTypes = Table(
 )
 
 
-# ASSETTYPE_PIPELINE_STEPS
-assetType_pipelineSteps = Table(
-    "assetType_pipelineSteps", metadata,
+# ASSETTYPE_TASKTYPES
+assetType_taskTypes = Table(
+    "assetType_taskTypes", metadata,
     Column(
         "assetType_id",
         Integer,
@@ -304,17 +304,17 @@ assetType_pipelineSteps = Table(
     ),
     
     Column(
-        "pipelineStep_id",
+        "taskType_id",
         Integer,
-        ForeignKey("pipelineSteps.id"),
+        ForeignKey("taskTypes.id"),
         primary_key=True,
     ),
 )
 
 
-# PIPELINESTEPS
-pipelineSteps = Table(
-    "pipelineSteps", metadata,
+# TASKTYPES
+taskTypes = Table(
+    "taskTypes", metadata,
     Column(
         "id",
         Integer,
@@ -329,19 +329,10 @@ pipelineSteps = Table(
 # TYPETEMPLATES
 typeTemplates = Table(
     "typeTemplates", metadata,
-    Column(
-        "id",
-        Integer,
-        ForeignKey("entities.id"),
-        primary_key=True,
-    ),
+    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
     Column("path_code", String),
     Column("file_code", String),
-    Column(
-        "type_id",
-        Integer,
-        ForeignKey("typeEntities.id"),
-    ),
+    Column("type_id", Integer, ForeignKey("typeEntities.id")),
 )
 
 
