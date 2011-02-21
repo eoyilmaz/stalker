@@ -4,6 +4,8 @@ Inheritance Diagram
 ===================
 
 .. inheritance-diagram::
+     stalker.core.errors.LoginError
+     stalker.core.errors.DBError
      stalker.core.models.Asset
      stalker.core.models.AssetBase
      stalker.core.models.AssetType
@@ -15,10 +17,8 @@ Inheritance Diagram
      stalker.core.models.ImageFormat
      stalker.core.models.Link
      stalker.core.models.LinkType
-     stalker.core.models.LoginError
      stalker.core.models.Message
      stalker.core.models.Note
-     stalker.core.models.PipelineStep
      stalker.core.models.Project
      stalker.core.models.ProjectType
      stalker.core.models.ReferenceMixin

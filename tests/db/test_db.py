@@ -18,6 +18,7 @@ from stalker import utils
 from stalker import db
 from stalker.db import tables
 from stalker.ext import auth
+from stalker.core.errors import LoginError, DBError
 from stalker.core.models import (
     Asset,
     AssetType,
@@ -27,7 +28,6 @@ from stalker.core.models import (
     Department,
     Entity,
     SimpleEntity,
-    LoginError,
     Group,
     ImageFormat,
     Link,
@@ -1558,8 +1558,8 @@ class ExamplesTester(unittest.TestCase):
         """
         
         # setup the database
-        clear_mappers()
-        db.__mappers__ = []
+        #clear_mappers()
+        #db.__mappers__ = []
     
     
     
@@ -1569,17 +1569,18 @@ class ExamplesTester(unittest.TestCase):
         class
         """
         
-        clear_mappers()
-        db.__mappers__ = []
+        #clear_mappers()
+        #db.__mappers__ = []
         
         # the actual test
         from examples.extending import great_entity
         defaults.MAPPERS.append("examples.extending.great_entity")
         defaults.CORE_MODEL_CLASSES.append(
-            "examples.extending.great_entity.GreatEntity")
+            "examples.extending.great_entity.GreatEntity"
+        )
         
         #db.setup("sqlite:////tmp/mixin_test.db")
-        db.setup("sqlite://")
+        db.setup()
         
         newGreatEntity = great_entity.GreatEntity(name="test")
         db.session.add(newGreatEntity)
@@ -1612,18 +1613,18 @@ class ExamplesTester(unittest.TestCase):
     def test_StatusMixin_setup(self):
         """testing if the StatusMixin can be correctly setup with a new class
         """
-        clear_mappers()
-        db.__mappers__ = []
+        #clear_mappers()
+        #db.__mappers__ = []
         
         # the actual test
         from examples.extending import statused_entity
-
+        
         defaults.MAPPERS.append("examples.extending.statused_entity")
         defaults.CORE_MODEL_CLASSES.append(
             "examples.extending.statused_entity.NewStatusedEntity")
         
         #db.setup("sqlite:////tmp/mixin_test.db")
-        db.setup("sqlite://")
+        db.setup()
         
         newStatusList = StatusList(
             name="A Status List for testing StatusMixin",

@@ -10,7 +10,7 @@ Whenever stalker.db or something under it imported, the
 import sqlalchemy
 from stalker.conf import defaults
 from stalker import utils
-from stalker.core.models import LoginError, User, Department
+from stalker.core.models import User, Department
 
 
 
@@ -58,8 +58,9 @@ def setup(database=None, mappers=[]):
         database = defaults.DATABASE
     
     # create engine
-    db.engine = sqlalchemy.create_engine(database,
-                                         **defaults.DATABASE_ENGINE_SETTINGS)
+    db.engine = sqlalchemy.create_engine(
+        database,**defaults.DATABASE_ENGINE_SETTINGS
+    )
     
     # extend the default mappers with the given mappers list
     if len(mappers):
@@ -152,10 +153,12 @@ def __create_mappers__(mappers):
         return
     
     for _mapper in mappers:
-        exec("import " + _mapper)
-        exec(_mapper + ".setup()")
+        if _mapper not in db.__mappers__:
+            exec("import " + _mapper)
+            exec(_mapper + ".setup()")
     
-    db.__mappers__ = mappers
+    db.__mappers__ = []
+    db.__mappers__.extend(mappers)
 
 
 

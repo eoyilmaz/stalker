@@ -42,6 +42,9 @@ Summary
    stalker.db.query
    stalker.db.session
    stalker.db.setup
+   stalker.core.errors
+   stalker.core.errors.LoginError
+   stalker.core.errors.DBError
    stalker.core.models
    stalker.core.models.Asset
    stalker.core.models.AssetBase
@@ -54,7 +57,6 @@ Summary
    stalker.core.models.ImageFormat
    stalker.core.models.Link
    stalker.core.models.LinkType
-   stalker.core.models.LoginError
    stalker.core.models.Message
    stalker.core.models.Note
    stalker.core.models.Project
