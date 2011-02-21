@@ -10,16 +10,14 @@ the database without login.
 The user information is going to be used in the database to store who created,
 updated, read or delete the data.
 
-There are three functions to log a user in, first one is
-:func:`stalker.ext.auth.session` that create the session and if there where
-user entry in session it return true else return false, the second one is
-:func:`stalker.ext.auth.authenticate`, which accepts username and password and
-returns a :class:`stalker.core.models.User` object::
+There are two main functions to be used in the process of login. The first one
+is :func:`stalker.ext.auth.authenticate`, which accepts username and password
+as strings and returns a :class:`stalker.core.models.User` object::
 
     from stalker.ext import auth
     user_obj = auth.authenticate("username", "password")
 
-The third one is the :func:`stalker.ext.auth.login` which uses a given
+The second one is the :func:`stalker.ext.auth.login` which uses a given
 :class:`stalker.core.models.User` object and creates a Beaker Session and
 stores the logged in user id in that session.
 
@@ -32,21 +30,23 @@ The basic usage of the system is as follows::
   from stalker.ext import auth
   from stalker.core.models import User
 
-  if "user_id" in auth.SESSION:
+  if auth.SESSION_KEY in auth.SESSION:
       # user has login data 
       auth.login()
   else
       #user doesn't have login data get them with login prompt
-      get_user_data()
+      username, password = get_user_data()
       auth.login(username, password)
 
 The module also introduces a decorator called
 :func:`stalker.ext.auth.login_required` to help adding the authentication
-functionality to any function or method. There is also another decorator called
+functionality to any function or method.
+
+There is also another decorator called
 :func:`stalker.ext.auth.premission_required` to check if the logged in user is
 in the given permission group.
 
-There are also two utility functions two check and set passwords.
+There are also two utility functions two check and set encrypted passwords.
 :func:`stalker.ext.auth.check_password` and
 :func:`stalker.ext.auth.set_password`.
 """
@@ -123,48 +123,7 @@ def login(user=None):
     
     from stalker.ext import auth
     
-    #if "user_id" not in auth.SESSION:
-        #create_session()
-    
-    #if username and password:
-        
-        #user_obj = authenticate(username, password)
-        
-        #if user_obj is not None:
-            
-            #auth.SESSION['user_id'] = username
-            #auth.SESSION['password'] =  password
-            #auth.SESSION.save()
-            
-            #user_obj.last_login = datetime.datetime.now()
-            #db.session.commit()
-            
-            #return True
-        #else:
-            #return False
-        
-    ## the username and password should be given from cookie file
-    #else:
-        #if auth.SESSION is not None:
-            
-            #username = auth.SESSION['user_id']
-            #password = auth.SESSION['password']
-            
-            #user_obj = authenticate(username, password)
-            #if user_obj is not None:
-                #auth.SESSION.save()
-                #user_obj.last_login = datetime.datetime.now()
-                #db.session.commit()
-                
-                #return True
-            #else:
-                #return False
-        #else:
-            #return False
-    
-    
     # log the user if the current session id matches the given user id
-    
     if user is None:
         try:
             logged_user_id = auth.SESSION[auth.SESSION_KEY]
@@ -178,6 +137,10 @@ def login(user=None):
     
     if not isinstance(user, User):
         raise ValueError("user must be a stalker.core.models.User instance")
+    
+    if db.session is None:
+        raise DBError("No database connection is setup yet, please use "
+                      "stalker.db.setup to setup a database")
     
     user.last_login = datetime.datetime.now()
     db.session.commit()
@@ -218,8 +181,6 @@ def authenticate(username="", password=""):
         raise LoginError(error_msg)
     
     if not check_password(password, user_obj.password):
-        print password
-        print user_obj.password
         raise LoginError(error_msg)
     
     return user_obj

@@ -135,6 +135,25 @@ class AuthTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_login_with_no_sesssion_and_a_User(self):
+        """testing if a DBError will be raised when there is no database set
+        but a correct User object is supplied to the login function
+        """
+        
+        # clear the db session
+        db.session = None
+        
+        # create a new user
+        new_user = User(login_name="testuser", first_name="test",
+                        last_name="test", email="test@test.com",
+                        password="2134")
+        
+        # try to login with this user and expect a DBError
+        self.assertRaises(DBError, auth.login, new_user)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_authenticate_without_a_db(self):
         """testing if a ValueError will be raised whne there are no db setup
         yet
@@ -174,6 +193,22 @@ class AuthTester(mocker.MockerTestCase):
         self.assertRaises(LoginError,
                           auth.authenticate,
                           "non_existent", "user")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_authenticate_correct_user_wrong_password(self):
+        """testing if a LoginError will be raised when the user name is correct
+        but the password is wrong
+        """
+        
+        # use the admin with wrong password
+        db.setup()
+        
+        self.assertRaises(LoginError,
+                          auth.authenticate,
+                          defaults.ADMIN_NAME,
+                          "wrong password")
     
     
     
