@@ -47,7 +47,6 @@ Summary
    stalker.core.errors.DBError
    stalker.core.models
    stalker.core.models.Asset
-   stalker.core.models.AssetBase
    stalker.core.models.AssetType
    stalker.core.models.Booking
    stalker.core.models.Comment

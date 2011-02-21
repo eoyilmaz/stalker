@@ -509,32 +509,12 @@ tasks = Table(
 
 
 
-# ASSETBASE_TASKS
-assetBase_tasks = Table(
-    "assetBase_tasks", metadata,
-    Column(
-        "assetBase_id",
-        Integer,
-        ForeignKey("assetBases.id"),
-        primary_key=True
-    ),
-    Column(
-        "task_id",
-        Integer,
-        ForeignKey("tasks.id"),
-        primary_key=True
-    )
-)
-
-
-
-# ASSETBASE
-assetBases = Table(
-    "assetBases", metadata,
+# ASSET
+assets = Table(
+    "assets", metadata,
     Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
     Column("type_id", Integer, ForeignKey("assetTypes.id")),
 )
-
 
 
 # SHOT - WARNING: It is a temprorary table, will be completed later

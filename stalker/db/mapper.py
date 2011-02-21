@@ -8,10 +8,10 @@ You can use your also use your own mappers. See the docs.
 
 from sqlalchemy.orm import mapper, relationship, backref, synonym
 from stalker.db import tables
-from stalker.db.mixin import ReferenceMixinDB, StatusMixinDB, ScheduleMixinDB
+from stalker.db.mixin import (ReferenceMixinDB, StatusMixinDB, ScheduleMixinDB,
+                              TaskMixinDB)
 from stalker.core.models import (
     Asset,
-    AssetBase,
     AssetType,
     Booking,
     Comment,
@@ -496,38 +496,38 @@ def setup():
     
     
     
-    # AssetBase
-    assetBase_mapper_arguments = dict(
-        inherits=AssetBase.__base__,
-        polymorphic_identity=AssetBase.entity_type,
-        inherit_condition=tables.assetBases.c.id==tables.entities.c.id,
+    # Asset
+    # WARNING: Not completely implemented
+    asset_mapper_arguments = dict(
+        inherits=Asset.__base__,
+        polymorphic_identity=Asset.entity_type,
+        inherit_condition=tables.assets.c.id==tables.entities.c.id,
         properties={
             "_type": relationship(
                 AssetType,
                 primaryjoin=\
-                    tables.assetBases.c.type_id==tables.assetTypes.c.id
+                    tables.assets.c.type_id==tables.assetTypes.c.id
             ),
             "type": synonym("_type"),
-            "_tasks": relationship(
-                Task,
-                secondary=tables.assetBase_tasks,
-            ),
-            "tasks": synonym("_tasks"),
         }
     )
     
     
     # mix it with ReferenceMixin
-    ReferenceMixinDB.setup(AssetBase, tables.assetBases,
-                           assetBase_mapper_arguments)
+    ReferenceMixinDB.setup(Asset, tables.assets,
+                           asset_mapper_arguments)
     
     # then with StatusMixin
-    StatusMixinDB.setup(AssetBase, tables.assetBases,
-                        assetBase_mapper_arguments)
+    StatusMixinDB.setup(Asset, tables.assets,
+                        asset_mapper_arguments)
+    
+    # then with TaskMixin
+    TaskMixinDB.setup(Asset, tables.assets,
+                      asset_mapper_arguments)
     
     # complete mapping
-    mapper(AssetBase, tables.assetBases,
-           **assetBase_mapper_arguments)
+    mapper(Asset, tables.assets,
+           **asset_mapper_arguments)
     
     
     

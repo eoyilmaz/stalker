@@ -81,6 +81,15 @@ v0.1.1.a7
    new mappers without deleting the previous
    :const:`stalker.conf.defaults.MAPPERS` list.
 
+ * Introduced the :class:`~stalker.core.models.TaskMixin` which gives the
+   ability to connect to a list of tasks to the mixed in class. Also added the
+   mapper setup for this mixin.
+
+ * Removed the :class:`~stalker.core.models.AssetType` and derived the
+   :class:`~stalker.core.models.Shot` and :class:`~stalker.core.models.Asset`
+   classes from :class:`~stalker.core.models.Entity`.
+ 
+
 v0.1.1.a6
 ---------
 

@@ -14,7 +14,7 @@ from sqlalchemy import (
 )
 from stalker import db
 from stalker.db import tables
-from stalker.core.models import Link, Status, StatusList
+from stalker.core.models import Link, Status, StatusList, Task
 
 
 
@@ -34,27 +34,28 @@ class ReferenceMixinDB(object):
     #----------------------------------------------------------------------
     @classmethod
     def setup(cls, class_, class_table, mapper_arguments={}):
-        """creates the necessary tables and properties for the mappers for the
-        mixed in class
+        """Creates the necessary tables and properties for the mappers for the mixed in class.
         
-        use the returning dictionary (mapper_arguments) in your mapper
+        Use the returning dictionary (mapper_arguments) in your mapper.
         
-        :param class_: the mixed in class, in other words the class which will
+        :param class_: The mixed in class, in other words the class which will
           be extended with the mixin functionalities
          
-        :param class_table: the table holding the information about the class
+        :param class_table: The table holding the information about the class
         
-        :param mapper_arguments: incoming mapper arugments for the
+        :param mapper_arguments: Incoming mapper arugments for the
           SQLAlchemy.Orm.Mapper, it will be updated with the properties of the
           current mixin
+        
+        :type mapper_arguments: dict
         
         :returns: a dictionary holding the mapper_arguments
         """
         
         class_name = class_.__name__
         
-        # there is no extra columns in the base table so we don't need to update
-        # the given class_table
+        # there is no extra columns in the base table so we don't need to
+        # update the given class_table
         
         # use the given class_name and the class_table
         secondary_table_name = class_name.lower() + "_references"
@@ -122,19 +123,20 @@ class StatusMixinDB(object):
     #----------------------------------------------------------------------
     @classmethod
     def setup(cls, class_, class_table, mapper_arguments={}):
-        """creates the necessary tables and properties for the mappers for the
-        mixed in class
+        """Creates the necessary tables and properties for the mappers for the mixed in class.
         
-        use the returning dictionary (mapper_arguments) in your mapper
+        Use the returning dictionary (mapper_arguments) in your mapper.
         
-        :param class_: the mixed in class, in other words the class which will
+        :param class_: The mixed in class, in other words the class which will
           be extended with the mixin functionalities
          
-        :param class_table: the table holding the information about the class
+        :param class_table: The table holding the information about the class
         
-        :param mapper_arguments: incoming mapper arugments for the
+        :param mapper_arguments: Incoming mapper arugments for the
           SQLAlchemy.Orm.Mapper, it will be updated with the properties of the
           current mixin
+        
+        :type mapper_arguments: dict
         
         :returns: a dictionary holding the mapper_arguments
         """
@@ -195,17 +197,16 @@ class ScheduleMixinDB(object):
     #----------------------------------------------------------------------
     @classmethod
     def setup(cls, class_, class_table, mapper_arguments={}):
-        """creates the necessary tables and properties for the mappers for the
-        mixed in class
+        """Creates the necessary tables and properties for the mappers for the mixed in class.
         
-        use the returning dictionary (mapper_arguments) in your mapper
+        Use the returning dictionary (mapper_arguments) in your mapper.
         
-        :param class_: the mixed in class, in other words the class which will
+        :param class_: The mixed in class, in other words the class which will
           be extended with the mixin functionalities
          
-        :param class_table: the table holding the information about the class
+        :param class_table: The table holding the information about the class
         
-        :param mapper_arguments: incoming mapper arugments for the
+        :param mapper_arguments: Incoming mapper arugments for the
           SQLAlchemy.Orm.Mapper, it will be updated with the properties of the
           current mixin
         
@@ -239,3 +240,98 @@ class ScheduleMixinDB(object):
             mapper_arguments["properties"] = new_properties
         
         return mapper_arguments
+
+
+
+
+
+
+########################################################################
+class TaskMixinDB(object):
+    """A helper class for TaskMixin table and mapper setup.
+    
+    Helps setting up tables and mappers for classes mixed in with
+    :class:`stalker.core.models.TaskMixin`
+    
+    For now there is no exmaple for it, but it is pretty similiar to the other
+    mixin classes.
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    @classmethod
+    def setup(cls, class_, class_table, mapper_arguments={}):
+        """Creates the necessary tables and properties for the mappers for the mixed in class.
+        
+        Use the returning dictionary (mapper_arguments) in your mapper.
+        
+        :param class_: The mixed in class, in other words the class which will
+          be extended with the mixin functionalities
+         
+        :param class_table: The table holding the information about the class
+        
+        :param mapper_arguments: Incoming mapper arugments for the
+          SQLAlchemy.Orm.Mapper, it will be updated with the properties of the
+          current mixin
+        
+        :type mapper_arguments: dict
+        
+        :returns: a dictionary holding the mapper_arguments
+        """
+        
+        class_name = class_.__name__
+        
+        # there is no extra columns in the base table so we don't need to
+        # update the given class_table
+        
+        # use the given class_name and the class_table
+        secondary_table_name = class_name.lower() + "_tasks"
+        secondary_table = None
+        
+        # check if the table is already defined
+        if secondary_table_name not in db.metadata:
+            secondary_table = Table(
+                secondary_table_name, db.metadata,
+                Column(
+                    class_name.lower() + "_id",
+                    Integer,
+                    ForeignKey(class_table.c.id),
+                    primary_key=True,
+                ),
+                
+                Column(
+                    "task_id",
+                    Integer,
+                    ForeignKey(tables.tasks.c.id),
+                    primary_key=True,
+                )
+            )
+        else:
+            secondary_table = db.metadata.tables[secondary_table_name]
+        
+        new_properties = {
+            "_tasks": relationship(
+                Task,
+                secondary=secondary_table,
+                primaryjoin=\
+                    class_table.c.id==\
+                    eval("secondary_table.c." + class_name.lower() + "_id"),
+                secondaryjoin=\
+                    secondary_table.c.task_id==\
+                    tables.tasks.c.id,
+            ),
+            "tasks": synonym("_tasks"),
+        }
+        
+        try:
+            mapper_arguments["properties"].update(new_properties)
+        except KeyError:
+            mapper_arguments["properties"] = new_properties
+        
+        return mapper_arguments
+
+
+
+
+

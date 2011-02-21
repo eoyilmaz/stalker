@@ -1256,16 +1256,8 @@ class ScheduleMixin(object):
 
 
 ########################################################################
-class AssetBase(Entity, ReferenceMixin, StatusMixin):
-    """The base class for :class:`~stalker.core.models.Shot` and :class:`~stalker.core.models.Asset` classes.
-    
-    This the base class for :class:`stalker.core.models.Shot` and
-    :class:`stalker.core.models.Asset` classes which gathers the common
-    attributes of these two entities.
-    
-    :param type: The type of the asset or shot. The default value is None.
-    
-    :type type: :class:`stalker.core.models.AssetType`
+class TaskMixin(object):
+    """Gives the abilitiy to connect to a list of taks.
     
     :param list tasks: The list of tasks. Should be a list of
       :class:`stalker.core.models.Task` instances. Default value is an
@@ -1274,11 +1266,13 @@ class AssetBase(Entity, ReferenceMixin, StatusMixin):
     
     
     
+    _tasks = []
+    
+    
+    
     #----------------------------------------------------------------------
-    def __init__(self, type=None, tasks=[], **kwargs):
-        super(AssetBase, self).__init__(**kwargs)
+    def __init__(self, tasks=[]):
         self._tasks = self._validate_tasks(tasks)
-        self._type = self._validate_type(type)
     
     
     
@@ -1303,20 +1297,6 @@ class AssetBase(Entity, ReferenceMixin, StatusMixin):
     
     
     #----------------------------------------------------------------------
-    def _validate_type(self, type_in):
-        """validates the given type_in value
-        """
-        
-        if type_in is not None:
-            if not isinstance(type_in, AssetType):
-                raise ValueError("type should be an instance of "
-                                 "stalker.core.models.AssetType")
-        
-        return type_in
-    
-    
-    
-    #----------------------------------------------------------------------
     def tasks():
         def fget(self):
             return self._tasks
@@ -1329,6 +1309,43 @@ class AssetBase(Entity, ReferenceMixin, StatusMixin):
         return locals()
     
     tasks = property(**tasks())
+
+
+
+
+
+
+########################################################################
+class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
+    """The Asset class is the whole idea behind Stalker.
+    
+    WARNING: NotImplemented yet!
+    
+    :param type: The type of the asset or shot. The default value is None.
+    
+    :type type: :class:`stalker.core.models.AssetType`
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, type=None, tasks=[], **kwargs):
+        super(Asset, self).__init__(**kwargs)
+        self._type = self._validate_type(type)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_type(self, type_in):
+        """validates the given type_in value
+        """
+        
+        if type_in is not None:
+            if not isinstance(type_in, AssetType):
+                raise ValueError("type should be an instance of "
+                                 "stalker.core.models.AssetType")
+        
+        return type_in
     
     
     
@@ -1352,22 +1369,9 @@ class AssetBase(Entity, ReferenceMixin, StatusMixin):
         """the equality operator
         """
         
-        return super(AssetBase, self).__eq__(other) and \
-               isinstance(other, AssetBase) and self.type == other.type
+        return super(Asset, self).__eq__(other) and \
+               isinstance(other, Asset) and self.type == other.type
 
-
-
-
-
-
-########################################################################
-class Asset(AssetBase):
-    """The Asset class is the whole idea behind Stalker.
-    """
-    
-    
-    
-    pass
 
 
 
@@ -1977,48 +1981,6 @@ class Note(SimpleEntity):
         return super(Note, self).__eq__(other) and \
                isinstance(other, Note) and \
                self.content == other.content
-
-
-
-
-
-
-########################################################################
-class TaskType(TypeEntity):
-    """Defines the type of the a :class:`~stalker.core.models.Task`.
-    
-    A TaskType object represents the general steps which are used around the
-    studio. A couple of examples are:
-    
-      * Design
-      * Model
-      * Rig
-      * Fur
-      * Shading
-      * Previs
-      * Match Move
-      * Animations
-      
-      etc.
-    
-    Doesn't add any new parameter for its parent class.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super(TaskType, self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(TaskType, self).__eq__(other) and \
-               isinstance(other, TaskType)
 
 
 
@@ -2793,17 +2755,15 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
 
 
 ########################################################################
-class Shot(AssetBase):
+class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     """Manage Shot related data.
     
-    WARNING: (obviously) not implemented yet!
-    
     Because most of the shots in different projects are going to have the same
-    name, which is a kind of code like SH001, SH012A etc., and in Stalker you
+    name, which is a kind of a code like SH001, SH012A etc., and in Stalker you
     can not have two entities with the same name if their types are also
     matching, to guarantee all the shots are going to have different names the
     :attr:`~stalker.core.models.Shot.name` attribute of the Shot instances are
-    automatically set to a generated uuid sequence.
+    automatically set to a randomly generated uuid4 sequence.
     
     But there is no such rule for the code attribute, which should be used to
     give shot codes to individual shots.
@@ -3336,7 +3296,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 
 
 
-
 ########################################################################
 class AssetType(TypeEntity):
     """Holds the information about the asset types.
@@ -3364,9 +3323,7 @@ class AssetType(TypeEntity):
     :class:`~stalker.core.models.AssetType` and the related
     :class:`~stalker.core.models.TaskType`\ s will only be used to create a
     list of :class:`~stalker.core.models.Task`\ s intially with the
-    :class:`~stalker.core.models.AssetBase` (thus for the inherited classes
-    like :class:`~stalker.core.models.Asset` and
-    :class:`~stalker.core.models.Shot`) it self.
+    :class:`~stalker.core.models.Asset` it self.
     
     :param task_types: A list of :class:`~stalker.core.models.TaskType`
       instances showing the initial :class:`~stalker.core.models.TaskType`\ s
@@ -3501,6 +3458,48 @@ class ProjectType(TypeEntity):
                isinstance(other, ProjectType)
         
 
+
+
+
+
+
+
+########################################################################
+class TaskType(TypeEntity):
+    """Defines the type of the a :class:`~stalker.core.models.Task`.
+    
+    A TaskType object represents the general steps which are used around the
+    studio. A couple of examples are:
+    
+      * Design
+      * Model
+      * Rig
+      * Fur
+      * Shading
+      * Previs
+      * Match Move
+      * Animations
+      
+      etc.
+    
+    Doesn't add any new parameter for its parent class.
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(TaskType, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(TaskType, self).__eq__(other) and \
+               isinstance(other, TaskType)
 
 
 

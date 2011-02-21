@@ -50,7 +50,6 @@ MAPPERS = [
 
 CORE_MODEL_CLASSES = [
     "stalker.core.models.Asset",
-    "stalker.core.models.AssetBase",
     "stalker.core.models.Booking",
     "stalker.core.models.Comment",
     "stalker.core.models.Department",

@@ -22,7 +22,6 @@ from stalker.core.errors import LoginError, DBError
 from stalker.core.models import (
     Asset,
     AssetType,
-    AssetBase,
     Booking,
     Comment,
     Department,
@@ -549,15 +548,6 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of Asset
         """
         
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_persistence_AssetBase(self):
-        """testing the persistence of AssetBase
-        """
-        
         asset_type = AssetType(name="A new AssetType")
         
         status1 = Status(name="On Hold", code="OH")
@@ -578,29 +568,31 @@ class DatabaseModelsTester(unittest.TestCase):
         mock_task2.status_list = task_status_list
         mock_task3.status_list = task_status_list
         
-        assetBase_statusList = StatusList(
-            name="AssetBase Status List",
+        asset_statusList = StatusList(
+            name="Asset Status List",
             statuses=[status1, status2, status3],
-            target_entity_type=AssetBase.entity_type
+            target_entity_type=Asset.entity_type
         )
         
         kwargs = {
-            "name": "Test AssetBase",
-            "description": "This is a test AssetBase object",
+            "name": "Test Asset",
+            "description": "This is a test Asset object",
             "type": asset_type,
             "tasks": [mock_task1, mock_task2, mock_task3],
         }
         
-        asset_base = AssetBase(**kwargs)
-        asset_base.status_list = assetBase_statusList
+        asset_base = Asset(**kwargs)
+        asset_base.status_list = asset_statusList
         
         db.session.add(asset_base)
         db.session.commit()
         
-        asset_base_DB = db.query(AssetBase).\
+        asset_base_DB = db.query(Asset).\
                       filter_by(name=kwargs["name"]).one()
         
         self.assertEquals(asset_base, asset_base_DB)
+        
+        self.fail("test is not implemented completely yet")
     
     
     

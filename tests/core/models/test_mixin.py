@@ -6,7 +6,7 @@ import datetime
 import mocker
 from stalker.core.models import (SimpleEntity, ReferenceMixin, StatusMixin,
                                  ScheduleMixin, Link, LinkType, Status,
-                                 StatusList)
+                                 StatusList, Task, TaskMixin)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -762,6 +762,161 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         self.assertRaises(
             AttributeError, setattr, new_foo_entity, "duration", 10
         )
+
+
+
+
+
+
+########################################################################
+class TaskMixinTester(mocker.MockerTestCase):
+    """Tests the TaskMixin
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """setup the test
+        """
+        
+        self.mock_task1 = self.mocker.mock(Task)
+        self.mock_task2 = self.mocker.mock(Task)
+        self.mock_task3 = self.mocker.mock(Task)
+        
+        self.mocker.replay()
+        
+        self.kwargs = {
+            "tasks": [self.mock_task1, self.mock_task2, self.mock_task3],
+        }
+        
+        class BarClass(object):
+            pass
+        
+        class FooMixedInClass(BarClass, TaskMixin):
+            pass
+        
+        class FooMixedInClassWithInit(BarClass, TaskMixin):
+            def __init__(self):
+                pass
+        
+        self.FooMixedInClass = FooMixedInClass
+        self.FooMixedInClassWithInit = FooMixedInClassWithInit
+        
+        self.mock_foo_obj = FooMixedInClass(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_argument_is_None(self):
+        """testing if the tasks attribute will be set to empty list if tasks
+        argument is given as None
+        """
+        
+        self.kwargs["tasks"] = None
+        new_foo_obj = self.FooMixedInClass(**self.kwargs)
+        self.assertEquals(new_foo_obj.tasks, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_attribute_is_None(self):
+        """testing if the tasks attribute will be set to empty list when it is
+        set to None
+        """
+        
+        self.mock_foo_obj.tasks = None
+        self.assertEquals(self.mock_foo_obj.tasks, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_argument_is_not_a_list(self):
+        """testing if a ValueError will be raised when the tasks argument is
+        not a list
+        """
+        
+        test_values = [1, 1.2, "a str"]
+        
+        for test_value in test_values:
+            self.kwargs["tasks"] = test_value
+            self.assertRaises(ValueError, self.FooMixedInClass, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_attribute_is_not_a_list(self):
+        """testing if a ValueError will be raised when the tasks attribute is
+        tried to set to a non list object
+        """
+        
+        test_values = [1, 1.2, "a str"]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_foo_obj,
+                "tasks",
+                test_value
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_argument_is_a_list_of_other_objects_than_Task(self):
+        """testing if a ValueError will be raised when the items in the tasks
+        argument is not Task instance
+        """
+        
+        test_value = [1, 1.2, "a str", ["a", "list"]]
+        self.kwargs["tasks"] = test_value
+        self.assertRaises(ValueError, self.FooMixedInClass, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_attribute_is_set_to_a_list_of_other_objects_than_Task(self):
+        """testing if a ValueError will be raised when the items in the tasks
+        attribute is not Task instance
+        """
+        
+        test_value = [1, 1.2, "a str", ["a", "list"]]
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_foo_obj,
+            "tasks",
+            test_value
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_element_attributes_are_set_to_other_object_than_Task(self):
+        """testing if a ValueError will be raised when trying to set the
+        individual elements in the tasks attribute to other objects than a
+        Task instance
+        """
+        
+        test_values = [1, 1.2, "a str"]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                self.mock_foo_obj.tasks.__setitem__,
+                "0",
+                test_value
+            )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_attribute_is_instance_of_ValidatedList(self):
+        """testing if the tasks attribute is a ValidatedList instance
+        """
+        
+        self.assertIsInstance(self.mock_foo_obj.tasks, ValidatedList)
     
     
     
