@@ -636,11 +636,12 @@ class Entity(SimpleEntity):
 class TypeEntity(Entity):
     """The entry point for **Types**.
     
-    There are currently three Type classes in Stalker:
+    There are currently four Type classes in Stalker:
      
      * :class:`~stalker.core.models.AssetType`
      * :class:`~stalker.core.models.LinkType`
      * :class:`~stalker.core.models.ProjectType`
+     * :class:`~stalker.core.models.TaskType`
     
     All derives from :class:`stalker.core.models.TypeEntity`.
     
@@ -650,10 +651,13 @@ class TypeEntity(Entity):
     :class:`~stalker.core.models.LinkType` for
     :class:`~stalker.core.models.Link` and
     :class:`~stalker.core.models.ProjectType` for
-    :class:`~stalker.core.models.Project`\ .
+    :class:`~stalker.core.models.Project`\ and finaly
+    :class:`~stalker.core.models.TaskType` for
+    :class:`~stalker.core.more.Task`.
     
     By using these *type classes* you are able to let say create *Commercial*
-    projects, or create a *Character* assets and *Image* links.
+    projects, or create a *Character* assets, *Image* links or *Modeling*
+    tasks.
     
     One another use of the :class:`~stalker.core.models.TypeEntity` is, to
     group the instances deriving from the inherited classes, so any other

@@ -256,10 +256,9 @@ If you want to do changes in Stalker, the basic pipeline is as follows:
 
  * If there are conflicts where mercurial is waiting for you to solve them,
    solve the conflicts by using your text editor and opening the file which has
-   conflicts. You will see lines like ">>>>>>>>> their version" and
-   "<<<<<<<<<<<<< your version", showing the conflicting code. Clean the code
-   and save the file, and inform mercurial that you have resolved the conflicts
-   by::
+   conflicts. You will see lines like ">>>>>>> other" and "<<<<<<< local",
+   showing the conflicting code. Clean the code and save the file, and inform
+   mercurial that you have resolved the conflicts by::
 
      hg resolve -m the_conflicting_source_file.py
 
