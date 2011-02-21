@@ -3,9 +3,6 @@
 
 
 import mocker
-#import os
-#import tempfile
-#from beaker import session as beakerSession
 
 from stalker.conf import defaults
 from stalker import db
