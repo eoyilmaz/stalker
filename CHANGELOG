@@ -19,9 +19,10 @@ v0.1.1.a7
  * moved the :mod:`stalker.db.auth` to :mod:`stalker.ext.auth`
 
  * :class:`stalker.core.models.User` class now uses the
-   :func:`stalker.auth.set_password` and :func:`stalker.auth.check_password`
-   utility functions to handle passwords. The user passwords are now always
-   hidden, but not strongly encrypted.
+   :func:`stalker.ext.auth.set_password` and
+   :func:`stalker.ext.auth.check_password` utility functions to handle
+   passwords. The user passwords are now always hidden, but not strongly
+   encrypted.
 
  * The :func:`stalker.ext.auth.session` renamed to
    :func:`stalker.ext.auth.create_session` to reflect its functionality
@@ -35,7 +36,7 @@ v0.1.1.a7
      auth.create_session()
      
      # check if there is a user
-     if "user_id" in auth.SESSION:
+     if auth.SESSION_KEY in auth.SESSION:
          print "There is a logged in user"
      else:
          print "There is no logged in user"
@@ -57,16 +58,28 @@ v0.1.1.a7
 
  * Updated :ref:`contribute_toplevel`
 
- * Renamed the :class:`stalker.core.models.PipelineStep` to
-   :class:`stalker.core.models.TaskType` and changed the idea behind the
-   relation between :class:`stalker.core.models.AssetType` and
-   :class:`stalker.core.models.Task`
+ * Renamed the :class:`~stalker.core.models.PipelineStep` to
+   :class:`~stalker.core.models.TaskType` and changed the idea behind the
+   relation between :class:`~stalker.core.models.AssetType` and
+   :class:`~stalker.core.models.Task`
 
  * :class:`stalker.core.models.AssetType` classes
    :attr:`~stalker.core.models.AssetType.pipeline_steps` attribute has been
-   renamed to :attr:`~stalker.core.models.AssetType.task_template`
- 
- * fixed a little error in the mapper of :class:`stalker.core.models.Structure`
+   renamed to :attr:`~stalker.core.models.AssetType.task_types`
+
+ * Fixed a little error in the mapper of :class:`stalker.core.models.Structure`
+
+ * Re-implemented the :func:`stalker.ext.auth.login` function and updated the
+   tests accordingly.
+
+ * All the error classes in :mod:`stalker.core.models` moved to
+   :mod:`stalker.core.errors`
+
+ * Added a new error class called :class:`stalker.core.errors.DBError`
+
+ * Fixed a bug in :const:`stalker.db.__mappers__`, it is now possible to add
+   new mappers without deleting the previous
+   :const:`stalker.conf.defaults.MAPPERS` list.
 
 v0.1.1.a6
 ---------
