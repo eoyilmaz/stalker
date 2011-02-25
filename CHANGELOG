@@ -88,7 +88,12 @@ v0.1.1.a7
  * Removed the :class:`~stalker.core.models.AssetType` and derived the
    :class:`~stalker.core.models.Shot` and :class:`~stalker.core.models.Asset`
    classes from :class:`~stalker.core.models.Entity`.
- 
+
+ * Moved the mixin classes from :mod:`stalker.core.models` to
+   :mod:`stalker.core.mixins`
+
+ * :class:`~stalker.ext.validatedList.ValidatedList` now accepts string values
+   for the :param:`~stalker.ext.validatedList.ValidatedList.type_` arguments.
 
 v0.1.1.a6
 ---------

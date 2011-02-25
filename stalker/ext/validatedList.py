@@ -23,14 +23,19 @@ class ValidatedList(list):
     
     :param type\_: if given, the ValidatedList will accept only this type of
       objects. If both the list\_ and the type\_ arguments are given the the
-      type\_ will be used as the forced type.
+      type\_ will be used as the forced type. Can be a string showing the
+      absolute path of the type object.
     """
     
     
     #----------------------------------------------------------------------
     def __init__(self, list_=[], type_=None):
         
-        self.__type__ = type_
+        self.__type__ = None
+        
+        if type_ is not None:
+            self.__set_type__(type_)
+        
         self.__type_as_str__ = ""
         self.__error_message__ = ""
         
@@ -56,7 +61,37 @@ class ValidatedList(list):
         """sets the type which the list is allowed to work on
         """
         
-        self.__type__ = type_
+        # type_ can be string to ease circular imports
+        if isinstance(type_, (str, unicode)):
+            # get the class from the string
+            from stalker.utils import path_to_exec
+            exec_, module, object_ = path_to_exec(type_)
+            
+            #print exec_
+            #print module
+            #print object_
+            
+            if module != "":
+                # import the object
+                #print "import " + module
+                #exec("import " + module)
+                #exec(exec_)
+                imported_module = __import__(module, globals(),
+                                             locals(), [object_], -1)
+                
+                #print imported_module
+                #type_ = eval(object_)
+                type_ = eval("imported_module."+object_)
+            else:
+                #imported_module = __import__(object_, globals(),
+                                             #locals(), [], -1)
+                type_ = eval(object_)
+        
+        if isinstance(type_, type):
+            self.__type__ = type_
+        else:
+            self.__type__ = type(type_)
+        
         self.__type_as_str__ = str(self.__type__).split("'")[1]
         self.__error_message__ = "the type of the given value is not " + \
             "correct, please supply an %s instance" % self.__type_as_str__

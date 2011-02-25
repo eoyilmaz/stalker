@@ -48,7 +48,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___init__2(self):
+    def test___init___2(self):
         """testing initialization with a list of different kind of objects will
         reduce the list to a list containing the objects of the type of first
         element
@@ -64,7 +64,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___init__with_only_type_argument(self):
+    def test___init___with_only_type_argument(self):
         """testing initialization with the type argument sticks the type to
         given type
         """
@@ -84,7 +84,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___init__with_list_and_matching_type_argument(self):
+    def test___init___with_list_and_matching_type_argument(self):
         """testing initialization with a list and a type argument sticks the
         type to given type with the list elements is also matching the type
         """
@@ -104,7 +104,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___init__with_list_and_non_matching_type_argument(self):
+    def test___init___with_list_and_non_matching_type_argument(self):
         """testing initialization with a list and a type argument sticks the 
         type to given type with list elements is not matching the given type
         """
@@ -124,13 +124,31 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___init__with_list_and_non_mathcing_type_argument_2(self):
+    def test___init___with_list_and_non_mathcing_type_argument_2(self):
         """testing initialization with a list and non matching type will filter
         the non-matching elements in the list
         """
         
         vList1 = ValidatedList(["str", 1, 2.3, 2, 3, "another str", 4], int)
         self.assertEquals(vList1, [1, 2, 3, 4])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___init___with_string_type_argument(self):
+        """testing __init__ with string values for type_ argument
+        """
+        
+        test_list = ValidatedList([], "str")
+        
+        self.assertRaises(ValueError, test_list.append, 1)
+        test_list.append("a str")
+        
+        # a real world example
+        test_list2 = ValidatedList([], "datetime.datetime")
+        import datetime
+        
+        self.assertEquals(test_list2.__type__, datetime.datetime)
     
     
     
@@ -218,8 +236,9 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_append(self):
-        """testing append method
+    def test_append_with_wrong_type(self):
+        """testing if a ValueError will be raised in append method when the
+        given object is in wrong type
         """
         
         self.assertRaises(
@@ -230,7 +249,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_append_2(self):
+    def test_append_with_uninit_class(self):
         """testing append method with un-initialized class
         """
         
@@ -243,7 +262,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_append_3(self):
+    def test_append_with_new_class_without_initialization(self):
         """testing if append method with newly created un-inialized class fills
         the self.__type__
         """
@@ -258,7 +277,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_append_4(self):
+    def test_append_works_properly(self):
         """testing append functionality
         """
         
@@ -269,8 +288,41 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_extend(self):
-        """testing extend method
+    def test_append_when_type_argument_is_string(self):
+        """testing if append works fine even when the type argument is given as
+        string
+        """
+        
+        new_list = ValidatedList([], "str")
+        
+        # now check if it only accepts strings
+        self.assertRaises(ValueError, new_list.append, 12)
+        
+        # this should work
+        new_list.append("test string")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_append_when_type_argument_is_type(self):
+        """testing if append works fine when the type argument is instance of
+        type
+        """
+        
+        new_list = ValidatedList([], str)
+        
+        # now check if it only accpets strings
+        self.assertRaises(ValueError, new_list.append, 12)
+        
+        # this should work
+        new_list.append("test string")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_extend_with_wrong_type(self):
+        """testing if a ValueError will be raised in extend method when the
+        given object is in wrong type
         """
         
         self.assertRaises(
@@ -282,7 +334,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_extend_2(self):
+    def test_extend_with_uninit_class(self):
         """testing extend method with un-initialized class
         """
         
@@ -295,7 +347,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_extend_3(self):
+    def test_extend_with_zero_length_list(self):
         """testing extend with zero length list
         """
         
@@ -305,7 +357,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_extend_4(self):
+    def test_extend_works_properly(self):
         """testing extend functionality
         """
         
@@ -317,8 +369,41 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_insert(self):
-        """testing insert method
+    def test_extend_when_type_argument_is_string(self):
+        """testing if extend works fine even when the type argument is given as
+        string
+        """
+        
+        new_list = ValidatedList([], "str")
+        
+        # now check if it only accepts strings
+        self.assertRaises(ValueError, new_list.extend, [12, 123])
+        
+        # this should work
+        new_list.extend(["test", "string"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_extend_when_type_argument_is_type(self):
+        """testing if extend works fine when the type argument is instance of
+        type
+        """
+        
+        new_list = ValidatedList([], str)
+        
+        # now check if it only accpets strings
+        self.assertRaises(ValueError, new_list.extend, [12, 123])
+        
+        # this should work
+        new_list.extend(["test", "string"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_insert_with_wrong_type(self):
+        """testing if a ValueError will be raised in insert method when the
+        given object is in wrong type
         """
         
         self.assertRaises(
@@ -331,8 +416,9 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_insert_2(self):
-        """testing insert method with un-initialized class
+    def test_insert_with_uninit_class(self):
+        """testing if a ValueError will be raised in un-initialized classes
+        insert method when the given item is in wrong type
         """
         
         self.assertRaises(
@@ -345,7 +431,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_insert_3(self):
+    def test_insert_new_uninit_class(self):
         """testing insert method with newly created un-initialized class
         """
         
@@ -363,7 +449,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_insert_4(self):
+    def test_insert_works_properly(self):
         """testing insert functionality
         """
         
@@ -374,8 +460,41 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___add__(self):
-        """testing __add__ method
+    def test_insert_when_type_argument_is_string(self):
+        """testing if insert works fine even when the type argument is given as
+        string
+        """
+        
+        new_list = ValidatedList([], "str")
+        
+        # now check if it only accepts strings
+        self.assertRaises(ValueError, new_list.insert, 0, 12)
+        
+        # this should work
+        new_list.insert(0, "test string")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_insert_when_type_argument_is_type(self):
+        """testing if insert works fine when the type argument is instance of
+        type
+        """
+        
+        new_list = ValidatedList([], str)
+        
+        # now check if it only accpets strings
+        self.assertRaises(ValueError, new_list.insert, 0, 12)
+        
+        # this should work
+        new_list.insert(0, "test string")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___add___with_wrong_type(self):
+        """testing if a ValueError will be raised in the __add__ method when
+        the given item is in wrong type
         """
         
         test_value = ["a", "b", "c"]
@@ -389,7 +508,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___add__2(self):
+    def test___add___with_uninit_class(self):
         """testing __add__ (+) method with un-initialized class
         """
         
@@ -404,7 +523,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___add__3(self):
+    def test___add___with_new_uninit_class(self):
         """testing __add__ with newly created un-initialized list and an empty
         list
         """
@@ -419,7 +538,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___add__4(self):
+    def test___add___works_properly(self):
         """testing __add__ functionality
         """
         
@@ -430,8 +549,41 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___iadd__(self):
-        """testing __iadd__ (+=) method
+    def test___add___when_type_argument_is_string(self):
+        """testing if __add__ works fine even when the type argument is given
+        as string
+        """
+        
+        new_list = ValidatedList([], "str")
+        
+        # now check if it only accepts strings
+        self.assertRaises(ValueError, new_list.__add__, [12, 123])
+        
+        # this should work
+        new_list.__add__(["test", "string"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___add___when_type_argument_is_type(self):
+        """testing if __add__ works fine when the type argument is instance of
+        type
+        """
+        
+        new_list = ValidatedList([], str)
+        
+        # now check if it only accpets strings
+        self.assertRaises(ValueError, new_list.__add__, [12, 123])
+        
+        # this should work
+        new_list.__add__(["test","string"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___iadd___with_wrong_type(self):
+        """testing if a ValueError will be raised in the __iadd__ (+=) method
+        when the given item type is wrong
         """
         
         test_value = ["a", "b", "c"]
@@ -445,8 +597,9 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___iadd__2(self):
-        """testing __iadd__ (+=) method with un-initialized class
+    def test___iadd__with_uninit_class(self):
+        """testing if a ValueErrorr will be raised in the __iadd__ (+=) method
+        of the un-initialized class when the given item is in wrong type
         """
         
         test_value = ["a", "b", "c"]
@@ -460,7 +613,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___iadd__3(self):
+    def test___iadd__with_new_uninit_class(self):
         """testing __iadd__ with newly created un-initialized list and an empty
         list
         """
@@ -475,13 +628,45 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___iadd__4(self):
+    def test___iadd__works_properly(self):
         """testing __iadd__ functionality
         """
         
         test_value = [1032, 12304]
         self.mock_valideted_list1 += test_value
         self.assertEquals(self.mock_valideted_list1[-2:], test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___iadd___when_type_argument_is_string(self):
+        """testing if __iadd__ works fine even when the type argument is given
+        as string
+        """
+        
+        new_list = ValidatedList([], "str")
+        
+        # now check if it only accepts strings
+        self.assertRaises(ValueError, new_list.__iadd__, [12, 123])
+        
+        # this should work
+        new_list.__iadd__(["test", "string"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___iadd___when_type_argument_is_type(self):
+        """testing if __iadd__ works fine when the type argument is instance of
+        type
+        """
+        
+        new_list = ValidatedList([], str)
+        
+        # now check if it only accpets strings
+        self.assertRaises(ValueError, new_list.__iadd__, [12, 123])
+        
+        # this should work
+        new_list.__iadd__(["test", "string"])
     
     
     

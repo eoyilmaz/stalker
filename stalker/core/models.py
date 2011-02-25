@@ -6,7 +6,9 @@ import datetime
 import platform
 import uuid
 
+
 from stalker.ext.validatedList import ValidatedList
+from stalker.core.entities import SimpleEntity, Entity, TypeEntity
 
 
 
@@ -15,8 +17,9 @@ from stalker.ext.validatedList import ValidatedList
 
 ########################################################################
 class EntityMeta(type):
-    """the metaclass for the very basic entity, just adds the name of the class
-    as the entity_type class attribute
+    """The metaclass for the very basic entity.
+    
+    Just adds the name of the class as the entity_type class attribute
     """
     
     
@@ -345,6 +348,8 @@ class SimpleEntity(object):
             # set it to what created_by attribute has
             updated_by_in = self._created_by
         
+        from stalker.core.models import User
+        
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
                 raise ValueError("the updated_by attribute should be an "
@@ -557,6 +562,8 @@ class Entity(SimpleEntity):
         if not isinstance(notes_in, list):
             raise ValueError("notes should be an instance of list")
         
+        from stalker.core.models import Note
+        
         for element in notes_in:
             if not isinstance(element, Note):
                 raise ValueError("every element in notes should be an "
@@ -708,161 +715,97 @@ class TypeEntity(Entity):
 
 
 
+
 ########################################################################
-class Link(Entity):
-    """Holds data about external links.
+class AssetType(TypeEntity):
+    """Holds the information about the asset types.
     
-    Links are all about to give some external information to the current entity
-    (external to the database, so it can be something on the
-    :class:`stalker.core.models.Repository` or in the Web). The
-    link type is defined by the :class:`stalker.core.models.LinkType` object
-    and it can be anything like *General*, *File*, *Folder*, *WebPage*,
-    *Image*, *ImageSequence*, *Movie*, *Text* etc. (you can also use multiple
-    :class:`stalker.core.models.Tag` objects to adding more information,
-    and filtering back). Again it is defined by the needs of the studio.
+    One AssetType object gives information about the
+    :class:`~stalker.core.models.TaskType`\ s that this type of asset
+    can intially have.
     
-    :param path: The Path to the link, it can be a path to a file in the file
-      system, or a web page.  Setting path to None or an empty string is not
-      accepted and causes a ValueError to be raised.
+    So for example one can create a "Character"
+    :class:`~stalker.core.models.AssetType` and then link "Design", "Modeling",
+    "Rig", "Shading" :class:`stalker.core.model.TaskType`\ s to this
+    :class:`~stalker.core.models.AssetType`. And then have an "Environment"
+    :class:`~stalker.core.models.AssetType` and then just link "Design",
+    "Modeling", "Shading" :class:`stalker.core.model.TaskType`\ s to it.
     
-    :param filename: The file name part of the link url, for file sequences use
-      "#" in place of the numerator (`Nuke`_ style). Setting filename to None
-      or an empty string is not accepted and causes a ValueError to be raised.
+    The idea behind :class:`~stalker.core.models.AssetType` is to have an
+    initial list of :class:`~stalker.core.mddels.TaskType`\ s instances which
+    are going to be used to define the automatically created
+    :class:`~stalker.core.models.Task`\ s for this
+    :class:`~stalker.core.models.AssetType`.
     
-    :param type\_: The type of the link. It should be an instance of
-      :class:`stalker.core.models.LinkType`, the type can not be
-      None or anything other than a
-      :class:`stalker.core.models.LinkType` object. Specifies the link
-      type, can be an LinkType with name Image, Movie/Video, Sound etc.
+    It is still possible to add a new type of
+    :class:`~stalker.core.models.Task` to the list of tasks of one
+    :class:`~stalker.core.models.Asset` object. The
+    :class:`~stalker.core.models.AssetType` and the related
+    :class:`~stalker.core.models.TaskType`\ s will only be used to create a
+    list of :class:`~stalker.core.models.Task`\ s intially with the
+    :class:`~stalker.core.models.Asset` it self.
     
-    .. _Nuke: http://www.thefoundry.co.uk
+    :param task_types: A list of :class:`~stalker.core.models.TaskType`
+      instances showing the initial :class:`~stalker.core.models.TaskType`\ s
+      available for this :class:`~stalker.core.models.AssetType`.
+    
+    :type task_types: a :class:`stalker.ext.validatedList.ValidatedList` of
+      :class:`stalker.core.models.TaskType` instances.
     """
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self, path="", filename="", type=None, **kwargs):
-        super(Link, self).__init__(**kwargs)
+    def __init__(self, task_types=[], **kwargs):
+        super(AssetType, self).__init__(**kwargs)
         
-        self._path = self._validate_path(path)
-        self._filename = self._validate_filename(filename)
-        self._type = self._validate_type(type)
+        self._task_types = self._validate_task_types(task_types)
     
     
     
     #----------------------------------------------------------------------
-    def _validate_path(self, path_in):
-        """validates the given path
+    def _validate_task_types(self, task_types_in):
+        """validates the given task_types list
         """
         
-        if path_in is None:
-            raise ValueError("path can not be None")
+        # raise a Value error if it is not a list
+        if not isinstance(task_types_in, list):
+            raise ValueError("task_types should be an instance of list")
         
-        if not isinstance(path_in, (str, unicode)):
-            raise ValueError("path should be an instance of string or unicode")
+        # raise a Value error if not all of the elements are pipelineStep
+        # objects
+        if not all([ isinstance(obj, TaskType)
+                 for obj in task_types_in]):
+            raise ValueError(
+                "all of the elements of the given list should be instance of "
+                "stalker.core.models.TaskType class"
+            )
         
-        if path_in=="":
-            raise ValueError("path can not be an empty string")
-        
-        return self._format_path(path_in)
+        return ValidatedList(task_types_in)
     
     
     
     #----------------------------------------------------------------------
-    def _format_path(self, path_in):
-        """formats the path to internal format, which is Linux forward slashes
-        for path seperation
-        """
+    def task_types():
         
-        return path_in.replace("\\", "/")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_filename(self, filename_in):
-        """validates the given filename
-        """
-        
-        if filename_in is None:
-            raise ValueError("filename can not be None")
-        
-        if not isinstance(filename_in, (str, unicode)):
-            raise ValueError("filename should be an instance of string or "
-                             "unicode")
-        
-        if filename_in=="":
-            raise ValueError("filename can not be an empty string")
-        
-        return filename_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_type(self, type_in):
-        """validates the given type
-        """
-        
-        if type_in is None:
-            raise ValueError("type can not be None, set it to a "
-                             "stalker.core.models.LinkType object")
-        
-        if not isinstance(type_in, LinkType):
-            raise ValueError("type should be an instance of "
-                             "stalker.core.models.LinkType object")
-        
-        return type_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def path():
         def fget(self):
-            return self._path
+            return self._task_types
         
-        def fset(self, path_in):
-            self._path = self._validate_path(path_in)
+        def fset(self, task_types_in):
+            self._task_types = self._validate_task_types(task_types_in)
         
-        doc="""the path part of the url to the link, it can not be None or an
-        empty string, it should be a string or unicode"""
+        doc = """task_types of this AssetType object.
+        
+        task_types is a list of :class:`stalker.core.models.TaskType` objects,
+        showing the list of possible :class:`~stalker.core.models.TaskType`\ s
+        that this kind of :class:`~stalker.core.models.Asset`\ s can have. Its
+        main use is to create a default :class:`~stalker.core.models.Task`\ s
+        list which can be later on edited.
+        """
         
         return locals()
     
-    path = property(**path())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def filename():
-        def fget(self):
-            return self._filename
-        
-        def fset(self, filename_in):
-            self._filename = self._validate_filename(filename_in)
-        
-        doc="""the filename part of the url to the link, it can not be None or
-        an empty string, it should be a string or unicode"""
-        
-        return locals()
-    
-    filename = property(**filename())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def type():
-        def fget(self):
-            return self._type
-        
-        def fset(self, type_in):
-            self._type = self._validate_type(type_in)
-        
-        doc="""the type of the link, it should be a
-        :class:`stalker.core.models.LinkType` object and it can not be
-        None"""
-        
-        return locals()
-    
-    type = property(**type())
+    task_types = property(**task_types())
     
     
     
@@ -871,11 +814,37 @@ class Link(Entity):
         """the equality operator
         """
         
-        return super(Link, self).__eq__(other) and \
-               isinstance(other, Link) and \
-               self.path == other.path and \
-               self.filename == other.filename and \
-               self.type == other.type
+        return super(AssetType, self).__eq__(other) and \
+               isinstance(other, AssetType) and \
+               self.task_types == other.task_types
+
+
+
+
+########################################################################
+class LinkType(TypeEntity):
+    """Defines the types of :class:`~stalker.core.models.Link` instances.
+    
+    LinkType objects hold the type of the link and it is generaly used by
+    :class:`stalker.core.models.Project` to sort things out. See
+    :class:`stalker.core.models.Project` object documentation for details.
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(LinkType, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(LinkType, self).__eq__(other) and \
+               isinstance(other, LinkType)
 
 
 
@@ -883,484 +852,286 @@ class Link(Entity):
 
 
 ########################################################################
-class ReferenceMixin(object):
-    """Adds reference capabilities to the mixed in class.
+class ProjectType(TypeEntity):
+    """Defines the types of :class:`~stalker.core.models.Project` instances.
     
-    References are :class:`stalker.core.models.Link` objects which adds
-    outside information to the attached objects. The aim of the References are
-    generally to give more info to direct the evolution of the objects,
-    generally these objects are :class:`stalker.core.models.Asset`\ s.
+    Can be used to create different type projects like Commercial, Movie, Still
+    etc.
     """
     
     
     
-    _references = ValidatedList([], Link)
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(ProjectType, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(ProjectType, self).__eq__(other) and \
+               isinstance(other, ProjectType)
+
+
+
+
+
+
+########################################################################
+class TaskType(TypeEntity):
+    """Defines the type of the a :class:`~stalker.core.models.Task`.
+    
+    A TaskType object represents the general steps which are used around the
+    studio. A couple of examples are:
+    
+      * Design
+      * Model
+      * Rig
+      * Fur
+      * Shading
+      * Previs
+      * Match Move
+      * Animations
+      
+      etc.
+    
+    Doesn't add any new parameter for its parent class.
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(TaskType, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(TaskType, self).__eq__(other) and \
+               isinstance(other, TaskType)
+
+
+
+
+
+
+########################################################################
+class Status(Entity):
+    """Defins object statutes.
+    
+    No extra parameters, use the *code* attribute to give a short name for the
+    status.
+    
+    A Status object can be compared with a string or unicode value and it will
+    return if the lower case name or lower case code of the status matches the
+    lower case form of the given string:
+    
+    >>> from stalker.core.models import Status
+    >>> a_status = Status(name="On Hold", "OH")
+    >>> a_status == "on hold"
+    True
+    >>> a_status != "complete"
+    True
+    >>> a_status == "oh"
+    True
+    >>> a_status == "another status"
+    False
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        
+        super(Status,self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        if isinstance(other, (str, unicode)):
+            return self.name.lower() == other.lower() or \
+                   self.code.lower() == other.lower()
+        else:
+            return super(Status, self).__eq__(other) and \
+                   isinstance(other, Status)
+
+
+
+
+
+
+########################################################################
+class StatusList(Entity):
+    """Type specific list of :class:`~stalker.core.models.Status` instances.
+    
+    Holds multiple statuses to be used as a choice list for several other
+    classes.
+    
+    A StatusList can only be assigned to only one entity type. So a Project can
+    only have a suitable StatusList object which is designed for Project
+    entities.
+    
+    The list of statuses in StatusList can be accessed by using a list like
+    indexing and it also supports string indexes only for getting the item,
+    you can not set an item with string indices:
+    
+    >>> from stalker.core.models import Status, StatusList
+    >>> status1 = Status(name="Complete", code="CMPLT")
+    >>> status2 = Status(name="Work in Progress", code="WIP")
+    >>> status3 = Status(name="Pending Review", code="PRev")
+    >>> a_status_list = StatusList(name="Asset Status List",
+                                   statuses=[status1, status2, status3],
+                                   target_entity_type="Asset")
+    >>> a_status_list[0]
+    <Status (Complete, CMPLT)>
+    >>> a_status_list["complete"]
+    <Status (Complete, CMPLT)>
+    >>> a_status_list["wip"]
+    <Status (Work in Progress, WIP)>
+    
+    :param statuses: this is a list of status objects, so you can prepare
+      different StatusList objects for different kind of entities
+    
+    :param target_entity_type: use this parameter to specify the target entity
+      type that this StatusList is designed for. It accepts entity_type names.
+      For example::
+        
+        from stalker.core.models import Status, StatusList, Project
+        
+        status_list = [
+            Status(name="Waiting To Start", code="WTS"),
+            Status(name="On Hold", code="OH"),
+            Status(name="In Progress", code="WIP"),
+            Status(name="Waiting Review", code="WREV"),
+            Status(name="Approved", code="APP"),
+            Status(name="Completed", code="CMPLT"),
+        ]
+        
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=status_list,
+            target_type=Project.entit_type
+        )
+      
+      now with the code above you can not assign the ``project_status_list``
+      object to any other class than a ``Project`` object.
+    """
     
     
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 references=ValidatedList([], Link),
-                 **kwargs):
+                 statuses=[],
+                 target_entity_type="",
+                 **kwargs
+                 ):
         
-        self._validate_references(references)
+        super(StatusList,self).__init__(**kwargs)
+        
+        self._statuses = self._validate_statuses(statuses)
+        
+        self._target_entity_type = \
+            self._validate_target_entity_type(target_entity_type)
     
     
     
     #----------------------------------------------------------------------
-    def _validate_references(self, references_in):
-        """validates the given references_in
+    def _validate_statuses(self, statuses):
+        """validates the given status_list
         """
         
-        # it should be an object supporting indexing, not necessarily a list
-        if not (hasattr(references_in, "__setitem__") and \
-                hasattr(references_in, "__getitem__")):
-            raise ValueError("the references_in should support indexing")
+        if not isinstance(statuses, list):
+            raise ValueError("statuses should be an instance of list")
         
-        # all the elements should be instance of stalker.core.models.Link
-        if not all([isinstance(element, Link)
-                    for element in references_in]):
-            raise ValueError("all the elements should be instances of "
-                             ":class:`stalker.core.models.Link`")
+        if len(statuses) < 1:
+            raise ValueError("statuses should not be an empty list")
         
-        return ValidatedList(references_in, Link)
+        for item in statuses:
+            self._validate_status(item)
+        
+        return ValidatedList(statuses)
     
     
     
     #----------------------------------------------------------------------
-    def references():
-        
-        def fget(self):
-            return self._references
-        
-        def fset(self, references_in):
-            self._references = self._validate_references(references_in)
-        
-        doc="""references are lists containing
-        :class:`stalker.core.models.Link` objects
+    def _validate_target_entity_type(self, target_entity_type_in):
+        """validates the given target_entity_type value
         """
         
-        return locals()
-    
-    references = property(**references())
-
-
-
-
-
-
-########################################################################
-class StatusMixin(object):
-    """Adds statusabilities to the object.
-    
-    This mixin adds status and statusList variables to the list. Any object
-    that needs a status and a corresponding status list can include this mixin.
-    
-    When mixed with a class which don't have an __init__ method, the mixin
-    supplies one, and in this case the parameters below must be defined.
-    
-    :param status_list: this attribute holds a status list object, which shows
-      the possible statuses that this entity could be in. This attribute can
-      not be empty or None. Giving a StatusList object, the
-      StatusList.target_type should match the current class.
-    
-    :param status: an integer value which is the index of the status in the
-      status_list attribute. So the value of this attribute couldn't be lower
-      than 0 and higher than the length-1 of the status_list object and nothing
-      other than an integer
-    """
-    
-    
-    
-    _status_list = None
-    _status = 0
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, status=0, status_list=None, **kwargs):
+        # it can not be None
+        if target_entity_type_in is None:
+            raise ValueError("target_entity_type can not be None")
         
-        self._status_list = self._validate_status_list(status_list)
-        self._status = self._validate_status(status)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_status_list(self, status_list_in):
-        """validates the given status_list_in value
-        """
+        if str(target_entity_type_in)=="":
+            raise ValueError("target_entity_type can not be empty string")
         
-        # raise ValueError when:
-        
-        # it is not an instance of status_list
-        if not isinstance(status_list_in, StatusList):
-            raise ValueError("the status list should be an instance of "
-                             "stalker.core.models.StatusList")
-        
-        # check if the entity_type matches to the StatusList.target_entity_type
-        if self.entity_type != status_list_in.target_entity_type:
-            raise TypeError("the given StatusLists' target_entity_type is %s, "
-                            "whereas the entity_type of this object is %s" % \
-                            (status_list_in.target_entity_type,
-                             self.entity_type))
-        
-        return status_list_in
+        return str(target_entity_type_in)
     
     
     
     #----------------------------------------------------------------------
     def _validate_status(self, status_in):
-        """validates the given status_in value
+        """validates the given status_in
         """
         
-        # raise ValueError when there is no status_list is not an instance of
-        # StatusList
-        
-        if not isinstance(self.status_list, StatusList):
-            raise ValueError("please set the status_list attribute first")
-        
-        # it is set to None
-        if status_in is None:
-            raise ValueError("the status couldn't be None, set it to a "
-                             "non-negative integer")
-        
-        # it is not an instance of int
-        if not isinstance(status_in, int):
-            raise ValueError("the status must be an instance of integer")
-        
-        # if it is not in the correct range:
-        if status_in < 0:
-            raise ValueError("the status must be a non-negative integer")
-        
-        if status_in >= len(self._status_list.statuses):
-            raise ValueError("the status can not be bigger than the length of "
-                             "the status_list")
+        if not isinstance(status_in, Status):
+            raise ValueError("all elements must be an instance of Status in "
+                             "the given statuses list")
         
         return status_in
     
     
     
     #----------------------------------------------------------------------
-    def status():
+    def statuses():
         
         def fget(self):
-            return self._status
+            return self._statuses
         
-        def fset(self, status_in):
-            self._status = self._validate_status(status_in)
+        def fset(self, statuses):
+            self._statuses = self._validate_statuses(statuses)
         
-        doc = """The current status index of the object.
+        doc = """list of :class:`stalker.core.models.Status` objects,
+        showing the possible statuses"""
         
-        This is an integer value and shows the index of the
-        :class:`stalker.core.models.Status` object in the
-        :class:`stalker.core.models.StatusList` of this object.
+        return locals()
+    
+    statuses = property(**statuses())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def target_entity_type():
+        
+        def fget(self):
+            return self._target_entity_type
+        
+        doc="""the entity type which this StatusList is valid for, usally it
+        is set to the TargetClass.entity_type class attribute of the target
+        class::
+          
+          from stalker.core.models import Status, StatusList, Asset
+          
+          # now create a StatusList valid only for assets
+          status1 = Status(name="Waiting To Start", code="WTS")
+          status2 = Status(name="Work In Progress", code="WIP")
+          status3 = Status(name="Complete", code="CMPLT")
         """
         
         return locals()
     
-    status = property(**status())
-        
-    
-    
-    
-    #----------------------------------------------------------------------
-    def status_list():
-        
-        def fget(self):
-            return self._status_list
-        
-        def fset(self, status_list_in):
-            self._status_list = self._validate_status_list(status_list_in)
-        
-        doc = """The list of statuses that this object can have.
-        
-        
-        """
-        
-        return locals()
-    
-    status_list = property(**status_list())
-
-
-
-
-
-
-########################################################################
-class ScheduleMixin(object):
-    """Adds schedule info to the mixed in class.
-    
-    The schedule is the right mixin for entities which needs schedule
-    information like ``start_date``, ``due_date`` and ``duration``
-    
-    The date attributes can be managed with timezones. Follow the Python idioms
-    shown in the `documentation of datetime`_
-    
-    .. _documentation of datetime: http://docs.python.org/library/datetime.html
-    
-    :param start_date: the start date of the entity, should be a datetime.date
-      instance, when given as None or tried to be set to None, it is to set to
-      today, setting the start date also effects due date, if the new
-      start_date passes the due_date the due_date is also changed to a date to
-      keep the timedelta between dates. The default value is
-      datetime.date.today()
-    
-    :type start_date: :class:`datetime.datetime`
-    
-    :param due_date: the due_date of the entity, should be a datetime.date or
-      datetime.timedelta instance, if given as a datetime.timedelta, then it
-      will be converted to date by adding the timedelta to the start_date
-      attribute, when the start_date is changed to a date passing the due_date,
-      then the due_date is also changed to a later date so the timedelta is
-      kept between the dates. The default value is 10 days given as
-      datetime.timedelta
-    
-    :type due_date: :class:`datetime.datetime` or :class:`datetime.timedelta`
-    
-    """
-    
-    
-    _start_date = datetime.date.today()
-    _due_date = _start_date + datetime.timedelta(days=10)
-    _duration = _due_date - _start_date
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self,
-                 start_date=datetime.date.today(),
-                 due_date=datetime.timedelta(days=10),
-                 **kwargs
-                 ):
-        
-        self._start_date = self._validate_start_date(start_date)
-        self._due_date = self._validate_due_date(due_date)
-        self._duration = self.due_date - self.start_date
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_due_date(self, due_date_in):
-        """validates the given due_date_in value
-        """
-        
-        if due_date_in is None:
-            due_date_in = datetime.timedelta(days=10)
-        
-        if not isinstance(due_date_in, (datetime.date, datetime.timedelta)):
-            raise ValueError("the due_date should be an instance of "
-                             "datetime.date or datetime.timedelta")
-        
-        if isinstance(due_date_in, datetime.date) and \
-           self.start_date > due_date_in:
-            raise ValueError("the due_date should be set to a date passing "
-                             "the start_date, or should be set to a "
-                             "datetime.timedelta")
-        
-        if isinstance(due_date_in, datetime.timedelta):
-            due_date_in = self._start_date + due_date_in
-        
-        return due_date_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_start_date(self, start_date_in):
-        """validates the given start_date_in value
-        """
-        
-        if start_date_in is None:
-            start_date_in = datetime.date.today()
-        
-        if not isinstance(start_date_in, datetime.date):
-            raise ValueError("start_date shouldbe an instance of "
-                             "datetime.date")
-        
-        return start_date_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def due_date():
-        def fget(self):
-            return self._due_date
-        
-        def fset(self, due_date_in):
-            self._due_date = self._validate_due_date(due_date_in)
-            
-            # update the _project_duration
-            self._duration = self._due_date - self._start_date
-        
-        doc = """The date that the entity should be delivered.
-        
-        The due_date can be set to a datetime.timedelta and in this case it
-        will be calculated as an offset from the start_date and converted to
-        datetime.date again. Setting the start_date to a date passing the
-        due_date will also set the due_date so the timedelta between them is
-        preserved, default value is 10 days"""
-        
-        return locals()
-    
-    due_date = property(**due_date())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def start_date():
-        def fget(self):
-            return self._start_date
-        
-        def fset(self, start_date_in):
-            self._start_date = self._validate_start_date(start_date_in)
-            
-            # check if start_date is passing due_date and offset due_date
-            # accordingly
-            if self._start_date > self._due_date:
-                self._due_date = self._start_date + self._duration
-            
-            # update the project duration
-            self._duration = self._due_date - self._start_date
-        
-        doc = """The date that this entity should start.
-        
-        Also effects the due_date in certain conditions, if the start_date is
-        set to a time passing the due_date it will also offset the due_date to
-        keep the time difference between the start_date and due_date.
-        start_date should be an instance of datetime.date and the default value
-        is datetime.date.today()"""
-        
-        return locals()
-    
-    start_date = property(**start_date())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def duration():
-        def fget(self):
-            return self._duration
-        
-        doc = """Duration of the project.
-        
-        The duration is calculated by subtracting start_date from the due_date,
-        so it is a datetime.timedelta, for now it is read-only
-        """
-        
-        return locals()
-    
-    duration = property(**duration())
-
-
-
-
-
-
-########################################################################
-class TaskMixin(object):
-    """Gives the abilitiy to connect to a list of taks.
-    
-    :param list tasks: The list of tasks. Should be a list of
-      :class:`stalker.core.models.Task` instances. Default value is an
-      empty list.
-    """
-    
-    
-    
-    _tasks = []
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, tasks=[]):
-        self._tasks = self._validate_tasks(tasks)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_tasks(self, tasks_in):
-        """validates the given tasks_in value
-        """
-        
-        if tasks_in is None:
-            tasks_in = []
-        
-        if not isinstance(tasks_in, list):
-            raise ValueError("tasks should be a list")
-        
-        for item in tasks_in:
-            if not isinstance(item, Task):
-                raise ValueError("tasks should be a list of "
-                "stalker.core.models.Task instances")
-        
-        return ValidatedList(tasks_in, Task)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def tasks():
-        def fget(self):
-            return self._tasks
-        def fset(self, task_in):
-            self._tasks = self._validate_tasks(task_in)
-        
-        doc = """The list of :class:`~stalker.core.models.Task` instances.
-        """
-        
-        return locals()
-    
-    tasks = property(**tasks())
-
-
-
-
-
-
-########################################################################
-class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
-    """The Asset class is the whole idea behind Stalker.
-    
-    WARNING: NotImplemented yet!
-    
-    :param type: The type of the asset or shot. The default value is None.
-    
-    :type type: :class:`stalker.core.models.AssetType`
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, type=None, tasks=[], **kwargs):
-        super(Asset, self).__init__(**kwargs)
-        self._type = self._validate_type(type)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_type(self, type_in):
-        """validates the given type_in value
-        """
-        
-        if type_in is not None:
-            if not isinstance(type_in, AssetType):
-                raise ValueError("type should be an instance of "
-                                 "stalker.core.models.AssetType")
-        
-        return type_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def type():
-        def fget(self):
-            return self._type
-        def fset(self, type_in):
-            self._type = self._validate_type(type_in)
-        
-        doc = """The type of this object."""
-        
-        return locals()
-    
-    type = property(**type())
+    target_entity_type = property(**target_entity_type())
     
     
     
@@ -1369,253 +1140,49 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         """the equality operator
         """
         
-        return super(Asset, self).__eq__(other) and \
-               isinstance(other, Asset) and self.type == other.type
-
-
-
-
-
-
-
-########################################################################
-class Booking(Entity):
-    """Holds information about the time spend on a specific task by a specific user.
-    """
-    
-    
-    
-    pass
-
-
-
-
-
-
-
-########################################################################
-class Comment(Entity):
-    """User reviews and comments about other entities.
-    
-    :param body: the body of the comment, it is a string or unicode variable,
-      it can be empty but it is then meaningles to have an empty comment.
-      Anything other than a string or unicode will raise a ValueError.
-    
-    :param to: the relation variable, that holds the connection that this
-      comment is related to. it should be an Entity object, any other will
-      raise a ValueError
-    """
+        return super(StatusList, self).__eq__(other) and \
+               isinstance(other, StatusList) and \
+               self.statuses == other.statuses and \
+               self.target_entity_type == other.target_entity_type
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self, body="", to=None, **kwargs):
-        super(Comment, self).__init__(**kwargs)
-        
-        self._body = self._validate_body(body)
-        self._to = self._validate_to(to)
-    
+    def __getitem__(self, key):
+        """the indexing attributes for getting item
+        """
+        if isinstance(key, (str, unicode)):
+            for item in self._statuses:
+                if item==key:
+                    return item
+        else:
+            return self._statuses[key]
     
     
     #----------------------------------------------------------------------
-    def _validate_body(self, body_in):
-        """validates the given body variable
+    def __setitem__(self, key, value):
+        """the indexing attributes for setting item
         """
         
-        # the body could be empty
-        # but it should be an instance of string or unicode
-        
-        if not isinstance(body_in, (str, unicode)):
-            raise ValueError("the body attribute should be an instance of "
-                              "string or unicode")
-        
-        return body_in
+        self._statuses[key] = self._validate_status(value)
     
     
     
     #----------------------------------------------------------------------
-    def _validate_to(self, to_in):
-        """validates the given to variable
+    def __delitem__(self, key):
+        """the indexing attributes for deleting item
         """
         
-        
-        # the to variable should be:
-        # - not None
-        # - an instance of Entity object
-        
-        if to_in is None:
-            raise ValueError("the to attribute could not be empty")
-        
-        if not isinstance(to_in, Entity):
-            raise ValueError("the to attibute should be an instance of "
-                             "Entity class")
-        
-        return to_in
+        del self._statuses[key]
     
     
     
     #----------------------------------------------------------------------
-    def body():
-        def fget(self):
-            return self._body
-        
-        def fset(self, body_in):
-            self._body = self._validate_body(body_in)
-        
-        doc = """this is the property that sets and returns the body attribute
+    def __len__(self):
+        """the indexing attributes for getting the length
         """
         
-        return locals()
-    
-    body = property(**body())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def to():
-        def fget(self):
-            return self._to
-        
-        def fset(self, to_in):
-            self._to = self._validate_to(to_in)
-        
-        doc = """this is the property that sets and returns the to attribute
-        """
-        
-        return locals()
-    
-    to = property(**to())
-
-
-
-
-
-
-########################################################################
-class Department(Entity):
-    """The departments that forms the studio itself.
-    
-    The informations that a Department object holds is like:
-    
-      * The members of the department
-      * The lead of the department
-      * and all the other things those are inherited from the AuditEntity class
-    
-    Two Department object considered the same if they have the same name, the
-    the members list nor the lead info is important, a "Modeling" department
-    should of course be the same with another department which has the name
-    "Modeling" again.
-    
-    so creating a department object needs the following parameters:
-    
-    :param members: it can be an empty list, so one department can be created
-      without any member in it. But this parameter should be a list of User
-      objects.
-    
-    :param lead: this is a User object, that holds the lead information, a lead
-      could be in this department but it is not forced to be also a member of
-      the department. So another departments member can be a lead for another
-      department. Lead attribute can not be empty or None.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, members=[], lead=None, **kwargs):
-        super(Department, self).__init__(**kwargs)
-        
-        self._members = self._validate_members(members)
-        self._lead = self._validate_lead(lead)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_members(self, members):
-        """validates the given members attribute
-        """
-        
-        for member in members:
-            if not isinstance(member, User):
-                raise ValueError("every element in the members list should be "
-                                 "an instance of stalker.core.models.User"
-                                 " class")
-        
-        return ValidatedList(members, User)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_lead(self, lead):
-        """validates the given lead attribute
-        """
-        
-        # the lead should not be None
-        #if lead is None:
-            #raise ValueError("lead could not be set to None")
-        
-        if lead is not None:
-            # the lead should be an instance of User class
-            if not isinstance(lead, User):
-                raise ValueError("lead should be an instance of "
-                                 "stalker.core.models.User")
-        
-        return lead
-    
-    
-    
-    #----------------------------------------------------------------------
-    def members():
-        
-        def fget(self):
-            return self._members
-        
-        def fset(self, members):
-            self._members = self._validate_members(members)
-        
-        doc = """members are a list of users representing the members of this
-        department"""
-        
-        return locals()
-    
-    members = property(**members())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def lead():
-        
-        def fget(self):
-            return self._lead
-        
-        def fset(self, lead):
-            self._lead = self._validate_lead(lead)
-        
-        doc = """lead is the lead of this department, it is a User object"""
-        
-        return locals()
-    
-    lead = property(**lead())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(Department, self).__eq__(other) and \
-               isinstance(other, Department)
-
-
-
-
-
-########################################################################
-class Group(Entity):
-    """the group class
-    """
-    
-    pass
+        return len(self._statuses)
 
 
 
@@ -1880,6 +1447,432 @@ class ImageFormat(Entity):
 
 
 ########################################################################
+class Link(Entity):
+    """Holds data about external links.
+    
+    Links are all about to give some external information to the current entity
+    (external to the database, so it can be something on the
+    :class:`stalker.core.models.Repository` or in the Web). The
+    link type is defined by the :class:`stalker.core.models.LinkType` object
+    and it can be anything like *General*, *File*, *Folder*, *WebPage*,
+    *Image*, *ImageSequence*, *Movie*, *Text* etc. (you can also use multiple
+    :class:`stalker.core.models.Tag` objects to adding more information,
+    and filtering back). Again it is defined by the needs of the studio.
+    
+    :param path: The Path to the link, it can be a path to a file in the file
+      system, or a web page.  Setting path to None or an empty string is not
+      accepted and causes a ValueError to be raised.
+    
+    :param filename: The file name part of the link url, for file sequences use
+      "#" in place of the numerator (`Nuke`_ style). Setting filename to None
+      or an empty string is not accepted and causes a ValueError to be raised.
+    
+    :param type\_: The type of the link. It should be an instance of
+      :class:`stalker.core.models.LinkType`, the type can not be
+      None or anything other than a
+      :class:`stalker.core.models.LinkType` object. Specifies the link
+      type, can be an LinkType with name Image, Movie/Video, Sound etc.
+    
+    .. _Nuke: http://www.thefoundry.co.uk
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, path="", filename="", type=None, **kwargs):
+        super(Link, self).__init__(**kwargs)
+        
+        self._path = self._validate_path(path)
+        self._filename = self._validate_filename(filename)
+        self._type = self._validate_type(type)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_path(self, path_in):
+        """validates the given path
+        """
+        
+        if path_in is None:
+            raise ValueError("path can not be None")
+        
+        if not isinstance(path_in, (str, unicode)):
+            raise ValueError("path should be an instance of string or unicode")
+        
+        if path_in=="":
+            raise ValueError("path can not be an empty string")
+        
+        return self._format_path(path_in)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _format_path(self, path_in):
+        """formats the path to internal format, which is Linux forward slashes
+        for path seperation
+        """
+        
+        return path_in.replace("\\", "/")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_filename(self, filename_in):
+        """validates the given filename
+        """
+        
+        if filename_in is None:
+            raise ValueError("filename can not be None")
+        
+        if not isinstance(filename_in, (str, unicode)):
+            raise ValueError("filename should be an instance of string or "
+                             "unicode")
+        
+        if filename_in=="":
+            raise ValueError("filename can not be an empty string")
+        
+        return filename_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_type(self, type_in):
+        """validates the given type
+        """
+        
+        if type_in is None:
+            raise ValueError("type can not be None, set it to a "
+                             "stalker.core.models.LinkType object")
+        
+        if not isinstance(type_in, LinkType):
+            raise ValueError("type should be an instance of "
+                             "stalker.core.models.LinkType object")
+        
+        return type_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def path():
+        def fget(self):
+            return self._path
+        
+        def fset(self, path_in):
+            self._path = self._validate_path(path_in)
+        
+        doc="""the path part of the url to the link, it can not be None or an
+        empty string, it should be a string or unicode"""
+        
+        return locals()
+    
+    path = property(**path())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def filename():
+        def fget(self):
+            return self._filename
+        
+        def fset(self, filename_in):
+            self._filename = self._validate_filename(filename_in)
+        
+        doc="""the filename part of the url to the link, it can not be None or
+        an empty string, it should be a string or unicode"""
+        
+        return locals()
+    
+    filename = property(**filename())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def type():
+        def fget(self):
+            return self._type
+        
+        def fset(self, type_in):
+            self._type = self._validate_type(type_in)
+        
+        doc="""the type of the link, it should be a
+        :class:`stalker.core.models.LinkType` object and it can not be
+        None"""
+        
+        return locals()
+    
+    type = property(**type())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Link, self).__eq__(other) and \
+               isinstance(other, Link) and \
+               self.path == other.path and \
+               self.filename == other.filename and \
+               self.type == other.type
+
+
+
+
+
+# mixin class imports should be placed after StatusList and Link definitions
+from stalker.core.mixins import (ReferenceMixin, ScheduleMixin, StatusMixin,
+                                 TaskMixin)
+
+
+
+
+
+
+########################################################################
+class Booking(Entity):
+    """Holds information about the time spend on a specific task by a specific user.
+    """
+    
+    
+    
+    pass
+
+
+
+
+
+
+
+########################################################################
+class Comment(Entity):
+    """User reviews and comments about other entities.
+    
+    :param body: the body of the comment, it is a string or unicode variable,
+      it can be empty but it is then meaningles to have an empty comment.
+      Anything other than a string or unicode will raise a ValueError.
+    
+    :param to: the relation variable, that holds the connection that this
+      comment is related to. it should be an Entity object, any other will
+      raise a ValueError
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, body="", to=None, **kwargs):
+        super(Comment, self).__init__(**kwargs)
+        
+        self._body = self._validate_body(body)
+        self._to = self._validate_to(to)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_body(self, body_in):
+        """validates the given body variable
+        """
+        
+        # the body could be empty
+        # but it should be an instance of string or unicode
+        
+        if not isinstance(body_in, (str, unicode)):
+            raise ValueError("the body attribute should be an instance of "
+                              "string or unicode")
+        
+        return body_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_to(self, to_in):
+        """validates the given to variable
+        """
+        
+        
+        # the to variable should be:
+        # - not None
+        # - an instance of Entity object
+        
+        if to_in is None:
+            raise ValueError("the to attribute could not be empty")
+        
+        if not isinstance(to_in, Entity):
+            raise ValueError("the to attibute should be an instance of "
+                             "Entity class")
+        
+        return to_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def body():
+        def fget(self):
+            return self._body
+        
+        def fset(self, body_in):
+            self._body = self._validate_body(body_in)
+        
+        doc = """this is the property that sets and returns the body attribute
+        """
+        
+        return locals()
+    
+    body = property(**body())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def to():
+        def fget(self):
+            return self._to
+        
+        def fset(self, to_in):
+            self._to = self._validate_to(to_in)
+        
+        doc = """this is the property that sets and returns the to attribute
+        """
+        
+        return locals()
+    
+    to = property(**to())
+
+
+
+
+
+
+########################################################################
+class Department(Entity):
+    """The departments that forms the studio itself.
+    
+    The informations that a Department object holds is like:
+    
+      * The members of the department
+      * The lead of the department
+      * and all the other things those are inherited from the AuditEntity class
+    
+    Two Department object considered the same if they have the same name, the
+    the members list nor the lead info is important, a "Modeling" department
+    should of course be the same with another department which has the name
+    "Modeling" again.
+    
+    so creating a department object needs the following parameters:
+    
+    :param members: it can be an empty list, so one department can be created
+      without any member in it. But this parameter should be a list of User
+      objects.
+    
+    :param lead: this is a User object, that holds the lead information, a lead
+      could be in this department but it is not forced to be also a member of
+      the department. So another departments member can be a lead for another
+      department. Lead attribute can not be empty or None.
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, members=[], lead=None, **kwargs):
+        super(Department, self).__init__(**kwargs)
+        
+        self._members = self._validate_members(members)
+        self._lead = self._validate_lead(lead)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_members(self, members):
+        """validates the given members attribute
+        """
+        
+        for member in members:
+            if not isinstance(member, User):
+                raise ValueError("every element in the members list should be "
+                                 "an instance of stalker.core.models.User"
+                                 " class")
+        
+        return ValidatedList(members, User)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_lead(self, lead):
+        """validates the given lead attribute
+        """
+        
+        # the lead should not be None
+        #if lead is None:
+            #raise ValueError("lead could not be set to None")
+        
+        if lead is not None:
+            # the lead should be an instance of User class
+            if not isinstance(lead, User):
+                raise ValueError("lead should be an instance of "
+                                 "stalker.core.models.User")
+        
+        return lead
+    
+    
+    
+    #----------------------------------------------------------------------
+    def members():
+        
+        def fget(self):
+            return self._members
+        
+        def fset(self, members):
+            self._members = self._validate_members(members)
+        
+        doc = """members are a list of users representing the members of this
+        department"""
+        
+        return locals()
+    
+    members = property(**members())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def lead():
+        
+        def fget(self):
+            return self._lead
+        
+        def fset(self, lead):
+            self._lead = self._validate_lead(lead)
+        
+        doc = """lead is the lead of this department, it is a User object"""
+        
+        return locals()
+    
+    lead = property(**lead())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Department, self).__eq__(other) and \
+               isinstance(other, Department)
+
+
+
+
+
+########################################################################
+class Group(Entity):
+    """the group class
+    """
+    
+    pass
+
+
+
+
+
+
+########################################################################
 class Message(Entity, StatusMixin):
     """The base of the messaging system in Stalker
     
@@ -1908,6 +1901,7 @@ class Message(Entity, StatusMixin):
       this message (so anything can be attached to a message)
     
     """
+    
     
     
     #----------------------------------------------------------------------
@@ -2093,13 +2087,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
         self._fps = self._validate_fps(fps)
         self._is_stereoscopic = bool(is_stereoscopic)
         self._display_width = self._validate_display_width(display_width)
-        
-        ## update the mixin side of the project class (status and references)
-        #self.status_list = status_list
-        #self.status = status
-        #self.references = references
-        #self.start_date = start_date
-        #self.due_date = due_date
     
     
     
@@ -2798,273 +2785,6 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
 
 
 ########################################################################
-class Status(Entity):
-    """Defins object statutes.
-    
-    No extra parameters, use the *code* attribute to give a short name for the
-    status.
-    
-    A Status object can be compared with a string or unicode value and it will
-    return if the lower case name or lower case code of the status matches the
-    lower case form of the given string:
-    
-    >>> from stalker.core.models import Status
-    >>> a_status = Status(name="On Hold", "OH")
-    >>> a_status == "on hold"
-    True
-    >>> a_status != "complete"
-    True
-    >>> a_status == "oh"
-    True
-    >>> a_status == "another status"
-    False
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        
-        super(Status,self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        if isinstance(other, (str, unicode)):
-            return self.name.lower() == other.lower() or \
-                   self.code.lower() == other.lower()
-        else:
-            return super(Status, self).__eq__(other) and \
-                   isinstance(other, Status)
-
-
-
-
-
-
-########################################################################
-class StatusList(Entity):
-    """Type specific list of :class:`~stalker.core.models.Status` instances.
-    
-    Holds multiple statuses to be used as a choice list for several other
-    classes.
-    
-    A StatusList can only be assigned to only one entity type. So a Project can
-    only have a suitable StatusList object which is designed for Project
-    entities.
-    
-    The list of statuses in StatusList can be accessed by using a list like
-    indexing and it also supports string indexes only for getting the item,
-    you can not set an item with string indices:
-    
-    >>> from stalker.core.models import Status, StatusList
-    >>> status1 = Status(name="Complete", code="CMPLT")
-    >>> status2 = Status(name="Work in Progress", code="WIP")
-    >>> status3 = Status(name="Pending Review", code="PRev")
-    >>> a_status_list = StatusList(name="Asset Status List",
-                                   statuses=[status1, status2, status3],
-                                   target_entity_type="Asset")
-    >>> a_status_list[0]
-    <Status (Complete, CMPLT)>
-    >>> a_status_list["complete"]
-    <Status (Complete, CMPLT)>
-    >>> a_status_list["wip"]
-    <Status (Work in Progress, WIP)>
-    
-    :param statuses: this is a list of status objects, so you can prepare
-      different StatusList objects for different kind of entities
-    
-    :param target_entity_type: use this parameter to specify the target entity
-      type that this StatusList is designed for. It accepts entity_type names.
-      For example::
-        
-        from stalker.core.models import Status, StatusList, Project
-        
-        status_list = [
-            Status(name="Waiting To Start", code="WTS"),
-            Status(name="On Hold", code="OH"),
-            Status(name="In Progress", code="WIP"),
-            Status(name="Waiting Review", code="WREV"),
-            Status(name="Approved", code="APP"),
-            Status(name="Completed", code="CMPLT"),
-        ]
-        
-        project_status_list = StatusList(
-            name="Project Status List",
-            statuses=status_list,
-            target_type=Project.entit_type
-        )
-      
-      now with the code above you can not assign the ``project_status_list``
-      object to any other class than a ``Project`` object.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self,
-                 statuses=[],
-                 target_entity_type="",
-                 **kwargs
-                 ):
-        
-        super(StatusList,self).__init__(**kwargs)
-        
-        self._statuses = self._validate_statuses(statuses)
-        
-        self._target_entity_type = \
-            self._validate_target_entity_type(target_entity_type)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_statuses(self, statuses):
-        """validates the given status_list
-        """
-        
-        if not isinstance(statuses, list):
-            raise ValueError("statuses should be an instance of list")
-        
-        if len(statuses) < 1:
-            raise ValueError("statuses should not be an empty list")
-        
-        for item in statuses:
-            self._validate_status(item)
-        
-        return ValidatedList(statuses)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_target_entity_type(self, target_entity_type_in):
-        """validates the given target_entity_type value
-        """
-        
-        # it can not be None
-        if target_entity_type_in is None:
-            raise ValueError("target_entity_type can not be None")
-        
-        if str(target_entity_type_in)=="":
-            raise ValueError("target_entity_type can not be empty string")
-        
-        return str(target_entity_type_in)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_status(self, status_in):
-        """validates the given status_in
-        """
-        
-        if not isinstance(status_in, Status):
-            raise ValueError("all elements must be an instance of Status in "
-                             "the given statuses list")
-        
-        return status_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def statuses():
-        
-        def fget(self):
-            return self._statuses
-        
-        def fset(self, statuses):
-            self._statuses = self._validate_statuses(statuses)
-        
-        doc = """list of :class:`stalker.core.models.Status` objects,
-        showing the possible statuses"""
-        
-        return locals()
-    
-    statuses = property(**statuses())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def target_entity_type():
-        
-        def fget(self):
-            return self._target_entity_type
-        
-        doc="""the entity type which this StatusList is valid for, usally it
-        is set to the TargetClass.entity_type class attribute of the target
-        class::
-          
-          from stalker.core.models import Status, StatusList, Asset
-          
-          # now create a StatusList valid only for assets
-          status1 = Status(name="Waiting To Start", code="WTS")
-          status2 = Status(name="Work In Progress", code="WIP")
-          status3 = Status(name="Complete", code="CMPLT")
-        """
-        
-        return locals()
-    
-    target_entity_type = property(**target_entity_type())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(StatusList, self).__eq__(other) and \
-               isinstance(other, StatusList) and \
-               self.statuses == other.statuses and \
-               self.target_entity_type == other.target_entity_type
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __getitem__(self, key):
-        """the indexing attributes for getting item
-        """
-        if isinstance(key, (str, unicode)):
-            for item in self._statuses:
-                if item==key:
-                    return item
-        else:
-            return self._statuses[key]
-    
-    
-    #----------------------------------------------------------------------
-    def __setitem__(self, key, value):
-        """the indexing attributes for setting item
-        """
-        
-        self._statuses[key] = self._validate_status(value)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __delitem__(self, key):
-        """the indexing attributes for deleting item
-        """
-        
-        del self._statuses[key]
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __len__(self):
-        """the indexing attributes for getting the length
-        """
-        
-        return len(self._statuses)
-
-
-
-
-
-
-########################################################################
 class Structure(Entity):
     """A structure object is the place to hold data about how the physical
     files are arranged in the
@@ -3280,6 +3000,73 @@ class Tag(SimpleEntity):
 
 
 ########################################################################
+class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
+    """The Asset class is the whole idea behind Stalker.
+    
+    WARNING: NotImplemented yet!
+    
+    :param type: The type of the asset or shot. The default value is None.
+    
+    :type type: :class:`stalker.core.models.AssetType`
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, type=None, **kwargs):
+        super(Asset, self).__init__(**kwargs)
+        
+        # call the mixin 
+        
+        
+        self._type = self._validate_type(type)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_type(self, type_in):
+        """validates the given type_in value
+        """
+        
+        if type_in is not None:
+            if not isinstance(type_in, AssetType):
+                raise ValueError("type should be an instance of "
+                                 "stalker.core.models.AssetType")
+        
+        return type_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def type():
+        def fget(self):
+            return self._type
+        def fset(self, type_in):
+            self._type = self._validate_type(type_in)
+        
+        doc = """The type of this object."""
+        
+        return locals()
+    
+    type = property(**type())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Asset, self).__eq__(other) and \
+               isinstance(other, Asset) and self.type == other.type
+
+
+
+
+
+
+
+########################################################################
 class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
@@ -3291,215 +3078,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(Task, self).__init__(**kwargs)
-
-
-
-
-
-########################################################################
-class AssetType(TypeEntity):
-    """Holds the information about the asset types.
-    
-    One AssetType object gives information about the
-    :class:`~stalker.core.models.TaskType`\ s that this type of asset
-    can intially have.
-    
-    So for example one can create a "Character"
-    :class:`~stalker.core.models.AssetType` and then link "Design", "Modeling",
-    "Rig", "Shading" :class:`stalker.core.model.TaskType`\ s to this
-    :class:`~stalker.core.models.AssetType`. And then have an "Environment"
-    :class:`~stalker.core.models.AssetType` and then just link "Design",
-    "Modeling", "Shading" :class:`stalker.core.model.TaskType`\ s to it.
-    
-    The idea behind :class:`~stalker.core.models.AssetType` is to have an
-    initial list of :class:`~stalker.core.mddels.TaskType`\ s instances which
-    are going to be used to define the automatically created
-    :class:`~stalker.core.models.Task`\ s for this
-    :class:`~stalker.core.models.AssetType`.
-    
-    It is still possible to add a new type of
-    :class:`~stalker.core.models.Task` to the list of tasks of one
-    :class:`~stalker.core.models.Asset` object. The
-    :class:`~stalker.core.models.AssetType` and the related
-    :class:`~stalker.core.models.TaskType`\ s will only be used to create a
-    list of :class:`~stalker.core.models.Task`\ s intially with the
-    :class:`~stalker.core.models.Asset` it self.
-    
-    :param task_types: A list of :class:`~stalker.core.models.TaskType`
-      instances showing the initial :class:`~stalker.core.models.TaskType`\ s
-      available for this :class:`~stalker.core.models.AssetType`.
-    
-    :type task_types: a :class:`stalker.ext.validatedList.ValidatedList` of
-      :class:`stalker.core.models.TaskType` instances.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, task_types=[], **kwargs):
-        super(AssetType, self).__init__(**kwargs)
-        
-        self._task_types = self._validate_task_types(task_types)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_task_types(self, task_types_in):
-        """validates the given task_types list
-        """
-        
-        # raise a Value error if it is not a list
-        if not isinstance(task_types_in, list):
-            raise ValueError("task_types should be an instance of list")
-        
-        # raise a Value error if not all of the elements are pipelineStep
-        # objects
-        if not all([ isinstance(obj, TaskType)
-                 for obj in task_types_in]):
-            raise ValueError(
-                "all of the elements of the given list should be instance of "
-                "stalker.core.models.TaskType class"
-            )
-        
-        return ValidatedList(task_types_in)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def task_types():
-        
-        def fget(self):
-            return self._task_types
-        
-        def fset(self, task_types_in):
-            self._task_types = self._validate_task_types(task_types_in)
-        
-        doc = """task_types of this AssetType object.
-        
-        task_types is a list of :class:`stalker.core.models.TaskType` objects,
-        showing the list of possible :class:`~stalker.core.models.TaskType`\ s
-        that this kind of :class:`~stalker.core.models.Asset`\ s can have. Its
-        main use is to create a default :class:`~stalker.core.models.Task`\ s
-        list which can be later on edited.
-        """
-        
-        return locals()
-    
-    task_types = property(**task_types())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(AssetType, self).__eq__(other) and \
-               isinstance(other, AssetType) and \
-               self.task_types == other.task_types
-
-
-
-
-
-
-########################################################################
-class LinkType(TypeEntity):
-    """Defines the types of :class:`~stalker.core.models.Link` instances.
-    
-    LinkType objects hold the type of the link and it is generaly used by
-    :class:`stalker.core.models.Project` to sort things out. See
-    :class:`stalker.core.models.Project` object documentation for details.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super(LinkType, self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(LinkType, self).__eq__(other) and \
-               isinstance(other, LinkType)
-
-
-
-
-
-
-########################################################################
-class ProjectType(TypeEntity):
-    """Defines the types of :class:`~stalker.core.models.Project` instances.
-    
-    Can be used to create different type projects like Commercial, Movie, Still
-    etc.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super(ProjectType, self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(ProjectType, self).__eq__(other) and \
-               isinstance(other, ProjectType)
-        
-
-
-
-
-
-
-
-########################################################################
-class TaskType(TypeEntity):
-    """Defines the type of the a :class:`~stalker.core.models.Task`.
-    
-    A TaskType object represents the general steps which are used around the
-    studio. A couple of examples are:
-    
-      * Design
-      * Model
-      * Rig
-      * Fur
-      * Shading
-      * Previs
-      * Match Move
-      * Animations
-      
-      etc.
-    
-    Doesn't add any new parameter for its parent class.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super(TaskType, self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(TaskType, self).__eq__(other) and \
-               isinstance(other, TaskType)
 
 
 

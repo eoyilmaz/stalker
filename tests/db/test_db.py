@@ -1545,24 +1545,10 @@ class ExamplesTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def setUp(self):
-        """setup per test basis
-        """
-        
-        # setup the database
-        #clear_mappers()
-        #db.__mappers__ = []
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_ReferenceMixin_setup(self):
         """testing if the ReferenceMixin can be correctly setup with a new
         class
         """
-        
-        #clear_mappers()
-        #db.__mappers__ = []
         
         # the actual test
         from examples.extending import great_entity
@@ -1605,8 +1591,6 @@ class ExamplesTester(unittest.TestCase):
     def test_StatusMixin_setup(self):
         """testing if the StatusMixin can be correctly setup with a new class
         """
-        #clear_mappers()
-        #db.__mappers__ = []
         
         # the actual test
         from examples.extending import statused_entity
@@ -1648,15 +1632,6 @@ class ExamplesTester(unittest.TestCase):
         defaults.MAPPERS.remove("examples.extending.statused_entity")
         defaults.CORE_MODEL_CLASSES.remove(
             "examples.extending.statused_entity.NewStatusedEntity")
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_multiple_mixin_case(self):
-        #"""testing multiple mixin case
-        #"""
-        
-        #self.fail("test is not implemented yet")
     
     
     
@@ -1703,6 +1678,7 @@ class ExamplesTester(unittest.TestCase):
         
         self.assertEquals(new_camera, new_camera_DB)
         self.assertEquals(new_lens, new_lens_DB)
+    
     
     
     

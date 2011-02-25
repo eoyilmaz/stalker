@@ -20,6 +20,7 @@ class ReferenceMixinTester(mocker.MockerTestCase):
     """
     
     
+    
     #----------------------------------------------------------------------
     def setUp(self):
         """setup the test
