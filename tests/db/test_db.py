@@ -1137,32 +1137,25 @@ class DatabaseModelsTester(unittest.TestCase):
         lead = User(login_name="lead", email="lead@lead.com",
                     first_name="lead", last_name="lead", password="password")
         
-        shot1 = Shot(code="SH001")
-        shot2 = Shot(code="SH002")
-        shot3 = Shot(code="SH003")
-        
-        shot1.status_list = shot_status_list
-        shot2.status_list = shot_status_list
-        shot3.status_list = shot_status_list
-        
-        #db.session.add_all(
-            #[status1, status2, status3,
-             #project_status_list, sequence_status_list, shot_status_list,
-             #project1, lead,
-             #shot1, shot2, shot3]
-        #)
-        #db.session.commit()
-        
         kwargs = {
             "name": "Test seuqence",
             "description": "this is a test sequence",
             "project": project1,
             "lead": lead,
-            "shots": [shot1, shot2, shot3],
+            #"shots": [shot1, shot2, shot3],
             "status_list": sequence_status_list,
         }
         
         test_sequence = Sequence(**kwargs)
+        
+        # now add the shots
+        shot1 = Shot(code="SH001", sequence=test_sequence)
+        shot2 = Shot(code="SH002", sequence=test_sequence)
+        shot3 = Shot(code="SH003", sequence=test_sequence)
+        
+        shot1.status_list = shot_status_list
+        shot2.status_list = shot_status_list
+        shot3.status_list = shot_status_list
         
         db.session.add(test_sequence)
         db.session.commit()

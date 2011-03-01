@@ -4,11 +4,9 @@
 import re
 import datetime
 import platform
-import uuid
 
 
 from stalker.ext.validatedList import ValidatedList
-from stalker.core.entities import SimpleEntity, Entity, TypeEntity
 
 
 
@@ -314,22 +312,6 @@ class SimpleEntity(object):
         """validates the given created_by_in attribute
         """
         
-        #-------------------------------------------------------------------
-        # Python documentation says one of the nice ways to over come circular
-        # imports is late imports and it is perfectly ok to use it like that
-        # 
-        # just try to import the module as late as possible
-        # 
-        # ref:
-        # http://docs.python.org/faq/programming.html#
-        #     what-are-the-best-practices-for-using-import-in-a-module
-        #-------------------------------------------------------------------
-        
-        ## raise ValueError when:
-        ## it is None
-        #if created_by_in is None:
-            #raise ValueError("the created_by attribute can not be set to None")
-        
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
                 raise ValueError("the created_by attribute should be an "
@@ -415,11 +397,10 @@ class SimpleEntity(object):
         
         It accepts string or unicode values and any other kind of objects will
         be converted to string. In any update to the name attribute the code
-        also will be updated to the uppercase form of the nice_name attribute.
-        If the not initialized or given as None, it will be set to the
-        uppercase version of the nice_name attribute. Setting the code
-        attribute to None will reset it to the default value. The default value
-        is the upper case form of the nice_name. """
+        also will be updated. If the code is not initialized or given as None,
+        it will be set to the uppercase version of the nice_name attribute.
+        Setting the code attribute to None will reset it to the default value.
+        The default value is the upper case form of the nice_name."""
         
         return locals()
     
@@ -709,7 +690,6 @@ class TypeEntity(Entity):
         """
         
         return not self.__eq__(other)
-
 
 
 
@@ -2743,41 +2723,411 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
 
 ########################################################################
 class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
-    """Manage Shot related data.
+    """Manages Shot related data.
     
     Because most of the shots in different projects are going to have the same
     name, which is a kind of a code like SH001, SH012A etc., and in Stalker you
     can not have two entities with the same name if their types are also
     matching, to guarantee all the shots are going to have different names the
     :attr:`~stalker.core.models.Shot.name` attribute of the Shot instances are
-    automatically set to a randomly generated uuid4 sequence.
+    automatically set to a randomly generated **uuid4** sequence.
     
-    But there is no such rule for the code attribute, which should be used to
+    But there is no such rule for the
+    :attr:`~stalker.core.models.Shot.code` attribute, which should be used to
     give shot codes to individual shots.
     
+    Two shots with the same :attr:`~stalker.core.models.Shot.code` can not be
+    assigned to the same :class:`~stalker.core.models.Sequence`.
+    
+    The :attr:`~stalker.core.models.Shot.cut_out` and
+    :attr:`~stalker.core.models.Shot.cut_duration` attributes effects each
+    other. Setting the :attr:`~stalker.core.models.Shot.cut_out` will change
+    the :attr:`~stalker.core.models.Shot.cut_duration` and setting the
+    :attr:`~stalker.core.models.Shot.cut_duration` will change the
+    :attr:`~stalker.core.models.Shot.cut_out` value. The default value of the
+    :attr:`~stalker.core.models.Shot.cut_out` attribute is calculated from the
+    :attr:`~stalker.core.models.Shot.cut_in` and
+    :attr:`~stalker.core.models.Shot.cut_duration` attributes. If both
+    :attr:`~stalker.core.models.Shot.cut_out` and
+    :attr:`~stalker.core.models.Shot.cut_duration` arguments are set to None,
+    the :attr:`~stalker.core.models.Shot.cut_duration` defaults to 100 and
+    :attr:`~stalker.core.models.Shot.cut_out` will be set to
+    :attr:`~stalker.core.models.Shot.cut_in` +
+    :attr:`~stalker.core.models.Shot.cut_duration`. So the priority of the
+    attributes are as follows:
+      
+      :attr:`~stalker.core.models.Shot.cut_in` >
+      :attr:`~stalker.core.models.Shot.cut_duration` >
+      :attr:`~stalker.core.models.Shot.cut_out`
+    
+    For still images (which can be also managed by shots) the
+    :attr:`~stalker.core.models.Shot.cut_in` and
+    :attr:`~stalker.core.models.Shot.cut_out` can be set to the same value
+    so the :attr:`~stalker.core.models.Shot.cut_duration` can be set to zero.
+    
     :param sequence: The :class:`~stalker.core.models.Sequence` that this shot
-      blengs to.
+      blengs to. A shot can only be created with a
+      :class:`~stalker.core.models.Sequence` instance, so it can not be None.
+      The shot itself will be added to the
+      :attr:`~stalker.core.models.Sequence.shots` list of the given sequence.
     
     :type sequence: :class:`stalker.core.models.Sequence`
     
     :param assets: The list of :class:`~stalker.core.models.Asset`\ s used in
-      this shot.
+      this shot. When it is set to None, it defaults to the default value and
+      the default value is an empty list.
     
     :type assets: list of :class:`stalker.core.models.Asset` instances
     
-    :param integer cut_in: The in frame number that this shot starts.
+    :param integer cut_in: The in frame number that this shot starts. The
+      default value is 1. When the ``cut_in`` is bigger then
+      ``cut_out``, the :attr:`~stalker.core.models.Shot.cut_out` attribute is
+      set to :attr:`~stalker.core.models.Shot.cut_in` + 1.
     
-    :param integer cut_out: The out frame number taht this shot ends.
+    :param integer cut_duration: The duration of this shot in frames. It should
+      be zero or a positive integer value (natural number?) or . The default
+      value is None.
     
-    :param integer cut_duration: The duration of this shot in frames.
+    :param integer cut_out: The out frame number that this shot ends. If it is
+      given as a value lower then the ``cut_in`` parameter, then the
+      :attr:`~stalker.core.models.Shot.cut_out` will be set to the same value
+      with :attr:`~stalker.core.models.Shot.cut_in` and the
+      :attr:`~stalker.core.models.Shot.cut_duration` attribute will be set to
+      1. Can be skipped. The default value is None.
     """
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        kwargs["name"] = kwargs["code"] # create the test for it
+    def __init__(self, code=None, sequence=None, assets=[], cut_in=1,
+                 cut_out=None, cut_duration=None, **kwargs):
+        kwargs["name"] = code
         super(Shot, self).__init__(**kwargs)
+        
+        # set the code
+        self._code = self._validate_code(code)
+        
+        # set the name atribute
+        import uuid
+        self._name = uuid.uuid4().hex
+        
+        self._sequence = self._validate_sequence(sequence)
+        # add the shot to the sequences shot list
+        self._sequence.shots.append(self)
+        
+        
+        self._assets = self._validate_assets(assets)
+        
+        self._cut_in = cut_in
+        self._cut_duration = cut_duration
+        self._cut_out = cut_out
+        
+        self._update_cut_info(cut_in, cut_duration, cut_out)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """equality operator
+        """
+        
+        # __eq__ always returns false but to be safe the code will be added
+        # here
+        
+        return self.code == other.code and isinstance(other, Shot) and \
+               self.sequence == other.sequence
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _update_cut_info(self, cut_in, cut_duration, cut_out):
+        """updates the cut_in, cut_duration and cut_out attributes
+        """
+        
+        # validate all the values
+        self._cut_in = self._validate_cut_in(cut_in)
+        self._cut_duration = self._validate_cut_duration(cut_duration)
+        self._cut_out = self._validate_cut_out(cut_out)
+        
+        if self._cut_in is None:
+            self._cut_in = 1
+        
+        if self._cut_out is not None:
+            if self._cut_in > self._cut_out:
+                # just update cut_duration
+                self._cut_duration = 1
+        #else:
+            #self._cut_o
+        
+        if self._cut_duration is None or self._cut_duration <= 0:
+            self._cut_duration = 1
+        
+        self._cut_out = self._cut_in + self._cut_duration - 1
+    
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_assets(self, assets_in):
+        """validates the given assets_in value
+        """
+        
+        if assets_in is None:
+            assets_in = []
+        
+        if not isinstance(assets_in, list):
+            raise ValueError("assets should be an instance of list")
+        
+        for item in assets_in:
+            if not isinstance(item, Asset):
+                raise ValueError("all the items in the assets list should be"
+                                 "an instance of stalker.core.models.Asset")
+        
+        return ValidatedList(assets_in, Asset)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_code(self, code_in):
+        """validates the given code value
+        """
+        
+        # check if the code_in is None or empty string
+        if code_in is None or code_in=="":
+            raise ValueError("the code can not be None or empty string")
+        
+        return self._condition_code(str(code_in))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_cut_duration(self, cut_duration_in):
+        """validates the given cut_duration value
+        """
+        
+        if cut_duration_in is not None and \
+           not isinstance(cut_duration_in, int):
+            raise ValueError("cut_duration should be an instance of int")
+        
+        #if cut_duration_in is None or cut_duration_in <= 0:
+                #if self._cut_out is None:
+                    #raise ValueError("cut_duration can not be None or negative"
+                                     #"when the cut_out is also undefined")
+                #else:
+                    #cut_duration_in = self._cut_out - self._cut_in + 1
+        
+        return cut_duration_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_cut_in(self, cut_in_in):
+        """validates the given cut_in_in value
+        """
+        
+        
+        if cut_in_in is not None:
+            if not isinstance(cut_in_in, int):
+                raise ValueError("cut_in should be an instance of int")
+        
+        return cut_in_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_cut_out(self, cut_out_in):
+        """validates the given cut_out_in value
+        """
+        
+        if cut_out_in is not None:
+            if not isinstance(cut_out_in, int):
+                raise ValueError("cut_out should be an instance of int")
+        
+        return cut_out_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_sequence(self, sequence_in):
+        """validates the given sequence_in value
+        """
+        
+        if not isinstance(sequence_in, Sequence):
+            raise ValueError("the sequence should be an instance of"
+                             "stalker.core.models.Sequence instance")
+        
+        for shot in sequence_in.shots:
+            #assert(isinstance(shot, Shot))
+            
+            if self.code ==  shot.code:
+                raise ValueError("the given sequence already has a shot with "
+                                 "a code %s" % self.code)
+        
+        return sequence_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def assets():
+        
+        def fget(self):
+            return self._assets
+        
+        def fset(self, assets_in):
+            self._assets = self._validate_assets(assets_in)
+        
+        doc = """The list of :class:`~stalker.core.models.Asset`\ s used in this shot.
+        
+        When it is set to None, it defaults to the default value and the
+        default value is an empty list."""
+        
+        return locals()
+    
+    assets = property(**assets())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def code():
+        def fget(self):
+            return self._code
+        
+        def fset(self, code_in):
+            self._code = self._validate_code(code_in)
+        
+        doc = """The code of this :class:`~stalker.core.models.Shot`.
+        
+        Contrary to the original attribute from the inherited parent
+        (:attr:`~stalker.core.models.SimpleEntity.code`), the code attribute
+        can not be set to None or empty string."""
+        
+        return locals()
+    
+    code = property(**code())
+        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def cut_duration():
+        
+        def fget(self):
+            return self._cut_duration
+        
+        def fset(self, cut_duration_in):
+            #self._cut_duration = self._validate_cut_duration(cut_duration_in)
+            
+            # also set the cut_out
+            #self._cut_out = self._cut_in + self._cut_duration - 1
+            
+            self._update_cut_info(self._cut_in, cut_duration_in, self._cut_out)
+        
+        doc = """The duration of this shot in frames.
+        
+        It should be a positive integer value. If updated also updates the
+        :attr:`~stalker.core.models.Shot.cut_duration` attribute. The default
+        value is 100."""
+        
+        return locals()
+    
+    cut_duration = property(**cut_duration())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def cut_in():
+        
+        def fget(self):
+            return self._cut_in
+        
+        def fset(self, cut_in_in):
+            #self._cut_in = self._validate_cut_in(cut_in_in)
+            
+            #if self._cut_in > self._cut_out:
+                ## udpate the cut_out value
+                #self._cut_out = self._cut_in + 1
+            
+            #self._update_cut_duration()
+            
+            self._update_cut_info(cut_in_in, self._cut_duration, self._cut_out)
+        
+        doc = """The in frame number taht this shot starts.
+        
+        The default value is 1. When the cut_in is bigger then
+        :attr:`~stalker.core.models.Shot.cut_out`, the
+        :attr:`~stalker.core.models.Shot.cut_out` value is update to
+        :attr:`~stalker.core.models.Shot.cut_in` + 1."""
+        
+        return locals()
+    
+    cut_in = property(**cut_in())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def cut_out():
+        def fget(self):
+            return self._cut_out
+        
+        def fset(self, cut_out_in):
+            #self._cut_out = self._validate_cut_out(cut_out_in)
+            
+            #if self._cut_out is None:
+                #self._cut_out = self._cut_in + self._cut_duration - 1
+            
+            #self._update_cut_duration()
+            self._update_cut_info(self._cut_in, self._cut_duration, cut_out_in)
+        
+        doc = """The out frame number that this shot ends.
+        
+        When the :attr:`~stalker.core.models.Shot.cut_out` is set to a value
+        lower than :attr:`~stalker.core.models.Shot.cut_in`,
+        :attr:`~stalker.core.models.Shot.cut_out` will be updated to
+        :attr:`~stalker.core.models.Shot.cut_in` + 1. The default value is
+        :attr:`~stalker.core.models.Shot.cut_in` +
+        :attr:`~stalker.core.models.Shot.cut_duration`."""
+        
+        return locals()
+    
+    cut_out = property(**cut_out())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def name():
+        def fget(self):
+            return self._name
+        
+        def fset(self, name_in):
+            pass
+        
+        doc = """Name of this Shot.
+        
+        Different than other :class:`~stalker.core.models.SimpleEntity`
+        derivatives, the :class:`~stalker.core.models.Shot` classes
+        :attr:`~stalker.core.models.Shot.name` attribute is read-only. And the
+        stored value is a uuid4 sequence.
+        """
+        
+        return locals()
+    
+    name = property(**name())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def sequence():
+        def fget(self):
+            return self._sequence
+        
+        doc = """The :class:`~stalker.core.models.Sequence` instance that this :class:`~stalker.core.models.Shot` instance belongs to.
+        
+        It is a read-only attribute."""
+        
+        return locals()
+    
+    sequence = property(**sequence())
+        
 
 
 

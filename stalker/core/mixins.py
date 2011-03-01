@@ -409,7 +409,7 @@ class TaskMixin(object):
     
     
     
-    _tasks = []
+    _tasks = ValidatedList([], "stalker.core.models.Task")
     
     
     

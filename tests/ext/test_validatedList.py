@@ -147,6 +147,7 @@ class ValidetedListTester(unittest.TestCase):
         # a real world example
         test_list2 = ValidatedList([], "datetime.datetime")
         import datetime
+        test_list2.append(datetime.datetime.now())
         
         self.assertEquals(test_list2.__type__, datetime.datetime)
     
@@ -320,6 +321,25 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
+    def test_append_lazy_loading(self):
+        """testing if the type will be lazily imported in append method when
+        given as a string
+        """
+        
+        new_list = ValidatedList([], "datetime.datetime")
+        
+        # check if it is still a string
+        self.assertEquals(new_list.__type__, "datetime.datetime")
+        
+        # check if it is converted to a type instance when appended
+        import datetime
+        new_list.append(datetime.datetime.now())
+        
+        self.assertEquals(new_list.__type__, datetime.datetime)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_extend_with_wrong_type(self):
         """testing if a ValueError will be raised in extend method when the
         given object is in wrong type
@@ -397,6 +417,25 @@ class ValidetedListTester(unittest.TestCase):
         
         # this should work
         new_list.extend(["test", "string"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_extend_lazy_loading(self):
+        """testing if the type will be lazily imported in extend method when
+        given as a string
+        """
+        
+        new_list = ValidatedList([], "datetime.datetime")
+        
+        # check if it is still a string
+        self.assertEquals(new_list.__type__, "datetime.datetime")
+        
+        # check if it is converted to a type instance when appended
+        import datetime
+        new_list.extend([datetime.datetime.now()])
+        
+        self.assertEquals(new_list.__type__, datetime.datetime)
     
     
     
@@ -492,6 +531,25 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
+    def test_insert_lazy_loading(self):
+        """testing if the type will be lazily imported in insert method when
+        given as a string
+        """
+        
+        new_list = ValidatedList([], "datetime.datetime")
+        
+        # check if it is still a string
+        self.assertEquals(new_list.__type__, "datetime.datetime")
+        
+        # check if it is converted to a type instance when appended
+        import datetime
+        new_list.insert(0, datetime.datetime.now())
+        
+        self.assertEquals(new_list.__type__, datetime.datetime)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test___add___with_wrong_type(self):
         """testing if a ValueError will be raised in the __add__ method when
         the given item is in wrong type
@@ -577,6 +635,25 @@ class ValidetedListTester(unittest.TestCase):
         
         # this should work
         new_list.__add__(["test","string"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___add___lazy_loading(self):
+        """testing if the type will be lazily imported in __add__ method when
+        given as a string
+        """
+        
+        new_list = ValidatedList([], "datetime.datetime")
+        
+        # check if it is still a string
+        self.assertEquals(new_list.__type__, "datetime.datetime")
+        
+        # check if it is converted to a type instance when appended
+        import datetime
+        new_list.__add__([datetime.datetime.now()])
+        
+        self.assertEquals(new_list.__type__, datetime.datetime)
     
     
     
@@ -670,3 +747,19 @@ class ValidetedListTester(unittest.TestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test___iadd___lazy_loading(self):
+        """testing if the type will be lazily imported in __iadd__ method when
+        given as a string
+        """
+        
+        new_list = ValidatedList([], "datetime.datetime")
+        
+        # check if it is still a string
+        self.assertEquals(new_list.__type__, "datetime.datetime")
+        
+        # check if it is converted to a type instance when appended
+        import datetime
+        new_list.__iadd__([datetime.datetime.now()])
+        
+        self.assertEquals(new_list.__type__, datetime.datetime)

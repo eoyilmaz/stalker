@@ -6,6 +6,10 @@ Inheritance Diagram
 .. inheritance-diagram::
      stalker.core.errors.LoginError
      stalker.core.errors.DBError
+     stalker.core.mixins.StatusMixin
+     stalker.core.mixins.ReferenceMixin
+     stalker.core.mixins.ScheduleMixin
+     stalker.core.mixins.TaskMixin
      stalker.core.models.Asset
      stalker.core.models.AssetType
      stalker.core.models.Booking
@@ -20,15 +24,12 @@ Inheritance Diagram
      stalker.core.models.Note
      stalker.core.models.Project
      stalker.core.models.ProjectType
-     stalker.core.models.ReferenceMixin
      stalker.core.models.Repository
-     stalker.core.models.ScheduleMixin
      stalker.core.models.Sequence
      stalker.core.models.Shot
      stalker.core.models.SimpleEntity
      stalker.core.models.Status
      stalker.core.models.StatusList
-     stalker.core.models.StatusMixin
      stalker.core.models.Structure
      stalker.core.models.Tag
      stalker.core.models.Task

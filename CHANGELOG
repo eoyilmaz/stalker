@@ -32,7 +32,7 @@ v0.1.1.a7
    
      from stalker.ext import auth
      
-     # initialise the session
+     # initialize the session
      auth.create_session()
      
      # check if there is a user
@@ -82,7 +82,7 @@ v0.1.1.a7
    :const:`stalker.conf.defaults.MAPPERS` list.
 
  * Introduced the :class:`~stalker.core.models.TaskMixin` which gives the
-   ability to connect to a list of tasks to the mixed in class. Also added the
+   ability to connect a list of tasks to the mixed in class. Also added the
    mapper setup for this mixin.
 
  * Removed the :class:`~stalker.core.models.AssetType` and derived the
@@ -93,7 +93,15 @@ v0.1.1.a7
    :mod:`stalker.core.mixins`
 
  * :class:`~stalker.ext.validatedList.ValidatedList` now accepts string values
-   for the :param:`~stalker.ext.validatedList.ValidatedList.type_` arguments.
+   for the ``type_`` argument.
+
+ * Added :class:`~stalker.core.models.Shot` class and test for it.
+ 
+ * Updated the :class:`~stalker.core.models.Sequence` database tests according
+   to new rules introduced with the :class:`~stalker.core.models.Shot` class.
+
+ * :class:`~stalker.ext.validatedList.ValidatedList` now imports the given
+   types lazily when the type is given as a string path.
 
 v0.1.1.a6
 ---------
@@ -122,7 +130,7 @@ v0.1.1.a6
  * removed the ``stalker.db.__setup__`` module which were helping to reference
    the variables in :mod:`stalker.db` module but it is not needed any more
 
- * It is now possible to initialise a
+ * It is now possible to initialize a
    :class:`stalker.core.models.project.Project` object without a
    :class:`stalker.core.models.repository.Repository`,
    :class:`stalker.core.models.structure.Structure` or an
@@ -133,7 +141,7 @@ v0.1.1.a6
 
  * From now on, in a :class:`stalker.core.models.entity.SimpleEntity`,
    setting the code attribute to None or empty string will not raise any
-   ``ValueError``\ s but will re-initialise the ``code`` value from the
+   ``ValueError``\ s but will re-initialize the ``code`` value from the
    ``nice_name`` attribute.
 
  * Implemented :class:`stalker.core.models.sequence.Sequence` class along with
@@ -226,7 +234,7 @@ v0.1.1.a5
    :class:`mocker.MockerTestCase`
 
  * changed the design of the **stalker.db.mixins.ReferenceMixin.setup**
-   and **stalker.db.mixins.StatusMixin.setup** to organise the mixin
+   and **stalker.db.mixins.StatusMixin.setup** to organize the mixin
    classes' database setup helper functions, now they are converted to classes
    with a classmethod called :meth:`stalker.db.mixin.ReferenceMixinDB.setup`
    doing all the functionality of the previous setup function and placed them
@@ -533,7 +541,7 @@ v0.1.0.20110108.1
  * added ``__eq__`` to :class:`stalker.core.models.entity.SimpleEntity` and
    still trying to add it to the derived classes
 
- * organised the project structure to conform setup tools for **PyPI**
+ * organized the project structure to conform setup tools for **PyPI**
  
 v0.1.0.20110107.2
 -----------------
@@ -546,7 +554,7 @@ v0.1.0.20110107.2
 v0.1.0.20110107.1
 -----------------
 
- * organised the existent tests
+ * organized the existent tests
 
 v0.1.0.20110106.2
 -----------------
@@ -582,17 +590,17 @@ v0.1.0.20110104
 ---------------
 
  * removed the link.Link and introduced reference.Reference and
-   typeEntity.ReferenceType classes, which I think are more organised then the
+   typeEntity.ReferenceType classes, which I think are more organized then the
    previous design.
 
- * reorganised the AssetType and ReferenceType objects by introducing the new
+ * reorganized the AssetType and ReferenceType objects by introducing the new
    TypeEntity class and deriving the AssetType and ReferenceType from this
    class
 
  * added ProjectType class to hold different project types (like Commercial,
    Film, Still etc., it is different than having a Commercial Structure object)
 
- * removed AssetTemplate and ReferenceTemplate concepts and generalised the
+ * removed AssetTemplate and ReferenceTemplate concepts and generalized the
    Template class by adding a `type` parameter to it, which accepts TypeEntity
    and classes derived from TypeEntity.
 
@@ -628,7 +636,7 @@ v0.1.0.20101231
 v0.1.0.20101229.3
 -----------------
 
- * generalised the Template class. Now every Entity can be assigned to a
+ * generalized the Template class. Now every Entity can be assigned to a
    template, it is not limited with Assets or References.
 
 v0.1.0.20101229.2
@@ -668,7 +676,7 @@ v0.1.0.20101228
  * added stalker.db.meta.__mappers__ list to hold the mappers and use it to
    check if anything is already mapped
 
- * added tests for db initialisation
+ * added tests for db initialization
 
  * removed the whole stalker.models.unit module from SOM, only TimeUnit was
    usable in some cases, but in fact it is also not important, the only object
@@ -737,7 +745,7 @@ v0.0.1.20101219
 
     * a database entry point
 
-    * a customisable object model and database tables
+    * a customizable object model and database tables
 
     * an automatic mapper to map the objects and tables together according to
       user settings
