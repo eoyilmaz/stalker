@@ -593,18 +593,72 @@ class DatabaseModelsTester(unittest.TestCase):
             "status_list": asset_statusList,
         }
         
-        asset_base = Asset(**kwargs)
+        test_asset = Asset(**kwargs)
         
-        db.session.add(asset_base)
+        db.session.add(test_asset)
         db.session.commit()
         
-        asset_base_DB = db.query(Asset).\
+        # create a couple of shots
+        sequence_status_list = StatusList(
+            name="Sequence Statuses",
+            statuses=[status1, status2, status3],
+            target_entity_type="Sequence"
+        )
+        
+        mock_sequence = Sequence(name="Test Sequence",
+                                 project=mock_project,
+                                 status=0,
+                                 status_list=sequence_status_list)
+        
+        shot_status_list = StatusList(
+            name="Shot Statuses",
+            statuses=[status1, status2, status3],
+            target_entity_type="Shot",
+        )
+        
+        mock_shot1 = Shot(code="SH001",
+                          sequence=mock_sequence,
+                          status=0,
+                          status_list=shot_status_list)
+        
+        mock_shot2 = Shot(code="SH002",
+                          sequence=mock_sequence,
+                          status=0,
+                          status_list=shot_status_list)
+        
+        mock_shot3 = Shot(code="SH003",
+                          sequence=mock_sequence,
+                          status=0,
+                          status_list=shot_status_list)
+        
+        test_asset.shots = [mock_shot1, mock_shot2, mock_shot3]
+        
+        db.session.add_all([mock_shot1, mock_shot2, mock_shot3])
+        db.session.commit()
+        
+        test_asset_DB = db.query(Asset).\
                       filter_by(name=kwargs["name"]).one()
         
-        self.assertEqual(asset_base, asset_base_DB)
+        assert(isinstance(test_asset_DB, Asset))
         
-        # I don't remember why I decided to add this assertion
-        self.fail("test is not completely implemented yet")
+        self.assertEqual(test_asset, test_asset_DB)
+        self.assertEqual(test_asset.code, test_asset_DB.code)
+        self.assertEqual(test_asset.created_by, test_asset_DB.created_by)
+        self.assertEqual(test_asset.date_created, test_asset_DB.date_created)
+        self.assertEqual(test_asset.date_updated, test_asset_DB.date_updated)
+        self.assertEqual(test_asset.description, test_asset_DB.description)
+        self.assertEqual(test_asset.name, test_asset_DB.name)
+        self.assertEqual(test_asset.nice_name, test_asset_DB.nice_name)
+        self.assertEqual(test_asset.notes, test_asset_DB.notes)
+        self.assertEqual(test_asset.project, test_asset_DB.project)
+        self.assertEqual(test_asset.references, test_asset_DB.references)
+        self.assertEqual(test_asset.shots, test_asset_DB.shots)
+        self.assertEqual(test_asset.status, test_asset_DB.status)
+        self.assertEqual(test_asset.status_list, test_asset_DB.status_list)
+        self.assertEqual(test_asset.tags, test_asset_DB.tags)
+        self.assertEqual(test_asset.tasks, test_asset_DB.tasks)
+        self.assertEqual(test_asset.type, test_asset_DB.type)
+        self.assertEqual(test_asset.updated_by, test_asset_DB.updated_by)
     
     
     

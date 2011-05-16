@@ -500,7 +500,6 @@ def setup():
     
     
     # Asset
-    # WARNING: Not completely implemented
     asset_mapper_arguments = dict(
         inherits=Asset.__base__,
         polymorphic_identity=Asset.entity_type,
@@ -512,6 +511,13 @@ def setup():
                     tables.assets.c.type_id==tables.assetTypes.c.id
             ),
             "type": synonym("_type"),
+            "_project": relationship(
+                Project,
+                primaryjoin=\
+                    tables.assets.c.project_id==tables.projects.c.id
+            ),
+            "project": synonym("_project"),
+            "shots": synonym("_shots"),
         }
     )
     
@@ -542,7 +548,8 @@ def setup():
                 primaryjoin=tables.shots.c.id==\
                     tables.shot_assets.c.shot_id,
                 secondaryjoin=tables.shot_assets.c.asset_id==\
-                    tables.assets.c.id
+                    tables.assets.c.id,
+                backref="_shots",
             ),
             "assets": synonym("_assets"),
             "_sequence": relationship(

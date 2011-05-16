@@ -2,6 +2,9 @@
 
 
 
+
+
+
 ########################################################################
 class ValidatedList(list):
     """A list variant which accepts only one type of element.
@@ -61,20 +64,6 @@ class ValidatedList(list):
     def __set_type__(self, type_):
         """sets the type which the list is allowed to work on
         """
-        
-        ## type_ can be string to ease circular imports
-        #if isinstance(type_, (str, unicode)):
-            ## get the class from the string
-            #from stalker.utils import path_to_exec
-            #exec_, module, object_ = path_to_exec(type_)
-            
-            ##if module != "":
-                ## import the object
-                ##imported_module = __import__(module, globals(),
-                                             ##locals(), [object_], -1)
-                ##type_ = eval("imported_module." + object_)
-            ##else:
-                ##type_ = eval(object_)
         
         if isinstance(type_, (str, unicode)):
             self.__lazy_load_type__ = True

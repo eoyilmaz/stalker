@@ -1,6 +1,34 @@
 Stalker Changes
 ===============
 
+v0.1.1.a8
+---------
+
+ * From now on an :class:`~stalker.core.models.Asset` instance can not be
+   created without a :class:`~stalker.core.models.AssetType` object defining
+   the type of the current :class:`~stalker.core.models.Asset`. This is done to
+   prevent creation of :class:`~stalker.core.models.Asset`\ s without a certain
+   type.
+
+ * :class:`~stalker.core.models.Asset` now has
+   :attr:`~stalker.core.models.Asset.shots` attribute to hold the
+   :class:`~stalker.core.models.Shot`\ s those this
+   :class:`~stalker.core.models.Asset` has been used in.
+
+ * Fixed :class:`~stalker.core.models.Project` where it was not raising a
+   ValueError properly for :attr:`~stalker.core.models.Project.sequence`,
+   :attr:`~stalker.core.models.Project.assets` and
+   :attr:`~stalker.core.models.Project.users` attributes when the assigned
+   value is not iterable.
+
+ * Fixed :class:`~stalker.core.models.Department` where it was not raising a
+   ValueError properly for :attr:`~stalker.core.models.Department.members`
+   attribute when the assigned value is not iterable.
+
+ * Changed the representaion string of the :class:`~stalker.core.models.Shot`
+   to <Shot (Shot.code, Shot.code)> because the
+   :attr:`~stalker.core.models.Shot.name` is not meaningful.
+
 v0.1.1.a7
 ---------
 

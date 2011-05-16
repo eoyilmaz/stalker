@@ -504,6 +504,7 @@ assets = Table(
     "assets", metadata,
     Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
     Column("type_id", Integer, ForeignKey("assetTypes.id")),
+    Column("project_id", Integer, ForeignKey("projects.id")),
 )
 
 # SHOT ASSETS

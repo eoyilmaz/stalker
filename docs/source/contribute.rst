@@ -261,8 +261,13 @@ If you want to do changes in Stalker, the basic pipeline is as follows:
    mercurial that you have resolved the conflicts by::
 
      hg resolve -m the_conflicting_source_file.py
+   
+   or better, use a merge tool like `Meld`_.
+   
+   .. _Meld: http://meld.sourceforge.net/
 
- * Delete the file with \*.orig extension::
+ * Delete the file with \*.orig extension (generally not needed if you are
+   using a merge tool)::
 
    Linux/Mac:
    
@@ -294,5 +299,6 @@ If you want to do changes in Stalker, the basic pipeline is as follows:
    
      hg bundle --base aee27d8c6820 ~/my.bundle
   
-  and send it to eoyilmaz@gmail.com. I also accept, diffs in git format.
+  and send it to eoyilmaz-you-know-what-to-do-with-this-part@gmail.com. I also
+  accept, diffs in git format.
 

@@ -147,6 +147,34 @@ class DepartmentTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_members_argument_is_not_iterable(self):
+        """testing if a ValueError will be raised when the given members
+        argument is not an instance of list
+        """
+        
+        test_values = [1, 1.2, "a user"]
+        
+        for test_value in test_values:
+            self.kwargs["members"] = test_value
+            self.assertRaises(ValueError, Department, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_members_attribute_is_not_iterable(self):
+        """testing if a ValueError will be raised when the members attribute
+        is tried to be set to a non-iterable value
+        """
+        
+        test_values = [1, 1.2, "a user"]
+        
+        for test_value in test_values:
+            self.assertRaises(ValueError, setattr, self.mock_department,
+                              "members", test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_lead_argument_accepts_only_user_objects(self):
         """testing if lead argument accepts only user objects
         """

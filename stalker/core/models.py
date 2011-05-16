@@ -1764,11 +1764,14 @@ class Department(Entity):
         """validates the given members attribute
         """
         
-        for member in members:
-            if not isinstance(member, User):
-                raise ValueError("every element in the members list should be "
-                                 "an instance of stalker.core.models.User"
-                                 " class")
+        if not isinstance(members, list):
+            raise ValueError("members should be a list of "
+                             "stalker.core.models.User instances")
+        
+        if not all([isinstance(member, User) for member in members]):
+            raise ValueError("every element in the members list should be "
+                             "an instance of stalker.core.models.User"
+                             " class")
         
         return ValidatedList(members, User)
     
@@ -2076,6 +2079,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         if assets_in is None:
             assets_in = []
         
+        if not isinstance(assets_in, list):
+            raise ValueError("assets should be a list of "
+                             "stalker.core.models.Assets instances")
+        
         if not all([isinstance(element, Asset)
                     for element in assets_in]):
             raise ValueError("the elements in assets lists should be all "
@@ -2155,6 +2162,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         if sequences_in is None:
             sequences_in = []
         
+        if not isinstance(sequences_in, list):
+            raise ValueError("sequences should be a list of "
+                             "stalker.core.models.Sequence instances")
+        
         if not all([isinstance(seq, Sequence)
                     for seq in sequences_in]):
             raise ValueError("sequences should be a list of "
@@ -2198,6 +2209,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         
         if users_in is None:
             users_in = []
+        
+        if not isinstance(users_in, list):
+            raise ValueError("users should be a list of "
+                             "stalker.core.models.User instances")
         
         if not all([isinstance(element, User) \
                     for element in users_in]):
@@ -2839,6 +2854,15 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     #----------------------------------------------------------------------
+    def __repr__(self):
+        """the representation of the Shot
+        """
+        
+        return "<%s (%s, %s)>" % (self.entity_type, self.code, self.code)
+    
+    
+    
+    #----------------------------------------------------------------------
     def __eq__(self, other):
         """equality operator
         """
@@ -3365,15 +3389,33 @@ class Tag(SimpleEntity):
 class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     """The Asset class is the whole idea behind Stalker.
     
-    WARNING: NotImplemented yet!
+    *Assets* are containers of :class:`~stalker.core.models.Task`\ s. And
+    :class:`~stalker.core.models.Task`\ s are the smallest meaningful part that
+    should be accomplished to complete the
+    :class:`~stalker.core.models.Project`.
+    
+    An example could be given as follows; you can create an asset for one of
+    the characters in your project. Than you can divide this character asset in
+    to :class:`~stalker.core.models.Task`\ s. These
+    :class:`~stalker.core.models.Task`\ s can be defined by the type of the
+    :class:`~stalker.core.models.Asset`, which is the
+    :class:`~stalker.core.models.AssetType`,
+    :class:`~stalker.core.models.AssetType`\ s are templates defining group of
+    :class:`~stalker.core.models.Task`\ s. So an
+    :class:`~stalker.core.models.Asset` in **Character**
+    :class:`~stalker.core.models.AssetType` can have
+    :class:`~stalker.core.models.Task`\ s like, **Design**, **Model**, **Rig**,
+    **Shading**.
     
     :param project: The :class:`~stalker.core.models.Project` instance that
       this asset belongs to. An asset can not be created without a
-      :class:`~stalker.core.models.Project`.
+      :class:`~stalker.core.models.Project` instance.
     
     :type project: :class:`~stalker.core.models.Project`
     
-    :param type: The type of the asset or shot. The default value is None.
+    :param type: The type of the asset or shot. An Asset can not be created
+      without an :class:`~stalker.core.models.AssetType` instance. The default
+      value is None which raises a ValueError.
     
     :type type: :class:`~stalker.core.models.AssetType`
     """
@@ -3392,6 +3434,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         
         self._project = self._validate_project(project)
         self._type = self._validate_type(type)
+        self._shots = self._validate_shots(None)
     
     
     
@@ -3414,12 +3457,33 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         """validates the given type_in value
         """
         
-        if type_in is not None:
-            if not isinstance(type_in, AssetType):
-                raise ValueError("type should be an instance of "
-                                 "stalker.core.models.AssetType")
+        if not isinstance(type_in, AssetType):
+            raise ValueError("type should be an instance of "
+                             "stalker.core.models.AssetType")
         
         return type_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_shots(self, shots_in):
+        """validates the given shots_in value
+        """
+        
+        if shots_in is None:
+            shots_in = []
+        
+        if not isinstance(shots_in, list):
+            raise ValueError("shots should be set to a list of "
+                             ":class:`~stalker.core.models.Shot` objects")
+        
+        if not all([isinstance(shot, Shot)
+                    for shot in shots_in]):
+            raise ValueError("shots should be set to a list of "
+                             ":class:`~stalker.core.models.Shot` objects")
+        
+        return ValidatedList(shots_in, Shot)
+        
     
     
     
@@ -3454,6 +3518,22 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     type = property(**type())
     
+    
+    
+    #----------------------------------------------------------------------
+    def shots():
+        def fget(self):
+            return self._shots
+        
+        def fset(self, shots_in):
+            self._shots = self._validate_shots(shots_in)
+        
+        doc = """The :class:`~stalker.core.models.Shot`\ s that this :class:`~stalker.core.models.Asset` has been used in.
+        """
+        
+        return locals()
+    
+    shots = property(**shots())
     
     
     #----------------------------------------------------------------------

@@ -4,7 +4,7 @@
 
 import mocker
 from stalker.core.models import (Asset, AssetType, Task, Entity, Project, Link,
-                                 LinkType, Status, StatusList)
+                                 LinkType, Status, StatusList, Shot)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -44,6 +44,10 @@ class AssetTester(mocker.MockerTestCase):
         self.expect(self.mock_status_list1.statuses).result(
             [self.mock_status1, self.mock_status2, self.mock_status3]).\
             count(0, None)
+        
+        self.mock_shot1 = self.mocker.mock(Shot)
+        self.mock_shot2 = self.mocker.mock(Shot)
+        self.mock_shot3 = self.mocker.mock(Shot)
         
         self.mocker.replay()
         
@@ -97,20 +101,22 @@ class AssetTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_type_argument_is_None(self):
-        """testing if nothing happens when the type argument is given as None
+        """testing if a ValueError will be raised when the type argument is
+        given as None
         """
         
         self.kwargs["type"] = None
-        new_asset = Asset(**self.kwargs)
+        self.assertRaises(ValueError, Asset, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_type_attribute_is_set_to_None(self):
-        """testing if nothing happens when the type attribute is set to None
+        """testing a ValueError will be raised when the type attribute is set
+        to None
         """
         
-        self.mock_asset.type = None
+        self.assertRaises(ValueError, setattr, self.mock_asset, "type", None)
     
     
     
@@ -207,7 +213,7 @@ class AssetTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_ReferenceMixin_initialization(self):
-        """tetsing if the ReferenceMixin part is initialized correctly
+        """testing if the ReferenceMixin part is initialized correctly
         """
         
         link_type_1 = LinkType(name="Image")
@@ -231,7 +237,7 @@ class AssetTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_StatusMixin_initialization(self):
-        """tetsing if the StatusMixin part is initialized correctly
+        """testing if the StatusMixin part is initialized correctly
         """
         
         status1 = Status(name="On Hold", code="OH")
@@ -253,7 +259,7 @@ class AssetTester(mocker.MockerTestCase):
      
     #----------------------------------------------------------------------
     def test_TaskMixin_initialization(self):
-        """tetsing if the TaskMixin part is initialized correctly
+        """testing if the TaskMixin part is initialized correctly
         """
         
         status1 = Status(name="On Hold", code="OH")
@@ -274,4 +280,77 @@ class AssetTester(mocker.MockerTestCase):
         
         self.assertEqual(new_asset.tasks, tasks)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_is_working_properly(self):
+        """testing if the shots attribute is working properly
+        """
+        
+        shots_list = [self.mock_shot1, self.mock_shot2,
+                                 self.mock_shot3]
+        self.mock_asset.shots = shots_list
+        self.assertEqual(self.mock_asset.shots, shots_list)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_only_accepts_list_of_Shot_instances_list_part(self):
+        """testing if the shots attribute accepts only lists of Shot instances
+        """
+        
+        test_values = [1, 1.2, "a shot list"]
+        
+        for test_value in test_values:
+            self.assertRaises(ValueError, setattr, self.mock_asset, "shots",
+                              test_value)
+        
+        # now test with proper values
+        shots_list = [self.mock_shot1, self.mock_shot2,
+                                 self.mock_shot3]
+        
+        # should not raise any error
+        self.mock_asset.shots = shots_list
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_accepts_only_list_of_Shot_instances(self):
+        """testing if the shot attribute accepts only lists of Shot instances
+        """
+        
+        test_value = ["a", "list", "of", "others", 1, 1.2]
+        
+        self.assertRaises(ValueError, setattr, self.mock_asset, "shots",
+                          test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_elements_tried_to_be_changed_to_other_than_Shot(self):
+        """testing if a ValueError will be raised when the individual elements
+        are tried to be changed
+        """
+        
+        test_values = [1, 1.2, "a shot list", ["a", "list", "of", "others"]]
+        
+        # test append
+        for test_value in test_values:
+            self.assertRaises(ValueError, self.mock_asset.shots.append,
+                              test_value)
+        
+        # test setitem
+        self.mock_asset.shots = [self.mock_shot1, self.mock_shot2]
+        for test_value in test_values:
+            self.assertRaises(ValueError, self.mock_asset.shots.__setitem__,
+                              0, test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_is_instance_of_ValidatedList(self):
+        """testing if the shots attribute is instance of ValidatedList
+        """
+        
+        self.assertIsInstance(self.mock_asset.shots, ValidatedList)
     

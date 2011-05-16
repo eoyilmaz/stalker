@@ -859,3 +859,15 @@ class ShotTester(mocker.MockerTestCase):
         self.assertEqual(new_shot.tasks, tasks)
     
     
+    
+    #----------------------------------------------------------------------
+    def test__repr__(self):
+        """testing the represantation of Shot
+        """
+        
+        
+        self.assertEqual(
+            self.mock_shot.__repr__(),
+            "<Shot (%s, %s)>" % (self.mock_shot.code, self.mock_shot.code)
+        )
+        

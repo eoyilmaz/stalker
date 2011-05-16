@@ -258,6 +258,35 @@ class ProjectTester(mocker.MockerTestCase):
         )
     
     
+    
+    #----------------------------------------------------------------------
+    def test_users_argument_is_not_iterable(self):
+        """testing if a ValueError will be raised when the users argument is
+        not iterable
+        """
+        
+        test_values = [1, 1.2]
+        
+        for test_value in test_values:
+            self.kwargs["users"] = test_value
+            self.assertRaises(ValueError, Project, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_users_attribute_is_not_iterable(self):
+        """testing if a ValueError will be raised when the users attribute is
+        not iterable
+        """
+        
+        test_values = [1, 1.2]
+        
+        for test_value in test_values:
+            self.assertRaises(ValueError, setattr, self.mock_project, "users",
+                              test_value)
+    
+    
+    
     #----------------------------------------------------------------------
     def test_sequences_argument_is_given_as_None(self):
         """testing if sequence attribute is set to an empty list when the
@@ -330,6 +359,40 @@ class ProjectTester(mocker.MockerTestCase):
             "sequences",
             test_value
         )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_argument_is_given_as_non_Sequence_object(self):
+        """testing if a ValueError will be raised when trying the given
+        sequences argument is an object other than Sequence instance
+        """
+        
+        test_values = [1, 1.2, "a user"]
+        
+        for test_value in test_values:
+            self.kwargs["sequences"] = test_value
+            self.assertRaises(ValueError, Project, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_attribute_is_set_to_a_list_containing_non_Sequence_objects(self):
+        """testing if a ValueError will be raised when trying to set the
+        sequences list to a list containing objects other than Sequence
+        instances
+        """
+        
+        test_values = [1, 1.2, "a user"]
+        
+        for test_value in test_values:
+            self.assertRaises(
+                ValueError,
+                setattr,
+                self.mock_project,
+                "sequences",
+                test_value
+            )
     
     
     
@@ -479,6 +542,34 @@ class ProjectTester(mocker.MockerTestCase):
             0,
             0
         )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_argument_is_not_iterable(self):
+        """testing if a ValueError will be raised when the assets argument is
+        not iterable
+        """
+        
+        test_values = [1, 1.2, "an asset"]
+        
+        for test_value in test_values:
+            self.kwargs["assets"] = test_value
+            self.assertRaises(ValueError, Project, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_not_iterable(self):
+        """testing if a ValueError will be raised when a non-iterable value is
+        tried to be assigned to the assets attribute
+        """
+        
+        test_values = [1, 1.2, "an asset"]
+        
+        for test_value in test_values:
+            self.assertRaises(ValueError, setattr, self.mock_project, "assets",
+                              test_value)
     
     
     
