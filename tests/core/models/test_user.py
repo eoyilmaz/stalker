@@ -205,7 +205,7 @@ class UserTest(mocker.MockerTestCase):
             self.kwargs["login_name"] = test_value[0]
             new_user = User(**self.kwargs)
             
-            self.assertEquals(new_user.code, test_value[1])
+            self.assertEqual(new_user.code, test_value[1])
     
     
     
@@ -238,7 +238,7 @@ class UserTest(mocker.MockerTestCase):
             
             new_user = User(**self.kwargs)
             
-            self.assertEquals(new_user.code, test_value[2])
+            self.assertEqual(new_user.code, test_value[2])
     
     
     
@@ -269,7 +269,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertNotEquals(new_user.code, old_code)
         
         # then check if it is set to the expected result
-        self.assertEquals(new_user.code, expected_new_code)
+        self.assertEqual(new_user.code, expected_new_code)
     
     
     
@@ -369,7 +369,7 @@ class UserTest(mocker.MockerTestCase):
         
         test_email = "eoyilmaz@somemail.com"
         self.mock_user.email = test_email
-        self.assertEquals(self.mock_user.email, test_email)
+        self.assertEqual(self.mock_user.email, test_email)
     
     
     
@@ -483,7 +483,7 @@ class UserTest(mocker.MockerTestCase):
             
             test_user = User(**self.kwargs)
             
-            self.assertEquals(
+            self.assertEqual(
                 test_user.login_name,
                 valuePair[1]
             )
@@ -510,7 +510,7 @@ class UserTest(mocker.MockerTestCase):
             # set the input and expect the expected output
             self.mock_user.login_name = valuePair[0]
             
-            self.assertEquals(
+            self.assertEqual(
                 self.mock_user.login_name,
                 valuePair[1]
             )
@@ -525,7 +525,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.kwargs["name"] = self.kwargs.pop("login_name")
         new_user = User(**self.kwargs)
-        self.assertEquals(new_user.login_name, self.kwargs["name"])
+        self.assertEqual(new_user.login_name, self.kwargs["name"])
     
     
     
@@ -537,7 +537,7 @@ class UserTest(mocker.MockerTestCase):
         
         # just supply login_name and check if they are holding the same value
         new_user = User(**self.kwargs)
-        self.assertEquals(new_user.login_name, new_user.name)
+        self.assertEqual(new_user.login_name, new_user.name)
     
     
     
@@ -548,7 +548,7 @@ class UserTest(mocker.MockerTestCase):
         
         # give a new value to login_name and
         self.mock_user.login_name = "newusername"
-        self.assertEquals(self.mock_user.login_name, self.mock_user.name)
+        self.assertEqual(self.mock_user.login_name, self.mock_user.name)
     
     
     
@@ -562,7 +562,7 @@ class UserTest(mocker.MockerTestCase):
         
         new_user = User(**self.kwargs)
         
-        self.assertEquals(new_user.name, self.kwargs["login_name"])
+        self.assertEqual(new_user.name, self.kwargs["login_name"])
     
     
     
@@ -576,7 +576,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs.pop("login_name")
         
         new_user_with_name = User(**self.kwargs)
-        self.assertEquals(new_user_with_name.login_name,
+        self.assertEqual(new_user_with_name.login_name,
                           new_user_with_name.name)
     
     
@@ -589,7 +589,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.mock_user.name = "EoYilmaz"
         
-        self.assertEquals(self.mock_user.login_name, "eoyilmaz")
+        self.assertEqual(self.mock_user.login_name, "eoyilmaz")
     
     
     
@@ -673,7 +673,7 @@ class UserTest(mocker.MockerTestCase):
             # set the input and expect the expected output
             self.kwargs["first_name"] = valuePair[0]
             test_user = User(**self.kwargs)
-            self.assertEquals(test_user._first_name, valuePair[1])
+            self.assertEqual(test_user._first_name, valuePair[1])
     
     
     
@@ -698,7 +698,7 @@ class UserTest(mocker.MockerTestCase):
             
             self.mock_user.first_name = valuePair[0]
             
-            self.assertEquals(
+            self.assertEqual(
                 self.mock_user.first_name,
                 valuePair[1]
             )
@@ -825,7 +825,7 @@ class UserTest(mocker.MockerTestCase):
         
         test_value = datetime.datetime.now()
         self.mock_user.last_login = test_value
-        self.assertEquals(self.mock_user.last_login, test_value)
+        self.assertEqual(self.mock_user.last_login, test_value)
     
     
     
@@ -837,7 +837,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.kwargs["last_name"] = None
         aNewUser = User(**self.kwargs)
-        self.assertEquals(aNewUser.last_name, "")
+        self.assertEqual(aNewUser.last_name, "")
     
     
     
@@ -848,7 +848,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.mock_user.last_name = None
-        self.assertEquals(self.mock_user.last_name, "")
+        self.assertEqual(self.mock_user.last_name, "")
     
     
     
@@ -874,7 +874,7 @@ class UserTest(mocker.MockerTestCase):
             
             test_user = User(**self.kwargs)
             
-            self.assertEquals(
+            self.assertEqual(
                 test_user._last_name,
                 valuePair[1]
             )
@@ -897,7 +897,7 @@ class UserTest(mocker.MockerTestCase):
         
         for valuePair in test_values:
             self.mock_user.last_name = valuePair[0]
-            self.assertEquals(self.mock_user.last_name, valuePair[1])
+            self.assertEqual(self.mock_user.last_name, valuePair[1])
     
     
     
@@ -1004,7 +1004,7 @@ class UserTest(mocker.MockerTestCase):
         
         # try to set and get the same value back
         self.mock_user.department = self.mock_department2
-        self.assertEquals(self.mock_user.department, self.mock_department2)
+        self.assertEqual(self.mock_user.department, self.mock_department2)
         
     
     
@@ -1221,7 +1221,7 @@ class UserTest(mocker.MockerTestCase):
         
         test_pg = [self.mock_permission_group3]
         self.mock_user.permission_groups = test_pg
-        self.assertEquals(self.mock_user.permission_groups, test_pg)
+        self.assertEqual(self.mock_user.permission_groups, test_pg)
     
     
     
@@ -1499,7 +1499,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.mock_user.projects_lead = projects_lead
         
-        self.assertEquals(self.mock_user.projects_lead, projects_lead)
+        self.assertEqual(self.mock_user.projects_lead, projects_lead)
     
     
     
@@ -1632,7 +1632,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if sequence_lead attribute works properly
         """
         
-        self.assertEquals(
+        self.assertEqual(
             self.mock_user.sequences_lead, self.kwargs["sequences_lead"]
         )
     
@@ -1767,7 +1767,7 @@ class UserTest(mocker.MockerTestCase):
         
         self.mock_user.tasks = tasks
         
-        self.assertEquals(self.mock_user.tasks, tasks)
+        self.assertEqual(self.mock_user.tasks, tasks)
     
     
     
@@ -1874,7 +1874,7 @@ class UserTest(mocker.MockerTestCase):
         
         new_user = User(**self.kwargs)
         
-        self.assertEquals(new_user.initials, self.kwargs["initials"])
+        self.assertEqual(new_user.initials, self.kwargs["initials"])
     
     
     
@@ -1903,7 +1903,7 @@ class UserTest(mocker.MockerTestCase):
             
             new_user = User(**self.kwargs)
             
-            self.assertEquals(new_user.initials, test_value[2], )
+            self.assertEqual(new_user.initials, test_value[2], )
     
     
     
@@ -1915,7 +1915,7 @@ class UserTest(mocker.MockerTestCase):
         test_value = "eoy"
         
         self.mock_user.initials = test_value
-        self.assertEquals(self.mock_user.initials, test_value)
+        self.assertEqual(self.mock_user.initials, test_value)
     
     
     
@@ -1924,7 +1924,7 @@ class UserTest(mocker.MockerTestCase):
         """testing the representation
         """
         
-        self.assertEquals(
+        self.assertEqual(
             self.mock_user.__repr__(),
             "<User (%s %s ('%s'))>" % (
                 self.mock_user.first_name,

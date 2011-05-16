@@ -81,10 +81,6 @@ v0.1.1.a7
    new mappers without deleting the previous
    :const:`stalker.conf.defaults.MAPPERS` list.
 
- * Introduced the :class:`~stalker.core.models.TaskMixin` which gives the
-   ability to connect a list of tasks to the mixed in class. Also added the
-   mapper setup for this mixin.
-
  * Removed the :class:`~stalker.core.models.AssetType` and derived the
    :class:`~stalker.core.models.Shot` and :class:`~stalker.core.models.Asset`
    classes from :class:`~stalker.core.models.Entity`.
@@ -92,16 +88,58 @@ v0.1.1.a7
  * Moved the mixin classes from :mod:`stalker.core.models` to
    :mod:`stalker.core.mixins`
 
+ * Introduced the :class:`~stalker.core.mixins.TaskMixin` which gives the
+   ability to connect a list of tasks to the mixed in class. Also added the
+   mapper setup for this mixin.
+
  * :class:`~stalker.ext.validatedList.ValidatedList` now accepts string values
    for the ``type_`` argument.
 
  * Added :class:`~stalker.core.models.Shot` class and test for it.
- 
+
  * Updated the :class:`~stalker.core.models.Sequence` database tests according
    to new rules introduced with the :class:`~stalker.core.models.Shot` class.
 
  * :class:`~stalker.ext.validatedList.ValidatedList` now imports the given
    types lazily when the type is given as a string path.
+
+ * :class:`~stalker.core.models.Sequence` now needs a
+   :class:`~stalker.core.models.Project` instance to be created.
+
+ * It is now possible to assign :class:`~stalker.core.models.Task`\ s to
+   :class:`~stalker.core.models.Project` and
+   :class:`~stalker.core.models.Sequence`\ s. Also updated the tests for this
+   change.
+
+ * Removed the ``shots`` argument from the
+   :class:`~stalker.core.models.Sequence` class initialization. Because there
+   is no way to create a :class:`~stalker.core.models.Shot` without a
+   :class:`~stalker.core.models.Sequence` instance.
+
+ * Added tests for mixin initialization for
+   :class:`~stalker.core.models.Project`,
+   :class:`~stalker.core.models.Sequence`, :class:`~stalker.core.models.Shot`
+   and :class:`~stalker.core.models.Asset` classes.
+
+ * Fixed a bug in :class:`~stalker.core.models.Project` where it was always
+   initializing the references with an empty list no matter what is given.
+
+ * Fixed a bug in :class:`~stalker.core.models.Project` where it was always
+   initializing the :attr:`~stalker.core.models.Project.start_date` to
+   **datetime.date.today** and the
+   :attr:`~stalker.core.models.project.due_date` to 10 days later then the
+   :attr:`~stalker.core.models.project.start_date` no matter what are given.
+
+ * Fixed a bug in :class:`~stalker.core.mixins.ReferenceMixin` where it was not
+   initializing the reference attribute correctly.
+
+ * Fixed a bug in :class:`~stalker.core.models.Asset` where the
+   :attr:`~stalker.core.models.Asset.project` attribute was not correctly
+   getting the given :class:`~stalker.core.models.Project` instance.
+
+ * Added the mappers and tables for :class:`~stalker.core.models.Shot` class.
+
+ * Updated database model tests to test all the attributes of the models.
 
 v0.1.1.a6
 ---------

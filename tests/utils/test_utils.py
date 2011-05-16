@@ -26,7 +26,7 @@ class UtilsTester(unittest.TestCase):
                            "stalker.core.models",
                            "Asset")
         
-        self.assertEquals(
+        self.assertEqual(
             utils.path_to_exec(full_path),
             expected_result
         )

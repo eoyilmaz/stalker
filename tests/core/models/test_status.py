@@ -257,7 +257,7 @@ class StatusListTest(mocker.MockerTestCase):
         ]
         
         self.mock_status_list.statuses = new_list_of_statutes
-        self.assertEquals( self.mock_status_list.statuses,
+        self.assertEqual( self.mock_status_list.statuses,
                            new_list_of_statutes)
     
     
@@ -356,7 +356,7 @@ class StatusListTest(mocker.MockerTestCase):
         status1 = self.mock_status_list[0]
         
         # check the equality
-        self.assertEquals(self.mock_status_list.statuses[0], status1)
+        self.assertEqual(self.mock_status_list.statuses[0], status1)
     
     
     
@@ -373,8 +373,8 @@ class StatusListTest(mocker.MockerTestCase):
                                           statuses=[status1, status2, status3],
                                           target_entity_type="Asset")
         
-        self.assertEquals(a_status_list[0], a_status_list["complete"])
-        self.assertEquals(a_status_list[1], a_status_list["wip"])
+        self.assertEqual(a_status_list[0], a_status_list["complete"])
+        self.assertEqual(a_status_list[1], a_status_list["wip"])
     
     
     
@@ -390,7 +390,7 @@ class StatusListTest(mocker.MockerTestCase):
         self.mock_status_list[-1] = status1
         
         # check the equality
-        self.assertEquals(self.mock_status_list.statuses[-1], status1)
+        self.assertEqual(self.mock_status_list.statuses[-1], status1)
     
     
     
@@ -404,7 +404,7 @@ class StatusListTest(mocker.MockerTestCase):
         
         del self.mock_status_list[-1]
         
-        self.assertEquals(len(self.mock_status_list.statuses),
+        self.assertEqual(len(self.mock_status_list.statuses),
                           len_statuses-1)
     
     
@@ -415,7 +415,7 @@ class StatusListTest(mocker.MockerTestCase):
         """
         
         # get the len and compare it wiht len(statuses)
-        self.assertEquals(len(self.mock_status_list.statuses),
+        self.assertEqual(len(self.mock_status_list.statuses),
                           len(self.mock_status_list))
     
     

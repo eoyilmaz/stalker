@@ -55,12 +55,12 @@ class SimpleEntity(object):
       could not again have white spaces at the beggining and at the end of the
       string, again any given objects will be converted to strings
     
-    :param created_by: The :class:`stalker.core.models.User` who has created
+    :param created_by: The :class:`~stalker.core.models.User` who has created
       this object
     
-    :type created_by: :class:`stalker.core.models.User`
+    :type created_by: :class:`~stalker.core.models.User`
     
-    :param updated_by: The :class:`stalker.core.models.User` who has updated
+    :param updated_by: The :class:`~stalker.core.models.User` who has updated
       this object lastly. The created_by and updated_by attributes point the
       same object if this object is just created.
     
@@ -510,11 +510,11 @@ class Entity(SimpleEntity):
     Two Entities considered equal if they have the same name. It doesn't matter
     if they have different tags or notes.
     
-    :param list tags: A list of :class:`stalker.core.models.Tag` objects
+    :param list tags: A list of :class:`~stalker.core.models.Tag` objects
       related to this entity. tags could be an empty list, or when omitted it
       will be set to an empty list.
     
-    :param list notes: A list of :class:`stalker.core.models.Note` instances.
+    :param list notes: A list of :class:`~stalker.core.models.Note` instances.
       Can be an empty list, or when omitted it will be set to an empty list,
       when set to None it will be converted to an empty list.
     """
@@ -577,7 +577,7 @@ class Entity(SimpleEntity):
         
         doc = """All the notes about this entity.
         
-        It is a list of :class:`stalker.core.models.Note` objects or an empty
+        It is a list of :class:`~stalker.core.models.Note` objects or an empty
         list, None will be converted to an empty list.
         """
         
@@ -598,7 +598,7 @@ class Entity(SimpleEntity):
         
         doc = """A list of tags attached to this object.
         
-        It is a list of :class:`stalker.core.models.Tag` instances which shows
+        It is a list of :class:`~stalker.core.models.Tag` instances which shows
         the tags of this object"""
         
         return locals()
@@ -631,7 +631,7 @@ class TypeEntity(Entity):
      * :class:`~stalker.core.models.ProjectType`
      * :class:`~stalker.core.models.TaskType`
     
-    All derives from :class:`stalker.core.models.TypeEntity`.
+    All derives from :class:`~stalker.core.models.TypeEntity`.
     
     The main purpose of these classes are to introduce reusable *Types* of the
     related class. So an :class:`~stalker.core.models.AssetType` introduces
@@ -651,7 +651,7 @@ class TypeEntity(Entity):
     group the instances deriving from the inherited classes, so any other
     classes accepting a ``TypeEntity`` object can have one of the derived
     classes, this is done in that way mainly to ease the of creation of only
-    one :class:`stalker.core.models.TypeTemplate` class and let the others (the
+    one :class:`~stalker.core.models.TypeTemplate` class and let the others (the
     inherited classes) to use this one TypeTemplate class.
     
     It doesn't add any new parameters to it's super.
@@ -706,10 +706,10 @@ class AssetType(TypeEntity):
     
     So for example one can create a "Character"
     :class:`~stalker.core.models.AssetType` and then link "Design", "Modeling",
-    "Rig", "Shading" :class:`stalker.core.model.TaskType`\ s to this
+    "Rig", "Shading" :class:`~stalker.core.model.TaskType`\ s to this
     :class:`~stalker.core.models.AssetType`. And then have an "Environment"
     :class:`~stalker.core.models.AssetType` and then just link "Design",
-    "Modeling", "Shading" :class:`stalker.core.model.TaskType`\ s to it.
+    "Modeling", "Shading" :class:`~stalker.core.model.TaskType`\ s to it.
     
     The idea behind :class:`~stalker.core.models.AssetType` is to have an
     initial list of :class:`~stalker.core.mddels.TaskType`\ s instances which
@@ -729,8 +729,8 @@ class AssetType(TypeEntity):
       instances showing the initial :class:`~stalker.core.models.TaskType`\ s
       available for this :class:`~stalker.core.models.AssetType`.
     
-    :type task_types: a :class:`stalker.ext.validatedList.ValidatedList` of
-      :class:`stalker.core.models.TaskType` instances.
+    :type task_types: a :class:`~stalker.ext.validatedList.ValidatedList` of
+      :class:`~stalker.core.models.TaskType` instances.
     """
     
     
@@ -776,7 +776,7 @@ class AssetType(TypeEntity):
         
         doc = """task_types of this AssetType object.
         
-        task_types is a list of :class:`stalker.core.models.TaskType` objects,
+        task_types is a list of :class:`~stalker.core.models.TaskType` objects,
         showing the list of possible :class:`~stalker.core.models.TaskType`\ s
         that this kind of :class:`~stalker.core.models.Asset`\ s can have. Its
         main use is to create a default :class:`~stalker.core.models.Task`\ s
@@ -806,8 +806,8 @@ class LinkType(TypeEntity):
     """Defines the types of :class:`~stalker.core.models.Link` instances.
     
     LinkType objects hold the type of the link and it is generaly used by
-    :class:`stalker.core.models.Project` to sort things out. See
-    :class:`stalker.core.models.Project` object documentation for details.
+    :class:`~stalker.core.models.Project` to sort things out. See
+    :class:`~stalker.core.models.Project` object documentation for details.
     """
     
     
@@ -1082,7 +1082,7 @@ class StatusList(Entity):
         def fset(self, statuses):
             self._statuses = self._validate_statuses(statuses)
         
-        doc = """list of :class:`stalker.core.models.Status` objects,
+        doc = """list of :class:`~stalker.core.models.Status` objects,
         showing the possible statuses"""
         
         return locals()
@@ -1432,11 +1432,11 @@ class Link(Entity):
     
     Links are all about to give some external information to the current entity
     (external to the database, so it can be something on the
-    :class:`stalker.core.models.Repository` or in the Web). The
-    link type is defined by the :class:`stalker.core.models.LinkType` object
+    :class:`~stalker.core.models.Repository` or in the Web). The
+    link type is defined by the :class:`~stalker.core.models.LinkType` object
     and it can be anything like *General*, *File*, *Folder*, *WebPage*,
     *Image*, *ImageSequence*, *Movie*, *Text* etc. (you can also use multiple
-    :class:`stalker.core.models.Tag` objects to adding more information,
+    :class:`~stalker.core.models.Tag` objects to adding more information,
     and filtering back). Again it is defined by the needs of the studio.
     
     :param path: The Path to the link, it can be a path to a file in the file
@@ -1448,9 +1448,9 @@ class Link(Entity):
       or an empty string is not accepted and causes a ValueError to be raised.
     
     :param type\_: The type of the link. It should be an instance of
-      :class:`stalker.core.models.LinkType`, the type can not be
+      :class:`~stalker.core.models.LinkType`, the type can not be
       None or anything other than a
-      :class:`stalker.core.models.LinkType` object. Specifies the link
+      :class:`~stalker.core.models.LinkType` object. Specifies the link
       type, can be an LinkType with name Image, Movie/Video, Sound etc.
     
     .. _Nuke: http://www.thefoundry.co.uk
@@ -1575,7 +1575,7 @@ class Link(Entity):
             self._type = self._validate_type(type_in)
         
         doc="""the type of the link, it should be a
-        :class:`stalker.core.models.LinkType` object and it can not be
+        :class:`~stalker.core.models.LinkType` object and it can not be
         None"""
         
         return locals()
@@ -1860,24 +1860,24 @@ class Message(Entity, StatusMixin):
     messages is taken from the e-mail system. So it is pretty similiar to an
     e-mail message.
     
-    :param from: the :class:`stalker.core.models.User` object sending the
+    :param from: the :class:`~stalker.core.models.User` object sending the
       message
     
-    :param to: the list of :class:`stalker.core.models.User`\ s to
+    :param to: the list of :class:`~stalker.core.models.User`\ s to
       receive this message
     
     :param subject: the subject of the message
     
     :param body: the body of the message
     
-    :param in_reply_to: the :class:`stalker.core.models.Message`
+    :param in_reply_to: the :class:`~stalker.core.models.Message`
       object which this message is a reply to.
     
-    :param replies: the list of :class:`stalker.core.models.Message`
+    :param replies: the list of :class:`~stalker.core.models.Message`
       objects which are the direct replies of this message
     
     :param attachments: a list of
-      :class:`stalker.core.models.SimpleEntity` objects attached to
+      :class:`~stalker.core.models.SimpleEntity` objects attached to
       this message (so anything can be attached to a message)
     
     """
@@ -1962,37 +1962,39 @@ class Note(SimpleEntity):
 
 
 ########################################################################
-class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
+class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     """All the information about a Project in Stalker is hold in this class.
     
     Project is one of the main classes that will direct the others. A project
     in Stalker is a gathering point.
     
-    It is mixed with :class:`stalker.core.models.ReferenceMixin`,
-    :class:`stalker.core.models.StatusMixin` and
-    :class:`stalker.core.models.ScheduleMixin` to give reference, status
-    and schedule abilities.
+    It is mixed with :class:`~stalker.core.mixins.ReferenceMixin`,
+    :class:`~stalker.core.mixins.StatusMixin`,
+    :class:`~stalker.core.mixins.ScheduleMixin` and
+    :class:`~stalker.core.mixins.TaskMixin` to give reference, status, schedule
+    and task abilities. Please read the individual documentation of each of the
+    mixins.
     
     :param lead: The lead of the project. Default value is None.
     
-    :type lead: :class:`stalker.core.models.User`
+    :type lead: :class:`~stalker.core.models.User`
     
     :param list users: The users assigned to this project, should be a list of
-      :class:`stalker.core.models.User` instances, if set to None it is
+      :class:`~stalker.core.models.User` instances, if set to None it is
       converted to an empty list. Default value is an empty list.
     
     :param list sequences: The sequences of the project, it should be a list of
-      :class:`stalker.core.models.Sequence` instances, if set to None it is
+      :class:`~stalker.core.models.Sequence` instances, if set to None it is
       converted to an empty list. Default value is an empty list.
     
     :param list assets: The assets used in this project, it should be a list of
-      :class:`stalker.core.models.Asset` instances, if set to None it is
+      :class:`~stalker.core.models.Asset` instances, if set to None it is
       converted to an empty list. Default value is an empty list.
     
     :param image_format: The output image format of the project. Default
       value is None.
     
-    :type image_format: :class:`stalker.core.models.ImageFormat`
+    :type image_format: :class:`~stalker.core.models.ImageFormat`
     
     :param float fps: The FPS of the project, it should be a integer or float
       number, or a string literal which can be correctly converted to a float.
@@ -2000,19 +2002,19 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
     
     :param type: The type of the project. Default value is None.
     
-    :type type: :class:`stalker.core.models.ProjectType`
+    :type type: :class:`~stalker.core.models.ProjectType`
     
     :param structure: The structure of the project. Default value is None
     
-    :type structure: :class:`stalker.core.models.Structure`
+    :type structure: :class:`~stalker.core.models.Structure`
     
     :param repository: The repository that the project files are going to be
       stored in. You can not create the project folder structure if the project
       doesn't have a connection to a
-      :class:`stalker.core.models.Repository`. Default value is
+      :class:`~stalker.core.models.Repository`. Default value is
       None.
     
-    :type repository: :class:`stalker.core.models.Repository`.
+    :type repository: :class:`~stalker.core.models.Repository`.
     
     :param bool is_stereoscopic: a bool value, showing if the project is going
       to be a stereo 3D project, anything given as the argument will be
@@ -2028,8 +2030,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 start_date=datetime.date.today(),
-                 due_date=datetime.timedelta(days=10),
                  lead=None,
                  users=[],
                  repository=None,
@@ -2041,7 +2041,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
                  fps=25.0,
                  is_stereoscopic=False,
                  display_width=1.0,
-                 references=[],
                  **kwargs):
         
         super(Project, self).__init__(**kwargs)
@@ -2049,9 +2048,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
+        TaskMixin.__init__(self, **kwargs)
         
-        self._start_date = self._validate_start_date(start_date)
-        self._due_date = self._validate_due_date(due_date)
         self._lead = self._validate_lead(lead)
         self._users = self._validate_users(users)
         self._repository = self._validate_repository(repository)
@@ -2204,7 +2202,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
         if not all([isinstance(element, User) \
                     for element in users_in]):
             raise ValueError("users should be a list containing instances of "
-                             ":class:`stalker.core.models.User`")
+                             ":class:`~stalker.core.models.User`")
         
         return ValidatedList(users_in)
     
@@ -2270,7 +2268,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
         
         doc = """the image format of the current project. This value defines
         the output image format of the project, should be an instance of
-        :class:`stalker.core.models.ImageFormat`, can not be
+        :class:`~stalker.core.models.ImageFormat`, can not be
         skipped"""
         
         return locals()
@@ -2302,7 +2300,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
             self._lead = self._validate_lead(lead_in)
         
         doc = """the lead of the project, should be an instance of
-        :class:`stalker.core.models.User`, also can set to None"""
+        :class:`~stalker.core.models.User`, also can set to None"""
         
         return locals()
     
@@ -2318,7 +2316,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
             self._repository = self._validate_repository(repository_in)
         
         doc = """the repository that this project should reside, should be an
-        instance of :class:`stalker.core.models.Repository`, can
+        instance of :class:`~stalker.core.models.Repository`, can
         not be skipped"""
         
         return locals()
@@ -2335,7 +2333,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
             self._sequences = self._validate_sequences(sequences_in)
         
         doc = """the sequences contained in this project, should be a list
-        containing all of :class:`stalker.core.models.Sequence`
+        containing all of :class:`~stalker.core.models.Sequence`
         instances, when set to None it is converted to an empty list"""
         
         return locals()
@@ -2352,7 +2350,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
             self._structure = self._validate_structure(structure_in)
         
         doc = """The structure of the project. Should be an instance of
-        :class:`stalker.core.models.Structure` class"""
+        :class:`~stalker.core.models.Structure` class"""
         
         return locals()
     
@@ -2369,7 +2367,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
             self._type = self._validate_type(type_in)
         
         doc = """defines the type of the project, should be an instance of
-        :class:`stalker.core.models.ProjectType`"""
+        :class:`~stalker.core.models.ProjectType`"""
         
         return locals()
     
@@ -2385,7 +2383,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
             self._users = self._validate_users(users_in)
         
         doc = """the users assigned to this project. Should be a list of
-        :class:`stalker.core.models.User` instances. Can be and empty
+        :class:`~stalker.core.models.User` instances. Can be and empty
         list, and when set to None it will be converted to an empty list"""
         
         return locals()
@@ -2571,23 +2569,22 @@ class Repository(Entity):
 
 
 ########################################################################
-class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
+class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     """Stores data about Sequences.
     
-    Sequences are holders of the :class:`stalker.core.models.Shot` objects.
+    Sequences are holders of the :class:`~stalker.core.models.Shot` objects.
     They orginize the conceptual data with another level of complexity.
     
-    :param project: The :class:`stalker.core.models.Project` that this
-      Sequence belongs to. The default value is None.
+    :param project: The :class:`~stalker.core.models.Project` that this
+      Sequence belongs to. A Sequence can not be created without a
+      :class:`~stalker.core.models.Project` instance. The default value is
+      None which will raise a ValueError if you skip this argument.
     
-    :type project: :class:`stalker.core.models.Project`.
-    
-    :param list shots: The list of :class:`stalker.core.models.Shot` objects
-      that this Sequence has. The default value is an empty list.
+    :type project: :class:`~stalker.core.models.Project`.
     
     :param lead: The lead of this Seuqence. The default value is None.
     
-    :type lead: :class:`stalker.core.models.User`
+    :type lead: :class:`~stalker.core.models.User`
     """
     
     
@@ -2606,10 +2603,11 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
+        TaskMixin.__init__(self, **kwargs)
         
         self._project = self._validate_project(project)
         self._lead = self._validate_lead(lead)
-        self._shots = self._validate_shots(shots)
+        self._shots = self._validate_shots(None)
     
     
     
@@ -2618,10 +2616,13 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin):
         """validates the given project_in value
         """
         
-        if project_in is not None:
-            if not isinstance(project_in, Project):
-                raise ValueError("project should be instance of"
-                                 "stalker.core.models.Project")
+        if project_in is None:
+            raise ValueError("project should be an instance of "
+                             "stalker.core.models.Project")
+        
+        if not isinstance(project_in, Project):
+            raise ValueError("project should be an instance of "
+                             "stalker.core.models.Project")
         
         return project_in
     
@@ -2755,7 +2756,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     :attr:`~stalker.core.models.Shot.cut_in` +
     :attr:`~stalker.core.models.Shot.cut_duration`. So the priority of the
     attributes are as follows:
-      
+    
       :attr:`~stalker.core.models.Shot.cut_in` >
       :attr:`~stalker.core.models.Shot.cut_duration` >
       :attr:`~stalker.core.models.Shot.cut_out`
@@ -2771,13 +2772,13 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
       The shot itself will be added to the
       :attr:`~stalker.core.models.Sequence.shots` list of the given sequence.
     
-    :type sequence: :class:`stalker.core.models.Sequence`
+    :type sequence: :class:`~stalker.core.models.Sequence`
     
     :param assets: The list of :class:`~stalker.core.models.Asset`\ s used in
       this shot. When it is set to None, it defaults to the default value and
       the default value is an empty list.
     
-    :type assets: list of :class:`stalker.core.models.Asset` instances
+    :type assets: list of :class:`~stalker.core.models.Asset` instances
     
     :param integer cut_in: The in frame number that this shot starts. The
       default value is 1. When the ``cut_in`` is bigger then
@@ -2799,10 +2800,21 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, code=None, sequence=None, assets=[], cut_in=1,
-                 cut_out=None, cut_duration=None, **kwargs):
+    def __init__(self,
+                 code=None,
+                 sequence=None,
+                 assets=[],
+                 cut_in=1,
+                 cut_out=None,
+                 cut_duration=None,
+                 **kwargs):
+        
         kwargs["name"] = code
+        
         super(Shot, self).__init__(**kwargs)
+        ReferenceMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        TaskMixin.__init__(self, **kwargs)
         
         # set the code
         self._code = self._validate_code(code)
@@ -3138,7 +3150,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
 class Structure(Entity):
     """A structure object is the place to hold data about how the physical
     files are arranged in the
-    :class:`stalker.core.models.Repository`.
+    :class:`~stalker.core.models.Repository`.
     
     :param project_template: it is a string holding several lines of text
       showing the folder structure of the project. Whenever a project is
@@ -3148,25 +3160,25 @@ class Structure(Entity):
       to the template engine:
       
         * *project*: holds the current
-          :class:`stalker.core.models.Project`
+          :class:`~stalker.core.models.Project`
           object using this structure, so you can use {{project.code}} or
           {{project.sequences}} kind of variables in the Jinja2 template
     
-    :param asset_templates: holds :class:`stalker.core.models.TypeTemplate`
-      objects with an :class:`stalker.core.models.AssetType` connected to its
+    :param asset_templates: holds :class:`~stalker.core.models.TypeTemplate`
+      objects with an :class:`~stalker.core.models.AssetType` connected to its
       `type` attribute, which can help specifying templates based on the
-      related :class:`stalker.core.models.AssetType` object.
+      related :class:`~stalker.core.models.AssetType` object.
       
       Testing a second paragraph addition.
     
     :param reference_templates: holds
-      :class:`stalker.core.models.TypeTemplate` objects, which can help
+      :class:`~stalker.core.models.TypeTemplate` objects, which can help
       specifying templates based on the given
-      :class:`stalker.core.models.LinkType` object
+      :class:`~stalker.core.models.LinkType` object
     
     This templates are used in creation of Project folder structure and also
     while interacting with the assets and references in the current
-    :class:`stalker.core.models.Project`. You can create one project
+    :class:`~stalker.core.models.Project`. You can create one project
     structure for `Commmercials` and another project structure for `Movies` and
     another one for `Print` projects etc. and can reuse them with new projects.
     """
@@ -3249,9 +3261,9 @@ class Structure(Entity):
             self._asset_templates = \
                 self._validate_asset_templates(asset_templates_in)
         
-        doc = """A list of :class:`stalker.core.models.TypeTemplate` objects
-        which gives information about the :class:`stalker.core.models.Asset`
-        :class:`stalker.core.models.Version` file placements"""
+        doc = """A list of :class:`~stalker.core.models.TypeTemplate` objects
+        which gives information about the :class:`~stalker.core.models.Asset`
+        :class:`~stalker.core.models.Version` file placements"""
         
         return locals()
     
@@ -3269,7 +3281,7 @@ class Structure(Entity):
             self._reference_templates = \
                 self._validate_reference_templates(reference_templates_in)
         
-        doc = """A list of :class:`stalker.core.models.TypeTemplate` objects
+        doc = """A list of :class:`~stalker.core.models.TypeTemplate` objects
         which gives information about the placement of references to
         entities"""
         
@@ -3291,7 +3303,7 @@ class Structure(Entity):
         
         doc= """A string which shows the folder structure of the current
         project. It can have Jinja2 directives. See the documentation of
-        :class:`stalker.core.models.Structure` object for more information"""
+        :class:`~stalker.core.models.Structure` object for more information"""
         
         return locals()
     
@@ -3355,21 +3367,45 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     WARNING: NotImplemented yet!
     
+    :param project: The :class:`~stalker.core.models.Project` instance that
+      this asset belongs to. An asset can not be created without a
+      :class:`~stalker.core.models.Project`.
+    
+    :type project: :class:`~stalker.core.models.Project`
+    
     :param type: The type of the asset or shot. The default value is None.
     
-    :type type: :class:`stalker.core.models.AssetType`
+    :type type: :class:`~stalker.core.models.AssetType`
     """
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self, type=None, **kwargs):
+    def __init__(self, project=None, type=None, **kwargs):
+        
         super(Asset, self).__init__(**kwargs)
         
-        # call the mixin 
+        # call the mixin init methods
+        ReferenceMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        TaskMixin.__init__(self, **kwargs)
         
-        
+        self._project = self._validate_project(project)
         self._type = self._validate_type(type)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_project(self, project_in):
+        """validates the given project
+        """
+        
+        # the project should be instance of Project
+        if not isinstance(project_in, Project):
+            raise ValueError("The project should be instance of "
+                             "stalker.core.models.Project")
+        
+        return project_in
     
     
     
@@ -3384,6 +3420,24 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
                                  "stalker.core.models.AssetType")
         
         return type_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def project():
+        def fget(self):
+            return self._project
+        
+        def fset(self, project_in):
+            self._project = self._validate_project(project_in)
+        
+        doc = """The :class:`~stalker.core.models.Project` instance that this asset belongs to.
+        """
+        
+        return locals()
+    
+    project = property(**project())
+    
     
     
     
@@ -3428,6 +3482,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(Task, self).__init__(**kwargs)
+        
+        # call the mixin __init__ methods
+        #ReferenceMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
+        #TaskMixin.__init__(self, **kwargs)
 
 
 
@@ -3439,13 +3499,13 @@ class TypeTemplate(Entity):
     """The TypeTemplate model holds templates for Types.
     
     TypeTemplate objects help to specify where to place a file related to
-    :class:`stalker.core.models.TypeEntity` objects and its derived
+    :class:`~stalker.core.models.TypeEntity` objects and its derived
     classes.
     
     The first very important usage of TypeTemplates is to place asset
-    :class:`stalker.core.models.Version`'s to proper places inside a
-    :class:`stalker.core.models.Project`'s
-    :class:`stalker.core.models.Structure`.
+    :class:`~stalker.core.models.Version`'s to proper places inside a
+    :class:`~stalker.core.models.Project`'s
+    :class:`~stalker.core.models.Structure`.
     
     :param path_code: The Jinja2 template code which specifies the path of the
       given item. It is relative to the project root which is in general
@@ -3454,7 +3514,7 @@ class TypeTemplate(Entity):
     :param file_code: The Jinja2 template code which specifies the file name of
       the given item
     
-    :param type\_: A :class:`stalker.core.models.TypeEntity` object
+    :param type\_: A :class:`~stalker.core.models.TypeEntity` object
       or any other class which is derived from TypeEntity.
     
     Examples:
@@ -3516,7 +3576,7 @@ Character assets",
       session.commit()
     
     Now with the code above, whenever a new
-    :class:`stalker.core.models.Version` created for a **Character**
+    :class:`~stalker.core.models.Version` created for a **Character**
     asset, Stalker will automatically place the related file to a certain
     folder and with a certain file name defined by the template. For example
     the above template should render something like below for Windows::
@@ -3657,7 +3717,7 @@ Character assets",
             self._type = self._validate_type(type_in)
         
         doc = """the target type this template should work on, should be an
-        instance of :class:`stalker.core.models.TypeEntity`"""
+        instance of :class:`~stalker.core.models.TypeEntity`"""
         
         return locals()
     
@@ -4206,7 +4266,7 @@ class User(Entity):
             self._department = self._validate_department(department_in)
         
         doc = """department of the user, it is a
-        :class:`stalker.core.models.Department` object"""
+        :class:`~stalker.core.models.Department` object"""
         
         return locals()
     
@@ -4394,7 +4454,7 @@ class User(Entity):
                 self._validate_permission_groups(permission_groups_in)
         
         doc = """permission groups that this users is a member of, accepts
-        :class:`stalker.core.models.Group` object"""
+        :class:`~stalker.core.models.Group` object"""
         
         return locals()
     
@@ -4412,7 +4472,7 @@ class User(Entity):
             self._projects = self._validate_projects(projects_in)
         
         doc = """projects those the current user assigned to, accepts
-        :class:`stalker.core.models.Project` object"""
+        :class:`~stalker.core.models.Project` object"""
         
         return locals()
     
@@ -4431,7 +4491,7 @@ class User(Entity):
                 self._validate_projects_lead(projects_lead_in)
         
         doc = """projects lead by this current user, accepts
-        :class:`stalker.core.models.Project` object"""
+        :class:`~stalker.core.models.Project` object"""
         
         return locals()
     
@@ -4450,7 +4510,7 @@ class User(Entity):
                 self._validate_sequences_lead(sequences_lead_in)
         
         doc = """sequences lead by this user, accpets
-        :class:`stalker.core.models.Sequence` objects"""
+        :class:`~stalker.core.models.Sequence` objects"""
         
         return locals()
     
@@ -4468,7 +4528,7 @@ class User(Entity):
             self._tasks = self._validate_tasks(tasks_in)
         
         doc = """tasks assigned to the current user, accepts
-        :class:`stalker.core.models.Task` objects"""
+        :class:`~stalker.core.models.Task` objects"""
         
         return locals()
     

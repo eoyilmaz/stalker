@@ -2,9 +2,10 @@
 
 
 
+import datetime
 import mocker
 from stalker.core.models import (Sequence, Project, User, Shot, Entity, Status,
-                                 StatusList)
+                                 StatusList, Link, LinkType, Task)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -60,37 +61,52 @@ class SequenceTester(mocker.MockerTestCase):
         
         # the mock seuqence
         self.mock_sequence = Sequence(**self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_project_attribute_default_value_is_None(self):
-        """testing if the project attribute defaults to None when no project
-        argument is given
-        """
         
-        self.kwargs.pop("project")
-        new_sequence = Sequence(**self.kwargs)
-        self.assertEquals(new_sequence.project, None)
+        # assign the shots
+        self.mock_sequence.shots.append(self.mock_shot1)
+        self.mock_sequence.shots.append(self.mock_shot2)
+        self.mock_sequence.shots.append(self.mock_shot3)
+
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_project_attribute_default_value_is_None(self):
+        #"""testing if the project attribute defaults to None when no project
+        #argument is given
+        #"""
+        
+        #self.kwargs.pop("project")
+        #new_sequence = Sequence(**self.kwargs)
+        #self.assertEqual(new_sequence.project, None)
     
     
     
     #----------------------------------------------------------------------
     def test_project_argument_is_None(self):
-        """testing if nothing happens when the project argument is None
+        """testing if a ValueError will be raised when the project argument is
+        None
         """
         
         self.kwargs["project"] = None
-        new_sequence = Sequence(**self.kwargs)
+        self.assertRaises(ValueError, Sequence, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_project_attribute_is_set_to_None(self):
-        """testing if nothing happends when the project attribute set to None
+        """testing if a ValueError will be raised when the project attribute
+        set to None
         """
         
-        self.mock_sequence.project = None
+        #self.mock_sequence.project = None
+        self.assertRaises(
+            ValueError,
+            setattr,
+            self.mock_sequence,
+            "project",
+            None
+        )
     
     
     
@@ -133,7 +149,7 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.mock_sequence.project = self.mock_project2
-        self.assertEquals(self.mock_sequence.project, self.mock_project2)
+        self.assertEqual(self.mock_sequence.project, self.mock_project2)
     
     
     
@@ -145,7 +161,7 @@ class SequenceTester(mocker.MockerTestCase):
         
         self.kwargs.pop("lead")
         new_sequence = Sequence(**self.kwargs)
-        self.assertEquals(new_sequence.lead, None)
+        self.assertEqual(new_sequence.lead, None)
     
     
     
@@ -208,7 +224,7 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.mock_sequence.lead = self.mock_lead2
-        self.assertEquals(self.mock_sequence.lead, self.mock_lead2)
+        self.assertEqual(self.mock_sequence.lead, self.mock_lead2)
     
     
     
@@ -219,19 +235,19 @@ class SequenceTester(mocker.MockerTestCase):
         
         self.kwargs.pop("shots")
         new_sequence = Sequence(**self.kwargs)
-        self.assertEquals(new_sequence.shots, [])
+        self.assertEqual(new_sequence.shots, [])
     
     
     
-    #----------------------------------------------------------------------
-    def test_shots_argument_is_set_to_None(self):
-        """testing if the shots attribute will be set to an empty list when the
-        shots argument is given as None
-        """
+    ##----------------------------------------------------------------------
+    #def test_shots_argument_is_set_to_None(self):
+        #"""testing if the shots attribute will be set to an empty list when the
+        #shots argument is given as None
+        #"""
         
-        self.kwargs["shots"] = None
-        new_sequence = Sequence(**self.kwargs)
-        self.assertEquals(new_sequence.shots, [])
+        #self.kwargs["shots"] = None
+        #new_sequence = Sequence(**self.kwargs)
+        #self.assertEqual(new_sequence.shots, [])
     
     
     #----------------------------------------------------------------------
@@ -241,21 +257,21 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.mock_sequence.shots = None
-        self.assertEquals(self.mock_sequence.shots, [])
+        self.assertEqual(self.mock_sequence.shots, [])
     
     
     
-    #----------------------------------------------------------------------
-    def test_shots_argument_is_set_to_other_than_a_list(self):
-        """testing if a ValueError will be raised when the given shots argument
-        is not a list
-        """
+    ##----------------------------------------------------------------------
+    #def test_shots_argument_is_set_to_other_than_a_list(self):
+        #"""testing if a ValueError will be raised when the given shots argument
+        #is not a list
+        #"""
         
-        test_values = [1, 1.2, "a string"]
+        #test_values = [1, 1.2, "a string"]
         
-        for test_value in test_values:
-            self.kwargs["shots"] = test_value
-            self.assertRaises(ValueError, Sequence, **self.kwargs)
+        #for test_value in test_values:
+            #self.kwargs["shots"] = test_value
+            #self.assertRaises(ValueError, Sequence, **self.kwargs)
     
     
     
@@ -278,15 +294,15 @@ class SequenceTester(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_shots_argument_is_a_list_of_other_objects(self):
-        """testing if a ValueError will be raised when the shots argument is a
-        list of other type of objects
-        """
+    ##----------------------------------------------------------------------
+    #def test_shots_argument_is_a_list_of_other_objects(self):
+        #"""testing if a ValueError will be raised when the shots argument is a
+        #list of other type of objects
+        #"""
         
-        test_value = [1, 1.2, "a string"]
-        self.kwargs["shots"] = test_value
-        self.assertRaises(ValueError, Sequence, **self.kwargs)
+        #test_value = [1, 1.2, "a string"]
+        #self.kwargs["shots"] = test_value
+        #self.assertRaises(ValueError, Sequence, **self.kwargs)
     
     
     
@@ -369,5 +385,91 @@ class SequenceTester(mocker.MockerTestCase):
         self.assertTrue(new_seq1!=new_seq3)
         self.assertTrue(new_seq1!=new_entity)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_ReferenceMixin_initialization(self):
+        """tetsing if the ReferenceMixin part is initialized correctly
+        """
+        
+        link_type_1 = LinkType(name="Image")
+        
+        link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
+                     filename="a.jpg", type=link_type_1)
+        
+        link2 = Link(name="Artwork 2", path="/mnt/M/JOBs/TEST_PROJECT",
+                     filename="b.jbg", type=link_type_1)
+        
+        references = [link1, link2]
+        
+        self.kwargs["references"] = references
+        
+        new_sequence = Sequence(**self.kwargs)
+        
+        self.assertEqual(new_sequence.references, references)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_StatusMixin_initialization(self):
+        """tetsing if the StatusMixin part is initialized correctly
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        status2 = Status(name="Complete", code="CMPLT")
+        
+        status_list = StatusList(name="Project Statuses",
+                                 statuses=[status1, status2],
+                                 target_entity_type=Sequence.entity_type)
+        
+        self.kwargs["status"] = 0
+        self.kwargs["status_list"] = status_list
+        
+        new_sequence = Sequence(**self.kwargs)
+        
+        self.assertEqual(new_sequence.status_list, status_list)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_ScheduleMixin_initialization(self):
+        """tetsing if the ScheduleMixin part is initialized correctly
+        """
+        
+        start_date = datetime.date.today() + datetime.timedelta(days=25)
+        due_date = start_date + datetime.timedelta(days=12)
+        
+        self.kwargs["start_date"] = start_date
+        self.kwargs["due_date"] = due_date
+        
+        new_sequence = Sequence(**self.kwargs)
+        
+        self.assertEqual(new_sequence.start_date, start_date)
+        self.assertEqual(new_sequence.due_date, due_date)
+        self.assertEqual(new_sequence.duration, due_date - start_date)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_TaskMixin_initialization(self):
+        """tetsing if the TaskMixin part is initialized correctly
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        
+        task_status_list = StatusList(name="Task Statuses",
+                                      statuses=[status1],
+                                      target_entity_type=Task.entity_type)
+        
+        task1 = Task(name="Modeling", status=0, status_list=task_status_list)
+        task2 = Task(name="Lighting", status=0, status_list=task_status_list)
+        
+        tasks = [task1, task2]
+        
+        self.kwargs["tasks"] = tasks
+        
+        new_sequence = Sequence(**self.kwargs)
+        
+        self.assertEqual(new_sequence.tasks, tasks)
     
     

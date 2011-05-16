@@ -206,7 +206,7 @@ class DatabaseTester(unittest.TestCase):
         
         full_db_url = drivername + ":///" + database
         
-        self.assertEquals(full_db_url, defaults.DATABASE)
+        self.assertEqual(full_db_url, defaults.DATABASE)
     
     
     
@@ -224,7 +224,7 @@ class DatabaseTester(unittest.TestCase):
         # check if there is an admin
         admin = auth.authenticate(defaults.ADMIN_NAME,defaults.ADMIN_PASSWORD)
         
-        self.assertEquals(admin.name, defaults.ADMIN_NAME)
+        self.assertEqual(admin.name, defaults.ADMIN_NAME)
         
     
     
@@ -560,13 +560,12 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type=Task.entity_type
         )
         
-        mock_task1 = Task(name="test task 1")
-        mock_task2 = Task(name="test task 2")
-        mock_task3 = Task(name="test task 3")
-        
-        mock_task1.status_list = task_status_list
-        mock_task2.status_list = task_status_list
-        mock_task3.status_list = task_status_list
+        mock_task1 = Task(name="test task 1", status=0,
+                          status_list=task_status_list)
+        mock_task2 = Task(name="test task 2", status=0,
+                          status_list=task_status_list)
+        mock_task3 = Task(name="test task 3", status=0,
+                          status_list=task_status_list)
         
         asset_statusList = StatusList(
             name="Asset Status List",
@@ -574,15 +573,27 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type=Asset.entity_type
         )
         
+        project_statusList = StatusList(
+            name="Project Status List",
+            statuses=[status1, status2, status3],
+            target_entity_type="Project"
+        )
+        
+        mock_project = Project(name="Test Project",
+                               status_list=project_statusList,
+                               status=0)
+        
         kwargs = {
             "name": "Test Asset",
             "description": "This is a test Asset object",
             "type": asset_type,
             "tasks": [mock_task1, mock_task2, mock_task3],
+            "project": mock_project,
+            "status": 0,
+            "status_list": asset_statusList,
         }
         
         asset_base = Asset(**kwargs)
-        asset_base.status_list = asset_statusList
         
         db.session.add(asset_base)
         db.session.commit()
@@ -590,9 +601,10 @@ class DatabaseModelsTester(unittest.TestCase):
         asset_base_DB = db.query(Asset).\
                       filter_by(name=kwargs["name"]).one()
         
-        self.assertEquals(asset_base, asset_base_DB)
+        self.assertEqual(asset_base, asset_base_DB)
         
-        self.fail("test is not implemented completely yet")
+        # I don't remember why I decided to add this assertion
+        self.fail("test is not completely implemented yet")
     
     
     
@@ -641,11 +653,20 @@ class DatabaseModelsTester(unittest.TestCase):
         aType_DB = db.session.query(AssetType). \
                  filter_by(name=kwargs["name"]).first()
         
-        #for i, pStep_DB in enumerate(aType_DB.steps):
-            #self.assertEquals(aType.steps[i].name, pStep_DB.name)
-            #self.assertEquals(aType.steps[i].description, pStep_DB.description)
-        self.assertEquals(aType, aType_DB)
+        assert(isinstance(aType_DB, AssetType))
         
+        self.assertEqual(aType, aType_DB)
+        self.assertEqual(aType.code, aType_DB.code)
+        self.assertEqual(aType.created_by, aType_DB.created_by)
+        self.assertEqual(aType.date_created, aType_DB.date_created)
+        self.assertEqual(aType.date_updated, aType_DB.date_updated)
+        self.assertEqual(aType.description, aType_DB.description)
+        self.assertEqual(aType.name, aType_DB.name)
+        self.assertEqual(aType.nice_name, aType_DB.nice_name)
+        self.assertEqual(aType.notes, aType_DB.notes)
+        self.assertEqual(aType.tags, aType_DB.tags)
+        self.assertEqual(aType.task_types, aType_DB.task_types)
+        self.assertEqual(aType.updated_by, aType_DB.updated_by)
     
     
     
@@ -679,7 +700,7 @@ class DatabaseModelsTester(unittest.TestCase):
         date_created = datetime.datetime.now()
         date_updated = datetime.datetime.now()
         
-        testDepartment = Department(
+        test_dep = Department(
             name=name,
             description=description,
             created_by=created_by,
@@ -700,7 +721,7 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user1_first_name",
             last_name="user1_last_name",
             email="user1@department.com",
-            department=testDepartment,
+            department=test_dep,
             password="password",
         )
         
@@ -714,7 +735,7 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user2_first_name",
             last_name="user2_last_name",
             email="user2@department.com",
-            department=testDepartment,
+            department=test_dep,
             password="password",
         )
         
@@ -729,32 +750,37 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user3_first_name",
             last_name="user3_last_name",
             email="user3@department.com",
-            department=testDepartment,
+            department=test_dep,
             password="password",
         )
         
         # add as the members and the lead
-        testDepartment.lead = user1
-        testDepartment.members = [user1, user2, user3]
+        test_dep.lead = user1
+        test_dep.members = [user1, user2, user3]
         
-        db.session.add(testDepartment)
+        db.session.add(test_dep)
         db.session.commit()
         
         # lets check the data
         # first get the department from the db
-        dep_from_db = db.session.query(Department). \
-                    filter_by(name=testDepartment.name).first()
+        test_dep_db = db.session.query(Department). \
+                    filter_by(name=test_dep.name).first()
         
-        # members
-        for i, member in enumerate(dep_from_db.members):
-            self.assertEquals( testDepartment.members[i].name, member.name)
-            self.assertEquals( testDepartment.members[i].last_name,
-                               member.last_name)
-            self.assertEquals( testDepartment.members[i].login_name,
-                               member.login_name)
+        assert(isinstance(test_dep_db, Department))
         
-        # lead
-        self.assertEquals(testDepartment.lead, dep_from_db.lead)
+        self.assertEqual(test_dep, test_dep_db)
+        self.assertEqual(test_dep.code, test_dep_db.code)
+        self.assertEqual(test_dep.created_by, test_dep_db.created_by)
+        self.assertEqual(test_dep.date_created, test_dep_db.date_created)
+        self.assertEqual(test_dep.date_updated, test_dep_db.date_updated)
+        self.assertEqual(test_dep.description, test_dep_db.description)
+        self.assertEqual(test_dep.lead, test_dep_db.lead)
+        self.assertEqual(test_dep.members, test_dep_db.members)
+        self.assertEqual(test_dep.name, test_dep_db.name)
+        self.assertEqual(test_dep.nice_name, test_dep_db.nice_name)
+        self.assertEqual(test_dep.notes, test_dep_db.notes)
+        self.assertEqual(test_dep.tags, test_dep_db.tags)
+        self.assertEqual(test_dep.updated_by, test_dep_db.updated_by)
     
     
     
@@ -802,7 +828,7 @@ class DatabaseModelsTester(unittest.TestCase):
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
         
-        testEntity = Entity(
+        test_entity = Entity(
             name=name,
             description=description,
             created_by=created_by,
@@ -813,16 +839,26 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         # persist it to the database
-        db.session.add(testEntity)
+        db.session.add(test_entity)
         db.session.commit()
         
         # now try to retrieve it
-        testEntityDB = db.session.query(Entity). \
+        test_entity_DB = db.session.query(Entity). \
                      filter_by(name=name).first()
         
-        # just test the entity part of the object
-        for i, tag_ in enumerate(testEntity.tags):
-            self.assertEquals(tag_, testEntityDB.tags[i])
+        assert(isinstance(test_entity_DB, Entity))
+        
+        self.assertEqual(test_entity, test_entity_DB)
+        self.assertEqual(test_entity.code, test_entity_DB.code)
+        self.assertEqual(test_entity.created_by, test_entity_DB.created_by)
+        self.assertEqual(test_entity.date_created, test_entity_DB.date_created)
+        self.assertEqual(test_entity.date_updated, test_entity_DB.date_updated)
+        self.assertEqual(test_entity.description, test_entity_DB.description)
+        self.assertEqual(test_entity.name, test_entity_DB.name)
+        self.assertEqual(test_entity.nice_name, test_entity_DB.nice_name)
+        self.assertEqual(test_entity.notes, test_entity_DB.notes)
+        self.assertEqual(test_entity.tags, test_entity_DB.tags)
+        self.assertEqual(test_entity.updated_by, test_entity_DB.updated_by)
     
     
     
@@ -859,18 +895,36 @@ class DatabaseModelsTester(unittest.TestCase):
         }
         
         # create the ImageFormat object
-        imFormat = ImageFormat(**kwargs)
+        im_format = ImageFormat(**kwargs)
         
         # persist it
-        session.add(imFormat)
+        session.add(im_format)
         session.commit()
         
         # get it back
-        imFormat_db = session.query(ImageFormat). \
+        im_format_DB = session.query(ImageFormat). \
                 filter_by(name=kwargs["name"]).first()
         
+        assert(isinstance(im_format_DB, ImageFormat))
+        
         # just test the repository part of the attributes
-        self.assertEquals(imFormat, imFormat_db)
+        self.assertEqual(im_format, im_format_DB)
+        self.assertEqual(im_format.code, im_format_DB.code)
+        self.assertEqual(im_format.created_by, im_format_DB.created_by)
+        self.assertEqual(im_format.date_created, im_format_DB.date_created)
+        self.assertEqual(im_format.date_updated, im_format_DB.date_updated)
+        self.assertEqual(im_format.description, im_format_DB.description)
+        self.assertEqual(im_format.device_aspect, im_format_DB.device_aspect)
+        self.assertEqual(im_format.height, im_format_DB.height)
+        self.assertEqual(im_format.name, im_format_DB.name)
+        self.assertEqual(im_format.nice_name, im_format_DB.nice_name)
+        self.assertEqual(im_format.notes, im_format_DB.notes)
+        self.assertEqual(im_format.pixel_aspect, im_format_DB.pixel_aspect)
+        self.assertEqual(im_format.print_resolution,
+                         im_format_DB.print_resolution)
+        self.assertEqual(im_format.tags, im_format_DB.tags)
+        self.assertEqual(im_format.updated_by, im_format_DB.updated_by)
+        self.assertEqual(im_format.width, im_format_DB.width)
     
     
     
@@ -903,10 +957,25 @@ class DatabaseModelsTester(unittest.TestCase):
         db.session.commit()
         
         # retrieve it back
-        link_DB = db.session.query(Link).\
+        new_link_DB = db.session.query(Link).\
                 filter_by(name=kwargs["name"]).first()
         
-        self.assertTrue(new_link==link_DB)
+        assert(isinstance(new_link_DB, Link))
+        
+        self.assertEqual(new_link, new_link_DB)
+        self.assertEqual(new_link.code, new_link_DB.code)
+        self.assertEqual(new_link.created_by, new_link_DB.created_by)
+        self.assertEqual(new_link.date_created, new_link_DB.date_created)
+        self.assertEqual(new_link.date_updated, new_link_DB.date_updated)
+        self.assertEqual(new_link.description, new_link_DB.description)
+        self.assertEqual(new_link.filename, new_link_DB.filename)
+        self.assertEqual(new_link.name, new_link_DB.name)
+        self.assertEqual(new_link.nice_name, new_link_DB.nice_name)
+        self.assertEqual(new_link.notes, new_link_DB.notes)
+        self.assertEqual(new_link.path, new_link_DB.path)
+        self.assertEqual(new_link.tags, new_link_DB.tags)
+        self.assertEqual(new_link.type, new_link_DB.type)
+        self.assertEqual(new_link.updated_by, new_link_DB.updated_by)
     
     
     
@@ -926,32 +995,43 @@ class DatabaseModelsTester(unittest.TestCase):
             rig later on",
         }
         
-        a_note_obj = Note(**note_kwargs)
+        test_note = Note(**note_kwargs)
         
         # create an entity
         entity_kwargs = {
             "name": "Entity with Note",
             "description": "This Entity is created for testing purposes",
-            "notes": [a_note_obj],
+            "notes": [test_note],
         }
         
-        an_entity_obj = Entity(**entity_kwargs)
+        test_entity = Entity(**entity_kwargs)
         
-        db.session.add_all([an_entity_obj, a_note_obj])
+        db.session.add_all([test_entity, test_note])
         db.session.commit()
         
         # try to get the note directly
         
-        note_DB = db.query(Note).\
-                filter(Note.name==note_kwargs["name"]).first()
+        test_note_DB = db.query(Note).\
+                     filter(Note.name==note_kwargs["name"]).first()
         
-        self.assertEquals(a_note_obj, note_DB)
+        assert(isinstance(test_note_DB, Note))
         
         # try to get the note from the entity
-        entity_DB = db.query(Entity).\
-                  filter(Entity.name==entity_kwargs["name"]).first()
+        test_entity_DB = db.query(Entity).\
+                      filter(Entity.name==entity_kwargs["name"]).first()
         
-        self.assertEquals(a_note_obj, entity_DB.notes[0])
+        self.assertEqual(test_note, test_entity_DB.notes[0])
+        
+        self.assertEqual(test_note, test_note_DB)
+        self.assertEqual(test_note.code, test_note_DB.code)
+        self.assertEqual(test_note.content, test_note_DB.content)
+        self.assertEqual(test_note.created_by, test_note_DB.created_by)
+        self.assertEqual(test_note.date_created, test_note_DB.date_created)
+        self.assertEqual(test_note.date_updated, test_note_DB.date_updated)
+        self.assertEqual(test_note.description, test_note_DB.description)
+        self.assertEqual(test_note.name, test_note_DB.name)
+        self.assertEqual(test_note.nice_name, test_note_DB.nice_name)
+        self.assertEqual(test_note.updated_by, test_note_DB.updated_by)
     
     
     
@@ -982,9 +1062,20 @@ class DatabaseModelsTester(unittest.TestCase):
                  filter_by(description=kwargs["description"]). \
                  first()
         
+        assert(isinstance(tType_DB, TaskType))
+        
         # lets compare it
-        #self.assertEquals(pStep.code, pStep_DB.code)
-        self.assertEquals(tType, tType_DB)
+        self.assertEqual(tType, tType_DB)
+        self.assertEqual(tType.code, tType_DB.code)
+        self.assertEqual(tType.created_by, tType_DB.created_by)
+        self.assertEqual(tType.date_created, tType_DB.date_created)
+        self.assertEqual(tType.date_updated, tType_DB.date_updated)
+        self.assertEqual(tType.description, tType_DB.description)
+        self.assertEqual(tType.name, tType_DB.name)
+        self.assertEqual(tType.nice_name, tType_DB.nice_name)
+        self.assertEqual(tType.notes, tType_DB.notes)
+        self.assertEqual(tType.tags, tType_DB.tags)
+        self.assertEqual(tType.updated_by, tType_DB.updated_by)
     
     
     
@@ -1007,29 +1098,56 @@ class DatabaseModelsTester(unittest.TestCase):
         user3 = User(login_name="user3", first_name="user3", last_name="user3",
                      email="user3@user3.com", password="password")
         
-        image_format = ImageFormat(name="HD", width=1920,
-                                               height=1080)
+        image_format = ImageFormat(name="HD", width=1920, height=1080)
         
         project_type = ProjectType(name="Commercial")
         
-        project_structure = Structure(name="Commercial Structure",
-                                      project_template="")
+        project_structure = Structure(
+            name="Commercial Structure",
+            project_template="{{project.code}}\n"
+            "{{project.code}}/ASSETS\n"
+            "{{project.code}}/SEQUENCES\n"
+        )
         
         repo = Repository(name="Commercials Repository",
-                          linux_path="/mnt/Projects",
+                          linux_path="/mnt/M/Projects",
                           windows_path="M:\\Projects",
-                          osx_path="/Volumes/Projects")
+                          osx_path="/Volumes/M/Projects")
+        
+        status1 = Status(name="On Hold", code="OH")
+        status2 = Status(name="Complete", code="CMPLT")
         
         project_status_list = StatusList(
             name="A Status List for testing Project",
-            statuses=[
-                Status(name="On Hold", code="OH"),
-                Status(name="Complete", code="CMPLT")
-            ],
-            target_entity_type = Project.entity_type
+            statuses=[status1, status2],
+            target_entity_type=Project.entity_type
         )
         
         db.session.add(project_status_list)
+        db.session.commit()
+        
+        # create data for mixins
+        # Reference Mixin
+        link_type = LinkType(name="Image")
+        ref1 = Link(name="Ref1", path="/mnt/M/JOBs/TEST_PROJECT",
+                    filename="1.jpg", type=link_type)
+        ref2 = Link(name="Ref2", path="/mnt/M/JOBs/TEST_PROJECT",
+                    filename="1.jpg", type=link_type)
+        
+        # TaskMixin
+        task_status_list = StatusList(
+            name="Task Statuses",
+            statuses=[status1, status2],
+            target_entity_type=Task.entity_type
+        )
+        
+        db.session.add(task_status_list)
+        db.session.commit()
+        
+        task1 = Task(name="task1", status_list=task_status_list, status=0)
+        task2 = Task(name="task2", status_list=task_status_list, status=0)
+        
+        db.session.add_all([ref1, ref2, task1, task2])
         db.session.commit()
         
         # create a project object
@@ -1048,7 +1166,9 @@ class DatabaseModelsTester(unittest.TestCase):
             "start_date": start_date,
             "due_date": due_date,
             "status_list": project_status_list,
-            "status": 0
+            "status": 0,
+            "references": [ref1, ref2],
+            "tasks": [task1, task2],
         }
         
         new_project = Project(**kwargs)
@@ -1061,7 +1181,39 @@ class DatabaseModelsTester(unittest.TestCase):
         new_project_DB = db.query(Project).\
                        filter_by(name=kwargs["name"]).first()
         
-        self.assertEquals(new_project, new_project_DB)
+        assert(isinstance(new_project_DB, Project))
+        
+        self.assertEqual(new_project, new_project_DB)
+        self.assertEqual(new_project.assets, new_project_DB.assets)
+        self.assertEqual(new_project.code, new_project_DB.code)
+        self.assertEqual(new_project.created_by, new_project_DB.created_by)
+        self.assertEqual(new_project.date_created, new_project_DB.date_created)
+        self.assertEqual(new_project.date_updated, new_project_DB.date_updated)
+        self.assertEqual(new_project.description, new_project_DB.description)
+        self.assertEqual(new_project.display_width,
+                         new_project_DB.display_width)
+        self.assertEqual(new_project.due_date, new_project_DB.due_date)
+        self.assertEqual(new_project.duration, new_project_DB.duration)
+        self.assertEqual(new_project.fps, new_project_DB.fps)
+        self.assertEqual(new_project.image_format, new_project_DB.image_format)
+        self.assertEqual(new_project.is_stereoscopic,
+                         new_project_DB.is_stereoscopic)
+        self.assertEqual(new_project.lead, new_project_DB.lead)
+        self.assertEqual(new_project.name, new_project_DB.name)
+        self.assertEqual(new_project.nice_name, new_project_DB.nice_name)
+        self.assertEqual(new_project.notes, new_project_DB.notes)
+        self.assertEqual(new_project.references, new_project_DB.references)
+        self.assertEqual(new_project.repository, new_project_DB.repository)
+        self.assertEqual(new_project.sequences, new_project_DB.sequences)
+        self.assertEqual(new_project.start_date, new_project_DB.start_date)
+        self.assertEqual(new_project.status, new_project_DB.status)
+        self.assertEqual(new_project.status_list, new_project_DB.status_list)
+        self.assertEqual(new_project.structure, new_project_DB.structure)
+        self.assertEqual(new_project.tags, new_project_DB.tags)
+        self.assertEqual(new_project.tasks, new_project_DB.tasks)
+        self.assertEqual(new_project.type, new_project_DB.type)
+        self.assertEqual(new_project.updated_by, new_project.updated_by)
+        self.assertEqual(new_project.users, new_project_DB.users)
     
     
     
@@ -1096,11 +1248,22 @@ class DatabaseModelsTester(unittest.TestCase):
                   filter_by(name=kwargs["name"]).\
                   first()
         
-        # just test the repository part of the attributes
-        self.assertEquals(repo.linux_path, repo_db.linux_path)
-        self.assertEquals(repo.windows_path, repo_db.windows_path)
-        self.assertEquals(repo.osx_path, repo_db.osx_path)
-        self.assertEquals(repo.path, repo_db.path)
+        assert(isinstance(repo_db, Repository))
+        
+        self.assertEqual(repo.code, repo_db.code)
+        self.assertEqual(repo.created_by, repo_db.created_by)
+        self.assertEqual(repo.date_created, repo_db.date_created)
+        self.assertEqual(repo.date_updated, repo_db.date_updated)
+        self.assertEqual(repo.description, repo_db.description)
+        self.assertEqual(repo.linux_path, repo_db.linux_path)
+        self.assertEqual(repo.name, repo_db.name)
+        self.assertEqual(repo.nice_name, repo_db.nice_name)
+        self.assertEqual(repo.notes, repo_db.notes)
+        self.assertEqual(repo.osx_path, repo_db.osx_path)
+        self.assertEqual(repo.path, repo_db.path)
+        self.assertEqual(repo.tags, repo_db.tags)
+        self.assertEqual(repo.updated_by, repo_db.updated_by)
+        self.assertEqual(repo.windows_path, repo_db.windows_path)
     
     
     
@@ -1114,19 +1277,19 @@ class DatabaseModelsTester(unittest.TestCase):
         status3 = Status(name="Finished", code="FIN")
         
         project_status_list = StatusList(
-            name="Project Status List",
+            name="Project Statuses",
             statuses=[status1, status2, status3],
             target_entity_type = Project.entity_type
         )
         
         sequence_status_list = StatusList(
-            name="Sequence Status List",
+            name="Sequence Statuses",
             statuses=[status1, status2, status3],
             target_entity_type = Sequence.entity_type
         )
         
         shot_status_list = StatusList(
-            name="Shot Status List",
+            name="Shot Statuses",
             statuses=[status1, status2, status3],
             target_entity_type = Shot.entity_type
         )
@@ -1138,7 +1301,7 @@ class DatabaseModelsTester(unittest.TestCase):
                     first_name="lead", last_name="lead", password="password")
         
         kwargs = {
-            "name": "Test seuqence",
+            "name": "Test sequence",
             "description": "this is a test sequence",
             "project": project1,
             "lead": lead,
@@ -1149,13 +1312,12 @@ class DatabaseModelsTester(unittest.TestCase):
         test_sequence = Sequence(**kwargs)
         
         # now add the shots
-        shot1 = Shot(code="SH001", sequence=test_sequence)
-        shot2 = Shot(code="SH002", sequence=test_sequence)
-        shot3 = Shot(code="SH003", sequence=test_sequence)
-        
-        shot1.status_list = shot_status_list
-        shot2.status_list = shot_status_list
-        shot3.status_list = shot_status_list
+        shot1 = Shot(code="SH001", sequence=test_sequence, status=0,
+                     status_list=shot_status_list)
+        shot2 = Shot(code="SH002", sequence=test_sequence, status=0,
+                     status_list=shot_status_list)
+        shot3 = Shot(code="SH003", sequence=test_sequence, status=0,
+                     status_list=shot_status_list)
         
         db.session.add(test_sequence)
         db.session.commit()
@@ -1163,7 +1325,33 @@ class DatabaseModelsTester(unittest.TestCase):
         test_sequence_DB = db.query(Sequence).\
                          filter_by(name=kwargs["name"]).one()
         
-        self.assertEquals(test_sequence, test_sequence_DB)
+        self.assertEqual(test_sequence, test_sequence_DB)
+        self.assertEqual(test_sequence.code, test_sequence_DB.code)
+        self.assertEqual(test_sequence.created_by, test_sequence_DB.created_by)
+        self.assertEqual(test_sequence.date_created,
+                         test_sequence_DB.date_created)
+        self.assertEqual(test_sequence.date_updated,
+                         test_sequence_DB.date_updated)
+        self.assertEqual(test_sequence.description,
+                         test_sequence_DB.description)
+        self.assertEqual(test_sequence.due_date, test_sequence_DB.due_date)
+        self.assertEqual(test_sequence.duration, test_sequence_DB.duration)
+        self.assertEqual(test_sequence.lead, test_sequence_DB.lead)
+        self.assertEqual(test_sequence.name, test_sequence_DB.name)
+        self.assertEqual(test_sequence.nice_name, test_sequence_DB.nice_name)
+        self.assertEqual(test_sequence.notes, test_sequence_DB.notes)
+        self.assertEqual(test_sequence.project, test_sequence_DB.project)
+        self.assertEqual(test_sequence.references, test_sequence_DB.references)
+        self.assertEqual(test_sequence.shots, test_sequence_DB.shots)
+        self.assertEqual(test_sequence.start_date, test_sequence_DB.start_date)
+        self.assertEqual(test_sequence.status, test_sequence_DB.status)
+        self.assertEqual(test_sequence.status_list,
+                         test_sequence_DB.status_list)
+        self.assertEqual(test_sequence.tags, test_sequence_DB.tags)
+        self.assertEqual(test_sequence.tasks, test_sequence_DB.tasks)
+        self.assertEqual(test_sequence.updated_by, test_sequence_DB.updated_by)
+        
+        
     
     
     
@@ -1172,7 +1360,80 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of Shot
         """
         
-        self.fail("test is not implemented yet")
+        status1 = Status(name="On Hold", code="OH")
+        status2 = Status(name="Work In Progress", code="WIP")
+        status3 = Status(name="Finished", code="FIN")
+        
+        project_status_list = StatusList(
+            name="Project Statuses",
+            statuses=[status1, status2, status3],
+            target_entity_type = Project.entity_type
+        )
+        
+        sequence_status_list = StatusList(
+            name="Sequence Statuses",
+            statuses=[status1, status2, status3],
+            target_entity_type = Sequence.entity_type
+        )
+        
+        shot_status_list = StatusList(
+            name="Shot Statuses",
+            statuses=[status1, status2, status3],
+            target_entity_type = Shot.entity_type
+        )
+        
+        project1 = Project(name="Test project",
+                           status_list=project_status_list)
+        
+        lead = User(login_name="lead", email="lead@lead.com",
+                    first_name="lead", last_name="lead", password="password")
+        
+        kwargs = {
+            "name": "Test sequence",
+            "description": "this is a test sequence",
+            "project": project1,
+            "lead": lead,
+            "status_list": sequence_status_list,
+        }
+        
+        test_sequence = Sequence(**kwargs)
+        
+        # now add the shots
+        shot_kwargs = {
+            "code": "SH001",
+            "sequence": test_sequence,
+            "status": 0,
+            "status_list": shot_status_list
+        }
+        
+        test_shot = Shot(**shot_kwargs)
+        
+        db.session.add(test_shot)
+        db.session.add(test_sequence)
+        db.session.commit()
+        
+        test_shot_DB = db.query(Shot).\
+                     filter_by(code=shot_kwargs["code"]).first()
+        
+        self.assertEqual(test_shot, test_shot_DB)
+        self.assertEqual(test_shot.assets, test_shot_DB.assets)
+        self.assertEqual(test_shot.code, test_shot_DB.code)
+        self.assertEqual(test_shot.cut_duration, test_shot_DB.cut_duration)
+        self.assertEqual(test_shot.cut_in, test_shot_DB.cut_in)
+        self.assertEqual(test_shot.cut_out, test_shot_DB.cut_out)
+        self.assertEqual(test_shot.date_created, test_shot_DB.date_created)
+        self.assertEqual(test_shot.date_updated, test_shot_DB.date_updated)
+        self.assertEqual(test_shot.description, test_shot_DB.description)
+        self.assertEqual(test_shot.name, test_shot_DB.name)
+        self.assertEqual(test_shot.nice_name, test_shot_DB.nice_name)
+        self.assertEqual(test_shot.notes, test_shot_DB.notes)
+        self.assertEqual(test_shot.references, test_shot_DB.references)
+        self.assertEqual(test_shot.sequence, test_shot_DB.sequence)
+        self.assertEqual(test_shot.status, test_shot_DB.status)
+        self.assertEqual(test_shot.status_list, test_shot_DB.status_list)
+        self.assertEqual(test_shot.tags, test_shot_DB.tags)
+        self.assertEqual(test_shot.tasks, test_shot_DB.tasks)
+        self.assertEqual(test_shot.updated_by, test_shot_DB.updated_by)
     
     
     
@@ -1186,17 +1447,33 @@ class DatabaseModelsTester(unittest.TestCase):
             "description": "this is for testing purposes",
         }
         
-        aSimpleEntity = SimpleEntity(**kwargs)
+        test_simple_entity = SimpleEntity(**kwargs)
         
         # persist it to the database
-        db.session.add(aSimpleEntity)
+        db.session.add(test_simple_entity)
         db.session.commit()
         
         # now try to retrieve it
-        SE_from_DB = db.session.query(SimpleEntity).\
+        test_simple_entity_DB = db.session.query(SimpleEntity).\
             filter(SimpleEntity.name==kwargs["name"]).first()
         
-        self.assertEquals(aSimpleEntity, SE_from_DB)
+        assert(isinstance(test_simple_entity_DB, SimpleEntity))
+        
+        self.assertEqual(test_simple_entity, test_simple_entity_DB)
+        self.assertEqual(test_simple_entity.code, test_simple_entity_DB.code)
+        self.assertEqual(test_simple_entity.created_by,
+                         test_simple_entity_DB.created_by)
+        self.assertEqual(test_simple_entity.date_created,
+                         test_simple_entity_DB.date_created)
+        self.assertEqual(test_simple_entity.date_updated,
+                         test_simple_entity_DB.date_updated)
+        self.assertEqual(test_simple_entity.description,
+                         test_simple_entity_DB.description)
+        self.assertEqual(test_simple_entity.name, test_simple_entity_DB.name)
+        self.assertEqual(test_simple_entity.nice_name,
+                         test_simple_entity_DB.nice_name)
+        self.assertEqual(test_simple_entity.updated_by,
+                         test_simple_entity_DB.updated_by)
     
     
     
@@ -1213,18 +1490,30 @@ class DatabaseModelsTester(unittest.TestCase):
             "code": "TSTST",
         }
         
-        testStatus = Status(**kwargs)
+        test_status = Status(**kwargs)
         
         # persist it to the database
-        db.session.add(testStatus)
+        db.session.add(test_status)
         db.session.commit()
         
         # now try to retrieve it
-        testStatusDB = db.query(Status).\
+        test_status_DB = db.query(Status).\
                      filter(Status.name==kwargs["name"]).first()
         
+        assert(isinstance(test_status_DB, Status))
+        
         # just test the satuts part of the object
-        self.assertEquals(testStatus, testStatusDB)
+        self.assertEqual(test_status, test_status_DB)
+        self.assertEqual(test_status.code, test_status_DB.code)
+        self.assertEqual(test_status.created_by, test_status_DB.created_by)
+        self.assertEqual(test_status.date_created, test_status_DB.date_created)
+        self.assertEqual(test_status.date_updated, test_status_DB.date_updated)
+        self.assertEqual(test_status.description, test_status_DB.description)
+        self.assertEqual(test_status.name, test_status_DB.name)
+        self.assertEqual(test_status.nice_name, test_status_DB.nice_name)
+        self.assertEqual(test_status.notes, test_status_DB.notes)
+        self.assertEqual(test_status.tags, test_status_DB.tags)
+        self.assertEqual(test_status.updated_by, test_status_DB.updated_by)
     
     
     
@@ -1258,7 +1547,33 @@ class DatabaseModelsTester(unittest.TestCase):
         sequence_status_list_DB = db.query(StatusList).\
                                 filter_by(name=kwargs["name"]).first()
         
-        self.assertEquals(sequence_status_list, sequence_status_list_DB)
+        assert(isinstance(sequence_status_list_DB, StatusList))
+        
+        self.assertEqual(sequence_status_list, sequence_status_list_DB)
+        self.assertEqual(sequence_status_list.code,
+                         sequence_status_list_DB.code)
+        self.assertEqual(sequence_status_list.created_by,
+                         sequence_status_list_DB.created_by)
+        self.assertEqual(sequence_status_list.date_created,
+                         sequence_status_list_DB.date_created)
+        self.assertEqual(sequence_status_list.date_updated,
+                         sequence_status_list_DB.date_updated)
+        self.assertEqual(sequence_status_list.description,
+                         sequence_status_list_DB.description)
+        self.assertEqual(sequence_status_list.name,
+                         sequence_status_list_DB.name)
+        self.assertEqual(sequence_status_list.nice_name,
+                         sequence_status_list_DB.nice_name)
+        self.assertEqual(sequence_status_list.notes,
+                         sequence_status_list_DB.notes)
+        self.assertEqual(sequence_status_list.statuses,
+                         sequence_status_list_DB.statuses)
+        self.assertEqual(sequence_status_list.tags,
+                         sequence_status_list_DB.tags)
+        self.assertEqual(sequence_status_list.target_entity_type,
+                         sequence_status_list_DB.target_entity_type)
+        self.assertEqual(sequence_status_list.updated_by,
+                         sequence_status_list_DB.updated_by)
         
         # try to create another StatusList for the same target_entity_type
         # and expect and IntegrityError
@@ -1267,7 +1582,6 @@ class DatabaseModelsTester(unittest.TestCase):
         new_sequence_list = StatusList(**kwargs)
         
         db.session.add(new_sequence_list)
-        
         self.assertRaises(IntegrityError, db.session.commit)
     
     
@@ -1357,9 +1671,28 @@ class DatabaseModelsTester(unittest.TestCase):
         new_structure_DB = db.query(Structure).\
                          filter_by(name=kwargs["name"]).first()
         
-        self.assertEquals(new_structure, new_structure_DB)
+        assert(isinstance(new_structure_DB, Structure))
         
-        #self.fail("test is not implemented yet")
+        self.assertEqual(new_structure, new_structure_DB)
+        self.assertEqual(new_structure.asset_templates,
+                         new_structure_DB.asset_templates)
+        self.assertEqual(new_structure.code, new_structure_DB.code)
+        self.assertEqual(new_structure.created_by, new_structure_DB.created_by)
+        self.assertEqual(new_structure.date_created,
+                         new_structure_DB.date_created)
+        self.assertEqual(new_structure.date_updated,
+                         new_structure_DB.date_updated)
+        self.assertEqual(new_structure.description,
+                         new_structure_DB.description)
+        self.assertEqual(new_structure.name, new_structure_DB.name)
+        self.assertEqual(new_structure.nice_name, new_structure_DB.nice_name)
+        self.assertEqual(new_structure.notes, new_structure_DB.notes)
+        self.assertEqual(new_structure.project_template,
+                         new_structure_DB.project_template)
+        self.assertEqual(new_structure.reference_templates,
+                         new_structure_DB.reference_templates)
+        self.assertEqual(new_structure.tags, new_structure_DB.tags)
+        self.assertEqual(new_structure.updated_by, new_structure_DB.updated_by)
     
     
     
@@ -1390,12 +1723,12 @@ class DatabaseModelsTester(unittest.TestCase):
         tag_query = db.session.query(Tag)
         Tag_from_DB = tag_query.filter_by(name=name).first()
         
-        self.assertEquals(aTag.name, Tag_from_DB.name)
-        self.assertEquals(aTag.description, Tag_from_DB.description)
-        self.assertEquals(aTag.created_by, Tag_from_DB.created_by)
-        self.assertEquals(aTag.updated_by, Tag_from_DB.updated_by)
-        self.assertEquals(aTag.date_created, Tag_from_DB.date_created)
-        self.assertEquals(aTag.date_updated, Tag_from_DB.date_updated)
+        self.assertEqual(aTag.name, Tag_from_DB.name)
+        self.assertEqual(aTag.description, Tag_from_DB.description)
+        self.assertEqual(aTag.created_by, Tag_from_DB.created_by)
+        self.assertEqual(aTag.updated_by, Tag_from_DB.updated_by)
+        self.assertEqual(aTag.date_created, Tag_from_DB.date_created)
+        self.assertEqual(aTag.date_updated, Tag_from_DB.date_updated)
     
     
     
@@ -1433,18 +1766,42 @@ class DatabaseModelsTester(unittest.TestCase):
             "type": movie_link_type,
         }
         
-        aTypeTemplate = TypeTemplate(**kwargs)
+        new_type_template = TypeTemplate(**kwargs)
         
         # persist it
         session = db.session
-        session.add(aTypeTemplate)
+        session.add(new_type_template)
         session.commit()
         
         # get it back
-        aTypeTemplate_DB = session.query(TypeTemplate).\
-                     filter_by(name=kwargs["name"]).first()
+        new_type_template_DB = session.query(TypeTemplate).\
+                             filter_by(name=kwargs["name"]).first()
         
-        self.assertEquals(aTypeTemplate, aTypeTemplate_DB)
+        assert(isinstance(new_type_template_DB, TypeTemplate))
+        
+        self.assertEqual(new_type_template, new_type_template_DB)
+        self.assertEqual(new_type_template.code, new_type_template_DB.code)
+        self.assertEqual(new_type_template.created_by,
+                         new_type_template_DB.created_by)
+        self.assertEqual(new_type_template.date_created,
+                         new_type_template_DB.date_created)
+        self.assertEqual(new_type_template.date_updated,
+                         new_type_template_DB.date_updated)
+        self.assertEqual(new_type_template.description,
+                         new_type_template_DB.description)
+        self.assertEqual(new_type_template.file_code,
+                         new_type_template_DB.file_code)
+        self.assertEqual(new_type_template.name, new_type_template_DB.name)
+        self.assertEqual(new_type_template.nice_name,
+                         new_type_template_DB.nice_name)
+        self.assertEqual(new_type_template.notes,
+                         new_type_template_DB.notes)
+        self.assertEqual(new_type_template.path_code,
+                         new_type_template_DB.path_code)
+        self.assertEqual(new_type_template.tags, new_type_template_DB.tags)
+        self.assertEqual(new_type_template.type, new_type_template_DB.type)
+        self.assertEqual(new_type_template.updated_by,
+                         new_type_template_DB.updated_by)
     
     
     
@@ -1480,21 +1837,45 @@ class DatabaseModelsTester(unittest.TestCase):
         db.session.add_all([new_user, new_department])
         db.session.commit()
         
-        user_DB = db.query(User).\
-                filter(User.name==user_kwargs["login_name"]).first()
+        new_user_DB = db.query(User).\
+                    filter(User.name==user_kwargs["login_name"]).first()
+        
+        assert(isinstance(new_user_DB, User))
         
         # the user itself
-        self.assertEquals(new_user, user_DB)
+        self.assertEqual(new_user, new_user_DB)
+        self.assertEqual(new_user.code, new_user_DB.code)
+        self.assertEqual(new_user.created_by, new_user_DB.created_by)
+        self.assertEqual(new_user.date_created, new_user_DB.date_created)
+        self.assertEqual(new_user.date_updated, new_user_DB.date_updated)
+        self.assertEqual(new_user.department, new_user_DB.department)
+        self.assertEqual(new_user.description, new_user_DB.description)
+        self.assertEqual(new_user.email, new_user_DB.email)
+        self.assertEqual(new_user.first_name, new_user_DB.first_name)
+        self.assertEqual(new_user.initials, new_user_DB.initials)
+        self.assertEqual(new_user.last_login, new_user_DB.last_login)
+        self.assertEqual(new_user.last_name, new_user_DB.last_name)
+        self.assertEqual(new_user.login_name, new_user_DB.login_name)
+        self.assertEqual(new_user.name, new_user_DB.name)
+        self.assertEqual(new_user.nice_name, new_user_DB.nice_name)
+        self.assertEqual(new_user.notes, new_user_DB.notes)
+        self.assertEqual(new_user.password, new_user_DB.password)
+        self.assertEqual(new_user.permission_groups,
+                         new_user_DB.permission_groups)
+        self.assertEqual(new_user.projects, new_user_DB.projects)
+        self.assertEqual(new_user.projects_lead, new_user_DB.projects_lead)
+        self.assertEqual(new_user.sequences_lead, new_user_DB.sequences_lead)
+        self.assertEqual(new_user.tags, new_user_DB.tags)
+        self.assertEqual(new_user.tasks, new_user_DB.tasks)
+        self.assertEqual(new_user.updated_by, new_user_DB.updated_by)
         
         # as the member of a department
         department_db = db.query(Department).\
                       filter(Department.name==dep_kwargs["name"]).\
                       first()
         
-        self.assertEquals(new_user, department_db.members[0])
+        self.assertEqual(new_user, department_db.members[0])
         
-        # get the user initials and check if they are same
-        self.assertEquals(new_user.initials, user_DB.initials)
     
     
     
@@ -1571,7 +1952,7 @@ class ExamplesTester(unittest.TestCase):
         newGreatEntity_DB = db.query(great_entity.GreatEntity).\
                           filter_by(name="test").first()
         
-        self.assertEquals(newGreatEntity, newGreatEntity_DB)
+        self.assertEqual(newGreatEntity, newGreatEntity_DB)
         
         # clean up the test
         defaults.MAPPERS.remove("examples.extending.great_entity")
@@ -1619,7 +2000,7 @@ class ExamplesTester(unittest.TestCase):
         aStatusedEntity_DB = db.query(statused_entity.NewStatusedEntity).\
                            first()
         
-        self.assertEquals(aStatusedEntity, aStatusedEntity_DB)
+        self.assertEqual(aStatusedEntity, aStatusedEntity_DB)
         
         # clean up the test
         defaults.MAPPERS.remove("examples.extending.statused_entity")
@@ -1669,8 +2050,8 @@ class ExamplesTester(unittest.TestCase):
         new_camera_DB = db.query(camera_lens.Camera).first()
         new_lens_DB = db.query(camera_lens.Lens).first()
         
-        self.assertEquals(new_camera, new_camera_DB)
-        self.assertEquals(new_lens, new_lens_DB)
+        self.assertEqual(new_camera, new_camera_DB)
+        self.assertEqual(new_lens, new_lens_DB)
     
     
     

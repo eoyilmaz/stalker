@@ -38,7 +38,7 @@ class ReferenceMixinDB(object):
         
         Use the returning dictionary (mapper_arguments) in your mapper.
         
-        :param class_: The mixed in class, in other words the class which will
+        :param class\_: The mixed in class, in other words the class which will
           be extended with the mixin functionalities
          
         :param class_table: The table holding the information about the class
@@ -127,7 +127,7 @@ class StatusMixinDB(object):
         
         Use the returning dictionary (mapper_arguments) in your mapper.
         
-        :param class_: The mixed in class, in other words the class which will
+        :param class\_: The mixed in class, in other words the class which will
           be extended with the mixin functionalities
          
         :param class_table: The table holding the information about the class
@@ -201,7 +201,7 @@ class ScheduleMixinDB(object):
         
         Use the returning dictionary (mapper_arguments) in your mapper.
         
-        :param class_: The mixed in class, in other words the class which will
+        :param class\_: The mixed in class, in other words the class which will
           be extended with the mixin functionalities
          
         :param class_table: The table holding the information about the class
@@ -266,7 +266,7 @@ class TaskMixinDB(object):
         
         Use the returning dictionary (mapper_arguments) in your mapper.
         
-        :param class_: The mixed in class, in other words the class which will
+        :param class\_: The mixed in class, in other words the class which will
           be extended with the mixin functionalities
          
         :param class_table: The table holding the information about the class

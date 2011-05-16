@@ -3,7 +3,8 @@
 
 
 import mocker
-from stalker.core.models import Entity, Shot, Sequence, Asset, AssetType, Task
+from stalker.core.models import (Entity, Shot, Sequence, Asset, AssetType,
+                                 Task, Link, LinkType, Status, StatusList)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -22,7 +23,6 @@ class ShotTester(mocker.MockerTestCase):
     def setUp(self):
         """setup the test
         """
-        
         # create a Sequence
         self.mock_sequence = self.mocker.mock(Sequence)
         self.mock_sequence2 = self.mocker.mock(Sequence)
@@ -56,6 +56,18 @@ class ShotTester(mocker.MockerTestCase):
         
         self.expect(self.mock_shot2.code).result(code).count(0, None)
         
+        self.mock_status1 = self.mocker.mock(Status)
+        self.mock_status2 = self.mocker.mock(Status)
+        self.mock_status3 = self.mocker.mock(Status)
+        
+        self.mock_status_list1 = self.mocker.mock(StatusList)
+        
+        self.expect(self.mock_status_list1.target_entity_type).\
+            result(Shot.entity_type).count(0, None)
+        self.expect(self.mock_status_list1.statuses).result(
+            [self.mock_status1, self.mock_status2, self.mock_status3]).\
+            count(0, None)
+        
         self.mocker.replay()
         
         self.cut_in_default = 1
@@ -70,6 +82,8 @@ class ShotTester(mocker.MockerTestCase):
             "cut_in": 112,
             "cut_out": 149,
             "cut_duration": 123,
+            "status": 0,
+            "status_list": self.mock_status_list1,
         }
         
         # create a mock shot object
@@ -83,12 +97,12 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         # the length is 32 character
-        self.assertEquals(len(self.mock_shot.name), 32)
+        self.assertEqual(len(self.mock_shot.name), 32)
         
         import re
         
         # and all the characters are in [0-9a-f] range
-        self.assertEquals(re.sub("[0-9a-f]+","", self.mock_shot.name), "")
+        self.assertEqual(re.sub("[0-9a-f]+","", self.mock_shot.name), "")
     
     
     
@@ -102,7 +116,7 @@ class ShotTester(mocker.MockerTestCase):
         
         self.mock_shot.name = test_value
         
-        self.assertEquals(self.mock_shot.name, before_value)
+        self.assertEqual(self.mock_shot.name, before_value)
     
     
     
@@ -182,7 +196,7 @@ class ShotTester(mocker.MockerTestCase):
         """testing if the sequence argument works properly
         """
         
-        self.assertEquals(self.mock_shot.sequence, self.kwargs["sequence"])
+        self.assertEqual(self.mock_shot.sequence, self.kwargs["sequence"])
     
     
     
@@ -216,7 +230,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["assets"] = None
         self.kwargs["code"] = "SH123A"
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.assets, [])
+        self.assertEqual(new_shot.assets, [])
     
     
     
@@ -227,7 +241,7 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         self.mock_shot.assets = None
-        self.assertEquals(self.mock_shot.assets, [])
+        self.assertEqual(self.mock_shot.assets, [])
     
     
     
@@ -311,7 +325,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs.pop("assets")
         self.kwargs["code"] = "SH123A"
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.assets, [])
+        self.assertEqual(new_shot.assets, [])
     
     
     
@@ -376,7 +390,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop("cut_in")
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_in, self.cut_in_default)
+        self.assertEqual(new_shot.cut_in, self.cut_in_default)
     
     
     
@@ -389,7 +403,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = None
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_in, self.cut_in_default)
+        self.assertEqual(new_shot.cut_in, self.cut_in_default)
     
     
     
@@ -429,8 +443,8 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = self.kwargs["cut_out"] + 10
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_out, new_shot.cut_in)
-        self.assertEquals(new_shot.cut_duration, 1)
+        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
+        self.assertEqual(new_shot.cut_duration, 1)
     
     
     
@@ -441,8 +455,8 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         self.mock_shot.cut_in = self.mock_shot.cut_out + 10
-        self.assertEquals(self.mock_shot.cut_out, self.mock_shot.cut_in)
-        self.assertEquals(self.mock_shot.cut_duration, 1)
+        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in)
+        self.assertEqual(self.mock_shot.cut_duration, 1)
     
     
     
@@ -455,7 +469,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop("cut_out")
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_out,
+        self.assertEqual(new_shot.cut_out,
                           new_shot.cut_in + new_shot.cut_duration - 1)
     
     
@@ -469,7 +483,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_out"] = None
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_out,
+        self.assertEqual(new_shot.cut_out,
                           new_shot.cut_in + new_shot.cut_duration - 1)
     
     
@@ -481,7 +495,7 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         self.mock_shot.cut_out = None
-        self.assertEquals(self.mock_shot.cut_out, self.mock_shot.cut_in +
+        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in +
                           self.mock_shot.cut_duration - 1)
     
     
@@ -522,8 +536,8 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_out"] = self.kwargs["cut_in"] - 10
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_out, new_shot.cut_in)
-        self.assertEquals(new_shot.cut_duration, 1)
+        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
+        self.assertEqual(new_shot.cut_duration, 1)
     
     
     
@@ -534,8 +548,8 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         self.mock_shot.cut_out = self.mock_shot.cut_in - 10
-        self.assertEquals(self.mock_shot.cut_out, self.mock_shot.cut_in)
-        self.assertEquals(self.mock_shot.cut_duration, 1)
+        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in)
+        self.assertEqual(self.mock_shot.cut_duration, 1)
     
     
     
@@ -548,7 +562,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop("cut_duration")
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_duration, new_shot.cut_out -
+        self.assertEqual(new_shot.cut_duration, new_shot.cut_out -
                           new_shot.cut_in + 1)
     
     
@@ -562,7 +576,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_duration"] = None
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_duration, new_shot.cut_out -
+        self.assertEqual(new_shot.cut_duration, new_shot.cut_out -
                           new_shot.cut_in + 1)
     
     
@@ -601,7 +615,7 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         self.mock_shot.cut_in = 1
-        self.assertEquals(self.mock_shot.cut_duration, self.mock_shot.cut_out -
+        self.assertEqual(self.mock_shot.cut_duration, self.mock_shot.cut_out -
                           self.mock_shot.cut_in + 1)
     
     
@@ -613,7 +627,7 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         self.mock_shot.cut_out = 1000
-        self.assertEquals(self.mock_shot.cut_duration, self.mock_shot.cut_out -
+        self.assertEqual(self.mock_shot.cut_duration, self.mock_shot.cut_out -
                           self.mock_shot.cut_in + 1)
     
     
@@ -628,7 +642,7 @@ class ShotTester(mocker.MockerTestCase):
         self.mock_shot.cut_in
         self.mock_shot.cut_duration = 245
         self.assertNotEquals(self.mock_shot.cut_out, first_cut_out)
-        self.assertEquals(self.mock_shot.cut_out, self.mock_shot.cut_in +
+        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in +
                           self.mock_shot.cut_duration - 1)
     
     
@@ -641,8 +655,8 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         self.mock_shot.cut_duration = 0
-        self.assertEquals(self.mock_shot.cut_out, self.mock_shot.cut_in)
-        self.assertEquals(self.mock_shot.cut_duration, 1)
+        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in)
+        self.assertEqual(self.mock_shot.cut_duration, 1)
     
     
     
@@ -655,8 +669,8 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         self.mock_shot.cut_duration = -100
-        self.assertEquals(self.mock_shot.cut_out, self.mock_shot.cut_in)
-        self.assertEquals(self.mock_shot.cut_duration, 1)
+        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in)
+        self.assertEqual(self.mock_shot.cut_duration, 1)
     
     
     
@@ -671,8 +685,8 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["cut_duration"] = 0
         self.kwargs.pop("cut_out")
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_duration, 1)
-        self.assertEquals(new_shot.cut_out, new_shot.cut_in)
+        self.assertEqual(new_shot.cut_duration, 1)
+        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
     
     
     
@@ -688,8 +702,8 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["cut_duration"] = -10
         self.kwargs.pop("cut_out")
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_duration, 1)
-        self.assertEquals(new_shot.cut_out, new_shot.cut_in)
+        self.assertEqual(new_shot.cut_duration, 1)
+        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
     
     
     
@@ -704,8 +718,8 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_duration"] = 0
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_duration, 1)
-        self.assertEquals(new_shot.cut_out, new_shot.cut_in)
+        self.assertEqual(new_shot.cut_duration, 1)
+        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
     
     
     
@@ -720,8 +734,8 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_duration"] = -100
         new_shot = Shot(**self.kwargs)
-        self.assertEquals(new_shot.cut_duration, 1)
-        self.assertEquals(new_shot.cut_out, new_shot.cut_in)
+        self.assertEqual(new_shot.cut_duration, 1)
+        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
     
     
     
@@ -772,6 +786,76 @@ class ShotTester(mocker.MockerTestCase):
         self.assertTrue(new_shot1!=new_shot2)
         self.assertTrue(new_shot1!=new_entity)
         self.assertTrue(new_shot1!=new_shot3)
-
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_ReferenceMixin_initialization(self):
+        """tetsing if the ReferenceMixin part is initialized correctly
+        """
+        
+        link_type_1 = LinkType(name="Image")
+        
+        link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
+                     filename="a.jpg", type=link_type_1)
+        
+        link2 = Link(name="Artwork 2", path="/mnt/M/JOBs/TEST_PROJECT",
+                     filename="b.jbg", type=link_type_1)
+        
+        references = [link1, link2]
+        
+        self.kwargs["code"] = "SH12314"
+        self.kwargs["references"] = references
+        
+        new_shot = Shot(**self.kwargs)
+        
+        self.assertEqual(new_shot.references, references)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_StatusMixin_initialization(self):
+        """tetsing if the StatusMixin part is initialized correctly
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        status2 = Status(name="Complete", code="CMPLT")
+        
+        status_list = StatusList(name="Project Statuses",
+                                 statuses=[status1, status2],
+                                 target_entity_type=Shot.entity_type)
+        
+        self.kwargs["code"] = "SH12314"
+        self.kwargs["status"] = 0
+        self.kwargs["status_list"] = status_list
+        
+        new_shot = Shot(**self.kwargs)
+        
+        self.assertEqual(new_shot.status_list, status_list)
+    
+    
+     
+    #----------------------------------------------------------------------
+    def test_TaskMixin_initialization(self):
+        """tetsing if the TaskMixin part is initialized correctly
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        
+        task_status_list = StatusList(name="Task Statuses",
+                                      statuses=[status1],
+                                      target_entity_type=Task.entity_type)
+        
+        task1 = Task(name="Modeling", status=0, status_list=task_status_list)
+        task2 = Task(name="Lighting", status=0, status_list=task_status_list)
+        
+        tasks = [task1, task2]
+        
+        self.kwargs["code"] = "SH12314"
+        self.kwargs["tasks"] = tasks
+        
+        new_shot = Shot(**self.kwargs)
+        
+        self.assertEqual(new_shot.tasks, tasks)
     
     

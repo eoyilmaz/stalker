@@ -40,10 +40,10 @@ class ValidetedListTester(unittest.TestCase):
         mock_valideted_list.append(test_value)
         
         # check if the __type__ is set to str
-        self.assertEquals(mock_valideted_list.__type__, type(test_value))
+        self.assertEqual(mock_valideted_list.__type__, type(test_value))
         
         # check if the __type_as_str__ is set to str
-        self.assertEquals(mock_valideted_list.__type_as_str__, "str")
+        self.assertEqual(mock_valideted_list.__type_as_str__, "str")
     
     
     
@@ -59,7 +59,7 @@ class ValidetedListTester(unittest.TestCase):
         
         mock_validated_list = ValidatedList(test_list)
         
-        self.assertEquals(mock_validated_list, test_expected_list)
+        self.assertEqual(mock_validated_list, test_expected_list)
     
     
     
@@ -130,7 +130,7 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         vList1 = ValidatedList(["str", 1, 2.3, 2, 3, "another str", 4], int)
-        self.assertEquals(vList1, [1, 2, 3, 4])
+        self.assertEqual(vList1, [1, 2, 3, 4])
     
     
     
@@ -149,7 +149,7 @@ class ValidetedListTester(unittest.TestCase):
         import datetime
         test_list2.append(datetime.datetime.now())
         
-        self.assertEquals(test_list2.__type__, datetime.datetime)
+        self.assertEqual(test_list2.__type__, datetime.datetime)
     
     
     
@@ -190,7 +190,7 @@ class ValidetedListTester(unittest.TestCase):
         
         self.mock_valideted_list1[0] = test_value
         
-        self.assertEquals(self.mock_valideted_list1[0], test_value)
+        self.assertEqual(self.mock_valideted_list1[0], test_value)
     
     
     
@@ -231,7 +231,7 @@ class ValidetedListTester(unittest.TestCase):
         
         test_value = [7, 8, 9]
         self.mock_valideted_list1[1:3] = test_value
-        self.assertEquals(self.mock_valideted_list1[1:4], test_value)
+        self.assertEqual(self.mock_valideted_list1[1:4], test_value)
         
     
     
@@ -273,7 +273,7 @@ class ValidetedListTester(unittest.TestCase):
         self.assertTrue(new_list.__type__ is None)
         
         new_list.append(1)
-        self.assertEquals(new_list.__type__, type(1))
+        self.assertEqual(new_list.__type__, type(1))
     
     
     
@@ -284,7 +284,7 @@ class ValidetedListTester(unittest.TestCase):
         
         test_value = 45
         self.mock_valideted_list1.append(test_value)
-        self.assertEquals(self.mock_valideted_list1[-1], test_value)
+        self.assertEqual(self.mock_valideted_list1[-1], test_value)
     
     
     
@@ -329,13 +329,13 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "datetime.datetime")
         
         # check if it is still a string
-        self.assertEquals(new_list.__type__, "datetime.datetime")
+        self.assertEqual(new_list.__type__, "datetime.datetime")
         
         # check if it is converted to a type instance when appended
         import datetime
         new_list.append(datetime.datetime.now())
         
-        self.assertEquals(new_list.__type__, datetime.datetime)
+        self.assertEqual(new_list.__type__, datetime.datetime)
     
     
     
@@ -384,7 +384,7 @@ class ValidetedListTester(unittest.TestCase):
         test_value = [34, 32]
         
         self.mock_valideted_list1.extend(test_value)
-        self.assertEquals(self.mock_valideted_list1[-2:], test_value)
+        self.assertEqual(self.mock_valideted_list1[-2:], test_value)
     
     
     
@@ -429,13 +429,13 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "datetime.datetime")
         
         # check if it is still a string
-        self.assertEquals(new_list.__type__, "datetime.datetime")
+        self.assertEqual(new_list.__type__, "datetime.datetime")
         
         # check if it is converted to a type instance when appended
         import datetime
         new_list.extend([datetime.datetime.now()])
         
-        self.assertEquals(new_list.__type__, datetime.datetime)
+        self.assertEqual(new_list.__type__, datetime.datetime)
     
     
     
@@ -483,7 +483,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list.insert(0, test_value)
         
         # check the type is now set to type(test_value)
-        self.assertEquals(new_list.__type__, type(test_value))
+        self.assertEqual(new_list.__type__, type(test_value))
     
     
     
@@ -494,7 +494,7 @@ class ValidetedListTester(unittest.TestCase):
         
         test_value = 101
         self.mock_valideted_list1.insert(0, test_value)
-        self.assertEquals(self.mock_valideted_list1[0], test_value)
+        self.assertEqual(self.mock_valideted_list1[0], test_value)
     
     
     
@@ -539,13 +539,13 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "datetime.datetime")
         
         # check if it is still a string
-        self.assertEquals(new_list.__type__, "datetime.datetime")
+        self.assertEqual(new_list.__type__, "datetime.datetime")
         
         # check if it is converted to a type instance when appended
         import datetime
         new_list.insert(0, datetime.datetime.now())
         
-        self.assertEquals(new_list.__type__, datetime.datetime)
+        self.assertEqual(new_list.__type__, datetime.datetime)
     
     
     
@@ -602,7 +602,7 @@ class ValidetedListTester(unittest.TestCase):
         
         test_value = [1002, 1004]
         self.mock_valideted_list1 = self.mock_valideted_list1 + test_value
-        self.assertEquals(self.mock_valideted_list1[-2:], test_value)
+        self.assertEqual(self.mock_valideted_list1[-2:], test_value)
     
     
     
@@ -647,13 +647,13 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "datetime.datetime")
         
         # check if it is still a string
-        self.assertEquals(new_list.__type__, "datetime.datetime")
+        self.assertEqual(new_list.__type__, "datetime.datetime")
         
         # check if it is converted to a type instance when appended
         import datetime
         new_list.__add__([datetime.datetime.now()])
         
-        self.assertEquals(new_list.__type__, datetime.datetime)
+        self.assertEqual(new_list.__type__, datetime.datetime)
     
     
     
@@ -711,7 +711,7 @@ class ValidetedListTester(unittest.TestCase):
         
         test_value = [1032, 12304]
         self.mock_valideted_list1 += test_value
-        self.assertEquals(self.mock_valideted_list1[-2:], test_value)
+        self.assertEqual(self.mock_valideted_list1[-2:], test_value)
     
     
     
@@ -756,10 +756,10 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "datetime.datetime")
         
         # check if it is still a string
-        self.assertEquals(new_list.__type__, "datetime.datetime")
+        self.assertEqual(new_list.__type__, "datetime.datetime")
         
         # check if it is converted to a type instance when appended
         import datetime
         new_list.__iadd__([datetime.datetime.now()])
         
-        self.assertEquals(new_list.__type__, datetime.datetime)
+        self.assertEqual(new_list.__type__, datetime.datetime)

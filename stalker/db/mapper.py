@@ -461,8 +461,11 @@ def setup():
     # then to the StatusMixin
     StatusMixinDB.setup(Project, tables.projects, project_mapper_arguments)
     
-    # the to the ScheduleMixin
+    # then to the ScheduleMixin
     ScheduleMixinDB.setup(Project, tables.projects, project_mapper_arguments)
+    
+    # then to the TaskMixin
+    TaskMixinDB.setup(Project, tables.projects, project_mapper_arguments)
     
     mapper(
         Project,
@@ -514,34 +517,62 @@ def setup():
     
     
     # mix it with ReferenceMixin
-    ReferenceMixinDB.setup(Asset, tables.assets,
-                           asset_mapper_arguments)
+    ReferenceMixinDB.setup(Asset, tables.assets, asset_mapper_arguments)
     
     # then with StatusMixin
-    StatusMixinDB.setup(Asset, tables.assets,
-                        asset_mapper_arguments)
+    StatusMixinDB.setup(Asset, tables.assets, asset_mapper_arguments)
     
     # then with TaskMixin
-    TaskMixinDB.setup(Asset, tables.assets,
-                      asset_mapper_arguments)
+    TaskMixinDB.setup(Asset, tables.assets, asset_mapper_arguments)
     
     # complete mapping
-    mapper(Asset, tables.assets,
-           **asset_mapper_arguments)
+    mapper(Asset, tables.assets, **asset_mapper_arguments)
     
     
     
     # Shot
-    # WARNING: Not finished, it is a temporary implementation, created to be
-    # able to test other classes
-    
-    mapper(
-        Shot,
-        tables.shots,
+    shot_mapper_arguments = dict(
         inherits=Shot.__base__,
         inherit_condition=tables.shots.c.id==tables.entities.c.id,
         polymorphic_identity=Shot.entity_type,
+        properties={
+            "_assets": relationship(
+                Asset,
+                secondary=tables.shot_assets,
+                primaryjoin=tables.shots.c.id==\
+                    tables.shot_assets.c.shot_id,
+                secondaryjoin=tables.shot_assets.c.asset_id==\
+                    tables.assets.c.id
+            ),
+            "assets": synonym("_assets"),
+            "_sequence": relationship(
+                Sequence,
+                primaryjoin=tables.shots.c.sequence_id==\
+                    tables.sequences.c.id
+            ),
+            "sequence": synonym("_sequence"),
+            "_cut_in": tables.shots.c.cut_in,
+            "cut_in": synonym("_cut_in"),
+            "_cut_duration": tables.shots.c.cut_duration,
+            "cut_duration": synonym("_cut_duration"),
+            "_code": tables.simpleEntities.c.code, # overloaded attribute
+            "code": synonym("_code"), # overloaded property
+        }
     )
+    
+    # mix it with ReferenceMixin
+    ReferenceMixinDB.setup(Shot, tables.shots, shot_mapper_arguments)
+    
+    # then with StatusMixin
+    StatusMixinDB.setup(Shot, tables.shots, shot_mapper_arguments)
+    
+    # then with TaskMixin
+    TaskMixinDB.setup(Shot, tables.shots, shot_mapper_arguments)
+    
+    #print shot_mapper_arguments
+    
+    # complete mapping
+    mapper(Shot, tables.shots, **shot_mapper_arguments)
     
     
     
@@ -570,10 +601,13 @@ def setup():
     ReferenceMixinDB.setup(Sequence, tables.sequences,
                            sequence_mapper_arguments)
     
-    StatusMixinDB.setup(Sequence, tables.sequences,
-                        sequence_mapper_arguments)
+    StatusMixinDB.setup(Sequence, tables.sequences, sequence_mapper_arguments)
     
     ScheduleMixinDB.setup(Sequence, tables.sequences,
                           sequence_mapper_arguments)
     
+    TaskMixinDB.setup(Sequence, tables.sequences, sequence_mapper_arguments)
+    
     mapper(Sequence, tables.sequences, **sequence_mapper_arguments)
+    
+

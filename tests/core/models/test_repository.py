@@ -90,7 +90,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         test_value = "~/newRepoPath/Projects"
         self.mock_repo.linux_path = test_value
-        self.assertEquals(self.mock_repo.linux_path, test_value)
+        self.assertEqual(self.mock_repo.linux_path, test_value)
     
     
     
@@ -134,7 +134,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         test_value = "~/newRepoPath/Projects"
         self.mock_repo.windows_path = test_value
-        self.assertEquals(self.mock_repo.windows_path, test_value)
+        self.assertEqual(self.mock_repo.windows_path, test_value)
     
     
     
@@ -178,7 +178,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         test_value = "~/newRepoPath/Projects"
         self.mock_repo.osx_path = test_value
-        self.assertEquals(self.mock_repo.osx_path, test_value)
+        self.assertEqual(self.mock_repo.osx_path, test_value)
     
     
     
@@ -198,11 +198,11 @@ class RepositoryTester(mocker.MockerTestCase):
         self.mocker.replay()
         
         #import platform
-        #self.assertEquals(platform.system(), "Windows")
+        #self.assertEqual(platform.system(), "Windows")
         
         new_mock_repo = Repository(**self.kwargs)
         
-        self.assertEquals(new_mock_repo.path, new_mock_repo.windows_path)
+        self.assertEqual(new_mock_repo.path, new_mock_repo.windows_path)
     
     
     
@@ -221,7 +221,7 @@ class RepositoryTester(mocker.MockerTestCase):
         self.mocker.count(0, 1000)
         self.mocker.replay()
         
-        self.assertEquals(self.mock_repo.path, self.mock_repo.linux_path)
+        self.assertEqual(self.mock_repo.path, self.mock_repo.linux_path)
     
     
     
@@ -240,7 +240,7 @@ class RepositoryTester(mocker.MockerTestCase):
         self.mocker.count(0, 1000)
         self.mocker.replay()
         
-        self.assertEquals(self.mock_repo.path, self.mock_repo.osx_path)
+        self.assertEqual(self.mock_repo.path, self.mock_repo.osx_path)
     
     
     

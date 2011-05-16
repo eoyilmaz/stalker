@@ -59,7 +59,7 @@ copyright = u'2010, Erkan Ozgur Yilmaz'
 
 # find stalkers path
 dirName = os.path.dirname(__file__)
-modulePath = os.path.sep.join(dirName.split(os.path.sep)[:-3])
+modulePath = os.path.sep.join(dirName.split(os.path.sep)[:-2])
 sys.path.append( modulePath )
 import stalker
 

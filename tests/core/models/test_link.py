@@ -149,7 +149,7 @@ class LinkTester(mocker.MockerTestCase):
         
         self.mock_link.path = windows_path
         
-        self.assertEquals(self.mock_link.path, expected_result)
+        self.assertEqual(self.mock_link.path, expected_result)
     
     
     

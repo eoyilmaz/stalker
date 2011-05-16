@@ -5,7 +5,8 @@ import datetime
 import mocker
 from stalker.core.models import (User, Sequence, Asset, ImageFormat,
                                  Project, ProjectType, Structure, Repository,
-                                 Entity, Status, StatusList)
+                                 Entity, Status, StatusList, Link, LinkType,
+                                 Task)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -149,7 +150,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.mock_project.lead = self.mock_user1
-        self.assertEquals(self.mock_project.lead, self.mock_user1)
+        self.assertEqual(self.mock_project.lead, self.mock_user1)
     
     
     
@@ -182,7 +183,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs["users"] = None
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.users, [])
+        self.assertEqual(new_project.users, [])
     
     
     
@@ -193,7 +194,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.mock_project.users = None
-        self.assertEquals(self.mock_project.users, [])
+        self.assertEqual(self.mock_project.users, [])
     
     
     
@@ -265,7 +266,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs["sequences"] = None
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.sequences, [])
+        self.assertEqual(new_project.sequences, [])
     
     
     
@@ -276,7 +277,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.mock_project.sequences = None
-        self.assertEquals(self.mock_project.sequences, [])
+        self.assertEqual(self.mock_project.sequences, [])
     
     
     
@@ -371,7 +372,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs["assets"] = None
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.assets, [])
+        self.assertEqual(new_project.assets, [])
     
     
     
@@ -382,7 +383,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.mock_project.assets = None
-        self.assertEquals(self.mock_project.assets, [])
+        self.assertEqual(self.mock_project.assets, [])
     
     
     
@@ -394,7 +395,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs.pop("assets")
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.assets, [])
+        self.assertEqual(new_project.assets, [])
     
     
     
@@ -555,7 +556,7 @@ class ProjectTester(mocker.MockerTestCase):
         )
         
         self.mock_project.image_format = new_image_format
-        self.assertEquals(self.mock_project.image_format, new_image_format)
+        self.assertEqual(self.mock_project.image_format, new_image_format)
     
     
     
@@ -566,7 +567,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs.pop("fps")
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.fps, 25.0)
+        self.assertEqual(new_project.fps, 25.0)
     
     
     
@@ -678,7 +679,7 @@ class ProjectTester(mocker.MockerTestCase):
         self.kwargs["fps"] = test_value
         new_project = Project(**self.kwargs)
         self.assertIsInstance(new_project.fps, float)
-        self.assertEquals(new_project.fps, float(test_value))
+        self.assertEqual(new_project.fps, float(test_value))
     
     
     
@@ -692,7 +693,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.mock_project.fps = test_value
         self.assertIsInstance(self.mock_project.fps, float)
-        self.assertEquals(self.mock_project.fps, float(test_value))
+        self.assertEqual(self.mock_project.fps, float(test_value))
     
     
     
@@ -764,7 +765,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.mock_project.type = self.mock_project_type2
-        self.assertEquals(self.mock_project.type, self.mock_project_type2)
+        self.assertEqual(self.mock_project.type, self.mock_project_type2)
     
     
     
@@ -826,7 +827,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.mock_project.repository = self.mock_repo2
-        self.assertEquals(self.mock_project.repository, self.mock_repo2)
+        self.assertEqual(self.mock_project.repository, self.mock_repo2)
     
     
     
@@ -838,7 +839,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs.pop("is_stereoscopic")
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.is_stereoscopic, False)
+        self.assertEqual(new_project.is_stereoscopic, False)
     
     
     
@@ -853,7 +854,7 @@ class ProjectTester(mocker.MockerTestCase):
         for test_value in test_values:
             self.kwargs["is_stereoscopic"] = test_value
             new_project = Project(**self.kwargs)
-            self.assertEquals(new_project.is_stereoscopic, bool(test_value))
+            self.assertEqual(new_project.is_stereoscopic, bool(test_value))
     
     
     
@@ -867,7 +868,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.mock_project.is_stereoscopic = test_value
-            self.assertEquals(
+            self.assertEqual(
                 self.mock_project.is_stereoscopic,
                 bool(test_value)
             )
@@ -882,7 +883,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs.pop("display_width")
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.display_width, 1.0)
+        self.assertEqual(new_project.display_width, 1.0)
     
     
     
@@ -897,7 +898,7 @@ class ProjectTester(mocker.MockerTestCase):
             self.kwargs["display_width"] = test_value
             new_project = Project(**self.kwargs)
             self.assertIsInstance(new_project.display_width, float)
-            self.assertEquals(new_project.display_width, float(test_value))
+            self.assertEqual(new_project.display_width, float(test_value))
     
     
     
@@ -911,7 +912,7 @@ class ProjectTester(mocker.MockerTestCase):
         for test_value in test_values:
             self.mock_project.display_width = test_value
             self.assertIsInstance(self.mock_project.display_width, float)
-            self.assertEquals(self.mock_project.display_width,
+            self.assertEqual(self.mock_project.display_width,
                               float(test_value))
     
     
@@ -925,7 +926,7 @@ class ProjectTester(mocker.MockerTestCase):
         test_value = -1.0
         self.kwargs["display_width"] = test_value
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.display_width, abs(test_value))
+        self.assertEqual(new_project.display_width, abs(test_value))
     
     
     
@@ -937,7 +938,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         test_value = -1.0
         self.mock_project.display_width = test_value
-        self.assertEquals(self.mock_project.display_width, abs(test_value))
+        self.assertEqual(self.mock_project.display_width, abs(test_value))
     
     
     
@@ -1000,7 +1001,7 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.mock_project.structure = self.mock_project_structure2
-        self.assertEquals(self.mock_project.structure,
+        self.assertEqual(self.mock_project.structure,
                           self.mock_project_structure2)
     
     
@@ -1045,5 +1046,91 @@ class ProjectTester(mocker.MockerTestCase):
         self.assertTrue(self.mock_project!=new_project2)
         self.assertTrue(self.mock_project!=new_entity)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_ReferenceMixin_initialization(self):
+        """tetsing if the ReferenceMixin part is initialized correctly
+        """
+        
+        link_type_1 = LinkType(name="Image")
+        
+        link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
+                     filename="a.jpg", type=link_type_1)
+        
+        link2 = Link(name="Artwork 2", path="/mnt/M/JOBs/TEST_PROJECT",
+                     filename="b.jbg", type=link_type_1)
+        
+        references = [link1, link2]
+        
+        self.kwargs["references"] = references
+        
+        new_project = Project(**self.kwargs)
+        
+        self.assertEqual(new_project.references, references)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_StatusMixin_initialization(self):
+        """tetsing if the StatusMixin part is initialized correctly
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        status2 = Status(name="Complete", code="CMPLT")
+        
+        status_list = StatusList(name="Project Statuses",
+                                 statuses=[status1, status2],
+                                 target_entity_type=Project.entity_type)
+        
+        self.kwargs["status"] = 0
+        self.kwargs["status_list"] = status_list
+        
+        new_project = Project(**self.kwargs)
+        
+        self.assertEqual(new_project.status_list, status_list)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_ScheduleMixin_initialization(self):
+        """tetsing if the ScheduleMixin part is initialized correctly
+        """
+        
+        start_date = datetime.date.today() + datetime.timedelta(days=25)
+        due_date = start_date + datetime.timedelta(days=12)
+        
+        self.kwargs["start_date"] = start_date
+        self.kwargs["due_date"] = due_date
+        
+        new_project = Project(**self.kwargs)
+        
+        self.assertEqual(new_project.start_date, start_date)
+        self.assertEqual(new_project.due_date, due_date)
+        self.assertEqual(new_project.duration, due_date - start_date)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_TaskMixin_initialization(self):
+        """tetsing if the TaskMixin part is initialized correctly
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        
+        task_status_list = StatusList(name="Task Statuses",
+                                      statuses=[status1],
+                                      target_entity_type=Task.entity_type)
+        
+        task1 = Task(name="Modeling", status=0, status_list=task_status_list)
+        task2 = Task(name="Lighting", status=0, status_list=task_status_list)
+        
+        tasks = [task1, task2]
+        
+        self.kwargs["tasks"] = tasks
+        
+        new_project = Project(**self.kwargs)
+        
+        self.assertEqual(new_project.tasks, tasks)
     
     

@@ -166,7 +166,7 @@ class StructureTester(mocker.MockerTestCase):
         """testing if asset_templates attribute works properly
         """
         
-        self.assertEquals(self.mock_structure.asset_templates,
+        self.assertEqual(self.mock_structure.asset_templates,
                           self.kwargs["asset_templates"])
     
     

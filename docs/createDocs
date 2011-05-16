@@ -1,8 +1,6 @@
 clear
 clear
-rm -R html
-rm -R latex
-rm -R doctrees
+rm -R build
 rm -R source/generated
 make html
 #make latexpdf

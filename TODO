@@ -1,6 +1,11 @@
 TODO:
 =====
 
+ * Shot should also have start_date, due_date and duration attributes, but
+   instead of a real Schedule part it should calculate these values from the
+   Tasks it contains. And any change in the end_date should also scale the
+   date values of the contained Tasks.
+
  * All the attributes that has a back reference on other objects should reset
    the back reference value to Null or to the default value whenever they are
    set to None or empty list. For example, when the Project objects sequences

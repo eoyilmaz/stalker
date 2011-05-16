@@ -185,7 +185,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             self.kwargs["name"] = test_value[0]
             new_entity = SimpleEntity(**self.kwargs)
             
-            self.assertEquals(new_entity.code, test_value[1])
+            self.assertEqual(new_entity.code, test_value[1])
     
     
     
@@ -220,7 +220,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             
             new_entity = SimpleEntity(**self.kwargs)
             
-            self.assertEquals(new_entity.code, test_value[1])
+            self.assertEqual(new_entity.code, test_value[1])
     
     
     
@@ -251,7 +251,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertNotEquals(new_simple_entity.code, old_code)
         
         # then check if it is set to the expected result
-        self.assertEquals(new_simple_entity.code, expected_new_code)
+        self.assertEqual(new_simple_entity.code, expected_new_code)
     
     
     
@@ -262,7 +262,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         self.mock_simple_entity.code = ""
-        self.assertEquals(self.mock_simple_entity.code, "TEST_ENTITY")
+        self.assertEqual(self.mock_simple_entity.code, "TEST_ENTITY")
     
     
     
@@ -273,7 +273,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         self.mock_simple_entity.code = None
-        self.assertEquals(self.mock_simple_entity.code, "TEST_ENTITY")
+        self.assertEqual(self.mock_simple_entity.code, "TEST_ENTITY")
     
     
     
@@ -342,7 +342,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         for test_value in test_values:
             self.kwargs["name"] = test_value[0]
             a_new_simple_entity = SimpleEntity(**self.kwargs)
-            self.assertEquals(a_new_simple_entity.name, test_value[1])
+            self.assertEqual(a_new_simple_entity.name, test_value[1])
     
     
     
@@ -369,7 +369,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
             # set the new name
             self.mock_simple_entity.name = test_value[0]
             
-            self.assertEquals(
+            self.assertEqual(
                 self.mock_simple_entity.name,
                 test_value[1],
                 "the name attribute is not correctly formatted for, %s, %s" % \
@@ -386,7 +386,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         for test_value in self.nice_name_test_values:
             self.mock_simple_entity.name = test_value[0]
             
-            self.assertEquals(
+            self.assertEqual(
                 self.mock_simple_entity.nice_name,
                 test_value[1],
                 "the nice name attribute is not correctly formatted for, " + \
@@ -419,7 +419,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.kwargs["description"] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
         
-        self.assertEquals(new_simple_entity.description, "")
+        self.assertEqual(new_simple_entity.description, "")
     
     
     
@@ -430,7 +430,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         self.mock_simple_entity.description = None
-        self.assertEquals(self.mock_simple_entity.description, "")
+        self.assertEqual(self.mock_simple_entity.description, "")
     
     
     
@@ -656,7 +656,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         aNewSimpleEntity = SimpleEntity(**self.kwargs)
         
         # now check if they are same
-        self.assertEquals(aNewSimpleEntity.created_by,
+        self.assertEqual(aNewSimpleEntity.created_by,
                           aNewSimpleEntity.updated_by)
     
     
@@ -815,7 +815,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         test_value = datetime.datetime.now()
         self.mock_simple_entity.date_updated = test_value
-        self.assertEquals(self.mock_simple_entity.date_updated, test_value)
+        self.assertEqual(self.mock_simple_entity.date_updated, test_value)
     
     
     
@@ -840,7 +840,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """testing the __repr__ works properly
         """
         
-        self.assertEquals(
+        self.assertEqual(
             self.mock_simple_entity.__repr__(),
             "<%s (%s, %s)>" % (
                 self.mock_simple_entity.entity_type,
@@ -1021,7 +1021,7 @@ class EntityTester(mocker.MockerTestCase):
         
         test_value = [self.mock_note3]
         self.mock_entity.notes = test_value
-        self.assertEquals(self.mock_entity.notes, test_value)
+        self.assertEqual(self.mock_entity.notes, test_value)
     
     
     
@@ -1074,7 +1074,7 @@ class EntityTester(mocker.MockerTestCase):
         
         expected_result = []
         
-        self.assertEquals(aNewEntity.tags, expected_result)
+        self.assertEqual(aNewEntity.tags, expected_result)
     
     
     
@@ -1100,7 +1100,7 @@ class EntityTester(mocker.MockerTestCase):
         
         self.mock_entity.tags = test_value
         
-        self.assertEquals(self.mock_entity.tags, test_value)
+        self.assertEqual(self.mock_entity.tags, test_value)
     
     
     

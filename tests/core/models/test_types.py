@@ -153,7 +153,7 @@ class AssetTypeTester(mocker.MockerTestCase):
         # lets assign it to the AssetType and check if they are same
         self.mock_assetType.task_types = a_new_list_of_task_type_objs
         
-        self.assertEquals(self.mock_assetType.task_types,
+        self.assertEqual(self.mock_assetType.task_types,
                           a_new_list_of_task_type_objs)
     
     
@@ -408,7 +408,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
         
         self.template_obj.path_code = test_value
         
-        self.assertEquals(self.template_obj.path_code, test_value)
+        self.assertEqual(self.template_obj.path_code, test_value)
     
     
     
@@ -523,7 +523,7 @@ class TypeTemplateTester(mocker.MockerTestCase):
         
         self.template_obj.file_code = test_value
         
-        self.assertEquals(self.template_obj.file_code, test_value)
+        self.assertEqual(self.template_obj.file_code, test_value)
     
     
     

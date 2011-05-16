@@ -132,7 +132,7 @@ class NoteTester(mocker.MockerTestCase):
         
         self.mock_note.content = new_content
         
-        self.assertEquals(self.mock_note.content, new_content)
+        self.assertEqual(self.mock_note.content, new_content)
     
     
     

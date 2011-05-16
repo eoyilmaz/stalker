@@ -26,9 +26,16 @@ class ReferenceMixin(object):
     
     References are :class:`stalker.core.models.Link` objects which adds
     outside information to the attached objects. The aim of the References are
-    generally to give more info to direct the evolution of the objects,
-    generally these objects are :class:`stalker.core.models.Asset`\ s.
+    generally to give more info to direct the evolution of the object.
+    
+    :param references: A list of :class:`~stalker.core.models.Link` objects.
+      For more detail about references see the
+      :class:`~stalker.core.models.Link` documentation.
+    
+    :type references: list of :class:`~stalker.core.models.Link` objects
+    
     """
+    
     
     
     _references = ValidatedList([], "stalker.core.models.Link")
@@ -40,7 +47,7 @@ class ReferenceMixin(object):
                  references=ValidatedList([], "stalker.core.models.Link"),
                  **kwargs):
         
-        self._validate_references(references)
+        self._references = self._validate_references(references)
     
     
     
@@ -76,8 +83,7 @@ class ReferenceMixin(object):
         def fset(self, references_in):
             self._references = self._validate_references(references_in)
         
-        doc="""references are lists containing
-        :class:`stalker.core.models.Link` objects
+        doc="""References are lists containing :class:`~stalker.core.models.Link` objects.
         """
         
         return locals()
@@ -195,14 +201,13 @@ class StatusMixin(object):
         doc = """The current status index of the object.
         
         This is an integer value and shows the index of the
-        :class:`stalker.core.models.Status` object in the
-        :class:`stalker.core.models.StatusList` of this object.
+        :class:`~stalker.core.models.Status` object in the
+        :class:`~stalker.core.models.StatusList` of this object.
         """
         
         return locals()
     
     status = property(**status())
-        
     
     
     
@@ -386,7 +391,7 @@ class ScheduleMixin(object):
         doc = """Duration of the project.
         
         The duration is calculated by subtracting start_date from the due_date,
-        so it is a datetime.timedelta, for now it is read-only
+        so it is a datetime.timedelta, for now it is read-only.
         """
         
         return locals()
@@ -400,11 +405,11 @@ class ScheduleMixin(object):
 
 ########################################################################
 class TaskMixin(object):
-    """Gives the abilitiy to connect to a list of taks.
+    """Gives the abilitiy to connect to a list of taks to the mixed in object.
     
-    :param list tasks: The list of tasks. Should be a list of
-      :class:`stalker.core.models.Task` instances. Default value is an
-      empty list.
+    :param list tasks: The list of :class:`~stalker.core.models.Task`\ s.
+      Should be a list of :class:`~stalker.core.models.Task` instances. Default
+      value is an empty list.
     """
     
     

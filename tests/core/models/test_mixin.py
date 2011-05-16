@@ -102,7 +102,7 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         
         self.mock_foo_obj.references = self.mock_links
         
-        self.assertEquals(self.mock_foo_obj.references, self.mock_links)
+        self.assertEqual(self.mock_foo_obj.references, self.mock_links)
     
     
     
@@ -157,7 +157,7 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         
         myGreatEntity.references = test_value
         
-        self.assertEquals(myGreatEntity.references, test_value)
+        self.assertEqual(myGreatEntity.references, test_value)
 
 
 
@@ -477,7 +477,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         test_value = 1
         
         self.mock_mixed_obj.status = test_value
-        self.assertEquals(self.mock_mixed_obj.status, test_value)
+        self.assertEqual(self.mock_mixed_obj.status, test_value)
 
 
 
@@ -568,7 +568,7 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         
         self.kwargs["start_date"] = None
         new_foo_obj = self.FooMixedInClass_without_init(**self.kwargs)
-        self.assertEquals(new_foo_obj.start_date, datetime.date.today())
+        self.assertEqual(new_foo_obj.start_date, datetime.date.today())
     
     
     
@@ -579,7 +579,7 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         """
         
         self.mock_foo_obj.start_date = None
-        self.assertEquals(self.mock_foo_obj.start_date, datetime.date.today())
+        self.assertEqual(self.mock_foo_obj.start_date, datetime.date.today())
     
     
     
@@ -590,7 +590,7 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         
         test_value = datetime.date(year=2011, month=1, day=1)
         self.mock_foo_obj.start_date = test_value
-        self.assertEquals(self.mock_foo_obj.start_date, test_value)
+        self.assertEqual(self.mock_foo_obj.start_date, test_value)
     
     
     
@@ -636,7 +636,7 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         
         self.kwargs["due_date"] = None
         new_foo_obj = self.FooMixedInClass_without_init(**self.kwargs)
-        self.assertEquals(new_foo_obj.due_date - new_foo_obj.start_date,
+        self.assertEqual(new_foo_obj.due_date - new_foo_obj.start_date,
                           datetime.timedelta(days=10))
     
     
@@ -648,7 +648,7 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         """
         
         self.mock_foo_obj.due_date = None
-        self.assertEquals(
+        self.assertEqual(
             self.mock_foo_obj.due_date - self.mock_foo_obj.start_date,
             datetime.timedelta(days=10)
         )
@@ -667,7 +667,7 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         
         self.assertIsInstance(new_foo_obj.due_date, datetime.date)
         
-        self.assertEquals(
+        self.assertEqual(
             new_foo_obj.due_date - new_foo_obj.start_date,
             test_value
         )
@@ -685,7 +685,7 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         
         self.assertIsInstance(self.mock_foo_obj.due_date, datetime.date)
         
-        self.assertEquals(
+        self.assertEqual(
             self.mock_foo_obj.due_date - self.mock_foo_obj.start_date,
             test_value
         )
@@ -734,7 +734,7 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         time_delta = self.mock_foo_obj.due_date - self.mock_foo_obj.start_date
         self.mock_foo_obj.start_date += 2 * time_delta
         
-        self.assertEquals(
+        self.assertEqual(
             self.mock_foo_obj.due_date - self.mock_foo_obj.start_date,
             time_delta
         )
@@ -750,7 +750,7 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         new_foo_entity.start_date = datetime.date.today()
         new_foo_entity.due_date = datetime.timedelta(201)
         
-        self.assertEquals(new_foo_entity.duration, datetime.timedelta(201))
+        self.assertEqual(new_foo_entity.duration, datetime.timedelta(201))
     
     
     
@@ -816,7 +816,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         
         self.kwargs["tasks"] = None
         new_foo_obj = self.FooMixedInClass(**self.kwargs)
-        self.assertEquals(new_foo_obj.tasks, [])
+        self.assertEqual(new_foo_obj.tasks, [])
     
     
     
@@ -827,7 +827,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         """
         
         self.mock_foo_obj.tasks = None
-        self.assertEquals(self.mock_foo_obj.tasks, [])
+        self.assertEqual(self.mock_foo_obj.tasks, [])
     
     
     

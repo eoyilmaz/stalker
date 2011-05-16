@@ -262,7 +262,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         an_image_format = ImageFormat(**self.kwargs)
         
         # the device aspect for this setup should be around 1.7778
-        self.assertEquals("%1.4g" % an_image_format.device_aspect,
+        self.assertEqual("%1.4g" % an_image_format.device_aspect,
                           "%1.4g" % 1.7778 )
         
         
@@ -279,7 +279,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         an_image_format = ImageFormat(**self.kwargs)
         
         # the device aspect for this setup should be around 4/3
-        self.assertEquals("%1.4g" % an_image_format.device_aspect,
+        self.assertEqual("%1.4g" % an_image_format.device_aspect,
                           "%1.4g" % 1.3333)
     
     
@@ -429,7 +429,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         self.kwargs.pop("pixel_aspect")
         an_image_format = ImageFormat(**self.kwargs)
         default_value = 1.0
-        self.assertEquals(an_image_format.pixel_aspect, default_value)
+        self.assertEqual(an_image_format.pixel_aspect, default_value)
     
     
     

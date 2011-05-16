@@ -85,7 +85,7 @@ class AuthTester(mocker.MockerTestCase):
         # now check if the value for the key session_id is equal to the
         # admin.id
         
-        self.assertEquals(auth.SESSION[auth.SESSION_KEY], admin.id)
+        self.assertEqual(auth.SESSION[auth.SESSION_KEY], admin.id)
     
     
     
@@ -129,7 +129,7 @@ class AuthTester(mocker.MockerTestCase):
                             admin_session[auth.SESSION_KEY])
         
         # check if the session id matches the user id
-        self.assertEquals(auth.SESSION[auth.SESSION_KEY],
+        self.assertEqual(auth.SESSION[auth.SESSION_KEY],
                           new_user.id)
     
     
@@ -286,7 +286,7 @@ class PasswordTester(mocker.MockerTestCase):
         
         for raw_pass, enc_pass, result in test_values:
             #print "r:%s e:%s res:%s" % (raw_pass, enc_pass, result)
-            self.assertEquals(auth.check_password(raw_pass, enc_pass), result)
+            self.assertEqual(auth.check_password(raw_pass, enc_pass), result)
     
     
     
@@ -296,7 +296,7 @@ class PasswordTester(mocker.MockerTestCase):
         """
         
         enc_password = auth.set_password(self.raw_pass)
-        self.assertEquals(enc_password, self.enc_pass)
+        self.assertEqual(enc_password, self.enc_pass)
     
     
     

@@ -469,18 +469,8 @@ notes = Table(
 # PROJECT_USERS
 project_users = Table(
     "project_users", metadata,
-    Column(
-        "project_id",
-        Integer,
-        ForeignKey("projects.id"),
-        primary_key=True,
-    ),
-    Column(
-        "user_id",
-        Integer,
-        ForeignKey("users.id"),
-        primary_key=True,
-    )
+    Column("project_id", Integer, ForeignKey("projects.id"), primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
 )
 
 
@@ -516,12 +506,24 @@ assets = Table(
     Column("type_id", Integer, ForeignKey("assetTypes.id")),
 )
 
+# SHOT ASSETS
+shot_assets = Table(
+    "shot_assets", metadata,
+    Column("shot_id", Integer, ForeignKey("shots.id"), primary_key=True),
+    Column("asset_id", Integer, ForeignKey("assets.id"), primary_key=True),
+)
 
-# SHOT - WARNING: It is a temprorary table, will be completed later
+
+# SHOT
+# the cut_out attribute is not going to be stored in the database, only
+# the cut_in and cut_duration will be enough to calculate the cut_out
+# 
 shots = Table(
     "shots", metadata,
     Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
     Column("sequence_id", Integer, ForeignKey("sequences.id")),
+    Column("cut_in", Integer),
+    Column("cut_duration", Integer),
 )
 
 

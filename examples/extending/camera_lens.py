@@ -20,7 +20,7 @@ shooting. The Camera class should hold these information:
 
 The other class is going to be the Lens. A Lens class should hold these
 information:
- 
+
  * The make of the lens
  * The model of the lens
  * min focal length

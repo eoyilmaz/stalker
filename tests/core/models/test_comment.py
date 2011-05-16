@@ -107,7 +107,7 @@ class CommentTest(mocker.MockerTestCase):
         
         new_body = "This is a new comment body"
         self.mock_comment.body = new_body
-        self.assertEquals(new_body, self.mock_comment.body)
+        self.assertEqual(new_body, self.mock_comment.body)
     
     
     
@@ -212,7 +212,7 @@ class CommentTest(mocker.MockerTestCase):
         
         new_to = self.mock_entity2
         self.mock_comment.to = new_to
-        self.assertEquals(new_to, self.mock_comment.to)
+        self.assertEqual(new_to, self.mock_comment.to)
     
     
     
