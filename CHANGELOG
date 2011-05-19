@@ -29,6 +29,32 @@ v0.1.1.a8
    to <Shot (Shot.code, Shot.code)> because the
    :attr:`~stalker.core.models.Shot.name` is not meaningful.
 
+ * Changed the way :class:`~stalker.core.models.EntityMeta` metaclass working.
+   It is now using the ``__new__`` method and the ``dict_`` of the class to
+   set the attributes.
+
+ * The :class:`~stalker.core.models.EntityMeta` now adds another attribute
+   called ``plural_name`` to the classes, which shows the plural form of the
+   class name. By default it tries to set it to a good name using plural form
+   rules of English but if the name has an irregular plural name (or it is not
+   in English) you can override this attribute by adding ``plural_name`` to the
+   class attributes::
+     
+     from stalker.core.models import SimpleEntity
+     
+     class MyEntity(SimpleEntity):
+         plural_name = "MyEntities"
+         pass
+
+ * From now on the table names are in the following format:
+   
+    * The plural name of the class if the table belongs to one class
+   
+    * The class1.__name__ + "_" + class2.plural_name if the table is a join
+      join table
+
+ * Updated the table names in the :mod:`stalker.db.mixin` module
+
 v0.1.1.a7
 ---------
 
@@ -786,7 +812,7 @@ v0.0.1.20101225
 
  * creating tables for catch the general inheritance of the entity classes
 
- * entitiy.SimpleEntity.name's first letter is not capitalised any more
+ * entitiy.SimpleEntity.name's first letter is not capitalized any more
 
  * department.Department class now accepts Null for lead attribute (for now
    again)

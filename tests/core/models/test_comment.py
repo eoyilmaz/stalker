@@ -216,3 +216,12 @@ class CommentTest(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Comment class
+        """
+        
+        self.assertTrue(Comment.plural_name, "Comments")
+    
+    
+    

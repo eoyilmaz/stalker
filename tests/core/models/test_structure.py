@@ -311,3 +311,12 @@ class StructureTester(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Structure class
+        """
+        
+        self.assertTrue(Structure.plural_name, "Structures")
+    
+    
+    

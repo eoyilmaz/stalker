@@ -335,3 +335,12 @@ class LinkTester(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Link class
+        """
+        
+        self.assertTrue(Link.plural_name, "Links")
+    
+    
+    

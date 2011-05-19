@@ -290,4 +290,12 @@ class RepositoryTester(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Repository class
+        """
+        
+        self.assertTrue(Repository.plural_name, "Repositories")
+    
+    
     

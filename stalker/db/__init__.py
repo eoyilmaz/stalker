@@ -175,7 +175,7 @@ def __fill_entity_types_table__():
     
     # get the current values in the table
     conn = db.engine.connect()
-    s = sqlalchemy.sql.select([tables.entity_types.c.entity_type])
+    s = sqlalchemy.sql.select([tables.EntityTypes.c.entity_type])
     result = conn.execute(s)
     
     entity_types_DB = []
@@ -205,7 +205,7 @@ def __fill_entity_types_table__():
     for entity_type in default_entity_types:
         if entity_type not in entity_types_DB:
             db.engine.execute(
-                tables.entity_types.insert(),
+                tables.EntityTypes.insert(),
                 entity_type=entity_type
             )
 

@@ -17,15 +17,52 @@ from stalker.ext.validatedList import ValidatedList
 class EntityMeta(type):
     """The metaclass for the very basic entity.
     
-    Just adds the name of the class as the entity_type class attribute
+    Just adds the name of the class as the entity_type class attribute and
+    creates an attribute called plural_name to hold the auto generated plural
+    form of the class name. These two attributes can be overriden in the
+    class itself.
     """
     
     
-    
     #----------------------------------------------------------------------
-    def __init__(cls, classname, bases, dict_):
-        setattr(cls, "entity_type", unicode(classname))
-        return type.__init__(cls, classname, bases, dict_)
+    def __new__(cls, classname, bases, dict_):
+        
+        # create the entity_type
+        dict_["entity_type"] = unicode(classname)
+        
+        # try to find a plural name for the class if not given
+        if not dict_.has_key("plural_name"):
+            
+            plural_name = unicode(classname+"s")
+            
+            if classname[-1] == "y":
+                plural_name = unicode(classname[:-1] + "ies")
+            elif classname[-2] == "ch":
+                plural_name = unicode(classname + "es")
+            elif classname[-1] == "f":
+                plural_name = unicode(classname[:-1] + "ves")
+            elif classname[-1] == "s":
+                plural_name = unicode(classname + "es")
+            
+            dict_["plural_name"] = plural_name
+        
+        return super(EntityMeta, cls).__new__(cls, classname, bases, dict_)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def __init__(cls, classname, bases, dict_):
+        #print "runs before class __init__"
+        
+        #setattr(cls, "entity_type", unicode(classname))
+        #setattr(cls, "plural_name", unicode(classname+"s"))
+        #if classname[-1] == "y":
+            #setattr(cls, "plural_name", unicode(classname[:-1]+"ies"))
+        #elif classname[-2] == "ch":
+            #setattr(cls, "plural_name", unicode(classname+"es"))
+        #elif classname[-1] == "f":
+            #setattr(cls, "plural_name", unicode(classname[:-1]+"ves"))
+        #return type.__init__(cls, classname, bases, dict_)
 
 
 
@@ -3536,6 +3573,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     shots = property(**shots())
     
     
+    
     #----------------------------------------------------------------------
     def __eq__(self, other):
         """the equality operator
@@ -3549,13 +3587,82 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
 
 
 
-
 ########################################################################
 class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
-    WARNING: (obviously) not implemented yet!
+    Tasks are the smallest meaningful part that should be accomplished to
+    complete the a :class:`~stalker.core.models.Project`.
+    
+    In Stalker, currently these items supports Tasks:
+    
+       * :class:`~stalker.core.models.Project`
+    
+       * :class:`~stalker.core.models.Sequence`
+    
+       * :class:`~stalker.core.models.Asset`
+    
+       * :class:`~stalker.core.models.Shot`
+    
+    Task is mixed with :class:`~stalker.core.mixins.StatusMixin` and
+    :class:`~stalker.core.mixins.ScheduleMixin`.
+    
+    :param int priority: It is a number between 0 to 1000 which defines the
+      priority of the :class:`~stalker.core.models.Task`. The higher the value
+      the higher its priority. The default value is 500.
+    
+    :param resources: The :class:`~stalker.core.models.User`\ s assigned to
+      this :class:`~stalker.core.models.Task`. A
+      :class:`~stalker.core.models.Task` without any resource can not be
+      scheduled.
+    
+    :type resources: list of :class:`~stalker.core.models.User`
+    
+    :param effort: The total effort that needs to be spend to complete this
+      Task. Can be used to create an initial bid of how long this task going to
+      take. The effort is equaly divided to the assigned resources. So if the
+      effort is 10 days and 2 resources is assigned then the duration of the
+      task is going to be 5 days (if both of the resources are free to work).
+    
+    :type effort: datetime.timedelta
+    
+    :param depends: A list of other :class:`~stalker.core.models.Task`\ s that
+      this one depends to.
+    
+    :type depends: list of :class:`~stalker.core.models.Task`
+    
+    :param depend_relation: An enumerator that has the values of
+      "0|START-START", "1|START-END", "2|END-END" which defines the relation of
+      dependent :class:`~stalker.core.models.Task"\ s.
+    
+    :type depend_relation: enumerator
+    
+    :param int percent_complete: An integer number between 0-100 showing how
+      much this task is completed.
+    
+    :param bool milestone: A bool (True or False) value showing if this task is
+      a milestone which doesn't need any resource and effort.
+    
+    :param type: The type of the task. Which is defined by a
+    :class:`~stalker.core.models.TaskType` instance. A
+    :class:`~stalker.core.models.TaskType` can be "MODEL", "RIG", "SHADING",
+    "RENDERING" etc. and generally is defined by the :class:
+    
+    :param bookings: A list of :class:`~stalker.core.models.Booking` objects
+      showing who spent how much effort on this task.
+    
+    :type bookings: list of :class:`~stalker.core.models.Booking`
+    
+    :param versions: A list of :class:`~stalker.core.models.Version` objects
+      showing the produced work on the repository. This is the relation between
+      database and the repository.
+    
+    :type versions: list of :class:`~stalker.core.models.Version`
     """
+    
+    #:param published_version: A shortcut to the
+      #:class:`~stalker.core.models.Versions`\ s which have their published to
+      #set
     
     
     

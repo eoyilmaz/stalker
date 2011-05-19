@@ -160,7 +160,7 @@ def setup():
         Column(
             "id",
             Integer,
-            ForeignKey(tables.entities.c.id),
+            ForeignKey(tables.Entities.c.id),
             primary_key=True
         ),
         Column("make", String),
@@ -178,7 +178,7 @@ def setup():
         Column(
             "id",
             Integer,
-            ForeignKey(tables.entities.c.id),
+            ForeignKey(tables.Entities.c.id),
             primary_key=True
         ),
         Column("make", String),

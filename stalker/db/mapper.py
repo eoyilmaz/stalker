@@ -56,19 +56,19 @@ def setup():
     # SimpleEntity
     mapper(
         SimpleEntity,
-        tables.simpleEntities,
+        tables.SimpleEntities,
         properties={
-            "_code": tables.simpleEntities.c.code,
+            "_code": tables.SimpleEntities.c.code,
             "code": synonym("_code"),
-            "_name": tables.simpleEntities.c.name,
+            "_name": tables.SimpleEntities.c.name,
             "name": synonym("_name"),
-            "_description": tables.simpleEntities.c.description,
+            "_description": tables.SimpleEntities.c.description,
             "description": synonym("_description"),
             "_created_by": relationship(
                 User,
                 backref="_entities_created",
-                primaryjoin=tables.simpleEntities.c.created_by_id== \
-                            tables.users.c.id,
+                primaryjoin=tables.SimpleEntities.c.created_by_id== \
+                            tables.Users.c.id,
                 post_update=True,
                 #uselist=False
             ),
@@ -76,18 +76,18 @@ def setup():
             "_updated_by": relationship(
                 User,
                 backref="_entities_updated",
-                primaryjoin=tables.simpleEntities.c.updated_by_id== \
-                            tables.users.c.id,
+                primaryjoin=tables.SimpleEntities.c.updated_by_id== \
+                            tables.Users.c.id,
                 post_update=True,
                 #uselist=False
             ),
             "updated_by": synonym("_updated_by"),
-            "_date_created": tables.simpleEntities.c.date_created,
+            "_date_created": tables.SimpleEntities.c.date_created,
             "date_created": synonym("_date_created"),
-            "_date_updated": tables.simpleEntities.c.date_updated,
+            "_date_updated": tables.SimpleEntities.c.date_updated,
             "date_updated": synonym("_date_updated"),
         },
-        polymorphic_on=tables.simpleEntities.c.db_entity_type,
+        polymorphic_on=tables.SimpleEntities.c.db_entity_type,
         polymorphic_identity=SimpleEntity.entity_type
     )
     
@@ -96,7 +96,7 @@ def setup():
     # Tag
     mapper(
         Tag,
-        tables.tags,
+        tables.Tags,
         inherits=Tag.__base__,
         polymorphic_identity=Tag.entity_type
     )
@@ -106,20 +106,20 @@ def setup():
     # Entity
     mapper(
         Entity,
-        tables.entities,
+        tables.Entities,
         inherits=Entity.__base__,
-        inherit_condition=tables.entities.c.id==tables.simpleEntities.c.id,
+        inherit_condition=tables.Entities.c.id==tables.SimpleEntities.c.id,
         polymorphic_identity=Entity.entity_type,
         properties={
             "_tags": relationship(
                 Tag,
-                secondary=tables.entity_tags,
+                secondary=tables.Entity_Tags,
                 backref="entities"
             ),
             "tags": synonym("_tags"),
             "_notes": relationship(
                 Note,
-                primaryjoin=tables.entities.c.id==tables.notes.c.entity_id,
+                primaryjoin=tables.Entities.c.id==tables.Notes.c.entity_id,
                 backref="entity",
             ),
             "notes": synonym("_notes"),
@@ -131,27 +131,27 @@ def setup():
     # User
     mapper(
         User,
-        tables.users,
+        tables.Users,
         inherits=User.__base__,
-        inherit_condition=tables.users.c.id==tables.entities.c.id,
+        inherit_condition=tables.Users.c.id==tables.Entities.c.id,
         polymorphic_identity=User.entity_type,
         properties={
             "enitites_created": synonym("_entities_created"),
             "enitites_updated": synonym("_entities_updated"),
             "department": synonym("_department"),
-            "_name": tables.simpleEntities.c.name,
+            "_name": tables.SimpleEntities.c.name,
             "name": synonym("_name"),
-            "_first_name": tables.users.c.first_name,
+            "_first_name": tables.Users.c.first_name,
             "first_name": synonym("_first_name"),
-            "_last_name": tables.users.c.last_name,
+            "_last_name": tables.Users.c.last_name,
             "last_name": synonym("_last_name"),
-            "_initials": tables.users.c.initials,
+            "_initials": tables.Users.c.initials,
             "initials": synonym("_initials"),
-            "_email": tables.users.c.email,
+            "_email": tables.Users.c.email,
             "email": synonym("_email"),
-            "_password": tables.users.c.password,
+            "_password": tables.Users.c.password,
             "password": synonym("_password"),
-            "_last_login": tables.users.c.last_login,
+            "_last_login": tables.Users.c.last_login,
             "last_login": synonym("_last_login"),
         },
     )
@@ -161,16 +161,16 @@ def setup():
     # Department
     mapper(
         Department,
-        tables.departments,
+        tables.Departments,
         inherits=Department.__base__,
-        inherit_condition=tables.departments.c.id==tables.entities.c.id,
+        inherit_condition=tables.Departments.c.id==tables.Entities.c.id,
         polymorphic_identity=Department.entity_type,
         properties={
             "_members": relationship(
                 User,
                 backref="_department",
                 primaryjoin=\
-                    tables.departments.c.id==tables.users.c.department_id,
+                    tables.Departments.c.id==tables.Users.c.department_id,
             ),
             "members": synonym("_members")
         },
@@ -181,9 +181,9 @@ def setup():
     # Status
     mapper(
         Status,
-        tables.statuses,
+        tables.Statuses,
         inherits=Status.__base__,
-        inherit_condition=tables.statuses.c.id==tables.entities.c.id,
+        inherit_condition=tables.Statuses.c.id==tables.Entities.c.id,
         polymorphic_identity=Status.entity_type,
     )
     
@@ -192,17 +192,17 @@ def setup():
     # StatusList
     mapper(
         StatusList,
-        tables.statusLists,
+        tables.StatusLists,
         inherits=StatusList.__base__,
-        inherit_condition=tables.statusLists.c.id==tables.entities.c.id,
+        inherit_condition=tables.StatusLists.c.id==tables.Entities.c.id,
         polymorphic_identity=StatusList.entity_type,
         properties={
             "_statuses": relationship(
                 Status,
-                secondary=tables.statusList_statuses
+                secondary=tables.StatusList_Statuses
             ),
             "statuses": synonym("_statuses"),
-            "_target_entity_type": tables.statusLists.c.target_entity_type,
+            "_target_entity_type": tables.StatusLists.c.target_entity_type,
             "target_entity_type": synonym("_target_entity_type"),
         }
     )
@@ -212,16 +212,16 @@ def setup():
     # Repository
     mapper(
         Repository,
-        tables.repositories,
+        tables.Repositories,
         inherits=Repository.__base__,
-        inherit_condition=tables.repositories.c.id==tables.entities.c.id,
+        inherit_condition=tables.Repositories.c.id==tables.Entities.c.id,
         polymorphic_identity=Repository.entity_type,
         properties={
-            "_linux_path": tables.repositories.c.linux_path,
+            "_linux_path": tables.Repositories.c.linux_path,
             "linux_path": synonym("_linux_path"),
-            "_windows_path": tables.repositories.c.windows_path,
+            "_windows_path": tables.Repositories.c.windows_path,
             "windows_path": synonym("_windows_path"),
-            "_osx_path": tables.repositories.c.osx_path,
+            "_osx_path": tables.Repositories.c.osx_path,
             "osx_path": synonym("_osx_path")
         },
         #exclude_properties=["path"]
@@ -232,18 +232,18 @@ def setup():
     # ImageFormat
     mapper(
         ImageFormat,
-        tables.imageFormats,
+        tables.ImageFormats,
         inherits=ImageFormat.__base__,
-        inherit_condition=tables.imageFormats.c.id==tables.entities.c.id,
+        inherit_condition=tables.ImageFormats.c.id==tables.Entities.c.id,
         polymorphic_identity=ImageFormat.entity_type,
         properties={
-            "_width": tables.imageFormats.c.width,
+            "_width": tables.ImageFormats.c.width,
             "width": synonym("_width"),
-            "_height": tables.imageFormats.c.height,
+            "_height": tables.ImageFormats.c.height,
             "height": synonym("_height"),
-            "_pixel_aspect": tables.imageFormats.c.pixel_aspect,
+            "_pixel_aspect": tables.ImageFormats.c.pixel_aspect,
             "pixel_aspect": synonym("_pixel_aspect"),
-            "_print_resolution": tables.imageFormats.c.print_resolution,
+            "_print_resolution": tables.ImageFormats.c.print_resolution,
             "print_resolution": synonym("print_resolution")
         },
         exclude_properties=["device_aspect"]
@@ -254,9 +254,9 @@ def setup():
     # TypeEntity
     mapper(
         TypeEntity,
-        tables.typeEntities,
+        tables.TypeEntities,
         inherits=TypeEntity.__base__,
-        inherit_condition=tables.typeEntities.c.id==tables.entities.c.id,
+        inherit_condition=tables.TypeEntities.c.id==tables.Entities.c.id,
         polymorphic_identity=TypeEntity.entity_type,
     )
     
@@ -265,14 +265,14 @@ def setup():
     # AssetType
     mapper(
         AssetType,
-        tables.assetTypes,
+        tables.AssetTypes,
         inherits=AssetType.__base__,
-        inherit_condition=tables.assetTypes.c.id==tables.typeEntities.c.id,
+        inherit_condition=tables.AssetTypes.c.id==tables.TypeEntities.c.id,
         polymorphic_identity=AssetType.entity_type,
         properties={
             "_task_types": relationship(
                 TaskType,
-                secondary=tables.assetType_taskTypes
+                secondary=tables.AssetType_TaskTypes
                 ),
             "task_types": synonym("_task_types")
         }
@@ -283,9 +283,9 @@ def setup():
     # LinkType
     mapper(
         LinkType,
-        tables.linkTypes,
+        tables.LinkTypes,
         inherits=LinkType.__base__,
-        inherit_condition=tables.linkTypes.c.id==tables.typeEntities.c.id,
+        inherit_condition=tables.LinkTypes.c.id==tables.TypeEntities.c.id,
         polymorphic_identity=LinkType.entity_type,
     )
     
@@ -294,9 +294,9 @@ def setup():
     # ProjectType
     mapper(
         ProjectType,
-        tables.projectTypes,
+        tables.ProjectTypes,
         inherits=ProjectType.__base__,
-        inherit_condition=tables.projectTypes.c.id==tables.typeEntities.c.id,
+        inherit_condition=tables.ProjectTypes.c.id==tables.TypeEntities.c.id,
         polymorphic_identity=ProjectType.entity_type,
     )
     
@@ -305,9 +305,9 @@ def setup():
     # TaskType
     mapper(
         TaskType,
-        tables.taskTypes,
+        tables.TaskTypes,
         inherits=TaskType.__base__,
-        inherit_condition=tables.taskTypes.c.id==tables.entities.c.id,
+        inherit_condition=tables.TaskTypes.c.id==tables.Entities.c.id,
         polymorphic_identity=TaskType.entity_type,
     )
     
@@ -316,19 +316,19 @@ def setup():
     # TypeTemplate
     mapper(
         TypeTemplate,
-        tables.typeTemplates,
+        tables.TypeTemplates,
         inherits=TypeTemplate.__base__,
-        inherit_condition=tables.typeTemplates.c.id==tables.entities.c.id,
+        inherit_condition=tables.TypeTemplates.c.id==tables.Entities.c.id,
         polymorphic_identity=TypeTemplate.entity_type,
         properties={
-            "_path_code": tables.typeTemplates.c.path_code,
+            "_path_code": tables.TypeTemplates.c.path_code,
             "path_code": synonym("_path_code"),
-            "_file_code": tables.typeTemplates.c.file_code,
+            "_file_code": tables.TypeTemplates.c.file_code,
             "file_code": synonym("_file_code"),
             "_type": relationship(
                 TypeEntity,
                 primaryjoin=\
-                    tables.typeTemplates.c.type_id==tables.typeEntities.c.id
+                    tables.TypeTemplates.c.type_id==tables.TypeEntities.c.id
                 ),
             "type": synonym("_type"),
         },
@@ -339,33 +339,33 @@ def setup():
     # Structure
     mapper(
         Structure,
-        tables.structures,
+        tables.Structures,
         inherits=Structure.__base__,
-        inherit_condition=tables.structures.c.id==tables.entities.c.id,
+        inherit_condition=tables.Structures.c.id==tables.Entities.c.id,
         polymorphic_identity=Structure.entity_type,
         properties={
-            "_project_template": tables.structures.c.project_template,
+            "_project_template": tables.Structures.c.project_template,
             "project_template": synonym("_project_template"),
             "_asset_templates": relationship(
                 TypeTemplate,
-                secondary=tables.structure_assetTemplates,
+                secondary=tables.Structure_AssetTemplates,
                 primaryjoin=\
-                    tables.structures.c.id==\
-                    tables.structure_assetTemplates.c.structure_id,
+                    tables.Structures.c.id==\
+                    tables.Structure_AssetTemplates.c.structure_id,
                 secondaryjoin=
-                    tables.structure_assetTemplates.c.typeTemplate_id==\
-                    tables.typeTemplates.c.id
+                    tables.Structure_AssetTemplates.c.typeTemplate_id==\
+                    tables.TypeTemplates.c.id
             ),
             "asset_templates": synonym("_asset_templates"),
             "_reference_templates": relationship(
                 TypeTemplate,
-                secondary=tables.structure_referenceTemplates,
+                secondary=tables.Structure_ReferenceTemplates,
                 primaryjoin=\
-                    tables.structures.c.id==\
-                    tables.structure_referenceTemplates.c.structure_id,
+                    tables.Structures.c.id==\
+                    tables.Structure_ReferenceTemplates.c.structure_id,
                 secondaryjoin=
-                    tables.structure_referenceTemplates.c.typeTemplate_id==\
-                    tables.typeTemplates.c.id
+                    tables.Structure_ReferenceTemplates.c.typeTemplate_id==\
+                    tables.TypeTemplates.c.id
             ),
             "reference_templates": synonym("_reference_templates"),
         },
@@ -376,19 +376,19 @@ def setup():
     # Links
     mapper(
         Link,
-        tables.links,
+        tables.Links,
         inherits=Link.__base__,
-        inherit_condition=tables.links.c.id==tables.entities.c.id,
+        inherit_condition=tables.Links.c.id==tables.Entities.c.id,
         polymorphic_identity=Link.entity_type,
         properties={
-            "_path": tables.links.c.path,
+            "_path": tables.Links.c.path,
             "path": synonym("_path"),
-            "_filename": tables.links.c.filename,
+            "_filename": tables.Links.c.filename,
             "filename": synonym("_filename"),
             "_type": relationship(
                 LinkType,
                 primaryjoin=\
-                    tables.links.c.type_id==tables.linkTypes.c.id
+                    tables.Links.c.type_id==tables.LinkTypes.c.id
             ),
             "type": synonym("_type"),
         },
@@ -400,12 +400,12 @@ def setup():
     # Notes
     mapper(
         Note,
-        tables.notes,
+        tables.Notes,
         inherits=Note.__base__,
-        inherit_condition=tables.notes.c.id==tables.simpleEntities.c.id,
+        inherit_condition=tables.Notes.c.id==tables.SimpleEntities.c.id,
         polymorphic_identity=Note.entity_type,
         properties={
-            "_content": tables.notes.c.content,
+            "_content": tables.Notes.c.content,
             "content": synonym("_content"),
         }
     )
@@ -416,60 +416,60 @@ def setup():
     project_mapper_arguments = dict(
         inherits=Project.__base__,
         polymorphic_identity=Project.entity_type,
-        inherit_condition=tables.projects.c.id==tables.entities.c.id,
+        inherit_condition=tables.Projects.c.id==tables.Entities.c.id,
         properties={
             "_lead": relationship(
                 User,
-                primaryjoin=tables.projects.c.lead_id==tables.users.c.id,
+                primaryjoin=tables.Projects.c.lead_id==tables.Users.c.id,
             ),
             "lead": synonym("_lead"),
             "_repository": relationship(
                 Repository,
-                primaryjoin=tables.projects.c.repository_id==\
-                            tables.repositories.c.id
+                primaryjoin=tables.Projects.c.repository_id==\
+                            tables.Repositories.c.id
             ),
             "repository": synonym("repository"),
             "_type": relationship(
                 ProjectType,
-                primaryjoin=tables.projects.c.type_id==tables.projectTypes.c.id
+                primaryjoin=tables.Projects.c.type_id==tables.ProjectTypes.c.id
             ),
             "type": synonym("_type"),
             "_structure": relationship(
                 Structure,
-                primaryjoin=tables.projects.c.structure_id==\
-                            tables.structures.c.id
+                primaryjoin=tables.Projects.c.structure_id==\
+                            tables.Structures.c.id
             ),
             "structure": synonym("_structure"),
             "_image_format": relationship(
                 ImageFormat,
-                primaryjoin=tables.projects.c.image_format_id==\
-                            tables.imageFormats.c.id
+                primaryjoin=tables.Projects.c.image_format_id==\
+                            tables.ImageFormats.c.id
             ),
             "image_format": synonym("_image_format"),
-            "_fps": tables.projects.c.fps,
+            "_fps": tables.Projects.c.fps,
             "fps": synonym("_fps"),
-            "_is_stereoscopic": tables.projects.c.is_stereoscopic,
+            "_is_stereoscopic": tables.Projects.c.is_stereoscopic,
             "is_stereoscopic": synonym("_is_stereoscopic"),
-            "_display_width": tables.projects.c.display_width,
+            "_display_width": tables.Projects.c.display_width,
             "display_width": synonym("_display_width"),
         }
     )
     
     # mix it with ReferenceMixin first
-    ReferenceMixinDB.setup(Project, tables.projects, project_mapper_arguments)
+    ReferenceMixinDB.setup(Project, tables.Projects, project_mapper_arguments)
     
     # then to the StatusMixin
-    StatusMixinDB.setup(Project, tables.projects, project_mapper_arguments)
+    StatusMixinDB.setup(Project, tables.Projects, project_mapper_arguments)
     
     # then to the ScheduleMixin
-    ScheduleMixinDB.setup(Project, tables.projects, project_mapper_arguments)
+    ScheduleMixinDB.setup(Project, tables.Projects, project_mapper_arguments)
     
     # then to the TaskMixin
-    TaskMixinDB.setup(Project, tables.projects, project_mapper_arguments)
+    TaskMixinDB.setup(Project, tables.Projects, project_mapper_arguments)
     
     mapper(
         Project,
-        tables.projects,
+        tables.Projects,
         **project_mapper_arguments
     )
     
@@ -482,18 +482,18 @@ def setup():
     task_mapper_arguments = dict(
         inherits=Task.__base__,
         polymorphic_identity=Task.entity_type,
-        inherit_condition=tables.tasks.c.id==tables.entities.c.id
+        inherit_condition=tables.Tasks.c.id==tables.Entities.c.id
     )
     
     # mix it with StatusMixin
-    StatusMixinDB.setup(Task, tables.tasks, task_mapper_arguments)
+    StatusMixinDB.setup(Task, tables.Tasks, task_mapper_arguments)
     
     # and then ScheduleMixin
-    ScheduleMixinDB.setup(Task, tables.tasks, task_mapper_arguments)
+    ScheduleMixinDB.setup(Task, tables.Tasks, task_mapper_arguments)
     
     mapper(
         Task,
-        tables.tasks,
+        tables.Tasks,
         **task_mapper_arguments
     )
     
@@ -503,18 +503,18 @@ def setup():
     asset_mapper_arguments = dict(
         inherits=Asset.__base__,
         polymorphic_identity=Asset.entity_type,
-        inherit_condition=tables.assets.c.id==tables.entities.c.id,
+        inherit_condition=tables.Assets.c.id==tables.Entities.c.id,
         properties={
             "_type": relationship(
                 AssetType,
                 primaryjoin=\
-                    tables.assets.c.type_id==tables.assetTypes.c.id
+                    tables.Assets.c.type_id==tables.AssetTypes.c.id
             ),
             "type": synonym("_type"),
             "_project": relationship(
                 Project,
                 primaryjoin=\
-                    tables.assets.c.project_id==tables.projects.c.id
+                    tables.Assets.c.project_id==tables.Projects.c.id
             ),
             "project": synonym("_project"),
             "shots": synonym("_shots"),
@@ -523,63 +523,63 @@ def setup():
     
     
     # mix it with ReferenceMixin
-    ReferenceMixinDB.setup(Asset, tables.assets, asset_mapper_arguments)
+    ReferenceMixinDB.setup(Asset, tables.Assets, asset_mapper_arguments)
     
     # then with StatusMixin
-    StatusMixinDB.setup(Asset, tables.assets, asset_mapper_arguments)
+    StatusMixinDB.setup(Asset, tables.Assets, asset_mapper_arguments)
     
     # then with TaskMixin
-    TaskMixinDB.setup(Asset, tables.assets, asset_mapper_arguments)
+    TaskMixinDB.setup(Asset, tables.Assets, asset_mapper_arguments)
     
     # complete mapping
-    mapper(Asset, tables.assets, **asset_mapper_arguments)
+    mapper(Asset, tables.Assets, **asset_mapper_arguments)
     
     
     
     # Shot
     shot_mapper_arguments = dict(
         inherits=Shot.__base__,
-        inherit_condition=tables.shots.c.id==tables.entities.c.id,
+        inherit_condition=tables.Shots.c.id==tables.Entities.c.id,
         polymorphic_identity=Shot.entity_type,
         properties={
             "_assets": relationship(
                 Asset,
-                secondary=tables.shot_assets,
-                primaryjoin=tables.shots.c.id==\
-                    tables.shot_assets.c.shot_id,
-                secondaryjoin=tables.shot_assets.c.asset_id==\
-                    tables.assets.c.id,
+                secondary=tables.Shot_Assets,
+                primaryjoin=tables.Shots.c.id==\
+                    tables.Shot_Assets.c.shot_id,
+                secondaryjoin=tables.Shot_Assets.c.asset_id==\
+                    tables.Assets.c.id,
                 backref="_shots",
             ),
             "assets": synonym("_assets"),
             "_sequence": relationship(
                 Sequence,
-                primaryjoin=tables.shots.c.sequence_id==\
-                    tables.sequences.c.id
+                primaryjoin=tables.Shots.c.sequence_id==\
+                    tables.Sequences.c.id
             ),
             "sequence": synonym("_sequence"),
-            "_cut_in": tables.shots.c.cut_in,
+            "_cut_in": tables.Shots.c.cut_in,
             "cut_in": synonym("_cut_in"),
-            "_cut_duration": tables.shots.c.cut_duration,
+            "_cut_duration": tables.Shots.c.cut_duration,
             "cut_duration": synonym("_cut_duration"),
-            "_code": tables.simpleEntities.c.code, # overloaded attribute
+            "_code": tables.SimpleEntities.c.code, # overloaded attribute
             "code": synonym("_code"), # overloaded property
         }
     )
     
     # mix it with ReferenceMixin
-    ReferenceMixinDB.setup(Shot, tables.shots, shot_mapper_arguments)
+    ReferenceMixinDB.setup(Shot, tables.Shots, shot_mapper_arguments)
     
     # then with StatusMixin
-    StatusMixinDB.setup(Shot, tables.shots, shot_mapper_arguments)
+    StatusMixinDB.setup(Shot, tables.Shots, shot_mapper_arguments)
     
     # then with TaskMixin
-    TaskMixinDB.setup(Shot, tables.shots, shot_mapper_arguments)
+    TaskMixinDB.setup(Shot, tables.Shots, shot_mapper_arguments)
     
     #print shot_mapper_arguments
     
     # complete mapping
-    mapper(Shot, tables.shots, **shot_mapper_arguments)
+    mapper(Shot, tables.Shots, **shot_mapper_arguments)
     
     
     
@@ -587,34 +587,34 @@ def setup():
     sequence_mapper_arguments = dict(
         inherits=Sequence.__base__,
         polymorphic_identity=Sequence.entity_type,
-        inherit_condition=tables.sequences.c.id==tables.entities.c.id,
+        inherit_condition=tables.Sequences.c.id==tables.Entities.c.id,
         properties={
             "_project": relationship(
                 Project,
-                primaryjoin=tables.sequences.c.project_id==\
-                    tables.projects.c.id
+                primaryjoin=tables.Sequences.c.project_id==\
+                    tables.Projects.c.id
             ),
             "project": synonym("project"),
             "_shots": relationship(
                 Shot,
-                primaryjoin=tables.shots.c.sequence_id==\
-                    tables.sequences.c.id,
+                primaryjoin=tables.Shots.c.sequence_id==\
+                    tables.Sequences.c.id,
                 uselist=True,
             )
         }
     )
     
     # mix it with ReferenceMixin, StatusMixin and ScheduleMixin
-    ReferenceMixinDB.setup(Sequence, tables.sequences,
+    ReferenceMixinDB.setup(Sequence, tables.Sequences,
                            sequence_mapper_arguments)
     
-    StatusMixinDB.setup(Sequence, tables.sequences, sequence_mapper_arguments)
+    StatusMixinDB.setup(Sequence, tables.Sequences, sequence_mapper_arguments)
     
-    ScheduleMixinDB.setup(Sequence, tables.sequences,
+    ScheduleMixinDB.setup(Sequence, tables.Sequences,
                           sequence_mapper_arguments)
     
-    TaskMixinDB.setup(Sequence, tables.sequences, sequence_mapper_arguments)
+    TaskMixinDB.setup(Sequence, tables.Sequences, sequence_mapper_arguments)
     
-    mapper(Sequence, tables.sequences, **sequence_mapper_arguments)
+    mapper(Sequence, tables.Sequences, **sequence_mapper_arguments)
     
 

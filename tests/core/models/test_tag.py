@@ -76,5 +76,15 @@ class TagTest(unittest.TestCase):
         self.assertFalse(a_tag_object1!=a_tag_object2)
         self.assertTrue(a_tag_object1!=a_tag_object3)
         self.assertTrue(a_tag_object1!=self.simple_entity)
-
-
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Tag class
+        """
+        
+        self.assertTrue(Tag.plural_name, "Tags")
+    
+    
+    

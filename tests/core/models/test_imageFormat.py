@@ -561,3 +561,12 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of ImageFormat class
+        """
+        
+        self.assertTrue(ImageFormat.plural_name, "ImageFormats")
+    
+    
+    

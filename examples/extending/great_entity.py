@@ -44,7 +44,7 @@ def setup():
         Column(
             "id",
             Integer,
-            ForeignKey(tables.simpleEntities.c.id),
+            ForeignKey(tables.SimpleEntities.c.id),
             primary_key=True,
         ),
     )

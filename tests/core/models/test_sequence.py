@@ -473,3 +473,13 @@ class SequenceTester(mocker.MockerTestCase):
         self.assertEqual(new_sequence.tasks, tasks)
     
     
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Sequence class
+        """
+        
+        self.assertTrue(Sequence.plural_name, "Sequences")
+    
+    
+    

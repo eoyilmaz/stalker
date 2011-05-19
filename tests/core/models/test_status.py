@@ -459,6 +459,12 @@ class StatusListTest(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Status class
+        """
+        
+        self.assertTrue(Status.plural_name, "Statuses")
     
     
     

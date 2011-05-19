@@ -262,3 +262,15 @@ class DepartmentTester(mocker.MockerTestCase):
         self.assertFalse(dep1!=dep2)
         self.assertTrue(dep1!=dep3)
         self.assertTrue(dep1!=entity1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Deparment class
+        """
+        
+        self.assertTrue(Department.plural_name, "Departments")
+    
+    
+    

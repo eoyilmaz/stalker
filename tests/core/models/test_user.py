@@ -1934,3 +1934,12 @@ class UserTest(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of User class
+        """
+        
+        self.assertTrue(User.plural_name, "Users")
+    
+    
+    

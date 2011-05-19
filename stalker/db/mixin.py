@@ -58,13 +58,13 @@ class ReferenceMixinDB(object):
         # update the given class_table
         
         # use the given class_name and the class_table
-        secondary_table_name = class_name.lower() + "_references"
+        secondary_table_name = class_name + "_References"
         secondary_table = None
         
         # check if the table is already defined
         if secondary_table_name not in db.metadata:
             secondary_table = Table(
-                class_name.lower() + "_references", db.metadata,
+                secondary_table_name, db.metadata,
                 Column(
                     class_name.lower() + "_id",
                     Integer,
@@ -75,7 +75,7 @@ class ReferenceMixinDB(object):
                 Column(
                     "reference_id",
                     Integer,
-                    ForeignKey(tables.links.c.id),
+                    ForeignKey(tables.Links.c.id),
                     primary_key=True,
                 )
             )
@@ -91,7 +91,7 @@ class ReferenceMixinDB(object):
                     eval("secondary_table.c." + class_name.lower() + "_id"),
                 secondaryjoin=\
                     secondary_table.c.reference_id==\
-                    tables.links.c.id,
+                    tables.Links.c.id,
             ),
             "references": synonym("_references"),
         }
@@ -152,7 +152,7 @@ class StatusMixinDB(object):
             Column(
                 "status_list_id",
                 Integer,
-                ForeignKey(tables.statusLists.c.id),
+                ForeignKey(tables.StatusLists.c.id),
                 nullable=False
             )
         )
@@ -164,7 +164,7 @@ class StatusMixinDB(object):
                 StatusList,
                 primaryjoin=\
                 class_table.c.status_list_id==\
-                tables.statusLists.c.id
+                tables.StatusLists.c.id
             ),
             "status_list": synonym("_status_list"),
         }
@@ -286,7 +286,7 @@ class TaskMixinDB(object):
         # update the given class_table
         
         # use the given class_name and the class_table
-        secondary_table_name = class_name.lower() + "_tasks"
+        secondary_table_name = class_name + "_Tasks"
         secondary_table = None
         
         # check if the table is already defined
@@ -303,7 +303,7 @@ class TaskMixinDB(object):
                 Column(
                     "task_id",
                     Integer,
-                    ForeignKey(tables.tasks.c.id),
+                    ForeignKey(tables.Tasks.c.id),
                     primary_key=True,
                 )
             )
@@ -319,7 +319,7 @@ class TaskMixinDB(object):
                     eval("secondary_table.c." + class_name.lower() + "_id"),
                 secondaryjoin=\
                     secondary_table.c.task_id==\
-                    tables.tasks.c.id,
+                    tables.Tasks.c.id,
             ),
             "tasks": synonym("_tasks"),
         }

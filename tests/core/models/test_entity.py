@@ -1230,3 +1230,12 @@ class TypeEntityTester(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Entities class
+        """
+        
+        self.assertTrue(Entity.plural_name, "Entities")
+    
+    
+    

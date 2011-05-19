@@ -168,3 +168,12 @@ class NoteTester(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Note class
+        """
+        
+        self.assertTrue(Note.plural_name, "Notes")
+    
+    
+    

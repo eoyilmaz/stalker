@@ -354,3 +354,12 @@ class AssetTester(mocker.MockerTestCase):
         
         self.assertIsInstance(self.mock_asset.shots, ValidatedList)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the default plural name of the Asset class
+        """
+        
+        self.assertEqual(Asset.plural_name, "Assets")
+        

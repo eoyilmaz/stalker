@@ -223,6 +223,18 @@ class AssetTypeTester(mocker.MockerTestCase):
         
         self.assertFalse(asset_type1!=asset_type2)
         self.assertTrue(asset_type1!=asset_type3)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of AssetType class
+        """
+        
+        self.assertTrue(AssetType.plural_name, "AssetTypes")
+    
+    
+    
 
 
 
@@ -576,6 +588,15 @@ class TypeTemplateTester(mocker.MockerTestCase):
         """testing if type attribute doesn't accept None and raises ValueError
         """
         self.assertRaises(ValueError, setattr, self.template_obj, "type", None)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of TypeTemplate class
+        """
+        
+        self.assertTrue(TypeTemplate.plural_name, "TypeTemplates")
 
 
 
@@ -641,6 +662,15 @@ class ProjectTypeTester(mocker.MockerTestCase):
         self.assertFalse(project_type1!=project_type2)
         self.assertTrue(project_type1!=project_type3)
         self.assertTrue(project_type1!=self.type_entity1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of ProjectType class
+        """
+        
+        self.assertTrue(ProjectType.plural_name, "ProjectTypes")
 
 
 
@@ -689,6 +719,15 @@ class LinkTypeTester(mocker.MockerTestCase):
         self.assertFalse(self.link_type1!=self.link_type2)
         self.assertTrue(self.link_type1!=self.link_type3)
         self.assertTrue(self.link_type1!=self.type_entity1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of LinkType class
+        """
+        
+        self.assertTrue(LinkType.plural_name, "LinkTypes")
 
 
 
@@ -747,6 +786,14 @@ class TaskTypeTester(mocker.MockerTestCase):
         self.assertTrue(self.task_type1!=self.task_type3)
         self.assertTrue(self.task_type1!=self.type_entity)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of TaskType class
+        """
+        
+        self.assertTrue(TaskType.plural_name, "TaskTypes")
     
     
     

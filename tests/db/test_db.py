@@ -421,7 +421,7 @@ class DatabaseTester(unittest.TestCase):
         
         # get the table content
         conn = db.engine.connect()
-        s = select([tables.entity_types.c.entity_type])
+        s = select([tables.EntityTypes.c.entity_type])
         result = conn.execute(s)
         
         entity_types_DB = []
@@ -516,10 +516,10 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         ## create a test database, possibly an in memory datase
-        #self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
+        self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
         #self.TEST_DATABASE_URI = "sqlite:///" + self.TEST_DATABASE_FILE
         
-        self.TEST_DATABASE_FILE = ":memory:"
+        #self.TEST_DATABASE_FILE = ":memory:"
         self.TEST_DATABASE_URI = "sqlite:///" + self.TEST_DATABASE_FILE
         
         # setup using this db

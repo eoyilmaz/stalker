@@ -870,4 +870,15 @@ class ShotTester(mocker.MockerTestCase):
             self.mock_shot.__repr__(),
             "<Shot (%s, %s)>" % (self.mock_shot.code, self.mock_shot.code)
         )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_plural_name(self):
+        """testing the plural name of Shot class
+        """
         
+        self.assertTrue(Shot.plural_name, "Shots")
+    
+    
+    

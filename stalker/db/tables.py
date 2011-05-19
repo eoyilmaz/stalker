@@ -27,16 +27,16 @@ metadata = db.metadata
 
 
 # ENTITYTYPES
-entity_types = Table(
-    "entity_types", metadata,
+EntityTypes = Table(
+    "EntityTypes", metadata,
     Column("id", Integer, primary_key=True),
     Column("entity_type", String(128), nullable=False),
 )
 
 
-# SIMPLE ENTITY
-simpleEntities = Table(
-    "simpleEntities", metadata,
+# SIMPLEENTITY
+SimpleEntities = Table(
+    "SimpleEntities", metadata,
     Column("id", Integer, primary_key=True),
     Column("code", String(256), nullable=False),
     Column("name", String(256), nullable=False),
@@ -45,13 +45,13 @@ simpleEntities = Table(
     Column(
         "created_by_id",
         Integer,
-        ForeignKey("users.id", use_alter=True, name="x")
+        ForeignKey("Users.id", use_alter=True, name="x")
     ),
     
     Column(
         "updated_by_id",
         Integer,
-        ForeignKey("users.id", use_alter=True, name="x")
+        ForeignKey("Users.id", use_alter=True, name="x")
     ),
     
     Column("date_created", DateTime),
@@ -63,31 +63,31 @@ simpleEntities = Table(
 
 
 # TAG
-tags = Table(
-    "tags", metadata,
+Tags = Table(
+    "Tags", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("simpleEntities.id"),
+        ForeignKey("SimpleEntities.id"),
         primary_key=True
     )
 )
 
 
 # ENTITY_TAGS
-entity_tags = Table(
-    "entity_tags", metadata,
+Entity_Tags = Table(
+    "Entity_Tags", metadata,
     Column(
         "entity_id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True,
     ),
     
     Column(
         "tag_id",
         Integer,
-        ForeignKey("tags.id"),
+        ForeignKey("Tags.id"),
         primary_key=True,
     )
 )
@@ -95,11 +95,11 @@ entity_tags = Table(
 
 
 # ENTITY
-entities = Table(
-    "entities", metadata,
+Entities = Table(
+    "Entities", metadata,
     Column(
         "id",
-        ForeignKey("simpleEntities.id"),
+        ForeignKey("SimpleEntities.id"),
         primary_key=True
     ),
 )
@@ -107,19 +107,19 @@ entities = Table(
 
 
 # USER
-users = Table(
-    "users", metadata,
+Users = Table(
+    "Users", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True
     ),
     
     Column(
         "department_id",
         Integer,
-        ForeignKey("departments.id")
+        ForeignKey("Departments.id")
     ),
     
     Column("email", String(256), unique=True, nullable=False),
@@ -131,7 +131,7 @@ users = Table(
     
     #Column("permission_groups_id",
            #Integer,
-           #ForeignKey("groups.id")
+           #ForeignKey("Groups.id")
     #),
     
     Column("initials", String(16)),
@@ -141,74 +141,74 @@ users = Table(
 
 
 ## USER_PROJECTS
-#user_projects = Table(
-    #"user_projects", metadata,
+#User_Projects = Table(
+    #"User_Projects", metadata,
     #Column(
         #"user_id",
         #Integer,
-        #ForeignKey("users.id")
+        #ForeignKey("Users.id")
     #),
     
     #Column(
         #"project_id",
         #Integer,
-        #ForeignKey("projects.id")
+        #ForeignKey("Projects.id")
     #)
 #)
 
 
 
 ## USER_TASKS
-#user_tasks = Table(
-    #"user_tasks", meta,
+#User_Tasks = Table(
+    #"User_Tasks", meta,
     #Column(
         #"user_id",
         #Integer,
-        #ForeignKey("users.id")
+        #ForeignKey("Users.id")
     #),
     
     #Column(
         #"task_id",
         #Integer,
-        #ForeignKey("tasks.id")
+        #ForeignKey("Tasks.id")
     #)
 #)
 
 
 
 # DEPARTMENT
-departments = Table(
-    "departments", metadata,
+Departments = Table(
+    "Departments", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True,
     ),
     
     #Column(
         #"members",
         #Integer,
-        #ForeignKey("users.id"),
+        #ForeignKey("Users.id"),
     #)
 )
 
 
 
 ## TASKS
-#tasks = Table(
-    #"tasks", metadata,
+#Tasks = Table(
+    #"Tasks", metadata,
     #Column(
         #"id",
 
 
 # STATUS
-statuses = Table(
-    "statuses", metadata,
+Statuses = Table(
+    "Statuses", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True,
     ),
 )
@@ -216,18 +216,18 @@ statuses = Table(
 
 
 # STATUSLIST_STATUSES
-statusList_statuses = Table(
-    "statusList_statuses", metadata,
+StatusList_Statuses = Table(
+    "StatusList_Statuses", metadata,
     Column(
         "statusList_id",
         Integer,
-        ForeignKey("statusLists.id"),
+        ForeignKey("StatusLists.id"),
         primary_key=True
     ),
     Column(
         "status_id",
         Integer,
-        ForeignKey("statuses.id"),
+        ForeignKey("Statuses.id"),
         primary_key=True
     )
 )
@@ -235,12 +235,12 @@ statusList_statuses = Table(
 
 
 # STATUSLIST
-statusLists = Table(
-    "statusLists", metadata,
+StatusLists = Table(
+    "StatusLists", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True
     ),
     Column("target_entity_type", String(128), nullable=False, unique=True),
@@ -249,12 +249,12 @@ statusLists = Table(
 
 
 # REPOSITORY
-repositories = Table(
-    "repositories", metadata,
+Repositories = Table(
+    "Repositories", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True,
     ),
     Column("linux_path", String(256)),
@@ -265,12 +265,12 @@ repositories = Table(
 
 
 # IMAGEFORMAT
-imageFormats = Table(
-    "imageFormats", metadata,
+ImageFormats = Table(
+    "ImageFormats", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True,
     ),
     Column("width", Integer),
@@ -282,43 +282,43 @@ imageFormats = Table(
 
 
 # ASSETTYPE
-assetTypes = Table(
-    "assetTypes", metadata,
+AssetTypes = Table(
+    "AssetTypes", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("typeEntities.id"),
+        ForeignKey("TypeEntities.id"),
         primary_key=True,
     ),
 )
 
 
 # ASSETTYPE_TASKTYPES
-assetType_taskTypes = Table(
-    "assetType_taskTypes", metadata,
+AssetType_TaskTypes = Table(
+    "AssetType_TaskTypes", metadata,
     Column(
         "assetType_id",
         Integer,
-        ForeignKey("assetTypes.id"),
+        ForeignKey("AssetTypes.id"),
         primary_key=True,
     ),
     
     Column(
         "taskType_id",
         Integer,
-        ForeignKey("taskTypes.id"),
+        ForeignKey("TaskTypes.id"),
         primary_key=True,
     ),
 )
 
 
 # TASKTYPES
-taskTypes = Table(
-    "taskTypes", metadata,
+TaskTypes = Table(
+    "TaskTypes", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True,
     ),
     #Column("code", String(32), unique=True),
@@ -327,23 +327,23 @@ taskTypes = Table(
 
 
 # TYPETEMPLATES
-typeTemplates = Table(
-    "typeTemplates", metadata,
-    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
+TypeTemplates = Table(
+    "TypeTemplates", metadata,
+    Column("id", Integer, ForeignKey("Entities.id"), primary_key=True),
     Column("path_code", String),
     Column("file_code", String),
-    Column("type_id", Integer, ForeignKey("typeEntities.id")),
+    Column("type_id", Integer, ForeignKey("TypeEntities.id")),
 )
 
 
 
 # STRUCTURE
-structures = Table(
-    "structures", metadata,
+Structures = Table(
+    "Structures", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True,
     ),
     Column("project_template", String),
@@ -352,18 +352,18 @@ structures = Table(
 
 
 # STRUCTURE_ASSETTEMPLATES
-structure_assetTemplates = Table(
-    "structure_assetTemplates", metadata,
+Structure_AssetTemplates = Table(
+    "Structure_AssetTemplates", metadata,
     Column(
         "structure_id",
         Integer,
-        ForeignKey("structures.id"),
+        ForeignKey("Structures.id"),
         primary_key=True,
     ),
     Column(
         "typeTemplate_id",
         Integer,
-        ForeignKey("typeTemplates.id"),
+        ForeignKey("TypeTemplates.id"),
         primary_key=True,
     ),
 )
@@ -371,18 +371,18 @@ structure_assetTemplates = Table(
 
 
 # STRUCTURE_REFERENCETEMPLATES
-structure_referenceTemplates = Table(
-    "structure_referenceTemplates", metadata,
+Structure_ReferenceTemplates = Table(
+    "Structure_ReferenceTemplates", metadata,
     Column(
         "structure_id",
         Integer,
-        ForeignKey("structures.id"),
+        ForeignKey("Structures.id"),
         primary_key=True,
     ),
     Column(
         "typeTemplate_id",
         Integer,
-        ForeignKey("typeTemplates.id"),
+        ForeignKey("TypeTemplates.id"),
         primary_key=True,
     ),
 )
@@ -390,12 +390,12 @@ structure_referenceTemplates = Table(
 
 
 # TYPEENTITIES
-typeEntities = Table(
-    "typeEntities", metadata,
+TypeEntities = Table(
+    "TypeEntities", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True,
     ),
 )
@@ -403,31 +403,31 @@ typeEntities = Table(
 
 
 # LINK
-links = Table(
-    "links", metadata,
+Links = Table(
+    "Links", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
         primary_key=True,
     ),
     Column("path", String),
     Column("filename", String),
     Column("type_id",
            Integer,
-           ForeignKey("linkTypes.id"),
+           ForeignKey("LinkTypes.id"),
     ),
 )
 
 
 
 # LINKTYPES
-linkTypes = Table(
-    "linkTypes", metadata,
+LinkTypes = Table(
+    "LinkTypes", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("typeEntities.id"),
+        ForeignKey("TypeEntities.id"),
         primary_key=True,
     ),
 )
@@ -435,12 +435,12 @@ linkTypes = Table(
 
 
 # PROJECTTYPES
-projectTypes = Table(
-    "projectTypes", metadata,
+ProjectTypes = Table(
+    "ProjectTypes", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("typeEntities.id"),
+        ForeignKey("TypeEntities.id"),
         primary_key=True,
     ),
 )
@@ -448,18 +448,18 @@ projectTypes = Table(
 
 
 # NOTES
-notes = Table(
-    "notes", metadata,
+Notes = Table(
+    "Notes", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("simpleEntities.id"),
+        ForeignKey("SimpleEntities.id"),
         primary_key=True,
     ),
     Column(
         "entity_id",
         Integer,
-        ForeignKey("entities.id"),
+        ForeignKey("Entities.id"),
     ),
     Column("content", String),
 )
@@ -467,23 +467,23 @@ notes = Table(
 
 
 # PROJECT_USERS
-project_users = Table(
-    "project_users", metadata,
-    Column("project_id", Integer, ForeignKey("projects.id"), primary_key=True),
-    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
+Project_Users = Table(
+    "Project_Users", metadata,
+    Column("project_id", Integer, ForeignKey("Projects.id"), primary_key=True),
+    Column("user_id", Integer, ForeignKey("Users.id"), primary_key=True),
 )
 
 
 
 # PROJECT
-projects = Table(
-    "projects", metadata,
-    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
-    Column("lead_id", Integer, ForeignKey("users.id")),
-    Column("repository_id", Integer, ForeignKey("repositories.id")),
-    Column("type_id", Integer, ForeignKey("projectTypes.id")),
-    Column("structure_id", Integer, ForeignKey("structures.id")),
-    Column("image_format_id", Integer, ForeignKey("imageFormats.id")),
+Projects = Table(
+    "Projects", metadata,
+    Column("id", Integer, ForeignKey("Entities.id"), primary_key=True),
+    Column("lead_id", Integer, ForeignKey("Users.id")),
+    Column("repository_id", Integer, ForeignKey("Repositories.id")),
+    Column("type_id", Integer, ForeignKey("ProjectTypes.id")),
+    Column("structure_id", Integer, ForeignKey("Structures.id")),
+    Column("image_format_id", Integer, ForeignKey("ImageFormats.id")),
     Column("fps", Float(precision=3)),
     Column("is_stereoscopic", Boolean),
     Column("display_width", Float(precision=3)),
@@ -492,26 +492,26 @@ projects = Table(
 
 
 # TASK - WARNING: It is a temprorary table, will be completed later
-tasks = Table(
-    "tasks", metadata,
-    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
+Tasks = Table(
+    "Tasks", metadata,
+    Column("id", Integer, ForeignKey("Entities.id"), primary_key=True),
 )
 
 
 
 # ASSET
-assets = Table(
-    "assets", metadata,
-    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
-    Column("type_id", Integer, ForeignKey("assetTypes.id")),
-    Column("project_id", Integer, ForeignKey("projects.id")),
+Assets = Table(
+    "Assets", metadata,
+    Column("id", Integer, ForeignKey("Entities.id"), primary_key=True),
+    Column("type_id", Integer, ForeignKey("AssetTypes.id")),
+    Column("project_id", Integer, ForeignKey("Projects.id")),
 )
 
 # SHOT ASSETS
-shot_assets = Table(
-    "shot_assets", metadata,
-    Column("shot_id", Integer, ForeignKey("shots.id"), primary_key=True),
-    Column("asset_id", Integer, ForeignKey("assets.id"), primary_key=True),
+Shot_Assets = Table(
+    "Shot_Assets", metadata,
+    Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
+    Column("asset_id", Integer, ForeignKey("Assets.id"), primary_key=True),
 )
 
 
@@ -519,10 +519,10 @@ shot_assets = Table(
 # the cut_out attribute is not going to be stored in the database, only
 # the cut_in and cut_duration will be enough to calculate the cut_out
 # 
-shots = Table(
-    "shots", metadata,
-    Column("id", Integer, ForeignKey("entities.id"), primary_key=True),
-    Column("sequence_id", Integer, ForeignKey("sequences.id")),
+Shots = Table(
+    "Shots", metadata,
+    Column("id", Integer, ForeignKey("Entities.id"), primary_key=True),
+    Column("sequence_id", Integer, ForeignKey("Sequences.id")),
     Column("cut_in", Integer),
     Column("cut_duration", Integer),
 )
@@ -530,21 +530,21 @@ shots = Table(
 
 
 # SEQUENCES
-sequences = Table(
-    "sequences", metadata,
+Sequences = Table(
+    "Sequences", metadata,
     Column(
         "id",
         Integer,
-        ForeignKey("entities.id"), primary_key=True
+        ForeignKey("Entities.id"), primary_key=True
     ),
     Column(
         "project_id",
         Integer,
-        ForeignKey("projects.id"),
+        ForeignKey("Projects.id"),
     ),
     Column(
         "lead",
         Integer,
-        ForeignKey("users.id"),
+        ForeignKey("Users.id"),
     ),
 )
