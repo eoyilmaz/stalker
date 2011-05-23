@@ -282,77 +282,77 @@ class AssetTester(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_shots_attribute_is_working_properly(self):
-        """testing if the shots attribute is working properly
-        """
+    ##----------------------------------------------------------------------
+    #def test_shots_attribute_is_working_properly(self):
+        #"""testing if the shots attribute is working properly
+        #"""
         
-        shots_list = [self.mock_shot1, self.mock_shot2,
-                                 self.mock_shot3]
-        self.mock_asset.shots = shots_list
-        self.assertEqual(self.mock_asset.shots, shots_list)
+        #shots_list = [self.mock_shot1, self.mock_shot2,
+                                 #self.mock_shot3]
+        #self.mock_asset.shots = shots_list
+        #self.assertEqual(self.mock_asset.shots, shots_list)
     
     
     
-    #----------------------------------------------------------------------
-    def test_shots_attribute_only_accepts_list_of_Shot_instances_list_part(self):
-        """testing if the shots attribute accepts only lists of Shot instances
-        """
+    ##----------------------------------------------------------------------
+    #def test_shots_attribute_only_accepts_list_of_Shot_instances_list_part(self):
+        #"""testing if the shots attribute accepts only lists of Shot instances
+        #"""
         
-        test_values = [1, 1.2, "a shot list"]
+        #test_values = [1, 1.2, "a shot list"]
         
-        for test_value in test_values:
-            self.assertRaises(ValueError, setattr, self.mock_asset, "shots",
-                              test_value)
+        #for test_value in test_values:
+            #self.assertRaises(ValueError, setattr, self.mock_asset, "shots",
+                              #test_value)
         
-        # now test with proper values
-        shots_list = [self.mock_shot1, self.mock_shot2,
-                                 self.mock_shot3]
+        ## now test with proper values
+        #shots_list = [self.mock_shot1, self.mock_shot2,
+                                 #self.mock_shot3]
         
-        # should not raise any error
-        self.mock_asset.shots = shots_list
+        ## should not raise any error
+        #self.mock_asset.shots = shots_list
     
     
     
-    #----------------------------------------------------------------------
-    def test_shots_attribute_accepts_only_list_of_Shot_instances(self):
-        """testing if the shot attribute accepts only lists of Shot instances
-        """
+    ##----------------------------------------------------------------------
+    #def test_shots_attribute_accepts_only_list_of_Shot_instances(self):
+        #"""testing if the shot attribute accepts only lists of Shot instances
+        #"""
         
-        test_value = ["a", "list", "of", "others", 1, 1.2]
+        #test_value = ["a", "list", "of", "others", 1, 1.2]
         
-        self.assertRaises(ValueError, setattr, self.mock_asset, "shots",
-                          test_value)
+        #self.assertRaises(ValueError, setattr, self.mock_asset, "shots",
+                          #test_value)
     
     
     
-    #----------------------------------------------------------------------
-    def test_shots_attribute_elements_tried_to_be_changed_to_other_than_Shot(self):
-        """testing if a ValueError will be raised when the individual elements
-        are tried to be changed
-        """
+    ##----------------------------------------------------------------------
+    #def test_shots_attribute_elements_tried_to_be_changed_to_other_than_Shot(self):
+        #"""testing if a ValueError will be raised when the individual elements
+        #are tried to be changed
+        #"""
         
-        test_values = [1, 1.2, "a shot list", ["a", "list", "of", "others"]]
+        #test_values = [1, 1.2, "a shot list", ["a", "list", "of", "others"]]
         
-        # test append
-        for test_value in test_values:
-            self.assertRaises(ValueError, self.mock_asset.shots.append,
-                              test_value)
+        ## test append
+        #for test_value in test_values:
+            #self.assertRaises(ValueError, self.mock_asset.shots.append,
+                              #test_value)
         
-        # test setitem
-        self.mock_asset.shots = [self.mock_shot1, self.mock_shot2]
-        for test_value in test_values:
-            self.assertRaises(ValueError, self.mock_asset.shots.__setitem__,
-                              0, test_value)
+        ## test setitem
+        #self.mock_asset.shots = [self.mock_shot1, self.mock_shot2]
+        #for test_value in test_values:
+            #self.assertRaises(ValueError, self.mock_asset.shots.__setitem__,
+                              #0, test_value)
     
     
     
-    #----------------------------------------------------------------------
-    def test_shots_attribute_is_instance_of_ValidatedList(self):
-        """testing if the shots attribute is instance of ValidatedList
-        """
+    ##----------------------------------------------------------------------
+    #def test_shots_attribute_is_instance_of_ValidatedList(self):
+        #"""testing if the shots attribute is instance of ValidatedList
+        #"""
         
-        self.assertIsInstance(self.mock_asset.shots, ValidatedList)
+        #self.assertIsInstance(self.mock_asset.shots, ValidatedList)
     
     
     

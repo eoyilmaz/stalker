@@ -372,7 +372,7 @@ Structure_AssetTemplates = Table(
 
 # STRUCTURE_REFERENCETEMPLATES
 Structure_ReferenceTemplates = Table(
-    "Structure_ReferenceTemplates", metadata,
+    "structure_ReferenceTemplates", metadata,
     Column(
         "structure_id",
         Integer,
@@ -507,12 +507,12 @@ Assets = Table(
     Column("project_id", Integer, ForeignKey("Projects.id")),
 )
 
-# SHOT ASSETS
-Shot_Assets = Table(
-    "Shot_Assets", metadata,
-    Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
-    Column("asset_id", Integer, ForeignKey("Assets.id"), primary_key=True),
-)
+## SHOT ASSETS
+#Shot_Assets = Table(
+    #"Shot_Assets", metadata,
+    #Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
+    #Column("asset_id", Integer, ForeignKey("Assets.id"), primary_key=True),
+#)
 
 
 # SHOT

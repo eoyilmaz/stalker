@@ -200,132 +200,132 @@ class ShotTester(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_argument_is_None(self):
-        """testing if no error will be raised when the assets argument is None
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_argument_is_None(self):
+        #"""testing if no error will be raised when the assets argument is None
+        #"""
         
-        self.kwargs["assets"] = None
-        self.kwargs["code"] = "SH123A"
-        new_shot = Shot(**self.kwargs)
+        #self.kwargs["assets"] = None
+        #self.kwargs["code"] = "SH123A"
+        #new_shot = Shot(**self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_attribute_is_set_to_None(self):
-        """testing if no error will be raised when the assets attribute is set
-        to None
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_attribute_is_set_to_None(self):
+        #"""testing if no error will be raised when the assets attribute is set
+        #to None
+        #"""
         
-        self.mock_shot.assets = None
+        #self.mock_shot.assets = None
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_argument_set_to_None_defaults_to_empty_list(self):
-        """testing if the assets argument is given as None will default the
-        assets attribute to an empty list
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_argument_set_to_None_defaults_to_empty_list(self):
+        #"""testing if the assets argument is given as None will default the
+        #assets attribute to an empty list
+        #"""
         
-        self.kwargs["assets"] = None
-        self.kwargs["code"] = "SH123A"
-        new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.assets, [])
+        #self.kwargs["assets"] = None
+        #self.kwargs["code"] = "SH123A"
+        #new_shot = Shot(**self.kwargs)
+        #self.assertEqual(new_shot.assets, [])
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_attribute_is_set_to_None_defaults_to_empty_list(self):
-        """testing if the assets attribute is set to None will set the assets
-        to an empty list
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_attribute_is_set_to_None_defaults_to_empty_list(self):
+        #"""testing if the assets attribute is set to None will set the assets
+        #to an empty list
+        #"""
         
-        self.mock_shot.assets = None
-        self.assertEqual(self.mock_shot.assets, [])
+        #self.mock_shot.assets = None
+        #self.assertEqual(self.mock_shot.assets, [])
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_argument_is_not_a_list(self):
-        """testing if a ValueError will be raised when the assets argument is
-        not a list
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_argument_is_not_a_list(self):
+        #"""testing if a ValueError will be raised when the assets argument is
+        #not a list
+        #"""
         
-        test_values = [1, 1.2, "a str"]
+        #test_values = [1, 1.2, "a str"]
         
-        for test_value in test_values:
-            self.kwargs["assets"] = test_value
-            self.assertRaises(ValueError, Shot, **self.kwargs)
+        #for test_value in test_values:
+            #self.kwargs["assets"] = test_value
+            #self.assertRaises(ValueError, Shot, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_attribute_is_not_a_list(self):
-        """testing if a ValueError will be raised when the assets attribute is
-        not a list
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_attribute_is_not_a_list(self):
+        #"""testing if a ValueError will be raised when the assets attribute is
+        #not a list
+        #"""
         
-        test_values = [1, 1.2, "a str"]
+        #test_values = [1, 1.2, "a str"]
         
-        for test_value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_shot,
-                "assets",
-                test_value
-            )
+        #for test_value in test_values:
+            #self.assertRaises(
+                #ValueError,
+                #setattr,
+                #self.mock_shot,
+                #"assets",
+                #test_value
+            #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_argument_is_not_a_list_of_Asset_instances(self):
-        """testing if a ValueError will be raised when the assets argument is
-        not a list of stalker.core.models.Asset instances
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_argument_is_not_a_list_of_Asset_instances(self):
+        #"""testing if a ValueError will be raised when the assets argument is
+        #not a list of stalker.core.models.Asset instances
+        #"""
         
-        self.kwargs["assets"] = [1, 1.2, "an asset"]
-        self.assertRaises(ValueError, Shot, **self.kwargs)
+        #self.kwargs["assets"] = [1, 1.2, "an asset"]
+        #self.assertRaises(ValueError, Shot, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_attribute_is_not_a_list_of_Asset_instances(self):
-        """testing if a ValueError will be raised when the assets attribute is
-        not a list of stalker.core.models.Asset instances
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_attribute_is_not_a_list_of_Asset_instances(self):
+        #"""testing if a ValueError will be raised when the assets attribute is
+        #not a list of stalker.core.models.Asset instances
+        #"""
         
-        test_value = [1, 1.2, "an asset"]
+        #test_value = [1, 1.2, "an asset"]
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_shot,
-            "assets",
-            test_value
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.mock_shot,
+            #"assets",
+            #test_value
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_attribute_is_a_ValidatedList_instance(self):
-        """testing if the assets attribute is an instance of ValidatedList
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_attribute_is_a_ValidatedList_instance(self):
+        #"""testing if the assets attribute is an instance of ValidatedList
+        #"""
         
-        self.assertIsInstance(self.mock_shot.assets, ValidatedList)
+        #self.assertIsInstance(self.mock_shot.assets, ValidatedList)
     
     
     
-    #----------------------------------------------------------------------
-    def test_assets_argument_is_skipped_default_value_is_empty_list(self):
-        """testing if the default value of assets is an empty list when the
-        assets argument is skipped
-        """
+    ##----------------------------------------------------------------------
+    #def test_assets_argument_is_skipped_default_value_is_empty_list(self):
+        #"""testing if the default value of assets is an empty list when the
+        #assets argument is skipped
+        #"""
         
-        self.kwargs.pop("assets")
-        self.kwargs["code"] = "SH123A"
-        new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.assets, [])
+        #self.kwargs.pop("assets")
+        #self.kwargs["code"] = "SH123A"
+        #new_shot = Shot(**self.kwargs)
+        #self.assertEqual(new_shot.assets, [])
     
     
     

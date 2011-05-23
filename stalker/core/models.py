@@ -658,40 +658,35 @@ class Entity(SimpleEntity):
 
 
 ########################################################################
-class TypeEntity(Entity):
-    """The entry point for **Types**.
+class Type(Entity):
+    """Everything can have a type.
     
-    There are currently four Type classes in Stalker:
-     
-     * :class:`~stalker.core.models.AssetType`
-     * :class:`~stalker.core.models.LinkType`
-     * :class:`~stalker.core.models.ProjectType`
-     * :class:`~stalker.core.models.TaskType`
+    .. versionadded:: 0.1.1.a8
+    Types
     
-    All derives from :class:`~stalker.core.models.TypeEntity`.
+    Type is a generalized version of the previous design that defines types for
+    specific classes deriving from :class:`~stalker.core.models.Entity` class.
     
-    The main purpose of these classes are to introduce reusable *Types* of the
-    related class. So an :class:`~stalker.core.models.AssetType` introduces
-    reusable types for :class:`~stalker.core.models.Asset`,
-    :class:`~stalker.core.models.LinkType` for
-    :class:`~stalker.core.models.Link` and
-    :class:`~stalker.core.models.ProjectType` for
-    :class:`~stalker.core.models.Project`\ and finaly
-    :class:`~stalker.core.models.TaskType` for
-    :class:`~stalker.core.more.Task`.
+    The purpose of the :class:`~stalker.core.models.Type` class is just to
+    define a new type for a specific Entity. For example; to create a new
+    :class:`~stalker.core.models.Assets` type create a
+    :class:`~stalker.core.models.Type` like::
     
-    By using these *type classes* you are able to let say create *Commercial*
-    projects, or create a *Character* assets, *Image* links or *Modeling*
-    tasks.
+      Type(name="Character", entity_type="Asset")
+      Type(name="Commercial", entity_type="Project")
+      Type(name="Movie", entity_type="Project")
     
-    One another use of the :class:`~stalker.core.models.TypeEntity` is, to
-    group the instances deriving from the inherited classes, so any other
-    classes accepting a ``TypeEntity`` object can have one of the derived
-    classes, this is done in that way mainly to ease the of creation of only
-    one :class:`~stalker.core.models.TypeTemplate` class and let the others (the
-    inherited classes) to use this one TypeTemplate class.
+    or::
+      
+      Type(name="Character", entity_type=Asset.entity_type)
+      Type(name="Commercial", entity_type=Project.entity_type)
+      Type(name="Movie", entity_type=Project.entity_type)
     
-    It doesn't add any new parameters to it's super.
+    :class:`~stalker.core.models.Type`\ s are generally used in
+    :class:`~stalker.core.models.Structure`\ s.
+    
+    :param string entity_type: The string defining the target entity type of
+      this :class:`~stalker.core.models.Type`.
     """
     
     
@@ -2826,12 +2821,6 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     :type sequence: :class:`~stalker.core.models.Sequence`
     
-    :param assets: The list of :class:`~stalker.core.models.Asset`\ s used in
-      this shot. When it is set to None, it defaults to the default value and
-      the default value is an empty list.
-    
-    :type assets: list of :class:`~stalker.core.models.Asset` instances
-    
     :param integer cut_in: The in frame number that this shot starts. The
       default value is 1. When the ``cut_in`` is bigger then
       ``cut_out``, the :attr:`~stalker.core.models.Shot.cut_out` attribute is
@@ -2855,7 +2844,6 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     def __init__(self,
                  code=None,
                  sequence=None,
-                 assets=[],
                  cut_in=1,
                  cut_out=None,
                  cut_duration=None,
@@ -2879,8 +2867,6 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         # add the shot to the sequences shot list
         self._sequence.shots.append(self)
         
-        
-        self._assets = self._validate_assets(assets)
         
         self._cut_in = cut_in
         self._cut_duration = cut_duration
@@ -2940,23 +2926,23 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     
-    #----------------------------------------------------------------------
-    def _validate_assets(self, assets_in):
-        """validates the given assets_in value
-        """
+    ##----------------------------------------------------------------------
+    #def _validate_assets(self, assets_in):
+        #"""validates the given assets_in value
+        #"""
         
-        if assets_in is None:
-            assets_in = []
+        #if assets_in is None:
+            #assets_in = []
         
-        if not isinstance(assets_in, list):
-            raise ValueError("assets should be an instance of list")
+        #if not isinstance(assets_in, list):
+            #raise ValueError("assets should be an instance of list")
         
-        for item in assets_in:
-            if not isinstance(item, Asset):
-                raise ValueError("all the items in the assets list should be"
-                                 "an instance of stalker.core.models.Asset")
+        #for item in assets_in:
+            #if not isinstance(item, Asset):
+                #raise ValueError("all the items in the assets list should be"
+                                 #"an instance of stalker.core.models.Asset")
         
-        return ValidatedList(assets_in, Asset)
+        #return ValidatedList(assets_in, Asset)
     
     
     
@@ -3040,23 +3026,23 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     
-    #----------------------------------------------------------------------
-    def assets():
+    ##----------------------------------------------------------------------
+    #def assets():
         
-        def fget(self):
-            return self._assets
+        #def fget(self):
+            #return self._assets
         
-        def fset(self, assets_in):
-            self._assets = self._validate_assets(assets_in)
+        #def fset(self, assets_in):
+            #self._assets = self._validate_assets(assets_in)
         
-        doc = """The list of :class:`~stalker.core.models.Asset`\ s used in this shot.
+        #doc = """The list of :class:`~stalker.core.models.Asset`\ s used in this shot.
         
-        When it is set to None, it defaults to the default value and the
-        default value is an empty list."""
+        #When it is set to None, it defaults to the default value and the
+        #default value is an empty list."""
         
-        return locals()
+        #return locals()
     
-    assets = property(**assets())
+    #assets = property(**assets())
     
     
     

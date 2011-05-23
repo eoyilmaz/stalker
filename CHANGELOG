@@ -1,6 +1,16 @@
 Stalker Changes
 ===============
 
+v0.1.1.a9
+---------
+
+ * Introduced :class:`~stalker.core.models.Type`. A new class to define
+   **types**.
+
+ * Added an attribute called ``type`` to the
+   :class:`~stalker.core.models.SimpleEntity`. Which will be used to create new
+   types to the derived classes.
+
 v0.1.1.a8
 ---------
 
@@ -9,11 +19,6 @@ v0.1.1.a8
    the type of the current :class:`~stalker.core.models.Asset`. This is done to
    prevent creation of :class:`~stalker.core.models.Asset`\ s without a certain
    type.
-
- * :class:`~stalker.core.models.Asset` now has
-   :attr:`~stalker.core.models.Asset.shots` attribute to hold the
-   :class:`~stalker.core.models.Shot`\ s those this
-   :class:`~stalker.core.models.Asset` has been used in.
 
  * Fixed :class:`~stalker.core.models.Project` where it was not raising a
    ValueError properly for :attr:`~stalker.core.models.Project.sequence`,

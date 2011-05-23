@@ -517,7 +517,7 @@ def setup():
                     tables.Assets.c.project_id==tables.Projects.c.id
             ),
             "project": synonym("_project"),
-            "shots": synonym("_shots"),
+            #"shots": synonym("_shots"),
         }
     )
     
@@ -542,16 +542,16 @@ def setup():
         inherit_condition=tables.Shots.c.id==tables.Entities.c.id,
         polymorphic_identity=Shot.entity_type,
         properties={
-            "_assets": relationship(
-                Asset,
-                secondary=tables.Shot_Assets,
-                primaryjoin=tables.Shots.c.id==\
-                    tables.Shot_Assets.c.shot_id,
-                secondaryjoin=tables.Shot_Assets.c.asset_id==\
-                    tables.Assets.c.id,
-                backref="_shots",
-            ),
-            "assets": synonym("_assets"),
+            #"_assets": relationship(
+                #Asset,
+                #secondary=tables.Shot_Assets,
+                #primaryjoin=tables.Shots.c.id==\
+                    #tables.Shot_Assets.c.shot_id,
+                #secondaryjoin=tables.Shot_Assets.c.asset_id==\
+                    #tables.Assets.c.id,
+                #backref="_shots",
+            #),
+            #"assets": synonym("_assets"),
             "_sequence": relationship(
                 Sequence,
                 primaryjoin=tables.Shots.c.sequence_id==\
