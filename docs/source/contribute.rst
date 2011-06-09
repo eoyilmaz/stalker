@@ -268,16 +268,16 @@ If you want to do changes in Stalker, the basic pipeline is as follows:
 
  * Delete the file with \*.orig extension (generally not needed if you are
    using a merge tool)::
-
-   Linux/Mac:
-   
-     rm the_conflicting_source_file.py.orig
-   
-   Windows:
-   
-     del the_conflicting_source_file.py.orig
-   
-   Or use your favourite file browser.
+     
+     Linux/Mac:
+     
+       rm the_conflicting_source_file.py.orig
+     
+     Windows:
+     
+       del the_conflicting_source_file.py.orig
+     
+     Or use your favourite file browser.
 
  * Do the tests again:
    

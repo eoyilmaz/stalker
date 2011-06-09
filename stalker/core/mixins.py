@@ -108,7 +108,7 @@ class StatusMixin(object):
     :param status_list: this attribute holds a status list object, which shows
       the possible statuses that this entity could be in. This attribute can
       not be empty or None. Giving a StatusList object, the
-      StatusList.target_type should match the current class.
+      StatusList.target_entity_type should match the current class.
     
     :param status: an integer value which is the index of the status in the
       status_list attribute. So the value of this attribute couldn't be lower
@@ -336,8 +336,8 @@ class ScheduleMixin(object):
         def fset(self, due_date_in):
             self._due_date = self._validate_due_date(due_date_in)
             
-            # update the _project_duration
-            self._duration = self._due_date - self._start_date
+            # update the project duration
+            self.update_duration()
         
         doc = """The date that the entity should be delivered.
         
@@ -367,7 +367,7 @@ class ScheduleMixin(object):
                 self._due_date = self._start_date + self._duration
             
             # update the project duration
-            self._duration = self._due_date - self._start_date
+            self.update_duration()
         
         doc = """The date that this entity should start.
         
@@ -378,7 +378,7 @@ class ScheduleMixin(object):
         is datetime.date.today()"""
         
         return locals()
-    
+
     start_date = property(**start_date())
     
     
@@ -386,6 +386,9 @@ class ScheduleMixin(object):
     #----------------------------------------------------------------------
     def duration():
         def fget(self):
+            #if self._duration is None:
+            self.update_duration()
+            
             return self._duration
         
         doc = """Duration of the project.
@@ -397,6 +400,11 @@ class ScheduleMixin(object):
         return locals()
     
     duration = property(**duration())
+    
+    
+    
+    def update_duration(self):
+        self._duration = self._due_date - self._start_date
 
 
 

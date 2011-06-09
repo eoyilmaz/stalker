@@ -16,6 +16,7 @@ from stalker.core.models import User, Department
 
 # SQLAlchemy database engine
 engine = None
+secondary_engine = None
 
 # SQLAlchemy session manager
 session = None
@@ -59,7 +60,7 @@ def setup(database=None, mappers=[]):
     
     # create engine
     db.engine = sqlalchemy.create_engine(
-        database,**defaults.DATABASE_ENGINE_SETTINGS
+        database, **defaults.DATABASE_ENGINE_SETTINGS
     )
     
     # extend the default mappers with the given mappers list
@@ -180,7 +181,7 @@ def __fill_entity_types_table__():
     
     entity_types_DB = []
     for row in result:
-        entity_types_DB.append( row[0] )
+        entity_types_DB.append(row[0])
     
     result.close()
     

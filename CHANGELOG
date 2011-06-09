@@ -5,11 +5,53 @@ v0.1.1.a9
 ---------
 
  * Introduced :class:`~stalker.core.models.Type`. A new class to define
-   **types**.
+   **types**. With this introduction, all the classes deriving from
+   ``TypeEntity`` (and the TypeEntity it self) are removed from Stalker.
 
  * Added an attribute called ``type`` to the
    :class:`~stalker.core.models.SimpleEntity`. Which will be used to create new
    types to the derived classes.
+
+ * Introduced a new attribute called ``__strictly_typed__`` to all the classes
+   (by the means of the EntityMeta), which will force the class to have a
+   proper (not None) ``type``.
+
+ * :class:`~stalker.core.models.SimpleEntity` now has its own test module.
+
+ * :class:`~stalker.core.models.TypeTemplate` is renamed to
+   :class:`~stalker.core.models.FilenameTemplate` to reflect its duty more
+   clearly.
+
+ * fixed the tests for the :mod:`~stalker.db`. Previously each of the tests
+   were creating an instance of a specific class then storing it in the
+   database, retrieved it back and then comparing the instances, one just
+   created and one queried from the database. The problem was that, SA was
+   returning the same instance (can be checked with id(instance)) so in any
+   case they were equal, it was not possible to compare them and get a
+   meaningful difference to see if the database part worked properly. Now, all
+   the attributes of the original instance are stored in new variables and
+   then the original intance is deleted, and the a new one is retrieved back
+   from the database, and all the attributes are compared with the stored ones.
+   (there is properly another good way)
+
+ * fixed :attr:`~stalker.core.models.SimpleEntity.nice_name` if the instance
+   is created by using __new__ (like in SA) then the
+   :attr:`~stalker.core.models.SimpleEntity.nice_name` attribute was not
+   initialized correctly.
+
+ * fixed mapping of :attr:`~stalker.core.models.Department.lead`
+
+ * fixed :attr:`~stalker.core.models.ImageFormat.device_aspect`, it is now
+   correctly calculated when the instance is created with __new__ instead of
+   __init__
+
+ * fixed mapping of :attr:`~stalker.core.models.Project.users` attribute
+
+ * fixed mapping of :attr:`~stalker.core.models.Project.duration` attribute
+   (also possibly fixed all the classes
+   mixed with :class:`~stalker.core.mixins.ScheduleMixin`)
+
+ * fixed mapping of :attr:`~stalker.core.models.Sequence.lead` attribute
 
 v0.1.1.a8
 ---------

@@ -3,8 +3,9 @@
 
 
 import mocker
-from stalker.core.models import User, Structure, TypeTemplate
+from stalker.core.models import Structure, FilenameTemplate, Type
 from stalker.ext.validatedList import ValidatedList
+
 
 
 
@@ -24,20 +25,20 @@ class StructureTester(mocker.MockerTestCase):
         
         # create mocks
         
-        # mock_user
-        self.mock_user = self.mocker.mock(User)
-        
         # mock type templates
-        self.asset_template1 = self.mocker.mock(TypeTemplate)
-        self.asset_template2 = self.mocker.mock(TypeTemplate)
+        self.asset_template = self.mocker.mock(FilenameTemplate)
+        self.shot_template = self.mocker.mock(FilenameTemplate)
+        self.reference_template = self.mocker.mock(FilenameTemplate)
         
-        self.asset_templates = [self.asset_template1, self.asset_template2]
+        self.mock_templates = [self.asset_template,
+                               self.shot_template,
+                               self.reference_template]
         
-        self.reference_template1 = self.mocker.mock(TypeTemplate)
-        self.reference_template2 = self.mocker.mock(TypeTemplate)
+        self.mock_templates2 = [self.asset_template]
         
-        self.reference_templates = [self.reference_template1,
-                                    self.reference_template2]
+        self.custom_template = "a custom template"
+        
+        self.mock_type = self.mocker.mock(Type)
         
         self.mocker.replay()
         
@@ -45,10 +46,9 @@ class StructureTester(mocker.MockerTestCase):
         self.kwargs = {
             "name": "Test Structure",
             "description": "This is a test structure",
-            "created_by": self.mock_user,
-            "project_template": "some template which is not important",
-            "asset_templates": self.asset_templates,
-            "reference_templates": self.reference_templates,
+            "templates": self.mock_templates,
+            "custom_template": self.custom_template,
+            "type": self.mock_type,
         }
         
         self.mock_structure = Structure(**self.kwargs)
@@ -56,228 +56,139 @@ class StructureTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_project_template_argument_accepts_string_only(self):
-        """testing if project_template parameter accepts string or unicodes
+    def test_custom_template_argument_can_be_skipped(self):
+        """testing if the custom_template argument can be skipped
         """
         
-        test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
-        
-        for test_value in test_values:
-            
-            self.kwargs["project_template"] = test_value
-            
-            self.assertRaises(ValueError, Structure, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_project_template_argument_accepts_empty_string(self):
-        """testing if project_template parameter accepts None without error
-        """
-        
-        self.kwargs["project_template"] = ""
-        
-        # should't raise any errors
+        self.kwargs.pop("custom_template")
         new_structure = Structure(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_project_template_attribute_accepts_string_only(self):
-        """testing if project_template attribute accepts string or unicodes
+    def test_custom_template_argument_is_None(self):
+        """testing if no error will be raised when the custom_template argument
+        is None.
         """
         
-        test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
-        
-        for test_value in test_values:
-            
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_structure,
-                "project_template",
-                test_value
-            )
+        self.kwargs["custom_template"] = None
+        new_structure = Structure(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_argument_accepts_list_of_templates_only(self):
-        """testing if asset_templates argument accepts list of
-        :class:`stalker.core.models.TypeTemplate` objects only
+    def test_custom_template_argument_is_empty_string(self):
+        """testing if no error will be raised when the custom_template argument
+        is an empty string
         """
         
-        test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
-        
-        # these all should raise ValueErrors
-        for test_value in test_values:
-            
-            self.kwargs["asset_templates"] = test_value
-            
-            self.assertRaises(ValueError, Structure, **self.kwargs)
+        self.kwargs["custom_template"] = ""
+        new_structure = Structure(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_attribute_accepts_list_of_templates_only(self):
-        """testing if asset_templates argument accepts list of
-        :class:`stalker.core.models.TypeTemplate` objects only
+    def test_templates_argument_can_be_skipped(self):
+        """testing if no error will be raised when the templates argument is
+        skipped
         """
         
-        test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
-        
-        # these all should raise ValueErrors
-        for test_value in test_values:
-            
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_structure,
-                "asset_templates",
-                test_value
-            )
+        self.kwargs.pop("templates")
+        new_structure = Structure(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_argument_accepts_empty_list(self):
-        """testing if asset_templates argument accepts empty lists
+    def test_templates_argument_can_be_None(self):
+        """testing if no error will be raised when the templates argument is
+        None
         """
         
-        # this should work properly wihtout raising an error
-        self.kwargs["asset_templates"] = []
-        
-        a_new_structure = Structure(**self.kwargs)
+        self.kwargs["templates"] = None
+        new_structure = Structure(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_attribute_accepts_empty_list(self):
-        """testing if asset_templates attribute accepts empty lists
+    def test_templates_attribute_can_be_set_to_None(self):
+        """testing if no error will be raised when the templates attribute is
+        set to None
         """
         
-        # this should work properly without raising an error
-        self.mock_structure.asset_templates = []
+        self.mock_structure.templates = None
     
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_attribute_works_correctly(self):
-        """testing if asset_templates attribute works properly
+    def test_templates_argument_only_accepts_list(self):
+        """testing if a TypeError will be raised when the given templates
+        argument is not a list
         """
         
-        self.assertEqual(self.mock_structure.asset_templates,
-                          self.kwargs["asset_templates"])
+        self.kwargs["templates"] = 1
+        self.assertRaises(TypeError, Structure, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_attribute_is_converted_to_ValidatedList(self):
-        """testing if asset_templates attribute converted to a ValidatedList
-        instance
+    def test_templates_attribute_only_accepts_list(self):
+        """teting if a TypeError will be raised when the templates attribute
+        is tried to be set to an object which is not a list instance.
         """
         
-        self.assertIsInstance(self.mock_structure.asset_templates,
-                              ValidatedList)
+        self.assertRaises(TypeError, setattr, self.mock_structure, "templates",
+                          1.121)
+        
+        # test the correct value
+        self.mock_structure.templates = self.mock_templates
     
     
     
     #----------------------------------------------------------------------
-    def test_asset_templates_attribute_elements_set_to_other_objects_than_Templates(self):
-        """testing if a ValueError will be raised when trying to change an
-        individual element in the asset_templates list
+    def test_templates_argument_accepts_only_list_of_FilenameTemplate_instances(self):
+        """testing if a TypeError will be raised when the templates argument is
+        a list but the elements are not all instances of FilenameTemplate
+        class.
         """
         
-        self.assertRaises(
-            ValueError,
-            self.mock_structure.asset_templates.__setitem__,
-            0,
-            0
-        )
+        test_value = [1, 1.2, "a string"]
+        self.kwargs["templates"] = test_value
+        self.assertRaises(TypeError, Structure, **self.kwargs)
+        
+        # test the correct value
+        self.kwargs["templates"] = self.mock_templates
+        new_structure = Structure(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_reference_templates_argument_accepts_list_of_templates_only(self):
-        """testing if reference_templates argument accepts list of
-        :class:`stalker.core.models.TypeTemplate` objects only
+    def test_templates_attribute_accpets_only_list_of_FilenameTemplate_instances(self):
+        """testing if a TypeError will be raised when the templates attribute
+        is a list but the elements are not all instances of FilenameTemplate
+        class.
         """
         
-        test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
-        
-        # these all should raise ValueErrors
-        for test_value in test_values:
-            self.kwargs["reference_templates"] = test_value
-            self.assertRaises(ValueError, Structure, **self.kwargs)
+        test_value = [1, 1.2, "a string"]
+        self.assertRaises(TypeError, setattr, self.mock_structure, "templates",
+                          test_value)
     
     
     
     #----------------------------------------------------------------------
-    def test_reference_templates_attribute_accepts_list_of_templates_only(self):
-        """testing if reference_templates argument accepts list of
-        :class:`stalker.core.models.TypeTemplate` objects only
+    def test_templates_attribute_is_instance_of_ValidatedList(self):
+        """testing if the templates attribute is an instance of ValidatedList
         """
         
-        test_values = [1, 1.0, ["a string"], {"a": "dictionary"}]
-        
-        # these all should raise ValueErrors
-        for test_value in test_values:
-            
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_structure,
-                "reference_templates",
-                test_value
-            )
+        self.assertIsInstance(self.mock_structure.templates, ValidatedList)
     
     
     
     #----------------------------------------------------------------------
-    def test_reference_templates_argument_accepts_empty_list(self):
-        """testing if reference_templates argument accepts empty lists
+    def test___strictly_typed___is_True(self):
+        """testing if the __strictly_typed__ is True
         """
         
-        # this should work properly wihtou raising an error
-        self.kwargs["reference_templates"] = []
-        
-        a_new_structure = Structure(**self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_reference_templates_attribute_accepts_empty_list(self):
-        """testing if the reference_templates attribute accepts empty lists
-        """
-        
-        # this should work without any error
-        self.mock_structure.reference_templates = []
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_reference_templates_attribute_is_a_ValidatedList_instance(self):
-        """testing if the reference_template attribute is an instance of
-        ValidatedList
-        """
-        
-        self.assertIsInstance(self.mock_structure.reference_templates,
-                                   ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_reference_templates_attribute_elements_accepts_Template_only(self):
-        """testing if a ValueError will be raised when trying to assign
-        something other than a Template object to the reference_templates list
-        """
-        
-        self.assertRaises(
-            ValueError,
-            self.mock_structure.reference_templates.__setitem__,
-            0,
-            0
-        )
+        self.assertTrue(Structure.__strictly_typed__, True)
     
     
     
@@ -288,11 +199,16 @@ class StructureTester(mocker.MockerTestCase):
         
         new_structure2 = Structure(**self.kwargs)
         
-        self.kwargs["project_template"] = "a mock project template"
+        self.kwargs["custom_template"] = "a mock custom template"
         new_structure3 = Structure(**self.kwargs)
+        
+        self.kwargs["custom_template"] = self.mock_structure.custom_template
+        self.kwargs["templates"] = self.mock_templates2
+        new_structure4 = Structure(**self.kwargs)
         
         self.assertTrue(self.mock_structure==new_structure2)
         self.assertFalse(self.mock_structure==new_structure3)
+        self.assertFalse(self.mock_structure==new_structure4)
     
     
     
@@ -303,11 +219,16 @@ class StructureTester(mocker.MockerTestCase):
         
         new_structure2 = Structure(**self.kwargs)
         
-        self.kwargs["project_template"] = "a mock project template"
+        self.kwargs["custom_template"] = "a mock custom template"
         new_structure3 = Structure(**self.kwargs)
+        
+        self.kwargs["custom_template"] = self.mock_structure.custom_template
+        self.kwargs["templates"] = self.mock_templates2
+        new_structure4 = Structure(**self.kwargs)
         
         self.assertFalse(self.mock_structure!=new_structure2)
         self.assertTrue(self.mock_structure!=new_structure3)
+        self.assertTrue(self.mock_structure!=new_structure4)
     
     
     

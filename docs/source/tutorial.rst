@@ -514,15 +514,14 @@ individual asset :class:`~stalker.core.models.Version` files specific for an
 every single iteration of one asset and has a connection to files in the
 repository. So before creating a new version for any kind of asset, we need to
 tell Stalker where to place the related files. This can be done by using a
-:class:`~stalker.core.models.TypeTemplate` object.
+:class:`~stalker.core.models.FilenameTemplate` object.
 
-A :class:`~stalker.core.models.TypeTemplate` object has information about
+A :class:`~stalker.core.models.FilenameTemplate` object has information about
 the path, the filename, and the Type of the asset to apply this template to::
 
-  from stalker.core.models import TypeTemplate
+  from stalker.core.models import FilenameTemplate
   
-  shot_version_template = TypeTemplate(name="Shot Template")
-  
+  shot_version_template = FilenameTemplate(name="Shot Template")
   
   # lets create the templates
   #

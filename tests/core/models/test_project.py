@@ -3,10 +3,9 @@
 
 import datetime
 import mocker
-from stalker.core.models import (User, Sequence, Asset, ImageFormat,
-                                 Project, ProjectType, Structure, Repository,
-                                 Entity, Status, StatusList, Link, LinkType,
-                                 Task)
+from stalker.core.models import (User, Sequence, Asset, ImageFormat, Project,
+                                 Structure, Repository, Entity, Status,
+                                 StatusList, Link, Task, Type)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -46,8 +45,8 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.mock_imageFormat = self.mocker.mock(ImageFormat)
         
-        self.mock_project_type = self.mocker.mock(ProjectType)
-        self.mock_project_type2 = self.mocker.mock(ProjectType)
+        self.mock_project_type = self.mocker.mock(Type)
+        self.mock_project_type2 = self.mocker.mock(Type)
         
         self.mock_project_structure = self.mocker.mock(Structure)
         self.mock_project_structure2 = self.mocker.mock(Structure)
@@ -83,6 +82,17 @@ class ProjectTester(mocker.MockerTestCase):
         }
         
         self.mock_project = Project(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_setup_is_working_correctly(self):
+        """testing if the setup is done correctly
+        """
+        
+        self.assertIsInstance(self.mock_project_type, Type)
+        self.assertIsInstance(self.mock_project_type2, Type)
+        
     
     
     
@@ -789,78 +799,6 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_type_argument_is_skipped(self):
-        """testing if nothing happens when the type argument is skipped
-        """
-        
-        self.kwargs.pop("type")
-        new_project = Project(**self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_type_argument_is_None(self):
-        """testing if nothing happens when the type argument is set to None
-        """
-        
-        self.kwargs["type"] = None
-        new_project = Project(**self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_type_argument_is_given_as_non_ProjectType_object(self):
-        """testing if a ValueError will be raised when the type argument is
-        given as something other than a ProjectType object
-        """
-        
-        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-        
-        for test_value in test_values:
-            self.kwargs["type"] = test_value
-            self.assertRaises(ValueError, Project, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_type_attribute_is_set_None(self):
-        """testing if nothing happens when the type attribute is set to None
-        """
-        
-        self.mock_project.type = None
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_type_attribute_is_set_to_non_ProjectType_object(self):
-        """testing if a ValueError will be raised when the type attribute is
-        set to something other than a ProjectType object
-        """
-        
-        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-        
-        for test_value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_project,
-                "type",
-                test_value
-            )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_type_attribute_is_working_properly(self):
-        """testing if the type attribute is working properly
-        """
-        
-        self.mock_project.type = self.mock_project_type2
-        self.assertEqual(self.mock_project.type, self.mock_project_type2)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_repository_argument_is_None(self):
         """testing if nothing happens when repository is set to None
         """
@@ -1144,7 +1082,7 @@ class ProjectTester(mocker.MockerTestCase):
         """tetsing if the ReferenceMixin part is initialized correctly
         """
         
-        link_type_1 = LinkType(name="Image")
+        link_type_1 = Type(name="Image", target_entity_type="Link")
         
         link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
                      filename="a.jpg", type=link_type_1)
@@ -1235,3 +1173,10 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test___strictly_typed___is_True(self):
+        """testing if the __strictly_typed__ is True for Project class
+        """
+        
+        self.assertEqual(Project.__strictly_typed__, True)
+        

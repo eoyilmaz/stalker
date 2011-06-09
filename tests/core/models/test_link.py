@@ -3,7 +3,7 @@
 
 
 import mocker
-from stalker.core.models import Link, LinkType
+from stalker.core.models import Link, Type
 
 
 
@@ -24,8 +24,8 @@ class LinkTester(mocker.MockerTestCase):
         assert(isinstance(self.mocker, mocker.Mocker))
         
         # create a mock LinkType object
-        self.mock_link_type1 = self.mocker.mock(LinkType)
-        self.mock_link_type2 = self.mocker.mock(LinkType)
+        self.mock_link_type1 = self.mocker.mock(Type)
+        self.mock_link_type2 = self.mocker.mock(Type)
         
         # for __eq__
         self.mock_link_type1.__eq__(self.mock_link_type2)
@@ -239,65 +239,65 @@ class LinkTester(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_type_argument_being_None(self):
-        """testing if a ValueError will be raised when type argument is set to
-        None
-        """
+    ##----------------------------------------------------------------------
+    #def test_type_argument_being_None(self):
+        #"""testing if a ValueError will be raised when type argument is set to
+        #None
+        #"""
         
-        self.kwargs["type"] = None
-        self.assertRaises(ValueError, Link, **self.kwargs)
+        #self.kwargs["type"] = None
+        #self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_type_attribute_being_None(self):
-        """testing if a ValueError will be raised when type attribute is set to
-        None
-        """
+    ##----------------------------------------------------------------------
+    #def test_type_attribute_being_None(self):
+        #"""testing if a ValueError will be raised when type attribute is set to
+        #None
+        #"""
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_link,
-            "type",
-            None
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.mock_link,
+            #"type",
+            #None
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_type_argument_accepts_only_LinkType_objects(self):
-        """testing if a ValueError will be raised when type argument is
-        something other than a LinkType object
-        """
+    ##----------------------------------------------------------------------
+    #def test_type_argument_accepts_only_LinkType_objects(self):
+        #"""testing if a ValueError will be raised when type argument is
+        #something other than a LinkType object
+        #"""
         
-        test_values = [1, 1.2, "A link Type", ["Another link type"],
-                       {"another":"link type"}]
+        #test_values = [1, 1.2, "A link Type", ["Another link type"],
+                       #{"another":"link type"}]
         
-        for test_value in test_values:
-            self.kwargs["type"] = test_value
-            self.assertRaises(ValueError, Link, **self.kwargs)
+        #for test_value in test_values:
+            #self.kwargs["type"] = test_value
+            #self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_type_attribute_accepts_only_LinkType_objects(self):
-        """testing if a ValueError will be raised when type attribute is
-        somehting other than a LinkType object
-        """
+    ##----------------------------------------------------------------------
+    #def test_type_attribute_accepts_only_LinkType_objects(self):
+        #"""testing if a ValueError will be raised when type attribute is
+        #somehting other than a LinkType object
+        #"""
         
-        test_values = [1, 1.2, "A link Type", ["Another link type"],
-                       {"another":"link type"}]
+        #test_values = [1, 1.2, "A link Type", ["Another link type"],
+                       #{"another":"link type"}]
         
-        for test_value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_link,
-                "type",
-                test_value
-            )
+        #for test_value in test_values:
+            #self.assertRaises(
+                #ValueError,
+                #setattr,
+                #self.mock_link,
+                #"type",
+                #test_value
+            #)
     
     
     
@@ -341,6 +341,15 @@ class LinkTester(mocker.MockerTestCase):
         """
         
         self.assertTrue(Link.plural_name, "Links")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___strictly_typed___is_True(self):
+        """testing if the __strictly_typed__ class attribute is True
+        """
+        
+        self.assertEqual(Link.__strictly_typed__, True)
     
     
     

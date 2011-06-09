@@ -46,23 +46,10 @@ class EntityMeta(type):
             
             dict_["plural_name"] = plural_name
         
-        return super(EntityMeta, cls).__new__(cls, classname, bases, dict_)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def __init__(cls, classname, bases, dict_):
-        #print "runs before class __init__"
+        if not dict_.has_key("__strictly_typed__"):
+            dict_["__strictly_typed__"] = False
         
-        #setattr(cls, "entity_type", unicode(classname))
-        #setattr(cls, "plural_name", unicode(classname+"s"))
-        #if classname[-1] == "y":
-            #setattr(cls, "plural_name", unicode(classname[:-1]+"ies"))
-        #elif classname[-2] == "ch":
-            #setattr(cls, "plural_name", unicode(classname+"es"))
-        #elif classname[-1] == "f":
-            #setattr(cls, "plural_name", unicode(classname[:-1]+"ves"))
-        #return type.__init__(cls, classname, bases, dict_)
+        return super(EntityMeta, cls).__new__(cls, classname, bases, dict_)
 
 
 
@@ -73,12 +60,33 @@ class EntityMeta(type):
 class SimpleEntity(object):
     """The base class of all the others
     
-    This class has the basic information about an entity which are the name,
-    the description, tags and the audit information like created_by,
-    updated_by, date_created and date_updated about this entity.
+    The :class:`~stalker.core.models.SimpleEntity` is the starting point of the
+    Stalker Object Model, it starts by adding the basic information about an
+    entity which are :attr:`~stalker.core.models.SimpleEntity.name`,
+    :attr:`~stalker.core.models.SimpleEntity.description`, the audit
+    informations like :attr:`~stalker.core.models.SimpleEntity.created_by`,
+    :attr:`~stalker.core.models.SimpleEntity.updated_by`,
+    :attr:`~stalker.core.models.SimpleEntity.date_created`,
+    :attr:`~stalker.core.models.SimpleEntity.date_updated` and a couple of
+    naming attributes like :attr:`~stalker.core.models.SimpleEntity.code` and
+    :attr:`~stalker.core.models.SimpleEntity.nice_name` and last but not least
+    the :attr:`~stalker.core.models.SimpleEntity.type` attribute which is very
+    important for entities that needs a type.
     
-    Two SimpleEntities considered equal if they have the same name, the other
-    attributes doesn't matter.
+    For derived classes if the :attr:`~stalker.core.models.SimpleEntity.type`
+    needed to be specifically specified, that is it can not be None or nothing
+    else then a :class:`~stalker.core.models.Type` instance, set the
+    ``strictly_typed`` class attribute to True::
+      
+      class NewClass(SimpleEntity):
+          __strictly_typed__ = True
+    
+    This will ensure that the derived class always have a proper
+    :attr:`~stalker.core.models.SimpleEntity.type` attribute and can not
+    initialize without one.
+    
+    Two SimpleEntities considered to be equal if they have the same name, the
+    other attributes doesn't matter.
     
     :param string name: A string or unicode value that holds the name of this
       entity. It can not be empty, the first letter should be an alphabetic
@@ -120,18 +128,24 @@ class SimpleEntity(object):
       the nice_name attribute. When the code is directly edited the code will
       not be formated other than removing any illegal characters. The default
       value is the upper case form of the nice_name.
+    
+    :param type: The type of the current SimpleEntity. Used across several
+      places in Stalker. Can be None. The default value is None.
+    
+    :type type: :class:`~stalker.core.models.Type`
     """
     
     
     
     __metaclass__ = EntityMeta
-    
+    _nice_name = None
     
     
     #----------------------------------------------------------------------
     def __init__(self,
                  name=None,
                  description="",
+                 type=None,
                  created_by=None,
                  updated_by=None,
                  date_created=datetime.datetime.now(),
@@ -160,6 +174,8 @@ class SimpleEntity(object):
         self._updated_by = self._validate_updated_by(updated_by)
         self._date_created = self._validate_date_created(date_created)
         self._date_updated = self._validate_date_updated(date_updated)
+        
+        self._type = self._validate_type(type)
     
     
     
@@ -311,6 +327,10 @@ class SimpleEntity(object):
     def nice_name():
         
         def fget(self):
+            # also set the nice_name
+            if self._nice_name is None:
+                self._nice_name = self._condition_nice_name(self._name)
+            
             return self._nice_name
         
         doc = """Nice name of this object.
@@ -420,6 +440,50 @@ class SimpleEntity(object):
                              "date_created before")
         
         return date_updated_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_type(self, type_in):
+        """validates the given type value
+        """
+        
+        raise_error = False
+        
+        if not self.__strictly_typed__:
+            if not type_in is None:
+                if not isinstance(type_in, Type):
+                    raise_error = True
+        else:
+            if not isinstance(type_in, Type):
+                raise_error = True
+        
+        if raise_error:
+            raise TypeError("%s.type must be an instance of "
+                             "stalker.core.models.Type" \
+                             % self.entity_type)
+        
+        return type_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def type():
+        def fget(self):
+            return self._type
+        
+        def fset(self, type_in):
+            self._type = self._validate_type(type_in)
+        
+        doc = """The type of the object.
+        
+        It is an instance of :class:`~stalker.core.models.Type` with a proper
+        :attr:`~stalker.core.models.Type.target_entity_type`.
+        """
+        
+        return locals()
+    
+    type = property(**type())
     
     
     
@@ -661,48 +725,53 @@ class Entity(SimpleEntity):
 class Type(Entity):
     """Everything can have a type.
     
-    .. versionadded:: 0.1.1.a8
-    Types
+    .. versionadded:: 0.1.1
+      Types
     
     Type is a generalized version of the previous design that defines types for
-    specific classes deriving from :class:`~stalker.core.models.Entity` class.
+    specific classes.
     
     The purpose of the :class:`~stalker.core.models.Type` class is just to
-    define a new type for a specific Entity. For example; to create a new
-    :class:`~stalker.core.models.Assets` type create a
-    :class:`~stalker.core.models.Type` like::
+    define a new type for a specific :class:`~stalker.core.models.Entity`. For
+    example, you can have a ``Character`` :class:`~stalker.core.models.Asset`
+    or you can have a ``Commercial`` :class:`~stalker.core.models.Project` or
+    you can define a :class:`~stalker.core.models.Link` as an ``Image`` etc.,
+    to create a new :class:`~stalker.core.models.Type` for various classes::
     
-      Type(name="Character", entity_type="Asset")
-      Type(name="Commercial", entity_type="Project")
-      Type(name="Movie", entity_type="Project")
+      Type(name="Character", target_entity_type="Asset")
+      Type(name="Commercial", target_entity_type="Project")
+      Type(name="Image", target_entity_type="Link")
     
     or::
       
-      Type(name="Character", entity_type=Asset.entity_type)
-      Type(name="Commercial", entity_type=Project.entity_type)
-      Type(name="Movie", entity_type=Project.entity_type)
+      Type(name="Character", target_entity_type=Asset.entity_type)
+      Type(name="Commercial", target_entity_type=Project.entity_type)
+      Type(name="Image", target_entity_type=Link.entity_type)
+    
+    or even better:
+      
+      Type(name="Character", target_entity_type=Asset)
+      Type(name="Commercial", target_entity_type=Project)
+      Type(name="Image", target_entity_type=Link)
+    
+    By using :class:`~stalker.core.models.Type`\ s, one can able to sort and
+    group same type of entities.
     
     :class:`~stalker.core.models.Type`\ s are generally used in
     :class:`~stalker.core.models.Structure`\ s.
     
-    :param string entity_type: The string defining the target entity type of
+    :param string target_entity_type: The string defining the target type of
       this :class:`~stalker.core.models.Type`.
     """
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super(TypeEntity, self).__init__(**kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def __repr__(self):
-        #"""the representation
-        #"""
+    def __init__(self, target_entity_type=None, **kwargs):
+        super(Type, self).__init__(**kwargs)
         
-        #return "<TypeEntity (%s, %s)>" % (self.name, self.code)
+        self._target_entity_type =\
+            self._validate_target_entity_type(target_entity_type)
     
     
     
@@ -711,8 +780,8 @@ class Type(Entity):
         """the equality operator
         """
         
-        return super(TypeEntity, self).__eq__(other) and \
-               isinstance(other, TypeEntity)
+        return super(Type, self).__eq__(other) and isinstance(other, Type) \
+               and self.target_entity_type == other.target_entity_type
     
     
     
@@ -722,212 +791,47 @@ class Type(Entity):
         """
         
         return not self.__eq__(other)
-
-
-
-
-
-
-########################################################################
-class AssetType(TypeEntity):
-    """Holds the information about the asset types.
-    
-    One AssetType object gives information about the
-    :class:`~stalker.core.models.TaskType`\ s that this type of asset
-    can intially have.
-    
-    So for example one can create a "Character"
-    :class:`~stalker.core.models.AssetType` and then link "Design", "Modeling",
-    "Rig", "Shading" :class:`~stalker.core.model.TaskType`\ s to this
-    :class:`~stalker.core.models.AssetType`. And then have an "Environment"
-    :class:`~stalker.core.models.AssetType` and then just link "Design",
-    "Modeling", "Shading" :class:`~stalker.core.model.TaskType`\ s to it.
-    
-    The idea behind :class:`~stalker.core.models.AssetType` is to have an
-    initial list of :class:`~stalker.core.mddels.TaskType`\ s instances which
-    are going to be used to define the automatically created
-    :class:`~stalker.core.models.Task`\ s for this
-    :class:`~stalker.core.models.AssetType`.
-    
-    It is still possible to add a new type of
-    :class:`~stalker.core.models.Task` to the list of tasks of one
-    :class:`~stalker.core.models.Asset` object. The
-    :class:`~stalker.core.models.AssetType` and the related
-    :class:`~stalker.core.models.TaskType`\ s will only be used to create a
-    list of :class:`~stalker.core.models.Task`\ s intially with the
-    :class:`~stalker.core.models.Asset` it self.
-    
-    :param task_types: A list of :class:`~stalker.core.models.TaskType`
-      instances showing the initial :class:`~stalker.core.models.TaskType`\ s
-      available for this :class:`~stalker.core.models.AssetType`.
-    
-    :type task_types: a :class:`~stalker.ext.validatedList.ValidatedList` of
-      :class:`~stalker.core.models.TaskType` instances.
-    """
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self, task_types=[], **kwargs):
-        super(AssetType, self).__init__(**kwargs)
-        
-        self._task_types = self._validate_task_types(task_types)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_task_types(self, task_types_in):
-        """validates the given task_types list
+    def _validate_target_entity_type(self, target_entity_type_in):
+        """validates the given target_entity_type value
         """
         
-        # raise a Value error if it is not a list
-        if not isinstance(task_types_in, list):
-            raise ValueError("task_types should be an instance of list")
+        # check if a class is given
+        if isinstance(target_entity_type_in, type):
+            target_entity_type_in = target_entity_type_in.__name__
         
-        # raise a Value error if not all of the elements are pipelineStep
-        # objects
-        if not all([ isinstance(obj, TaskType)
-                 for obj in task_types_in]):
-            raise ValueError(
-                "all of the elements of the given list should be instance of "
-                "stalker.core.models.TaskType class"
-            )
+        error_string = "target_entity_type must be a string showing the "\
+                     "target class name"
         
-        return ValidatedList(task_types_in)
+        if target_entity_type_in is None \
+           or not isinstance(target_entity_type_in, str):
+            raise TypeError(error_string)
+        
+        if target_entity_type_in == "":
+            raise ValueError(error_string)
+        
+        return target_entity_type_in
     
     
     
     #----------------------------------------------------------------------
-    def task_types():
-        
+    def target_entity_type():
         def fget(self):
-            return self._task_types
+            return self._target_entity_type
         
-        def fset(self, task_types_in):
-            self._task_types = self._validate_task_types(task_types_in)
+        doc = """The target type of this Type instance.
         
-        doc = """task_types of this AssetType object.
-        
-        task_types is a list of :class:`~stalker.core.models.TaskType` objects,
-        showing the list of possible :class:`~stalker.core.models.TaskType`\ s
-        that this kind of :class:`~stalker.core.models.Asset`\ s can have. Its
-        main use is to create a default :class:`~stalker.core.models.Task`\ s
-        list which can be later on edited.
+        It is a string, showing the name of the target type class. It is a
+        read-only attribute.
         """
         
         return locals()
     
-    task_types = property(**task_types())
+    target_entity_type = property(**target_entity_type())
     
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(AssetType, self).__eq__(other) and \
-               isinstance(other, AssetType) and \
-               self.task_types == other.task_types
-
-
-
-
-########################################################################
-class LinkType(TypeEntity):
-    """Defines the types of :class:`~stalker.core.models.Link` instances.
-    
-    LinkType objects hold the type of the link and it is generaly used by
-    :class:`~stalker.core.models.Project` to sort things out. See
-    :class:`~stalker.core.models.Project` object documentation for details.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super(LinkType, self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(LinkType, self).__eq__(other) and \
-               isinstance(other, LinkType)
-
-
-
-
-
-
-########################################################################
-class ProjectType(TypeEntity):
-    """Defines the types of :class:`~stalker.core.models.Project` instances.
-    
-    Can be used to create different type projects like Commercial, Movie, Still
-    etc.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super(ProjectType, self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(ProjectType, self).__eq__(other) and \
-               isinstance(other, ProjectType)
-
-
-
-
-
-
-########################################################################
-class TaskType(TypeEntity):
-    """Defines the type of the a :class:`~stalker.core.models.Task`.
-    
-    A TaskType object represents the general steps which are used around the
-    studio. A couple of examples are:
-    
-      * Design
-      * Model
-      * Rig
-      * Fur
-      * Shading
-      * Previs
-      * Match Move
-      * Animations
-      
-      etc.
-    
-    Doesn't add any new parameter for its parent class.
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super(TaskType, self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(TaskType, self).__eq__(other) and \
-               isinstance(other, TaskType)
 
 
 
@@ -1015,8 +919,8 @@ class StatusList(Entity):
     :param statuses: this is a list of status objects, so you can prepare
       different StatusList objects for different kind of entities
     
-    :param target_entity_type: use this parameter to specify the target entity
-      type that this StatusList is designed for. It accepts entity_type names.
+    :param target_entity_type: use this parameter to specify the target entity type
+      that this StatusList is designed for. It accepts entity_type names.
       For example::
         
         from stalker.core.models import Status, StatusList, Project
@@ -1033,7 +937,7 @@ class StatusList(Entity):
         project_status_list = StatusList(
             name="Project Status List",
             statuses=status_list,
-            target_type=Project.entit_type
+            target_entity_type=Project.entit_type
         )
       
       now with the code above you can not assign the ``project_status_list``
@@ -1224,6 +1128,10 @@ class ImageFormat(Entity):
     
     
     
+    _device_aspect = None
+    
+    
+    
     #----------------------------------------------------------------------
     def __init__(self,
                  width=None,
@@ -1409,6 +1317,8 @@ class ImageFormat(Entity):
         because the device_aspect is calculated from the width/height*pixel
         formula, this property is read-only.
         """
+        if self._device_aspect is None:
+            self._update_device_aspect()
         return self._device_aspect
     
     
@@ -1479,24 +1389,22 @@ class Link(Entity):
       "#" in place of the numerator (`Nuke`_ style). Setting filename to None
       or an empty string is not accepted and causes a ValueError to be raised.
     
-    :param type\_: The type of the link. It should be an instance of
-      :class:`~stalker.core.models.LinkType`, the type can not be
-      None or anything other than a
-      :class:`~stalker.core.models.LinkType` object. Specifies the link
-      type, can be an LinkType with name Image, Movie/Video, Sound etc.
-    
     .. _Nuke: http://www.thefoundry.co.uk
     """
     
     
     
+    __strictly_typed__ = True
+    
+    
+    
     #----------------------------------------------------------------------
-    def __init__(self, path="", filename="", type=None, **kwargs):
+    def __init__(self, path="", filename="", **kwargs):
         super(Link, self).__init__(**kwargs)
         
         self._path = self._validate_path(path)
         self._filename = self._validate_filename(filename)
-        self._type = self._validate_type(type)
+        #self._type = self._validate_type(type)
     
     
     
@@ -1547,20 +1455,20 @@ class Link(Entity):
     
     
     
-    #----------------------------------------------------------------------
-    def _validate_type(self, type_in):
-        """validates the given type
-        """
+    ##----------------------------------------------------------------------
+    #def _validate_type(self, type_in):
+        #"""validates the given type
+        #"""
         
-        if type_in is None:
-            raise ValueError("type can not be None, set it to a "
-                             "stalker.core.models.LinkType object")
+        #if type_in is None:
+            #raise ValueError("type can not be None, set it to a "
+                             #"stalker.core.models.LinkType object")
         
-        if not isinstance(type_in, LinkType):
-            raise ValueError("type should be an instance of "
-                             "stalker.core.models.LinkType object")
+        #if not isinstance(type_in, LinkType):
+            #raise ValueError("type should be an instance of "
+                             #"stalker.core.models.LinkType object")
         
-        return type_in
+        #return type_in
     
     
     
@@ -1598,21 +1506,21 @@ class Link(Entity):
     
     
     
-    #----------------------------------------------------------------------
-    def type():
-        def fget(self):
-            return self._type
+    ##----------------------------------------------------------------------
+    #def type():
+        #def fget(self):
+            #return self._type
         
-        def fset(self, type_in):
-            self._type = self._validate_type(type_in)
+        #def fset(self, type_in):
+            #self._type = self._validate_type(type_in)
         
-        doc="""the type of the link, it should be a
-        :class:`~stalker.core.models.LinkType` object and it can not be
-        None"""
+        #doc="""the type of the link, it should be a
+        #:class:`~stalker.core.models.LinkType` object and it can not be
+        #None"""
         
-        return locals()
+        #return locals()
     
-    type = property(**type())
+    #type = property(**type())
     
     
     
@@ -2063,12 +1971,15 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     
     
     
+    __strictly_typed__ = True
+    
+    
+    
     #----------------------------------------------------------------------
     def __init__(self,
                  lead=None,
                  users=[],
                  repository=None,
-                 type=None,
                  structure=None,
                  sequences=[],
                  assets=[],
@@ -2088,7 +1999,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         self._lead = self._validate_lead(lead)
         self._users = self._validate_users(users)
         self._repository = self._validate_repository(repository)
-        self._type = self._validate_type(type)
         self._structure = self._validate_structure(structure)
         self._sequences = self._validate_sequences(sequences)
         self._assets = self._validate_assets(assets)
@@ -2218,19 +2128,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
                                  "stalker.core.models.Structure")
         
         return structure_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_type(self, type_in):
-        """validates the given type_in value
-        """
-        
-        if type_in is not None and not isinstance(type_in, ProjectType):
-            raise ValueError("type should be an instance of "
-                             "stalker.core.models.ProjectType")
-        
-        return type_in
     
     
     
@@ -2402,23 +2299,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         return locals()
     
     structure = property(**structure())
-    
-    
-    
-    
-    #----------------------------------------------------------------------
-    def type():
-        def fget(self):
-            return self._type
-        def fset(self, type_in):
-            self._type = self._validate_type(type_in)
-        
-        doc = """defines the type of the project, should be an instance of
-        :class:`~stalker.core.models.ProjectType`"""
-        
-        return locals()
-    
-    type = property(**type())
     
     
     
@@ -3195,166 +3075,111 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
 
 ########################################################################
 class Structure(Entity):
-    """A structure object is the place to hold data about how the physical
-    files are arranged in the
-    :class:`~stalker.core.models.Repository`.
+    """A structure object is the place to hold data about how the physical files are arranged in the :class:`~stalker.core.models.Repository`.
     
-    :param project_template: it is a string holding several lines of text
-      showing the folder structure of the project. Whenever a project is
-      created, folders are created by looking at this folder template.
+    Structures are generally owned by :class:`~stalker.core.models.Project`
+    objects. Whenever a :class:`~stalker.core.models.Project` is physicaly
+    created, project folders are created by looking at
+    :attr:`~stalker.core.models.Structure.custom_template` of the
+    :class:`~stalker.core.models.Structure`, the
+    :class:`~stalker.core.models.Project` object is generally given to the
+    :class:`~stalker.core.models.Structure`. So it is possible to use a
+    variable like "{{project}}" or derived variables like::
       
-      The template string can have Jinja2 directives. These variables are given
-      to the template engine:
+      {% for seq in project.sequences %}
+          {{do something here}}
+    
+    :param templates: A list of
+      :class:`~stalker.core.models.FilenameTemplate`\ s which
+      defines a specific template for the given
+      :attr:`~stalker.core.models.FilenameTemplate.target_entity_type`\ s.
+    
+    :type templates: list of :class:`~stalker.core.models.FilenameTemplate`\ s
+    
+    :param str custom_template: A string containing several lines of folder
+      names. The folders are relative to the
+      :class:`~stalker.core.models.Project` root. It can also contain a Jinja2
+      Template code. Which will be rendered to show the list of folders to be
+      created with the project. The Jinja2 Template is going to have the
+      {{project}} variable. The important point to be careful about is to list
+      all the custom folders of the project in a new line in this string. For
+      example a :class:`~stalker.core.models.Structure` for a
+      :class:`~stalker.core.models.Project` can have the following
+      :attr:`~stalker.core.models.Structure.custom_template`::
+        
+        ASSETS
+        {% for asset in project.assets %}
+            {% set asset_root = 'ASSETS/' + asset.code %}
+            {{asset_root}}
+            
+            {% for task in asset.tasks %}
+                {% set task_root = asset_root + '/' + task.code %}
+                {{task_root}}
+        
+        SEQUENCES
+        {% for seq in project.sequences %}}
+            {% set seq_root = 'SEQUENCES/' + {{seq.code}} %}
+            {{seq_root}}/Edit
+            {{seq_root}}/Edit/AnimaticStoryboard
+            {{seq_root}}/Edit/Export
+            {{seq_root}}/Storyboard
+            
+            {% for shot in seq.shots %}
+                {% set shot_root = seq_root + '/SHOTS/' + shot.code %}
+                {{shot_root}}
+                
+                {% for task in shot.tasks %}
+                    {% set task_root = shot_root + '/' + task.code %}
+                    {{task_root}}
       
-        * *project*: holds the current
-          :class:`~stalker.core.models.Project`
-          object using this structure, so you can use {{project.code}} or
-          {{project.sequences}} kind of variables in the Jinja2 template
-    
-    :param asset_templates: holds :class:`~stalker.core.models.TypeTemplate`
-      objects with an :class:`~stalker.core.models.AssetType` connected to its
-      `type` attribute, which can help specifying templates based on the
-      related :class:`~stalker.core.models.AssetType` object.
+      The above example has gone far beyond deep than it is needed, where it
+      started to define paths for :class:`~stalker.core.models.Asset`\ s. Even
+      it is possible to create a :class:`~stalker.core.models.Project`
+      structure like that, in general it is unnecessary. Because the above
+      folders are going to be created but they are probably going to be empty
+      for a while, because the :class:`~stalker.core.models.Asset`\ s are not
+      created yet (or in fact no :class:`~stalker.core.models.Version`\ s are
+      created for the :class:`~stalker.core.models.Task`\ s). Anyway, it is
+      much suitable and desired to create this details by using
+      :class:`~stalker.core.models.FilenameTemplate` objects. Which are
+      spesific to certain
+      :attr:`~stalker.core.FilenameTemplate.target_entity_type`\ s. And by
+      using the :attr:`~stalker.core.models.Structure.custom_template`
+      attribute, Stalker can not place any source or output file of a
+      :class:`~stalker.core.models.Version` in the
+      :class:`~stalker.core.models.Repository` where as it can by using
+      :class:`~stalker.core.models.FilenameTemplate`\ s.
       
-      Testing a second paragraph addition.
+      But for certain types of :class:`~stalker.core.models.Task`\ s it is may
+      be good to previously create the folder structure just because in certain
+      environments (programs) it is not possible to run a Python code that will
+      place the file in to the Repository like in Photoshop.
+      
+      The ``custom_template`` parameter can be None or an empty string if it is
+      not needed. Be carefull not to pass a variable other than a string or
+      unicode because it will use the string representation of the given
+      variable.
     
-    :param reference_templates: holds
-      :class:`~stalker.core.models.TypeTemplate` objects, which can help
-      specifying templates based on the given
-      :class:`~stalker.core.models.LinkType` object
-    
-    This templates are used in creation of Project folder structure and also
-    while interacting with the assets and references in the current
-    :class:`~stalker.core.models.Project`. You can create one project
-    structure for `Commmercials` and another project structure for `Movies` and
-    another one for `Print` projects etc. and can reuse them with new projects.
+    A :class:`~stalker.core.models.Structure` can not be created without a
+    ``type`` (__strictly_typed__ = True). By giving a ``type`` to the
+    :class:`~stalker.core.models.Strucutre`, you can create one structure for
+    **Commmercials** and another project structure for **Movies** and another
+    one for **Print** projects etc. and can reuse them with new
+    :class:`~stalker.core.models.Project`\ s.
     """
     
     
     
+    __strictly_typed__ = True
+    
+    
+    
     #----------------------------------------------------------------------
-    def __init__(self,
-                 project_template="",
-                 asset_templates=[],
-                 reference_templates=[], **kwargs):
+    def __init__(self, templates=None, custom_template=None, **kwargs):
         super(Structure, self).__init__(**kwargs)
         
-        self._project_template = self._validate_project_template(project_template)
-        self._asset_templates = self._validate_asset_templates(asset_templates)
-        self._reference_templates = \
-            self._validate_reference_templates(reference_templates)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_asset_templates(self, asset_templates_in):
-        """validates the given asset_templates list
-        """
-        
-        if not isinstance(asset_templates_in, list):
-            raise ValueError("asset_templates should be a list object")
-        
-        for element in asset_templates_in:
-            if not isinstance(element, TypeTemplate):
-                raise ValueError(
-                    "asset_templates should only contain instances of "
-                    "stalker.core.models.TypeTemplate objects"
-                )
-        
-        return ValidatedList(asset_templates_in)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_reference_templates(self, reference_templates_in):
-        """validates the given reference_templates list
-        """
-        
-        if not isinstance(reference_templates_in, list):
-            raise ValueError("reference_templates should be a list object")
-        
-        for element in reference_templates_in:
-            if not isinstance(element, TypeTemplate):
-                raise ValueError(
-                    "reference_templates should only contain instances of "
-                    "stalker.core.models.TypeTemplate objects"
-                )
-        
-        return ValidatedList(reference_templates_in)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_project_template(self, project_template_in):
-        """validates the given project_template object
-        """
-        
-        if not isinstance(project_template_in, (str, unicode)):
-            raise ValueError(
-                "project_template should be an instance of string or unicode"
-            )
-        
-        return project_template_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def asset_templates():
-        
-        def fget(self):
-            return self._asset_templates
-        
-        def fset(self, asset_templates_in):
-            self._asset_templates = \
-                self._validate_asset_templates(asset_templates_in)
-        
-        doc = """A list of :class:`~stalker.core.models.TypeTemplate` objects
-        which gives information about the :class:`~stalker.core.models.Asset`
-        :class:`~stalker.core.models.Version` file placements"""
-        
-        return locals()
-    
-    asset_templates = property(**asset_templates())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def reference_templates():
-        
-        def fget(self):
-            return self._reference_templates
-        
-        def fset(self, reference_templates_in):
-            self._reference_templates = \
-                self._validate_reference_templates(reference_templates_in)
-        
-        doc = """A list of :class:`~stalker.core.models.TypeTemplate` objects
-        which gives information about the placement of references to
-        entities"""
-        
-        return locals()
-    
-    reference_templates = property(**reference_templates())
-    
-    
-    
-    #----------------------------------------------------------------------
-    def project_template():
-        
-        def fget(self):
-            return self._project_template
-        
-        def fset(self, project_template_in):
-            self._project_template = \
-                self._validate_project_template(project_template_in)
-        
-        doc= """A string which shows the folder structure of the current
-        project. It can have Jinja2 directives. See the documentation of
-        :class:`~stalker.core.models.Structure` object for more information"""
-        
-        return locals()
-    
-    project_template = property(**project_template())
+        self._templates = self._validate_templates(templates)
+        self._custom_template= self._validate_custom_template(custom_template)
     
     
     
@@ -3365,9 +3190,82 @@ class Structure(Entity):
         
         return super(Structure, self).__eq__(other) and \
                isinstance(other, Structure) and \
-               self.project_template == other.project_template and \
-               self.reference_templates == other.reference_templates and \
-               self.asset_templates == other.asset_templates
+               self.templates == other.templates and \
+               self.custom_template == other.custom_template
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_custom_template(self, custom_template_in):
+        """validates the given custom_template value
+        """
+        
+        return custom_template_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_templates(self, templates_in):
+        """validates the given templates value
+        """
+        
+        if templates_in is None:
+            templates_in = []
+        
+        if not isinstance(templates_in, list):
+            raise TypeError("templates should be a list of "
+                            "stalker.core.models.FilenameTemplate instances")
+        
+        if not all(isinstance(element, FilenameTemplate)
+                   for element in templates_in):
+            raise TypeError("all the elements in the templates should be a "
+                            "list of stalker.core.models.FilenameTemplate "
+                            "instances")
+        
+        return ValidatedList(templates_in)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def custom_template():
+        def fget(self):
+            return self._custom_template
+        
+        def fset(self, custom_template_in):
+            self._custom_template =\
+                self._validate_custom_template(custom_template_in)
+        
+        doc = """A string value, which is a list of folder names.
+        
+        It can also contain Jinja2 direction. See the\
+        :class:`~stalker.core.models.Structure` documentaion for more details.
+        """
+        
+        return locals()
+    
+    custom_template = property(**custom_template())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def templates():
+        def fget(self):
+            return self._templates
+        
+        def fset(self, templates_in):
+            self._templates = self._validate_templates(templates_in)
+        
+        doc = """A list of :class:`~stalker.core.models.FilenameTemplate` instances.
+        
+        This list shows possible filenaming conventions created along with this
+        :class:`~stalker.core.models.Structure` instance. It should be a list
+        of :class:`~stalker.core.models.FilenameTemplate` instances.
+        """
+        
+        return locals()
+    
+    templates = property(**templates())
+    
 
 
 
@@ -3421,32 +3319,35 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     the characters in your project. Than you can divide this character asset in
     to :class:`~stalker.core.models.Task`\ s. These
     :class:`~stalker.core.models.Task`\ s can be defined by the type of the
-    :class:`~stalker.core.models.Asset`, which is the
-    :class:`~stalker.core.models.AssetType`,
-    :class:`~stalker.core.models.AssetType`\ s are templates defining group of
-    :class:`~stalker.core.models.Task`\ s. So an
-    :class:`~stalker.core.models.Asset` in **Character**
-    :class:`~stalker.core.models.AssetType` can have
-    :class:`~stalker.core.models.Task`\ s like, **Design**, **Model**, **Rig**,
-    **Shading**.
+    :class:`~stalker.core.models.Asset`, which is a
+    :class:`~stalker.core.models.Type` object created specifically for
+    :class:`~stalker.core.models.Asset` (ie. has its
+    :attr:`~stalker.core.models.Type.target_entity_type` set to "Asset"),
+    
+    ..::
+      :class:`~stalker.core.models.AssetType`\ s are templates defining group of
+      :class:`~stalker.core.models.Task`\ s. So an
+      :class:`~stalker.core.models.Asset` in **Character**
+      :class:`~stalker.core.models.AssetType` can have
+      :class:`~stalker.core.models.Task`\ s like, **Design**, **Model**, **Rig**,
+      **Shading**.
     
     :param project: The :class:`~stalker.core.models.Project` instance that
       this asset belongs to. An asset can not be created without a
       :class:`~stalker.core.models.Project` instance.
     
     :type project: :class:`~stalker.core.models.Project`
-    
-    :param type: The type of the asset or shot. An Asset can not be created
-      without an :class:`~stalker.core.models.AssetType` instance. The default
-      value is None which raises a ValueError.
-    
-    :type type: :class:`~stalker.core.models.AssetType`
     """
     
     
     
+    __strictly_typed__ = True
+    _shots = None
+    
+    
+    
     #----------------------------------------------------------------------
-    def __init__(self, project=None, type=None, **kwargs):
+    def __init__(self, project=None, **kwargs):
         
         super(Asset, self).__init__(**kwargs)
         
@@ -3456,7 +3357,6 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         TaskMixin.__init__(self, **kwargs)
         
         self._project = self._validate_project(project)
-        self._type = self._validate_type(type)
         self._shots = self._validate_shots(None)
     
     
@@ -3472,19 +3372,6 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
                              "stalker.core.models.Project")
         
         return project_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_type(self, type_in):
-        """validates the given type_in value
-        """
-        
-        if not isinstance(type_in, AssetType):
-            raise ValueError("type should be an instance of "
-                             "stalker.core.models.AssetType")
-        
-        return type_in
     
     
     
@@ -3525,21 +3412,6 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     project = property(**project())
     
-    
-    
-    
-    #----------------------------------------------------------------------
-    def type():
-        def fget(self):
-            return self._type
-        def fset(self, type_in):
-            self._type = self._validate_type(type_in)
-        
-        doc = """The type of this object."""
-        
-        return locals()
-    
-    type = property(**type())
     
     
     
@@ -3619,7 +3491,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :param depend_relation: An enumerator that has the values of
       "0|START-START", "1|START-END", "2|END-END" which defines the relation of
-      dependent :class:`~stalker.core.models.Task"\ s.
+      dependent :class:`~stalker.core.models.Task`\ s.
     
     :type depend_relation: enumerator
     
@@ -3630,9 +3502,9 @@ class Task(Entity, StatusMixin, ScheduleMixin):
       a milestone which doesn't need any resource and effort.
     
     :param type: The type of the task. Which is defined by a
-    :class:`~stalker.core.models.TaskType` instance. A
-    :class:`~stalker.core.models.TaskType` can be "MODEL", "RIG", "SHADING",
-    "RENDERING" etc. and generally is defined by the :class:
+      :class:`~stalker.core.models.TaskType` instance. A
+      :class:`~stalker.core.models.TaskType` can be "MODEL", "RIG", "SHADING",
+      "RENDERING" etc. and generally is defined by the :class:
     
     :param bookings: A list of :class:`~stalker.core.models.Booking` objects
       showing who spent how much effort on this task.
@@ -3668,84 +3540,126 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 
 
 ########################################################################
-class TypeTemplate(Entity):
-    """The TypeTemplate model holds templates for Types.
+class FilenameTemplate(Entity):
+    """Holds templates for filename conventions.
     
-    TypeTemplate objects help to specify where to place a file related to
-    :class:`~stalker.core.models.TypeEntity` objects and its derived
-    classes.
+    FilenameTemplate objects help to specify where to place a file related to
+    its :attr:`~stalker.core.models.FilenameTemplate.target_entity_type`.
     
-    The first very important usage of TypeTemplates is to place asset
+    The first very important usage of FilenameTemplates is to place asset file
     :class:`~stalker.core.models.Version`'s to proper places inside a
     :class:`~stalker.core.models.Project`'s
     :class:`~stalker.core.models.Structure`.
     
-    :param path_code: The Jinja2 template code which specifies the path of the
-      given item. It is relative to the project root which is in general
-      {{repository.path}}/{{project.code}}/
+    Secondly, it can be used while injecting files in to the repository. By
+    creating templates for :class:`~stalker.core.models.Links`.
     
-    :param file_code: The Jinja2 template code which specifies the file name of
-      the given item
+    :param str target_entity_type: The class name that this FilenameTemplate
+      is designed for. You can also pass the class itself. So both of the
+      examples below can work::
+        
+        new_filename_template1 = FilenameTemplate(target_entity_type="Asset")
+        new_filename_template2 = FilenameTemplate(target_entity_type=Asset)
     
-    :param type\_: A :class:`~stalker.core.models.TypeEntity` object
-      or any other class which is derived from TypeEntity.
+      A TypeError will be raised when it is skipped or it is None and a
+      ValueErorr will be raised when it is given as and empty string.
+    
+    :param str path_code: A Jinja2 template code which specifies the path of
+      the given item. It is relative to the project root. A typical example
+      could be::
+        
+        asset_path_code = "ASSETS/{{asset.code}}/{{task.code}}/"
+    
+    :param str file_code: A Jinja2 template code which specifies the file name
+      of the given item. It is relative to the
+      :attr:`~stalker.core.models.FilenameTemplate.path_code`. A typical
+      example could be::
+        
+        asset_file_code = "{{asset.code}}_{{version.take}}_{{task.code}}_"\\
+                          "{{version.version}}_{{user.initials}}"
+      
+      Could be set to an empty string or None, the default value is None.
+    
+    :param str output_path_code: A Jinja2 template code specifying where to
+      place the outputs of the applied
+      :attr:`~stalker.core.models.FilenameTemplate.target_entity_type`. If it
+      is empty and the
+      :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is True,
+      then the outputs will naturally be in the same place with the
+      :attr:`~stalker.core.models.FilenameTemplate.path_code`. If the
+      :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is False
+      then :attr:`~stalker.core.models.FilenameTemplate.output_path_code` will
+      be the same code with
+      :attr:`~stalker.core.models.FilenameTemplate.path_code`.
+      
+      It can be None, or an empty string, or it can be skipped.
+    
+    :param str output_file_code: A Jinja2 template code specifying what will be
+      the file name of the output. If it is skipped or given as None or as an
+      empty string, it will be the same with the
+      :attr:`~stalker.core.models.FilenameTemplate.file_code`.
+      
+      It can be skipped, or can be set to None or an empty string. The default
+      value is None, and this will set the
+      :attr:`~stalker.core.models.FilenameTemplate.output_file_code` to the
+      same value with :attr:`~stalker.core.models.FilenameTemplate.file_code`.
+    
+    :param bool output_is_relative: A bool value specifying if the
+      :attr:`~stalker.core.models.FilenameTemplate.output_path_code` is
+      relative to the :attr:`~stalker.core.models.FilenameTemplate.path_code`.
+      The default value is True. Can be skipped, any other than a bool value
+      will be evaluated to a bool value.
     
     Examples:
     
-    A template for asset versions can have this parameters::
-    
-      from stalker import db
-      from stalker.ext import auth
-      from stalker.core.models import AssetTypes, TypeTemplate, PipelineStep
+    A template for asset versions can be used like this::
       
-      # setup the default database
-      db.setup()
-      
-      # store the query method for ease of use
-      session = db.session
-      query = db.session.query
-      
-      # login to the system as admin
-      admin = auth.login("admin", "admin")
+      from stalker.core.models import Type, FilenameTemplate, TaskTemplate
       
       # create a couple of variables
       path_code = "ASSETS/{{asset_type.name}}/{{task_type.code}}"
       
-      file_code = "{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
-v{{version.version_number}}"
+      file_code =
+      "{{asset.name}}_{{take.name}}_{{asset_type.name}}_v{{version.version_number}}"
       
-      # create a pipeline step object
-      modelingStep = PipelineStep(
+      output_path_code = "OUTPUT"
+      output_file_code = file_code
+      
+      # create a type for modeling task
+      modeling = Type(
           name="Modeling",
           code="MODEL",
           description="The modeling step of the asset",
-          created_by=admin
+          target_entity_type=Task
       )
       
-      # create a "Character" AssetType with only one step
-      typeObj = AssetType(
+      # create a "Character" Type for Asset classes
+      character = Type(
           name="Character",
           description="this is the character asset type",
-          created_by=admin,
-          task_types=[modelingStep]
+          target_entity_type=Asset
       )
       
-      # now create our TypeTemplate
-      char_template = TypeTemplate(
+      # now create our FilenameTemplate
+      char_template = FilenameTemplate(
           name="Character",
           description="this is the template which explains how to place \
 Character assets",
+          target_entity_type="Asset",
           path_code=path_code,
           file_code=file_code,
-          type=typeObj,
+          output_path_code=output_path_code,
+          output_file_code=output_file_code,
+          output_is_relative=True,
       )
       
       # assign this type template to the structure of the project with id=101
       myProject = query(Project).filter_by(id=101).first()
       
-      # append the type template to the structures' asset templates
-      myProject.structure.asset_templates.append(char_template)
+      # append the type template to the structures' templates
+      myProject.structure.templates.append(char_template)
       
+      # commit everything to the database
       session.commit()
     
     Now with the code above, whenever a new
@@ -3763,7 +3677,7 @@ Character assets",
             |- Olum_MAIN_MODEL_v001.ma --> {{asset.name}}_\
 {{take.name}}_{{asset_type.name}}_v{{version.version_number}}
     
-    And one of the good side is you can create a version from Linux, Windows or
+    And one of the best side is you can create a version from Linux, Windows or
     OSX all the paths will be correctly handled by Stalker.
     """
     
@@ -3771,15 +3685,25 @@ Character assets",
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 path_code="",
-                 file_code="",
-                 type=None,
+                 target_entity_type=None,
+                 path_code=None,
+                 file_code=None,
+                 output_path_code=None,
+                 output_file_code=None,
+                 output_is_relative=True,
                  **kwargs):
-        super(TypeTemplate, self).__init__(**kwargs)
+        super(FilenameTemplate, self).__init__(**kwargs)
         
+        self._target_entity_type =\
+            self._validate_target_entity_type(target_entity_type)
         self._path_code = self._validate_path_code(path_code)
         self._file_code = self._validate_file_code(file_code)
-        self._type = self._validate_type(type)
+        self._output_is_relative =\
+            self._validate_output_is_relative(output_is_relative)
+        self._output_path_code =\
+            self._validate_output_path_code(output_path_code)
+        self._output_file_code =\
+            self._validate_output_file_code(output_file_code)
     
     
     
@@ -3790,16 +3714,9 @@ Character assets",
         
         # check if it is None
         if path_code_in is None:
-            raise ValueError("path_code could not be None")
+            path_code_in = u""
         
-        # check if it is an instance of string or unicode
-        if not isinstance(path_code_in, (str, unicode)):
-            raise ValueError("path_code should be an instance of string "
-                             "or unicode")
-        
-        # check if it is an empty string
-        if path_code_in == "":
-            raise ValueError("path_code could not be an empty string")
+        path_code_in = unicode(path_code_in)
         
         return path_code_in
     
@@ -3812,35 +3729,68 @@ Character assets",
         
         # check if it is None
         if file_code_in is None:
-            raise ValueError("file_code could not be None")
+            file_code_in = u""
         
-        # check if it is an instance of string or unicode
-        if not isinstance(file_code_in, (str, unicode)):
-            raise ValueError("file_code should be an instance of string "
-                             "or unicode")
-        
-        # check if it is an empty string
-        if file_code_in == "":
-            raise ValueError("file_code could not be an empty string")
+        # convert it to unicode
+        file_code_in = unicode(file_code_in)
         
         return file_code_in
     
     
     
     #----------------------------------------------------------------------
-    def _validate_type(self, type_in):
-        """validates the given type attribute for several conditions
+    def _validate_target_entity_type(self, target_entity_type_in):
+        """validates the given target_entity_type attribute for several
+        conditions
         """
         
         # check if it is None
-        if type_in is None:
-            raise ValueError("type could not be None")
+        if target_entity_type_in is None:
+            raise TypeError("target_entity_type can not be None")
         
-        if not isinstance(type_in, TypeEntity):
-            raise ValueError("type should be an instance of "
-                             "stalker.core.models.TypeEntity")
+        if isinstance(target_entity_type_in, type):
+            target_entity_type_in = target_entity_type_in.__name__
         
-        return type_in
+        return target_entity_type_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_output_path_code(self, output_path_code_in):
+        """validates the given output_path_code value
+        """
+        
+        if output_path_code_in == None or output_path_code_in == "":
+            if self.output_is_relative:
+                output_path_code_in = ""
+            else:
+                output_path_code_in = self.path_code
+        
+        return output_path_code_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_output_file_code(self, output_file_code_in):
+        """validates the given output_file_code value
+        """
+        
+        if output_file_code_in == None or output_file_code_in == "":
+            if self.output_is_relative:
+                output_file_code_in = ""
+            else:
+                output_file_code_in = self.file_code
+        
+        return output_file_code_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_output_is_relative(self, output_is_relative_in):
+        """validates the given output_is_relative value
+        """
+        
+        return bool(output_is_relative_in)
     
     
     
@@ -3881,20 +3831,87 @@ Character assets",
     
     
     #----------------------------------------------------------------------
-    def type():
+    def target_entity_type():
         
         def fget(self):
-            return self._type
+            return self._target_entity_type
         
-        def fset(self, type_in):
-            self._type = self._validate_type(type_in)
-        
-        doc = """the target type this template should work on, should be an
-        instance of :class:`~stalker.core.models.TypeEntity`"""
+        doc = """the target entity type this FilenameTemplate object should
+        work on, should be a string value or the class itself"""
         
         return locals()
     
-    type = property(**type())
+    target_entity_type = property(**target_entity_type())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def output_path_code():
+        def fget(self):
+            return self._output_path_code
+        
+        def fset(self, output_path_code_in):
+            self._output_path_code =\
+                self._validate_output_path_code(output_path_code_in)
+        
+        doc = """The output_path_code of this FilenameTemplate object.
+        
+        Should be a unicode string. None and empty string is also accepted, but
+        in this case the value is copied from the
+        :attr:`~stalker.core.models.FilenameTemplate.path_code` if also the
+        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
+        False. If
+        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
+        True then it will left as an empty string.
+        """
+        
+        return locals()
+    
+    output_path_code = property(**output_path_code())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def output_file_code():
+        def fget(self):
+            return self._output_file_code
+        
+        def fset(self, output_file_code_in):
+            self._output_file_code =\
+                self._validate_output_file_code(output_file_code_in)
+        
+        doc = """The output_file_code of this FilenameTemplate object.
+        
+        Should be a unicode string. None and empty string is also accepted, but
+        in this case the value is copied from the
+        :attr:`~stalker.core.models.FilenameTemplate.file_code` if also the
+        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
+        False. If
+        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
+        True then it will left as an empty string.
+        """
+        
+        return locals()
+    
+    output_file_code = property(**output_file_code())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def output_is_relative():
+        def fget(self):
+            return self._output_is_relative
+        
+        def fset(self, output_is_relative_in):
+            self._output_is_relative =\
+                self._validate_output_is_relative(output_is_relative_in)
+        
+        doc = """
+        """
+        
+        return locals()
+    
+    output_is_relative = property(**output_is_relative())
     
     
     
@@ -3902,20 +3919,14 @@ Character assets",
     def __eq__(self, other):
         """checks the equality of the given object to this one
         """
-        #print "running the TypeTemplate.__eq__"
         
-        #print super(TypeTemplate, self).__eq__(other)
-        #print isinstance(other, TypeTemplate)
-        #print self.path_code == other.path_code
-        #print self.file_code == other.file_code
-        #print self.type == other.type
-        
-        
-        return super(TypeTemplate, self).__eq__(other) and \
-               isinstance(other, TypeTemplate) and \
+        return super(FilenameTemplate, self).__eq__(other) and \
+               isinstance(other, FilenameTemplate) and \
+               self.target_entity_type == other.target_entity_type and \
                self.path_code == other.path_code and \
                self.file_code == other.file_code and \
-               self.type == other.type
+               self.output_path_code == other.output_path_code and \
+               self.output_file_code == other.output_file_code
 
 
 

@@ -3,8 +3,8 @@
 
 
 import mocker
-from stalker.core.models import (Asset, AssetType, Task, Entity, Project, Link,
-                                 LinkType, Status, StatusList, Shot)
+from stalker.core.models import (Asset, Task, Entity, Project, Link, Status,
+                                 StatusList, Shot, Type)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -26,8 +26,20 @@ class AssetTester(mocker.MockerTestCase):
         
         self.mock_project = self.mocker.mock(Project)
         
-        self.mock_type1 = self.mocker.mock(AssetType)
-        self.mock_type2 = self.mocker.mock(AssetType)
+        self.mock_type1 = self.mocker.mock(Type)
+        self.mock_type2 = self.mocker.mock(Type)
+        
+        self.expect(self.mock_type1.__eq__(self.mock_type2)).result(False).\
+            count(0, None)
+        
+        self.expect(self.mock_type2.__eq__(self.mock_type1)).result(False).\
+            count(0, None)
+        
+        self.expect(self.mock_type1.__ne__(self.mock_type2)).result(True).\
+            count(0, None)
+        
+        self.expect(self.mock_type2.__ne__(self.mock_type1)).result(True).\
+            count(0, None)
         
         self.mock_task1 = self.mocker.mock(Task)
         self.mock_task2 = self.mocker.mock(Task)
@@ -66,6 +78,15 @@ class AssetTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_test_setup(self):
+        """testing if the test setup is correct
+        """
+        self.assertFalse(self.mock_type1==self.mock_type2)
+        self.assertTrue(self.mock_type1!=self.mock_type2)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_project_argument_is_not_instance_of_Project(self):
         """testing if a ValueError will be raised when the project argument is
         not an instance of Project
@@ -99,67 +120,67 @@ class AssetTester(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_type_argument_is_None(self):
-        """testing if a ValueError will be raised when the type argument is
-        given as None
-        """
+    ##----------------------------------------------------------------------
+    #def test_type_argument_is_None(self):
+        #"""testing if a ValueError will be raised when the type argument is
+        #given as None
+        #"""
         
-        self.kwargs["type"] = None
-        self.assertRaises(ValueError, Asset, **self.kwargs)
+        #self.kwargs["type"] = None
+        #self.assertRaises(ValueError, Asset, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_type_attribute_is_set_to_None(self):
-        """testing a ValueError will be raised when the type attribute is set
-        to None
-        """
+    ##----------------------------------------------------------------------
+    #def test_type_attribute_is_set_to_None(self):
+        #"""testing a ValueError will be raised when the type attribute is set
+        #to None
+        #"""
         
-        self.assertRaises(ValueError, setattr, self.mock_asset, "type", None)
+        #self.assertRaises(ValueError, setattr, self.mock_asset, "type", None)
     
     
     
-    #----------------------------------------------------------------------
-    def test_type_argument_is_not_AssetType_instance(self):
-        """testing if a ValueError will be raised when the type argument is not
-        an instance of AssetType
-        """
+    ##----------------------------------------------------------------------
+    #def test_type_argument_is_not_AssetType_instance(self):
+        #"""testing if a ValueError will be raised when the type argument is not
+        #an instance of AssetType
+        #"""
         
-        test_values = [1, 1.2, "a str", ["a", "str"]]
+        #test_values = [1, 1.2, "a str", ["a", "str"]]
         
-        for test_value in test_values:
-            self.kwargs["type"] = test_value
-            self.assertRaises(ValueError, Asset, **self.kwargs)
+        #for test_value in test_values:
+            #self.kwargs["type"] = test_value
+            #self.assertRaises(ValueError, Asset, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_type_attribute_is_not_AssetType_instance(self):
-        """testing if a ValueError will be raised when the type attribute is
-        tried to be set to something other than a AssetType instance
-        """
+    ##----------------------------------------------------------------------
+    #def test_type_attribute_is_not_AssetType_instance(self):
+        #"""testing if a ValueError will be raised when the type attribute is
+        #tried to be set to something other than a AssetType instance
+        #"""
         
-        test_values = [1, 1.2, "a str", ["a", "str"]]
+        #test_values = [1, 1.2, "a str", ["a", "str"]]
         
-        for test_value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_asset,
-                "type",
-                test_value
-            )
+        #for test_value in test_values:
+            #self.assertRaises(
+                #ValueError,
+                #setattr,
+                #self.mock_asset,
+                #"type",
+                #test_value
+            #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_type_attribute_is_working_properly(self):
-        """testing if the type attribute is working properly
-        """
+    ##----------------------------------------------------------------------
+    #def test_type_attribute_is_working_properly(self):
+        #"""testing if the type attribute is working properly
+        #"""
         
-        self.mock_asset.type = self.mock_type2
-        self.assertEqual(self.mock_asset.type, self.mock_type2)
+        #self.mock_asset.type = self.mock_type2
+        #self.assertEqual(self.mock_asset.type, self.mock_type2)
     
     
     
@@ -216,7 +237,7 @@ class AssetTester(mocker.MockerTestCase):
         """testing if the ReferenceMixin part is initialized correctly
         """
         
-        link_type_1 = LinkType(name="Image")
+        link_type_1 = Type(name="Image", target_entity_type="Link")
         
         link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
                      filename="a.jpg", type=link_type_1)
@@ -362,4 +383,14 @@ class AssetTester(mocker.MockerTestCase):
         """
         
         self.assertEqual(Asset.plural_name, "Assets")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___strictly_typed___is_True(self):
+        """testing if the __strictly_typed__ class attribute is True
+        """
         
+        self.assertEqual(Asset.__strictly_typed__, True)
+    
+    

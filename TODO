@@ -14,9 +14,21 @@ TODO:
    kind of relations in the system. SQLAlchemy handles them automatically but
    Stalker should do it too, to allow others who are not willing to use
    SQLAlchemy as their ORM to be able to have this property automatically.
- 
+
  * The repository can be a local path, and the project can be managed with an
    SCM, preferably with Mercurial.
+
+ * Check FileNameTemplate class documentation.
+
+ * Update the exceptions. Check if a proper exception is raised instead of
+   raising ValueErrors all the time.
+
+ * Check database part of all the previous Type dependent classes (Link, Asset,
+   Project, Task)
+
+ * All the string attributes should be unicode so for string attributes which
+   are checked against being a string should now be checked agains being
+   unicode.
 
 DONE:
 =====

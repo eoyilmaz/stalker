@@ -5,7 +5,7 @@
 import datetime
 import mocker
 from stalker.core.models import (Sequence, Project, User, Shot, Entity, Status,
-                                 StatusList, Link, LinkType, Task)
+                                 StatusList, Link, Task, Type)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -392,7 +392,7 @@ class SequenceTester(mocker.MockerTestCase):
         """tetsing if the ReferenceMixin part is initialized correctly
         """
         
-        link_type_1 = LinkType(name="Image")
+        link_type_1 = Type(name="Image", target_entity_type="Link")
         
         link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
                      filename="a.jpg", type=link_type_1)
@@ -480,6 +480,16 @@ class SequenceTester(mocker.MockerTestCase):
         """
         
         self.assertTrue(Sequence.plural_name, "Sequences")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___strictly_typed___is_False(self):
+        """testing if the __strictly_typed__ class attribute is False for
+        Sequence class.
+        """
+        
+        self.assertEqual(Sequence.__strictly_typed__, False)
     
     
     

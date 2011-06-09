@@ -3,8 +3,8 @@
 
 
 import mocker
-from stalker.core.models import (Entity, Shot, Sequence, Asset, AssetType,
-                                 Task, Link, LinkType, Status, StatusList)
+from stalker.core.models import (Entity, Shot, Sequence, Asset, Task, Link,
+                                 Status, StatusList, Type)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -794,7 +794,7 @@ class ShotTester(mocker.MockerTestCase):
         """tetsing if the ReferenceMixin part is initialized correctly
         """
         
-        link_type_1 = LinkType(name="Image")
+        link_type_1 = Type(name="Image", target_entity_type="Link")
         
         link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
                      filename="a.jpg", type=link_type_1)
@@ -879,6 +879,16 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         self.assertTrue(Shot.plural_name, "Shots")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___strictly_typed___is_False(self):
+        """testing if the __strictly_typed__ class attribute is False for
+        Shot class
+        """
+        
+        self.assertEqual(Shot.__strictly_typed__, False)
     
     
     

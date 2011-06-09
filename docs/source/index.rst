@@ -52,19 +52,17 @@ Summary
    stalker.core.mixins.TaskMixin
    stalker.core.models
    stalker.core.models.Asset
-   stalker.core.models.AssetType
    stalker.core.models.Booking
    stalker.core.models.Comment
    stalker.core.models.Department
+   stalker.core.models.FilenameTemplate
    stalker.core.models.Entity
    stalker.core.models.Group
    stalker.core.models.ImageFormat
    stalker.core.models.Link
-   stalker.core.models.LinkType
    stalker.core.models.Message
    stalker.core.models.Note
    stalker.core.models.Project
-   stalker.core.models.ProjectType
    stalker.core.models.Repository
    stalker.core.models.Sequence
    stalker.core.models.Shot
@@ -74,9 +72,7 @@ Summary
    stalker.core.models.Structure
    stalker.core.models.Tag
    stalker.core.models.Task
-   stalker.core.models.TaskType
-   stalker.core.models.TypeEntity
-   stalker.core.models.TypeTemplate
+   stalker.core.models.Type
    stalker.core.models.User
    stalker.core.models.Version
    stalker.ext.auth

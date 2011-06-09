@@ -12,7 +12,6 @@ from stalker.db.mixin import (ReferenceMixinDB, StatusMixinDB, ScheduleMixinDB,
                               TaskMixinDB)
 from stalker.core.models import (
     Asset,
-    AssetType,
     Booking,
     Comment,
     Department,
@@ -20,10 +19,8 @@ from stalker.core.models import (
     Group,
     ImageFormat,
     Link,
-    LinkType,
     Note,
     Project,
-    ProjectType,
     ReferenceMixin,
     Repository,
     ScheduleMixin,
@@ -36,9 +33,8 @@ from stalker.core.models import (
     Structure,
     Tag,
     Task,
-    TaskType,
-    TypeEntity,
-    TypeTemplate,
+    Type,
+    FilenameTemplate,
     User,
     Version
 )
@@ -57,6 +53,8 @@ def setup():
     mapper(
         SimpleEntity,
         tables.SimpleEntities,
+        polymorphic_on=tables.SimpleEntities.c.db_entity_type,
+        polymorphic_identity=SimpleEntity.entity_type,
         properties={
             "_code": tables.SimpleEntities.c.code,
             "code": synonym("_code"),
@@ -86,9 +84,12 @@ def setup():
             "date_created": synonym("_date_created"),
             "_date_updated": tables.SimpleEntities.c.date_updated,
             "date_updated": synonym("_date_updated"),
+            "_type": relationship(
+                Type,
+                primaryjoin=tables.SimpleEntities.c.type_id==tables.Types.c.id
+            ),
+            "type": synonym("_type"),
         },
-        polymorphic_on=tables.SimpleEntities.c.db_entity_type,
-        polymorphic_identity=SimpleEntity.entity_type
     )
     
     
@@ -172,7 +173,14 @@ def setup():
                 primaryjoin=\
                     tables.Departments.c.id==tables.Users.c.department_id,
             ),
-            "members": synonym("_members")
+            "members": synonym("_members"),
+            "_lead": relationship(
+                User,
+                uselist=False,
+                primaryjoin=tables.Departments.c.lead_id==tables.Users.c.id,
+                post_update=True
+            ),
+            "lead": synonym("_lead"),
         },
     )
     
@@ -244,93 +252,47 @@ def setup():
             "_pixel_aspect": tables.ImageFormats.c.pixel_aspect,
             "pixel_aspect": synonym("_pixel_aspect"),
             "_print_resolution": tables.ImageFormats.c.print_resolution,
-            "print_resolution": synonym("print_resolution")
+            "print_resolution": synonym("print_resolution"),
+            "device_aspect": synonym("_device_aspect"),
         },
-        exclude_properties=["device_aspect"]
+        #exclude_properties=["device_aspect"]
     )
     
     
     
-    # TypeEntity
+    # Type
     mapper(
-        TypeEntity,
-        tables.TypeEntities,
-        inherits=TypeEntity.__base__,
-        inherit_condition=tables.TypeEntities.c.id==tables.Entities.c.id,
-        polymorphic_identity=TypeEntity.entity_type,
+        Type,
+        tables.Types,
+        inherits=Type.__base__,
+        inherit_condition=tables.Types.c.id==tables.Entities.c.id,
+        polymorphic_identity=Type.entity_type,
     )
     
     
     
-    # AssetType
+    # FilenameTemplate
     mapper(
-        AssetType,
-        tables.AssetTypes,
-        inherits=AssetType.__base__,
-        inherit_condition=tables.AssetTypes.c.id==tables.TypeEntities.c.id,
-        polymorphic_identity=AssetType.entity_type,
+        FilenameTemplate,
+        tables.FilenameTemplates,
+        inherits=FilenameTemplate.__base__,
+        inherit_condition=tables.FilenameTemplates.c.id==tables.Entities.c.id,
+        polymorphic_identity=FilenameTemplate.entity_type,
         properties={
-            "_task_types": relationship(
-                TaskType,
-                secondary=tables.AssetType_TaskTypes
-                ),
-            "task_types": synonym("_task_types")
-        }
-    )
-    
-    
-    
-    # LinkType
-    mapper(
-        LinkType,
-        tables.LinkTypes,
-        inherits=LinkType.__base__,
-        inherit_condition=tables.LinkTypes.c.id==tables.TypeEntities.c.id,
-        polymorphic_identity=LinkType.entity_type,
-    )
-    
-    
-    
-    # ProjectType
-    mapper(
-        ProjectType,
-        tables.ProjectTypes,
-        inherits=ProjectType.__base__,
-        inherit_condition=tables.ProjectTypes.c.id==tables.TypeEntities.c.id,
-        polymorphic_identity=ProjectType.entity_type,
-    )
-    
-    
-    
-    # TaskType
-    mapper(
-        TaskType,
-        tables.TaskTypes,
-        inherits=TaskType.__base__,
-        inherit_condition=tables.TaskTypes.c.id==tables.Entities.c.id,
-        polymorphic_identity=TaskType.entity_type,
-    )
-    
-    
-    
-    # TypeTemplate
-    mapper(
-        TypeTemplate,
-        tables.TypeTemplates,
-        inherits=TypeTemplate.__base__,
-        inherit_condition=tables.TypeTemplates.c.id==tables.Entities.c.id,
-        polymorphic_identity=TypeTemplate.entity_type,
-        properties={
-            "_path_code": tables.TypeTemplates.c.path_code,
+            "_path_code": tables.FilenameTemplates.c.path_code,
             "path_code": synonym("_path_code"),
-            "_file_code": tables.TypeTemplates.c.file_code,
+            "_file_code": tables.FilenameTemplates.c.file_code,
             "file_code": synonym("_file_code"),
-            "_type": relationship(
-                TypeEntity,
-                primaryjoin=\
-                    tables.TypeTemplates.c.type_id==tables.TypeEntities.c.id
-                ),
-            "type": synonym("_type"),
+            "_target_entity_type":\
+                tables.FilenameTemplates.c.target_entity_type,
+            "target_entity_type": synonym("_target_entity_type"),
+            "_output_path_code": tables.FilenameTemplates.c.output_path_code,
+            "output_path_code": synonym("_output_path_code"),
+            "_output_file_code": tables.FilenameTemplates.c.output_file_code,
+            "output_file_code": synonym("_output_file_code"),
+            "_output_is_relative":\
+                tables.FilenameTemplates.c.output_is_relative,
+            "output_is_relative": synonym("_output_is_relative")
         },
     )
     
@@ -344,30 +306,13 @@ def setup():
         inherit_condition=tables.Structures.c.id==tables.Entities.c.id,
         polymorphic_identity=Structure.entity_type,
         properties={
-            "_project_template": tables.Structures.c.project_template,
-            "project_template": synonym("_project_template"),
-            "_asset_templates": relationship(
-                TypeTemplate,
-                secondary=tables.Structure_AssetTemplates,
-                primaryjoin=\
-                    tables.Structures.c.id==\
-                    tables.Structure_AssetTemplates.c.structure_id,
-                secondaryjoin=
-                    tables.Structure_AssetTemplates.c.typeTemplate_id==\
-                    tables.TypeTemplates.c.id
+            "_templates": relationship(
+                FilenameTemplate,
+                secondary=tables.Structure_FilenameTemplates
             ),
-            "asset_templates": synonym("_asset_templates"),
-            "_reference_templates": relationship(
-                TypeTemplate,
-                secondary=tables.Structure_ReferenceTemplates,
-                primaryjoin=\
-                    tables.Structures.c.id==\
-                    tables.Structure_ReferenceTemplates.c.structure_id,
-                secondaryjoin=
-                    tables.Structure_ReferenceTemplates.c.typeTemplate_id==\
-                    tables.TypeTemplates.c.id
-            ),
-            "reference_templates": synonym("_reference_templates"),
+            "templates": synonym("_templates"),
+            "_custom_template": tables.Structures.c.custom_template,
+            "custom_template": synonym("_custom_template"),
         },
     )
     
@@ -385,12 +330,6 @@ def setup():
             "path": synonym("_path"),
             "_filename": tables.Links.c.filename,
             "filename": synonym("_filename"),
-            "_type": relationship(
-                LinkType,
-                primaryjoin=\
-                    tables.Links.c.type_id==tables.LinkTypes.c.id
-            ),
-            "type": synonym("_type"),
         },
     )
     
@@ -429,11 +368,6 @@ def setup():
                             tables.Repositories.c.id
             ),
             "repository": synonym("repository"),
-            "_type": relationship(
-                ProjectType,
-                primaryjoin=tables.Projects.c.type_id==tables.ProjectTypes.c.id
-            ),
-            "type": synonym("_type"),
             "_structure": relationship(
                 Structure,
                 primaryjoin=tables.Projects.c.structure_id==\
@@ -452,6 +386,15 @@ def setup():
             "is_stereoscopic": synonym("_is_stereoscopic"),
             "_display_width": tables.Projects.c.display_width,
             "display_width": synonym("_display_width"),
+            "_users": relationship(
+                User,
+                secondary=tables.Project_Users,
+                primaryjoin=\
+                    tables.Projects.c.id==tables.Project_Users.c.project_id,
+                secondaryjoin=\
+                    tables.Project_Users.c.user_id==tables.Users.c.id,
+            ),
+            "users": synonym("_users")
         }
     )
     
@@ -505,19 +448,14 @@ def setup():
         polymorphic_identity=Asset.entity_type,
         inherit_condition=tables.Assets.c.id==tables.Entities.c.id,
         properties={
-            "_type": relationship(
-                AssetType,
-                primaryjoin=\
-                    tables.Assets.c.type_id==tables.AssetTypes.c.id
-            ),
-            "type": synonym("_type"),
             "_project": relationship(
                 Project,
                 primaryjoin=\
-                    tables.Assets.c.project_id==tables.Projects.c.id
+                    tables.Assets.c.project_id==tables.Projects.c.id,
+                backref="_assets"
             ),
             "project": synonym("_project"),
-            #"shots": synonym("_shots"),
+            "shots": synonym("_shots"),
         }
     )
     
@@ -542,16 +480,16 @@ def setup():
         inherit_condition=tables.Shots.c.id==tables.Entities.c.id,
         polymorphic_identity=Shot.entity_type,
         properties={
-            #"_assets": relationship(
-                #Asset,
-                #secondary=tables.Shot_Assets,
-                #primaryjoin=tables.Shots.c.id==\
-                    #tables.Shot_Assets.c.shot_id,
-                #secondaryjoin=tables.Shot_Assets.c.asset_id==\
-                    #tables.Assets.c.id,
-                #backref="_shots",
-            #),
-            #"assets": synonym("_assets"),
+            "_assets": relationship(
+                Asset,
+                secondary=tables.Shot_Assets,
+                primaryjoin=tables.Shots.c.id==\
+                    tables.Shot_Assets.c.shot_id,
+                secondaryjoin=tables.Shot_Assets.c.asset_id==\
+                    tables.Assets.c.id,
+                backref="_shots",
+            ),
+            "assets": synonym("_assets"),
             "_sequence": relationship(
                 Sequence,
                 primaryjoin=tables.Shots.c.sequence_id==\
@@ -592,7 +530,8 @@ def setup():
             "_project": relationship(
                 Project,
                 primaryjoin=tables.Sequences.c.project_id==\
-                    tables.Projects.c.id
+                    tables.Projects.c.id,
+                backref="_sequences"
             ),
             "project": synonym("project"),
             "_shots": relationship(
@@ -600,7 +539,14 @@ def setup():
                 primaryjoin=tables.Shots.c.sequence_id==\
                     tables.Sequences.c.id,
                 uselist=True,
-            )
+            ),
+            "shots": synonym("_shots"),
+            "_lead": relationship(
+                User,
+                primaryjoin=tables.Sequences.c.lead_id==tables.Users.c.id,
+                post_update=True
+            ),
+            "lead": synonym("_lead")
         }
     )
     

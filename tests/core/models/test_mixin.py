@@ -5,8 +5,8 @@
 import datetime
 import mocker
 from stalker.core.models import (SimpleEntity, ReferenceMixin, StatusMixin,
-                                 ScheduleMixin, Link, LinkType, Status,
-                                 StatusList, Task, TaskMixin)
+                                 ScheduleMixin, Link, Status, StatusList, Task,
+                                 TaskMixin, Type)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -149,7 +149,7 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         myGreatEntity = GreatEntity(name="Test")
         myGreatEntity.references
         
-        image_link_type = LinkType(name="Image")
+        image_link_type = Type(name="Image", target_entity_type="Link")
         new_link = Link(name="NewTestLink", path="nopath",
                         filename="nofilename", type=image_link_type)
         
