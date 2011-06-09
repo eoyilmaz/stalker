@@ -351,7 +351,7 @@ def setup():
     
     
     
-    # Project - also the first implemented class using the mixins
+    # Project
     project_mapper_arguments = dict(
         inherits=Project.__base__,
         polymorphic_identity=Project.entity_type,
@@ -386,15 +386,15 @@ def setup():
             "is_stereoscopic": synonym("_is_stereoscopic"),
             "_display_width": tables.Projects.c.display_width,
             "display_width": synonym("_display_width"),
-            "_users": relationship(
-                User,
-                secondary=tables.Project_Users,
-                primaryjoin=\
-                    tables.Projects.c.id==tables.Project_Users.c.project_id,
-                secondaryjoin=\
-                    tables.Project_Users.c.user_id==tables.Users.c.id,
-            ),
-            "users": synonym("_users")
+            #"_users": relationship(
+                #User,
+                #secondary=tables.Project_Users,
+                #primaryjoin=\
+                    #tables.Projects.c.id==tables.Project_Users.c.project_id,
+                #secondaryjoin=\
+                    #tables.Project_Users.c.user_id==tables.Users.c.id,
+            #),
+            #"users": synonym("_users")
         }
     )
     

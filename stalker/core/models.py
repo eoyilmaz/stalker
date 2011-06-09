@@ -1918,13 +1918,19 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     and task abilities. Please read the individual documentation of each of the
     mixins.
     
+    The :attr:`~stalker.core.models.Project.users` attributes content is
+    gathered from all the :class:`~stalker.core.models.Task`\ s of the project
+    itself and from the :class:`~stalker.core.models.Task`\ s of the
+    :class:`~stalker.core.models.Sequence`\ s stored in the
+    :attr:`~stalker.core.models.Project.sequences` attribute, the
+    :class:`~stalker.core.models.Shot`\ s stored in the
+    :attr:`~stalker.core.models.Sequence.shots` attribute, the
+    :class:`~stalker.core.models.Asset`\ s stored in the
+    :attr:`~stalker.core.models.Project.assets`. It is a read only attribute.
+    
     :param lead: The lead of the project. Default value is None.
     
     :type lead: :class:`~stalker.core.models.User`
-    
-    :param list users: The users assigned to this project, should be a list of
-      :class:`~stalker.core.models.User` instances, if set to None it is
-      converted to an empty list. Default value is an empty list.
     
     :param list sequences: The sequences of the project, it should be a list of
       :class:`~stalker.core.models.Sequence` instances, if set to None it is
@@ -1978,7 +1984,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     #----------------------------------------------------------------------
     def __init__(self,
                  lead=None,
-                 users=[],
                  repository=None,
                  structure=None,
                  sequences=[],
@@ -1997,7 +2002,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         TaskMixin.__init__(self, **kwargs)
         
         self._lead = self._validate_lead(lead)
-        self._users = self._validate_users(users)
+        self._users = []
         self._repository = self._validate_repository(repository)
         self._structure = self._validate_structure(structure)
         self._sequences = self._validate_sequences(sequences)
@@ -2131,24 +2136,24 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     
     
     
-    #----------------------------------------------------------------------
-    def _validate_users(self, users_in):
-        """validates the given users_in value
-        """
+    ##----------------------------------------------------------------------
+    #def _validate_users(self, users_in):
+        #"""validates the given users_in value
+        #"""
         
-        if users_in is None:
-            users_in = []
+        #if users_in is None:
+            #users_in = []
         
-        if not isinstance(users_in, list):
-            raise ValueError("users should be a list of "
-                             "stalker.core.models.User instances")
+        #if not isinstance(users_in, list):
+            #raise ValueError("users should be a list of "
+                             #"stalker.core.models.User instances")
         
-        if not all([isinstance(element, User) \
-                    for element in users_in]):
-            raise ValueError("users should be a list containing instances of "
-                             ":class:`~stalker.core.models.User`")
+        #if not all([isinstance(element, User) \
+                    #for element in users_in]):
+            #raise ValueError("users should be a list containing instances of "
+                             #":class:`~stalker.core.models.User`")
         
-        return ValidatedList(users_in)
+        #return ValidatedList(users_in)
     
     
     
@@ -2305,13 +2310,41 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     #----------------------------------------------------------------------
     def users():
         def fget(self):
+            #return self._users
+            
+            self._users = []
+            # project tasks
+            for task in self.tasks:
+                self._users.extend(task.resources)
+            
+            # sequence tasks
+            for seq in self.sequences:
+                for task in seq.tasks:
+                    self._users.extend(task.resources)
+                
+                # shot tasks
+                for shot in seq.shots:
+                    for task in shot.tasks:
+                        self._users.extend(task.resources)
+            
+            # asset tasks
+            for asset in self.assets:
+                for task in asset.tasks:
+                    self._users.extend(task.resources)
+            
+            self._users = list(set(self._users))
+            
             return self._users
-        def fset(self, users_in):
-            self._users = self._validate_users(users_in)
         
-        doc = """the users assigned to this project. Should be a list of
-        :class:`~stalker.core.models.User` instances. Can be and empty
-        list, and when set to None it will be converted to an empty list"""
+        doc = """The users assigned to this project.
+        
+        This is a list of :class:`~stalker.core.models.User` instances. All the
+        elements are gathered from all the
+        :class:`~stalker.core.models.Task`\ s of the project itself and from
+        :class:`~stalker.core.models.Sequence`\ s,
+        :class:`~stalker.core.models.Shot`\ s,
+        :class:`~stalker.core.models.Asset`\ s.
+        """
         
         return locals()
     
@@ -3524,15 +3557,18 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     
     
+    # for testing purposes
+    resources = []
+    
+    
+    
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(Task, self).__init__(**kwargs)
         
         # call the mixin __init__ methods
-        #ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-        #TaskMixin.__init__(self, **kwargs)
 
 
 

@@ -32,26 +32,40 @@ v0.1.1.a9
    the attributes of the original instance are stored in new variables and
    then the original intance is deleted, and the a new one is retrieved back
    from the database, and all the attributes are compared with the stored ones.
-   (there is properly another good way)
+   (probably there are other good ways)
 
  * fixed :attr:`~stalker.core.models.SimpleEntity.nice_name` if the instance
-   is created by using __new__ (like in SA) then the
+   is created by using ``__new__`` (like in SA) then the
    :attr:`~stalker.core.models.SimpleEntity.nice_name` attribute was not
    initialized correctly.
 
- * fixed mapping of :attr:`~stalker.core.models.Department.lead`
+ * fixed mapping of :attr:`~stalker.core.models.Department.lead` attribute in
+   :class:`~stalker.core.models.Department` class.
 
- * fixed :attr:`~stalker.core.models.ImageFormat.device_aspect`, it is now
-   correctly calculated when the instance is created with __new__ instead of
-   __init__
+ * fixed :attr:`~stalker.core.models.ImageFormat.device_aspect` attribute in
+   :class:`~stalker.core.models.ImageFormat`, it is now correctly calculated
+   when the instance is created with ``__new__`` instead of ``__init__``
 
- * fixed mapping of :attr:`~stalker.core.models.Project.users` attribute
+ * fixed mapping of :attr:`~stalker.core.models.Project.users` attribute in
+   :class:`~stalker.core.models.Project` class.
 
- * fixed mapping of :attr:`~stalker.core.models.Project.duration` attribute
-   (also possibly fixed all the classes
-   mixed with :class:`~stalker.core.mixins.ScheduleMixin`)
+ * fixed mapping of :attr:`~stalker.core.models.Project.duration` attribute in
+   :class:`~stalker.core.models.Project` class (also possibly fixed all the
+   classes mixed with :class:`~stalker.core.mixins.ScheduleMixin`)
 
- * fixed mapping of :attr:`~stalker.core.models.Sequence.lead` attribute
+ * fixed mapping of :attr:`~stalker.core.models.Sequence.lead` attribute in
+   :class:`~stalker.core.models.Sequence` class
+
+ * updated the behaviour of :attr:`~stalker.core.models.Project.users`
+   attribute in :class:`~stalker.core.models.Project` class. Now the list of
+   :class:`~stalker.core.models.User`\ s are gathered from the
+   :class:`~stalker.core.models.Task`\ s of the
+   :class:`~stalker.core.models.Project` and from the
+   :class:`~stalker.core.models.Sequence`\ s, 
+   the :class:`~stalker.core.models.Shot`\ s and
+   the :class:`~stalker.core.models.Asset`\ s of the same
+   :class:`~stalker.core.models.Project`.
+
 
 v0.1.1.a8
 ---------

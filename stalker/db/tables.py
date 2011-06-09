@@ -343,12 +343,13 @@ Notes = Table(
 
 
 
-# PROJECT_USERS
-Project_Users = Table(
-    "Project_Users", metadata,
-    Column("project_id", Integer, ForeignKey("Projects.id"), primary_key=True),
-    Column("user_id", Integer, ForeignKey("Users.id"), primary_key=True),
-)
+# removed this table because the users are now gathered from the tasks
+## PROJECT_USERS
+#Project_Users = Table(
+    #"Project_Users", metadata,
+    #Column("project_id", Integer, ForeignKey("Projects.id"), primary_key=True),
+    #Column("user_id", Integer, ForeignKey("Users.id"), primary_key=True),
+#)
 
 
 

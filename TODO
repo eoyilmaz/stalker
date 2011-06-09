@@ -30,6 +30,8 @@ TODO:
    are checked against being a string should now be checked agains being
    unicode.
 
+ * Convert all the list comparison test to assertItemsEqual
+
 DONE:
 =====
 

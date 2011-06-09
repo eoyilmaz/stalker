@@ -5,7 +5,7 @@ import datetime
 import mocker
 from stalker.core.models import (User, Sequence, Asset, ImageFormat, Project,
                                  Structure, Repository, Entity, Status,
-                                 StatusList, Link, Task, Type)
+                                 StatusList, Link, Task, Type, Shot)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -34,14 +34,41 @@ class ProjectTester(mocker.MockerTestCase):
         self.mock_user1 = self.mocker.mock(User)
         self.mock_user2 = self.mocker.mock(User)
         self.mock_user3 = self.mocker.mock(User)
+        self.mock_user4 = self.mocker.mock(User)
+        self.mock_user5 = self.mocker.mock(User)
+        self.mock_user6 = self.mocker.mock(User)
+        self.mock_user7 = self.mocker.mock(User)
+        self.mock_user8 = self.mocker.mock(User)
+        self.mock_user9 = self.mocker.mock(User)
+        self.mock_user10 = self.mocker.mock(User)
         
+        # sequences without tasks
         self.mock_seq1 = self.mocker.mock(Sequence)
         self.mock_seq2 = self.mocker.mock(Sequence)
         self.mock_seq3 = self.mocker.mock(Sequence)
         
+        # sequences with tasks
+        self.mock_seq4 = self.mocker.mock(Sequence)
+        self.mock_seq5 = self.mocker.mock(Sequence)
+        
+        # sequences without tasks but with shots
+        self.mock_seq6 = self.mocker.mock(Sequence)
+        self.mock_seq7 = self.mocker.mock(Sequence)
+        
+        # shots
+        self.mock_shot1 = self.mocker.mock(Shot)
+        self.mock_shot2 = self.mocker.mock(Shot)
+        self.mock_shot3 = self.mocker.mock(Shot)
+        self.mock_shot4 = self.mocker.mock(Shot)
+        
+        # assets without tasks
         self.mock_asset1 = self.mocker.mock(Asset)
         self.mock_asset2 = self.mocker.mock(Asset)
         self.mock_asset3 = self.mocker.mock(Asset)
+        
+        # assets with tasks
+        self.mock_asset4 = self.mocker.mock(Asset)
+        self.mock_asset5 = self.mocker.mock(Asset)
         
         self.mock_imageFormat = self.mocker.mock(ImageFormat)
         
@@ -59,6 +86,169 @@ class ProjectTester(mocker.MockerTestCase):
             result(Project.entity_type).count(0, None)
         self.expect(len(self.mock_status_list.statuses)).result(5).count(0,None)
         
+        # the tasks
+        
+        # for project
+        self.mock_task1 = self.mocker.mock(Task)
+        self.mock_task2 = self.mocker.mock(Task)
+        self.mock_task3 = self.mocker.mock(Task)
+        
+        # for sequence4
+        self.mock_task4 = self.mocker.mock(Task)
+        self.mock_task5 = self.mocker.mock(Task)
+        self.mock_task6 = self.mocker.mock(Task)
+        
+        # for sequence5
+        self.mock_task7 = self.mocker.mock(Task)
+        self.mock_task8 = self.mocker.mock(Task)
+        self.mock_task9 = self.mocker.mock(Task)
+        
+        # for shot1 of seuqence6
+        self.mock_task10 = self.mocker.mock(Task)
+        self.mock_task11 = self.mocker.mock(Task)
+        self.mock_task12 = self.mocker.mock(Task)
+        
+        # for shot2 of seuqence6
+        self.mock_task13 = self.mocker.mock(Task)
+        self.mock_task14 = self.mocker.mock(Task)
+        self.mock_task15 = self.mocker.mock(Task)
+        
+        # for shot3 of seuqence7
+        self.mock_task16 = self.mocker.mock(Task)
+        self.mock_task17 = self.mocker.mock(Task)
+        self.mock_task18 = self.mocker.mock(Task)
+        
+        # for shot4 of seuqence7
+        self.mock_task19 = self.mocker.mock(Task)
+        self.mock_task20 = self.mocker.mock(Task)
+        self.mock_task21 = self.mocker.mock(Task)
+        
+        # for asset4
+        self.mock_task22 = self.mocker.mock(Task)
+        self.mock_task23 = self.mocker.mock(Task)
+        self.mock_task24 = self.mocker.mock(Task)
+        
+        # for asset5
+        self.mock_task25 = self.mocker.mock(Task)
+        self.mock_task26 = self.mocker.mock(Task)
+        self.mock_task27 = self.mocker.mock(Task)
+        
+        # the users
+        self.expect(self.mock_task1.resources).\
+            result([self.mock_user1]).count(0, None)
+        self.expect(self.mock_task2.resources).\
+            result([self.mock_user2]).count(0, None)
+        self.expect(self.mock_task3.resources).\
+            result([self.mock_user3]).count(0, None)
+        self.expect(self.mock_task4.resources).\
+            result([self.mock_user4]).count(0, None)
+        self.expect(self.mock_task5.resources).\
+            result([self.mock_user5]).count(0, None)
+        self.expect(self.mock_task6.resources).\
+            result([self.mock_user6]).count(0, None)
+        self.expect(self.mock_task7.resources).\
+            result([self.mock_user7]).count(0, None)
+        self.expect(self.mock_task8.resources).\
+            result([self.mock_user8]).count(0, None)
+        self.expect(self.mock_task9.resources).\
+            result([self.mock_user9]).count(0, None)
+        self.expect(self.mock_task10.resources).\
+            result([self.mock_user10]).count(0, None)
+        self.expect(self.mock_task11.resources).\
+            result([self.mock_user1, self.mock_user2]).count(0, None)
+        self.expect(self.mock_task12.resources).\
+            result([self.mock_user3, self.mock_user4]).count(0, None)
+        self.expect(self.mock_task13.resources).\
+            result([self.mock_user5, self.mock_user6]).count(0, None)
+        self.expect(self.mock_task14.resources).\
+            result([self.mock_user7, self.mock_user8]).count(0, None)
+        self.expect(self.mock_task15.resources).\
+            result([self.mock_user9, self.mock_user10]).count(0, None)
+        self.expect(self.mock_task16.resources).\
+            result([self.mock_user1, self.mock_user2, self.mock_user3]).\
+                count(0, None)
+        self.expect(self.mock_task17.resources).\
+            result([self.mock_user4, self.mock_user5, self.mock_user6]).\
+                count(0, None)
+        self.expect(self.mock_task18.resources).\
+            result([self.mock_user7, self.mock_user8, self.mock_user9]).\
+                count(0, None)
+        self.expect(self.mock_task19.resources).\
+            result([self.mock_user10, self.mock_user1, self.mock_user2]).\
+                count(0, None)
+        self.expect(self.mock_task20.resources).\
+            result([self.mock_user3, self.mock_user4, self.mock_user5]).\
+                count(0, None)
+        self.expect(self.mock_task21.resources).\
+            result([self.mock_user6, self.mock_user7, self.mock_user8]).\
+                count(0, None)
+        self.expect(self.mock_task22.resources).\
+            result([self.mock_user9, self.mock_user10, self.mock_user1]).\
+                count(0, None)
+        self.expect(self.mock_task23.resources).\
+            result([self.mock_user2, self.mock_user3]).count(0, None)
+        self.expect(self.mock_task24.resources).\
+            result([self.mock_user4, self.mock_user5]).count(0, None)
+        self.expect(self.mock_task25.resources).\
+            result([self.mock_user6, self.mock_user7]).count(0, None)
+        self.expect(self.mock_task26.resources).\
+            result([self.mock_user8, self.mock_user9]).count(0, None)
+        self.expect(self.mock_task27.resources).\
+            result([self.mock_user10, self.mock_user1]).count(0, None)
+        
+        # assign tasks for seuqences
+        self.expect(self.mock_seq4.tasks).\
+            result([self.mock_task4, self.mock_task5, self.mock_task6]).\
+                count(0, None)
+        
+        self.expect(self.mock_seq5.tasks).\
+            result([self.mock_task7, self.mock_task8, self.mock_task9]).\
+                count(0, None)
+        
+        # for sequences without shots but with tasks
+        self.expect(self.mock_seq4.shots).result([]).count(0, None)
+        self.expect(self.mock_seq5.shots).result([]).count(0, None)
+        
+        # for sequences with shots but without tasks
+        self.expect(self.mock_seq6.tasks).result([]).count(0, None)
+        self.expect(self.mock_seq7.tasks).result([]).count(0, None)
+        
+        # assign tasks for shots
+        self.expect(self.mock_shot1.tasks).\
+            result([self.mock_task10, self.mock_task11, self.mock_task12]).\
+                count(0, None)
+        
+        self.expect(self.mock_shot2.tasks).\
+            result([self.mock_task13, self.mock_task14, self.mock_task15]).\
+                count(0, None)
+        
+        self.expect(self.mock_shot3.tasks).\
+            result([self.mock_task16, self.mock_task17, self.mock_task18]).\
+                count(0, None)
+        
+        self.expect(self.mock_shot4.tasks).\
+            result([self.mock_task19, self.mock_task20, self.mock_task21]).\
+                count(0, None)
+        
+        # assing tasks for assets
+        self.expect(self.mock_asset4.tasks).\
+            result([self.mock_task22, self.mock_task23, self.mock_task24]).\
+                count(0, None)
+        
+        self.expect(self.mock_asset5.tasks).\
+            result([self.mock_task25, self.mock_task26, self.mock_task27]).\
+                count(0, None)
+        
+        # assign shots to sequences
+        self.expect(self.mock_seq6.shots).\
+            result([self.mock_shot1, self.mock_shot2]).\
+                count(0, None)
+        
+        self.expect(self.mock_seq7.shots).\
+            result([self.mock_shot3, self.mock_shot4]).\
+                count(0, None)
+        
+        
         self.mocker.replay()
         
         # create a project object
@@ -66,7 +256,6 @@ class ProjectTester(mocker.MockerTestCase):
             "name": "Test Project",
             "description": "This is a project object for testing purposes",
             "lead": self.mock_lead,
-            "users": [self.mock_user1, self.mock_user2, self.mock_user3],
             "sequences": [self.mock_seq1, self.mock_seq2, self.mock_seq3],
             "assets": [self.mock_asset1, self.mock_asset2, self.mock_asset3],
             "image_format": self.mock_imageFormat,
@@ -79,6 +268,7 @@ class ProjectTester(mocker.MockerTestCase):
             "start_date": self.start_date,
             "due_date": self.due_date,
             "status_list": self.mock_status_list,
+            "tasks": [self.mock_task1, self.mock_task2, self.mock_task3]
         }
         
         self.mock_project = Project(**self.kwargs)
@@ -164,136 +354,241 @@ class ProjectTester(mocker.MockerTestCase):
     
     
     
+    ##----------------------------------------------------------------------
+    #def test_users_argument_is_set_to_None(self):
+        #"""testing if no error will be raised when the users argument is given
+        #as None
+        #"""
+        
+        #self.kwargs["users"] = None
+        #new_project = Project(**self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_users_attribute_is_set_to_None(self):
+        #"""testing if no error will be raised when the users attribute is set
+        #to None
+        #"""
+        
+        #self.mock_project.users = None
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_users_argument_given_as_None_converted_to_empty_list(self):
+        #"""testing if users argument is converted to an empty list when given
+        #as None
+        #"""
+        
+        #self.kwargs["users"] = None
+        #new_project = Project(**self.kwargs)
+        #self.assertEqual(new_project.users, [])
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_users_attribute_set_to_None_converted_to_empty_list(self):
+        #"""testing if users attribute is converted to an empty list when set to
+        #None
+        #"""
+        
+        #self.mock_project.users = None
+        #self.assertEqual(self.mock_project.users, [])
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_users_argument_is_given_as_a_list_of_other_objects_then_user(self):
+        #"""testing if a ValueError will be raised when the users argument is
+        #given as a list containing objects other than User
+        #"""
+        
+        #test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        #self.kwargs["users"] = test_value
+        #self.assertRaises(ValueError, Project, **self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_users_attribute_is_given_as_a_list_of_other_objects_then_user(self):
+        #"""testing if a ValueError will be raised when the users attribute is
+        #given as a list containing objects other than User
+        #"""
+        
+        #test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.mock_project,
+            #"users",
+            #test_value
+        #)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_users_attribute_is_a_ValidatedList_instance(self):
+        #"""testing if the users attribute is an instance of ValidatedList
+        #"""
+        
+        #self.assertIsInstance(self.mock_project.users, ValidatedList)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_users_attribute_elements_accepts_User_only(self):
+        #"""testing if a ValueError will be raised when trying to assign
+        #something other than a User object to the users list
+        #"""
+        
+        ## append
+        #self.assertRaises(
+            #ValueError,
+            #self.mock_project.users.append,
+            #0
+        #)
+        
+        ## __setitem__
+        #self.assertRaises(
+            #ValueError,
+            #self.mock_project.users.__setitem__,
+            #0,
+            #0
+        #)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_users_argument_is_not_iterable(self):
+        #"""testing if a ValueError will be raised when the users argument is
+        #not iterable
+        #"""
+        
+        #test_values = [1, 1.2]
+        
+        #for test_value in test_values:
+            #self.kwargs["users"] = test_value
+            #self.assertRaises(ValueError, Project, **self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_users_attribute_is_not_iterable(self):
+        #"""testing if a ValueError will be raised when the users attribute is
+        #not iterable
+        #"""
+        
+        #test_values = [1, 1.2]
+        
+        #for test_value in test_values:
+            #self.assertRaises(ValueError, setattr, self.mock_project, "users",
+                              #test_value)
+    
+    
     #----------------------------------------------------------------------
-    def test_users_argument_is_set_to_None(self):
-        """testing if no error will be raised when the users argument is given
-        as None
+    def test_users_attribute_is_read_only(self):
+        """testing if the users attribute is read-only
         """
         
-        self.kwargs["users"] = None
+        self.assertRaises(AttributeError, setattr, self.mock_project, "users",
+                          [self.mock_user1, self.mock_user2, self.mock_user3])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_users_attribute_is_calculated_from_project_tasks(self):
+        """testing if the users attribute is calculated from the tasks of the
+        project it self
+        """
+        
+        self.kwargs["sequences"] = []
+        self.kwargs["assets"] = []
+        self.kwargs["tasks"] = [self.mock_task1, self.mock_task2,
+                                self.mock_task3]
+        
         new_project = Project(**self.kwargs)
+        
+        # task1, task2, task3
+        expected_users = [self.mock_user1, self.mock_user2, self.mock_user3]
+        
+        self.assertItemsEqual(new_project.users, expected_users)
     
     
     
     #----------------------------------------------------------------------
-    def test_users_attribute_is_set_to_None(self):
-        """testing if no error will be raised when the users attribute is set
-        to None
+    def test_users_attribute_is_calculated_from_sequence_tasks(self):
+        """testing if the users attribute is calculated from the tasks of the
+        sequences
         """
         
-        self.mock_project.users = None
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_users_argument_given_as_None_converted_to_empty_list(self):
-        """testing if users argument is converted to an empty list when given
-        as None
-        """
+        self.kwargs["tasks"] = []
+        self.kwargs["assets"] = []
+        self.kwargs["sequences"] = [self.mock_seq4, self.mock_seq5]
         
-        self.kwargs["users"] = None
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.users, [])
+        
+        # task4, task5, task6
+        # task7, task8, task9
+        
+        expected_users = [self.mock_user4, self.mock_user5, self.mock_user6,
+                          self.mock_user7, self.mock_user8, self.mock_user9]
+        
+        self.assertItemsEqual(new_project.users, expected_users)
     
     
     
     #----------------------------------------------------------------------
-    def test_users_attribute_set_to_None_converted_to_empty_list(self):
-        """testing if users attribute is converted to an empty list when set to
-        None
+    def test_users_attribute_is_calculated_from_asset_tasks(self):
+        """testing if the users attribute is calculated from the tasks of the
+        assets
         """
         
-        self.mock_project.users = None
-        self.assertEqual(self.mock_project.users, [])
+        self.kwargs["tasks"] = []
+        self.kwargs["sequences"] = []
+        self.kwargs["assets"] = [self.mock_asset4, self.mock_asset5]
+        
+        new_project = Project(**self.kwargs)
+        
+        # mock_task22, mock_task23, mock_task24
+        # mock_task25, mock_task26, mock_task27
+        
+        expected_users = [self.mock_user1, self.mock_user2, self.mock_user3,
+                          self.mock_user4, self.mock_user5, self.mock_user6,
+                          self.mock_user7, self.mock_user8, self.mock_user9,
+                          self.mock_user10]
+        
+        #print expected_users
+        #print new_project.users
+        self.assertItemsEqual(new_project.users, expected_users)
     
     
     
     #----------------------------------------------------------------------
-    def test_users_argument_is_given_as_a_list_of_other_objects_then_user(self):
-        """testing if a ValueError will be raised when the users argument is
-        given as a list containing objects other than User
+    def test_users_attribute_is_calculated_from_sequence_shots(self):
+        """testing if the users attribute is calculated from the tasks of the
+        tasks of the sequence shots
         """
         
-        test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-        self.kwargs["users"] = test_value
-        self.assertRaises(ValueError, Project, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_users_attribute_is_given_as_a_list_of_other_objects_then_user(self):
-        """testing if a ValueError will be raised when the users attribute is
-        given as a list containing objects other than User
-        """
+        self.kwargs["tasks"] = []
+        self.kwargs["assets"] = []
+        self.kwargs["sequences"] = [self.mock_seq6, self.mock_seq7]
         
-        test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_project,
-            "users",
-            test_value
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_users_attribute_is_a_ValidatedList_instance(self):
-        """testing if the users attribute is an instance of ValidatedList
-        """
+        new_project = Project(**self.kwargs)
         
-        self.assertIsInstance(self.mock_project.users, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_users_attribute_elements_accepts_User_only(self):
-        """testing if a ValueError will be raised when trying to assign
-        something other than a User object to the users list
-        """
+        # tasks
+        # self.mock_task10, self.mock_task11, self.mock_task12
+        # self.mock_task13, self.mock_task14, self.mock_task15
+        # self.mock_task16, self.mock_task17, self.mock_task18
+        # self.mock_task19, self.mock_task20, self.mock_task21
         
-        # append
-        self.assertRaises(
-            ValueError,
-            self.mock_project.users.append,
-            0
-        )
+        expected_users = [self.mock_user1, self.mock_user2, self.mock_user3,
+                          self.mock_user4, self.mock_user5, self.mock_user6,
+                          self.mock_user7, self.mock_user8, self.mock_user9,
+                          self.mock_user10]
         
-        # __setitem__
-        self.assertRaises(
-            ValueError,
-            self.mock_project.users.__setitem__,
-            0,
-            0
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_users_argument_is_not_iterable(self):
-        """testing if a ValueError will be raised when the users argument is
-        not iterable
-        """
-        
-        test_values = [1, 1.2]
-        
-        for test_value in test_values:
-            self.kwargs["users"] = test_value
-            self.assertRaises(ValueError, Project, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_users_attribute_is_not_iterable(self):
-        """testing if a ValueError will be raised when the users attribute is
-        not iterable
-        """
-        
-        test_values = [1, 1.2]
-        
-        for test_value in test_values:
-            self.assertRaises(ValueError, setattr, self.mock_project, "users",
-                              test_value)
+        # users
+        self.assertItemsEqual(new_project.users, expected_users)
     
     
     
@@ -1151,10 +1446,7 @@ class ProjectTester(mocker.MockerTestCase):
                                       statuses=[status1],
                                       target_entity_type=Task.entity_type)
         
-        task1 = Task(name="Modeling", status=0, status_list=task_status_list)
-        task2 = Task(name="Lighting", status=0, status_list=task_status_list)
-        
-        tasks = [task1, task2]
+        tasks = [self.mock_task1, self.mock_task2]
         
         self.kwargs["tasks"] = tasks
         
