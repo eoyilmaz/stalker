@@ -34,8 +34,9 @@ v0.1.1.a9
    from the database, and all the attributes are compared with the stored ones.
    (probably there are other good ways)
 
- * fixed :attr:`~stalker.core.models.SimpleEntity.nice_name` if the instance
-   is created by using ``__new__`` (like in SA) then the
+ * fixed :attr:`~stalker.core.models.SimpleEntity.nice_name` in the
+   :class:`~stalker.core.models.SimpleEntity`, if the instance is created by
+   using ``__new__`` (like in SA) then the
    :attr:`~stalker.core.models.SimpleEntity.nice_name` attribute was not
    initialized correctly.
 
@@ -66,6 +67,34 @@ v0.1.1.a9
    the :class:`~stalker.core.models.Asset`\ s of the same
    :class:`~stalker.core.models.Project`.
 
+ * updated the behaviour of :attr:`~stalker.core.models.User.project` attribute
+   in class :class:`~stalker.core.models.User` class. Now the list of
+   :class:`~stalker.core.models.Project`\ s are gathered from all the
+   :class:`~stalker.core.models.Task`\ s assinged to the current
+   :class:`~stalker.core.models.User`.
+
+ * The ``Group`` class is renamed to
+   :class:`~stalker.core.models.PermissionGroup`.
+
+ * The default duration for the :class:`~stalker.core.mixins.ScheduleMixin`
+   is now defined by the :attr:`stalker.conf.defaults.DEFAULT_TASK_DURATION`
+   attribute.
+
+ * The :class:`~stalker.core.mixins.ScheduleMixin` class now accepts a third
+   argument called ``duration``.
+
+ * The :attr:`~stalker.core.mixins.ScheduleMixin.duration` attribute in the
+   :class:`~stalker.core.mixins.ScheduleMixin` is now a setable. See the 
+   :class:`~stalker.core.mixins.ScheduleMixin` class documentation for details.
+
+ * The :attr:`~stalker.core.mixins.ScheduleMixin.due_date` in
+   :class:`~stalker.core.mixins.ScheduleMixin` doesn't accept
+   ``datetime.timedelta`` objects anymore.
+
+ * The behaviour of :attr:`~stalker.core.mixins.ScheduleMixin.start_date`,
+   :attr:`~stalker.core.mixins.ScheduleMixin.due_date` and
+   :attr:`~stalker.core.mixins.ScheduleMixin.duration` in
+   :class:`~stalker.core.mixins.ScheduleMixin` is updated.
 
 v0.1.1.a8
 ---------

@@ -4,7 +4,6 @@
 
 import mocker
 from stalker.core.models import Entity, Type
-#from stalker.ext.validatedList import ValidatedList
 
 
 

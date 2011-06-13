@@ -120,10 +120,24 @@ Users = Table(
     Column("password", String(256), nullable=False),
     Column("last_login", DateTime),
     Column("initials", String(16)),
-    #Column("permission_groups_id", Integer, ForeignKey("Groups.id")),
 )
 
 
+# USER_PERMISSIONGROUPS
+User_PermissionGroups = Table(
+    "User_PermissionGroups", metadata,
+    Column("user_id", Integer, ForeignKey("Users.id"), primary_key=True),
+    Column("permissionGroup_id", Integer, ForeignKey("PermissionGroups.id"),
+           primary_key=True
+    ),
+    
+)
+
+# PERMISSIONGROUPS
+PermissionGroups = Table(
+    "PermissionGroups", metadata,
+    Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True),
+)
 
 ## USER_PROJECTS
 #User_Projects = Table(
@@ -143,21 +157,12 @@ Users = Table(
 
 
 
-## USER_TASKS
-#User_Tasks = Table(
-    #"User_Tasks", meta,
-    #Column(
-        #"user_id",
-        #Integer,
-        #ForeignKey("Users.id")
-    #),
-    
-    #Column(
-        #"task_id",
-        #Integer,
-        #ForeignKey("Tasks.id")
-    #)
-#)
+# USER_TASKS
+User_Tasks = Table(
+    "User_Tasks", metadata,
+    Column("user_id", Integer, ForeignKey("Users.id")),
+    Column("task_id", Integer, ForeignKey("Tasks.id")),
+)
 
 
 
@@ -170,13 +175,6 @@ Departments = Table(
     ),
 )
 
-
-
-## TASKS
-#Tasks = Table(
-    #"Tasks", metadata,
-    #Column(
-        #"id",
 
 
 # STATUS
@@ -340,16 +338,6 @@ Notes = Table(
     ),
     Column("content", String),
 )
-
-
-
-# removed this table because the users are now gathered from the tasks
-## PROJECT_USERS
-#Project_Users = Table(
-    #"Project_Users", metadata,
-    #Column("project_id", Integer, ForeignKey("Projects.id"), primary_key=True),
-    #Column("user_id", Integer, ForeignKey("Users.id"), primary_key=True),
-#)
 
 
 

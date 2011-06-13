@@ -26,10 +26,10 @@ from stalker.core.models import (
     Department,
     Entity,
     SimpleEntity,
-    Group,
     ImageFormat,
     Link,
     Note,
+    PermissionGroup,
     Project,
     Repository,
     Sequence,
@@ -983,17 +983,6 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persistence_Group(self):
-        """testing the persistence of Group
-        """
-        
-        self.fail("test is not implmented yet")
-    
-    
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_persistence_ImageFormat(self):
         """testing the persistence of ImageFormat
         """
@@ -1208,12 +1197,21 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
+    def test_persistence_PermissionGroup(self):
+        """testing the persistence of PermissionGroup
+        """
+        
+        self.fail("test is not implmented yet")
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_persistence_Project(self):
         """testing the persistence of Project
         """
         
         # create mock objects
-        start_date = datetime.date.today()
+        start_date = datetime.date.today() + datetime.timedelta(10)
         due_date = start_date + datetime.timedelta(days=20)
         
         lead = User(login_name="lead", first_name="lead", last_name="lead",
@@ -1287,7 +1285,6 @@ class DatabaseModelsTester(unittest.TestCase):
             "name": "Test Project",
             "description": "This is a project object for testing purposes",
             "lead": lead,
-            "users": [user1, user2, user3],
             "image_format": image_format,
             "fps": 25,
             "type": project_type,
@@ -1622,28 +1619,50 @@ class DatabaseModelsTester(unittest.TestCase):
         db.session.add(test_sequence)
         db.session.commit()
         
+        # store the attributes
+        code = test_shot.code
+        cut_duration = test_shot.cut_duration
+        cut_in = test_shot.cut_in
+        cut_out = test_shot.cut_out
+        date_created = test_shot.date_created
+        date_updated = test_shot.date_updated
+        description = test_shot.description
+        name = test_shot.name
+        nice_name = test_shot.nice_name
+        notes = test_shot.notes
+        references = test_shot.references
+        sequence = test_shot.sequence
+        status = test_shot.status
+        status_list = test_shot.status_list
+        tags = test_shot.tags
+        tasks = test_shot.tasks
+        updated_by = test_shot.updated_by
+        
+        
+        # delete the shot
+        del(test_shot)
+        
         test_shot_DB = db.query(Shot).\
                      filter_by(code=shot_kwargs["code"]).first()
         
-        self.assertEqual(test_shot, test_shot_DB)
-        #self.assertEqual(test_shot.assets, test_shot_DB.assets)
-        self.assertEqual(test_shot.code, test_shot_DB.code)
-        self.assertEqual(test_shot.cut_duration, test_shot_DB.cut_duration)
-        self.assertEqual(test_shot.cut_in, test_shot_DB.cut_in)
-        self.assertEqual(test_shot.cut_out, test_shot_DB.cut_out)
-        self.assertEqual(test_shot.date_created, test_shot_DB.date_created)
-        self.assertEqual(test_shot.date_updated, test_shot_DB.date_updated)
-        self.assertEqual(test_shot.description, test_shot_DB.description)
-        self.assertEqual(test_shot.name, test_shot_DB.name)
-        self.assertEqual(test_shot.nice_name, test_shot_DB.nice_name)
-        self.assertEqual(test_shot.notes, test_shot_DB.notes)
-        self.assertEqual(test_shot.references, test_shot_DB.references)
-        self.assertEqual(test_shot.sequence, test_shot_DB.sequence)
-        self.assertEqual(test_shot.status, test_shot_DB.status)
-        self.assertEqual(test_shot.status_list, test_shot_DB.status_list)
-        self.assertEqual(test_shot.tags, test_shot_DB.tags)
-        self.assertEqual(test_shot.tasks, test_shot_DB.tasks)
-        self.assertEqual(test_shot.updated_by, test_shot_DB.updated_by)
+        #self.assertEqual(test_shot, test_shot_DB)
+        self.assertEqual(code, test_shot_DB.code)
+        self.assertEqual(cut_duration, test_shot_DB.cut_duration)
+        self.assertEqual(cut_in, test_shot_DB.cut_in)
+        self.assertEqual(cut_out, test_shot_DB.cut_out)
+        self.assertEqual(date_created, test_shot_DB.date_created)
+        self.assertEqual(date_updated, test_shot_DB.date_updated)
+        self.assertEqual(description, test_shot_DB.description)
+        self.assertEqual(name, test_shot_DB.name)
+        self.assertEqual(nice_name, test_shot_DB.nice_name)
+        self.assertEqual(notes, test_shot_DB.notes)
+        self.assertEqual(references, test_shot_DB.references)
+        self.assertEqual(sequence, test_shot_DB.sequence)
+        self.assertEqual(status, test_shot_DB.status)
+        self.assertEqual(status_list, test_shot_DB.status_list)
+        self.assertEqual(tags, test_shot_DB.tags)
+        self.assertEqual(tasks, test_shot_DB.tasks)
+        self.assertEqual(updated_by, test_shot_DB.updated_by)
     
     
     
@@ -1711,6 +1730,21 @@ class DatabaseModelsTester(unittest.TestCase):
         db.session.add(test_status)
         db.session.commit()
         
+        # store the attributes
+        code = test_status.code
+        created_by = test_status.created_by
+        date_created = test_status.date_created
+        date_updated = test_status.date_updated
+        description = test_status.description
+        name = test_status.name
+        nice_name = test_status.nice_name
+        notes = test_status.notes
+        tags = test_status.tags
+        updated_by = test_status.updated_by
+        
+        # delete the test_status
+        del(test_status)
+        
         # now try to retrieve it
         test_status_DB = db.query(Status).\
                      filter(Status.name==kwargs["name"]).first()
@@ -1718,17 +1752,17 @@ class DatabaseModelsTester(unittest.TestCase):
         assert(isinstance(test_status_DB, Status))
         
         # just test the satuts part of the object
-        self.assertEqual(test_status, test_status_DB)
-        self.assertEqual(test_status.code, test_status_DB.code)
-        self.assertEqual(test_status.created_by, test_status_DB.created_by)
-        self.assertEqual(test_status.date_created, test_status_DB.date_created)
-        self.assertEqual(test_status.date_updated, test_status_DB.date_updated)
-        self.assertEqual(test_status.description, test_status_DB.description)
-        self.assertEqual(test_status.name, test_status_DB.name)
-        self.assertEqual(test_status.nice_name, test_status_DB.nice_name)
-        self.assertEqual(test_status.notes, test_status_DB.notes)
-        self.assertEqual(test_status.tags, test_status_DB.tags)
-        self.assertEqual(test_status.updated_by, test_status_DB.updated_by)
+        #self.assertEqual(test_status, test_status_DB)
+        self.assertEqual(code, test_status_DB.code)
+        self.assertEqual(created_by, test_status_DB.created_by)
+        self.assertEqual(date_created, test_status_DB.date_created)
+        self.assertEqual(date_updated, test_status_DB.date_updated)
+        self.assertEqual(description, test_status_DB.description)
+        self.assertEqual(name, test_status_DB.name)
+        self.assertEqual(nice_name, test_status_DB.nice_name)
+        self.assertEqual(notes, test_status_DB.notes)
+        self.assertEqual(tags, test_status_DB.tags)
+        self.assertEqual(updated_by, test_status_DB.updated_by)
     
     
     
@@ -1758,37 +1792,43 @@ class DatabaseModelsTester(unittest.TestCase):
         db.session.add(sequence_status_list)
         db.session.commit()
         
+        # store the attributes
+        code = sequence_status_list.code
+        created_by = sequence_status_list.created_by
+        date_created = sequence_status_list.date_created
+        date_updated = sequence_status_list.date_updated
+        description = sequence_status_list.description
+        name = sequence_status_list.name
+        nice_name = sequence_status_list.nice_name
+        notes = sequence_status_list.notes
+        statuses = sequence_status_list.statuses
+        tags = sequence_status_list.tags
+        target_entity_type = sequence_status_list.target_entity_type
+        updated_by = sequence_status_list.updated_by
+        
+        # delete the sequence_status_list
+        del(sequence_status_list)
+        
         # now get it back
         sequence_status_list_DB = db.query(StatusList).\
                                 filter_by(name=kwargs["name"]).first()
         
         assert(isinstance(sequence_status_list_DB, StatusList))
         
-        self.assertEqual(sequence_status_list, sequence_status_list_DB)
-        self.assertEqual(sequence_status_list.code,
-                         sequence_status_list_DB.code)
-        self.assertEqual(sequence_status_list.created_by,
-                         sequence_status_list_DB.created_by)
-        self.assertEqual(sequence_status_list.date_created,
-                         sequence_status_list_DB.date_created)
-        self.assertEqual(sequence_status_list.date_updated,
-                         sequence_status_list_DB.date_updated)
-        self.assertEqual(sequence_status_list.description,
-                         sequence_status_list_DB.description)
-        self.assertEqual(sequence_status_list.name,
-                         sequence_status_list_DB.name)
-        self.assertEqual(sequence_status_list.nice_name,
-                         sequence_status_list_DB.nice_name)
-        self.assertEqual(sequence_status_list.notes,
-                         sequence_status_list_DB.notes)
-        self.assertEqual(sequence_status_list.statuses,
-                         sequence_status_list_DB.statuses)
-        self.assertEqual(sequence_status_list.tags,
-                         sequence_status_list_DB.tags)
-        self.assertEqual(sequence_status_list.target_entity_type,
+        #self.assertEqual(sequence_status_list, sequence_status_list_DB)
+        self.assertEqual(code, sequence_status_list_DB.code)
+        self.assertEqual(created_by, sequence_status_list_DB.created_by)
+        self.assertEqual(date_created, sequence_status_list_DB.date_created)
+        self.assertEqual(date_updated, sequence_status_list_DB.date_updated)
+        self.assertEqual(description, sequence_status_list_DB.description)
+        self.assertEqual(name, sequence_status_list_DB.name)
+        self.assertEqual(nice_name, sequence_status_list_DB.nice_name)
+        self.assertEqual(notes, sequence_status_list_DB.notes)
+        self.assertEqual(statuses, sequence_status_list_DB.statuses)
+        self.assertEqual(tags, sequence_status_list_DB.tags)
+        self.assertEqual(target_entity_type,
                          sequence_status_list_DB.target_entity_type)
-        self.assertEqual(sequence_status_list.updated_by,
-                         sequence_status_list_DB.updated_by)
+        self.assertEqual(updated_by, sequence_status_list_DB.updated_by)
         
         # try to create another StatusList for the same target_entity_type
         # and expect and IntegrityError
@@ -1889,29 +1929,41 @@ SEQUENCES/{% for sequence in project.sequences %}
         db.session.add(new_structure)
         db.session.commit()
         
+        # store the attributes
+        templates = new_structure.templates
+        code = new_structure.code
+        created_by = new_structure.created_by
+        date_created = new_structure.date_created
+        date_updated = new_structure.date_updated
+        description = new_structure.description
+        name = new_structure.name
+        nice_name = new_structure.nice_name
+        notes = new_structure.notes
+        custom_template = new_structure.custom_template
+        tags = new_structure.tags
+        updated_by = new_structure.updated_by
+        
+        # delete the new_structure
+        del(new_structure)
+        
         new_structure_DB = db.query(Structure).\
                          filter_by(name=kwargs["name"]).first()
         
         assert(isinstance(new_structure_DB, Structure))
         
-        self.assertEqual(new_structure, new_structure_DB)
-        self.assertEqual(new_structure.templates,
-                         new_structure_DB.templates)
-        self.assertEqual(new_structure.code, new_structure_DB.code)
-        self.assertEqual(new_structure.created_by, new_structure_DB.created_by)
-        self.assertEqual(new_structure.date_created,
-                         new_structure_DB.date_created)
-        self.assertEqual(new_structure.date_updated,
-                         new_structure_DB.date_updated)
-        self.assertEqual(new_structure.description,
-                         new_structure_DB.description)
-        self.assertEqual(new_structure.name, new_structure_DB.name)
-        self.assertEqual(new_structure.nice_name, new_structure_DB.nice_name)
-        self.assertEqual(new_structure.notes, new_structure_DB.notes)
-        self.assertEqual(new_structure.custom_template,
-                         new_structure_DB.custom_template)
-        self.assertEqual(new_structure.tags, new_structure_DB.tags)
-        self.assertEqual(new_structure.updated_by, new_structure_DB.updated_by)
+        #self.assertEqual(new_structure, new_structure_DB)
+        self.assertEqual(templates, new_structure_DB.templates)
+        self.assertEqual(code, new_structure_DB.code)
+        self.assertEqual(created_by, new_structure_DB.created_by)
+        self.assertEqual(date_created, new_structure_DB.date_created)
+        self.assertEqual(date_updated, new_structure_DB.date_updated)
+        self.assertEqual(description, new_structure_DB.description)
+        self.assertEqual(name, new_structure_DB.name)
+        self.assertEqual(nice_name, new_structure_DB.nice_name)
+        self.assertEqual(notes, new_structure_DB.notes)
+        self.assertEqual(custom_template, new_structure_DB.custom_template)
+        self.assertEqual(tags, new_structure_DB.tags)
+        self.assertEqual(updated_by, new_structure_DB.updated_by)
     
     
     
@@ -1938,16 +1990,28 @@ SEQUENCES/{% for sequence in project.sequences %}
         db.session.add(aTag)
         db.session.commit()
         
-        # now try to retrieve it
-        tag_query = db.session.query(Tag)
-        Tag_from_DB = tag_query.filter_by(name=name).first()
+        # store the attributes
+        description = aTag.description
+        created_by = aTag.created_by
+        updated_by = aTag.updated_by
+        date_created = aTag.date_created
+        date_updated = aTag.date_updated
         
-        self.assertEqual(aTag.name, Tag_from_DB.name)
-        self.assertEqual(aTag.description, Tag_from_DB.description)
-        self.assertEqual(aTag.created_by, Tag_from_DB.created_by)
-        self.assertEqual(aTag.updated_by, Tag_from_DB.updated_by)
-        self.assertEqual(aTag.date_created, Tag_from_DB.date_created)
-        self.assertEqual(aTag.date_updated, Tag_from_DB.date_updated)
+        
+        # delete the aTag
+        del(aTag)
+        
+        # now try to retrieve it
+        aTag_DB = db.session.query(Tag).filter_by(name=name).first()
+        
+        assert(isinstance(aTag_DB, Tag))
+        
+        self.assertEqual(name, aTag_DB.name)
+        self.assertEqual(description, aTag_DB.description)
+        self.assertEqual(created_by, aTag_DB.created_by)
+        self.assertEqual(updated_by, aTag_DB.updated_by)
+        self.assertEqual(date_created, aTag_DB.date_created)
+        self.assertEqual(date_updated, aTag_DB.date_updated)
     
     
     
@@ -1996,44 +2060,72 @@ SEQUENCES/{% for sequence in project.sequences %}
         db.session.add_all([new_user, new_department])
         db.session.commit()
         
+        # store attributes
+        code = new_user.code
+        created_by = new_user.created_by
+        date_created = new_user.date_created
+        date_updated = new_user.date_updated
+        department = new_user.department
+        description = new_user.description
+        email = new_user.email
+        first_name = new_user.first_name
+        initials = new_user.initials
+        last_login = new_user.last_login
+        last_name = new_user.last_name
+        login_name = new_user.login_name
+        name = new_user.name
+        nice_name = new_user.nice_name
+        notes = new_user.notes
+        password = new_user.password
+        permission_groups = new_user.permission_groups
+        projects = new_user.projects
+        projects_lead = new_user.projects_lead
+        sequences_lead = new_user.sequences_lead
+        tags = new_user.tags
+        tasks = new_user.tasks
+        updated_by = new_user.updated_by
+        
+        
+        # delete new_user
+        del(new_user)
+        
         new_user_DB = db.query(User).\
                     filter(User.name==user_kwargs["login_name"]).first()
         
         assert(isinstance(new_user_DB, User))
         
         # the user itself
-        self.assertEqual(new_user, new_user_DB)
-        self.assertEqual(new_user.code, new_user_DB.code)
-        self.assertEqual(new_user.created_by, new_user_DB.created_by)
-        self.assertEqual(new_user.date_created, new_user_DB.date_created)
-        self.assertEqual(new_user.date_updated, new_user_DB.date_updated)
-        self.assertEqual(new_user.department, new_user_DB.department)
-        self.assertEqual(new_user.description, new_user_DB.description)
-        self.assertEqual(new_user.email, new_user_DB.email)
-        self.assertEqual(new_user.first_name, new_user_DB.first_name)
-        self.assertEqual(new_user.initials, new_user_DB.initials)
-        self.assertEqual(new_user.last_login, new_user_DB.last_login)
-        self.assertEqual(new_user.last_name, new_user_DB.last_name)
-        self.assertEqual(new_user.login_name, new_user_DB.login_name)
-        self.assertEqual(new_user.name, new_user_DB.name)
-        self.assertEqual(new_user.nice_name, new_user_DB.nice_name)
-        self.assertEqual(new_user.notes, new_user_DB.notes)
-        self.assertEqual(new_user.password, new_user_DB.password)
-        self.assertEqual(new_user.permission_groups,
-                         new_user_DB.permission_groups)
-        self.assertEqual(new_user.projects, new_user_DB.projects)
-        self.assertEqual(new_user.projects_lead, new_user_DB.projects_lead)
-        self.assertEqual(new_user.sequences_lead, new_user_DB.sequences_lead)
-        self.assertEqual(new_user.tags, new_user_DB.tags)
-        self.assertEqual(new_user.tasks, new_user_DB.tasks)
-        self.assertEqual(new_user.updated_by, new_user_DB.updated_by)
+        #self.assertEqual(new_user, new_user_DB)
+        self.assertEqual(code, new_user_DB.code)
+        self.assertEqual(created_by, new_user_DB.created_by)
+        self.assertEqual(date_created, new_user_DB.date_created)
+        self.assertEqual(date_updated, new_user_DB.date_updated)
+        self.assertEqual(department, new_user_DB.department)
+        self.assertEqual(description, new_user_DB.description)
+        self.assertEqual(email, new_user_DB.email)
+        self.assertEqual(first_name, new_user_DB.first_name)
+        self.assertEqual(initials, new_user_DB.initials)
+        self.assertEqual(last_login, new_user_DB.last_login)
+        self.assertEqual(last_name, new_user_DB.last_name)
+        self.assertEqual(login_name, new_user_DB.login_name)
+        self.assertEqual(name, new_user_DB.name)
+        self.assertEqual(nice_name, new_user_DB.nice_name)
+        self.assertEqual(notes, new_user_DB.notes)
+        self.assertEqual(password, new_user_DB.password)
+        self.assertEqual(permission_groups, new_user_DB.permission_groups)
+        self.assertEqual(projects, new_user_DB.projects)
+        self.assertEqual(projects_lead, new_user_DB.projects_lead)
+        self.assertEqual(sequences_lead, new_user_DB.sequences_lead)
+        self.assertEqual(tags, new_user_DB.tags)
+        self.assertEqual(tasks, new_user_DB.tasks)
+        self.assertEqual(updated_by, new_user_DB.updated_by)
         
         # as the member of a department
         department_db = db.query(Department).\
                       filter(Department.name==dep_kwargs["name"]).\
                       first()
         
-        self.assertEqual(new_user, department_db.members[0])
+        self.assertEqual(new_user_DB, department_db.members[0])
         
     
     

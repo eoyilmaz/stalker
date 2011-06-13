@@ -4,8 +4,8 @@
 
 import datetime
 import mocker
-from stalker.core.models import (User, Department, Group, Task, Project,
-                                 Sequence)
+from stalker.core.models import (User, Department, PermissionGroup, Task,
+                                 Project, Sequence)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -46,9 +46,9 @@ class UserTest(mocker.MockerTestCase):
             #result(True).count(0, None)
         
         # a couple of permission groups
-        self.mock_permission_group1 = self.mocker.mock(Group)
-        self.mock_permission_group2 = self.mocker.mock(Group)
-        self.mock_permission_group3 = self.mocker.mock(Group)
+        self.mock_permission_group1 = self.mocker.mock(PermissionGroup)
+        self.mock_permission_group2 = self.mocker.mock(PermissionGroup)
+        self.mock_permission_group3 = self.mocker.mock(PermissionGroup)
         
         # a couple of tasks
         self.mock_task1 = self.mocker.mock(Task)
@@ -88,9 +88,6 @@ class UserTest(mocker.MockerTestCase):
                       self.mock_task2,
                       self.mock_task3,
                       self.mock_task4],
-            "projects": [self.mock_project1,
-                         self.mock_project2,
-                         self.mock_project3],
             "projects_lead": [self.mock_project1,
                               self.mock_project2],
             "sequences_lead": [self.mock_sequence1,
@@ -304,8 +301,6 @@ class UserTest(mocker.MockerTestCase):
             "email",
             test_value
         )
-        
-        
         
         test_value = ["an email"]
         
@@ -1176,7 +1171,8 @@ class UserTest(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_perimssion_groups_argument_accepts_only_group_objects(self):
         """testing if a ValueError will be raised when trying to assign
-        anything other then a Group object to the permission_group argument
+        anything other then a PermissionGroup object to the permission_group
+        argument
         """
         
         test_values = [23123,
@@ -1194,7 +1190,8 @@ class UserTest(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_perimssion_groups_attribute_accepts_only_group_objects(self):
         """testing if a ValueError will be raised when trying to assign
-        anything other then a Group object to the permission_group attribute
+        anything other then a PermissionGroup object to the permission_group
+        attribute
         """
         
         test_values = [23123,
@@ -1238,7 +1235,8 @@ class UserTest(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_permission_groups_attribute_elements_accepts_Group_only(self):
         """testing if a ValueError will be raised when trying to assign
-        something other than a Group object to the permission_groups list
+        something other than a PermissionGroup object to the permission_groups
+        list
         """
         
         # append
@@ -1258,117 +1256,163 @@ class UserTest(mocker.MockerTestCase):
     
     
     
+    ##----------------------------------------------------------------------
+    #def test_projects_argument_accepts_an_empty_list(self):
+        #"""testing if projects argument accepts an empty list
+        #"""
+        
+        #self.kwargs["projects"] = []
+        
+        ## this should work properly
+        #User(**self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_attribute_accepts_an_empty_list(self):
+        #"""testing if projects attribute accepts an empty list
+        #"""
+        
+        ## this should work properly
+        #self.mock_user.projects = []
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_argument_None(self):
+        #"""testing if a ValueError will be raised when trying to assign None
+        #to the projects argument
+        #"""
+        
+        #self.kwargs["projects"] = None
+        #self.assertRaises(ValueError, User, **self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_attribute_None(self):
+        #"""testing if a ValueError will be raised when trying to assign None
+        #to the projects attribute
+        #"""
+        
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.mock_user,
+            #"projects",
+            #None
+        #)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_attribute_is_a_ValidatedList_instance(self):
+        #"""testing if the projects attribute is an instance of ValidatedList
+        #"""
+        
+        #self.assertIsInstance(self.mock_user.projects, ValidatedList)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_attribute_elements_accepts_Project_only(self):
+        #"""testing if a ValueError will be raised when trying to assign
+        #something other than a Project object to the projects list
+        #"""
+        
+        ## append
+        #self.assertRaises(
+            #ValueError,
+            #self.mock_user.projects.append,
+            #0
+        #)
+        
+        ## __setitem__
+        #self.assertRaises(
+            #ValueError,
+            #self.mock_user.projects.__setitem__,
+            #0,
+            #0
+        #)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_argument_accepts_only_a_list_of_project_objs(self):
+        #"""testing if a ValueError will be raised when trying to assign a list
+        #of other objects project argument
+        #"""
+        
+        #test_values = [ 123123, 1231.2132, ["a_project1", "a_project2"] ]
+        
+        #for test_value in test_values:
+            #self.kwargs["projects"] = test_value
+            #self.assertRaises(ValueError, User, **self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_attribute_accepts_only_a_list_of_project_objs(self):
+        #"""testing if a ValueError will be raised when trying to assign a list
+        #of other objects to projects attribute
+        #"""
+        
+        #test_values = [ 123123, 1231.2132, ["a_project1", "a_project2"] ]
+        
+        #for test_value in test_values:
+            #self.assertRaises(
+                #ValueError,
+                #setattr,
+                #self.mock_user,
+                #"projects",
+                #test_value
+            #)
+    
+    
+    
     #----------------------------------------------------------------------
-    def test_projects_argument_accepts_an_empty_list(self):
-        """testing if projects argument accepts an empty list
+    def test_projects_attribute_is_read_only(self):
+        """testing if the project attribute is read-only
         """
         
-        self.kwargs["projects"] = []
-        
-        # this should work properly
-        User(**self.kwargs)
+        self.assertRaises(AttributeError, setattr, self.mock_user, "projects",
+                         [])
     
     
     
     #----------------------------------------------------------------------
-    def test_projects_attribute_accepts_an_empty_list(self):
-        """testing if projects attribute accepts an empty list
+    def test_projects_attribute_is_calculated_from_the_project_tasks(self):
+        """testing if the projects is gathered from the project tasks
         """
         
-        # this should work properly
-        self.mock_user.projects = []
+        self.fail("test is not implemented yet")
     
     
     
     #----------------------------------------------------------------------
-    def test_projects_argument_None(self):
-        """testing if a ValueError will be raised when trying to assign None
-        to the projects argument
+    def test_projects_attribute_is_calculated_from_the_asset_tasks(self):
+        """testing if the projects is gathered from the asset tasks
         """
         
-        self.kwargs["projects"] = None
-        self.assertRaises(ValueError, User, **self.kwargs)
+        self.fail("test is not implemented yet")
     
     
     
     #----------------------------------------------------------------------
-    def test_projects_attribute_None(self):
-        """testing if a ValueError will be raised when trying to assign None
-        to the projects attribute
+    def test_projects_attribute_is_calculated_from_the_sequence_tasks(self):
+        """testing if the projects is gathered from the sequence tasks
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            "projects",
-            None
-        )
+        self.fail("test is not implemented yet")
     
     
     
     #----------------------------------------------------------------------
-    def test_projects_attribute_is_a_ValidatedList_instance(self):
-        """testing if the projects attribute is an instance of ValidatedList
+    def test_projects_attribute_is_calculated_from_the_shot_tasks(self):
+        """testing if the projects is gathered from the shot tasks
         """
         
-        self.assertIsInstance(self.mock_user.projects, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_projects_attribute_elements_accepts_Project_only(self):
-        """testing if a ValueError will be raised when trying to assign
-        something other than a Project object to the projects list
-        """
-        
-        # append
-        self.assertRaises(
-            ValueError,
-            self.mock_user.projects.append,
-            0
-        )
-        
-        # __setitem__
-        self.assertRaises(
-            ValueError,
-            self.mock_user.projects.__setitem__,
-            0,
-            0
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_projects_argument_accepts_only_a_list_of_project_objs(self):
-        """testing if a ValueError will be raised when trying to assign a list
-        of other objects project argument
-        """
-        
-        test_values = [ 123123, 1231.2132, ["a_project1", "a_project2"] ]
-        
-        for test_value in test_values:
-            self.kwargs["projects"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_projects_attribute_accepts_only_a_list_of_project_objs(self):
-        """testing if a ValueError will be raised when trying to assign a list
-        of other objects to projects attribute
-        """
-        
-        test_values = [ 123123, 1231.2132, ["a_project1", "a_project2"] ]
-        
-        for test_value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.mock_user,
-                "projects",
-                test_value
-            )
+        self.fail("test is not implemented yet")
     
     
     
@@ -1422,7 +1466,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_lead_argument_accepts_only_lits(self):
+    def test_projects_lead_argument_accepts_only_list(self):
         """testing if a ValueError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         projects_lead argument
@@ -1437,7 +1481,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_lead_argument_accepts_only_lits_of_project_obj(self):
+    def test_projects_lead_argument_accepts_only_lists_of_project_obj(self):
         """testing if a ValueError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         projects_lead argument
@@ -1450,7 +1494,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_lead_attribute_accepts_only_lits(self):
+    def test_projects_lead_attribute_accepts_only_lists(self):
         """testing if a ValueError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         projects_lead attribute
@@ -1463,7 +1507,7 @@ class UserTest(mocker.MockerTestCase):
                 ValueError,
                 setattr,
                 self.mock_user,
-                "projects",
+                "projects_lead",
                 test_value
             )
     
@@ -1587,7 +1631,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_sequences_lead_argument_accepts_only_lits(self):
+    def test_sequences_lead_argument_accepts_only_lists(self):
         """testing if a ValueError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         sequences_lead argument
@@ -1602,7 +1646,7 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_sequences_lead_argument_accepts_only_lits_of_project_obj(self):
+    def test_sequences_lead_argument_accepts_only_lists_of_project_obj(self):
         """testing if a ValueError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         sequences_lead argument

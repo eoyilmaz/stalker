@@ -1,5 +1,7 @@
 #-*- coding: utf-8 -*-
 
+import datetime
+
 #
 # The default database addres
 # 
@@ -53,18 +55,18 @@ CORE_MODEL_CLASSES = [
     "stalker.core.models.Booking",
     "stalker.core.models.Comment",
     "stalker.core.models.Department",
-    "stalker.core.models.FilenameTemplate",
     "stalker.core.models.Entity",
-    "stalker.core.models.Group",
+    "stalker.core.models.FilenameTemplate",
     "stalker.core.models.ImageFormat",
     "stalker.core.models.Link",
     "stalker.core.models.Message",
     "stalker.core.models.Note",
+    "stalker.core.models.PermissionGroup",
     "stalker.core.models.Project",
     "stalker.core.models.Repository",
     "stalker.core.models.Sequence",
-    "stalker.core.models.SimpleEntity",
     "stalker.core.models.Shot",
+    "stalker.core.models.SimpleEntity",
     "stalker.core.models.Status",
     "stalker.core.models.StatusList",
     "stalker.core.models.Structure",
@@ -74,3 +76,5 @@ CORE_MODEL_CLASSES = [
     "stalker.core.models.User",
     "stalker.core.models.Version",
 ]
+
+DEFAULT_TASK_DURATION = datetime.timedelta(days=10)

@@ -307,6 +307,7 @@ class SimpleEntity(object):
             return self._name
         
         def fset(self, name_in):
+            assert(isinstance(self, SimpleEntity))
             self._name = self._validate_name(name_in)
             
             # also set the nice_name
@@ -328,7 +329,7 @@ class SimpleEntity(object):
         
         def fget(self):
             # also set the nice_name
-            if self._nice_name is None:
+            if self._nice_name is None or self._nice_name == "":
                 self._nice_name = self._condition_nice_name(self._name)
             
             return self._nice_name
@@ -1784,11 +1785,46 @@ class Department(Entity):
 
 
 ########################################################################
-class Group(Entity):
-    """the group class
+class PermissionGroup(SimpleEntity):    
+    """Manages permission in the system.
+    
+    A PermissionGroup object maps permission for tasks like Create, Read,
+    Update, Delete operations in the system to available classes in the system.
+    
+    It reads the :attr:`~stalker.conf.defaults.CORE_MODEL_CLASSES` list to get
+    the list of available classes which can be created. It then stores a binary
+    value for each of the class.
+    
+    A :class:`~stalker.core.models.User` can be in several
+    :class:`~stalker.core.models.PermissionGroup`\ s. The combined permission
+    for an object is calculated with an ``OR`` (``^``) operation. So if one of
+    the :class:`~stalker.core.models.PermissionGroup`\ s of the
+    :class:`~stalker.core.models.User` is allowing the action then the user is
+    allowed to do the operation.
+    
+    The permissions are stored in a dictionary. The key is the class name and
+    the value is a 4-bit binary integer value like 0b0001.
+    
+    +-------------------+--------+------+--------+--------+
+    |        0b         |   0    |  0   |   0    |   0    |
+    +-------------------+--------+------+--------+--------+
+    | binary identifier | Create | Read | Update | Delete |
+    |                   | Bit    | Bit  | Bit    | Bit    |
+    +-------------------+--------+------+--------+--------+
+    
+    :param dict permissions: A Python dictionary showing the permissions. The
+      key is the name of the Class and the value is the permission bit.
+    
+    
+    NOTE TO DEVELOPERS: a Dictionary-Based Collections should be used in
+    SQLAlchemy.
     """
     
-    pass
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(PermissionGroup, self).__init__(**kwargs)
+        
+        pass
 
 
 
@@ -2753,6 +2789,11 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     
+    # fix creation with __new__
+    _cut_out = None
+    
+    
+    
     #----------------------------------------------------------------------
     def __init__(self,
                  code=None,
@@ -3039,6 +3080,8 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     #----------------------------------------------------------------------
     def cut_out():
         def fget(self):
+            if self._cut_out is None:
+                self._update_cut_info(self._cut_in, self._cut_duration, None)
             return self._cut_out
         
         def fset(self, cut_out_in):
@@ -3357,14 +3400,6 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     :class:`~stalker.core.models.Asset` (ie. has its
     :attr:`~stalker.core.models.Type.target_entity_type` set to "Asset"),
     
-    ..::
-      :class:`~stalker.core.models.AssetType`\ s are templates defining group of
-      :class:`~stalker.core.models.Task`\ s. So an
-      :class:`~stalker.core.models.Asset` in **Character**
-      :class:`~stalker.core.models.AssetType` can have
-      :class:`~stalker.core.models.Task`\ s like, **Design**, **Model**, **Rig**,
-      **Shading**.
-    
     :param project: The :class:`~stalker.core.models.Project` instance that
       this asset belongs to. An asset can not be created without a
       :class:`~stalker.core.models.Project` instance.
@@ -3495,8 +3530,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
        * :class:`~stalker.core.models.Shot`
     
-    Task is mixed with :class:`~stalker.core.mixins.StatusMixin` and
-    :class:`~stalker.core.mixins.ScheduleMixin`.
+    If you want to have your own class to be *taskable* user the
+    :class:`~stalker.core.mixins.TaskMixin` to add the ability to connect a
+    :class:`~stalker.core.models.Task` to it.
+    
+    The Task class itself is mixed with
+    :class:`~stalker.core.mixins.StatusMixin` and
+    :class:`~stalker.core.mixins.ScheduleMixin`. To be able to give the
+    :class:`~stalker.core.models.Task` a *Status* and a *start* and *end* time.
     
     :param int priority: It is a number between 0 to 1000 which defines the
       priority of the :class:`~stalker.core.models.Task`. The higher the value
@@ -3514,13 +3555,30 @@ class Task(Entity, StatusMixin, ScheduleMixin):
       take. The effort is equaly divided to the assigned resources. So if the
       effort is 10 days and 2 resources is assigned then the duration of the
       task is going to be 5 days (if both of the resources are free to work).
+      The default value is 1 day.
+      
+      The effort argument defines the duration of the task. Every resource is
+      counted equally effective and the duration will be calculated by the
+      simple formula:
+      
+      .. math::
+         
+         {duration} = \\frac{{effort}}{n_{resources}}
+      
+      And changing the duration will also effect the effort spend. The effort
+      will be calculated with the formula:
+      
+      .. math::
+         
+         {effort} = {duration} \\times {n_{resources}}
     
     :type effort: datetime.timedelta
     
-    :param depends: A list of other :class:`~stalker.core.models.Task`\ s that
-      this one depends to.
+    :param depends: A list of
+      :class:`~stalker.core.models.TaskDependencyRelation` objects, giving
+      information about the dependent tasks.
     
-    :type depends: list of :class:`~stalker.core.models.Task`
+    :type depends: list of :class:`~stalker.core.models.TaskDependencyRelation`
     
     :param depend_relation: An enumerator that has the values of
       "0|START-START", "1|START-END", "2|END-END" which defines the relation of
@@ -3528,16 +3586,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :type depend_relation: enumerator
     
-    :param int percent_complete: An integer number between 0-100 showing how
-      much this task is completed.
+    :param bool complete: A bool value showing if this task is completed or
+      not. There is a good article_ about why not to use an attribute called
+      ``percent_complete`` to measure how much the task is completed.
+      
+      .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
     
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
-    
-    :param type: The type of the task. Which is defined by a
-      :class:`~stalker.core.models.TaskType` instance. A
-      :class:`~stalker.core.models.TaskType` can be "MODEL", "RIG", "SHADING",
-      "RENDERING" etc. and generally is defined by the :class:
     
     :param bookings: A list of :class:`~stalker.core.models.Booking` objects
       showing who spent how much effort on this task.
@@ -3551,12 +3607,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     :type versions: list of :class:`~stalker.core.models.Version`
     """
     
-    #:param published_version: A shortcut to the
-      #:class:`~stalker.core.models.Versions`\ s which have their published to
-      #set
-    
-    
-    
     # for testing purposes
     resources = []
     
@@ -3569,6 +3619,52 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
+
+
+
+
+
+
+########################################################################
+class TaskDependencyRelation(object):
+    """Holds information about :class:`~stalker.core.models.Task` dependencies.
+    
+    (DEVELOPERS: It could be an association proxy for the Task class)
+    
+    A TaskDependencyRelation object basically defines which
+    :class:`~stalker.core.models.Task` is dependedt
+    to which other :class:`~stalker.core.models.Task` and what is the lag
+    between the end of the dependent to the start of the dependee.
+    
+    A :class:`~stalker.core.models.Task` can not be set dependent to it self.
+    So the the :attr:`~stalker.core.models.TaskDependencyRelation.depends` list
+    can not contain the same value with
+    :attr:`~stalker.core.models.TaskDependencyRelation.task`.
+    
+    :param task: The :class:`~stalker.core.models.Task` that is dependent to
+      others.
+    
+    :type task: :class:`~stalker.core.models.Task`
+    
+    :param depends: A :class:`~stalker.core.models.Task`\ s that the
+      :class:`~stalker.core.models.Task` which is held by the
+      :attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
+      dependening on. The :attr:`~stalker.core.models.Task.start_date` and the
+      :attr:`~stalker.core.models.Task.due_date` attributes of the
+      :class:`~stalker.core.models.Task` is updated if it is before the
+      ``due_date`` of the dependent :class:`~stalker.core.models.Task`.
+    
+    :type depends: :class:`~stalker.core.models.Task`
+    
+    :param lag: The lag between the end of the dependent task to the start of
+      the dependee. It is an instance of timedelta and could be a negative
+      value. The default is 0. So the end of the task is start of the other.
+    """
+    
+    #----------------------------------------------------------------------
+    def __init__(self):
+        pass
+    
 
 
 
@@ -4031,7 +4127,8 @@ class User(Entity):
       user has been assigned to
     
     :param projects: it is a list of Project objects which holds the projects
-      that this user is a part of
+      that this user is a part of. Calculated from all the
+      :class:`~stalker.core.models.Task`\ s of the current User.
     
     :param projects_lead: it is a list of Project objects that this user
       is the leader of, it is for back refefrencing purposes
@@ -4045,6 +4142,11 @@ class User(Entity):
     :param initials: it is the initials of the users name, if nothing given it
       will be calculated from the first and last names of the user
     """
+    
+    
+    
+    # fix __new__ errors
+    _projects = []
     
     
     
@@ -4357,15 +4459,13 @@ class User(Entity):
                              "objects")
         
         for permission_group in permission_groups_in:
-            if not isinstance(permission_group, Group):
-                raise ValueError("any group in permission_groups should be an "
-                                 "instance of stalker.core.models.Group")
+            if not isinstance(permission_group, PermissionGroup):
+                raise ValueError(
+                    "any group in permission_groups should be an instance of"
+                    "stalker.core.models.PermissionGroup"
+                )
         
-        #if len(permission_groups_in) == 0:
-            #raise ValueError("users should be assigned at least to one "
-            #                 "permission_group")
-        
-        return ValidatedList(permission_groups_in, Group)
+        return ValidatedList(permission_groups_in, PermissionGroup)
     
     
     
@@ -4674,7 +4774,7 @@ class User(Entity):
                 self._validate_permission_groups(permission_groups_in)
         
         doc = """permission groups that this users is a member of, accepts
-        :class:`~stalker.core.models.Group` object"""
+        :class:`~stalker.core.models.PermissionGroup` object"""
         
         return locals()
     
@@ -4688,11 +4788,24 @@ class User(Entity):
         def fget(self):
             return self._projects
         
-        def fset(self, projects_in):
-            self._projects = self._validate_projects(projects_in)
+        doc = """The list of :class:`~stlalker.core.models.Project`\ s those the current user assigned to.
         
-        doc = """projects those the current user assigned to, accepts
-        :class:`~stalker.core.models.Project` object"""
+        returns a list of :class:`~stalker.core.models.Project` objects.
+        It is a read-only attribute. To assign a
+        :class:`~stalker.core.models.User` to a
+        :class:`~stalker.core.models.Project`, you need to create a new
+        :class:`~stalker.core.models.Task` with the
+        :attr:`~stalker.core.models.Task.resources` is set to this
+        :class:`~stalker.core.models.User` and assign the
+        :class:`~stalker.core.models.Task` to the
+        :class:`~stalker.core.models.Project` or to one of the
+        :class:`~stalker.core.models.Sequence`\ s of the
+        :class:`~stalker.core.models.Project` or to one of the
+        :class:`~stalker.core.models.Shot`\ s of the
+        :class:`~stalker.core.models.Sequence`\ s or to one of the
+        :class:`~stalker.core.models.Asset`\ s in the
+        :class:`~stalker.core.models.Project`.
+        """
         
         return locals()
     

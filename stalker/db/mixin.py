@@ -9,6 +9,7 @@ from sqlalchemy import (
     Table,
     Column,
     Date,
+    Interval,
     ForeignKey,
     Integer,
 )
@@ -226,12 +227,17 @@ class ScheduleMixinDB(object):
             Column("due_date", Date),
         )
         
+        class_table.append_column(
+            Column("duration", Interval),
+        )
         
         new_properties = {
             "_start_date": class_table.c.start_date,
             "start_date": synonym("_start_date"),
             "_due_date": class_table.c.due_date,
             "due_date": synonym("_due_date"),
+            "_duration": class_table.c.duration,
+            "duration": synonym("_duration"),
         }
         
         try:

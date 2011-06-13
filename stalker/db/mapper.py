@@ -16,10 +16,10 @@ from stalker.core.models import (
     Comment,
     Department,
     Entity,
-    Group,
     ImageFormat,
     Link,
     Note,
+    PermissionGroup,
     Project,
     ReferenceMixin,
     Repository,
@@ -48,7 +48,7 @@ def setup():
     
     # Entity_Type_IDs
     
-    
+    # *******************************************************************
     # SimpleEntity
     mapper(
         SimpleEntity,
@@ -93,7 +93,7 @@ def setup():
     )
     
     
-    
+    # *******************************************************************
     # Tag
     mapper(
         Tag,
@@ -103,7 +103,16 @@ def setup():
     )
     
     
+    # *******************************************************************
+    # PermissionGroup
+    mapper(
+        PermissionGroup,
+        tables.PermissionGroups,
+        inherits=PermissionGroup.__base__,
+        polymorphic_identity=PermissionGroup.entity_type
+    )
     
+    # *******************************************************************
     # Entity
     mapper(
         Entity,
@@ -129,6 +138,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # User
     mapper(
         User,
@@ -154,11 +164,32 @@ def setup():
             "password": synonym("_password"),
             "_last_login": tables.Users.c.last_login,
             "last_login": synonym("_last_login"),
+            "_permission_groups": relationship(
+                PermissionGroup,
+                secondary=tables.User_PermissionGroups,
+                primaryjoin=\
+                    tables.Users.c.id==tables.User_PermissionGroups.c.user_id,
+                secondaryjoin=\
+                    tables.User_PermissionGroups.c.permissionGroup_id==\
+                    tables.PermissionGroups.c.id
+            ),
+            "permission_groups": synonym("_permission_groups"),
+            "projects_lead": synonym("_projects_lead"),
+            "sequences_lead": synonym("_sequences_lead"),
+            "_tasks": relationship(
+                Task,
+                secondary=tables.Tasks,
+                primaryjoin=tables.Users.c.id==tables.User_Tasks.c.user_id,
+                secondaryjoin=tables.User_Tasks.c.task_id==tables.Tasks.c.id,
+                backref="_resources",
+            ),
+            "tasks": synonym("_tasks"),
         },
     )
     
     
     
+    # *******************************************************************
     # Department
     mapper(
         Department,
@@ -186,6 +217,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Status
     mapper(
         Status,
@@ -197,6 +229,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # StatusList
     mapper(
         StatusList,
@@ -217,6 +250,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Repository
     mapper(
         Repository,
@@ -237,6 +271,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # ImageFormat
     mapper(
         ImageFormat,
@@ -260,6 +295,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Type
     mapper(
         Type,
@@ -271,6 +307,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # FilenameTemplate
     mapper(
         FilenameTemplate,
@@ -298,6 +335,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Structure
     mapper(
         Structure,
@@ -318,6 +356,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Links
     mapper(
         Link,
@@ -336,6 +375,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Notes
     mapper(
         Note,
@@ -351,6 +391,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Project
     project_mapper_arguments = dict(
         inherits=Project.__base__,
@@ -359,6 +400,7 @@ def setup():
         properties={
             "_lead": relationship(
                 User,
+                backref="_projects_lead",
                 primaryjoin=tables.Projects.c.lead_id==tables.Users.c.id,
             ),
             "lead": synonym("_lead"),
@@ -418,6 +460,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Task
     # WARNING: Not finished, it is a temporary implementation, created to be
     # able to test other classes
@@ -425,7 +468,10 @@ def setup():
     task_mapper_arguments = dict(
         inherits=Task.__base__,
         polymorphic_identity=Task.entity_type,
-        inherit_condition=tables.Tasks.c.id==tables.Entities.c.id
+        inherit_condition=tables.Tasks.c.id==tables.Entities.c.id,
+        properties={
+            "resources": synonym("_resources"),
+        }
     )
     
     # mix it with StatusMixin
@@ -442,6 +488,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Asset
     asset_mapper_arguments = dict(
         inherits=Asset.__base__,
@@ -474,6 +521,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Shot
     shot_mapper_arguments = dict(
         inherits=Shot.__base__,
@@ -500,6 +548,7 @@ def setup():
             "cut_in": synonym("_cut_in"),
             "_cut_duration": tables.Shots.c.cut_duration,
             "cut_duration": synonym("_cut_duration"),
+            "cut_out": synonym("_cut_out"),
             "_code": tables.SimpleEntities.c.code, # overloaded attribute
             "code": synonym("_code"), # overloaded property
         }
@@ -521,6 +570,7 @@ def setup():
     
     
     
+    # *******************************************************************
     # Sequence
     sequence_mapper_arguments = dict(
         inherits=Sequence.__base__,
@@ -544,6 +594,7 @@ def setup():
             "_lead": relationship(
                 User,
                 primaryjoin=tables.Sequences.c.lead_id==tables.Users.c.id,
+                backref="_sequences_lead",
                 post_update=True
             ),
             "lead": synonym("_lead")

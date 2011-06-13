@@ -57,11 +57,11 @@ Summary
    stalker.core.models.Department
    stalker.core.models.FilenameTemplate
    stalker.core.models.Entity
-   stalker.core.models.Group
    stalker.core.models.ImageFormat
    stalker.core.models.Link
    stalker.core.models.Message
    stalker.core.models.Note
+   stalker.core.models.PermissionGroup
    stalker.core.models.Project
    stalker.core.models.Repository
    stalker.core.models.Sequence

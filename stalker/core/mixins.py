@@ -13,6 +13,7 @@ and mappers.
 
 
 import datetime
+from stalker.conf import defaults
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -238,93 +239,98 @@ class StatusMixin(object):
 class ScheduleMixin(object):
     """Adds schedule info to the mixed in class.
     
-    The schedule is the right mixin for entities which needs schedule
-    information like ``start_date``, ``due_date`` and ``duration``
+    Adds schedule information like ``start_date``, ``due_date`` and
+    ``duration``. There are theree parameters to initialize a class with
+    ScheduleMixin, which are, ``start_date``, ``due_date`` and ``duration``.
+    Only two of them are enough to initialize the class. The preceeding order
+    for the parameters is as follows::
+      
+      start_date > due_date > duration
     
+    So if all of the parameters are given only the ``start_date`` and the
+    ``due_date`` will be used and the ``duration`` will be calculated
+    accordingly. In any other conditions the missing parameter will be
+    calculated from the following table:
+    
+    +------------+----------+----------+----------------------------------------+
+    | start_date | due_date | duration | DEFAULTS                               |
+    +============+==========+==========+========================================+
+    |            |          |          | start_date = datetime.date.today()     |
+    |            |          |          |                                        |
+    |            |          |          | duration = datetime.timedelta(days=10) |
+    |            |          |          |                                        |
+    |            |          |          | due_date = start_date + duration       |
+    +------------+----------+----------+----------------------------------------+
+    |     X      |          |          | duration = datetime.timedelta(days=10) |
+    |            |          |          |                                        |
+    |            |          |          | due_date = start_date + duration       |
+    +------------+----------+----------+----------------------------------------+
+    |     X      |    X     |          | duration = due_date - start_date       |
+    +------------+----------+----------+----------------------------------------+
+    |     X      |          |    X     | due_date = start_date + duration       |
+    +------------+----------+----------+----------------------------------------+
+    |     X      |    X     |    X     | duration = due_date - start_date       |
+    +------------+----------+----------+----------------------------------------+
+    |            |    X     |    X     | start_date = due_date - duration       |
+    +------------+----------+----------+----------------------------------------+
+    |            |    X     |          | duration = datetime.timedelta(days=10) |
+    |            |          |          |                                        |
+    |            |          |          | start_date = due_date - duration       |
+    +------------+----------+----------+----------------------------------------+
+    |            |          |    X     | start_date = datetime.date.today()     |
+    |            |          |          |                                        |
+    |            |          |          | due_date = start_date + duration       |
+    +------------+----------+----------+----------------------------------------+
+      
     The date attributes can be managed with timezones. Follow the Python idioms
     shown in the `documentation of datetime`_
     
     .. _documentation of datetime: http://docs.python.org/library/datetime.html
     
     :param start_date: the start date of the entity, should be a datetime.date
-      instance, when given as None or tried to be set to None, it is to set to
-      today, setting the start date also effects due date, if the new
-      start_date passes the due_date the due_date is also changed to a date to
-      keep the timedelta between dates. The default value is
+      instance, the start_date is the pin point for the date calculation. In
+      any condition if the start_date is available then the value will be
+      preserved. If start_date passes the due_date the due_date is also changed
+      to a date to keep the timedelta between dates. The default value is
       datetime.date.today()
     
     :type start_date: :class:`datetime.datetime`
     
-    :param due_date: the due_date of the entity, should be a datetime.date or
-      datetime.timedelta instance, if given as a datetime.timedelta, then it
-      will be converted to date by adding the timedelta to the start_date
-      attribute, when the start_date is changed to a date passing the due_date,
-      then the due_date is also changed to a later date so the timedelta is
-      kept between the dates. The default value is 10 days given as
-      datetime.timedelta
+    :param due_date: the due_date of the entity, should be a datetime.date
+      instance, when the start_date is changed to a date passing the due_date,
+      then the due_date is also changed to a later date so the timedelta
+      between the dates is kept.
     
     :type due_date: :class:`datetime.datetime` or :class:`datetime.timedelta`
     
+    :param duration: The duration of the entity. It is a
+      :class:`datetime.timedelta` instance. The default value is read from
+      the :mod:`~stalker.conf.defaults` module. See the table above for the
+      initialization rules.
+    
+    :type duration: :class:`datetime.timedelta`
     """
     
     
-    _start_date = datetime.date.today()
-    _due_date = _start_date + datetime.timedelta(days=10)
-    _duration = _due_date - _start_date
+    _start_date = None
+    _due_date = None
+    _duration = None
     
     
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 start_date=datetime.date.today(),
-                 due_date=datetime.timedelta(days=10),
+                 start_date=None,
+                 due_date=None,
+                 duration=None,
                  **kwargs
                  ):
         
-        self._start_date = self._validate_start_date(start_date)
-        self._due_date = self._validate_due_date(due_date)
-        self._duration = self.due_date - self.start_date
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_due_date(self, due_date_in):
-        """validates the given due_date_in value
-        """
+        self._start_date = None
+        self._due_date = None
+        self._duration = None
         
-        if due_date_in is None:
-            due_date_in = datetime.timedelta(days=10)
-        
-        if not isinstance(due_date_in, (datetime.date, datetime.timedelta)):
-            raise ValueError("the due_date should be an instance of "
-                             "datetime.date or datetime.timedelta")
-        
-        if isinstance(due_date_in, datetime.date) and \
-           self.start_date > due_date_in:
-            raise ValueError("the due_date should be set to a date passing "
-                             "the start_date, or should be set to a "
-                             "datetime.timedelta")
-        
-        if isinstance(due_date_in, datetime.timedelta):
-            due_date_in = self._start_date + due_date_in
-        
-        return due_date_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_start_date(self, start_date_in):
-        """validates the given start_date_in value
-        """
-        
-        if start_date_in is None:
-            start_date_in = datetime.date.today()
-        
-        if not isinstance(start_date_in, datetime.date):
-            raise ValueError("start_date shouldbe an instance of "
-                             "datetime.date")
-        
-        return start_date_in
+        self._validate_dates(start_date, due_date, duration)
     
     
     
@@ -334,10 +340,14 @@ class ScheduleMixin(object):
             return self._due_date
         
         def fset(self, due_date_in):
-            self._due_date = self._validate_due_date(due_date_in)
+            #self._due_date = self._validate_due_date(due_date_in)
             
             # update the project duration
-            self.update_duration()
+            #self.update_duration()
+            
+            self._validate_dates(self.start_date,
+                                 due_date_in,
+                                 self.duration)
         
         doc = """The date that the entity should be delivered.
         
@@ -359,23 +369,31 @@ class ScheduleMixin(object):
             return self._start_date
         
         def fset(self, start_date_in):
-            self._start_date = self._validate_start_date(start_date_in)
+            #self._start_date = self._validate_start_date(start_date_in)
             
             # check if start_date is passing due_date and offset due_date
             # accordingly
-            if self._start_date > self._due_date:
-                self._due_date = self._start_date + self._duration
+            #if self._start_date > self._due_date:
+                #self._due_date = self._start_date + self._duration
             
             # update the project duration
-            self.update_duration()
+            #self.update_duration()
+            
+            self._validate_dates(start_date_in, self.due_date, self.duration)
         
         doc = """The date that this entity should start.
         
-        Also effects the due_date in certain conditions, if the start_date is
-        set to a time passing the due_date it will also offset the due_date to
-        keep the time difference between the start_date and due_date.
-        start_date should be an instance of datetime.date and the default value
-        is datetime.date.today()"""
+        Also effects the
+        :attr:`~stalker.core.mixins.ScheduleMixin.due_date` attribute value in
+        certain conditions, if the
+        :attr:`~stalker.core.mixins.ScheduleMixin.start_date` is set to a time
+        passing the :attr:`~stalker.core.mixins.ScheduleMixin.due_date` it will
+        also offset the :attr:`~stalker.core.mixins.ScheduleMixin.due_date` to
+        keep the :attr:`~stalker.core.mixins.ScheduleMixin.duration` value
+        fixed. :attr:`~stalker.core.mixins.ScheduleMixin.start_date` should be
+        an instance of class:`datetime.date` and the default value is
+        :func:`datetime.date.today()`
+        """
         
         return locals()
 
@@ -386,15 +404,27 @@ class ScheduleMixin(object):
     #----------------------------------------------------------------------
     def duration():
         def fget(self):
-            #if self._duration is None:
-            self.update_duration()
-            
             return self._duration
+        
+        def fset(self, duration_in):
+            
+            if not duration_in is None:
+                if isinstance(duration_in, datetime.timedelta):
+                    # set the due_date to None
+                    # to make it recalculated
+                    self._validate_dates(self.start_date, None, duration_in)
+                else:
+                    self._validate_dates(self.start_date, self.due_date, duration_in)
+            else:
+                self._validate_dates(self.start_date, self.due_date, duration_in)
         
         doc = """Duration of the project.
         
-        The duration is calculated by subtracting start_date from the due_date,
-        so it is a datetime.timedelta, for now it is read-only.
+        It is a datetime.timedelta instance. Showing the difference of the
+        :attr:`~stalker.core.mixins.ScheduleMixin.start_date` and the
+        :attr:`~stalker.core.mixins.ScheduleMixin.due_date`. If edited it
+        changes the :attr:`~stalker.core.mixins.ScheduleMixin.due_date`
+        attribute value.
         """
         
         return locals()
@@ -403,8 +433,63 @@ class ScheduleMixin(object):
     
     
     
-    def update_duration(self):
+    def _validate_dates(self, start_date, due_date, duration):
+        """updates the date values
+        """
+        
+        
+        if not isinstance(start_date, datetime.date):
+            start_date = None
+        
+        if not isinstance(due_date, datetime.date):
+            due_date = None
+        
+        if not isinstance(duration, datetime.timedelta):
+            duration = None
+        
+        
+        # check start_date
+        if start_date is None:
+            # try to calculate the start_date from due_date and duration
+            if due_date is None:
+                
+                # set the defaults
+                start_date = datetime.date.today()
+                
+                if duration is None:
+                    # set the defaults
+                    duration = defaults.DEFAULT_TASK_DURATION
+                
+                due_date = start_date + duration
+            else:
+                
+                if duration is None:
+                    duration = defaults.DEFAULT_TASK_DURATION
+                
+                start_date = due_date - duration
+        
+        # check due_date
+        if due_date is None:
+            
+            if duration is None:
+                duration = defaults.DEFAULT_TASK_DURATION
+            
+            due_date = start_date + duration
+        
+        
+        if due_date < start_date:
+            
+            # check duration
+            if duration < datetime.timedelta(1):
+                duration = datetime.timedelta(1)
+            
+            due_date = start_date + duration
+        
+        self._start_date = start_date
+        self._due_date = due_date
         self._duration = self._due_date - self._start_date
+        
+        
 
 
 
