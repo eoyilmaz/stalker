@@ -96,6 +96,8 @@ v0.1.1.a9
    :attr:`~stalker.core.mixins.ScheduleMixin.duration` in
    :class:`~stalker.core.mixins.ScheduleMixin` is updated.
 
+ * Added :class:`~stalker.core.errors.CircularDependencyError`.
+
 v0.1.1.a8
 ---------
 

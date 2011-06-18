@@ -31,6 +31,11 @@ TODO:
    unicode.
 
  * Convert all the list comparison test to assertItemsEqual
+ 
+ * Add a slot in the ValidatedList which will hold the callable when any of the
+   objects are changed (set, remove, delete etc.) to allow the callable to be
+   called when something has changed. This will allow more control on the list,
+   e.g. the normal list operations will be in control.
 
 DONE:
 =====

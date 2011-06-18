@@ -43,6 +43,7 @@ Summary
    stalker.db.session
    stalker.db.setup
    stalker.core.errors
+   stalker.core.errors.CircularDependencyError
    stalker.core.errors.LoginError
    stalker.core.errors.DBError
    stalker.core.mixins

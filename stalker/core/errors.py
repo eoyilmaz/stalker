@@ -53,3 +53,19 @@ class DBError(Exception):
 
 
 
+########################################################################
+class CircularDependencyError(Exception):
+    """Raised when there is cirular dependencies within Tasks
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, value=""):
+        self.value = value
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __str__(self):
+        return repr(self.value)

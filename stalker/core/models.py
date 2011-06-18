@@ -3574,38 +3574,74 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :type effort: datetime.timedelta
     
-    :param depends: A list of
-      :class:`~stalker.core.models.TaskDependencyRelation` objects, giving
-      information about the dependent tasks.
+    :param depends: A list of :class:`~stalker.core.models.Task`\ s those this
+      :class:`~stalker.core.models.Task` is dependening on.
     
-    :type depends: list of :class:`~stalker.core.models.TaskDependencyRelation`
-    
-    :param depend_relation: An enumerator that has the values of
-      "0|START-START", "1|START-END", "2|END-END" which defines the relation of
-      dependent :class:`~stalker.core.models.Task`\ s.
-    
-    :type depend_relation: enumerator
-    
-    :param bool complete: A bool value showing if this task is completed or
-      not. There is a good article_ about why not to use an attribute called
-      ``percent_complete`` to measure how much the task is completed.
-      
-      .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
+    :type depends: list of :class:`~stalker.core.models.Task`
     
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
     
-    :param bookings: A list of :class:`~stalker.core.models.Booking` objects
-      showing who spent how much effort on this task.
-    
-    :type bookings: list of :class:`~stalker.core.models.Booking`
-    
-    :param versions: A list of :class:`~stalker.core.models.Version` objects
-      showing the produced work on the repository. This is the relation between
-      database and the repository.
-    
-    :type versions: list of :class:`~stalker.core.models.Version`
     """
+    #.. :param depends: A list of
+         #:class:`~stalker.core.models.TaskDependencyRelation` objects. Holds
+         #information about the list of other :class:`~stalker.core.models.Task`\ s
+         #which the current one is dependent on.
+         
+      #.. giving information about the dependent tasks. The given list is iterated
+         #and the :attr:`~stalker.core.models.Task.start_date` attribute is set to
+         #the latest found :attr:`~stalker.core.models.Task.due_date` attribute of
+         #the dependent :class:`~stalker.core.models.Task`\ s.
+    
+    #.. :type depends: list of :class:`~stalker.core.models.TaskDependencyRelation`
+    
+       
+       #:param parent_task: Another :class:`~stalker.core.models.Task` which is the
+         #parent of the current :class:`~stalker.core.models.Task`.
+         
+         #:class:`~stalker.core.models.Task`\ s can be grouped by using parent and
+         #child relation.
+       
+       #:type parent_task: :class:`~stalker.core.models.Task`
+       
+       #:param sub_tasks: A list of other :class:`~stalker.core.models.Task`\ s
+         #which are the child of the current one. A
+         #:class:`~stalker.core.models.Task` with other child
+         #:class:`~stalker.core.models.Task`\ s:
+         
+           #* can not have any resources
+           #* can not have any effort set
+           #* can not have any versions
+         
+         #The only reason of a :class:`~stalker.core.models.Task` to have other
+         #:class:`~stalker.core.models.Task`\ s as child is to group them. So it
+         #is meaningles to let a parent :class:`~stalker.core.models.Task` to have
+         #any resource or any effort or any verions. The
+         #:attr:`~stalker.core.models.Task.start_date`,
+         #:attr:`~stalker.core.models.Task.due_date` and
+         #:attr:`~stalker.core.models.Task.duration` attributes of a
+         #:class:`~stalker.core.models.Task` with child classes will be based on
+         #it childrens date attributes.
+       
+       #:type child_tasks: :class:`~stalker.core.models.Task`.
+       
+       #:param bookings: A list of :class:`~stalker.core.models.Booking` objects
+         #showing who spent how much effort on this task.
+       
+       #:type bookings: list of :class:`~stalker.core.models.Booking`
+       
+    #:param bool complete: A bool value showing if this task is completed or
+      #not. There is a good article_ about why not to use an attribute called
+      #``percent_complete`` to measure how much the task is completed.
+      
+      #.. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
+    
+    #:param versions: A list of :class:`~stalker.core.models.Version` objects
+      #showing the produced work on the repository. This is the relation between
+      #database and the repository.
+    
+    #:type versions: list of :class:`~stalker.core.models.Version`
+    #"""
     
     # for testing purposes
     resources = []
@@ -3625,46 +3661,45 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 
 
 
-########################################################################
-class TaskDependencyRelation(object):
-    """Holds information about :class:`~stalker.core.models.Task` dependencies.
+#########################################################################
+#class TaskDependencyRelation(object):
+    #"""Holds information about :class:`~stalker.core.models.Task` dependencies.
     
-    (DEVELOPERS: It could be an association proxy for the Task class)
+    #(DEVELOPERS: It could be an association proxy for the Task class)
     
-    A TaskDependencyRelation object basically defines which
-    :class:`~stalker.core.models.Task` is dependedt
-    to which other :class:`~stalker.core.models.Task` and what is the lag
-    between the end of the dependent to the start of the dependee.
+    #A TaskDependencyRelation object basically defines which
+    #:class:`~stalker.core.models.Task` is dependedt
+    #to which other :class:`~stalker.core.models.Task` and what is the lag
+    #between the end of the dependent to the start of the dependee.
     
-    A :class:`~stalker.core.models.Task` can not be set dependent to it self.
-    So the the :attr:`~stalker.core.models.TaskDependencyRelation.depends` list
-    can not contain the same value with
-    :attr:`~stalker.core.models.TaskDependencyRelation.task`.
+    #A :class:`~stalker.core.models.Task` can not be set dependent to it self.
+    #So the the :attr:`~stalker.core.models.TaskDependencyRelation.depends` list
+    #can not contain the same value with
+    #:attr:`~stalker.core.models.TaskDependencyRelation.task`.
     
-    :param task: The :class:`~stalker.core.models.Task` that is dependent to
-      others.
+    #:param task: The :class:`~stalker.core.models.Task` that is dependent to
+      #others.
     
-    :type task: :class:`~stalker.core.models.Task`
+    #:type task: :class:`~stalker.core.models.Task`
     
-    :param depends: A :class:`~stalker.core.models.Task`\ s that the
-      :class:`~stalker.core.models.Task` which is held by the
-      :attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
-      dependening on. The :attr:`~stalker.core.models.Task.start_date` and the
-      :attr:`~stalker.core.models.Task.due_date` attributes of the
-      :class:`~stalker.core.models.Task` is updated if it is before the
-      ``due_date`` of the dependent :class:`~stalker.core.models.Task`.
+    #:param depends: A :class:`~stalker.core.models.Task`\ s that the
+      #:class:`~stalker.core.models.Task` which is held by the
+      #:attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
+      #dependening on. The :attr:`~stalker.core.models.Task.start_date` and the
+      #:attr:`~stalker.core.models.Task.due_date` attributes of the
+      #:class:`~stalker.core.models.Task` is updated if it is before the
+      #``due_date`` of the dependent :class:`~stalker.core.models.Task`.
     
-    :type depends: :class:`~stalker.core.models.Task`
+    #:type depends: :class:`~stalker.core.models.Task`
     
-    :param lag: The lag between the end of the dependent task to the start of
-      the dependee. It is an instance of timedelta and could be a negative
-      value. The default is 0. So the end of the task is start of the other.
-    """
+    #:param lag: The lag between the end of the dependent task to the start of
+      #the dependee. It is an instance of timedelta and could be a negative
+      #value. The default is 0. So the end of the task is start of the other.
+    #"""
     
-    #----------------------------------------------------------------------
-    def __init__(self):
-        pass
-    
+    ##----------------------------------------------------------------------
+    #def __init__(self):
+        #pass
 
 
 
