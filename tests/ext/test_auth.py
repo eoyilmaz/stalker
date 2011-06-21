@@ -57,11 +57,11 @@ class AuthTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_login_with_user_argument_is_not_User_instance(self):
-        """testing if a LoginError will be raised when the user is not a User
+        """testing if a TypeError will be raised when the user is not a User
         instance
         """
         
-        self.assertRaises(ValueError, auth.login, 123)
+        self.assertRaises(TypeError, auth.login, 123)
     
     
     
@@ -155,7 +155,7 @@ class AuthTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_authenticate_without_a_db(self):
-        """testing if a ValueError will be raised whne there are no db setup
+        """testing if a DBError will be raised whne there are no db setup
         yet
         """
         
@@ -302,10 +302,10 @@ class PasswordTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_set_password_raw_password_None(self):
-        """testing if a ValueError will be raised when the raw_password is None
+        """testing if a TypeError will be raised when the raw_password is None
         """
         
-        self.assertRaises(ValueError, auth.set_password, None)
+        self.assertRaises(TypeError, auth.set_password, None)
     
     
     

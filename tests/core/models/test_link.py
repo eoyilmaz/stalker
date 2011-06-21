@@ -56,29 +56,29 @@ class LinkTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_path_argument_accepts_string_or_unicode_only(self):
-        """testing if path argument accepts string or unicode only and raises
-        ValueError otherwise
+        """testing if a TypeError will be raised when the path argument is not
+        a string or unicode instance
         """
         
         test_values = [1, 1.1, ["a path"], {"a": "path"}]
         
         for test_value in test_values:
             self.kwargs["path"] = test_value
-            self.assertRaises(ValueError, Link, **self.kwargs)
+            self.assertRaises(TypeError, Link, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_path_attribute_accpets_string_or_unicode_only(self):
-        """testing if path attribute accepts string or unicode only and raises
-        ValueError otherwise
+        """testing if a TypeError will be raised when the path attribute
+        is not a string or unicode instance
         """
         
         test_values = [1, 1.1, ["a path"], {"a": "path"}]
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_link,
                 "path",
@@ -116,21 +116,21 @@ class LinkTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_path_argument_being_None(self):
-        """testing if setting the path argument to None raises a ValueError
+        """testing if setting the path argument to None raises a TypeError
         """
         
         self.kwargs["path"] = None
-        self.assertRaises(ValueError, Link, **self.kwargs)
+        self.assertRaises(TypeError, Link, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_path_attribute_being_None(self):
-        """testing if setting the path attribute to None raises a ValueError
+        """testing if setting the path attribute to None raises a TypeError
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_link,
             "path",
@@ -156,28 +156,28 @@ class LinkTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_filename_argument_accepts_string_or_unicode_only(self):
         """testing if filename argument accepts string or unicode only and
-        raises ValueError otherwise
+        raises TypeError otherwise
         """
         
         test_values = [1, 1.1, ["a filename"], {"a": "filename"}]
         
         for test_value in test_values:
             self.kwargs["filename"] = test_value
-            self.assertRaises(ValueError, Link, **self.kwargs)
+            self.assertRaises(TypeError, Link, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_filename_attribute_accpets_string_or_unicode_only(self):
         """testing if filename attribute accepts string or unicode only and
-        raises ValueError otherwise
+        raises TypeError otherwise
         """
         
         test_values = [1, 1.1, ["a filename"], {"a": "filename"}]
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_link,
                 "filename",
@@ -215,89 +215,27 @@ class LinkTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_filename_argument_being_None(self):
-        """testing if setting the filename argument to None raises a ValueError
+        """testing if setting the filename argument to None raises a TypeError
         """
         
         self.kwargs["filename"] = None
-        self.assertRaises(ValueError, Link, **self.kwargs)
+        self.assertRaises(TypeError, Link, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_filename_attribute_being_None(self):
         """testing if setting the filename attribute to None raises a
-        ValueError
+        TypeError
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_link,
             "filename",
             None
         )
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_type_argument_being_None(self):
-        #"""testing if a ValueError will be raised when type argument is set to
-        #None
-        #"""
-        
-        #self.kwargs["type"] = None
-        #self.assertRaises(ValueError, Link, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_type_attribute_being_None(self):
-        #"""testing if a ValueError will be raised when type attribute is set to
-        #None
-        #"""
-        
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_link,
-            #"type",
-            #None
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_type_argument_accepts_only_LinkType_objects(self):
-        #"""testing if a ValueError will be raised when type argument is
-        #something other than a LinkType object
-        #"""
-        
-        #test_values = [1, 1.2, "A link Type", ["Another link type"],
-                       #{"another":"link type"}]
-        
-        #for test_value in test_values:
-            #self.kwargs["type"] = test_value
-            #self.assertRaises(ValueError, Link, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_type_attribute_accepts_only_LinkType_objects(self):
-        #"""testing if a ValueError will be raised when type attribute is
-        #somehting other than a LinkType object
-        #"""
-        
-        #test_values = [1, 1.2, "A link Type", ["Another link type"],
-                       #{"another":"link type"}]
-        
-        #for test_value in test_values:
-            #self.assertRaises(
-                #ValueError,
-                #setattr,
-                #self.mock_link,
-                #"type",
-                #test_value
-            #)
     
     
     

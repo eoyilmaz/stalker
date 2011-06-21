@@ -60,7 +60,7 @@ class ReferenceMixin(object):
         # it should be an object supporting indexing, not necessarily a list
         if not (hasattr(references_in, "__setitem__") and \
                 hasattr(references_in, "__getitem__")):
-            raise ValueError("the references_in should support indexing")
+            raise TypeError("the references_in should support indexing")
         
         #from stalker.core.models import Link
         from stalker.core import models
@@ -68,7 +68,7 @@ class ReferenceMixin(object):
         # all the elements should be instance of stalker.core.models.Link
         if not all([isinstance(element, models.Link)
                     for element in references_in]):
-            raise ValueError("all the elements should be instances of "
+            raise TypeError("all the elements should be instances of "
                              ":class:`stalker.core.models.Link`")
         
         return ValidatedList(references_in, models.Link)
@@ -137,12 +137,12 @@ class StatusMixin(object):
         """validates the given status_list_in value
         """
         
-        # raise ValueError when:
+        # raise TypeError when:
         from stalker.core import models
         
         # it is not an instance of status_list
         if not isinstance(status_list_in, models.StatusList):
-            raise ValueError("the status list should be an instance of "
+            raise TypeError("the status list should be an instance of "
                              "stalker.core.models.StatusList")
         
         # check if the entity_type matches to the StatusList.target_entity_type
@@ -161,22 +161,19 @@ class StatusMixin(object):
         """validates the given status_in value
         """
         
-        # raise ValueError when there is no status_list is not an instance of
-        # StatusList
-        
         from stalker.core.models import StatusList
         
         if not isinstance(self.status_list, StatusList):
-            raise ValueError("please set the status_list attribute first")
+            raise TypeError("please set the status_list attribute first")
         
         # it is set to None
         if status_in is None:
-            raise ValueError("the status couldn't be None, set it to a "
+            raise TypeError("the status couldn't be None, set it to a "
                              "non-negative integer")
         
         # it is not an instance of int
         if not isinstance(status_in, int):
-            raise ValueError("the status must be an instance of integer")
+            raise TypeError("the status must be an instance of integer")
         
         # if it is not in the correct range:
         if status_in < 0:
@@ -526,13 +523,13 @@ class TaskMixin(object):
             tasks_in = []
         
         if not isinstance(tasks_in, list):
-            raise ValueError("tasks should be a list")
+            raise TypeError("tasks should be a list")
         
         from stalker.core.models import Task
         
         for item in tasks_in:
             if not isinstance(item, Task):
-                raise ValueError("tasks should be a list of "
+                raise TypeError("tasks should be a list of "
                 "stalker.core.models.Task instances")
         
         return ValidatedList(tasks_in, Task)

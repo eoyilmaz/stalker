@@ -60,7 +60,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["linux_path"] = test_value
-            self.assertRaises(ValueError, Repository, **self.kwargs)
+            self.assertRaises(TypeError, Repository, **self.kwargs)
     
     
     
@@ -74,7 +74,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_repo,
                 "linux_path",
@@ -104,7 +104,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["windows_path"] = test_value
-            self.assertRaises(ValueError, Repository, **self.kwargs)
+            self.assertRaises(TypeError, Repository, **self.kwargs)
     
     
     
@@ -118,7 +118,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_repo,
                 "windows_path",
@@ -148,7 +148,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["osx_path"] = test_value
-            self.assertRaises(ValueError, Repository, **self.kwargs)
+            self.assertRaises(TypeError, Repository, **self.kwargs)
     
     
     
@@ -162,7 +162,7 @@ class RepositoryTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_repo,
                 "osx_path",

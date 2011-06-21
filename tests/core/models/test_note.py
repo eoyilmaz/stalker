@@ -90,7 +90,7 @@ class NoteTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_content_argument_is_set_to_something_other_than_a_string(self):
-        """testing if a ValueEror will be raised when trying to set the content
+        """testing if a TypeEror will be raised when trying to set the content
         argument to something other than a string or unicode
         """
         
@@ -98,13 +98,13 @@ class NoteTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["content"] = test_value
-            self.assertRaises(ValueError, Note, **self.kwargs)
+            self.assertRaises(TypeError, Note, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_content_attribute_is_set_to_something_other_than_a_string(self):
-        """testing if a ValueError will be raised when trying to set the
+        """testing if a TypeError will be raised when trying to set the
         content attribute to something other than a string or unicode
         """
         
@@ -113,7 +113,7 @@ class NoteTester(mocker.MockerTestCase):
         for test_value in test_values:
             
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_note,
                 "content",

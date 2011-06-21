@@ -195,7 +195,7 @@ class StatusListTest(mocker.MockerTestCase):
             
             self.kwargs["statuses"] = test_value
             
-            self.assertRaises(ValueError, StatusList, **self.kwargs)
+            self.assertRaises(TypeError, StatusList, **self.kwargs)
     
     
     
@@ -209,7 +209,7 @@ class StatusListTest(mocker.MockerTestCase):
         # check the attribute
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_status_list,
                 "statuses",
@@ -243,7 +243,7 @@ class StatusListTest(mocker.MockerTestCase):
         
         self.kwargs["statuses"] = a_fake_status_list
         
-        self.assertRaises(ValueError, StatusList, **self.kwargs)
+        self.assertRaises(TypeError, StatusList, **self.kwargs)
     
     
     
@@ -264,13 +264,13 @@ class StatusListTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_statuses_attributes_elements_changed_to_none_status_objects(self):
-        """testing if a ValueError will be raised when trying to set an
+        """testing if a TypeError will be raised when trying to set an
         individual element in the statuses list to an object which is not a
         Status instance
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_status_list.statuses.__setitem__,
             0,
             0
@@ -433,19 +433,19 @@ class StatusListTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_target_entity_type_argument_being_None(self):
-        """testing if a ValueError will be raised when the target_entity_type
+        """testing if a TypeError will be raised when the target_entity_type
         argument is given as None
         """
         
         self.kwargs["target_entity_type"] = None
-        self.assertRaises(ValueError, StatusList, **self.kwargs)
+        self.assertRaises(TypeError, StatusList, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_target_entity_type_attribute_is_read_only(self):
-        """testing if a ValueError will be raised when the target_entity_type
-        argment is tried to be set
+        """testing if a AttributeError will be raised when the
+        target_entity_type argment is tried to be set
         """
         
         # try to set the target_entity_type attribute and expect AttributeError

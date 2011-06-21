@@ -309,7 +309,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_lead_argument_is_given_as_something_other_than_a_user(self):
-        """testing if a ValueError will be raised when the lead argument is
+        """testing if a TypeError will be raised when the lead argument is
         given as something other than a User object
         """
         
@@ -318,7 +318,7 @@ class ProjectTester(mocker.MockerTestCase):
         for test_value in test_values:
             self.kwargs["lead"] = test_value
             self.assertRaises(
-                ValueError,
+                TypeError,
                 Project,
                 **self.kwargs
             )
@@ -327,15 +327,15 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_lead_attribute_is_set_to_something_other_than_a_user(self):
-        """testing if a ValueError will be raised when the lead attribute is
-        set to something other than a User object
+        """testing if a TypeError will be raised when the lead attribute is set
+        to something other than a User object
         """
         
         test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_project,
                 "lead",
@@ -352,138 +352,6 @@ class ProjectTester(mocker.MockerTestCase):
         self.mock_project.lead = self.mock_user1
         self.assertEqual(self.mock_project.lead, self.mock_user1)
     
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_argument_is_set_to_None(self):
-        #"""testing if no error will be raised when the users argument is given
-        #as None
-        #"""
-        
-        #self.kwargs["users"] = None
-        #new_project = Project(**self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_attribute_is_set_to_None(self):
-        #"""testing if no error will be raised when the users attribute is set
-        #to None
-        #"""
-        
-        #self.mock_project.users = None
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_argument_given_as_None_converted_to_empty_list(self):
-        #"""testing if users argument is converted to an empty list when given
-        #as None
-        #"""
-        
-        #self.kwargs["users"] = None
-        #new_project = Project(**self.kwargs)
-        #self.assertEqual(new_project.users, [])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_attribute_set_to_None_converted_to_empty_list(self):
-        #"""testing if users attribute is converted to an empty list when set to
-        #None
-        #"""
-        
-        #self.mock_project.users = None
-        #self.assertEqual(self.mock_project.users, [])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_argument_is_given_as_a_list_of_other_objects_then_user(self):
-        #"""testing if a ValueError will be raised when the users argument is
-        #given as a list containing objects other than User
-        #"""
-        
-        #test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-        #self.kwargs["users"] = test_value
-        #self.assertRaises(ValueError, Project, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_attribute_is_given_as_a_list_of_other_objects_then_user(self):
-        #"""testing if a ValueError will be raised when the users attribute is
-        #given as a list containing objects other than User
-        #"""
-        
-        #test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_project,
-            #"users",
-            #test_value
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_attribute_is_a_ValidatedList_instance(self):
-        #"""testing if the users attribute is an instance of ValidatedList
-        #"""
-        
-        #self.assertIsInstance(self.mock_project.users, ValidatedList)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_attribute_elements_accepts_User_only(self):
-        #"""testing if a ValueError will be raised when trying to assign
-        #something other than a User object to the users list
-        #"""
-        
-        ## append
-        #self.assertRaises(
-            #ValueError,
-            #self.mock_project.users.append,
-            #0
-        #)
-        
-        ## __setitem__
-        #self.assertRaises(
-            #ValueError,
-            #self.mock_project.users.__setitem__,
-            #0,
-            #0
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_argument_is_not_iterable(self):
-        #"""testing if a ValueError will be raised when the users argument is
-        #not iterable
-        #"""
-        
-        #test_values = [1, 1.2]
-        
-        #for test_value in test_values:
-            #self.kwargs["users"] = test_value
-            #self.assertRaises(ValueError, Project, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_users_attribute_is_not_iterable(self):
-        #"""testing if a ValueError will be raised when the users attribute is
-        #not iterable
-        #"""
-        
-        #test_values = [1, 1.2]
-        
-        #for test_value in test_values:
-            #self.assertRaises(ValueError, setattr, self.mock_project, "users",
-                              #test_value)
     
     
     #----------------------------------------------------------------------
@@ -638,27 +506,27 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_sequences_argument_is_given_as_a_list_containing_non_Sequence_objects(self):
-        """testing if a ValueError will be raised when trying the given
+        """testing if a TypeError will be raised when trying the given
         sequences argument is a list containing objects other than Sequence
         instances
         """
         
         test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
         self.kwargs["sequences"] = test_value
-        self.assertRaises(ValueError, Project, **self.kwargs)
+        self.assertRaises(TypeError, Project, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_sequences_attribute_is_set_to_a_list_containing_non_Sequence_objects(self):
-        """testing if a ValueError will be raised when trying to set the
+        """testing if a TypeError will be raised when trying to set the
         sequences list to a list containing objects other than Sequence
         instances
         """
         
         test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_project,
             "sequences",
@@ -669,7 +537,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_sequences_argument_is_given_as_non_Sequence_object(self):
-        """testing if a ValueError will be raised when trying the given
+        """testing if a TypeError will be raised when trying the given
         sequences argument is an object other than Sequence instance
         """
         
@@ -677,13 +545,13 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["sequences"] = test_value
-            self.assertRaises(ValueError, Project, **self.kwargs)
+            self.assertRaises(TypeError, Project, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_sequences_attribute_is_set_to_a_list_containing_non_Sequence_objects(self):
-        """testing if a ValueError will be raised when trying to set the
+        """testing if a TypeError will be raised when trying to set the
         sequences list to a list containing objects other than Sequence
         instances
         """
@@ -692,7 +560,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_project,
                 "sequences",
@@ -712,20 +580,20 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_sequences_attribute_elements_accepts_Sequence_only(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         something other than a Sequence object to the sequences list
         """
         
         # append
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_project.sequences.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_project.sequences.__setitem__,
             0,
             0
@@ -790,26 +658,26 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_assets_argument_is_a_list_containing_non_Asset_objects(self):
-        """testing if a ValueError will be raised when the assets argument is
+        """testing if a TypeError will be raised when the assets argument is
         given as a list containing objects other than Assets instances
         """
         
         test_value = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         self.kwargs["assets"] = test_value
-        self.assertRaises(ValueError, Project, **self.kwargs)
+        self.assertRaises(TypeError, Project, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_assets_attribute_is_set_to_a_list_containing_non_Asset_objects(self):
-        """testing if a ValueError will be raised when trying to set the
-        assets list to a list containing objects other than Assets instances
+        """testing if a TypeError will be raised when trying to set the assets
+        list to a list containing objects other than Assets instances
         """
         
         test_value = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_project,
             "assets",
@@ -829,20 +697,20 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_assets_attribute_elements_accepts_Asset_only(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         something other than a Asset instance to the assets list
         """
         
         # append
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_project.assets.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_project.assets.__setitem__,
             0,
             0
@@ -852,7 +720,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_assets_argument_is_not_iterable(self):
-        """testing if a ValueError will be raised when the assets argument is
+        """testing if a TypeError will be raised when the assets argument is
         not iterable
         """
         
@@ -860,20 +728,20 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["assets"] = test_value
-            self.assertRaises(ValueError, Project, **self.kwargs)
+            self.assertRaises(TypeError, Project, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_assets_attribute_is_not_iterable(self):
-        """testing if a ValueError will be raised when a non-iterable value is
+        """testing if a TypeError will be raised when a non-iterable value is
         tried to be assigned to the assets attribute
         """
         
         test_values = [1, 1.2, "an asset"]
         
         for test_value in test_values:
-            self.assertRaises(ValueError, setattr, self.mock_project, "assets",
+            self.assertRaises(TypeError, setattr, self.mock_project, "assets",
                               test_value)
     
     
@@ -901,7 +769,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_image_format_argument_accepts_ImageFormat_only(self):
-        """testing if a ValueError will be raised when the image_format
+        """testing if a TypeError will be raised when the image_format
         argument is given as another type then ImageFormat
         """
         
@@ -909,7 +777,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["image_format"] = test_value
-            self.assertRaises(ValueError, Project, **self.kwargs)
+            self.assertRaises(TypeError, Project, **self.kwargs)
         
         # and a proper image format
         self.kwargs["image_format"] = self.mock_imageFormat
@@ -919,7 +787,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_image_format_attribute_accepts_ImageFormat_only(self):
-        """testing if a ValueError will be raised when the image_format
+        """testing if a TypeError will be raised when the image_format
         attribute is tried to be set to something other than a ImageFormat
         instance
         """
@@ -928,7 +796,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_project,
                 "image_format",
@@ -980,9 +848,9 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_fps_argument_is_given_as_non_float_or_integer(self):
-        """testing if a ValueError will be raised when the fps argument is
+        """testing if a TypeError will be raised when the fps argument is
         given as a value other than a float or integer, or a string which is
-        convertable to float
+        convertable to float.
         """
         
         test_values = ["a str"]
@@ -1007,7 +875,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_fps_attribute_is_given_as_non_float_or_integer(self):
-        """testing if a ValueError will be raised when the fps attribute is
+        """testing if a TypeError will be raised when the fps attribute is
         set to a value other than a float, integer or valid string literals
         """
         
@@ -1099,7 +967,6 @@ class ProjectTester(mocker.MockerTestCase):
         """
         
         self.kwargs["repository"] = None
-        #self.assertRaises(ValueError, Project, **self.kwargs)
         new_project = Project(**self.kwargs)
     
     
@@ -1116,27 +983,27 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_repository_argument_is_non_Repository_object(self):
-        """testing if a ValueError will be raised when the repository argument
+        """testing if a TypeError will be raised when the repository argument
         is given as something other than a Repository object
         """
         
         test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         for test_value in test_values:
             self.kwargs["repository"] = test_value
-            self.assertRaises(ValueError, Project, **self.kwargs)
+            self.assertRaises(TypeError, Project, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_repository_attribute_is_set_to_non_Repository_object(self):
-        """testing if a ValueErorr will be raised when the repository attribute
+        """testing if a TypeErorr will be raised when the repository attribute
         is tried to be set to something other than a Repository object
         """
         
         test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_project,
                 "repository",
@@ -1288,7 +1155,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_structure_argument_not_instance_of_Structure(self):
-        """testing if a ValueError will be raised when the structure argument
+        """testing if a TypeError will be raised when the structure argument
         is not an instance of Structure
         """
         
@@ -1296,13 +1163,13 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["structure"] = test_value
-            self.assertRaises(ValueError, Project, **self.kwargs)
+            self.assertRaises(TypeError, Project, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_structure_attribute_not_instance_of_Structure(self):
-        """testing if a ValueError will be raised when the structure attribute
+        """testing if a TypeError will be raised when the structure attribute
         is not an instance of Structure
         """
         
@@ -1310,7 +1177,7 @@ class ProjectTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_project,
                 "structure",

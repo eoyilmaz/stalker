@@ -88,6 +88,33 @@ class SimpleEntity(object):
     Two SimpleEntities considered to be equal if they have the same name, the
     other attributes doesn't matter.
     
+    The formatting rules for the code attribute is as follows:
+      
+      * only alphanumerics and underscore is allowed [a-zA-Z0-9_]
+      
+      * no number is allowed at the beggining
+      
+      * no white spaces are allowed
+      
+      * all the white spaces will be converted to underscore characters
+      
+      * all the underscores are converted to only one underscore character if
+        more than one follows each other
+    
+    Examples:
+    
+      Input Value                        Formatted Output
+      ===========                        ================
+      testCode                           testCode
+      1testCode                          testCode
+      _testCode                          testCode
+      2423$+^^+^'%+%%&_testCode          testCode
+      2423$+^^+^'%+%%&_testCode_35       testCode_35
+      2423$ +^^+^ '%+%%&_ testCode_ 35   testCode_35
+      SH001                              SH001
+      My CODE is Ozgur                   My_CODE_is_Ozgur
+      this is another code for an asset  this_is_another_code_for_an_asset
+      
     :param string name: A string or unicode value that holds the name of this
       entity. It can not be empty, the first letter should be an alphabetic
       ([a-zA-z]) (not alphanumeric [a-zA-Z0-9]) letter and it should not
@@ -121,13 +148,12 @@ class SimpleEntity(object):
     
     :param str code: The code name of this object. It accepts string or unicode
       values and any other kind of objects will be converted to string. Can be
-      omitted and it will be set to the uppercase version of the nice_name
-      attribute. If both the name and code arguments are given the code
-      attribute will be set to the given code argument value, but in any update
-      to name attribute the code also will be updated to the uppercase form of
-      the nice_name attribute. When the code is directly edited the code will
-      not be formated other than removing any illegal characters. The default
-      value is the upper case form of the nice_name.
+      omitted and it will be set to the same value of the nice_name attribute.
+      If both the name and code arguments are given the code attribute will be
+      set to the given code argument value, but in any update to name attribute
+      the code also will be updated to the nice_name attribute. When the code
+      is directly edited the code will not be formated other than removing any
+      illegal characters. The default value is the same value of the nice_name.
     
     :param type: The type of the current SimpleEntity. Used across several
       places in Stalker. Can be None. The default value is None.
@@ -207,7 +233,7 @@ class SimpleEntity(object):
         
         # it is None
         if name_in is None:
-            raise ValueError("the name couldn't be set to None")
+            raise TypeError("the name couldn't be set to None")
         
         name_in = self._condition_name(str(name_in))
         
@@ -314,7 +340,8 @@ class SimpleEntity(object):
             self._nice_name = self._condition_nice_name(self._name)
             
             # set the code
-            self.code = self._nice_name.upper()
+            #self.code = self._nice_name.upper()
+            self.code = self._name
         
         doc = """Name of this object"""
         
@@ -359,7 +386,9 @@ class SimpleEntity(object):
         # check if the code_in is None or empty string
         if code_in is None or code_in=="":
             # restore the value from nice_name and let it be reformatted
-            code_in = self.nice_name.upper()
+            #code_in = self.nice_name.upper()
+            code_in = self.nice_name
+            
         
         return self._condition_code(str(code_in))
     
@@ -372,7 +401,7 @@ class SimpleEntity(object):
         
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
-                raise ValueError("the created_by attribute should be an "
+                raise TypeError("the created_by attribute should be an "
                                  "instance of stalker.core.models.User")
         
         return created_by_in
@@ -392,7 +421,7 @@ class SimpleEntity(object):
         
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
-                raise ValueError("the updated_by attribute should be an "
+                raise TypeError("the updated_by attribute should be an "
                                  "instance of stalker.core.models.User")
         
         return updated_by_in
@@ -404,14 +433,11 @@ class SimpleEntity(object):
         """validates the given date_creaetd_in
         """
         
-        # raise ValueError when:
-        
-        # it is None
         if date_created_in is None:
-            raise ValueError("the date_created could not be None")
+            raise TypeError("the date_created could not be None")
         
         if not isinstance(date_created_in, datetime.datetime):
-            raise ValueError("the date_created should be an instance of "
+            raise TypeError("the date_created should be an instance of "
                              "datetime.datetime")
         
         return date_created_in
@@ -423,15 +449,13 @@ class SimpleEntity(object):
         """validates the given date_updated_in
         """
         
-        # raise ValueError when:
-        
         # it is None
         if date_updated_in is None:
-            raise ValueError("the date_updated could not be None")
+            raise TypeError("the date_updated could not be None")
         
         # it is not an instance of datetime.datetime
         if not isinstance(date_updated_in, datetime.datetime):
-            raise ValueError("the date_updated should be an instance of "
+            raise TypeError("the date_updated should be an instance of "
                              "datetime.datetime")
         
         # lower than date_created
@@ -492,6 +516,7 @@ class SimpleEntity(object):
     def code():
         def fget(self):
             return self._code
+        
         def fset(self, code_in):
             self._code = self._validate_code(code_in)
         
@@ -643,13 +668,13 @@ class Entity(SimpleEntity):
         """
         
         if not isinstance(notes_in, list):
-            raise ValueError("notes should be an instance of list")
+            raise TypeError("notes should be an instance of list")
         
         from stalker.core.models import Note
         
         for element in notes_in:
             if not isinstance(element, Note):
-                raise ValueError("every element in notes should be an "
+                raise TypeError("every element in notes should be an "
                                  "instance of stalker.core.models.Note "
                                  "class")
         
@@ -664,7 +689,7 @@ class Entity(SimpleEntity):
         
         # it is not an instance of list
         if not isinstance(tags_in, list):
-            raise ValueError("the tags attribute should be set to a list")
+            raise TypeError("the tags attribute should be set to a list")
         
         return ValidatedList(tags_in)
     
@@ -969,7 +994,7 @@ class StatusList(Entity):
         """
         
         if not isinstance(statuses, list):
-            raise ValueError("statuses should be an instance of list")
+            raise TypeError("statuses should be an instance of list")
         
         if len(statuses) < 1:
             raise ValueError("statuses should not be an empty list")
@@ -988,7 +1013,7 @@ class StatusList(Entity):
         
         # it can not be None
         if target_entity_type_in is None:
-            raise ValueError("target_entity_type can not be None")
+            raise TypeError("target_entity_type can not be None")
         
         if str(target_entity_type_in)=="":
             raise ValueError("target_entity_type can not be empty string")
@@ -1003,8 +1028,8 @@ class StatusList(Entity):
         """
         
         if not isinstance(status_in, Status):
-            raise ValueError("all elements must be an instance of Status in "
-                             "the given statuses list")
+            raise TypeError("all elements must be an instance of Status in "
+                            "the given statuses list")
         
         return status_in
     
@@ -1169,7 +1194,7 @@ class ImageFormat(Entity):
         """validates the given width
         """
         if not isinstance(width, (int, float)):
-            raise ValueError("width should be an instance of int or float")
+            raise TypeError("width should be an instance of int or float")
         
         if width <= 0:
             raise ValueError("width shouldn't be zero or negative")
@@ -1183,7 +1208,7 @@ class ImageFormat(Entity):
         """validates the given height
         """
         if not isinstance(height, (int, float)):
-            raise ValueError("height should be an instance of int or float")
+            raise TypeError("height should be an instance of int or float")
         
         if height <= 0:
             raise ValueError("height shouldn't be zero or negative")
@@ -1197,7 +1222,7 @@ class ImageFormat(Entity):
         """validates the given pixel aspect
         """
         if not isinstance(pixel_aspect, (int, float)):
-            raise ValueError("pixel_aspect should be an instance of int or "
+            raise TypeError("pixel_aspect should be an instance of int or "
                              "float")
         
         if pixel_aspect <= 0:
@@ -1213,7 +1238,7 @@ class ImageFormat(Entity):
         """validates the print resolution
         """
         if not isinstance(print_resolution, (int, float)):
-            raise ValueError("print resolution should be an instance of int "
+            raise TypeError("print resolution should be an instance of int "
                              "or float")
         
         if print_resolution <= 0:
@@ -1243,7 +1268,7 @@ class ImageFormat(Entity):
         
         * the width should be set to a positif non-zero integer
         * integers are also accepted but will be converted to float
-        * for improper inputs the object will raise a ValueError
+        * for improper inputs the object will raise an exception.
         """
         
         return locals()
@@ -1272,7 +1297,7 @@ class ImageFormat(Entity):
         
         * the height should be set to a positif non-zero integer
         * integers are also accepted but will be converted to float
-        * for improper inputs the object will raise a ValueError
+        * for improper inputs the object will raise an exception.
         """
         
         return locals()
@@ -1301,7 +1326,7 @@ class ImageFormat(Entity):
         
         * the pixel_aspect should be set to a positif non-zero float
         * integers are also accepted but will be converted to float
-        * for improper inputs the object will raise a ValueError
+        * for improper inputs the object will raise an exception
         """
         
         return locals()
@@ -1343,7 +1368,7 @@ class ImageFormat(Entity):
         
         * it should be set to a positif non-zero float or integer
         * integers are also accepted but will be converted to float
-        * for improper inputs the object will raise a ValueError
+        * for improper inputs the object will raise an exception.
         """
         
         return locals()
@@ -1384,11 +1409,11 @@ class Link(Entity):
     
     :param path: The Path to the link, it can be a path to a file in the file
       system, or a web page.  Setting path to None or an empty string is not
-      accepted and causes a ValueError to be raised.
+      accepted.
     
     :param filename: The file name part of the link url, for file sequences use
       "#" in place of the numerator (`Nuke`_ style). Setting filename to None
-      or an empty string is not accepted and causes a ValueError to be raised.
+      or an empty string is not accepted.
     
     .. _Nuke: http://www.thefoundry.co.uk
     """
@@ -1415,10 +1440,10 @@ class Link(Entity):
         """
         
         if path_in is None:
-            raise ValueError("path can not be None")
+            raise TypeError("path can not be None")
         
         if not isinstance(path_in, (str, unicode)):
-            raise ValueError("path should be an instance of string or unicode")
+            raise TypeError("path should be an instance of string or unicode")
         
         if path_in=="":
             raise ValueError("path can not be an empty string")
@@ -1443,33 +1468,16 @@ class Link(Entity):
         """
         
         if filename_in is None:
-            raise ValueError("filename can not be None")
+            raise TypeError("filename can not be None")
         
         if not isinstance(filename_in, (str, unicode)):
-            raise ValueError("filename should be an instance of string or "
+            raise TypeError("filename should be an instance of string or "
                              "unicode")
         
         if filename_in=="":
             raise ValueError("filename can not be an empty string")
         
         return filename_in
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _validate_type(self, type_in):
-        #"""validates the given type
-        #"""
-        
-        #if type_in is None:
-            #raise ValueError("type can not be None, set it to a "
-                             #"stalker.core.models.LinkType object")
-        
-        #if not isinstance(type_in, LinkType):
-            #raise ValueError("type should be an instance of "
-                             #"stalker.core.models.LinkType object")
-        
-        #return type_in
     
     
     
@@ -1570,11 +1578,11 @@ class Comment(Entity):
     
     :param body: the body of the comment, it is a string or unicode variable,
       it can be empty but it is then meaningles to have an empty comment.
-      Anything other than a string or unicode will raise a ValueError.
+      Anything other than a string or unicode will raise a TypeError.
     
     :param to: the relation variable, that holds the connection that this
       comment is related to. it should be an Entity object, any other will
-      raise a ValueError
+      raise a TypeError.
     """
     
     
@@ -1597,7 +1605,7 @@ class Comment(Entity):
         # but it should be an instance of string or unicode
         
         if not isinstance(body_in, (str, unicode)):
-            raise ValueError("the body attribute should be an instance of "
+            raise TypeError("the body attribute should be an instance of "
                               "string or unicode")
         
         return body_in
@@ -1615,10 +1623,10 @@ class Comment(Entity):
         # - an instance of Entity object
         
         if to_in is None:
-            raise ValueError("the to attribute could not be empty")
+            raise TypeError("the to attribute could not be None")
         
         if not isinstance(to_in, Entity):
-            raise ValueError("the to attibute should be an instance of "
+            raise TypeError("the to attibute should be an instance of "
                              "Entity class")
         
         return to_in
@@ -1706,11 +1714,11 @@ class Department(Entity):
         """
         
         if not isinstance(members, list):
-            raise ValueError("members should be a list of "
+            raise TypeError("members should be a list of "
                              "stalker.core.models.User instances")
         
         if not all([isinstance(member, User) for member in members]):
-            raise ValueError("every element in the members list should be "
+            raise TypeError("every element in the members list should be "
                              "an instance of stalker.core.models.User"
                              " class")
         
@@ -1723,14 +1731,10 @@ class Department(Entity):
         """validates the given lead attribute
         """
         
-        # the lead should not be None
-        #if lead is None:
-            #raise ValueError("lead could not be set to None")
-        
         if lead is not None:
             # the lead should be an instance of User class
             if not isinstance(lead, User):
-                raise ValueError("lead should be an instance of "
+                raise TypeError("lead should be an instance of "
                                  "stalker.core.models.User")
         
         return lead
@@ -1901,7 +1905,7 @@ class Note(SimpleEntity):
         
         if content_in is not None and \
            not isinstance(content_in, (str, unicode)):
-            raise ValueError("content should be an instance of string or "
+            raise TypeError("content should be an instance of string or "
                              "unicode")
         
         return content_in
@@ -1918,7 +1922,7 @@ class Note(SimpleEntity):
         
         doc = """content is a string representing the content of this Note,
         can be given as an empty string or can be even None, but anything other
-        than None or string or unicode will raise a ValueError"""
+        than None or string or unicode will raise a TypeError"""
         
         return locals()
     
@@ -2063,13 +2067,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
             assets_in = []
         
         if not isinstance(assets_in, list):
-            raise ValueError("assets should be a list of "
-                             "stalker.core.models.Assets instances")
+            raise TypeError("assets should be a list of "
+                            "stalker.core.models.Assets instances")
         
         if not all([isinstance(element, Asset)
                     for element in assets_in]):
-            raise ValueError("the elements in assets lists should be all "
-                             "stalker.core.models.Asset instances")
+            raise TypeError("the elements in assets lists should be all "
+                            "stalker.core.models.Asset instances")
         
         return ValidatedList(assets_in)
     
@@ -2102,8 +2106,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         
         if image_format_in is not None and \
            not isinstance(image_format_in, ImageFormat):
-            raise ValueError("the image_format should be an instance of "
-                             "stalker.core.models.ImageFormat")
+            raise TypeError("the image_format should be an instance of "
+                            "stalker.core.models.ImageFormat")
         
         return image_format_in
     
@@ -2116,8 +2120,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         
         if lead_in is not None:
             if not isinstance(lead_in, User):
-                raise ValueError("lead must be an instance of "
-                                 "stalker.core.models.User")
+                raise TypeError("lead must be an instance of "
+                                "stalker.core.models.User")
         
         return lead_in
     
@@ -2130,8 +2134,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         
         if repository_in is not None and \
            not isinstance(repository_in, Repository):
-            raise ValueError("the repsoitory should be an instance of "
-                             "stalker.core.models.Repository")
+            raise TypeError("the repsoitory should be an instance of "
+                            "stalker.core.models.Repository")
         
         return repository_in
     
@@ -2146,13 +2150,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
             sequences_in = []
         
         if not isinstance(sequences_in, list):
-            raise ValueError("sequences should be a list of "
-                             "stalker.core.models.Sequence instances")
+            raise TypeError("sequences should be a list of "
+                            "stalker.core.models.Sequence instances")
         
         if not all([isinstance(seq, Sequence)
                     for seq in sequences_in]):
-            raise ValueError("sequences should be a list of "
-                             "stalker.core.models.Sequence instances")
+            raise TypeError("sequences should be a list of "
+                            "stalker.core.models.Sequence instances")
         
         return ValidatedList(sequences_in, Sequence)
     
@@ -2165,7 +2169,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         
         if structure_in is not None:
             if not isinstance(structure_in, Structure):
-                raise ValueError("structure should be an instance of "
+                raise TypeError("structure should be an instance of "
                                  "stalker.core.models.Structure")
         
         return structure_in
@@ -2181,12 +2185,12 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
             #users_in = []
         
         #if not isinstance(users_in, list):
-            #raise ValueError("users should be a list of "
+            #raise TypeError("users should be a list of "
                              #"stalker.core.models.User instances")
         
         #if not all([isinstance(element, User) \
                     #for element in users_in]):
-            #raise ValueError("users should be a list containing instances of "
+            #raise TypeError("users should be a list containing instances of "
                              #":class:`~stalker.core.models.User`")
         
         #return ValidatedList(users_in)
@@ -2441,7 +2445,7 @@ class Repository(Entity):
         """
         
         if not isinstance(linux_path_in, (str, unicode)):
-            raise ValueError("linux_path should be an instance of string or "
+            raise TypeError("linux_path should be an instance of string or "
                              "unicode")
         
         return linux_path_in
@@ -2454,7 +2458,7 @@ class Repository(Entity):
         """
         
         if not isinstance(osx_path_in, (str, unicode)):
-            raise ValueError("osx_path should be an instance of string or "
+            raise TypeError("osx_path should be an instance of string or "
                              "unicode")
         
         return osx_path_in
@@ -2467,7 +2471,7 @@ class Repository(Entity):
         """
         
         if not isinstance(windows_path_in, (str, unicode)):
-            raise ValueError("windows_path should be an instance of string or "
+            raise TypeError("windows_path should be an instance of string or "
                              "unicode")
         
         return windows_path_in
@@ -2574,7 +2578,7 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     :param project: The :class:`~stalker.core.models.Project` that this
       Sequence belongs to. A Sequence can not be created without a
       :class:`~stalker.core.models.Project` instance. The default value is
-      None which will raise a ValueError if you skip this argument.
+      None which will raise a TypeError if you skip this argument.
     
     :type project: :class:`~stalker.core.models.Project`.
     
@@ -2613,12 +2617,12 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         """
         
         if project_in is None:
-            raise ValueError("project should be an instance of "
-                             "stalker.core.models.Project")
+            raise TypeError("project should be an instance of "
+                            "stalker.core.models.Project")
         
         if not isinstance(project_in, Project):
-            raise ValueError("project should be an instance of "
-                             "stalker.core.models.Project")
+            raise TypeError("project should be an instance of "
+                            "stalker.core.models.Project")
         
         return project_in
     
@@ -2631,8 +2635,8 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         
         if lead_in is not None:
             if not isinstance(lead_in, User):
-                raise ValueError("lead should be instance of "
-                                 "stalker.core.models.User")
+                raise TypeError("lead should be instance of "
+                                "stalker.core.models.User")
         
         return lead_in
     
@@ -2647,13 +2651,13 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
             shots_in = []
         
         if not isinstance(shots_in, list):
-            raise ValueError("shots should be list containing "
-                             "stalker.core.models.Shot instances")
+            raise TypeError("shots should be list containing "
+                            "stalker.core.models.Shot instances")
         
         for element in shots_in:
             if not isinstance(element, Shot):
-                raise ValueError("every item in the shots list should be an "
-                                 "instance of stalker.core.models.Shot")
+                raise TypeError("every item in the shots list should be an "
+                                "instance of stalker.core.models.Shot")
         
         return ValidatedList(shots_in, Shot)
         
@@ -2889,11 +2893,11 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
             #assets_in = []
         
         #if not isinstance(assets_in, list):
-            #raise ValueError("assets should be an instance of list")
+            #raise TypeError("assets should be an instance of list")
         
         #for item in assets_in:
             #if not isinstance(item, Asset):
-                #raise ValueError("all the items in the assets list should be"
+                #raise TypeError("all the items in the assets list should be"
                                  #"an instance of stalker.core.models.Asset")
         
         #return ValidatedList(assets_in, Asset)
@@ -2906,8 +2910,11 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         """
         
         # check if the code_in is None or empty string
-        if code_in is None or code_in=="":
-            raise ValueError("the code can not be None or empty string")
+        if code_in is None:
+            raise TypeError("the code can not be None")
+        
+        if code_in=="":
+            raise ValueError("the code can not be empty string")
         
         return self._condition_code(str(code_in))
     
@@ -2920,7 +2927,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         
         if cut_duration_in is not None and \
            not isinstance(cut_duration_in, int):
-            raise ValueError("cut_duration should be an instance of int")
+            raise TypeError("cut_duration should be an instance of int")
         
         #if cut_duration_in is None or cut_duration_in <= 0:
                 #if self._cut_out is None:
@@ -2938,10 +2945,9 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         """validates the given cut_in_in value
         """
         
-        
         if cut_in_in is not None:
             if not isinstance(cut_in_in, int):
-                raise ValueError("cut_in should be an instance of int")
+                raise TypeError("cut_in should be an instance of int")
         
         return cut_in_in
     
@@ -2954,7 +2960,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         
         if cut_out_in is not None:
             if not isinstance(cut_out_in, int):
-                raise ValueError("cut_out should be an instance of int")
+                raise TypeError("cut_out should be an instance of int")
         
         return cut_out_in
     
@@ -2966,7 +2972,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         """
         
         if not isinstance(sequence_in, Sequence):
-            raise ValueError("the sequence should be an instance of"
+            raise TypeError("the sequence should be an instance of"
                              "stalker.core.models.Sequence instance")
         
         for shot in sequence_in.shots:
@@ -3402,7 +3408,8 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     :param project: The :class:`~stalker.core.models.Project` instance that
       this asset belongs to. An asset can not be created without a
-      :class:`~stalker.core.models.Project` instance.
+      :class:`~stalker.core.models.Project` instance. An the given project
+      value can not be changed later on.
     
     :type project: :class:`~stalker.core.models.Project`
     """
@@ -3436,7 +3443,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         
         # the project should be instance of Project
         if not isinstance(project_in, Project):
-            raise ValueError("The project should be instance of "
+            raise TypeError("The project should be instance of "
                              "stalker.core.models.Project")
         
         return project_in
@@ -3452,13 +3459,13 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
             shots_in = []
         
         if not isinstance(shots_in, list):
-            raise ValueError("shots should be set to a list of "
-                             ":class:`~stalker.core.models.Shot` objects")
+            raise TypeError("shots should be set to a list of "
+                            "stalker.core.models.Shot instances")
         
         if not all([isinstance(shot, Shot)
                     for shot in shots_in]):
-            raise ValueError("shots should be set to a list of "
-                             ":class:`~stalker.core.models.Shot` objects")
+            raise TypeError("shots should be set to a list of "
+                            "stalker.core.models.Shot objects")
         
         return ValidatedList(shots_in, Shot)
         
@@ -3470,8 +3477,8 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         def fget(self):
             return self._project
         
-        def fset(self, project_in):
-            self._project = self._validate_project(project_in)
+        #def fset(self, project_in):
+            #self._project = self._validate_project(project_in)
         
         doc = """The :class:`~stalker.core.models.Project` instance that this asset belongs to.
         """
@@ -4538,7 +4545,18 @@ class User(Entity):
        :attr:`~stalker.core.models.User.code` of a
        :class:`~stalker.core.models.User` and a
        :class:`~stalker.core.models.SimpleEntity` will be different then each
-       other.
+       other. The formatting of the :attr:`~stalker.core.models.User.code`
+       attribute is as follows:
+         
+         * no underscore character is allowed, so while in the
+           :class:`~stalker.core.models.SimpleEntity` class the code could have
+           underscores, in :class:`~stalker.core.models.User` class it is not
+           allowed.
+        
+         * all the letters in the code will be converted to lower case.
+       
+       Other than this two new rules all the previous formatting rules from the
+       :class:`~stalker.core.models.SimpleEntity` are still in charge.
     
      * The :attr:`~stalker.core.models.User.name` is a synonym of the
        :attr:`~stalker.core.models.User.login_name`, so changing one of them
@@ -4546,6 +4564,8 @@ class User(Entity):
     
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
+    
+    :type email: unicode
     
     :param login_name: it is the login name of the user, it should be all lower
       case. Giving a string or unicode that has uppercase letters, it will be
@@ -4558,19 +4578,27 @@ class User(Entity):
       both of them, one is enough and if the two is given `login_name` will be
       used.
     
+    :type login_name: unicode
+    
     :param first_name: it is the first name of the user, must be a string or
       unicode, middle name also can be added here, so it accepts white-spaces
       in the variable, but it will truncate the white spaces at the beginin and
       at the end of the variable and it can not be empty or None
     
+    :type first_name: unicode
+    
     :param last_name: it is the last name of the user, must be a string or
       unicode, again it can not contain any white spaces at the beggining and
       at the end of the variable and it can be an empty string or None
+    
+    :type last_name: unicode
     
     :param department: it is the department of the current user. It should be
       a Department object. One user can only be listed in one department. A
       user is allowed to have no department to make it easy to create a new
       user and create the department and assign the user it later.
+    
+    :type department: :class:`~stalker.core.models.Department`
     
     :param password: it is the password of the user, can contain any character.
       Stalker doesn't store the raw passwords of the users. To check a stored
@@ -4579,28 +4607,42 @@ class User(Entity):
       you can use the :attr:`~stalker.core.models.User.password` property
       directly.
     
+    :type password: unicode
+    
     :param permission_groups: it is a list of permission groups that this user
       is belong to
+    
+    :type permission_groups: :class:`~stalker.core.models.PermissionGroup`
     
     :param tasks: it is a list of Task objects which holds the tasks that this
       user has been assigned to
     
-    :param projects: it is a list of Project objects which holds the projects
-      that this user is a part of. Calculated from all the
-      :class:`~stalker.core.models.Task`\ s of the current User.
+    :type tasks: list of :class:`~stalker.core.models.Task`\ s
     
     :param projects_lead: it is a list of Project objects that this user
-      is the leader of, it is for back refefrencing purposes
+      is the leader of, it is for back refefrencing purposes.
+    
+    :type projects_lead: list of :class:`~stalker.core.models.Project`\ s
     
     :param sequences_lead: it is a list of Sequence objects that this
       user is the leader of, it is for back referencing purposes
     
+    :type sequences_lead: list of :class:`~stalker.core.models.Sequence`
+    
     :param last_login: it is a datetime.datetime object holds the last login
       date of the user (not implemented yet)
     
+    :type last_login: datetime.datetime
+    
     :param initials: it is the initials of the users name, if nothing given it
       will be calculated from the first and last names of the user
+    
+    :type initials: unicode
     """
+    
+    #:param projects: it is a list of Project objects which holds the projects
+      #that this user is a part of. Calculated from all the
+      #:class:`~stalker.core.models.Task`\ s of the current User.
     
     
     
@@ -4618,7 +4660,7 @@ class User(Entity):
                  login_name="",
                  password="",
                  permission_groups=[],
-                 projects=[],
+                 #projects=[],
                  projects_lead=[],
                  sequences_lead=[],
                  tasks=[],
@@ -4630,11 +4672,13 @@ class User(Entity):
         # use the login_name for name if there are no name attribute present
         name = kwargs.get("name")
         
-        if login_name is not None and login_name != "":
+        if name is None:
             name = login_name
-        else:
+        
+        if login_name == "":
             login_name = name
         
+        name = login_name
         kwargs["name"] = name
         
         super(User, self).__init__(**kwargs)
@@ -4643,7 +4687,11 @@ class User(Entity):
         self._email = self._validate_email(email)
         self._first_name = self._validate_first_name(first_name)
         self._last_name = self._validate_last_name(last_name)
+        
+        #self._login_name = ""
+        #self.login_name = login_name
         self._login_name = self._validate_login_name(login_name)
+        
         self._initials = self._validate_initials(initials)
         
         # to be able to mangle the password do it like this
@@ -4652,7 +4700,7 @@ class User(Entity):
         
         self._permission_groups = \
             self._validate_permission_groups(permission_groups)
-        self._projects = self._validate_projects(projects)
+        #self._projects = self._validate_projects(projects)
         self._projects_lead = self._validate_projects_lead(projects_lead)
         self._sequences_lead = self._validate_sequences_lead(sequences_lead)
         self._tasks = self._validate_tasks(tasks)
@@ -4700,14 +4748,10 @@ class User(Entity):
         """validates the given department value
         """
         
-        ## check if department_in is None
-        #if department_in is None:
-            #raise ValueError("department could not be None")
-        
         # check if it is intance of Department object
         if department_in is not None:
             if not isinstance(department_in, Department):
-                raise ValueError("department should be instance of "
+                raise TypeError("department should be instance of "
                                  "stalker.core.models.Department")
         
         return department_in
@@ -4721,7 +4765,7 @@ class User(Entity):
         
         # check if email_in is an instance of string or unicode
         if not isinstance(email_in, (str, unicode)):
-            raise ValueError("email should be an instance of string or "
+            raise TypeError("email should be an instance of string or "
                              "unicode")
         
         return self._validate_email_format(email_in)
@@ -4763,10 +4807,10 @@ class User(Entity):
         """
         
         if first_name_in is None:
-            raise ValueError("first_name cannot be none")
+            raise TypeError("first_name cannot be None")
         
         if not isinstance(first_name_in, (str, unicode)):
-            raise ValueError("first_name should be instance of string or "
+            raise TypeError("first_name should be instance of string or "
                              "unicode")
         
         if first_name_in == "":
@@ -4810,8 +4854,8 @@ class User(Entity):
         
         if not isinstance(last_login_in, datetime.datetime) and \
            last_login_in is not None:
-            raise ValueError("last_login should be an instance of "
-                             "datetime.datetime or None")
+            raise TypeError("last_login should be an instance of "
+                            "datetime.datetime or None")
         
         return last_login_in
     
@@ -4826,8 +4870,8 @@ class User(Entity):
             #raise ValueError("last_name cannot be none")
         if last_name_in is not None:
             if not isinstance(last_name_in, (str, unicode)):
-                raise ValueError("last_name should be instance of string or "
-                                 "unicode")
+                raise TypeError("last_name should be instance of string or "
+                                "unicode")
         else:
             last_name_in = ""
         
@@ -4851,12 +4895,13 @@ class User(Entity):
     def _validate_login_name(self, login_name_in):
         """validates the given login_name value
         """
+        
         if login_name_in is None:
-            raise ValueError("login name could not be None")
+            raise TypeError("login name could not be None")
         
         #if not isinstance(login_name_in, (str, unicode)):
-            #raise ValueError("login_name should be instance of string or "
-                             #"unicode")
+            #raise TypeError("login_name should be instance of string or "
+                            #"unicode")
         login_name_in = self._format_login_name(str(login_name_in))
         
         if login_name_in == "":
@@ -4899,7 +4944,7 @@ class User(Entity):
         """
         
         if password_in is None:
-            raise ValueError("password cannot be None")
+            raise TypeError("password cannot be None")
         
         return password_in
     
@@ -4911,15 +4956,15 @@ class User(Entity):
         """
         
         if permission_groups_in is None:
-            raise ValueError("permission_groups attribute can not be None")
+            permission_groups_in = []
         
         if not isinstance(permission_groups_in, list):
-            raise ValueError("permission_groups should be a list of group "
+            raise TypeError("permission_groups should be a list of group "
                              "objects")
         
         for permission_group in permission_groups_in:
             if not isinstance(permission_group, PermissionGroup):
-                raise ValueError(
+                raise TypeError(
                     "any group in permission_groups should be an instance of"
                     "stalker.core.models.PermissionGroup"
                 )
@@ -4928,27 +4973,26 @@ class User(Entity):
     
     
     
-    #----------------------------------------------------------------------
-    def _validate_projects(self, projects_in):
-        """validates the given projects attribute
-        """
+    ##----------------------------------------------------------------------
+    #def _validate_projects(self, projects_in):
+        #"""validates the given projects attribute
+        #"""
         
-        # projects can not be None
-        if projects_in is None:
-            raise ValueError("projects can not be None")
+        #if projects_in is None:
+            #projects_in = []
         
-        if not isinstance(projects_in, list):
-            raise ValueError("projects should be a list of "
-                             "stalker.core.models.Project objects")
+        #if not isinstance(projects_in, list):
+            #raise TypeError("projects should be a list of "
+                             #"stalker.core.models.Project objects")
         
-        for a_project in projects_in:
-            if not isinstance(a_project, Project):
-                raise ValueError(
-                    "any element in projects should be an instance of "
-                    "stalker.core.models.Project"
-                )
+        #for a_project in projects_in:
+            #if not isinstance(a_project, Project):
+                #raise TypeError(
+                    #"any element in projects should be an instance of "
+                    #"stalker.core.models.Project"
+                #)
         
-        return ValidatedList(projects_in, Project)
+        #return ValidatedList(projects_in, Project)
         
     
     
@@ -4958,18 +5002,17 @@ class User(Entity):
         """
         
         if projects_lead_in is None:
-            raise ValueError("projects_lead attribute could not be None, try "
-                             "setting it to an empty list")
+            projects_lead_in = []
         
         if not isinstance(projects_lead_in, list):
-            raise ValueError("projects_lead should be a list of "
-                             "stalker.core.models.Project objects")
+            raise TypeError("projects_lead should be a list of "
+                             "stalker.core.models.Project instances")
         
         for a_project in projects_lead_in:
             if not isinstance(a_project, Project):
-                raise ValueError(
-                    "any element in projects_lead should be an instance of "
-                    "stalker.core.models.Project class")
+                raise TypeError(
+                    "any element in projects_lead should be a"
+                    "stalker.core.models.Project instance")
         
         return ValidatedList(projects_lead_in, Project)
     
@@ -4981,16 +5024,15 @@ class User(Entity):
         """
         
         if sequences_lead_in is None:
-            raise ValueError("sequences_lead attribute could not be None, try "
-                             "setting it to an empty list")
+            sequences_lead_in = []
         
         if not isinstance(sequences_lead_in, list):
-            raise ValueError("sequences_lead should be a list of "
+            raise TypeError("sequences_lead should be a list of "
                              "stalker.core.models.Sequence objects")
         
         for a_sequence in sequences_lead_in:
             if not isinstance(a_sequence, Sequence):
-                raise ValueError(
+                raise TypeError(
                     "any element in sequences_lead should be an instance of "
                     "stalker.core.models.Sequence class"
                 )
@@ -5005,16 +5047,15 @@ class User(Entity):
         """
         
         if tasks_in is None:
-            raise ValueError("tasks attribute could not be None, try setting "
-                             "it to an empty list")
+            tasks_in = []
         
         if not isinstance(tasks_in, list):
-            raise ValueError("tasks should be a list of "
+            raise TypeError("tasks should be a list of "
                              "stalker.core.models.Task objects")
         
         for a_task in tasks_in:
             if not isinstance(a_task, Task):
-                raise ValueError(
+                raise TypeError(
                     "any element in tasks should be an instance of "
                     "stalker.core.models.Task class")
         
@@ -5189,7 +5230,8 @@ class User(Entity):
             self._nice_name = self._condition_nice_name(self._name)
             
             # and also the code
-            self.code = self._nice_name.upper()
+            #self.code = self._nice_name.upper()
+            self.code = self._name
         
         doc = """The name of this user.
         

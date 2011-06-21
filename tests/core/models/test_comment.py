@@ -61,7 +61,7 @@ class CommentTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_body_argument_accepts_string_or_unicode_only(self):
-        """testing if a ValueError raised if the body argument is set to
+        """testing if a TypeError raised if the body argument is set to
         anything other than a string or unicode
         """
         
@@ -73,7 +73,7 @@ class CommentTest(mocker.MockerTestCase):
         for test_value in test_values:
             self.kwargs["body"] = test_value
             self.assertRaises(
-                ValueError,
+                TypeError,
                 Comment,
                 **self.kwargs
             )
@@ -82,7 +82,7 @@ class CommentTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_body_attribute_being_string_or_unicode(self):
-        """testing if a ValueError raised if the body attribute is set to
+        """testing if a TypeError raised if the body attribute is set to
         anything other than a string or unicode
         """
         
@@ -91,7 +91,7 @@ class CommentTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_comment,
                 "body",
@@ -125,26 +125,26 @@ class CommentTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_to_argument_being_none(self):
-        """testing if a ValueError will be raised if to argment is tried to be
+        """testing if a TypeError will be raised if to argment is tried to be
         set to None
         """
         
         # create a new comment with no "to" argument
         self.kwargs["to"] = None
-        self.assertRaises(ValueError, Comment, **self.kwargs)
+        self.assertRaises(TypeError, Comment, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_to_attribute_being_none(self):
-        """testing if a ValueError will be raised if the to attribute tried to
+        """testing if a TypeError will be raised if the to attribute tried to
         be set to a None value
         """
         
         # try to set the to attribute to none
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_comment,
             "to",
@@ -155,7 +155,7 @@ class CommentTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_to_argument_accepts_entity_only(self):
-        """testing if a ValueError will be raised if **to** argument tried
+        """testing if a TypeError will be raised if **to** argument tried
         to be set to something other than an entity object
         """
         
@@ -165,7 +165,7 @@ class CommentTest(mocker.MockerTestCase):
             self.kwargs["to"] = test_value
             
             self.assertRaises(
-                ValueError,
+                TypeError,
                 Comment,
                 **self.kwargs
             )
@@ -174,13 +174,13 @@ class CommentTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_to_attribute_being_set_to_other_than_entity(self):
-        """testing if a ValueError will be raised if the to attribute tried to
+        """testing if a TypeError will be raised if the to attribute tried to
         be set to a something other than an entity object
         """
         
         # try to set the to attribute to something other than an entity object
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_comment,
             "to",
@@ -191,14 +191,14 @@ class CommentTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_to_argument_being_skipped(self):
-        """testing if a ValueError will be raised if **to** argument is skipped
+        """testing if a TypeError will be raised if **to** argument is skipped
         """
         
-        # this should raise a ValueError
+        # this should raise a TypeError
         self.kwargs.pop("to")
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             Comment,
             **self.kwargs
         )

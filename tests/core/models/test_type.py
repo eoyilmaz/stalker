@@ -89,7 +89,7 @@ class TypeTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_target_entity_type_argument_can_not_be_skipped(self):
-        """testing if a ValueError will be raised when the created Type doesn't
+        """testing if a TypeError will be raised when the created Type doesn't
         have any target_entity_type
         """
         

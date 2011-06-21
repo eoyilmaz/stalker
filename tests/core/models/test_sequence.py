@@ -84,24 +84,24 @@ class SequenceTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_project_argument_is_None(self):
-        """testing if a ValueError will be raised when the project argument is
+        """testing if a TypeError will be raised when the project argument is
         None
         """
         
         self.kwargs["project"] = None
-        self.assertRaises(ValueError, Sequence, **self.kwargs)
+        self.assertRaises(TypeError, Sequence, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_project_attribute_is_set_to_None(self):
-        """testing if a ValueError will be raised when the project attribute
-        set to None
+        """testing if a TypeError will be raised when the project attribute set
+        to None
         """
         
         #self.mock_sequence.project = None
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_sequence,
             "project",
@@ -112,21 +112,21 @@ class SequenceTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_project_argument_other_than_a_Project(self):
-        """testing if a ValueError will be raised when the project argument
-        is None
+        """testing if a TypeError will be raised when the project argument is
+        None
         """
         
         test_values = [1, 1.2, "a project", ["a", "list"]]
         
         for test_value in test_values:
             self.kwargs["project"] = test_value
-            self.assertRaises(ValueError, Sequence, **self.kwargs)
+            self.assertRaises(TypeError, Sequence, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_project_attribute_other_than_a_Project(self):
-        """testing if a ValueError will be raised when the project attribute
+        """testing if a TypeError will be raised when the project attribute
         is set to None
         """
         
@@ -134,7 +134,7 @@ class SequenceTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_sequence,
                 "project",
@@ -188,7 +188,7 @@ class SequenceTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_lead_argument_is_not_User(self):
-        """testing if a ValueError will be raised when the lead argument is not
+        """testing if a TypeError will be raised when the lead argument is not
         an instance of User
         """
         
@@ -196,13 +196,13 @@ class SequenceTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["lead"] = test_value
-            self.assertRaises(ValueError, Sequence, **self.kwargs)
+            self.assertRaises(TypeError, Sequence, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_lead_attribute_is_not_User(self):
-        """testing if a ValueError will be raised when the lead attribute is
+        """testing if a TypeError will be raised when the lead attribute is
         set to something other than a User
         """
         
@@ -210,7 +210,7 @@ class SequenceTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_sequence,
                 "lead",
@@ -239,17 +239,6 @@ class SequenceTester(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_shots_argument_is_set_to_None(self):
-        #"""testing if the shots attribute will be set to an empty list when the
-        #shots argument is given as None
-        #"""
-        
-        #self.kwargs["shots"] = None
-        #new_sequence = Sequence(**self.kwargs)
-        #self.assertEqual(new_sequence.shots, [])
-    
-    
     #----------------------------------------------------------------------
     def test_shots_attribute_is_set_None(self):
         """testing if the shots attribute will be set to an empty list when it
@@ -261,23 +250,9 @@ class SequenceTester(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_shots_argument_is_set_to_other_than_a_list(self):
-        #"""testing if a ValueError will be raised when the given shots argument
-        #is not a list
-        #"""
-        
-        #test_values = [1, 1.2, "a string"]
-        
-        #for test_value in test_values:
-            #self.kwargs["shots"] = test_value
-            #self.assertRaises(ValueError, Sequence, **self.kwargs)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_shots_attribute_is_set_to_other_than_a_list(self):
-        """testing if a ValueError will be raised when the shots attribute is
+        """testing if a TypeError will be raised when the shots attribute is
         tried to be set to something other than a list
         """
         
@@ -285,7 +260,7 @@ class SequenceTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_sequence,
                 "shots",
@@ -294,27 +269,15 @@ class SequenceTester(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_shots_argument_is_a_list_of_other_objects(self):
-        #"""testing if a ValueError will be raised when the shots argument is a
-        #list of other type of objects
-        #"""
-        
-        #test_value = [1, 1.2, "a string"]
-        #self.kwargs["shots"] = test_value
-        #self.assertRaises(ValueError, Sequence, **self.kwargs)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_shots_attribute_is_a_list_of_other_objects(self):
-        """testing if a ValueError will be raised when the shots argument is a
+        """testing if a TypeError will be raised when the shots argument is a
         list of other type of objects
         """
         
         test_value = [1, 1.2, "a string"]
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_sequence,
             "shots",
@@ -325,7 +288,7 @@ class SequenceTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_shots_attribute_elements_tried_to_be_set_to_non_Shot_object(self):
-        """testing if a ValueError will be raised when the individual elements
+        """testing if a TypeError will be raised when the individual elements
         in the shots list tried to be set to something other than a Shot
         instance
         """
@@ -333,7 +296,7 @@ class SequenceTester(mocker.MockerTestCase):
         test_values = [1, 1.2, "a string", ["a", "list"]]
         
         for test_value in test_values:
-            self.assertRaises(ValueError,
+            self.assertRaises(TypeError,
                               self.mock_sequence.shots.__setitem__,
                               0,
                               test_value)

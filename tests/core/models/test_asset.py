@@ -87,8 +87,41 @@ class AssetTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_project_argument_is_skipped(self):
+        """testing if a TypeError will be raised when the projects argument is
+        skipped
+        """
+        
+        self.kwargs.pop("project")
+        self.assertRaises(TypeError, Asset, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_project_argument_is_None(self):
+        """testing if a TypeError will be raised when the project argument is
+        None
+        """
+        
+        self.kwargs["project"] = None
+        self.assertRaises(TypeError, Asset, **self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_project_attribute_is_None(self):
+        #"""testing if a TypeError will be raised when the project attribute is
+        #set to None
+        #"""
+        
+        #self.assertRaises(TypeError, setattr, self.mock_asset, "project", None)
+    
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_project_argument_is_not_instance_of_Project(self):
-        """testing if a ValueError will be raised when the project argument is
+        """testing if a TypeError will be raised when the project argument is
         not an instance of Project
         """
         
@@ -97,7 +130,7 @@ class AssetTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["project"] = test_value
-            self.assertRaises(ValueError, Asset, **self.kwargs)
+            self.assertRaises(TypeError, Asset, **self.kwargs)
     
     
     
@@ -106,7 +139,7 @@ class AssetTester(mocker.MockerTestCase):
         """testing if the project attribute is read-only
         """
         
-        self.assertRaises(ValueError, setattr, self.mock_asset, "project",
+        self.assertRaises(AttributeError, setattr, self.mock_asset, "project",
                           None)
     
     
@@ -117,70 +150,6 @@ class AssetTester(mocker.MockerTestCase):
         """
         
         self.assertIsInstance(self.mock_asset.project, Project)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_type_argument_is_None(self):
-        #"""testing if a ValueError will be raised when the type argument is
-        #given as None
-        #"""
-        
-        #self.kwargs["type"] = None
-        #self.assertRaises(ValueError, Asset, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_type_attribute_is_set_to_None(self):
-        #"""testing a ValueError will be raised when the type attribute is set
-        #to None
-        #"""
-        
-        #self.assertRaises(ValueError, setattr, self.mock_asset, "type", None)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_type_argument_is_not_AssetType_instance(self):
-        #"""testing if a ValueError will be raised when the type argument is not
-        #an instance of AssetType
-        #"""
-        
-        #test_values = [1, 1.2, "a str", ["a", "str"]]
-        
-        #for test_value in test_values:
-            #self.kwargs["type"] = test_value
-            #self.assertRaises(ValueError, Asset, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_type_attribute_is_not_AssetType_instance(self):
-        #"""testing if a ValueError will be raised when the type attribute is
-        #tried to be set to something other than a AssetType instance
-        #"""
-        
-        #test_values = [1, 1.2, "a str", ["a", "str"]]
-        
-        #for test_value in test_values:
-            #self.assertRaises(
-                #ValueError,
-                #setattr,
-                #self.mock_asset,
-                #"type",
-                #test_value
-            #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_type_attribute_is_working_properly(self):
-        #"""testing if the type attribute is working properly
-        #"""
-        
-        #self.mock_asset.type = self.mock_type2
-        #self.assertEqual(self.mock_asset.type, self.mock_type2)
     
     
     
@@ -300,80 +269,6 @@ class AssetTester(mocker.MockerTestCase):
         new_asset = Asset(**self.kwargs)
         
         self.assertEqual(new_asset.tasks, tasks)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_shots_attribute_is_working_properly(self):
-        #"""testing if the shots attribute is working properly
-        #"""
-        
-        #shots_list = [self.mock_shot1, self.mock_shot2,
-                                 #self.mock_shot3]
-        #self.mock_asset.shots = shots_list
-        #self.assertEqual(self.mock_asset.shots, shots_list)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_shots_attribute_only_accepts_list_of_Shot_instances_list_part(self):
-        #"""testing if the shots attribute accepts only lists of Shot instances
-        #"""
-        
-        #test_values = [1, 1.2, "a shot list"]
-        
-        #for test_value in test_values:
-            #self.assertRaises(ValueError, setattr, self.mock_asset, "shots",
-                              #test_value)
-        
-        ## now test with proper values
-        #shots_list = [self.mock_shot1, self.mock_shot2,
-                                 #self.mock_shot3]
-        
-        ## should not raise any error
-        #self.mock_asset.shots = shots_list
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_shots_attribute_accepts_only_list_of_Shot_instances(self):
-        #"""testing if the shot attribute accepts only lists of Shot instances
-        #"""
-        
-        #test_value = ["a", "list", "of", "others", 1, 1.2]
-        
-        #self.assertRaises(ValueError, setattr, self.mock_asset, "shots",
-                          #test_value)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_shots_attribute_elements_tried_to_be_changed_to_other_than_Shot(self):
-        #"""testing if a ValueError will be raised when the individual elements
-        #are tried to be changed
-        #"""
-        
-        #test_values = [1, 1.2, "a shot list", ["a", "list", "of", "others"]]
-        
-        ## test append
-        #for test_value in test_values:
-            #self.assertRaises(ValueError, self.mock_asset.shots.append,
-                              #test_value)
-        
-        ## test setitem
-        #self.mock_asset.shots = [self.mock_shot1, self.mock_shot2]
-        #for test_value in test_values:
-            #self.assertRaises(ValueError, self.mock_asset.shots.__setitem__,
-                              #0, test_value)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_shots_attribute_is_instance_of_ValidatedList(self):
-        #"""testing if the shots attribute is instance of ValidatedList
-        #"""
-        
-        #self.assertIsInstance(self.mock_asset.shots, ValidatedList)
     
     
     

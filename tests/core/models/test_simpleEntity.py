@@ -164,20 +164,20 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         # set the name and check the code
         code_test_values = [
-            ("testCode","TEST_CODE"),
-            ("1testCode", "TEST_CODE"),
-            ("_testCode", "TEST_CODE"),
-            ("2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
-            ("2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
+            ("testCode","testCode"),
+            ("1testCode", "testCode"),
+            ("_testCode", "testCode"),
+            ("2423$+^^+^'%+%%&_testCode", "testCode"),
+            ("2423$+^^+^'%+%%&_testCode_35", "testCode_35"),
+            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "testCode_35"),
             ("SH001","SH001"),
-            ("My CODE is Ozgur", "MY_CODE_IS_OZGUR"),
+            ("My CODE is Ozgur", "My_CODE_is_Ozgur"),
             
             (" this is another code for an asset", 
-             "THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
+             "this_is_another_code_for_an_asset"),
             
             ([1, 3, "a", "list","for","testing",3],
-             "A_LIST_FOR_TESTING_3"),
+             "a_list_for_testing_3"),
         ]
         
         for test_value in code_test_values:
@@ -210,7 +210,6 @@ class SimpleEntityTester(mocker.MockerTestCase):
             ([1, 3, "a", "list","for","testing",3],
              "a_list_for_testing_3"),
         ]
-
         
         # set the name and code and test the code
         for test_value in code_test_values:
@@ -233,7 +232,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         code = "something"
         name = "some name"
         new_name = "something new"
-        expected_new_code = "SOMETHING_NEW"
+        expected_new_code = "something_new"
         
         self.kwargs["code"] = code
         self.kwargs["name"] = name
@@ -261,7 +260,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         self.mock_simple_entity.code = ""
-        self.assertEqual(self.mock_simple_entity.code, "TEST_ENTITY")
+        self.assertEqual(self.mock_simple_entity.code, "test_entity")
     
     
     
@@ -272,7 +271,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         self.mock_simple_entity.code = None
-        self.assertEqual(self.mock_simple_entity.code, "TEST_ENTITY")
+        self.assertEqual(self.mock_simple_entity.code, "test_entity")
     
     
     
@@ -288,11 +287,11 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_name_argument_init_as_None(self):
-        """testing if ValueError is raised for None name argument
+        """testing if TypeError is raised for None name argument
         """
         
         self.kwargs["name"] = None
-        self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
+        self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
     
     
     
@@ -314,11 +313,11 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_name_attribute_for_being_None(self):
-        """testing if ValueError is raised when trying to set the name to None
+        """testing if TypeError is raised when trying to set the name to None
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "name",
@@ -504,19 +503,19 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_created_by_argument_instance_of_User(self):
-        """testing if ValueError is raised when assigned anything other than a
+        """testing if TypeError is raised when assigned anything other than a
         stalker.core.models.User object to created_by argument
         """
         # the created_by argument should be an instance of User class, in any
-        # other case it should raise a ValueError
+        # other case it should raise a TypeError
         test_value = "A User Name"
         
         # be sure that the test value is not an instance of User
-        self.assertFalse( isinstance(test_value, User))
+        self.assertFalse(isinstance(test_value, User))
         
         # check the value
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "created_by",
@@ -527,19 +526,19 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_created_by_attribute_instance_of_User(self):
-        """testing if ValueError is raised when assigned anything other than a
+        """testing if TypeError is raised when assigned anything other than a
         stalker.modles.User object to created_by attribute
         """
         # the created_by attribute should be an instance of User class, in any
-        # other case it should raise a ValueError
+        # other case it should raise a TypeError
         test_value = "A User Name"
         
         # be sure that the test value is not an instance of User
-        self.assertFalse( isinstance(test_value, User))
+        self.assertFalse(isinstance(test_value, User))
         
         # check the value
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "created_by",
@@ -548,55 +547,13 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_created_by_argument_empty(self):
-        #"""testing if ValueError is raised when the created_by is tried to be
-        #set to None
-        #"""
-        
-        ## it can not be empty (the first created user going to have some
-        ## problems if we dont allow empty users, the database should be
-        ## initialized with an admin user)
-        ##
-        
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_simple_entity,
-            #"created_by",
-            #None
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_created_by_attribute_empty(self):
-        #"""testing if ValueError is raised when the created_by is tried to be
-        #set to None
-        #"""
-        
-        ## it can not be empty (the first created user going to have some
-        ## problems if we dont allow empty users, the database should be
-        ## initialized with an admin user)
-        ##
-        
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_simple_entity,
-            #"created_by",
-            #None
-        #)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_updated_by_argument_instance_of_User(self):
-        """testing if ValueError is raised when assigned anything other than a
+        """testing if TypeError is raised when assigned anything other than a
         stalker.modles.User object to updated_by argument
         """
         # the updated_by argument should be an instance of User class, in any
-        # other case it should raise a ValueError
+        # other case it should raise a TypeError
         test_value = "A User Name"
         
         # be sure that the test value is not an instance of User
@@ -604,7 +561,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         # check the value
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "updated_by",
@@ -615,19 +572,19 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_updated_by_attribute_instance_of_User(self):
-        """testing if ValueError is raised when assigned anything other than a
+        """testing if TypeError is raised when assigned anything other than a
         stalker.modles.User object to update_by attribute
         """
         # the updated_by attribute should be an instance of User class, in any
-        # other case it should raise a ValueError
+        # other case it should raise a TypeError
         test_value = "A User Name"
         
         # be sure that the test value is not an instance of User
-        self.assertFalse( isinstance(test_value, User))
+        self.assertFalse(isinstance(test_value, User))
         
         # check the value
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "updated_by",
@@ -642,14 +599,6 @@ class SimpleEntityTester(mocker.MockerTestCase):
         the same value with created_by argument
         """
         
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_simple_entity,
-            #"updated_by",
-            #None
-        #)
-        
         self.kwargs["updated_by"] = None
         
         aNewSimpleEntity = SimpleEntity(**self.kwargs)
@@ -660,36 +609,15 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_created_by_attribute_empty(self):
-        #"""testing if ValueError is raised when the created_by is tried to be
-        #set to None
-        #"""
-        
-        ## it can not be empty (the first created user going to have some
-        ## problems if we dont allow empty users, the database should be
-        ## initialized with an admin user)
-        ##
-        
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_simple_entity,
-            #"created_by",
-            #None
-        #)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_date_created_argument_accepts_datetime_only(self):
-        """testing if ValueError raises when the date_created argument is set
+        """testing if TypeError raises when the date_created argument is set
         to something else than a datetime.datetime object
         """
         
         # the date_created argument should be an instance of datetime.datetime
         
-        # try to set something else and expect a ValueError
+        # try to set something else and expect a TypeError
         
         test_value = "a string date time 2010-10-26 etc."
         
@@ -697,7 +625,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertFalse( isinstance(test_value, datetime.datetime) )
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "date_created",
@@ -708,13 +636,13 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_date_created_attribute_accepts_datetime_only(self):
-        """testing if ValueError raises when the date_created attribute is set
+        """testing if TypeError raises when the date_created attribute is set
         to something else than a datetime.datetime object
         """
         
         # the date_created attribute should be an instance of datetime.datetime
         
-        # try to set something else and expect a ValueError
+        # try to set something else and expect a TypeError
         
         test_value = "a string date time 2010-10-26 etc."
         
@@ -722,7 +650,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertFalse( isinstance(test_value, datetime.datetime) )
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "date_created",
@@ -733,12 +661,12 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_date_created_attribute_being_empty(self):
-        """testing if ValueError is raised when the date_created attribute is
+        """testing if TypeError is raised when the date_created attribute is
         set to None
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "date_created",
@@ -749,18 +677,18 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_date_updated_argument_accepts_datetime_only(self):
-        """testing if ValueError raises when the date_updated argument is set
+        """testing if TypeError raises when the date_updated argument is set
         to something else than a datetime.datetime object
         """
         
-        # try to set it to something else and expect a ValueError
+        # try to set it to something else and expect a TypeError
         test_value = "a string date time 2010-10-26 etc."
         
         # be sure that the test_value is not an instance of datetime.datetime
         self.assertFalse( isinstance(test_value, datetime.datetime) )
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "date_updated",
@@ -771,18 +699,18 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_date_updated_attribute_being_datetime(self):
-        """testing if ValueError raises when the date_updated attribute is set
+        """testing if TypeError raises when the date_updated attribute is set
         to something else than a datetime.datetime object
         """
         
-        # try to set something else and expect a ValueError
+        # try to set something else and expect a TypeError
         test_value = "a string date time 2010-10-26 etc."
         
         # be sure that the test_value is not an instance of datetime.datetime
-        self.assertFalse( isinstance(test_value, datetime.datetime) )
+        self.assertFalse(isinstance(test_value, datetime.datetime) )
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "date_updated",
@@ -792,13 +720,13 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_date_updated_attribute_being_empty(self):
-        """testing if ValueError is raised when the date_updated attribute is
+    def test_date_updated_attribute_is_set_to_None(self):
+        """testing if TypeError is raised when the date_updated attribute is
         set to None
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_simple_entity,
             "date_updated",
@@ -870,7 +798,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_type_argument_accepts_only_Type_instances(self):
-        """testing if a ValueError will be raised when the given type attribute
+        """testing if a TypeError will be raised when the given type attribute
         is not instance of stalker.core.models.Type class
         """
         
@@ -878,7 +806,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["type"] = test_value
-            self.assertRaises(SimpleEntity, **self.kwargs)
+            self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
     
     
     
@@ -897,7 +825,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_type_attribute_accepts_only_Type_instances(self):
-        """testing if a ValueError will be raised when the given type attribute
+        """testing if a TypeError will be raised when the given type attribute
         is not instance of stalker.core.models.Type class
         """
         
@@ -944,7 +872,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertEqual(newClass.__strictly_typed__, True)
         
         # create a new instance and skip the Type attribute and expect a
-        # ValueError
+        # TypeError
         if self.kwargs.has_key("type"):
             self.kwargs.pop("type")
         

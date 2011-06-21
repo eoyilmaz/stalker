@@ -136,7 +136,7 @@ def login(user=None):
                    first()
     
     if not isinstance(user, User):
-        raise ValueError("user must be a stalker.core.models.User instance")
+        raise TypeError("user must be a stalker.core.models.User instance")
     
     if db.session is None:
         raise DBError("No database connection is setup yet, please use "
@@ -290,8 +290,11 @@ def set_password(raw_password):
     :returns: string
     """
     
-    if raw_password is None or raw_password == "":
-        raise ValueError("raw_password can not be None or empty string")
+    if raw_password is None:
+        raise TypeError("raw_password can not be None")
+    
+    if raw_password == "":
+        raise ValueError("raw_password can not be empty string")
     
     return base64.encodestring(raw_password)
 

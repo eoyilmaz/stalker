@@ -181,27 +181,26 @@ class UserTest(mocker.MockerTestCase):
         # code format ?
         
         code_test_values = [
-            ("testCode","TESTCODE"),
-            ("1testCode", "TESTCODE"),
-            ("_testCode", "TESTCODE"),
-            ("2423$+^^+^'%+%%&_testCode", "TESTCODE"),
-            ("2423$+^^+^'%+%%&_testCode_35", "TESTCODE35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "TESTCODE35"),
-            ("SH001","SH001"),
-            ("My CODE is Ozgur", "MYCODEISOZGUR"),
+            ("testCode","testcode"),
+            ("1testCode", "testcode"),
+            ("_testCode", "testcode"),
+            ("2423$+^^+^'%+%%&_testCode", "testcode"),
+            ("2423$+^^+^'%+%%&_testCode_35", "testcode35"),
+            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "testcode35"),
+            ("SH001","sh001"),
+            ("My CODE is Ozgur", "mycodeisozgur"),
             
             (" this is another code for an asset", 
-             "THISISANOTHERCODEFORANASSET"),
+             "thisisanothercodeforanasset"),
             
             ([1, 3, "a", "list","for","testing",3],
-             "ALISTFORTESTING3"),
+             "alistfortesting3"),
         ]
         
         # set the name and check the code
         for test_value in code_test_values:
             self.kwargs["login_name"] = test_value[0]
             new_user = User(**self.kwargs)
-            
             self.assertEqual(new_user.code, test_value[1])
     
     
@@ -250,7 +249,7 @@ class UserTest(mocker.MockerTestCase):
         code = "something"
         name = "some name"
         new_name = "something new"
-        expected_new_code = "SOMETHINGNEW"
+        expected_new_code = "somethingnew"
         
         self.kwargs["code"] = code
         self.kwargs["name"] = name
@@ -281,7 +280,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["email"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+            self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
@@ -295,7 +294,7 @@ class UserTest(mocker.MockerTestCase):
         test_value = 1
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_user,
             "email",
@@ -305,7 +304,7 @@ class UserTest(mocker.MockerTestCase):
         test_value = ["an email"]
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_user,
             "email",
@@ -382,24 +381,6 @@ class UserTest(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_login_name_attribute_accepts_only_strings(self):
-        #"""testing if login_name attribute accepts only strings or unicode
-        #"""
-        
-        #test_values = [12312, 132.123123, ["aloginname"], {}, []]
-        
-        #for test_value in test_values:
-            #self.assertRaises(
-                #ValueError,
-                #setattr,
-                #self.mock_user,
-                #"login_name",
-                #test_value
-            #)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_login_name_argument_for_empty_string(self):
         """testing if a ValueError will be raised when trying to assign an
@@ -429,23 +410,23 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_login_name_argument_for_None(self):
-        """testing if a ValueError will be raised when trying to assign None
+        """testing if a TypeError will be raised when trying to assign None
         to login_name argument
         """
         
         self.kwargs["login_name"] = None
-        self.assertRaises(ValueError, User, **self.kwargs)
+        self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_login_name_attribute_for_None(self):
-        """testing if a ValueError will be raised when trying to assign None
+        """testing if a TypeError will be raised when trying to assign None
         to login_name attribute
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_user,
             "login_name",
@@ -590,28 +571,24 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_first_name_argument_None(self):
-        """testing if a ValuError will be raised when trying to assign None to
+        """testing if a TypeError will be raised when trying to assign None to
         first_name argument
         """
         
         self.kwargs["first_name"] = None
         
-        self.assertRaises(
-            ValueError,
-            User,
-            **self.kwargs
-        )
+        self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_first_name_attribute_None(self):
-        """testing if a ValueError will be raised when trying to assign None to
+        """testing if a TypeError will be raised when trying to assign None to
         first_name attribute
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_user,
             "first_name",
@@ -710,13 +687,8 @@ class UserTest(mocker.MockerTestCase):
         test_values = [1, 1.3, ["my first name"], {"a_frist":"name dict"}]
         
         for test_value in test_values:
-            self.kwargs["first_name"]
-            
-            self.assertRaises(
-                ValueError,
-                User,
-                self.kwargs
-            )
+            self.kwargs["first_name"] = test_value
+            self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
@@ -730,7 +702,7 @@ class UserTest(mocker.MockerTestCase):
         for value in test_values:
             
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_user,
                 "first_name",
@@ -778,7 +750,7 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_last_login_argument_accepts_only_datetime_instance_or_None(self):
-        """testing if a ValueError will be raised for values other than a
+        """testing if a TypeError will be raised for values other than a
         datetime.datetime instances or None tried to be set to last_login
         argument
         """
@@ -788,13 +760,13 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["last_login"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+            self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_last_login_attribute_accepts_only_datetime_instance_or_None(self):
-        """testing if a ValueError will be raised for values other than
+        """testing if a TypeError will be raised for values other than
         datetime.datetime instances tried to be assigned to last_login
         attribute
         """
@@ -804,7 +776,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_user,
                 "last_login",
@@ -905,7 +877,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["last_name"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+            self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
@@ -918,7 +890,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_user,
                 "last_name",
@@ -927,39 +899,9 @@ class UserTest(mocker.MockerTestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_department_argument_None(self):
-        #"""testing if a ValueError will be raised when trying to assign None
-        #for the department argument
-        #"""
-        
-        ##try to assign None to department
-        #self.kwargs["department"] = None
-        #self.assertRaises(ValueError, User, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_department_attribute_None(self):
-        #"""testing if a ValueError will be raised when trying to assign None
-        #for the department attribute
-        #"""
-        
-        ## try to assign None to the department attribute
-        
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_user,
-            #"department",
-            #None
-        #)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_department_argument_only_accepts_department_objects(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         anything other than a Department object to department argument
         """
         
@@ -969,13 +911,13 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["department"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+            self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_department_attribute_only_accepts_department_objects(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         anything other than a Department object to department attribute
         """
         
@@ -983,7 +925,7 @@ class UserTest(mocker.MockerTestCase):
         test_value = "a department"
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_user,
             "department",
@@ -1006,23 +948,23 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_password_argument_being_None(self):
-        """testing if a ValueError will be raised when trying to assign None
+        """testing if a TypeError will be raised when trying to assign None
         to the password argument
         """
         
         self.kwargs["password"] = None
-        self.assertRaises(ValueError, User, **self.kwargs)
+        self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_password_attribute_being_None(self):
-        """testing if a ValueError will be raised when tyring to assign None
-        to the password attribute
+        """testing if a TypeError will be raised when tyring to assign None to
+        the password attribute
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_user,
             "password",
@@ -1088,90 +1030,31 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_permission_groups_argument_for_None(self):
-        """testing if a ValueError will be raised when trying to assign None to
-        permission_groups argument
+        """testing if the permission_groups attribute will be an empty list
+        when the permission_groups argument is None
         """
         
         self.kwargs["permission_groups"] = None
-        self.assertRaises(ValueError, User, **self.kwargs)
+        new_user = User(**self.kwargs)
+        self.assertEqual(new_user.permission_groups, [])
     
     
     
     #----------------------------------------------------------------------
     def test_permission_groups_attribute_for_None(self):
-        """testing if a ValueError will be raised when trying to assign None to
-        permission_groups attribute
+        """testing if the permission_groups attribute will be an empty list
+        when it is set to None
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            "permission_groups",
-            None
-        )
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_permission_groups_argument_for_empty_list(self):
-        #"""testing if a ValueError will be raised when trying to assign an
-        #empty list to the permission_groups argument
-        #"""
-        
-        #test_value = []
-        
-        #self.assertRaises(
-            #ValueError,
-            #User,
-            #name=self.name,
-            #first_name=self.first_name,
-            #last_name=self.last_name,
-            #description=self.description,
-            #email=self.email,
-            #password=self.password,
-            #login_name=self.login_name,
-            #department=self.mock_department1,
-            #permission_groups=test_value,
-            #tasks=[self.mock_task1,
-                   #self.mock_task2,
-                   #self.mock_task3,
-                   #self.mock_task4],
-            #projects=[self.mock_project1,
-                      #self.mock_project2,
-                      #self.mock_project3],
-            #projects_lead=[self.mock_project1,
-                           #self.mock_project2],
-            #sequences_lead=[self.mock_sequence1,
-                            #self.mock_sequence2,
-                            #self.mock_sequence3,
-                            #self.mock_sequence4],
-            #created_by=self.mock_admin,
-            #updated_by=self.mock_admin
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_permission_groups_attribute_for_empty_list(self):
-        #"""testing if a ValueError will be raised when trying to assign an
-        #empty list to the permission_groups attribute
-        #"""
-        
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_user,
-            #"permission_groups",
-            #[]
-        #)
+        self.mock_user.permission_groups = None
+        self.assertEqual(self.mock_user.permission_groups, [])
     
     
     
     #----------------------------------------------------------------------
-    def test_perimssion_groups_argument_accepts_only_group_objects(self):
-        """testing if a ValueError will be raised when trying to assign
-        anything other then a PermissionGroup object to the permission_group
+    def test_perimssion_groups_argument_accepts_only_PermissionGroup_instances(self):
+        """testing if a TypeError will be raised when trying to assign
+        anything other then a PermissionGroup instances to the permission_group
         argument
         """
         
@@ -1183,14 +1066,14 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["permission_groups"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+            self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_perimssion_groups_attribute_accepts_only_group_objects(self):
-        """testing if a ValueError will be raised when trying to assign
-        anything other then a PermissionGroup object to the permission_group
+    def test_perimssion_groups_attribute_accepts_only_PermissionGroup_instances(self):
+        """testing if a TypeError will be raised when trying to assign
+        anything other then a PermissionGroup instances to the permission_group
         attribute
         """
         
@@ -1202,7 +1085,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_user,
                 "permission_groups",
@@ -1233,140 +1116,26 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_permission_groups_attribute_elements_accepts_Group_only(self):
-        """testing if a ValueError will be raised when trying to assign
-        something other than a PermissionGroup object to the permission_groups
+    def test_permission_groups_attribute_elements_accepts_PermissionGroup_only(self):
+        """testing if a TypeError will be raised when trying to assign
+        something other than a PermissionGroup instances to the permission_groups
         list
         """
         
         # append
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_user.permission_groups.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_user.permission_groups.__setitem__,
             0,
             0
         )
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_projects_argument_accepts_an_empty_list(self):
-        #"""testing if projects argument accepts an empty list
-        #"""
-        
-        #self.kwargs["projects"] = []
-        
-        ## this should work properly
-        #User(**self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_projects_attribute_accepts_an_empty_list(self):
-        #"""testing if projects attribute accepts an empty list
-        #"""
-        
-        ## this should work properly
-        #self.mock_user.projects = []
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_projects_argument_None(self):
-        #"""testing if a ValueError will be raised when trying to assign None
-        #to the projects argument
-        #"""
-        
-        #self.kwargs["projects"] = None
-        #self.assertRaises(ValueError, User, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_projects_attribute_None(self):
-        #"""testing if a ValueError will be raised when trying to assign None
-        #to the projects attribute
-        #"""
-        
-        #self.assertRaises(
-            #ValueError,
-            #setattr,
-            #self.mock_user,
-            #"projects",
-            #None
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_projects_attribute_is_a_ValidatedList_instance(self):
-        #"""testing if the projects attribute is an instance of ValidatedList
-        #"""
-        
-        #self.assertIsInstance(self.mock_user.projects, ValidatedList)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_projects_attribute_elements_accepts_Project_only(self):
-        #"""testing if a ValueError will be raised when trying to assign
-        #something other than a Project object to the projects list
-        #"""
-        
-        ## append
-        #self.assertRaises(
-            #ValueError,
-            #self.mock_user.projects.append,
-            #0
-        #)
-        
-        ## __setitem__
-        #self.assertRaises(
-            #ValueError,
-            #self.mock_user.projects.__setitem__,
-            #0,
-            #0
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_projects_argument_accepts_only_a_list_of_project_objs(self):
-        #"""testing if a ValueError will be raised when trying to assign a list
-        #of other objects project argument
-        #"""
-        
-        #test_values = [ 123123, 1231.2132, ["a_project1", "a_project2"] ]
-        
-        #for test_value in test_values:
-            #self.kwargs["projects"] = test_value
-            #self.assertRaises(ValueError, User, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_projects_attribute_accepts_only_a_list_of_project_objs(self):
-        #"""testing if a ValueError will be raised when trying to assign a list
-        #of other objects to projects attribute
-        #"""
-        
-        #test_values = [ 123123, 1231.2132, ["a_project1", "a_project2"] ]
-        
-        #for test_value in test_values:
-            #self.assertRaises(
-                #ValueError,
-                #setattr,
-                #self.mock_user,
-                #"projects",
-                #test_value
-            #)
     
     
     
@@ -1418,28 +1187,24 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_projects_lead_argument_None(self):
-        """testing if a ValueError will be raised when tyring to assign None to
-        the projects_lead argument
+        """testing if the projects_lead attribute will be an empty list when
+        the projects_lead attribute is None
         """
         
         self.kwargs["projects_lead"] = None
-        self.assertRaises(ValueError, User, **self.kwargs)
+        new_user = User(**self.kwargs)
+        self.assertEqual(new_user.projects_lead, [])
     
     
     
     #----------------------------------------------------------------------
     def test_projects_lead_attribute_None(self):
-        """testing if a ValueError will be raised when tyring to assign None to
-        the projects_lead attribute
+        """testing if the project_lead attribute will be an empty list when it
+        is set to None
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            "projects_lead",
-            None
-        )
+        self.mock_user.projects_lead = None
+        self.assertEqual(self.mock_user.projects_lead, [])
     
     
     
@@ -1467,7 +1232,7 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_projects_lead_argument_accepts_only_list(self):
-        """testing if a ValueError will be raised when trying to assign a list
+        """testing if a TypeError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         projects_lead argument
         """
@@ -1476,26 +1241,26 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["projects_lead"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+            self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_projects_lead_argument_accepts_only_lists_of_project_obj(self):
-        """testing if a ValueError will be raised when trying to assign a list
+        """testing if a TypeError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         projects_lead argument
         """
         
         test_value = ["a project", 123123, [], {}, 12.2132 ]
         self.kwargs["projects_lead"] = test_value
-        self.assertRaises(ValueError, User, **self.kwargs)
+        self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_projects_lead_attribute_accepts_only_lists(self):
-        """testing if a ValueError will be raised when trying to assign a list
+        """testing if a TypeError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         projects_lead attribute
         """
@@ -1504,7 +1269,7 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_user,
                 "projects_lead",
@@ -1514,8 +1279,8 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_lead_prop_accepts_only_list_of_project_obj(self):
-        """testing if a ValueError will be raised when trying to assign a list
+    def test_projects_lead_attribute_accepts_only_list_of_project_obj(self):
+        """testing if a TypeError will be raised when trying to assign a list
         of other object than a list of Project objects to the
         projects_lead attribute
         """
@@ -1523,7 +1288,7 @@ class UserTest(mocker.MockerTestCase):
         test_value = ["a project", 123123, [], {}, 12.2132 ]
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_user,
             "projects_lead",
@@ -1559,21 +1324,21 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_projects_lead_attribute_elements_accepts_Project_only(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         something other than a Project object to the projects_lead list
         """
         
         # append
         self.assertRaises(
-            ValueError,
-            self.mock_user.projects.append,
+            TypeError,
+            self.mock_user.projects_lead.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
-            ValueError,
-            self.mock_user.projects.__setitem__,
+            TypeError,
+            self.mock_user.projects_lead.__setitem__,
             0,
             0
         )
@@ -1582,29 +1347,24 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_sequences_lead_argument_None(self):
-        """testing if a ValueError will be raised when tyring to assign None to
-        the sequences_lead argument
+        """testing if the sequences_lead attribute will be an empty list when
+        the sequences_lead argument is None
         """
         
         self.kwargs["sequences_lead"] = None
-        
-        self.assertRaises(ValueError, User, **self.kwargs)
+        new_user = User(**self.kwargs)
+        self.assertEqual(new_user.sequences_lead, [])
     
     
     
     #----------------------------------------------------------------------
     def test_sequences_lead_attribute_None(self):
-        """testing if a ValueError will be raised when tyring to assign None to
-        the sequences_lead attribute
+        """testing if the sequences_lead attribute will be an empty list when
+        it is set to None
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            "sequences_lead",
-            None
-        )
+        self.mock_user.sequences_lead = None
+        self.assertEqual(self.mock_user.sequences_lead, [])
     
     
     
@@ -1632,7 +1392,7 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_sequences_lead_argument_accepts_only_lists(self):
-        """testing if a ValueError will be raised when trying to assign a list
+        """testing if a TypeError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         sequences_lead argument
         """
@@ -1641,33 +1401,33 @@ class UserTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["sequences_lead"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+            self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_sequences_lead_argument_accepts_only_lists_of_project_obj(self):
-        """testing if a ValueError will be raised when trying to assign a list
+        """testing if a TypeError will be raised when trying to assign a list
         of other objects than a list of Project objects to the
         sequences_lead argument
         """
         
         test_value = ["a sequence", 123123, [], {}, 12.2132 ]
         self.kwargs["sequences_lead"] = test_value
-        self.assertRaises(ValueError, User, **self.kwargs)
+        self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_sequences_lead_attribute_accepts_only_list_of_project_obj(self):
-        """testing if a ValueError will be raised when trying to assign a list
+        """testing if a TypeError will be raised when trying to assign a list
         of other object than a list of Project objects to the
         sequences_lead attribute
         """
         
         test_value = ["a sequence", 123123, [], {}, 12.2132 ]
         self.kwargs["sequences_lead"] = test_value
-        self.assertRaises(ValueError, User, **self.kwargs)
+        self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
@@ -1676,8 +1436,8 @@ class UserTest(mocker.MockerTestCase):
         """testing if sequence_lead attribute works properly
         """
         
-        self.assertEqual(
-            self.mock_user.sequences_lead, self.kwargs["sequences_lead"]
+        self.assertEqual(self.mock_user.sequences_lead,
+                         self.kwargs["sequences_lead"]
         )
     
     
@@ -1694,20 +1454,20 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_sequences_lead_attribute_elements_accepts_Project_only(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         something other than a Sequence object to the sequence_lead list
         """
         
         # append
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_user.sequences_lead.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_user.sequences_lead.__setitem__,
             0,
             0
@@ -1717,56 +1477,52 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tasks_argument_None(self):
-        """testing if a ValueError will be raised when trying to assign None
-        to the tasks argument
+        """testing if the tasks attribute will be an empty list when the tasks
+        argument is given as None
         """
         
         self.kwargs["tasks"] = None
-        self.assertRaises(ValueError, User, **self.kwargs)
+        new_user = User(**self.kwargs)
+        self.assertEqual(new_user.tasks, [])
     
     
     
     #----------------------------------------------------------------------
     def test_tasks_attribute_None(self):
-        """testing if a ValueError will be raised when trying to assign None
-        to the tasks argument
+        """testing if the tasks attribute will be an empty list when it is set
+        to None
         """
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.mock_user,
-            "tasks",
-            None
-        )
+        self.mock_user.tasks = None
+        self.assertEqual(self.mock_user.tasks, [])
     
     
     
     #----------------------------------------------------------------------
     def test_tasks_argument_accepts_only_list_of_task_objects(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         anything other than a list of task objects to the tasks argument
         """
         
-        test_values = [ 12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
+        test_values = [12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
         
         for test_value in test_values:
             self.kwargs["tasks"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+            self.assertRaises(TypeError, User, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_tasks_attribute_accepts_only_list_of_task_objects(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         anything other than a list of task objects to the tasks argument
         """
         
-        test_values = [ 12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
+        test_values = [12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_user,
                 "tasks",
@@ -1826,20 +1582,20 @@ class UserTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tasks_attribute_elements_accepts_Tasks_only(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         something other than a Task object to the tasks list
         """
         
         # append
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_user.tasks.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_user.tasks.__setitem__,
             0,
             0

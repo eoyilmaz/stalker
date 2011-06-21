@@ -69,7 +69,7 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_foo_obj,
                 "references",
@@ -87,7 +87,7 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         test_value = [1,2.2,["a reference as list"],"some references"]
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_foo_obj,
             "references",
@@ -118,20 +118,20 @@ class ReferenceMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_references_attribute_elements_accepts_Link_only(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         something other than a Link object to the references list
         """
         
         # append
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_foo_obj.references.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_foo_obj.references.__setitem__,
             0,
             0
@@ -242,7 +242,7 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_status_list_init_with_something_else_then_StatusList_1(self):
-        """testing if ValueError is going to be raised when trying to
+        """testing if TYpeError is going to be raised when trying to
         initialize status_list with something other than a StatusList
         """
         
@@ -250,25 +250,25 @@ class StatusMixinTester(mocker.MockerTestCase):
         
         for testValue in testValues:
             self.kwargs["status_list"] = testValue
-            self.assertRaises(ValueError, self.mock_class_for_init_test,
+            self.assertRaises(TypeError, self.mock_class_for_init_test,
                               **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_status_list_init_with_something_else_then_StatusList_2(self):
-        """testing if ValueError is going to be raised when trying to
+        """testing if TypeError is going to be raised when trying to
         initialize status_list with None
         """
         self.kwargs["status_list"] = None
-        self.assertRaises(ValueError, self.mock_class_for_init_test,
+        self.assertRaises(TypeError, self.mock_class_for_init_test,
                           **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_status_list_attribute_set_to_something_other_than_StatusList(self):
-        """testing if ValueError is going to be raised when trying to set the
+        """testing if TypeError is going to be raised when trying to set the
         status_list to something else than a StatusList object
         """
         
@@ -277,7 +277,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         for test_value in test_values:
             # now try to set it
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_mixed_obj,
                 "status_list",
@@ -288,12 +288,12 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_status_list_attribute_set_to_None(self):
-        """testing if ValueError is going to be raised when trying to set the
+        """testing if TypeError is going to be raised when trying to set the
         status_list to None
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_mixed_obj,
             "status_list",
@@ -304,11 +304,11 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_status_list_argument_being_omited(self):
-        """testing if a ValueError going to be raised when omiting the
+        """testing if a TypeError going to be raised when omiting the
         status_list argument
         """
         self.kwargs.pop("status_list")
-        self.assertRaises(ValueError, self.mock_class_for_init_test,
+        self.assertRaises(TypeError, self.mock_class_for_init_test,
                           **self.kwargs)
     
     
@@ -357,22 +357,22 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_status_argument_set_to_None(self):
-        """testing if a ValueError will be raised when setting the status
+        """testing if a TypeError will be raised when setting the status
         argument to None
         """
         self.kwargs["status"] = None
-        self.assertRaises(ValueError, self.mock_class_for_init_test,
+        self.assertRaises(TypeError, self.mock_class_for_init_test,
                           **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_status_attribute_set_to_None(self):
-        """testing if a ValueError will be raised when setting the status
+        """testing if a TypeError will be raised when setting the status
         attribute to None
         """
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_mixed_obj,
             "status",
@@ -383,7 +383,7 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_status_argument_different_than_an_int(self):
-        """testing if a ValueError is going to be raised if trying to
+        """testing if a TypeError is going to be raised if trying to
         initialize status with something else than an integer
         """
         
@@ -392,14 +392,14 @@ class StatusMixinTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["status"] = test_value
-            self.assertRaises(ValueError, self.mock_class_for_init_test,
+            self.assertRaises(TypeError, self.mock_class_for_init_test,
                               **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_status_attribute_set_to_other_than_int(self):
-        """testing if ValueError going to be raised when trying to set the
+        """testing if TypeError going to be raised when trying to set the
         current status to something other than an integer
         """
         
@@ -407,7 +407,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_mixed_obj,
                 "status",
@@ -437,13 +437,13 @@ class StatusMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_status_attribute_set_before_status_list(self):
-        """testing if a ValueError will be raised when trying to set the status
+        """testing if a TypeError will be raised when trying to set the status
         attribute to some value before having a StatusList object in
         status_list attribute
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_mixed_obj2,
             "status",
@@ -655,9 +655,6 @@ class ScheduleMixinTester(mocker.MockerTestCase):
         self.kwargs["due_date"] = self.kwargs["start_date"] - \
             datetime.timedelta(days=10)
         
-        #self.assertRaises(ValueError, self.FooMixedInClass_without_init,
-                          #**self.kwargs)
-        
         new_foo_obj = self.FooMixedInClass_without_init(**self.kwargs)
         
         self.assertEqual(new_foo_obj.due_date,
@@ -667,8 +664,9 @@ class ScheduleMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_due_date_attribute_is_tried_to_set_to_a_time_before_start_date(self):
-        """testing if a ValueError will be raised when the due attribute is
-        tried to be set to a date before start
+        """testing if a the due attribute is re calculated from the start_date
+        and duration attributes when the due_date is tried to be set to a date
+        before start
         """
         
         new_due_date = self.mock_foo_obj.start_date - \
@@ -1069,7 +1067,7 @@ class TaskMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tasks_argument_is_not_a_list(self):
-        """testing if a ValueError will be raised when the tasks argument is
+        """testing if a TypeError will be raised when the tasks argument is
         not a list
         """
         
@@ -1077,13 +1075,13 @@ class TaskMixinTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["tasks"] = test_value
-            self.assertRaises(ValueError, self.FooMixedInClass, **self.kwargs)
+            self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_tasks_attribute_is_not_a_list(self):
-        """testing if a ValueError will be raised when the tasks attribute is
+        """testing if a TypeError will be raised when the tasks attribute is
         tried to set to a non list object
         """
         
@@ -1091,7 +1089,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_foo_obj,
                 "tasks",
@@ -1102,25 +1100,25 @@ class TaskMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tasks_argument_is_a_list_of_other_objects_than_Task(self):
-        """testing if a ValueError will be raised when the items in the tasks
+        """testing if a TypeError will be raised when the items in the tasks
         argument is not Task instance
         """
         
         test_value = [1, 1.2, "a str", ["a", "list"]]
         self.kwargs["tasks"] = test_value
-        self.assertRaises(ValueError, self.FooMixedInClass, **self.kwargs)
+        self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_tasks_attribute_is_set_to_a_list_of_other_objects_than_Task(self):
-        """testing if a ValueError will be raised when the items in the tasks
+        """testing if a TypeError will be raised when the items in the tasks
         attribute is not Task instance
         """
         
         test_value = [1, 1.2, "a str", ["a", "list"]]
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_foo_obj,
             "tasks",
@@ -1131,7 +1129,7 @@ class TaskMixinTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tasks_element_attributes_are_set_to_other_object_than_Task(self):
-        """testing if a ValueError will be raised when trying to set the
+        """testing if a TypeError will be raised when trying to set the
         individual elements in the tasks attribute to other objects than a
         Task instance
         """
@@ -1140,7 +1138,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 self.mock_foo_obj.tasks.__setitem__,
                 "0",
                 test_value

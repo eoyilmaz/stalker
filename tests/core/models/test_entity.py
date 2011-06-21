@@ -81,23 +81,23 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_notes_argument_is_set_to_None(self):
-        """testing if a ValueError will be raised when setting the notes
+        """testing if a TypeError will be raised when setting the notes
         argument to None
         """
         
         self.kwargs["notes"] = None
-        self.assertRaises(ValueError, Entity, **self.kwargs)
+        self.assertRaises(TypeError, Entity, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_notes_attribute_is_set_to_None(self):
-        """testing if a ValueError will be raised when setting the notes
+        """testing if a TypeError will be raised when setting the notes
         attribute to None
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_entity,
             "notes",
@@ -108,7 +108,7 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_notes_argument_set_to_something_other_than_a_list(self):
-        """testing if a ValueError will be raised when setting the notes
+        """testing if a TypeError will be raised when setting the notes
         argument something other than a list
         """
         
@@ -116,13 +116,13 @@ class EntityTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["notes"] = test_value
-            self.assertRaises(ValueError, Entity, **self.kwargs)
+            self.assertRaises(TypeError, Entity, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_notes_attribute_set_to_something_other_than_a_list(self):
-        """testing if a ValueError will be raised when setting the notes
+        """testing if a TypeError will be raised when setting the notes
         argument something other than a list
         """
         
@@ -130,7 +130,7 @@ class EntityTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_entity,
                 "notes",
@@ -141,27 +141,27 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_notes_argument_set_to_a_list_of_other_objects(self):
-        """testing if a ValueError will be raised when trying to set the notes
+        """testing if a TypeError will be raised when trying to set the notes
         argument to a list of other kind of objects than Note objects
         """
         
         self.kwargs["notes"] = [1, 12.2, "this is a string",
                                 ["a list"], {"a": "note"}]
         
-        self.assertRaises(ValueError, Entity, **self.kwargs)
+        self.assertRaises(TypeError, Entity, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_notes_attribute_set_to_a_list_of_other_objects(self):
-        """testing if a ValueError will be raised when trying to set the notes
+        """testing if a TypeError will be raised when trying to set the notes
         attribute to a list of other kind of objects than Note objects
         """
         
         test_value = [1, 12.2, "this is a string", ["a list"], {"a": "note"}]
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_entity,
             "notes",
@@ -194,12 +194,12 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_notes_attribute_element_is_set_to_something_other_than_a_note_object(self):
-        """testing if a ValueError will be raised when trying to assign an
+        """testing if a TypeError will be raised when trying to assign an
         element to the notes list which is not an instance of Note
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_entity.notes.__setitem__,
             0,
             0
@@ -236,7 +236,7 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tags_argument_set_to_something_other_than_a_list(self):
-        """testing if a ValueError is going to be raised when initializing the
+        """testing if a TypeError is going to be raised when initializing the
         tags with something other than a list
         """
         
@@ -244,7 +244,7 @@ class EntityTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["tags"] = test_value
-            self.assertRaises(ValueError, Entity, **self.kwargs)
+            self.assertRaises(TypeError, Entity, **self.kwargs)
     
     
     
@@ -273,12 +273,12 @@ class EntityTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_tags_attribute_element_is_set_to_something_other_than_a_tag_object(self):
-        """testing if a ValueError will be raised when trying to assign an
+        """testing if a TypeError will be raised when trying to assign an
         element to the tags list which is not an instance of Tag
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_entity.tags.__setitem__,
             0,
             0

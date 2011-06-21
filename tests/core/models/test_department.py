@@ -87,9 +87,9 @@ class DepartmentTester(mocker.MockerTestCase):
         test_value = [1, 2.3, [], {}]
         
         self.kwargs["members"] = test_value
-        # this should raise a ValueError
+        # this should raise a TypeError
         self.assertRaises(
-            ValueError,
+            TypeError,
             Department,
             **self.kwargs
         )
@@ -103,9 +103,9 @@ class DepartmentTester(mocker.MockerTestCase):
         
         test_value = [1, 2.3, [], {}]
         
-        # this should raise a ValueError
+        # this should raise a TypeError
         self.assertRaises(
-            ValueError,
+            TypeError,
             setattr,
             self.mock_department,
             "members",
@@ -125,20 +125,20 @@ class DepartmentTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_members_attribute_elements_accepts_User_only(self):
-        """testing if a ValueError will be raised when trying to assign
+        """testing if a TypeError will be raised when trying to assign
         something other than a User object to the members list
         """
         
         # append
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_department.members.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_department.members.__setitem__,
             0,
             0
@@ -148,7 +148,7 @@ class DepartmentTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_members_argument_is_not_iterable(self):
-        """testing if a ValueError will be raised when the given members
+        """testing if a TypeError will be raised when the given members
         argument is not an instance of list
         """
         
@@ -156,20 +156,20 @@ class DepartmentTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["members"] = test_value
-            self.assertRaises(ValueError, Department, **self.kwargs)
+            self.assertRaises(TypeError, Department, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_members_attribute_is_not_iterable(self):
-        """testing if a ValueError will be raised when the members attribute
+        """testing if a TypeError will be raised when the members attribute
         is tried to be set to a non-iterable value
         """
         
         test_values = [1, 1.2, "a user"]
         
         for test_value in test_values:
-            self.assertRaises(ValueError, setattr, self.mock_department,
+            self.assertRaises(TypeError, setattr, self.mock_department,
                               "members", test_value)
     
     
@@ -181,11 +181,11 @@ class DepartmentTester(mocker.MockerTestCase):
         
         test_values = [ "", 1, 2.3, [], {} ]
         
-        # all of the above values should raise an ValueError
+        # all of the above values should raise an TypeError
         for test_value in test_values:
             self.kwargs["lead"] = test_value
             self.assertRaises(
-                ValueError,
+                TypeError,
                 Department,
                 **self.kwargs
             )
@@ -193,16 +193,17 @@ class DepartmentTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_lead_attribute_accepts_only_user_objects(self):
-        """testing if lead attribute accepts only user objects
+    def test_lead_attribute_accepts_only_User_instances(self):
+        """testing if a TypeError will be raised when the lead attribute
+        is not User instance
         """
         
         test_values = ["", 1, 2.3, [], {}]
         
-        # all of the above values should raise an ValueError
+        # all of the above values should raise an TypeError
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_department,
                 "lead",

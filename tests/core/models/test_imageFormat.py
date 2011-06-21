@@ -38,7 +38,7 @@ class ImageFormatTest(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_width_argument_accepts_int_or_float_only(self):
         """testing the width argument accepts integer or float and raises
-        ValueError in any other case
+        TypeError in any other case
         """
         
         #----------------------------------------------------------------------
@@ -47,21 +47,22 @@ class ImageFormatTest(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["width"] = test_value
-            self.assertRaises(ValueError, ImageFormat,
+            self.assertRaises(TypeError, ImageFormat,
                               **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_width_attribute_int_or_float(self):
-        """testing the width attribute against not being an integer or float
+        """testing if a TypeError will be raised when the width attribute
+        is not an integer or float
         """
         
         test_values = ["1920", [1920], {}, ()]
         
         for test_value in test_values:
             self.assertRaises(
-                ValueError,
+                TypeError,
                 setattr,
                 self.mock_imageFormat,
                 "width",
@@ -99,7 +100,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_width_argument_being_zero(self):
-        """testing the width argument against being zero
+        """testing if a ValueError will be raised when the width argument is
+        zero
         """
         
         #----------------------------------------------------------------------
@@ -108,9 +110,11 @@ class ImageFormatTest(mocker.MockerTestCase):
         self.assertRaises(ValueError, ImageFormat, **self.kwargs)
     
     
+    
     #----------------------------------------------------------------------
     def test_width_attribute_being_zero(self):
-        """testing the width attribute against being zero
+        """testing if a ValueError will be raised when the width attribute is
+        zero
         """
         
         # also test the attribute for this
@@ -121,7 +125,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_width_argument_being_negative(self):
-        """testing the width argument against being negative
+        """testing if a ValueError will be raised when the width argument is
+        negative
         """
         
         self.kwargs["width"] = -10
@@ -131,7 +136,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_width_attribute_being_negative(self):
-        """testing the width attribute against being negative
+        """testing if a ValueError will be raised when the width attribute is
+        negative
         """
         
         # also test the attribute for this
@@ -142,33 +148,35 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_height_argument_int_or_float(self):
-        """testing the height argument against not being integer or float
+        """testing if a TypeError will be raised when the height argument is
+        not an integer or float
         """
         
         test_values = ["1080", [1080], {}, ()]
         
         for test_value in test_values:
             self.kwargs["height"] = test_value
-            self.assertRaises(ValueError, ImageFormat,
+            self.assertRaises(TypeError, ImageFormat,
                               **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
     def test_height_attribute_int_or_float(self):
-        """testing the height attribute against not being an integer or float
+        """testing if a TypeError will be raised when the height attribute is
+        not an integer or float
         """
         
         # test also the attribute
         for test_value in ["1080", [1080]]:
-            self.assertRaises(
-                ValueError, setattr, self.mock_imageFormat, "height", "1080")
+            self.assertRaises(TypeError, setattr, self.mock_imageFormat,
+                              "height", "1080")
     
     
     
     #----------------------------------------------------------------------
     def test_height_argument_float_to_int_conversion(self):
-        """testing the height argument against being converted to int
+        """testing the height argument given as float will be converted to int
         successfuly
         """
         
@@ -181,7 +189,7 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_height_attribute_float_to_int_conversion(self):
-        """testing the height attribute against being converted to int
+        """testing the height attribute given as float being converted to int
         successfuly
         """
         
@@ -193,7 +201,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_height_argument_being_zero(self):
-        """testing the height argument against being zero
+        """testing if a ValueError will be raised when the height argument is
+        zero
         """
         
         self.kwargs["height"] = 0
@@ -203,7 +212,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_height_attribute_being_zero(self):
-        """testing the height attribute against being zero
+        """testing if a ValueError will be raised when the height attribute is
+        zero
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
@@ -213,7 +223,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_height_argument_being_negative(self):
-        """testing the height argument against being negative
+        """testing if a ValueError will be raised when the height argument is
+        negative
         """
         self.kwargs["height"] = -10
         self.assertRaises(ValueError, ImageFormat, **self.kwargs)
@@ -222,7 +233,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_height_attribute_being_negative(self):
-        """testing the height attribute against being negative
+        """testing if a ValueError will be raised when the height attribute is
+        negative
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
@@ -232,8 +244,7 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_device_aspect_attribute_float(self):
-        """testing the device aspect ratio attribute against not being a float
-        value
+        """testing the if device aspect ratio is calculated as a float value
         """
         
         self.assertIsInstance(self.mock_imageFormat.device_aspect, float)
@@ -242,7 +253,7 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_device_aspect_ratio_correctly_calculated(self):
-        """testing the device aspect ratio against being correctly calculated
+        """testing if the device aspect ratio is correctly calculated
         """
         
         #----------------------------------------------------------------------
@@ -286,8 +297,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_device_aspect_attribute_updates(self):
-        """testing device_aspect_ratio attribute being updated on changes to
-        any of the witdh, height or pixel_aspect
+        """testing if the device_aspect_ratio attribute is updated when any of
+        the witdh, height or pixel_aspect attributes are changed
         """
         
         #----------------------------------------------------------------------
@@ -333,7 +344,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_pixel_aspect_int_float(self):
-        """testing the pixel aspect ratio against not being integer or float
+        """testing if a TypeError will be raised when the pixel aspect ratio
+        is not an integer or float
         """
         
         #----------------------------------------------------------------------
@@ -341,7 +353,7 @@ class ImageFormatTest(mocker.MockerTestCase):
         
         # any other variable type than int and float is not ok
         self.kwargs["pixel_aspect"] = "1.0"
-        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
+        self.assertRaises(TypeError, ImageFormat, **self.kwargs)
         
         # float is ok
         self.kwargs["pixel_aspect"] = 1.0
@@ -355,7 +367,7 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_pixel_aspect_float_conversion(self):
-        """testing the pixel aspect ratio conversion to float
+        """testing if the pixel aspect ratio converted to float
         """
         
         #----------------------------------------------------------------------
@@ -382,7 +394,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_pixel_aspect_attribute_zero(self):
-        """testing the pixel_aspect attribute against being zero
+        """testing if a ValueError will be raised when the pixel_aspect
+        attribute is zero
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
@@ -392,8 +405,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_pixel_aspect_argument_negative(self):
-        """testing if a ValueError will be raised when pixel_aspect argument
-        against being negative
+        """testing if a ValueError will be raised when pixel_aspect argument is
+        negative
         """
         
         #----------------------------------------------------------------------
@@ -408,7 +421,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_pixel_aspect_attribute_negative(self):
-        """testing pixel_aspect attribute against being negative
+        """testing if a ValueError will be raised when pixel_aspect attribute
+        is negative
         """
         
         # also test the attribute
@@ -452,14 +466,15 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_print_resolution_argument_accepts_int_float_only(self):
-        """testing the print_resolution argument accepts integer or float only
+        """testing if a TypeError will be raised when the print_resolution
+        argument is not an integer or float
         """
         
         #----------------------------------------------------------------------
         # the print resolution should be initialized with an integer or a float
         self.kwargs["print_resolution"] = "300.0"
         
-        self.assertRaises(ValueError, ImageFormat, **self.kwargs)
+        self.assertRaises(TypeError, ImageFormat, **self.kwargs)
         
         self.kwargs["print_resolution"] = 300
         an_image_format = ImageFormat(**self.kwargs)
@@ -471,8 +486,10 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_print_resolution_argument_zero(self):
-        """testing the print_resolution argument being zero
+        """testing if a ValueError will be raised when the print_resolution
+        argument is zero
         """
+        
         self.kwargs["print_resolution"] = 0
         #----------------------------------------------------------------------
         # the print resolution can not be zero
@@ -482,7 +499,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_print_resolution_attribute_zero(self):
-        """testing the print_resolution attribute being zero
+        """testing if a ValueError will be raised when the print_resolution
+        attribute is zero
         """
         
         # also test the attribute
@@ -493,7 +511,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_print_resolution_argument_negative(self):
-        """testing the print_resolution argument being negative
+        """testing if a ValueError will be raised when the print_resolution
+        argument is negative
         """
         
         #----------------------------------------------------------------------
@@ -508,7 +527,8 @@ class ImageFormatTest(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_print_resolution_attribute_negative(self):
-        """testing the print_resolution attribute being negative
+        """testing if a ValueError will be raised when the print_resolution
+        attribute is negative
         """
         
         self.assertRaises(ValueError, setattr, self.mock_imageFormat,
