@@ -73,7 +73,7 @@ class ValidetedListTester(unittest.TestCase):
         vList1 = ValidatedList([], int)
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             vList1.append,
             "a string"
         )
@@ -93,7 +93,7 @@ class ValidetedListTester(unittest.TestCase):
         vList1 = ValidatedList([0, 1, 2, 3], int)
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             vList1.append,
             "a string"
         )
@@ -113,7 +113,7 @@ class ValidetedListTester(unittest.TestCase):
         vList1 = ValidatedList([0, 1, 2, 3], str)
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             vList1.append,
             0
         )
@@ -141,7 +141,7 @@ class ValidetedListTester(unittest.TestCase):
         
         test_list = ValidatedList([], "str")
         
-        self.assertRaises(ValueError, test_list.append, 1)
+        self.assertRaises(TypeError, test_list.append, 1)
         test_list.append("a str")
         
         # a real world example
@@ -159,7 +159,7 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list1.__setitem__,
             -1,
             "string value"
@@ -173,7 +173,7 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list2.__setitem__,
             -1,
             "string value"
@@ -200,7 +200,7 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list1.__setslice__,
             0,
             3,
@@ -215,7 +215,7 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list2.__setslice__,
             0,
             3,
@@ -238,12 +238,12 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_append_with_wrong_type(self):
-        """testing if a ValueError will be raised in append method when the
+        """testing if a TypeError will be raised in append method when the
         given object is in wrong type
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list1.append,
             "a string value"
         )
@@ -255,7 +255,7 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list2.append,
             "a string value"
         )
@@ -297,7 +297,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "str")
         
         # now check if it only accepts strings
-        self.assertRaises(ValueError, new_list.append, 12)
+        self.assertRaises(TypeError, new_list.append, 12)
         
         # this should work
         new_list.append("test string")
@@ -313,7 +313,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], str)
         
         # now check if it only accpets strings
-        self.assertRaises(ValueError, new_list.append, 12)
+        self.assertRaises(TypeError, new_list.append, 12)
         
         # this should work
         new_list.append("test string")
@@ -341,12 +341,12 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_extend_with_wrong_type(self):
-        """testing if a ValueError will be raised in extend method when the
+        """testing if a TypeError will be raised in extend method when the
         given object is in wrong type
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list1.extend,
             ["a", "string", "list"]
         )
@@ -359,7 +359,7 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list2.extend,
             ["a", "string", "list"]
         )
@@ -397,7 +397,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "str")
         
         # now check if it only accepts strings
-        self.assertRaises(ValueError, new_list.extend, [12, 123])
+        self.assertRaises(TypeError, new_list.extend, [12, 123])
         
         # this should work
         new_list.extend(["test", "string"])
@@ -413,7 +413,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], str)
         
         # now check if it only accpets strings
-        self.assertRaises(ValueError, new_list.extend, [12, 123])
+        self.assertRaises(TypeError, new_list.extend, [12, 123])
         
         # this should work
         new_list.extend(["test", "string"])
@@ -441,12 +441,12 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_insert_with_wrong_type(self):
-        """testing if a ValueError will be raised in insert method when the
+        """testing if a TypeError will be raised in insert method when the
         given object is in wrong type
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list1.insert,
             0,
             "a str"
@@ -456,12 +456,12 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_insert_with_uninit_class(self):
-        """testing if a ValueError will be raised in un-initialized classes
+        """testing if a TypeError will be raised in un-initialized classes
         insert method when the given item is in wrong type
         """
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list2.insert,
             0,
             "a str"
@@ -507,7 +507,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "str")
         
         # now check if it only accepts strings
-        self.assertRaises(ValueError, new_list.insert, 0, 12)
+        self.assertRaises(TypeError, new_list.insert, 0, 12)
         
         # this should work
         new_list.insert(0, "test string")
@@ -523,7 +523,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], str)
         
         # now check if it only accpets strings
-        self.assertRaises(ValueError, new_list.insert, 0, 12)
+        self.assertRaises(TypeError, new_list.insert, 0, 12)
         
         # this should work
         new_list.insert(0, "test string")
@@ -551,14 +551,14 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test___add___with_wrong_type(self):
-        """testing if a ValueError will be raised in the __add__ method when
+        """testing if a TypeError will be raised in the __add__ method when
         the given item is in wrong type
         """
         
         test_value = ["a", "b", "c"]
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list1.__add__,
             test_value
         )
@@ -573,7 +573,7 @@ class ValidetedListTester(unittest.TestCase):
         test_value = ["a", "b", "c"]
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list2.__add__,
             test_value
         )
@@ -615,7 +615,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "str")
         
         # now check if it only accepts strings
-        self.assertRaises(ValueError, new_list.__add__, [12, 123])
+        self.assertRaises(TypeError, new_list.__add__, [12, 123])
         
         # this should work
         new_list.__add__(["test", "string"])
@@ -631,7 +631,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], str)
         
         # now check if it only accpets strings
-        self.assertRaises(ValueError, new_list.__add__, [12, 123])
+        self.assertRaises(TypeError, new_list.__add__, [12, 123])
         
         # this should work
         new_list.__add__(["test","string"])
@@ -659,14 +659,14 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test___iadd___with_wrong_type(self):
-        """testing if a ValueError will be raised in the __iadd__ (+=) method
+        """testing if a TypeError will be raised in the __iadd__ (+=) method
         when the given item type is wrong
         """
         
         test_value = ["a", "b", "c"]
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list1.__iadd__,
             test_value
         )
@@ -675,14 +675,14 @@ class ValidetedListTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test___iadd__with_uninit_class(self):
-        """testing if a ValueErrorr will be raised in the __iadd__ (+=) method
+        """testing if a TypeError will be raised in the __iadd__ (+=) method
         of the un-initialized class when the given item is in wrong type
         """
         
         test_value = ["a", "b", "c"]
         
         self.assertRaises(
-            ValueError,
+            TypeError,
             self.mock_valideted_list2.__iadd__,
             test_value
         )
@@ -724,7 +724,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], "str")
         
         # now check if it only accepts strings
-        self.assertRaises(ValueError, new_list.__iadd__, [12, 123])
+        self.assertRaises(TypeError, new_list.__iadd__, [12, 123])
         
         # this should work
         new_list.__iadd__(["test", "string"])
@@ -740,7 +740,7 @@ class ValidetedListTester(unittest.TestCase):
         new_list = ValidatedList([], str)
         
         # now check if it only accpets strings
-        self.assertRaises(ValueError, new_list.__iadd__, [12, 123])
+        self.assertRaises(TypeError, new_list.__iadd__, [12, 123])
         
         # this should work
         new_list.__iadd__(["test", "string"])

@@ -7,8 +7,8 @@ import platform
 
 
 from stalker.ext.validatedList import ValidatedList
-
-
+from stalker.core.errors import CircularDependencyError
+from stalker.conf import defaults
 
 
 
@@ -3514,6 +3514,22 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
 
 
 ########################################################################
+class Version(Entity, StatusMixin):
+    """The Version class is the connection of Assets to versions of that asset.
+    So it connects the Assets to file system, and manages the files as
+    versions.
+    """
+    
+    
+    
+    pass
+
+
+
+
+
+
+########################################################################
 class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
@@ -3553,20 +3569,25 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     :param effort: The total effort that needs to be spend to complete this
       Task. Can be used to create an initial bid of how long this task going to
       take. The effort is equaly divided to the assigned resources. So if the
-      effort is 10 days and 2 resources is assigned then the duration of the
-      task is going to be 5 days (if both of the resources are free to work).
-      The default value is 1 day.
+      effort is 10 days and 2 :attr:`~stalker.core.models.Task.resources` is
+      assigned then the :attr:`~stalker.core.models.Task.duration` of the task
+      is going to be 5 days (if both of the resources are free to work). The
+      default value is stalker.conf.defaults.DEFAULT_TASK_DURATION.
       
-      The effort argument defines the duration of the task. Every resource is
-      counted equally effective and the duration will be calculated by the
+      The effort argument defines the
+      :attr:`~stalker.core.models.Task.duration` of the task. Every resource is
+      counted equally effective and the
+      :attr:`~stalker.core.models.Task.duration` will be calculated by the
       simple formula:
       
       .. math::
          
          {duration} = \\frac{{effort}}{n_{resources}}
       
-      And changing the duration will also effect the effort spend. The effort
-      will be calculated with the formula:
+      And changing the :attr:`~stalker.core.models.Task.duration` will also
+      effect the :attr:`~stalker.core.models.Task.effort` spend. The
+      :attr:`~stalker.core.models.Task.effort` will be calculated with the
+      formula:
       
       .. math::
          
@@ -3625,17 +3646,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
        
        #:type child_tasks: :class:`~stalker.core.models.Task`.
        
-       #:param bookings: A list of :class:`~stalker.core.models.Booking` objects
-         #showing who spent how much effort on this task.
-       
-       #:type bookings: list of :class:`~stalker.core.models.Booking`
-       
-    #:param bool complete: A bool value showing if this task is completed or
-      #not. There is a good article_ about why not to use an attribute called
-      #``percent_complete`` to measure how much the task is completed.
-      
-      #.. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
-    
     #:param versions: A list of :class:`~stalker.core.models.Version` objects
       #showing the produced work on the repository. This is the relation between
       #database and the repository.
@@ -3643,18 +3653,432 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #:type versions: list of :class:`~stalker.core.models.Version`
     #"""
     
-    # for testing purposes
-    resources = []
-    
+    _bookings = ValidatedList([], Booking)
+    _versions = ValidatedList([], Version)
     
     
     #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
+    def __init__(self,
+                 depends=None,
+                 effort=None,
+                 resources=None,
+                 milestone=False,
+                 priority=defaults.DEFAULT_TASK_PRIORITY,
+                 **kwargs):
         super(Task, self).__init__(**kwargs)
         
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
+        
+        self._milestone = self._validate_milestone(milestone)
+        
+        self._depends = self._validate_depends(depends)
+        self._resources = self._validate_resources(resources)
+        
+        self._effort = None
+        self.effort = effort
+        
+        self._priority = self._validate_priority(priority)
+        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Task, self).__eq__(other) and isinstance(other, Task)
+    
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_bookings(self, bookings_in):
+        """validates the given bookings value
+        """
+        
+        if bookings_in is None:
+            bookings_in = []
+        
+        if not all([isinstance(element, Booking) for element in bookings_in]):
+            raise TypeError("all the elements in the bookings should be "
+                            "an instances of stalker.core.models.Booking")
+        
+        
+        return ValidatedList(bookings_in, Booking)
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_complete(self, complete_in):
+        """validates the given complete value
+        """
+        
+        return bool(complete_in)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_depends(self, depends_in):
+        """validates the given depends value
+        """
+        
+        if depends_in is None:
+            depends_in = []
+        
+        if not isinstance(depends_in, list):
+            raise TypeError("the depends attribute should be an list of"
+                            "stalker.core.models.Task instances")
+            
+        
+        if not all([isinstance(element, Task) for element in depends_in]):
+            raise TypeError("all the elements in the depends should be an "
+                            "instance of stalker.core.models.Task")
+        
+        # check for the circular dependency
+        for task in depends_in:
+            _check_circular_dependency(task, self)
+        
+        return ValidatedList(depends_in, Task)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_effort(self, effort_in):
+        """validates the given effort
+        """
+        
+        if not isinstance(effort_in, datetime.timedelta):
+            effort_in = None
+        
+        if effort_in is None:
+            # take it from the duration and resources
+            
+            num_of_resources = len(self.resources)
+            if num_of_resources == 0:
+                num_of_resources = 1
+            
+            effort_in = self.duration * num_of_resources
+        
+        return effort_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_milestone(self, milestone_in):
+        """validates the given milestone value
+        """
+        
+        return bool(milestone_in)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_priority(self, priority_in):
+        """validates the given priority value
+        """
+        
+        try:
+            priority_in = int(priority_in)
+        except (ValueError, TypeError):
+            pass
+        
+        if not isinstance(priority_in, int):
+            priority_in = defaults.DEFAULT_TASK_PRIORITY
+        
+        if priority_in < 0:
+            priority_in = 0
+        elif priority_in > 1000:
+            priority_in = 1000
+        
+        return priority_in
+    
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_resources(self, resources_in):
+        """validates the given resources value
+        """
+        
+        if resources_in is None:
+            resources_in = []
+        
+        if not isinstance(resources_in, list):
+            raise TypeError("resources should be a list of "
+                            "stalker.core.models.User instances")
+        
+        if not all([isinstance(element, User) for element in resources_in]):
+            raise TypeError("resources should be a list of "
+                            "stalker.core.models.User instances")
+        
+        if self.milestone:
+            resources_in = []
+        
+        return ValidatedList(resources_in, User)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_versions(self, versions_in):
+        """validates the given version value
+        """
+        
+        if versions_in is None:
+            versions_in = []
+        
+        if not all([isinstance(element, Version) for element in versions_in]):
+            raise TypeError("all the elements in the versions list should be "
+                            "stalker.core.models.Version instances")
+        
+        return ValidatedList(versions_in, Version)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def bookings():
+        def fget(self):
+            return self._bookings
+        
+        def fset(self, bookings_in):
+            self._bookings = self._validate_bookings(bookings_in)
+        
+        doc = """A list of :class:`~stalker.core.models.Booking` objects
+        showing who and when spent how much effort on this task.
+        """
+        
+        return locals()
+    
+    bookings = property(**bookings())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def complete():
+        def fget(self):
+            return self._complete
+        
+        def fset(self, complete_in):
+            self._complete = self._validate_complete(complete_in)
+        
+        doc = """A bool value showing if this task is completed or not.
+        
+        There is a good article_ about why not to use an attribute called
+        ``percent_complete`` to measure how much the task is completed.
+        
+        .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
+        """
+        
+        return locals()
+    
+    complete = property(**complete())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def depends():
+        def fget(self):
+            return self._depends
+        
+        def fset(self, depends_in):
+            self._depends = self._validate_depends(depends_in)
+        
+        doc = """A list of :class:`~stalker.core.models.Task`\ s that this one is depending on.
+        
+        A CircularDependencyError will be raised when the task dependency
+        creates a circlar dependency which means it is not allowed to create
+        a dependency for this Task which is depending on another one which in
+        some way depends to this one again.
+        """
+        
+        return locals()
+    
+    depends = property(**depends())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def duration():
+        def fget(self):
+            return self._duration
+        
+        def fset(self, duration_in):
+            
+            # just call the fset method of the duration property in the super
+            ScheduleMixin.duration.fset(self, duration_in)
+            
+            # then update the effort
+            num_of_resources = len(self.resources)
+            if num_of_resources == 0:
+                num_of_resources = 1
+            
+            self._effort = self.duration * num_of_resources
+        
+        doc = """The overriden duration attribute.
+        
+        It is a datetime.timedelta instance. Showing the difference of the
+        :attr:`~stalker.core.mixins.ScheduleMixin.start_date` and the
+        :attr:`~stalker.core.mixins.ScheduleMixin.due_date`. If edited it
+        changes the :attr:`~stalker.core.mixins.ScheduleMixin.due_date`
+        attribute value.
+        """
+        
+        return locals()
+    
+    duration = property(**duration())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def effort():
+        def fget(self):
+            return self._effort
+        
+        def fset(self, effort_in):
+            self._effort = self._validate_effort(effort_in)
+            
+            # update the duration
+            num_of_resources = len(self.resources)
+            if num_of_resources == 0:
+                num_of_resources = 1
+            
+            self.duration = self._effort / num_of_resources
+        
+        doc = """The total effort that needs to be spend to complete this Task.
+        
+        Can be used to create an initial bid of how long this task going to
+        take. The effort is equaly divided to the assigned resources. So if the
+        effort is 10 days and 2 resources is assigned then the
+        :attr:`~stalker.core.models.Task.duration` of the task is going to be 5
+        days (if both of the resources are free to work). The default value is
+        stalker.conf.defaults.DEFAULT_TASK_DURATION.
+      
+        The effort defines the :attr:`~stalker.core.models.Task.duration` of
+        the task. Every resource is counted equally effective and the
+        :attr:`~stalker.core.models.Task.duration` will be calculated by the
+        simple formula:
+        
+        .. math::
+           
+           {duration} = \\frac{{effort}}{n_{resources}}
+        
+        And changing the :attr:`~stalker.core.models.Task.duration` will also
+        effect the :attr:`~stalker.core.models.Task.effort` spend. The
+        :attr:`~stalker.core.models.Task.effort` will be calculated with the
+        formula:
+           
+        .. math::
+           
+           {effort} = {duration} \\times {n_{resources}}
+        """
+        
+        return locals()
+    
+    effort = property(**effort())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def milestone():
+        def fget(self):
+            return self._milestone
+        
+        def fset(self, milestone_in):
+            self._milestone = self._validate_milestone(milestone_in)
+            
+            if self._milestone:
+                self._resources = []
+        
+        doc = """Specifies if this Task is a milestone.
+        
+        Milestones doesn't need any duration, any effort and any resources. It
+        is used to create meaningfull dependencies between the critical stages
+        of the project.
+        """
+        
+        return locals()
+    
+    milestone = property(**milestone())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def resources():
+        def fget(self):
+            return self._resources
+        
+        def fset(self, resources_in):
+            self._resources = self._validate_resources(resources_in)
+        
+        doc = """The list of :class:`stalker.core.models.User`\ s instances
+        assigned to this Task.
+        """
+        
+        return locals()
+    
+    resources = property(**resources())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def priority():
+        def fget(self):
+            return self._priority
+        
+        def fset(self, priority_in):
+            self._priority = self._validate_priority(priority_in)
+        
+        doc = """The priority of the current Task.
+        
+        It is a number between 0 and 1000 shows how important this task is
+        among the others.
+        """
+        
+        return locals()
+    
+    priority = property(**priority())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def versions():
+        def fget(self):
+            return self._versions
+        
+        def fset(self, versions_in):
+            self._versions = self._validate_versions(versions_in)
+        
+        doc = """A list of :class:`~stalker.core.models.Version` instances
+        showing the files created for this task.
+        """
+        
+        return locals()
+    
+    versions = property(**versions())
+    
+
+
+
+
+
+
+#----------------------------------------------------------------------
+def _check_circular_dependency(task, check_for_task):
+    """checks the circular dependency in task if it has check_for_task in its
+    depends list
+    
+    !!!!WARNING NO TEST FOR THIS FUNCTION!!!!
+    """
+    
+    for dependent_task in task.depends:
+        if dependent_task is check_for_task:
+            raise CircularDependencyError(
+                "task %s and %s creates a circular dependency" % \
+                (task, check_for_task)
+            )
+        else:
+            _check_circular_dependency(dependent_task, check_for_task)
 
 
 
@@ -4904,16 +5328,3 @@ class User(Entity):
 
 
 
-
-
-
-########################################################################
-class Version(Entity, StatusMixin):
-    """The Version class is the connection of Assets to versions of that asset.
-    So it connects the Assets to file system, and manages the files as
-    versions.
-    """
-    
-    
-    
-    pass

@@ -30,7 +30,7 @@ v0.1.1.a9
    case they were equal, it was not possible to compare them and get a
    meaningful difference to see if the database part worked properly. Now, all
    the attributes of the original instance are stored in new variables and
-   then the original intance is deleted, and the a new one is retrieved back
+   then the original instance is deleted, and the a new one is retrieved back
    from the database, and all the attributes are compared with the stored ones.
    (probably there are other good ways)
 
@@ -57,7 +57,7 @@ v0.1.1.a9
  * fixed mapping of :attr:`~stalker.core.models.Sequence.lead` attribute in
    :class:`~stalker.core.models.Sequence` class
 
- * updated the behaviour of :attr:`~stalker.core.models.Project.users`
+ * updated the behavior of :attr:`~stalker.core.models.Project.users`
    attribute in :class:`~stalker.core.models.Project` class. Now the list of
    :class:`~stalker.core.models.User`\ s are gathered from the
    :class:`~stalker.core.models.Task`\ s of the
@@ -67,10 +67,10 @@ v0.1.1.a9
    the :class:`~stalker.core.models.Asset`\ s of the same
    :class:`~stalker.core.models.Project`.
 
- * updated the behaviour of :attr:`~stalker.core.models.User.project` attribute
+ * updated the behavior of :attr:`~stalker.core.models.User.project` attribute
    in class :class:`~stalker.core.models.User` class. Now the list of
    :class:`~stalker.core.models.Project`\ s are gathered from all the
-   :class:`~stalker.core.models.Task`\ s assinged to the current
+   :class:`~stalker.core.models.Task`\ s assigned to the current
    :class:`~stalker.core.models.User`.
 
  * The ``Group`` class is renamed to
@@ -84,19 +84,24 @@ v0.1.1.a9
    argument called ``duration``.
 
  * The :attr:`~stalker.core.mixins.ScheduleMixin.duration` attribute in the
-   :class:`~stalker.core.mixins.ScheduleMixin` is now a setable. See the 
+   :class:`~stalker.core.mixins.ScheduleMixin` is now a settable. See the 
    :class:`~stalker.core.mixins.ScheduleMixin` class documentation for details.
 
  * The :attr:`~stalker.core.mixins.ScheduleMixin.due_date` in
    :class:`~stalker.core.mixins.ScheduleMixin` doesn't accept
    ``datetime.timedelta`` objects anymore.
 
- * The behaviour of :attr:`~stalker.core.mixins.ScheduleMixin.start_date`,
+ * The behavior of :attr:`~stalker.core.mixins.ScheduleMixin.start_date`,
    :attr:`~stalker.core.mixins.ScheduleMixin.due_date` and
    :attr:`~stalker.core.mixins.ScheduleMixin.duration` in
    :class:`~stalker.core.mixins.ScheduleMixin` is updated.
 
  * Added :class:`~stalker.core.errors.CircularDependencyError`.
+
+ * All the ``ValueError``\ s are converted to ``TypeError``\ s in the
+   :class:`~stalker.ext.validatedList.ValidatedList`.
+
+ * Finished the implementation of :class:`~stalker.core.models.Task` class.
 
 v0.1.1.a8
 ---------

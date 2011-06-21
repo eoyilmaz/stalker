@@ -418,7 +418,7 @@ class ScheduleMixin(object):
             else:
                 self._validate_dates(self.start_date, self.due_date, duration_in)
         
-        doc = """Duration of the project.
+        doc = """Duration of the entity.
         
         It is a datetime.timedelta instance. Showing the difference of the
         :attr:`~stalker.core.mixins.ScheduleMixin.start_date` and the

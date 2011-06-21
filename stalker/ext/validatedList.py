@@ -32,13 +32,13 @@ class ValidatedList(list):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, list_=[], type_=None):
+    def __init__(self, list_=[], element_type=None):
         
         self.__type__ = None
         self.__lazy_load_type__ = False
         
-        if type_ is not None:
-            self.__set_type__(type_)
+        if element_type is not None:
+            self.__set_type__(element_type)
         
         self.__type_as_str__ = ""
         self.__error_message__ = ""
@@ -61,18 +61,18 @@ class ValidatedList(list):
     
     
     #----------------------------------------------------------------------
-    def __set_type__(self, type_):
+    def __set_type__(self, element_type):
         """sets the type which the list is allowed to work on
         """
         
-        if isinstance(type_, (str, unicode)):
+        if isinstance(element_type, (str, unicode)):
             self.__lazy_load_type__ = True
-            self.__type__ = type_
+            self.__type__ = element_type
         else:
-            if isinstance(type_, type):
-                self.__type__ = type_
+            if isinstance(element_type, type):
+                self.__type__ = element_type
             else:
-                self.__type__ = type(type_)
+                self.__type__ = type(element_type)
             
             self.__type_as_str__ = str(self.__type__).split("'")[1]
             self.__error_message__ = "the type of the given value is not " + \
@@ -81,7 +81,7 @@ class ValidatedList(list):
     
     
     #----------------------------------------------------------------------
-    def __do_import__(self, type_):
+    def __do_import__(self, element_type):
         """imports the module
         """
         
@@ -89,19 +89,19 @@ class ValidatedList(list):
         if self.__lazy_load_type__:
             # get the class from the string
             from stalker.utils import path_to_exec
-            exec_, module, object_ = path_to_exec(type_)
+            exec_, module, object_ = path_to_exec(element_type)
             
             if module != "":
                 # import the object
                 imported_module = __import__(module, globals(),
                                              locals(), [object_], -1)
-                type_ = eval("imported_module." + object_)
+                element_type = eval("imported_module." + object_)
             else:
-                type_ = eval(object_)
+                element_type = eval(object_)
             
             self.__lazy_load_type__ = False
         
-        self.__set_type__(type_)
+        self.__set_type__(element_type)
     
     
     
@@ -118,7 +118,7 @@ class ValidatedList(list):
         if isinstance(value, self.__type__):
             super(ValidatedList, self).__setitem__(key, value)
         else:
-            raise ValueError(self.__error_message__)
+            raise TypeError(self.__error_message__)
     
     
     
@@ -137,7 +137,7 @@ class ValidatedList(list):
         
         for element in sequence:
             if not isinstance(element, self.__type__):
-                raise ValueError(self.__error_message__)
+                raise TypeError(self.__error_message__)
         
         super(ValidatedList, self).__setslice__(i, j, sequence)
     
@@ -158,7 +158,7 @@ class ValidatedList(list):
                 self.__do_import__(self.__type__)
             
             if not isinstance(object, self.__type__):
-                raise ValueError(self.__error_message__)
+                raise TypeError(self.__error_message__)
         
         super(ValidatedList, self).append(object)
     
@@ -182,7 +182,7 @@ class ValidatedList(list):
         else:
             for element in iterable:
                 if not isinstance(element, self.__type__):
-                    raise ValueError(self.__error_message__)
+                    raise TypeError(self.__error_message__)
         
         super(ValidatedList, self).extend(iterable)
     
@@ -202,7 +202,7 @@ class ValidatedList(list):
             self.__set_type__(type(object))
         else:
             if not isinstance(object, self.__type__):
-                raise ValueError(self.__error_message__)
+                raise TypeError(self.__error_message__)
         
         super(ValidatedList, self).insert(index, object)
     
@@ -226,7 +226,7 @@ class ValidatedList(list):
         else:
             for element in other:
                 if not isinstance(element, self.__type__):
-                    raise ValueError(self.__error_message__)
+                    raise TypeError(self.__error_message__)
         
         return super(ValidatedList, self).__add__(other)
     
@@ -250,6 +250,6 @@ class ValidatedList(list):
         else:
             for element in other:
                 if not isinstance(element, self.__type__):
-                    raise ValueError(self.__error_message__)
+                    raise TypeError(self.__error_message__)
         
         return super(ValidatedList, self).__iadd__(other)

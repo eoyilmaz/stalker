@@ -41,6 +41,12 @@ class TaskTester(mocker.MockerTestCase):
         self.mock_dependent_task1 = self.mocker.mock(Task)
         self.mock_dependent_task2 = self.mocker.mock(Task)
         
+        self.expect(self.mock_dependent_task1.depends).\
+            result([]).count(0, None)
+        
+        self.expect(self.mock_dependent_task2.depends).\
+            result([]).count(0, None)
+        
         ## task dependency relation 1
         #self.mock_taskDependencyRelation1 =\
             #self.mocker.mock(TaskDependencyRelation)
@@ -60,6 +66,8 @@ class TaskTester(mocker.MockerTestCase):
         
         #self.expect(self.mock_taskDependencyRelation2.lag).\
             #result(0).count(0, None)
+        
+        self.mocker.replay()
         
         self.kwargs = {
             "name": "Modeling",
@@ -122,10 +130,10 @@ class TaskTester(mocker.MockerTestCase):
     #----------------------------------------------------------------------
     def test_priority_argument_any_given_other_value_then_integer_will_default_to_DEFAULT_TASK_PRIORITY(self):
         """testing if any other value then an positif integer for priority
-        argument will default thepriority attribute to DEFAULT_TASK_PRIORITY.
+        argument will default the priority attribute to DEFAULT_TASK_PRIORITY.
         """
         
-        test_values = ["324", None, []]
+        test_values = ["a324", None, []]
         
         for test_value in test_values:
             self.kwargs["priority"] = test_value
@@ -140,11 +148,11 @@ class TaskTester(mocker.MockerTestCase):
         attribute will default it to DEFAULT_TASK_PRIORITY.
         """
         
-        test_values = ["324", None, []]
+        test_values = ["a324", None, []]
         
         for test_value in test_values:
             self.mock_task.priority = test_value
-            self.assertEqual(self.mock_task.priority.priority,
+            self.assertEqual(self.mock_task.priority,
                              defaults.DEFAULT_TASK_PRIORITY)
     
     
@@ -167,7 +175,7 @@ class TaskTester(mocker.MockerTestCase):
         set the priority attribute to zero.
         """
         
-        self.mock_task.prioty = -1
+        self.mock_task.priority = -1
         self.assertEqual(self.mock_task.priority, 0)
     
     
@@ -191,7 +199,7 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         self.mock_task.priority = 1001
-        self.asserEqual(self.mock_task.priority, 1000)
+        self.assertEqual(self.mock_task.priority, 1000)
     
     
     
@@ -347,8 +355,8 @@ class TaskTester(mocker.MockerTestCase):
         
         new_task = Task(**self.kwargs)
         
-        self.assertEqual(new_task.effort, defaults.DEFAULT_TASK_DURATION)
-        self.assertEqual(new_task.duration, defaults.DEFAULT_TASK_DURATION /
+        self.assertEqual(new_task.duration, defaults.DEFAULT_TASK_DURATION)
+        self.assertEqual(new_task.effort, defaults.DEFAULT_TASK_DURATION *
                          len(new_task.resources))
     
     
@@ -451,8 +459,8 @@ class TaskTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_effort_argument_preceds_duration_argument(self):
-        """testing if the effort argument preceeds duration argument 
+    def test_effort_argument_preceeds_duration_argument(self):
+        """testing if the effort argument is preceeds duration argument 
         """
         
         self.kwargs["effort"] = datetime.timedelta(40)
@@ -510,7 +518,7 @@ class TaskTester(mocker.MockerTestCase):
         self.kwargs.pop("resources")
         new_task = Task(**self.kwargs)
         
-        self.assertEqual(new_task.duration, self.kwargs["duration"])
+        self.assertEqual(new_task.effort, self.kwargs["effort"])
         self.assertEqual(new_task.effort, new_task.duration)
     
     
@@ -545,7 +553,7 @@ class TaskTester(mocker.MockerTestCase):
         not a list
         """
         
-        self.kwargs["depends"] = self.mock_taskDependencyRelation1
+        self.kwargs["depends"] = self.mock_dependent_task1
         self.assertRaises(TypeError, Task, **self.kwargs)
     
     
@@ -557,7 +565,7 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         self.assertRaises(TypeError, setattr, self.mock_task, "depends",
-                          self.mock_taskDependencyRelation1)
+                          self.mock_dependent_task1)
     
     
     
@@ -616,6 +624,28 @@ class TaskTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_depends_attribute_doesnt_allow_simple_cyclic_dependencies(self):
+        """testing if a CircularDependencyError will be raised when the depends
+        attribute has a simple circurlar dependency in dependencies
+        """
+        
+        # create two new tasks A, B
+        # make B dependent to A
+        # and make A dependent to B
+        # and expect a CircularDependencyError
+        self.kwargs["depends"] = None
+        
+        taskA = Task(**self.kwargs)
+        taskB = Task(**self.kwargs)
+        
+        taskB.depends = [taskA]
+        
+        self.assertRaises(CircularDependencyError, setattr, taskA, "depends",
+                          [taskB])
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_depends_attribute_doesnt_allow_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
         attribute has a circurlar dependency in dependencies
@@ -635,7 +665,40 @@ class TaskTester(mocker.MockerTestCase):
         taskB.depends = [taskA]
         taskC.depends = [taskB]
         
-        self.assertRaises(CircularDependencyError, taskA.depends, [taskC])
+        self.assertRaises(CircularDependencyError, setattr, taskA, "depends",
+                          [taskC])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_depends_attribute_doesnt_allow_more_deeper_cyclic_dependencies(self):
+        """testing if a CircularDependencyError will be raised when the depends
+        attribute has a deeper circular dependency in dependencies
+        """
+        
+        # create new tasks A, B, C, D
+        # make B dependent to A
+        # make C dependent to B
+        # make D dependent to C
+        # and make A dependent to D
+        # and expect a CircularDependencyError
+        self.kwargs["depends"] = None
+        
+        taskA = Task(**self.kwargs)
+        taskB = Task(**self.kwargs)
+        taskC = Task(**self.kwargs)
+        taskD = Task(**self.kwargs)
+        
+        taskB.depends = [taskA]
+        taskC.depends = [taskB]
+        taskD.depends = [taskC]
+        
+        self.assertRaises(CircularDependencyError, setattr, taskA, "depends",
+                          [taskD])
+    
+    
+    
+    
     
     
     

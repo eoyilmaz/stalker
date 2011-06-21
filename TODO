@@ -32,10 +32,14 @@ TODO:
 
  * Convert all the list comparison test to assertItemsEqual
  
- * Add a slot in the ValidatedList which will hold the callable when any of the
-   objects are changed (set, remove, delete etc.) to allow the callable to be
-   called when something has changed. This will allow more control on the list,
-   e.g. the normal list operations will be in control.
+ * Add a slot in the ValidatedList which will hold the callable for the
+   validation process when any of the objects are changed (set, remove, delete
+   etc.) to allow the callable to be called when something has changed. This
+   will allow more control on the list, e.g. this will help controling the
+   relation of the classes to each other.
+
+ * Add a ValidatedSet class which behaves like the ValidatedList but is a set
+   so holds only one references to the same object.
 
 DONE:
 =====
