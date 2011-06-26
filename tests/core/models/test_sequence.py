@@ -82,74 +82,74 @@ class SequenceTester(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_project_argument_is_None(self):
-        """testing if a TypeError will be raised when the project argument is
-        None
-        """
+    ##----------------------------------------------------------------------
+    #def test_project_argument_is_None(self):
+        #"""testing if a TypeError will be raised when the project argument is
+        #None
+        #"""
         
-        self.kwargs["project"] = None
-        self.assertRaises(TypeError, Sequence, **self.kwargs)
+        #self.kwargs["project"] = None
+        #self.assertRaises(TypeError, Sequence, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_project_attribute_is_set_to_None(self):
-        """testing if a TypeError will be raised when the project attribute set
-        to None
-        """
+    ##----------------------------------------------------------------------
+    #def test_project_attribute_is_set_to_None(self):
+        #"""testing if a TypeError will be raised when the project attribute set
+        #to None
+        #"""
         
-        #self.mock_sequence.project = None
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.mock_sequence,
-            "project",
-            None
-        )
+        ##self.mock_sequence.project = None
+        #self.assertRaises(
+            #TypeError,
+            #setattr,
+            #self.mock_sequence,
+            #"project",
+            #None
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_project_argument_other_than_a_Project(self):
-        """testing if a TypeError will be raised when the project argument is
-        None
-        """
+    ##----------------------------------------------------------------------
+    #def test_project_argument_other_than_a_Project(self):
+        #"""testing if a TypeError will be raised when the project argument is
+        #None
+        #"""
         
-        test_values = [1, 1.2, "a project", ["a", "list"]]
+        #test_values = [1, 1.2, "a project", ["a", "list"]]
         
-        for test_value in test_values:
-            self.kwargs["project"] = test_value
-            self.assertRaises(TypeError, Sequence, **self.kwargs)
+        #for test_value in test_values:
+            #self.kwargs["project"] = test_value
+            #self.assertRaises(TypeError, Sequence, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_project_attribute_other_than_a_Project(self):
-        """testing if a TypeError will be raised when the project attribute
-        is set to None
-        """
+    ##----------------------------------------------------------------------
+    #def test_project_attribute_other_than_a_Project(self):
+        #"""testing if a TypeError will be raised when the project attribute
+        #is set to None
+        #"""
         
-        test_values = [1, 1.2, "project", ["a", "list"]]
+        #test_values = [1, 1.2, "project", ["a", "list"]]
         
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.mock_sequence,
-                "project",
-                test_value
-            )
+        #for test_value in test_values:
+            #self.assertRaises(
+                #TypeError,
+                #setattr,
+                #self.mock_sequence,
+                #"project",
+                #test_value
+            #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_project_attribute_is_working_properly(self):
-        """testing if the project attribute is working properly
-        """
+    ##----------------------------------------------------------------------
+    #def test_project_attribute_is_working_properly(self):
+        #"""testing if the project attribute is working properly
+        #"""
         
-        self.mock_sequence.project = self.mock_project2
-        self.assertEqual(self.mock_sequence.project, self.mock_project2)
+        #self.mock_sequence.project = self.mock_project2
+        #self.assertEqual(self.mock_sequence.project, self.mock_project2)
     
     
     
@@ -352,7 +352,7 @@ class SequenceTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_ReferenceMixin_initialization(self):
-        """tetsing if the ReferenceMixin part is initialized correctly
+        """testing if the ReferenceMixin part is initialized correctly
         """
         
         link_type_1 = Type(name="Image", target_entity_type="Link")
@@ -375,7 +375,7 @@ class SequenceTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_StatusMixin_initialization(self):
-        """tetsing if the StatusMixin part is initialized correctly
+        """testing if the StatusMixin part is initialized correctly
         """
         
         status1 = Status(name="On Hold", code="OH")
@@ -396,7 +396,7 @@ class SequenceTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_ScheduleMixin_initialization(self):
-        """tetsing if the ScheduleMixin part is initialized correctly
+        """testing if the ScheduleMixin part is initialized correctly
         """
         
         start_date = datetime.date.today() + datetime.timedelta(days=25)
@@ -415,7 +415,7 @@ class SequenceTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_TaskMixin_initialization(self):
-        """tetsing if the TaskMixin part is initialized correctly
+        """testing if the TaskMixin part is initialized correctly
         """
         
         status1 = Status(name="On Hold", code="OH")
@@ -424,8 +424,21 @@ class SequenceTester(mocker.MockerTestCase):
                                       statuses=[status1],
                                       target_entity_type=Task.entity_type)
         
-        task1 = Task(name="Modeling", status=0, status_list=task_status_list)
-        task2 = Task(name="Lighting", status=0, status_list=task_status_list)
+        project_status_list = StatusList(
+            name="Project Statuses", statuses=[status1],
+            target_entity_type=Project.entity_type
+        )
+        
+        project_type = Type(name="Commercial", target_entity_type=Project)
+        
+        new_project = Project(name="Commercial",
+                              status_list=project_status_list,
+                              type=project_type)
+        
+        task1 = Task(name="Modeling", status=0, status_list=task_status_list,
+                     project=new_project)
+        task2 = Task(name="Lighting", status=0, status_list=task_status_list,
+                     project=new_project)
         
         tasks = [task1, task2]
         
@@ -434,6 +447,33 @@ class SequenceTester(mocker.MockerTestCase):
         new_sequence = Sequence(**self.kwargs)
         
         self.assertEqual(new_sequence.tasks, tasks)
+    
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_ProjectMixin_initialization(self):
+        """testing if the ProjectMixin part is initialized correctly
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        
+        project_status_list = StatusList(
+            name="Project Statuses", statuses=[status1],
+            target_entity_type=Project.entity_type
+        )
+        
+        project_type = Type(name="Commercial", target_entity_type=Project)
+        
+        new_project = Project(name="Test Project", status=0,
+                              status_list=project_status_list,
+                              type=project_type)
+        
+        self.kwargs["project"] = new_project
+        
+        new_sequence = Sequence(**self.kwargs)
+        
+        self.assertEqual(new_sequence.project, new_project)
     
     
     

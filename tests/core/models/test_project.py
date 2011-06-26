@@ -1241,7 +1241,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_ReferenceMixin_initialization(self):
-        """tetsing if the ReferenceMixin part is initialized correctly
+        """testing if the ReferenceMixin part is initialized correctly
         """
         
         link_type_1 = Type(name="Image", target_entity_type="Link")
@@ -1264,7 +1264,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_StatusMixin_initialization(self):
-        """tetsing if the StatusMixin part is initialized correctly
+        """testing if the StatusMixin part is initialized correctly
         """
         
         status1 = Status(name="On Hold", code="OH")
@@ -1285,7 +1285,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_ScheduleMixin_initialization(self):
-        """tetsing if the ScheduleMixin part is initialized correctly
+        """testing if the ScheduleMixin part is initialized correctly
         """
         
         start_date = datetime.date.today() + datetime.timedelta(days=25)
@@ -1304,7 +1304,7 @@ class ProjectTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_TaskMixin_initialization(self):
-        """tetsing if the TaskMixin part is initialized correctly
+        """testing if the TaskMixin part is initialized correctly
         """
         
         status1 = Status(name="On Hold", code="OH")

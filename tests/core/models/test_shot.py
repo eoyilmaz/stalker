@@ -4,7 +4,7 @@
 
 import mocker
 from stalker.core.models import (Entity, Shot, Sequence, Asset, Task, Link,
-                                 Status, StatusList, Type)
+                                 Status, StatusList, Type, Project)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -665,7 +665,7 @@ class ShotTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_ReferenceMixin_initialization(self):
-        """tetsing if the ReferenceMixin part is initialized correctly
+        """testing if the ReferenceMixin part is initialized correctly
         """
         
         link_type_1 = Type(name="Image", target_entity_type="Link")
@@ -689,7 +689,7 @@ class ShotTester(mocker.MockerTestCase):
     
     #----------------------------------------------------------------------
     def test_StatusMixin_initialization(self):
-        """tetsing if the StatusMixin part is initialized correctly
+        """testing if the StatusMixin part is initialized correctly
         """
         
         status1 = Status(name="On Hold", code="OH")
@@ -711,7 +711,7 @@ class ShotTester(mocker.MockerTestCase):
      
     #----------------------------------------------------------------------
     def test_TaskMixin_initialization(self):
-        """tetsing if the TaskMixin part is initialized correctly
+        """testing if the TaskMixin part is initialized correctly
         """
         
         status1 = Status(name="On Hold", code="OH")
@@ -720,8 +720,21 @@ class ShotTester(mocker.MockerTestCase):
                                       statuses=[status1],
                                       target_entity_type=Task.entity_type)
         
-        task1 = Task(name="Modeling", status=0, status_list=task_status_list)
-        task2 = Task(name="Lighting", status=0, status_list=task_status_list)
+        project_status_list = StatusList(
+            name="Project Statuses", statuses=[status1],
+            target_entity_type=Project.entity_type
+        )
+        
+        project_type = Type(name="Commercial", target_entity_type=Project)
+        
+        new_project = Project(name="Commercial",
+                              status_list=project_status_list,
+                              type=project_type)
+        
+        task1 = Task(name="Modeling", status=0, status_list=task_status_list,
+                     project=new_project)
+        task2 = Task(name="Lighting", status=0, status_list=task_status_list,
+                     project=new_project)
         
         tasks = [task1, task2]
         
@@ -738,8 +751,6 @@ class ShotTester(mocker.MockerTestCase):
     def test__repr__(self):
         """testing the represantation of Shot
         """
-        
-        
         self.assertEqual(
             self.mock_shot.__repr__(),
             "<Shot (%s, %s)>" % (self.mock_shot.code, self.mock_shot.code)
@@ -751,7 +762,6 @@ class ShotTester(mocker.MockerTestCase):
     def test_plural_name(self):
         """testing the plural name of Shot class
         """
-        
         self.assertTrue(Shot.plural_name, "Shots")
     
     
@@ -761,7 +771,6 @@ class ShotTester(mocker.MockerTestCase):
         """testing if the __strictly_typed__ class attribute is False for
         Shot class
         """
-        
         self.assertEqual(Shot.__strictly_typed__, False)
     
     

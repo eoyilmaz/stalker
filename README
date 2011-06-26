@@ -26,6 +26,7 @@ Stalker is build over these other OpenSource projects:
  * Jinja2
  * Beaker
  * PySide
+ * Pyramid
 
 Source
 ======

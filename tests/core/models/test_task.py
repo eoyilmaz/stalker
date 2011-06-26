@@ -6,7 +6,8 @@ import datetime
 import mocker
 from stalker.conf import defaults
 from stalker.core.errors import CircularDependencyError
-from stalker.core.models import Entity, Task, User, Status, StatusList
+from stalker.core.models import (Entity, Task, User, Status, StatusList,
+                                 Project, Type)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -24,6 +25,7 @@ class TaskTester(mocker.MockerTestCase):
     def setUp(self):
         """setup the test
         """
+        
         
         status_wip = Status(name="Work In Progress", code="WIP")
         status_complete = Status(name="Complete", code="CMPLT")
@@ -67,6 +69,8 @@ class TaskTester(mocker.MockerTestCase):
         #self.expect(self.mock_taskDependencyRelation2.lag).\
             #result(0).count(0, None)
         
+        self.mock_project = self.mocker.mock(Project)
+        
         self.mocker.replay()
         
         self.kwargs = {
@@ -83,7 +87,8 @@ class TaskTester(mocker.MockerTestCase):
             "versions": [],
             "milestone": False,
             "status": 0,
-            "status_list": task_status_list
+            "status_list": task_status_list,
+            "project": self.mock_project,
         }
         
         # create a mock Task
@@ -1112,6 +1117,31 @@ class TaskTester(mocker.MockerTestCase):
         self.assertTrue(self.mock_task!=entity1)
         self.assertFalse(self.mock_task!=task1)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_ProjectMixin_initialization(self):
+        """testing if the ProjectMixin part is initialized correctly
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        
+        project_status_list = StatusList(
+            name="Project Statuses", statuses=[status1],
+            target_entity_type=Project.entity_type
+        )
+        
+        project_type = Type(name="Commercial", target_entity_type=Project)
+        
+        new_project = Project(name="Test Project", status=0,
+                              status_list=project_status_list,
+                              type=project_type)
+        
+        self.kwargs["project"] = new_project
+        
+        new_task = Task(**self.kwargs)
+        
+        self.assertEqual(new_task.project, new_project)
     
     
     

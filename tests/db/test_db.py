@@ -551,25 +551,6 @@ class DatabaseModelsTester(unittest.TestCase):
         status2 = Status(name="Completed", code="CMPLT")
         status3 = Status(name="Work In Progress", code="WIP")
         
-        task_status_list = StatusList(
-            name="Task Status List",
-            statuses=[status1, status2, status3],
-            target_entity_type=Task.entity_type
-        )
-        
-        mock_task1 = Task(name="test task 1", status=0,
-                          status_list=task_status_list)
-        mock_task2 = Task(name="test task 2", status=0,
-                          status_list=task_status_list)
-        mock_task3 = Task(name="test task 3", status=0,
-                          status_list=task_status_list)
-        
-        asset_statusList = StatusList(
-            name="Asset Status List",
-            statuses=[status1, status2, status3],
-            target_entity_type=Asset.entity_type
-        )
-        
         project_statusList = StatusList(
             name="Project Status List",
             statuses=[status1, status2, status3],
@@ -582,6 +563,34 @@ class DatabaseModelsTester(unittest.TestCase):
                                status_list=project_statusList,
                                status=0,
                                type=commercial_type)
+        
+        task_status_list = StatusList(
+            name="Task Status List",
+            statuses=[status1, status2, status3],
+            target_entity_type=Task.entity_type,
+        )
+        
+        mock_task1 = Task(
+            name="test task 1", status=0,
+            status_list=task_status_list,
+            project=mock_project,
+        )
+        mock_task2 = Task(
+            name="test task 2", status=0,
+            status_list=task_status_list,
+            project=mock_project,
+        )
+        mock_task3 = Task(
+            name="test task 3", status=0,
+            status_list=task_status_list,
+            project=mock_project,
+        )
+        
+        asset_statusList = StatusList(
+            name="Asset Status List",
+            statuses=[status1, status2, status3],
+            target_entity_type=Asset.entity_type
+        )
         
         kwargs = {
             "name": "Test Asset",
@@ -1274,10 +1283,7 @@ class DatabaseModelsTester(unittest.TestCase):
         db.session.add(task_status_list)
         db.session.commit()
         
-        task1 = Task(name="task1", status_list=task_status_list, status=0)
-        task2 = Task(name="task2", status_list=task_status_list, status=0)
-        
-        db.session.add_all([ref1, ref2, task1, task2])
+        db.session.add_all([ref1, ref2])
         db.session.commit()
         
         # create a project object
@@ -1297,13 +1303,32 @@ class DatabaseModelsTester(unittest.TestCase):
             "status_list": project_status_list,
             "status": 0,
             "references": [ref1, ref2],
-            "tasks": [task1, task2],
         }
         
         new_project = Project(**kwargs)
         
         # persist it in the database
         db.session.add(new_project)
+        db.session.commit()
+        
+        
+        task1 = Task(
+            name="task1",
+            status_list=task_status_list,
+            status=0,
+            project=new_project,
+        )
+        
+        task2 = Task(
+            name="task2",
+            status_list=task_status_list,
+            status=0,
+            project=new_project,
+        )
+        
+        new_project.tasks = [task1, task2]
+        
+        db.session.add_all([task1, task2])
         db.session.commit()
         
         # store the attributes

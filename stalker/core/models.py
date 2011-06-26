@@ -90,7 +90,7 @@ class SimpleEntity(object):
     
     The formatting rules for the code attribute is as follows:
       
-      * only alphanumerics and underscore is allowed [a-zA-Z0-9_]
+      * only alphanumerics and underscore is allowed \[a-zA-Z0-9_\]
       
       * no number is allowed at the beggining
       
@@ -103,17 +103,27 @@ class SimpleEntity(object):
     
     Examples:
     
-      Input Value                        Formatted Output
-      ===========                        ================
-      testCode                           testCode
-      1testCode                          testCode
-      _testCode                          testCode
-      2423$+^^+^'%+%%&_testCode          testCode
-      2423$+^^+^'%+%%&_testCode_35       testCode_35
-      2423$ +^^+^ '%+%%&_ testCode_ 35   testCode_35
-      SH001                              SH001
-      My CODE is Ozgur                   My_CODE_is_Ozgur
-      this is another code for an asset  this_is_another_code_for_an_asset
+      +-----------------------------------+-----------------------------------+
+      | Input Value                       | Formatted Output                  |
+      +===================================+===================================+
+      | testCode                          | testCode                          |
+      +-----------------------------------+-----------------------------------+
+      | 1testCode                         | testCode                          |
+      +-----------------------------------+-----------------------------------+
+      | _testCode                         | testCode                          |
+      +-----------------------------------+-----------------------------------+
+      | 2423$+^^+^'%+%%&_testCode         | testCode                          |
+      +-----------------------------------+-----------------------------------+
+      | 2423$+^^+^'%+%%&_testCode_35      | testCode_35                       |
+      +-----------------------------------+-----------------------------------+
+      | 2423$ +^^+^ '%+%%&_ testCode\_ 35 | testCode_35                       |
+      +-----------------------------------+-----------------------------------+
+      | SH001                             | SH001                             |
+      +-----------------------------------+-----------------------------------+
+      | My CODE is Ozgur                  | My_CODE_is_Ozgur                  |
+      +-----------------------------------+-----------------------------------+
+      | this is another code for an asset | this_is_another_code_for_an_asset |
+      +-----------------------------------+-----------------------------------+
       
     :param string name: A string or unicode value that holds the name of this
       entity. It can not be empty, the first letter should be an alphabetic
@@ -245,6 +255,7 @@ class SimpleEntity(object):
     
     
     
+    #----------------------------------------------------------------------
     def _condition_code(self, code_in):
         """formats the given code_in value
         """
@@ -1550,7 +1561,7 @@ class Link(Entity):
 
 # mixin class imports should be placed after StatusList and Link definitions
 from stalker.core.mixins import (ReferenceMixin, ScheduleMixin, StatusMixin,
-                                 TaskMixin)
+                                 TaskMixin, ProjectMixin)
 
 
 
@@ -2569,18 +2580,16 @@ class Repository(Entity):
 
 
 ########################################################################
-class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
+class Sequence(Entity,
+               ReferenceMixin,
+               StatusMixin,
+               ScheduleMixin,
+               TaskMixin,
+               ProjectMixin):
     """Stores data about Sequences.
     
     Sequences are holders of the :class:`~stalker.core.models.Shot` objects.
     They orginize the conceptual data with another level of complexity.
-    
-    :param project: The :class:`~stalker.core.models.Project` that this
-      Sequence belongs to. A Sequence can not be created without a
-      :class:`~stalker.core.models.Project` instance. The default value is
-      None which will raise a TypeError if you skip this argument.
-    
-    :type project: :class:`~stalker.core.models.Project`.
     
     :param lead: The lead of this Seuqence. The default value is None.
     
@@ -2591,7 +2600,6 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 project=None,
                  shots=[],
                  lead=None,
                  **kwargs
@@ -2604,27 +2612,10 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
         TaskMixin.__init__(self, **kwargs)
+        ProjectMixin.__init__(self, **kwargs)
         
-        self._project = self._validate_project(project)
         self._lead = self._validate_lead(lead)
         self._shots = self._validate_shots(None)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_project(self, project_in):
-        """validates the given project_in value
-        """
-        
-        if project_in is None:
-            raise TypeError("project should be an instance of "
-                            "stalker.core.models.Project")
-        
-        if not isinstance(project_in, Project):
-            raise TypeError("project should be an instance of "
-                            "stalker.core.models.Project")
-        
-        return project_in
     
     
     
@@ -2661,21 +2652,6 @@ class Sequence(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         
         return ValidatedList(shots_in, Shot)
         
-    
-    
-    
-    #----------------------------------------------------------------------
-    def project():
-        def fget(self):
-            return self._project
-        def fset(self, project_in):
-            self._project = self._validate_project(project_in)
-        
-        doc ="""The Project of this sequence object."""
-        
-        return locals()
-    
-    project = property(**project())
     
     
     
@@ -3389,7 +3365,7 @@ class Tag(SimpleEntity):
 
 
 ########################################################################
-class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
+class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin, ProjectMixin):
     """The Asset class is the whole idea behind Stalker.
     
     *Assets* are containers of :class:`~stalker.core.models.Task`\ s. And
@@ -3405,13 +3381,6 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     :class:`~stalker.core.models.Type` object created specifically for
     :class:`~stalker.core.models.Asset` (ie. has its
     :attr:`~stalker.core.models.Type.target_entity_type` set to "Asset"),
-    
-    :param project: The :class:`~stalker.core.models.Project` instance that
-      this asset belongs to. An asset can not be created without a
-      :class:`~stalker.core.models.Project` instance. An the given project
-      value can not be changed later on.
-    
-    :type project: :class:`~stalker.core.models.Project`
     """
     
     
@@ -3422,7 +3391,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, project=None, **kwargs):
+    def __init__(self, **kwargs):
         
         super(Asset, self).__init__(**kwargs)
         
@@ -3430,23 +3399,9 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         TaskMixin.__init__(self, **kwargs)
+        ProjectMixin.__init__(self, **kwargs)
         
-        self._project = self._validate_project(project)
         self._shots = self._validate_shots(None)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_project(self, project_in):
-        """validates the given project
-        """
-        
-        # the project should be instance of Project
-        if not isinstance(project_in, Project):
-            raise TypeError("The project should be instance of "
-                             "stalker.core.models.Project")
-        
-        return project_in
     
     
     
@@ -3469,24 +3424,6 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         
         return ValidatedList(shots_in, Shot)
         
-    
-    
-    
-    #----------------------------------------------------------------------
-    def project():
-        def fget(self):
-            return self._project
-        
-        #def fset(self, project_in):
-            #self._project = self._validate_project(project_in)
-        
-        doc = """The :class:`~stalker.core.models.Project` instance that this asset belongs to.
-        """
-        
-        return locals()
-    
-    project = property(**project())
-    
     
     
     
@@ -3537,7 +3474,7 @@ class Version(Entity, StatusMixin):
 
 
 ########################################################################
-class Task(Entity, StatusMixin, ScheduleMixin):
+class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
     """Manages Task related data.
     
     Tasks are the smallest meaningful part that should be accomplished to
@@ -3677,6 +3614,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
+        ProjectMixin.__init__(self, **kwargs)
         
         self._milestone = self._validate_milestone(milestone)
         

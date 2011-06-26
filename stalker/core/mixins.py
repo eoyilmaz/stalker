@@ -555,3 +555,65 @@ class TaskMixin(object):
 
 
 
+########################################################################
+class ProjectMixin(object):
+    """Lets the mixed in object to have a relation with a :class:`~stalker.core.models.Project`.
+    
+    Anything that needs to be directly connected can be mixed with this mixin
+    class.
+    
+    :param project: A :class:`~stalker.core.models.Project` instance holding
+      the project which this object is related to. It can not be None, or
+      anything other than a :class:`~stalker.core.models.Project` instance.
+    
+    :type project: :class:`~stalker.core.models.Project`
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, project=None, **kwargs):
+        self._project = self._validate_project(project)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_project(self, project_in):
+        """validates the given project value
+        """
+        
+        if project_in is None:
+            raise TypeError("project can not be None it must be an instance "
+                            "of stalker.core.models.Project instance")
+        
+        from stalker.core.models import Project
+        
+        if not isinstance(project_in, Project):
+            raise TypeError("project must be an instance of "
+                            "stalker.core.models.Project instance")
+        
+        return project_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def project():
+        def fget(self):
+            return self._project
+        
+        def fset(self, project_in):
+            self._project = self._validate_project(project_in)
+        
+        doc = """A :class:`~stalker.core.models.Project` instance showing the
+        relation of this object to a Stalker
+        :class:`~stalker.core.models.Project`
+        """
+        
+        return locals()
+    
+    project = property(**project())
+    
+    
+    
+    
+    

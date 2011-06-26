@@ -9,7 +9,7 @@ You can use your also use your own mappers. See the docs.
 from sqlalchemy.orm import mapper, relationship, backref, synonym
 from stalker.db import tables
 from stalker.db.mixin import (ReferenceMixinDB, StatusMixinDB, ScheduleMixinDB,
-                              TaskMixinDB)
+                              TaskMixinDB, ProjectMixinDB)
 from stalker.core.models import (
     Asset,
     Booking,
@@ -462,15 +462,13 @@ def setup():
     
     # *******************************************************************
     # Task
-    # WARNING: Not finished, it is a temporary implementation, created to be
-    # able to test other classes
-    
     task_mapper_arguments = dict(
         inherits=Task.__base__,
         polymorphic_identity=Task.entity_type,
         inherit_condition=tables.Tasks.c.id==tables.Entities.c.id,
         properties={
             "resources": synonym("_resources"),
+            
         }
     )
     
@@ -506,7 +504,6 @@ def setup():
         }
     )
     
-    
     # mix it with ReferenceMixin
     ReferenceMixinDB.setup(Asset, tables.Assets, asset_mapper_arguments)
     
@@ -515,6 +512,9 @@ def setup():
     
     # then with TaskMixin
     TaskMixinDB.setup(Asset, tables.Assets, asset_mapper_arguments)
+    
+    # then with ProjectMixin
+    ProjectMixinDB.setup(Asset, tables.Assets, asset_mapper_arguments)
     
     # complete mapping
     mapper(Asset, tables.Assets, **asset_mapper_arguments)

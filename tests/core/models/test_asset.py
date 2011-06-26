@@ -87,73 +87,6 @@ class AssetTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_project_argument_is_skipped(self):
-        """testing if a TypeError will be raised when the projects argument is
-        skipped
-        """
-        
-        self.kwargs.pop("project")
-        self.assertRaises(TypeError, Asset, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_project_argument_is_None(self):
-        """testing if a TypeError will be raised when the project argument is
-        None
-        """
-        
-        self.kwargs["project"] = None
-        self.assertRaises(TypeError, Asset, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_is_None(self):
-        #"""testing if a TypeError will be raised when the project attribute is
-        #set to None
-        #"""
-        
-        #self.assertRaises(TypeError, setattr, self.mock_asset, "project", None)
-    
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_project_argument_is_not_instance_of_Project(self):
-        """testing if a TypeError will be raised when the project argument is
-        not an instance of Project
-        """
-        
-        test_values = [None, "a project", 1, 1.2, ["a", "project"],
-                       {"a": "project"}]
-        
-        for test_value in test_values:
-            self.kwargs["project"] = test_value
-            self.assertRaises(TypeError, Asset, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_project_attribute_is_read_only(self):
-        """testing if the project attribute is read-only
-        """
-        
-        self.assertRaises(AttributeError, setattr, self.mock_asset, "project",
-                          None)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_project_attribute_is_working_properly(self):
-        """testing if the project attribute is working properly
-        """
-        
-        self.assertIsInstance(self.mock_asset.project, Project)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_equality(self):
         """testing equality of two Asset objects
         """
@@ -258,8 +191,21 @@ class AssetTester(mocker.MockerTestCase):
                                       statuses=[status1],
                                       target_entity_type=Task.entity_type)
         
-        task1 = Task(name="Modeling", status=0, status_list=task_status_list)
-        task2 = Task(name="Lighting", status=0, status_list=task_status_list)
+        project_status_list = StatusList(
+            name="Project Statuses", statuses=[status1],
+            target_entity_type=Project.entity_type
+        )
+        
+        project_type = Type(name="Commercial", target_entity_type=Project)
+        
+        new_project = Project(name="Commercial",
+                              status_list=project_status_list,
+                              type=project_type)
+        
+        task1 = Task(name="Modeling", status=0, status_list=task_status_list,
+                     project=new_project)
+        task2 = Task(name="Lighting", status=0, status_list=task_status_list,
+                     project=new_project)
         
         tasks = [task1, task2]
         
@@ -269,6 +215,32 @@ class AssetTester(mocker.MockerTestCase):
         new_asset = Asset(**self.kwargs)
         
         self.assertEqual(new_asset.tasks, tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_ProjectMixin_initialization(self):
+        """testing if the ProjectMixin part is initialized correctly
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        
+        project_status_list = StatusList(
+            name="Project Statuses", statuses=[status1],
+            target_entity_type=Project.entity_type
+        )
+        
+        project_type = Type(name="Commercial", target_entity_type=Project)
+        
+        new_project = Project(name="Test Project", status=0,
+                              status_list=project_status_list,
+                              type=project_type)
+        
+        self.kwargs["project"] = new_project
+        
+        new_asset = Asset(**self.kwargs)
+        
+        self.assertEqual(new_asset.project, new_project)
     
     
     

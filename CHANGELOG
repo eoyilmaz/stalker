@@ -106,13 +106,24 @@ v0.1.1.a9
  * Updated the formatting of the :attr:`~stalker.core.models.SimpleEntity.code`
    attribute in :class:`~stalker.core.models.SimpleEntity` class. See the
    documentation of the :class:`~stalker.core.models.SimpleEntity` class for
-   details.
+   details.0
 
  * Updated the :attr:`~stalker.core.models.User.code` attribute in
    :class:`~stalker.core.models.User`.
 
  * Updated all the exceptions raised by the SOM classes. Now they are correctly
    raising ``TypeError`` and ValueError``\ s.
+
+ * added a new mixin class called :class:`~stalker.core.mixins.ProjectMixin`.
+
+ * :class:`~stalker.core.models.Sequence`,
+   :class:`~stalker.core.models.Asset` and :class:`~stalker.core.models.Task`
+   classes are now using the
+   :class:`~stalker.core.mixins.ProjectMixin` mixin class instead of
+   implementing this common feature by themselfs.
+
+ * added :class:`~stalker.db.mixin.ProjectMixinDB` for classes which are mixed
+   with :class:`~stalker.core.mixins.ProjectMixin`.
 
 v0.1.1.a8
 ---------
