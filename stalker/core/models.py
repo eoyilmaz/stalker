@@ -3619,7 +3619,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         self._milestone = self._validate_milestone(milestone)
         
         self._depends = self._validate_depends(depends)
-        self._resources = self._validate_resources(resources)
+        self._resources = []
+        self.resources = resources
         
         self._effort = None
         self.effort = effort
@@ -3761,7 +3762,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         if self.milestone:
             resources_in = []
         
-        return ValidatedList(resources_in, User)
+        return ValidatedList(resources_in, User, self.__resource_validator__)
     
     
     
@@ -3949,12 +3950,42 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
     
     
     #----------------------------------------------------------------------
+    def __resource_validator__(self, resources_added, resources_removed):
+        """a callable for more granular control over resources list
+        """
+        
+        # add the task to the resources
+        for resource in resources_added:
+            resource._tasks.append(self)
+        
+        for resource in resources_removed:
+            resource._tasks.remove(self)
+    
+    
+    
+    #----------------------------------------------------------------------
     def resources():
         def fget(self):
             return self._resources
         
         def fset(self, resources_in):
-            self._resources = self._validate_resources(resources_in)
+            
+            # validate the incoming resources
+            resources_in = self._validate_resources(resources_in)
+            
+            # remove the current task from the previous resources tasks list
+            for resource in self._resources:
+                try:
+                    resource.tasks.remove(self)
+                except ValueError:
+                    pass
+            
+            self._resources = resources_in
+            
+            # now append the task to every one of the users in the resources_in
+            for resource in self._resources:
+                if self not in resource.tasks:
+                    resource._tasks.append(self)
         
         doc = """The list of :class:`stalker.core.models.User`\ s instances
         assigned to this Task.
@@ -5225,7 +5256,12 @@ class User(Entity):
     def projects():
         
         def fget(self):
-            return self._projects
+            #return self._projects
+            projects = []
+            for task in self.tasks:
+                projects.append(task.project)
+            
+            return list(set(projects))
         
         doc = """The list of :class:`~stlalker.core.models.Project`\ s those the current user assigned to.
         
@@ -5237,12 +5273,9 @@ class User(Entity):
         :attr:`~stalker.core.models.Task.resources` is set to this
         :class:`~stalker.core.models.User` and assign the
         :class:`~stalker.core.models.Task` to the
-        :class:`~stalker.core.models.Project` or to one of the
-        :class:`~stalker.core.models.Sequence`\ s of the
-        :class:`~stalker.core.models.Project` or to one of the
-        :class:`~stalker.core.models.Shot`\ s of the
-        :class:`~stalker.core.models.Sequence`\ s or to one of the
-        :class:`~stalker.core.models.Asset`\ s in the
+        :class:`~stalker.core.models.Project` by setting the
+        :attr:`~stalker.core.models.Task.project` attribute of the
+        :class:`~stalker.core.models.Task` to the
         :class:`~stalker.core.models.Project`.
         """
         

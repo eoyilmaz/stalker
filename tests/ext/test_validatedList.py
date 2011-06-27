@@ -7,6 +7,20 @@ from stalker.ext.validatedList import ValidatedList
 
 
 
+########################################################################
+class FunctionCalled(Exception):
+    """An exception to be used in the test
+    """
+    
+    #----------------------------------------------------------------------
+    def __init__(self):
+        pass
+        
+    
+    
+
+
+
 
 ########################################################################
 class ValidetedListTester(unittest.TestCase):
@@ -763,3 +777,224 @@ class ValidetedListTester(unittest.TestCase):
         new_list.__iadd__([datetime.datetime.now()])
         
         self.assertEqual(new_list.__type__, datetime.datetime)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_argument_is_skipped(self):
+        """testing if nothing happens when the validator argument is skipped
+        """
+        
+        new_list = ValidatedList([], "datetime.datetime")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_will_be_called_for___setitem__(self):
+        """testing if the given validator will be called when __setitem__ is
+        called
+        """
+        
+        # create a function returning a defined value
+        def Func1(*args):
+            raise FunctionCalled
+        
+        try:
+            new_list = ValidatedList([], str, Func1)
+        except FunctionCalled:
+            pass
+        
+        # a little cheat
+        validator = new_list._validator
+        new_list._validator = None
+        new_list.append("start value")
+        new_list._validator = validator
+        
+        self.assertRaises(FunctionCalled, new_list.__setitem__, 0,
+                          "test_value")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_will_be_called_for___setslice__(self):
+        """testing if the given validator will be called when __setslice__ is
+        called
+        """
+        
+        # create a function returning a defined value
+        def Func1(*args):
+            raise FunctionCalled
+        
+        new_list = ValidatedList([], str, Func1)
+        
+        self.assertRaises(FunctionCalled, new_list.__setslice__, 0, 1,
+                          ["test_value"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_will_be_called_for_append(self):
+        """testing if the given validator will be called when append is called
+        """
+        
+        # create a function returning a defined value
+        def Func1(*args):
+            raise FunctionCalled
+        
+        new_list = ValidatedList([], str, Func1)
+        
+        self.assertRaises(FunctionCalled, new_list.append, "test_value")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_will_be_called_for_extend(self):
+        """testing if the given validator will be called when extend is called
+        """
+        
+        # create a function returning a defined value
+        def Func1(*args):
+            raise FunctionCalled
+        
+        new_list = ValidatedList([], str, Func1)
+        
+        self.assertRaises(FunctionCalled, new_list.extend, ["test_value"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_will_be_called_for_insert(self):
+        """testing if the given validator will be called when insert is called
+        """
+        
+        # create a function returning a defined value
+        def Func1(*args):
+            raise FunctionCalled
+        
+        new_list = ValidatedList([], str, Func1)
+        
+        self.assertRaises(FunctionCalled, new_list.insert, 0, "test_value")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_will_be_called_for___add__(self):
+        """testing if the given validator will be called when __add__ is called
+        """
+        
+        # create a function returning a defined value
+        def Func1(*args):
+            raise FunctionCalled
+        
+        new_list = ValidatedList([], str, Func1)
+        
+        self.assertRaises(FunctionCalled, new_list.__add__, ["test_value"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_will_be_called_for___iadd__(self):
+        """testing if the given validator will be called when __iadd__ is
+        called
+        """
+        
+        # create a function returning a defined value
+        def Func1(*args):
+            raise FunctionCalled
+        
+        new_list = ValidatedList([], str, Func1)
+        
+        self.assertRaises(FunctionCalled, new_list.__iadd__, ["test_value"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_will_be_called_for_pop(self):
+        """testing if the given validator will be called when pop is called
+        """
+        
+        # create a function returning a defined value
+        def Func1(*args):
+            raise FunctionCalled
+        
+        new_list = ValidatedList([], str, Func1)
+        
+        # a little cheat
+        validator = new_list._validator
+        new_list._validator = None
+        new_list.append("start value")
+        new_list._validator = validator
+        
+        self.assertRaises(FunctionCalled, new_list.pop, 0)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_validator_will_be_called_for_remove(self):
+        """testing if the given validator will be called when remove is called
+        """
+        
+        # create a function returning a defined value
+        def Func1(*args):
+            raise FunctionCalled
+        
+        new_list = ValidatedList([], str, Func1)
+        
+        # a little cheat
+        validator = new_list._validator
+        new_list._validator = None
+        new_list.append("start value")
+        new_list._validator = validator
+        
+        self.assertRaises(FunctionCalled, new_list.remove, "start value")
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_validator_will_be_called_for___delitem__(self):
+        #"""testing if the given validator will be called when __delitem__ is
+        #called
+        #"""
+        
+        ## create a function returning a defined value
+        #def Func1(*args):
+            #raise FunctionCalled
+        
+        #new_list = ValidatedList([], str, Func1)
+        
+        ## a little cheat
+        #validator = new_list._validator
+        #new_list._validator = None
+        #new_list.append("start value")
+        #new_list._validator = validator
+        
+        #self.assertRaises(FunctionCalled, new_list.__delitem__, 0)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_validator_will_be_called_for___delslice__(self):
+        #"""testing if the given validator will be called when __delslice__ is
+        #called
+        #"""
+        
+        ## create a function returning a defined value
+        #def Func1(*args):
+            #raise FunctionCalled
+        
+        #new_list = ValidatedList([], str, Func1)
+        
+        ## a little cheat
+        #validator = new_list._validator
+        #new_list._validator = None
+        #new_list.append("start value")
+        #new_list.append("end value")
+        #new_list._validator = validator
+        
+        #self.assertRaises(FunctionCalled, new_list.__delslice__, 0, 1)
+    
+    
+    
+    
+    
+    

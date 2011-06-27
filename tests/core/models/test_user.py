@@ -5,7 +5,7 @@
 import datetime
 import mocker
 from stalker.core.models import (User, Department, PermissionGroup, Task,
-                                 Project, Sequence)
+                                 Project, Sequence, Type, StatusList, Status)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -50,16 +50,16 @@ class UserTest(mocker.MockerTestCase):
         self.mock_permission_group2 = self.mocker.mock(PermissionGroup)
         self.mock_permission_group3 = self.mocker.mock(PermissionGroup)
         
+        # a couple of projects
+        self.mock_project1 = self.mocker.mock(Project)
+        self.mock_project2 = self.mocker.mock(Project)
+        self.mock_project3 = self.mocker.mock(Project)
+        
         # a couple of tasks
         self.mock_task1 = self.mocker.mock(Task)
         self.mock_task2 = self.mocker.mock(Task)
         self.mock_task3 = self.mocker.mock(Task)
         self.mock_task4 = self.mocker.mock(Task)
-        
-        # a couple of projects
-        self.mock_project1 = self.mocker.mock(Project)
-        self.mock_project2 = self.mocker.mock(Project)
-        self.mock_project3 = self.mocker.mock(Project)
         
         # a couple of sequences
         self.mock_sequence1 = self.mocker.mock(Sequence)
@@ -69,6 +69,19 @@ class UserTest(mocker.MockerTestCase):
         
         # a mock user
         self.mock_admin = self.mocker.mock(User)
+        
+        # assign projects to tasks
+        self.expect(self.mock_task1.project).\
+            result(self.mock_project1).count(0, None)
+        
+        self.expect(self.mock_task2.project).\
+            result(self.mock_project1).count(0, None)
+        
+        self.expect(self.mock_task3.project).\
+            result(self.mock_project2).count(0, None)
+        
+        self.expect(self.mock_task4.project).\
+            result(self.mock_project3).count(0, None)
         
         self.mocker.replay()
         
@@ -84,10 +97,10 @@ class UserTest(mocker.MockerTestCase):
             "department": self.mock_department1,
             "permission_groups": [self.mock_permission_group1,
                                   self.mock_permission_group2],
-            "tasks": [self.mock_task1,
-                      self.mock_task2,
-                      self.mock_task3,
-                      self.mock_task4],
+            #"tasks": [self.mock_task1,
+                      #self.mock_task2,
+                      #self.mock_task3,
+                      #self.mock_task4],
             "projects_lead": [self.mock_project1,
                               self.mock_project2],
             "sequences_lead": [self.mock_sequence1,
@@ -101,6 +114,18 @@ class UserTest(mocker.MockerTestCase):
         
         # create a proper user object
         self.mock_user = User(**self.kwargs)
+        
+        #self.expect(self.mock_task2.resources).\
+            #result([self.mock_user]).count(0, None)
+        
+        #self.expect(self.mock_task2.resources).\
+            #result([self.mock_user]).count(0, None)
+        
+        #self.expect(self.mock_task3.resources).\
+            #result([self.mock_user]).count(0, None)
+        
+        #self.expect(self.mock_task4.resources).\
+            #result([self.mock_user]).count(0, None)
     
     
     
@@ -1150,38 +1175,116 @@ class UserTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_attribute_is_calculated_from_the_project_tasks(self):
-        """testing if the projects is gathered from the project tasks
+    def test_projects_attribute_is_calculated_from_the_tasks_attribute(self):
+        """testing if the projects is gathered from the tasks attribute
+        directly
         """
         
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_projects_attribute_is_calculated_from_the_asset_tasks(self):
-        """testing if the projects is gathered from the asset tasks
-        """
+        # create a new project
+        commercial_project_type = Type(name="Commercial Project",
+                                       target_entity_type=Project)
         
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_projects_attribute_is_calculated_from_the_sequence_tasks(self):
-        """testing if the projects is gathered from the sequence tasks
-        """
+        complete_status = Status(name="Complete", code="CMPL")
+        wip_status = Status(name="Work In Progress", code="WIP")
         
-        self.fail("test is not implemented yet")
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_projects_attribute_is_calculated_from_the_shot_tasks(self):
-        """testing if the projects is gathered from the shot tasks
-        """
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[wip_status, complete_status],
+            target_entity_type="Project"
+        )
         
-        self.fail("test is not implemented yet")
+        new_project1 = Project(
+            name="New Project 1",
+            type=commercial_project_type,
+            status_list=project_status_list
+        )
+        
+        new_project2 = Project(
+            name="New Project 2",
+            type=commercial_project_type,
+            status_list=project_status_list
+        )
+        
+        task_status_list = StatusList(
+            name="Task Status List",
+            statuses=[wip_status, complete_status],
+            target_entity_type="Task"
+        )
+        
+        # create a new user
+        new_user = User(
+            first_name="Erkan Ozgur",
+            last_name="Yilmaz",
+            login_name="eoyilmaz",
+            email="eoyilmaz@fake.com",
+            password="hidden"
+        )
+        
+        # create a couple of tasks
+        design_task_type = Type(name="Design", target_entity_type=Task)
+        
+        modeling_task_type = Type(name="Modeling", target_entity_type=Task)
+        
+        shading_task_type = Type(name="Shading", target_entity_type=Task)
+        
+        task1 = Task(
+            name="Modeling",
+            resources=[new_user],
+            type=modeling_task_type,
+            project=new_project1,
+            status_list=task_status_list
+        )
+        
+        task2 = Task(
+            name="Shading",
+            resources=[new_user],
+            type=shading_task_type,
+            project=new_project1,
+            status_list=task_status_list
+        )
+        
+        task3 = Task(
+            name="Design",
+            resources=[new_user],
+            type=design_task_type,
+            project=new_project2,
+            status_list=task_status_list
+        )
+        
+        # now check the user.projects
+        #print new_user.projects
+        #print task1.project
+        #print task2.project
+        #print task3.project
+        
+        self.assertItemsEqual(new_user.projects, [new_project1, new_project2])
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_attribute_is_calculated_from_the_asset_tasks(self):
+        #"""testing if the projects is gathered from the asset tasks
+        #"""
+        
+        #self.fail("test is not implemented yet")
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_attribute_is_calculated_from_the_sequence_tasks(self):
+        #"""testing if the projects is gathered from the sequence tasks
+        #"""
+        
+        #self.fail("test is not implemented yet")
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_projects_attribute_is_calculated_from_the_shot_tasks(self):
+        #"""testing if the projects is gathered from the shot tasks
+        #"""
+        
+        #self.fail("test is not implemented yet")
     
     
     

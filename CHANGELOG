@@ -125,6 +125,30 @@ v0.1.1.a9
  * added :class:`~stalker.db.mixin.ProjectMixinDB` for classes which are mixed
    with :class:`~stalker.core.mixins.ProjectMixin`.
 
+ * :class:`~stalker.ext.validatedList.ValidatedList` now accepts a third
+   argument called the ``validator`` which should be a callable, which is
+   called when any of the methods of the
+   :class:`~stalker.ext.validatedList.ValidatedList` is called and the list of
+   elements are modified. The list of elements modified will be passed to the
+   validator function where the first argument is a list containing the
+   elements added and the last argument is a list contatining the elements
+   removed.
+
+ * :attr:`~stalker.core.models.Task.resources` in
+   :class:`~stalker.core.models.Task` is now updating the
+   :attr:`~stalker.core.models.User.tasks` attribute in the
+   :class:`~stalker.core.models.User` class.
+
+ * ``tasks`` is not an argument for the :class:`~stalker.core.models.User`
+   anymore. It was meaningles to have the :class:`~stalker.core.models.Task`\ s
+   in the initialization of the :class:`~stalker.core.models.User` instances.
+
+ * :class:`~stalker.core.models.User` classes
+   :attr:`~stalker.core.models.User.projects` attribute is now gathered by
+   looking at the :attr:`~stalker.core.models.Task.project` attribute of the
+   :class:`~stalker.core.models.Task`\ s in the
+   :attr:`~stalker.core.models.User.tasks` attribute.
+
 v0.1.1.a8
 ---------
 

@@ -40,6 +40,11 @@ class TaskTester(mocker.MockerTestCase):
         self.mock_user1 = self.mocker.mock(User)
         self.mock_user2 = self.mocker.mock(User)
         
+        self.expect(self.mock_user1.tasks).result([]).count(0, None)
+        self.expect(self.mock_user2.tasks).result([]).count(0, None)
+        self.expect(self.mock_user1._tasks).result([]).count(0, None)
+        self.expect(self.mock_user2._tasks).result([]).count(0, None)
+        
         self.mock_dependent_task1 = self.mocker.mock(Task)
         self.mock_dependent_task2 = self.mocker.mock(Task)
         
@@ -346,6 +351,528 @@ class TaskTester(mocker.MockerTestCase):
         test_value = [self.mock_user1]
         self.mock_task.resources = test_value
         self.assertEqual(self.mock_task.resources, test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_argument_backreferences_to_User(self):
+        """testing if the User instances passed with the resources argument
+        will have the current task in their User.tasks attribute
+        """
+        
+        # create a new user
+        new_user = User(first_name="Test",
+                        last_name="User",
+                        login_name="testuser",
+                        email="testuser@test.com",
+                        password="testpass")
+        
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_backreferences_to_User(self):
+        """testing if the User instances passed with the resources argument
+        will have the current task in their User.tasks attribute
+        """
+        
+        # create a new user
+        new_user = User(first_name="Test",
+                        last_name="User",
+                        login_name="testuser",
+                        email="testuser@test.com",
+                        password="testpass")
+        
+        # assign it to a newly created task
+        #self.kwargs["resources"] = [new_user]
+        new_task = Task(**self.kwargs)
+        new_task.resources = [new_user]
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user.tasks)
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_clear_itself_from_the_previous_Users(self):
+        """testing if the resources attribute is updated will clear itself from
+        the current resources tasks attribute.
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        new_user3 = User(first_name="Test3",
+                         last_name="User3",
+                         login_name="testuser3",
+                         email="testuser3@test.com",
+                         password="testpass")
+        
+        new_user4 = User(first_name="Test4",
+                         last_name="User4",
+                         login_name="testuser4",
+                         email="testuser4@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now update the resources list
+        new_task.resources = [new_user3, new_user4]
+        
+        # now check if the new resources has the task in their tasks attribute
+        self.assertIn(new_task, new_user3.tasks)
+        self.assertIn(new_task, new_user4.tasks)
+        
+        # and if it is not in the previous users tasks
+        self.assertNotIn(new_task, new_user1.tasks)
+        self.assertNotIn(new_task, new_user2.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_handle_append(self):
+        """testing if the resources attribute will handle appending users
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        new_user3 = User(first_name="Test3",
+                         last_name="User3",
+                         login_name="testuser3",
+                         email="testuser3@test.com",
+                         password="testpass")
+        
+        new_user4 = User(first_name="Test4",
+                         last_name="User4",
+                         login_name="testuser4",
+                         email="testuser4@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now update the resources list
+        new_task.resources.append(new_user3)
+        new_task.resources.append(new_user4)
+        
+        # now check if the new resources has the task in their tasks attribute
+        self.assertIn(new_task, new_user3.tasks)
+        self.assertIn(new_task, new_user4.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_handle_extend(self):
+        """testing if the resources attribute will handle extendeding users
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        new_user3 = User(first_name="Test3",
+                         last_name="User3",
+                         login_name="testuser3",
+                         email="testuser3@test.com",
+                         password="testpass")
+        
+        new_user4 = User(first_name="Test4",
+                         last_name="User4",
+                         login_name="testuser4",
+                         email="testuser4@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now update the resources list
+        new_task.resources.extend([new_user3, new_user4])
+        
+        # now check if the new resources has the task in their tasks attribute
+        self.assertIn(new_task, new_user3.tasks)
+        self.assertIn(new_task, new_user4.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_handle___setitem__(self):
+        """testing if the resources attribute will handle __setitem__ing users
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        new_user3 = User(first_name="Test3",
+                         last_name="User3",
+                         login_name="testuser3",
+                         email="testuser3@test.com",
+                         password="testpass")
+        
+        new_user4 = User(first_name="Test4",
+                         last_name="User4",
+                         login_name="testuser4",
+                         email="testuser4@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now update the resources list
+        new_task.resources[0] = new_user3
+        new_task.resources[1] = new_user4
+        
+        # now check if the new resources has the task in their tasks attribute
+        self.assertIn(new_task, new_user3.tasks)
+        self.assertIn(new_task, new_user4.tasks)
+        
+        # and check if the first and second tasks doesn't have task anymore
+        self.assertNotIn(new_task, new_user1.tasks)
+        self.assertNotIn(new_task, new_user2.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_handle___setslice__(self):
+        """testing if the resources attribute will handle __setslice__ing users
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        new_user3 = User(first_name="Test3",
+                         last_name="User3",
+                         login_name="testuser3",
+                         email="testuser3@test.com",
+                         password="testpass")
+        
+        new_user4 = User(first_name="Test4",
+                         last_name="User4",
+                         login_name="testuser4",
+                         email="testuser4@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now update the resources list
+        new_task.resources[1:2] = [new_user3, new_user4]
+        
+        # now check if the new resources has the task in their tasks attribute
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user3.tasks)
+        self.assertIn(new_task, new_user4.tasks)
+        
+        # and check if the first and second tasks doesn't have task anymore
+        self.assertNotIn(new_task, new_user2.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_handle_insert(self):
+        """testing if the resources attribute will handle inserting users
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        new_user3 = User(first_name="Test3",
+                         last_name="User3",
+                         login_name="testuser3",
+                         email="testuser3@test.com",
+                         password="testpass")
+        
+        new_user4 = User(first_name="Test4",
+                         last_name="User4",
+                         login_name="testuser4",
+                         email="testuser4@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now update the resources list
+        new_task.resources.insert(0, new_user3)
+        new_task.resources.insert(0, new_user4)
+        
+        # now check if the new resources has the task in their tasks attribute
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        self.assertIn(new_task, new_user3.tasks)
+        self.assertIn(new_task, new_user4.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_handle___add__(self):
+        """testing if the resources attribute will handle __add__ing users
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        new_user3 = User(first_name="Test3",
+                         last_name="User3",
+                         login_name="testuser3",
+                         email="testuser3@test.com",
+                         password="testpass")
+        
+        new_user4 = User(first_name="Test4",
+                         last_name="User4",
+                         login_name="testuser4",
+                         email="testuser4@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now update the resources list
+        new_task.resources = new_task.resources + [new_user3, new_user4]
+        
+        # now check if the new resources has the task in their tasks attribute
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        self.assertIn(new_task, new_user3.tasks)
+        self.assertIn(new_task, new_user4.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_handle___iadd__(self):
+        """testing if the resources attribute will handle __iadd__ing users
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        new_user3 = User(first_name="Test3",
+                         last_name="User3",
+                         login_name="testuser3",
+                         email="testuser3@test.com",
+                         password="testpass")
+        
+        new_user4 = User(first_name="Test4",
+                         last_name="User4",
+                         login_name="testuser4",
+                         email="testuser4@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now update the resources list
+        new_task.resources += [new_user3, new_user4]
+        
+        # now check if the new resources has the task in their tasks attribute
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        self.assertIn(new_task, new_user3.tasks)
+        self.assertIn(new_task, new_user4.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_handle_pop(self):
+        """testing if the resources attribute will handle popping users
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now pop the resources
+        new_task.resources.pop(0)
+        self.assertNotIn(new_task, new_user1.tasks)
+        
+        new_task.resources.pop()
+        self.assertNotIn(new_task, new_user2.tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_resources_attribute_will_handle_remove(self):
+        """testing if the resources attribute will handle removing users
+        """
+        
+        # create a couple of new users
+        new_user1 = User(first_name="Test1",
+                         last_name="User1",
+                         login_name="testuser1",
+                         email="testuser1@test.com",
+                         password="testpass")
+        
+        new_user2 = User(first_name="Test2",
+                         last_name="User2",
+                         login_name="testuser2",
+                         email="testuser2@test.com",
+                         password="testpass")
+        
+        # now add the 1 and 2 to the resources with the resources argument
+        # assign it to a newly created task
+        self.kwargs["resources"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+        
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.tasks)
+        self.assertIn(new_task, new_user2.tasks)
+        
+        # now pop the resources
+        new_task.resources.remove(new_user1)
+        self.assertNotIn(new_task, new_user1.tasks)
+        
+        new_task.resources.remove(new_user2)
+        self.assertNotIn(new_task, new_user2.tasks)
     
     
     
