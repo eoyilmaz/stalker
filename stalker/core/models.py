@@ -956,8 +956,9 @@ class StatusList(Entity):
     :param statuses: this is a list of status objects, so you can prepare
       different StatusList objects for different kind of entities
     
-    :param target_entity_type: use this parameter to specify the target entity type
-      that this StatusList is designed for. It accepts entity_type names.
+    :param target_entity_type: use this parameter to specify the target entity
+      type that this StatusList is designed for. It accepts classes or names
+      of classes.
       For example::
         
         from stalker.core.models import Status, StatusList, Project
@@ -974,7 +975,14 @@ class StatusList(Entity):
         project_status_list = StatusList(
             name="Project Status List",
             statuses=status_list,
-            target_entity_type=Project.entit_type
+            target_entity_type="Project"
+        )
+        
+        # or
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=status_list,
+            target_entity_type=Project
         )
       
       now with the code above you can not assign the ``project_status_list``
@@ -1028,6 +1036,10 @@ class StatusList(Entity):
         
         if str(target_entity_type_in)=="":
             raise ValueError("target_entity_type can not be empty string")
+        
+        # check if it is a class
+        if isinstance(target_entity_type_in, type):
+            target_entity_type_in = target_entity_type_in.__name__
         
         return str(target_entity_type_in)
     
@@ -4118,8 +4130,8 @@ class FilenameTemplate(Entity):
     :class:`~stalker.core.models.Project`'s
     :class:`~stalker.core.models.Structure`.
     
-    Secondly, it can be used while injecting files in to the repository. By
-    creating templates for :class:`~stalker.core.models.Links`.
+    Secondly, it can be used in the process of injecting files in to the
+    repository. By creating templates for :class:`~stalker.core.models.Links`.
     
     :param str target_entity_type: The class name that this FilenameTemplate
       is designed for. You can also pass the class itself. So both of the

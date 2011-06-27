@@ -460,6 +460,18 @@ class StatusListTest(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
+    def test_target_entity_type_argument_accepts_classes(self):
+        """testing if the target_entity_type argument accepts classes
+        """
+        
+        self.kwargs["target_entity_type"] = Project
+        new_status_list = StatusList(**self.kwargs)
+        
+        self.assertEqual(new_status_list.target_entity_type, "Project")
+    
+    
+    
+    #----------------------------------------------------------------------
     def test_plural_name(self):
         """testing the plural name of Status class
         """

@@ -149,6 +149,9 @@ v0.1.1.a9
    :class:`~stalker.core.models.Task`\ s in the
    :attr:`~stalker.core.models.User.tasks` attribute.
 
+ * :class:`~stalker.core.models.StatusList` now accepts classes for the
+   ``target_entity_type`` argument.
+
 v0.1.1.a8
 ---------
 
