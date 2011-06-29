@@ -25,27 +25,25 @@ from stalker.ext.validatedList import ValidatedList
 class ReferenceMixin(object):
     """Adds reference capabilities to the mixed in class.
     
-    References are :class:`stalker.core.models.Link` objects which adds
-    outside information to the attached objects. The aim of the References are
-    generally to give more info to direct the evolution of the object.
+    References are :class:`stalker.core.models.Entity` instances or anything
+    derived from it, which adds information to the attached objects. The aim of
+    the References are generally to give more info to direct the evolution of
+    the object.
     
-    :param references: A list of :class:`~stalker.core.models.Link` objects.
-      For more detail about references see the
-      :class:`~stalker.core.models.Link` documentation.
+    :param references: A list of :class:`~stalker.core.models.Entity` objects.
     
-    :type references: list of :class:`~stalker.core.models.Link` objects
-    
+    :type references: list of :class:`~stalker.core.models.Entity` objects.
     """
     
     
     
-    _references = ValidatedList([], "stalker.core.models.Link")
+    _references = ValidatedList([], "stalker.core.models.Entity")
     
     
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 references=ValidatedList([], "stalker.core.models.Link"),
+                 references=ValidatedList([], "stalker.core.models.Entity"),
                  **kwargs):
         
         self._references = self._validate_references(references)
@@ -62,16 +60,15 @@ class ReferenceMixin(object):
                 hasattr(references_in, "__getitem__")):
             raise TypeError("the references_in should support indexing")
         
-        #from stalker.core.models import Link
         from stalker.core import models
         
         # all the elements should be instance of stalker.core.models.Link
-        if not all([isinstance(element, models.Link)
+        if not all([isinstance(element, models.Entity)
                     for element in references_in]):
             raise TypeError("all the elements should be instances of "
-                             ":class:`stalker.core.models.Link`")
+                             ":class:`stalker.core.models.Entity`")
         
-        return ValidatedList(references_in, models.Link)
+        return ValidatedList(references_in, models.Entity)
     
     
     
@@ -84,7 +81,7 @@ class ReferenceMixin(object):
         def fset(self, references_in):
             self._references = self._validate_references(references_in)
         
-        doc="""References are lists containing :class:`~stalker.core.models.Link` objects.
+        doc="""References are lists containing :class:`~stalker.core.models.Entity` instances.
         """
         
         return locals()

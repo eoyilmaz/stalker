@@ -152,6 +152,9 @@ v0.1.1.a9
  * :class:`~stalker.core.models.StatusList` now accepts classes for the
    ``target_entity_type`` argument.
 
+ * :class:`~stalker.core.mixins.ReferenceMixin` now accepts anything derived
+   from the :class:`~stalker.core.models.Entity`.
+
 v0.1.1.a8
 ---------
 

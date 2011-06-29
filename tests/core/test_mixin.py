@@ -7,8 +7,8 @@ import mocker
 from stalker.conf import defaults
 from stalker.core.mixins import (ReferenceMixin, StatusMixin, ScheduleMixin,
                                  TaskMixin, ProjectMixin)
-from stalker.core.models import (SimpleEntity, Link, Status, StatusList, Task,
-                                 Type, Project)
+from stalker.core.models import (SimpleEntity, Entity, Link, Status,
+                                 StatusList, Task, Type, Project)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -33,6 +33,8 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         self.mock_link2 = self.mocker.mock(Link)
         self.mock_link3 = self.mocker.mock(Link)
         self.mock_link4 = self.mocker.mock(Link)
+        self.mock_entity1 = self.mocker.mock(Entity)
+        self.mock_entity2 = self.mocker.mock(Entity)
         
         self.mocker.replay()
         
@@ -80,9 +82,9 @@ class ReferenceMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_references_attribute_accepting_only_lists_with_link_instances(self):
-        """testing if references attribute accepting only lists with Link
-        instances
+    def test_references_attribute_accepting_only_lists_of_Entity_instances(self):
+        """testing if references attribute accepting only lists with Entity
+        instances and derivatives
         """
         
         test_value = [1,2.2,["a reference as list"],"some references"]
@@ -94,6 +96,12 @@ class ReferenceMixinTester(mocker.MockerTestCase):
             "references",
             test_value
         )
+        
+        # and test if it is accepting a proper list
+        
+        test_value = [self.mock_entity1, self.mock_entity2, self.mock_link1]
+        self.mock_foo_obj.references = test_value
+        self.assertItemsEqual(test_value, self.mock_foo_obj.references)
     
     
     
@@ -103,8 +111,11 @@ class ReferenceMixinTester(mocker.MockerTestCase):
         """
         
         self.mock_foo_obj.references = self.mock_links
-        
         self.assertEqual(self.mock_foo_obj.references, self.mock_links)
+        
+        test_value = [self.mock_entity1, self.mock_entity2]
+        self.mock_foo_obj.references = test_value
+        self.assertItemsEqual(self.mock_foo_obj.references, test_value)
     
     
     
@@ -118,9 +129,10 @@ class ReferenceMixinTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_references_attribute_elements_accepts_Link_only(self):
+    def test_references_attribute_elements_accepts_Entity_only(self):
         """testing if a TypeError will be raised when trying to assign
-        something other than a Link object to the references list
+        something other than an instance of Entity or its derived classes to
+        the references list
         """
         
         # append
@@ -149,6 +161,7 @@ class ReferenceMixinTester(mocker.MockerTestCase):
             pass
         
         myGreatEntity = GreatEntity(name="Test")
+        # we should have a references attribute right now
         myGreatEntity.references
         
         image_link_type = Type(name="Image", target_entity_type="Link")

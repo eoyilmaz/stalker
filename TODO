@@ -18,31 +18,28 @@ TODO:
  * The repository can be a local path, and the project can be managed with an
    SCM, preferably with Mercurial.
 
- * Check FilenameTemplate class documentation.
-
- * Update the exceptions. Check if a proper exception is raised instead of
-   raising ValueErrors all the time.
-
- * Check database part of all the previous Type dependent classes (Link, Asset,
-   Project, Task)
-
  * All the string attributes should be unicode so for string attributes which
    are checked against being a string should now be checked agains being
    unicode.
 
  * Convert all the list comparison test to assertItemsEqual
- 
+
+DONE:
+=====
+
  * Add a slot in the ValidatedList which will hold the callable for the
    validation process when any of the objects are changed (set, remove, delete
    etc.) to allow the callable to be called when something has changed. This
    will allow more control on the list, e.g. this will help controling the
    relation of the classes to each other.
 
- * Add a ValidatedSet class which behaves like the ValidatedList but is a set
-   so holds only one references to the same object.
+ * Check FilenameTemplate class documentation.
 
-DONE:
-=====
+ * Check database part of all the previous Type dependent classes (Link, Asset,
+   Project, Task)
+
+ * Update the exceptions. Check if a proper exception is raised instead of
+   raising ValueErrors all the time.
 
  * A Status in StatusList should be accessed by its name used as the index
  
