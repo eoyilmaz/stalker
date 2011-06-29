@@ -533,6 +533,20 @@ class TaskMixin(object):
     
     
     
+    ##----------------------------------------------------------------------
+    #def __task_item_validator__(self, tasks_added, tasks_removed):
+        #"""a callable for more granular control over tasks list
+        #"""
+        
+        ## add the current instance to tasks._part_of attribute
+        #for task in tasks_added:
+            #task._part_of.append(self)
+        
+        #for task in tasks_removed:
+            #task._part_of.remove(self)
+    
+    
+    
     #----------------------------------------------------------------------
     def tasks():
         def fget(self):

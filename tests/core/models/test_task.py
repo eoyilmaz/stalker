@@ -6,8 +6,8 @@ import datetime
 import mocker
 from stalker.conf import defaults
 from stalker.core.errors import CircularDependencyError
-from stalker.core.models import (Entity, Task, User, Status, StatusList,
-                                 Project, Type)
+from stalker.core.models import (SimpleEntity, Entity, Task, User, Status,
+                                 StatusList, Project, Type)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -25,7 +25,6 @@ class TaskTester(mocker.MockerTestCase):
     def setUp(self):
         """setup the test
         """
-        
         
         status_wip = Status(name="Work In Progress", code="WIP")
         status_complete = Status(name="Complete", code="CMPLT")
@@ -53,6 +52,13 @@ class TaskTester(mocker.MockerTestCase):
         
         self.expect(self.mock_dependent_task2.depends).\
             result([]).count(0, None)
+        
+        # for part_of attribute tests
+        self.mock_simpleEntity = self.mocker.mock(SimpleEntity)
+        self.mock_entity = self.mocker.mock(Entity)
+        
+        self.expect(self.mock_simpleEntity.tasks).result([]).count(0, None)
+        self.expect(self.mock_entity.tasks).result([]).count(0, None)
         
         ## task dependency relation 1
         #self.mock_taskDependencyRelation1 =\
@@ -94,6 +100,7 @@ class TaskTester(mocker.MockerTestCase):
             "status": 0,
             "status_list": task_status_list,
             "project": self.mock_project,
+            "part_of": self.mock_simpleEntity,
         }
         
         # create a mock Task
@@ -1669,6 +1676,104 @@ class TaskTester(mocker.MockerTestCase):
         new_task = Task(**self.kwargs)
         
         self.assertEqual(new_task.project, new_project)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_part_of_argument_accepts_anything_deriving_from_the_SimpleEntity(self):
+        """testing if the part_of attribute accepts anything deriving from
+        SimpleEntity
+        """
+        
+        self.kwargs["part_of"] = self.mock_entity
+        new_task = Task(**self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_part_of_attribute_accepts_anything_deriving_from_the_SimpleEntity(self):
+        """testing if  the part_of attribute accepts anything deriving from
+        SimpleEntity
+        """
+        
+        self.mock_task.part_of = self.mock_entity
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_part_of_argument_accepts_only_SimpleEntity_derivatives(self):
+        """testing if a TypeError will be raised when the part_of argument has
+        something which is not derived from the SimpleEntity
+        """
+        self.kwargs["part_of"] = 1
+        self.assertRaises(TypeError, Task, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_part_of_attribute_accepts_only_SimpleEntity_derivatives(self):
+        """testing if a TypeError will be raised when the part_of attribute has
+        something which is not derived from the SimpleEntity
+        """
+        self.assertRaises(TypeError, setattr, self.mock_task, "part_of", 1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_part_of_attribute_updates_the_back_reference_attribute_tasks(self):
+        """testing if the part_of updates the back reference attribute which
+        is called tasks
+        """
+        
+        # create a project and test if the Task.part_of will also update the
+        # project.tasks attribute
+        
+        status_complete = Status(name="complete", code="CMPLT")
+        status_wip = Status(name="work in progress", code="WIP")
+        
+        project_status_list = StatusList(
+            name="Project Status List",
+            target_entity_type=Project,
+            statuses=[status_complete, status_wip],
+        )
+        
+        project_type_commercial = Type(
+            name="Commercial",
+            target_entity_type=Project,
+        )
+        
+        new_project1 = Project(
+            name="Test Project 1",
+            status_list=project_status_list,
+            type=project_type_commercial,
+        )
+        
+        new_project2 = Project(
+            name="Test Project 2",
+            status_list=project_status_list,
+            type=project_type_commercial,
+        )
+        
+        # create a Task
+        task_status_list = StatusList(
+            name="Task Status List",
+            target_entity_type=Task,
+            statuses=[status_complete, status_wip],
+        )
+        
+        new_task = Task(
+            name="Modeling",
+            project=new_project1,
+            status_list=task_status_list,
+            part_of=new_project1,
+        )
+        
+        # now assign a new project to the part of attribute
+        new_task.part_of = new_project2
+        self.assertNotIn(new_task, new_project1.tasks)
+        self.assertIn(new_task, new_project2.tasks)
+        
+        
     
     
     

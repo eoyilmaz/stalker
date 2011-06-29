@@ -2045,11 +2045,9 @@ SEQUENCES/{% for sequence in project.sequences %}
         """testing the persistence of Task
         """
         
+        # lets create a task for an asset
         self.fail("test is not implemented yet")
-    
-    
-    
-    
+        
     
     
     

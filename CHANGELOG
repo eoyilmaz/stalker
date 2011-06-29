@@ -155,6 +155,11 @@ v0.1.1.a9
  * :class:`~stalker.core.mixins.ReferenceMixin` now accepts anything derived
    from the :class:`~stalker.core.models.Entity`.
 
+ * :class:`~stalker.core.models.Task` class now has a
+   :attr:`~stalker.core.models.Task.part_of` attribute which accepts
+   :class:`~stalker.core.models.SimpleEntity` instances and shows which
+   entity is this task a part of.
+
 v0.1.1.a8
 ---------
 

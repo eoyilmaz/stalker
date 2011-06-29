@@ -3559,6 +3559,20 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
     
+    :param part_of: A :class:`~satlker.core.models.SimpleEntity` instance that
+      has this :class:`~stalker.core.models.Task`. Now this one creates a
+      little hole in the system, cause not all of the
+      :class:`~stalker.core.models.SimpleEntity` instances has ``tasks``
+      attribute. Only classes that has been mixed with
+      :class:`~stalker.core.mixins.TasksMixin` has the attribute called
+      ``tasks``. But it needed to be done in this way cause Stalker is designed
+      to be used in a relational database (although you can opt not to use
+      one), and in the ORM of the database, possibly everything is going to be
+      derived from the :class:`~stalker.core.models.SimpleEntity` and the
+      mixed in classes are not going to have individual tables. Anyway you got
+      the point, it needs to be something that is represented in the database.
+    
+    :type part_of: :class:`~stalker.core.models.SimpleEntity`.
     """
     #.. :param depends: A list of
          #:class:`~stalker.core.models.TaskDependencyRelation` objects. Holds
@@ -3609,8 +3623,11 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
     #:type versions: list of :class:`~stalker.core.models.Version`
     #"""
     
+    
+    
     _bookings = ValidatedList([], Booking)
     _versions = ValidatedList([], Version)
+    
     
     
     #----------------------------------------------------------------------
@@ -3620,6 +3637,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
                  resources=None,
                  milestone=False,
                  priority=defaults.DEFAULT_TASK_PRIORITY,
+                 part_of=None,
                  **kwargs):
         super(Task, self).__init__(**kwargs)
         
@@ -3639,6 +3657,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         
         self._priority = self._validate_priority(priority)
         
+        self._part_of = None
+        self.part_of = self._validate_part_of(part_of)
     
     
     
@@ -3733,6 +3753,21 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
     
     
     #----------------------------------------------------------------------
+    def _validate_part_of(self, part_of_in):
+        """validates the given part_of value
+        """
+        
+        if not isinstance(part_of_in, SimpleEntity):
+            raise TypeError("part_of should be an instance of "
+                            "stalker.core.models.SimpleEntity or a derived "
+                            "one")
+        
+        return part_of_in
+    
+    
+    
+    
+    #----------------------------------------------------------------------
     def _validate_priority(self, priority_in):
         """validates the given priority value
         """
@@ -3774,7 +3809,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         if self.milestone:
             resources_in = []
         
-        return ValidatedList(resources_in, User, self.__resource_validator__)
+        return ValidatedList(resources_in, User,
+                             self.__resource_item_validator__)
     
     
     
@@ -3962,7 +3998,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
     
     
     #----------------------------------------------------------------------
-    def __resource_validator__(self, resources_added, resources_removed):
+    def __resource_item_validator__(self, resources_added, resources_removed):
         """a callable for more granular control over resources list
         """
         
@@ -4006,6 +4042,31 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         return locals()
     
     resources = property(**resources())
+    
+    
+    
+    #----------------------------------------------------------------------
+    def part_of():
+        def fget(self):
+            return self._part_of
+        
+        def fset(self, part_of_in):
+            part_of_in = self._validate_part_of(part_of_in)
+            
+            # remove it from the current part_of attribute
+            if not self._part_of is None:
+                self._part_of.tasks.remove(self)
+            
+            # update the back reference attribute tasks
+            self._part_of = part_of_in
+            self._part_of.tasks.append(self)
+        
+        doc = """The :class:`~satlker.core.models.SimpleEntity derivative that this Task is a part of.
+        """
+        
+        return locals()
+    
+    part_of = property(**part_of())
     
     
     

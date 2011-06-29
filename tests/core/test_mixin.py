@@ -1166,6 +1166,81 @@ class TaskMixinTester(mocker.MockerTestCase):
         """
         
         self.assertIsInstance(self.mock_foo_obj.tasks, ValidatedList)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tasks_attribute_updates_the_backreference_attribute_called_part_of(self):
+        """testing if the tasks attribute updates the back reference attribute
+        on the Task, the part_of attribute with the instance
+        """
+        
+        status_wip = Status(name="Work In Progress", code="WIP")
+        status_complete = Status(name="Complete", code="CMPLT")
+        
+        task_statusList = StatusList(name="Task Statuses",
+                                     statuses=[status_wip, status_complete],
+                                     target_entity_type=Task)
+        
+        project_statusList = StatusList(name="Project Statuses",
+                                     statuses=[status_wip, status_complete],
+                                     target_entity_type=Project)
+        
+        commercial_project_type = Type(name="Commercial",
+                                       target_entity_type=Project)
+        
+        new_project = Project(name="Test Project",
+                              status_list=project_statusList,
+                              type=commercial_project_type)
+        
+        new_task1 = Task(name="Test1", status_list=task_statusList,
+                         project=new_project)
+        new_task2 = Task(name="Test2", status_list=task_statusList,
+                         project=new_project)
+        new_task3 = Task(name="Test3", status_list=task_statusList,
+                         project=new_project)
+        new_task4 = Task(name="Test4", status_list=task_statusList,
+                         project=new_project)
+        
+        self.mock_foo_obj.tasks = [new_task1, new_task2]
+        
+        # now check if the part_of of the tasks are also having a reference
+        # to the mock_foo_obj
+        
+        self.assertEqual(new_task1.part_of, self.mock_foo_obj)
+        self.assertEqual(new_task2.part_of, self.mock_foo_obj)
+        
+        # now update the tasks with a new list
+        self.mock_foo_obj.tasks = [new_task3, new_task4]
+        
+        # and check if the previous tasks are disconnected
+        self.assertNotEqual(new_task1.part_of, self.mock_foo_obj)
+        self.assertNotEqual(new_task2.part_of, self.mock_foo_obj)
+        
+        # check if the new ones has the connection
+        self.assertEqual(new_task3.part_of, self.mock_foo_obj)
+        self.assertEqual(new_task4.part_of, self.mock_foo_obj)
+        
+        # now append one of the old ones
+        self.mock_foo_obj.tasks.append(new_task1)
+        
+        # check it
+        self.assertEqual(new_task1.part_of, self.mock_foo_obj)
+        
+        # pop the second element
+        removed_task = self.mock_foo_obj.tasks.pop(1)
+        #check it
+        self.assertNotEqual(removed_task.part_of, self.mock_foo_obj)
+        
+        # extend it
+        self.mock_foo_obj.extend([new_task2, new_task4])
+        
+        self.assertEqual(new_task2.part_of, self.mock_foo_obj)
+        self.asesrtEqual(new_task4.part_of, self.mock_foo_obj)
+    
+    
+    
+    
 
 
 
