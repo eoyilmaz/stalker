@@ -731,19 +731,28 @@ class ShotTester(mocker.MockerTestCase):
                               status_list=project_status_list,
                               type=project_type)
         
-        task1 = Task(name="Modeling", status=0, status_list=task_status_list,
-                     project=new_project)
-        task2 = Task(name="Lighting", status=0, status_list=task_status_list,
-                     project=new_project)
-        
-        tasks = [task1, task2]
-        
         self.kwargs["code"] = "SH12314"
-        self.kwargs["tasks"] = tasks
         
         new_shot = Shot(**self.kwargs)
         
-        self.assertEqual(new_shot.tasks, tasks)
+        task1 = Task(
+            name="Modeling", status=0,
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_shot,
+        )
+        
+        task2 = Task(
+            name="Lighting",
+            status=0,
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_shot,
+        )
+        
+        tasks = [task1, task2]
+        
+        self.assertItemsEqual(new_shot.tasks, tasks)
     
     
     

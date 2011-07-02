@@ -305,14 +305,11 @@ class ValidatedList(list):
         This is the overriden version of the original method.
         """
         
-        # call the original method
-        popped_item = super(ValidatedList, self).pop(index)
-        
         if not self._validator is None:
-            self._validator([], [popped_item])
+            self._validator([], [self[index]])
         
         # call the original method
-        return popped_item
+        return super(ValidatedList, self).pop(index)
     
     
     

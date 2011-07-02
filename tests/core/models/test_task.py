@@ -53,7 +53,7 @@ class TaskTester(mocker.MockerTestCase):
         self.expect(self.mock_dependent_task2.depends).\
             result([]).count(0, None)
         
-        # for part_of attribute tests
+        # for task_of attribute tests
         self.mock_simpleEntity = self.mocker.mock(SimpleEntity)
         self.mock_entity = self.mocker.mock(Entity)
         
@@ -100,7 +100,7 @@ class TaskTester(mocker.MockerTestCase):
             "status": 0,
             "status_list": task_status_list,
             "project": self.mock_project,
-            "part_of": self.mock_simpleEntity,
+            "task_of": self.mock_simpleEntity,
         }
         
         # create a mock Task
@@ -1680,52 +1680,78 @@ class TaskTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_part_of_argument_accepts_anything_deriving_from_the_SimpleEntity(self):
-        """testing if the part_of attribute accepts anything deriving from
-        SimpleEntity
+    def test_task_of_argument_skipped_raises_AttributeError(self):
+        """testing if an AttributeError will be raised when the task_of
+        argument has been skipped
         """
         
-        self.kwargs["part_of"] = self.mock_entity
-        new_task = Task(**self.kwargs)
+        self.kwargs.pop("task_of")
+        self.assertRaises(AttributeError, Task, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_part_of_attribute_accepts_anything_deriving_from_the_SimpleEntity(self):
-        """testing if  the part_of attribute accepts anything deriving from
-        SimpleEntity
+    def test_task_of_argument_None_raises_AttributeError(self):
+        """testing if an AttributeError will be raised when the task_of
+        argument is None
         """
         
-        self.mock_task.part_of = self.mock_entity
+        self.kwargs["task_of"] = None
+        self.assertRaises(AttributeError, Task, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_part_of_argument_accepts_only_SimpleEntity_derivatives(self):
-        """testing if a TypeError will be raised when the part_of argument has
-        something which is not derived from the SimpleEntity
+    def test_task_of_argument_accepts_anything_that_has_a_tasks_attribute(self):
+        """testing if the task_of attribute accepts anything that has a
+        ``tasks`` attribute
         """
-        self.kwargs["part_of"] = 1
-        self.assertRaises(TypeError, Task, **self.kwargs)
-    
+        
+        class SomeClass(object):
+            tasks = []
+        
+        class SomeOtherClass(object):
+            pass
+        
+        someClass_ins = SomeClass()
+        someOtherClass_ins = SomeOtherClass()
+        
+        self.kwargs["task_of"] = someClass_ins
+        new_task = Task(**self.kwargs) # it should accept it
+        
+        self.kwargs["task_of"] = someOtherClass_ins
+        self.assertRaises(AttributeError, Task, **self.kwargs)
     
     
     #----------------------------------------------------------------------
-    def test_part_of_attribute_accepts_only_SimpleEntity_derivatives(self):
-        """testing if a TypeError will be raised when the part_of attribute has
-        something which is not derived from the SimpleEntity
+    def test_task_of_attribute_accepts_anything_that_has_a_tasks_attribute(self):
+        """testing if  the task_of attribute accepts anything that has a
+        ``tasks`` attribute
         """
-        self.assertRaises(TypeError, setattr, self.mock_task, "part_of", 1)
+        
+        class SomeClass(object):
+            tasks = []
+        
+        class SomeOtherClass(object):
+            pass
+        
+        someClass_ins = SomeClass()
+        someOtherClass_ins = SomeOtherClass()
+        
+        self.mock_task.task_of = someClass_ins
+        
+        self.assertRaises(AttributeError, setattr, self.mock_task, "task_of",
+                          someOtherClass_ins)
     
     
     
     #----------------------------------------------------------------------
-    def test_part_of_attribute_updates_the_back_reference_attribute_tasks(self):
-        """testing if the part_of updates the back reference attribute which
+    def test_task_of_attribute_updates_the_back_reference_attribute_tasks(self):
+        """testing if the task_of updates the back reference attribute which
         is called tasks
         """
         
-        # create a project and test if the Task.part_of will also update the
+        # create a project and test if the Task.task_of will also update the
         # project.tasks attribute
         
         status_complete = Status(name="complete", code="CMPLT")
@@ -1760,20 +1786,30 @@ class TaskTester(mocker.MockerTestCase):
             target_entity_type=Task,
             statuses=[status_complete, status_wip],
         )
+        #print "new_project1.tasks", new_project1.tasks
+        #print "new_project2.tasks", new_project2.tasks
+        
+        #print "id(new_project1.tasks)", id(new_project1.tasks)
+        #print "id(new_project2.tasks)", id(new_project2.tasks)
         
         new_task = Task(
             name="Modeling",
             project=new_project1,
             status_list=task_status_list,
-            part_of=new_project1,
+            task_of=new_project1,
         )
+        #print "id(new_project1)", id(new_project1)
+        #print "id(new_project2)", id(new_project2)
         
-        # now assign a new project to the part of attribute
-        new_task.part_of = new_project2
+        # now assign a new project to the task_of attribute
+        #print "new_project1.tasks", new_project1.tasks
+        #print "new_project2.tasks", new_project2.tasks
+        new_task.task_of = new_project2
+        #print "new_project1.tasks", new_project1.tasks
+        #print "new_project2.tasks", new_project2.tasks
+        
         self.assertNotIn(new_task, new_project1.tasks)
         self.assertIn(new_task, new_project2.tasks)
-        
-        
     
     
     

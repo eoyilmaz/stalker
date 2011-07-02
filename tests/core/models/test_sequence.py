@@ -420,33 +420,50 @@ class SequenceTester(mocker.MockerTestCase):
         
         status1 = Status(name="On Hold", code="OH")
         
-        task_status_list = StatusList(name="Task Statuses",
-                                      statuses=[status1],
-                                      target_entity_type=Task.entity_type)
+        task_status_list = StatusList(
+            name="Task Statuses",
+            statuses=[status1],
+            target_entity_type=Task.entity_type
+        )
         
         project_status_list = StatusList(
             name="Project Statuses", statuses=[status1],
             target_entity_type=Project.entity_type
         )
         
-        project_type = Type(name="Commercial", target_entity_type=Project)
+        project_type = Type(
+            name="Commercial",
+            target_entity_type=Project
+        )
         
-        new_project = Project(name="Commercial",
-                              status_list=project_status_list,
-                              type=project_type)
-        
-        task1 = Task(name="Modeling", status=0, status_list=task_status_list,
-                     project=new_project)
-        task2 = Task(name="Lighting", status=0, status_list=task_status_list,
-                     project=new_project)
-        
-        tasks = [task1, task2]
-        
-        self.kwargs["tasks"] = tasks
+        new_project = Project(
+            name="Commercial",
+            status_list=project_status_list,
+            type=project_type
+        )
         
         new_sequence = Sequence(**self.kwargs)
         
-        self.assertEqual(new_sequence.tasks, tasks)
+        task1 = Task(
+            name="Modeling",
+            status=0,
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_sequence,
+        )
+        
+        task2 = Task(
+            name="Lighting",
+            status=0,
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_sequence,
+        )
+        
+        tasks = [task1, task2]
+        
+        
+        self.assertItemsEqual(new_sequence.tasks, tasks)
     
     
     

@@ -196,25 +196,42 @@ class AssetTester(mocker.MockerTestCase):
             target_entity_type=Project.entity_type
         )
         
-        project_type = Type(name="Commercial", target_entity_type=Project)
+        commercial_project_type = Type(
+            name="Commercial",
+            target_entity_type=Project,
+        )
         
-        new_project = Project(name="Commercial",
-                              status_list=project_status_list,
-                              type=project_type)
+        new_project = Project(
+            name="Commercial",
+            type=commercial_project_type,
+            status_list=project_status_list,
+        )
         
-        task1 = Task(name="Modeling", status=0, status_list=task_status_list,
-                     project=new_project)
-        task2 = Task(name="Lighting", status=0, status_list=task_status_list,
-                     project=new_project)
+        character_asset_type = Type(name="Character", target_entity_type=Asset)
+        
+        new_asset = Asset(
+            name="test asset",
+            type=character_asset_type,
+            code="tstasset",
+        )
+        
+        task1 = Task(
+            name="Modeling",
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_asset
+        )
+        
+        task2 = Task(
+            name="Lighting",
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_asset
+        )
         
         tasks = [task1, task2]
         
-        self.kwargs["code"] = "SH12314"
-        self.kwargs["tasks"] = tasks
-        
-        new_asset = Asset(**self.kwargs)
-        
-        self.assertEqual(new_asset.tasks, tasks)
+        self.assertItemsEqual(new_asset.tasks, tasks)
     
     
     

@@ -546,9 +546,12 @@ def setup():
             "sequence": synonym("_sequence"),
             "_cut_in": tables.Shots.c.cut_in,
             "cut_in": synonym("_cut_in"),
-            "_cut_duration": tables.Shots.c.cut_duration,
-            "cut_duration": synonym("_cut_duration"),
+            #"_cut_duration": tables.Shots.c.cut_duration,
+            #"cut_duration": synonym("_cut_duration"),
+            #"cut_out": synonym("_cut_out"),
+            "_cut_out": tables.Shots.c.cut_out,
             "cut_out": synonym("_cut_out"),
+            "cut_duration": synonym("_cut_duration"),
             "_code": tables.SimpleEntities.c.code, # overloaded attribute
             "code": synonym("_code"), # overloaded property
         }

@@ -1232,7 +1232,8 @@ class UserTest(mocker.MockerTestCase):
             resources=[new_user],
             type=modeling_task_type,
             project=new_project1,
-            status_list=task_status_list
+            status_list=task_status_list,
+            task_of=new_project1,
         )
         
         task2 = Task(
@@ -1240,7 +1241,8 @@ class UserTest(mocker.MockerTestCase):
             resources=[new_user],
             type=shading_task_type,
             project=new_project1,
-            status_list=task_status_list
+            status_list=task_status_list,
+            task_of=new_project1,
         )
         
         task3 = Task(
@@ -1248,7 +1250,8 @@ class UserTest(mocker.MockerTestCase):
             resources=[new_user],
             type=design_task_type,
             project=new_project2,
-            status_list=task_status_list
+            status_list=task_status_list,
+            task_of=new_project2,
         )
         
         # now check the user.projects

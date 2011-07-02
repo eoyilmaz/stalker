@@ -13,3 +13,4 @@ docs/source/static/stalker_design*.vue
 dist/*
 build/*
 stalker.egg-info/*
+upload_to_pypi

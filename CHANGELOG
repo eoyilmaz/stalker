@@ -1,6 +1,26 @@
 Stalker Changes
 ===============
 
+v0.1.1.a10
+----------
+
+ * :class:`~stalker.core.mixins.TaskMixin` from now on doesn't have a ``tasks``
+   argument in its ``__init__`` method.
+
+ * each of the mixin classes now has their own test modules.
+
+ * :attr:`~stalker.core.models.Task.part_of` attribute in
+   :class:`~stalker.core.models.Task` class now accepts anything that has a
+   ``tasks`` attribute, it is not limited with some classes derived from the
+   :class:`~stalker.core.models.SimpleEntity`.
+
+ * in :class:`~stalker.core.models.Shot`, now the
+   :attr:`~stalker.core.models.Shot.cut_out` attribute is mapped to the
+   database instead of the :attr:`~stalker.core.models.Shot.cut_duration`.
+
+ * in :class:`~stalker.core.models.Task` the ``part_of`` attribute is renamed
+   to :attr:`~stalker.core.modles.Task.task_of` to reflect its duty clearly.
+
 v0.1.1.a9
 ---------
 

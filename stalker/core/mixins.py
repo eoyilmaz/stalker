@@ -501,13 +501,14 @@ class TaskMixin(object):
     
     
     
-    _tasks = ValidatedList([], "stalker.core.models.Task")
+    #_tasks = ValidatedList([], "stalker.core.models.Task")
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self, tasks=[], **kwargs):
-        self._tasks = self._validate_tasks(tasks)
+    def __init__(self, **kwargs):
+        self._tasks = ValidatedList([], "stalker.core.models.Task",
+                                    self.__task_item_validator__)
     
     
     
@@ -529,21 +530,21 @@ class TaskMixin(object):
                 raise TypeError("tasks should be a list of "
                 "stalker.core.models.Task instances")
         
-        return ValidatedList(tasks_in, Task)
+        return ValidatedList(tasks_in, Task, self.__task_item_validator__)
     
     
     
-    ##----------------------------------------------------------------------
-    #def __task_item_validator__(self, tasks_added, tasks_removed):
-        #"""a callable for more granular control over tasks list
-        #"""
+    #----------------------------------------------------------------------
+    def __task_item_validator__(self, tasks_added, tasks_removed):
+        """a callable for more granular control over tasks list
+        """
         
-        ## add the current instance to tasks._part_of attribute
-        #for task in tasks_added:
-            #task._part_of.append(self)
+        # add the current instance to tasks._task_of attribute
+        for task in tasks_added:
+            task._task_of = self
         
-        #for task in tasks_removed:
-            #task._part_of.remove(self)
+        for task in tasks_removed:
+            task.task_of = None # which will raise an TypeError
     
     
     
@@ -555,6 +556,12 @@ class TaskMixin(object):
             self._tasks = self._validate_tasks(task_in)
         
         doc = """The list of :class:`~stalker.core.models.Task` instances.
+        
+        Be careful that you can not remove any of the elements in the ``tasks``
+        list. The removed :class:`~stalker.core.models.Task` will raise a
+        TypeError. To remove a :class:`~stalker.core.models.Task` from this
+        object you need to append the :class:`~stalker.core.models.Task` to
+        another objects ``tasks`` attribute.
         """
         
         return locals()

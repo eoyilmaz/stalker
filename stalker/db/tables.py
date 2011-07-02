@@ -388,7 +388,7 @@ Shots = Table(
     Column("id", Integer, ForeignKey("Entities.id"), primary_key=True),
     Column("sequence_id", Integer, ForeignKey("Sequences.id")),
     Column("cut_in", Integer),
-    Column("cut_duration", Integer),
+    Column("cut_out", Integer),
 )
 
 

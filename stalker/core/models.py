@@ -5,10 +5,19 @@ import re
 import datetime
 import platform
 
+try:
+    from sqlalchemy import orm
+except ImportError:
+    class orm(object):
+        @classmethod
+        def reconstructor(self, f):
+            return f
 
 from stalker.ext.validatedList import ValidatedList
 from stalker.core.errors import CircularDependencyError
 from stalker.conf import defaults
+
+
 
 
 
@@ -2782,7 +2791,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     # fix creation with __new__
-    _cut_out = None
+    #_cut_out = None
     
     
     
@@ -2818,6 +2827,14 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         self._cut_duration = cut_duration
         self._cut_out = cut_out
         
+        self._update_cut_info(cut_in, cut_duration, cut_out)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def init_on_load(self):
+        self._cut_out = None
         self._update_cut_info(cut_in, cut_duration, cut_out)
     
     
@@ -3471,10 +3488,42 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin, ProjectMixin):
 
 ########################################################################
 class Version(Entity, StatusMixin):
-    """The Version class is the connection of Assets to versions of that asset.
-    So it connects the Assets to file system, and manages the files as
-    versions.
+    """The connection to the filesystem.
+    
+    A :class:`~stalker.core.models.Version` holds information about the
+    incarnations of the files in the :class:`~stalker.core.models.Repository`.
+    So if one creates a new version for a file or a sequences of file for a
+    :class:`~stalker.core.models.Task` then the information is hold in the
+    :class:`~stalker.core.models.Version` instance.
+    
+    :param str take: A short string holding the current take name. Can be
+      any alphanumeric value (a-zA-Z0-0_)
+    
+    :param int version: An integer value showing the current version number.
+    
+    :param source_file: A :class:`~stalker.core.models.Link` instance, showing
+      the source file of this version.
+    
+    :type source_file: :class:`~stalker.core.models.Link`
+    
+    :param outputs: A list of :class:`~stalker.core.models.Link` instances,
+      holding the outputs of the current version.
+    
+    :type outputs: list of :class:`~stalker.core.models.Link` instances
+    
+    :param task: A :class:`~stalker.core.models.Task` instance showing the
+      owner of this Version.
+    
+    :type task: :class:`~stalker.core.models.Task`
     """
+    #:param review: A list of :class:`~stalker.core.models.Comment` instances,
+      #holding all the comments made for this Version.
+    
+    #:type review: :class:`~stalker.core.models.Stalker`
+    #:param bool published: A bool value shows if this version is published or
+      #not.
+    
+    
     
     
     
@@ -3559,20 +3608,20 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
     
-    :param part_of: A :class:`~satlker.core.models.SimpleEntity` instance that
-      has this :class:`~stalker.core.models.Task`. Now this one creates a
-      little hole in the system, cause not all of the
-      :class:`~stalker.core.models.SimpleEntity` instances has ``tasks``
-      attribute. Only classes that has been mixed with
+    :param task_of: A class instance which has an attribute called ``tasks``.
+      There is no limit in the type of the class. But it would be correct to
+      use something derived from the
+      :class:`~stalker.core.models.SimpleEntity` and mixed with
+      :class:`~stalker.core.mixins.TaskMixin`. If you are going to use the
+      :mod:`stalker.db` module than it have to be something derived from
+      the :class:`~stalker.core.models.SimpleEntity`.
+      
+      Again, only classes that has been mixed with
       :class:`~stalker.core.mixins.TasksMixin` has the attribute called
-      ``tasks``. But it needed to be done in this way cause Stalker is designed
-      to be used in a relational database (although you can opt not to use
-      one), and in the ORM of the database, possibly everything is going to be
-      derived from the :class:`~stalker.core.models.SimpleEntity` and the
-      mixed in classes are not going to have individual tables. Anyway you got
-      the point, it needs to be something that is represented in the database.
+      ``tasks``. And the instance given, have to be something that is mapped to
+      the database if you are going to use the database part of the system.
     
-    :type part_of: :class:`~stalker.core.models.SimpleEntity`.
+    :type task_of: :class:`~stalker.core.models.SimpleEntity`.
     """
     #.. :param depends: A list of
          #:class:`~stalker.core.models.TaskDependencyRelation` objects. Holds
@@ -3637,7 +3686,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
                  resources=None,
                  milestone=False,
                  priority=defaults.DEFAULT_TASK_PRIORITY,
-                 part_of=None,
+                 task_of=None,
                  **kwargs):
         super(Task, self).__init__(**kwargs)
         
@@ -3657,8 +3706,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         
         self._priority = self._validate_priority(priority)
         
-        self._part_of = None
-        self.part_of = self._validate_part_of(part_of)
+        self._task_of = None
+        self.task_of = self._validate_task_of(task_of)
     
     
     
@@ -3751,19 +3800,21 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         return bool(milestone_in)
     
     
-    
     #----------------------------------------------------------------------
-    def _validate_part_of(self, part_of_in):
-        """validates the given part_of value
+    def _validate_task_of(self, task_of_in):
+        """validates the given task_of value
         """
         
-        if not isinstance(part_of_in, SimpleEntity):
-            raise TypeError("part_of should be an instance of "
-                            "stalker.core.models.SimpleEntity or a derived "
-                            "one")
+        # the object given withe the task_of argument should have an attribute
+        # called "tasks"
+        if task_of_in is None:
+            raise TypeError("'task_of' can not be None")
         
-        return part_of_in
-    
+        if not hasattr(task_of_in, "tasks"):
+            raise AttributeError("the object given with 'task_of' should have "
+                                 "an attribute called 'tasks'")
+        
+        return task_of_in
     
     
     
@@ -4046,27 +4097,31 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
     
     
     #----------------------------------------------------------------------
-    def part_of():
+    def task_of():
         def fget(self):
-            return self._part_of
+            return self._task_of
         
-        def fset(self, part_of_in):
-            part_of_in = self._validate_part_of(part_of_in)
+        def fset(self, task_of_in):
+            task_of_in = self._validate_task_of(task_of_in)
             
-            # remove it from the current part_of attribute
-            if not self._part_of is None:
-                self._part_of.tasks.remove(self)
+            # remove it from the current task_of attribute
+            if not self._task_of is None:
+                self._task_of.tasks.remove(self)
             
             # update the back reference attribute tasks
-            self._part_of = part_of_in
-            self._part_of.tasks.append(self)
+            self._task_of = task_of_in
+            self._task_of.tasks.append(self)
         
-        doc = """The :class:`~satlker.core.models.SimpleEntity derivative that this Task is a part of.
+        doc = """An object that this Task is a part of.
+        
+        The assigned object should have an attribute called ``tasks``. Any
+        object which doesn't have a ``tasks`` attribute will raise an
+        AttributeError.
         """
         
         return locals()
     
-    part_of = property(**part_of())
+    task_of = property(**task_of())
     
     
     
