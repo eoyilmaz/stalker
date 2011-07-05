@@ -44,6 +44,10 @@ v0.1.1.a10
    :class:`~stalker.core.models.Shot` class to track down which asset is used
    in this shot.
 
+ * merged the ``ProjectMixinDB`` with ``TaskMixinDB`` and
+   removed the ``ProjectMixinDB`` from the database part of the mixins.
+
+
 v0.1.1.a9
 ---------
 

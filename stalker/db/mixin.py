@@ -288,8 +288,15 @@ class TaskMixinDB(object):
         
         class_name = class_.__name__
         
-        # there is no extra columns in the base table so we don't need to
-        # update the given class_table
+        # update the given class table with new columns
+        class_table.append_column(
+            Column(
+                "project_id",
+                Integer,
+                ForeignKey(tables.Projects.c.id),
+                nullable=False
+            )
+        )
         
         # use the given class_name and the class_table
         secondary_table_name = class_name + "_Tasks"
@@ -317,6 +324,13 @@ class TaskMixinDB(object):
             secondary_table = db.metadata.tables[secondary_table_name]
         
         new_properties = {
+            "_project": relationship(
+                Project,
+                primaryjoin=\
+                    class_table.c.project_id==\
+                    tables.Projects.c.id,
+            ),
+            "project": synonym("_project"),
             "_tasks": relationship(
                 Task,
                 secondary=secondary_table,
@@ -338,66 +352,3 @@ class TaskMixinDB(object):
         return mapper_arguments
 
 
-
-
-
-
-########################################################################
-class ProjectMixinDB(object):
-    """A helper class for ProjectMixin table and mapper setup.
-    
-    Helps setting up tables and mappers for classes mixed in with
-    :class:`stalker.core.models.ProjectMixin`
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    @classmethod
-    def setup(cls, class_, class_table, mapper_arguments={}):
-        """Creates the necessary tables and properties for the mappers for the mixed in class.
-        
-        Use the returning dictionary (mapper_arguments) in your mapper.
-        
-        :param class\_: The mixed in class, in other words the class which will
-          be extended with the mixin functionalities
-         
-        :param class_table: The table holding the information about the class
-        
-        :param mapper_arguments: Incoming mapper arugments for the
-          SQLAlchemy.Orm.Mapper, it will be updated with the properties of the
-          current mixin
-        
-        :type mapper_arguments: dict
-        
-        :returns: a dictionary holding the mapper_arguments
-        """
-        
-        class_name = class_.__name__
-        
-        # update the given class table with new columns
-        class_table.append_column(
-            Column(
-                "project_id",
-                Integer,
-                ForeignKey(tables.Projects.c.id),
-                nullable=False
-            )
-        )
-        
-        new_properties = {
-            "_project": relationship(
-                Project,
-                primaryjoin=\
-                    class_table.c.project_id==\
-                    tables.Projects.c.id,
-            ),
-            "project": synonym("_project"),
-        }
-        
-        try:
-            mapper_arguments["properties"].update(new_properties)
-        except KeyError:
-            mapper_arguments["properties"] = new_properties
-        
-        return mapper_arguments
