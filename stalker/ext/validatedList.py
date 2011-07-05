@@ -50,11 +50,11 @@ class ValidatedList(list):
         self.__lazy_load_type__ = False
         self._validator = validator
         
-        if element_type is not None:
-            self.__set_type__(element_type)
-        
         self.__type_as_str__ = ""
         self.__error_message__ = ""
+        
+        if element_type is not None:
+            self.__set_type__(element_type)
         
         if list_ and len(list_):
             
@@ -170,6 +170,8 @@ class ValidatedList(list):
         
         This is the overriden version of the original method.
         """
+        
+        #print "inside ValidatedList.append"
         
         if self.__type__ is None:
             self.__set_type__(type(object))
@@ -319,12 +321,16 @@ class ValidatedList(list):
         Raises ValueError if the value is not present.
         """
         
+        #print "inside ValidatedList.remove"
+        
         if not self._validator is None:
             try:
                 index = self.index(value)
                 self._validator([], [self[index]])
             except ValueError:
                 pass
+        
+        #print "ValidatedList.remove"
         
         # call the original method
         super(ValidatedList, self).remove(value)

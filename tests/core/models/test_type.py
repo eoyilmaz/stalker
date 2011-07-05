@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import Entity, Type
 
 
@@ -11,7 +11,7 @@ from stalker.core.models import Entity, Type
 
 
 ########################################################################
-class TypeTester(mocker.MockerTestCase):
+class TypeTester(unittest.TestCase):
     """Tests Type class
     """
     

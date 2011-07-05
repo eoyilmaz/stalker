@@ -3,7 +3,7 @@
 
 
 import datetime
-import mocker
+import unittest
 
 from stalker.conf import defaults
 from stalker.core.mixins import ScheduleMixin
@@ -14,7 +14,7 @@ from stalker.core.mixins import ScheduleMixin
 
 
 ########################################################################
-class ScheduleMixinTester(mocker.MockerTestCase):
+class ScheduleMixinTester(unittest.TestCase):
     """Tests the ScheduleMixin
     """
     

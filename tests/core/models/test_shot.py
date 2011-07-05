@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import (Entity, Shot, Sequence, Asset, Task, Link,
                                  Status, StatusList, Type, Project)
 from stalker.ext.validatedList import ValidatedList
@@ -13,7 +13,7 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class ShotTester(mocker.MockerTestCase):
+class ShotTester(unittest.TestCase):
     """Tests the Shot class
     """
     
@@ -23,71 +23,126 @@ class ShotTester(mocker.MockerTestCase):
     def setUp(self):
         """setup the test
         """
-        # create a Sequence
-        self.mock_sequence = self.mocker.mock(Sequence)
-        self.mock_sequence2 = self.mocker.mock(Sequence)
-        self.mock_sequence3 = self.mocker.mock(Sequence)
         
-        # create mock Tasks
-        self.mock_task1 = self.mocker.mock(Task)
-        self.mock_task2 = self.mocker.mock(Task)
-        self.mock_task3 = self.mocker.mock(Task)
+        class TestData(object):
+            pass
         
-        # create mock Assets
-        self.mock_asset1 = self.mocker.mock(Asset)
-        self.mock_asset2 = self.mocker.mock(Asset)
-        self.mock_asset3 = self.mocker.mock(Asset)
+        self.test_data = TestData()
         
-        # another shot with the same code
-        self.mock_shot2 = self.mocker.mock(Shot)
+        # statuses
+        self.test_data.status_complete = Status(name="Complete", code="CMPLT")
+        self.test_data.status_wip = Status(name="Work In Progress", code="WIP")
+        self.test_data.status_waiting = Status(name="Waiting To Start", code="WTS")
         
-        self.expect(self.mock_sequence.shots).\
-            result([]).count(0, None)
+        # status lists
+        self.test_data.project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[self.test_data.status_complete,
+                      self.test_data.status_waiting,
+                      self.test_data.status_wip],
+            target_entity_type=Project,
+        )
         
-        self.expect(self.mock_sequence3.shots).\
-            result([]).count(0, None)
+        self.test_data.sequence_status_list = StatusList(
+            name="Project Status List",
+            statuses=[self.test_data.status_complete,
+                      self.test_data.status_waiting,
+                      self.test_data.status_wip],
+            target_entity_type=Sequence,
+        )
         
-        self.expect(self.mock_sequence2.shots).\
-            result([self.mock_shot2]).count(0, None)
+        self.test_data.shot_status_list = StatusList(
+            name="Shot Status List",
+            statuses=[self.test_data.status_complete,
+                      self.test_data.status_waiting,
+                      self.test_data.status_wip],
+            target_entity_type=Shot,
+        )
         
-        # the code parameter to be used in the original mock_shot and the
-        # secondary mock_shot2
-        code = "SH123"
+        self.test_data.asset_status_list = StatusList(
+            name="Asset Status List",
+            statuses=[self.test_data.status_complete,
+                      self.test_data.status_waiting,
+                      self.test_data.status_wip],
+            target_entity_type=Asset,
+        )
         
-        self.expect(self.mock_shot2.code).result(code).count(0, None)
+        # types
+        self.test_data.commercial_project_type = Type(
+            name="Commercial Project",
+            target_entity_type=Project,
+        )
         
-        self.mock_status1 = self.mocker.mock(Status)
-        self.mock_status2 = self.mocker.mock(Status)
-        self.mock_status3 = self.mocker.mock(Status)
+        self.test_data.character_asset_type = Type(
+            name="Character",
+            target_entity_type=Asset,
+        )
         
-        self.mock_status_list1 = self.mocker.mock(StatusList)
+        # project and sequences
+        self.test_data.project1 = Project(
+            name="Test Project1",
+            type=self.test_data.commercial_project_type,
+            status_list = self.test_data.project_status_list,
+        )
         
-        self.expect(self.mock_status_list1.target_entity_type).\
-            result(Shot.entity_type).count(0, None)
-        self.expect(self.mock_status_list1.statuses).result(
-            [self.mock_status1, self.mock_status2, self.mock_status3]).\
-            count(0, None)
+        self.test_data.sequence1 = Sequence(
+            name="Test Seq1",
+            project=self.test_data.project1,
+            status_list=self.test_data.sequence_status_list,
+        )
         
-        self.mocker.replay()
+        self.test_data.sequence2 = Sequence(
+            name="Test Seq2", 
+            project=self.test_data.project1,
+            status_list=self.test_data.sequence_status_list,
+        )
         
-        self.cut_in_default = 1
-        self.cut_duration_default = 1
-        self.cut_out_default = 1
+        self.test_data.sequence3 = Sequence(
+            name="Test Seq3", 
+            project=self.test_data.project1,
+            status_list=self.test_data.sequence_status_list,
+        )
+        
+        self.test_data.asset1 = Asset(
+            name="Test Asset1",
+            project=self.test_data.project1,
+            status_list=self.test_data.asset_status_list,
+            type=self.test_data.character_asset_type,
+        )
+        
+        self.test_data.asset2 = Asset(
+            name="Test Asset2",
+            project=self.test_data.project1,
+            status_list=self.test_data.asset_status_list,
+            type=self.test_data.character_asset_type,
+        )
+        
+        self.test_data.asset3 = Asset(
+            name="Test Asset3",
+            project=self.test_data.project1,
+            status_list=self.test_data.asset_status_list,
+            type=self.test_data.character_asset_type,
+        )
+        
+        self.test_data.cut_in_default = 1
+        self.test_data.cut_duration_default = 1
+        self.test_data.cut_out_default = 1
         
         self.kwargs = {
-            "code": code,
+            "code": "SH123",
             "description": "This is a test Shot",
-            "assets": [self.mock_asset1, self.mock_asset2, self.mock_asset3],
-            "sequence": self.mock_sequence,
+            "sequence": self.test_data.sequence1,
             "cut_in": 112,
             "cut_out": 149,
             "cut_duration": 123,
             "status": 0,
-            "status_list": self.mock_status_list1,
+            "status_list": self.test_data.shot_status_list,
+            "assets": [self.test_data.asset1,
+                       self.test_data.asset2]
         }
         
         # create a mock shot object
-        self.mock_shot = Shot(**self.kwargs)
+        self.test_data.test_shot = Shot(**self.kwargs)
     
     
     
@@ -97,12 +152,14 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         # the length is 32 character
-        self.assertEqual(len(self.mock_shot.name), 32)
+        self.assertEqual(len(self.test_data.test_shot.name), 32)
         
         import re
         
         # and all the characters are in [0-9a-f] range
-        self.assertEqual(re.sub("[0-9a-f]+","", self.mock_shot.name), "")
+        self.assertEqual(
+            re.sub("[0-9a-f]+","", self.test_data.test_shot.name), ""
+        )
     
     
     
@@ -112,11 +169,11 @@ class ShotTester(mocker.MockerTestCase):
         """
         
         test_value = "new_name"
-        before_value = self.mock_shot.name
+        before_value = self.test_data.test_shot.name
         
-        self.mock_shot.name = test_value
+        self.test_data.test_shot.name = test_value
         
-        self.assertEqual(self.mock_shot.name, before_value)
+        self.assertEqual(self.test_data.test_shot.name, before_value)
     
     
     
@@ -164,7 +221,8 @@ class ShotTester(mocker.MockerTestCase):
         
         # lets try to assign the shot to the mock_sequence2 which has another
         # shot with the same code
-        self.kwargs["sequence"] = self.mock_sequence2
+        self.kwargs["sequence"] = self.test_data.sequence2
+        new_shot = Shot(**self.kwargs)
         
         self.assertRaises(ValueError, Shot, **self.kwargs)
     
@@ -175,8 +233,8 @@ class ShotTester(mocker.MockerTestCase):
         """testing if the sequence attribute is read only
         """
         
-        self.assertRaises(AttributeError, setattr,self.mock_shot, "sequence",
-                          self.mock_sequence2)
+        self.assertRaises(AttributeError, setattr,self.test_data.test_shot,
+                          "sequence", self.test_data.sequence2)
     
     
     
@@ -187,7 +245,8 @@ class ShotTester(mocker.MockerTestCase):
         current shot
         """
         
-        self.assertIn(self.mock_shot, self.mock_shot.sequence.shots)
+        self.assertIn(self.test_data.test_shot,
+                      self.test_data.test_shot.sequence.shots)
     
     
     
@@ -196,7 +255,8 @@ class ShotTester(mocker.MockerTestCase):
         """testing if the sequence argument works properly
         """
         
-        self.assertEqual(self.mock_shot.sequence, self.kwargs["sequence"])
+        self.assertEqual(self.test_data.test_shot.sequence,
+                         self.kwargs["sequence"])
     
     
     
@@ -218,7 +278,7 @@ class ShotTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_shot,
+            self.test_data.test_shot,
             "code",
             None
         )
@@ -245,7 +305,7 @@ class ShotTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.mock_shot,
+            self.test_data.test_shot,
             "code",
             ""
         )
@@ -261,7 +321,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop("cut_in")
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_in, self.cut_in_default)
+        self.assertEqual(new_shot.cut_in, self.test_data.cut_in_default)
     
     
     
@@ -274,7 +334,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = None
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_in, self.cut_in_default)
+        self.assertEqual(new_shot.cut_in, self.test_data.cut_in_default)
     
     
     
@@ -299,7 +359,7 @@ class ShotTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_shot,
+            self.test_data.test_shot,
             "cut_in",
             "a string"
         )
@@ -326,9 +386,10 @@ class ShotTester(mocker.MockerTestCase):
         attribute is bigger than cut_out attribute
         """
         
-        self.mock_shot.cut_in = self.mock_shot.cut_out + 10
-        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in)
-        self.assertEqual(self.mock_shot.cut_duration, 1)
+        self.test_data.test_shot.cut_in = self.test_data.test_shot.cut_out + 10
+        self.assertEqual(self.test_data.test_shot.cut_out,
+                         self.test_data.test_shot.cut_in)
+        self.assertEqual(self.test_data.test_shot.cut_duration, 1)
     
     
     
@@ -366,9 +427,10 @@ class ShotTester(mocker.MockerTestCase):
         set to default value
         """
         
-        self.mock_shot.cut_out = None
-        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in +
-                          self.mock_shot.cut_duration - 1)
+        self.test_data.test_shot.cut_out = None
+        self.assertEqual(self.test_data.test_shot.cut_out,
+                         self.test_data.test_shot.cut_in + \
+                         self.test_data.test_shot.cut_duration - 1)
     
     
     
@@ -393,7 +455,7 @@ class ShotTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_shot,
+            self.test_data.test_shot,
             "cut_out",
             "a string"
         )
@@ -420,9 +482,10 @@ class ShotTester(mocker.MockerTestCase):
         cut_in attribute
         """
         
-        self.mock_shot.cut_out = self.mock_shot.cut_in - 10
-        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in)
-        self.assertEqual(self.mock_shot.cut_duration, 1)
+        self.test_data.test_shot.cut_out = self.test_data.test_shot.cut_in - 10
+        self.assertEqual(self.test_data.test_shot.cut_out,
+                         self.test_data.test_shot.cut_in)
+        self.assertEqual(self.test_data.test_shot.cut_duration, 1)
     
     
     
@@ -475,7 +538,7 @@ class ShotTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_shot,
+            self.test_data.test_shot,
             "cut_duration",
             "a string"
         )
@@ -488,9 +551,10 @@ class ShotTester(mocker.MockerTestCase):
         cut_in attribute changed
         """
         
-        self.mock_shot.cut_in = 1
-        self.assertEqual(self.mock_shot.cut_duration, self.mock_shot.cut_out -
-                          self.mock_shot.cut_in + 1)
+        self.test_data.test_shot.cut_in = 1
+        self.assertEqual(self.test_data.test_shot.cut_duration,
+                         self.test_data.test_shot.cut_out - \
+                         self.test_data.test_shot.cut_in + 1)
     
     
     
@@ -500,9 +564,10 @@ class ShotTester(mocker.MockerTestCase):
         cut_out attribute changed
         """
         
-        self.mock_shot.cut_out = 1000
-        self.assertEqual(self.mock_shot.cut_duration, self.mock_shot.cut_out -
-                          self.mock_shot.cut_in + 1)
+        self.test_data.test_shot.cut_out = 1000
+        self.assertEqual(self.test_data.test_shot.cut_duration,
+                         self.test_data.test_shot.cut_out - \
+                         self.test_data.test_shot.cut_in + 1)
     
     
     
@@ -512,12 +577,13 @@ class ShotTester(mocker.MockerTestCase):
         cut_out value.
         """
         
-        first_cut_out = self.mock_shot.cut_out
-        self.mock_shot.cut_in
-        self.mock_shot.cut_duration = 245
-        self.assertNotEquals(self.mock_shot.cut_out, first_cut_out)
-        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in +
-                          self.mock_shot.cut_duration - 1)
+        first_cut_out = self.test_data.test_shot.cut_out
+        self.test_data.test_shot.cut_in
+        self.test_data.test_shot.cut_duration = 245
+        self.assertNotEquals(self.test_data.test_shot.cut_out, first_cut_out)
+        self.assertEqual(self.test_data.test_shot.cut_out,
+                         self.test_data.test_shot.cut_in + \
+                         self.test_data.test_shot.cut_duration - 1)
     
     
     
@@ -528,9 +594,10 @@ class ShotTester(mocker.MockerTestCase):
         attribute is set to zero
         """
         
-        self.mock_shot.cut_duration = 0
-        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in)
-        self.assertEqual(self.mock_shot.cut_duration, 1)
+        self.test_data.test_shot.cut_duration = 0
+        self.assertEqual(self.test_data.test_shot.cut_out,
+                         self.test_data.test_shot.cut_in)
+        self.assertEqual(self.test_data.test_shot.cut_duration, 1)
     
     
     
@@ -542,9 +609,10 @@ class ShotTester(mocker.MockerTestCase):
         attribute is set to a negative value
         """
         
-        self.mock_shot.cut_duration = -100
-        self.assertEqual(self.mock_shot.cut_out, self.mock_shot.cut_in)
-        self.assertEqual(self.mock_shot.cut_duration, 1)
+        self.test_data.test_shot.cut_duration = -100
+        self.assertEqual(self.test_data.test_shot.cut_out,
+                         self.test_data.test_shot.cut_in)
+        self.assertEqual(self.test_data.test_shot.cut_duration, 1)
     
     
     
@@ -621,7 +689,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         new_shot1 = Shot(**self.kwargs)
         
-        self.kwargs["sequence"] = self.mock_sequence3
+        self.kwargs["sequence"] = self.test_data.sequence3
         new_shot2 = Shot(**self.kwargs)
         # an entity with the same parameters
         # just set the name to the code too
@@ -629,7 +697,7 @@ class ShotTester(mocker.MockerTestCase):
         new_entity = Entity(**self.kwargs)
         
         # another shot with different code
-        self.kwargs["code"] = "SHOnetherShot"
+        self.kwargs["code"] = "SHAnotherShot"
         new_shot3 = Shot(**self.kwargs)
         
         self.assertFalse(new_shot1==new_shot2)
@@ -646,7 +714,7 @@ class ShotTester(mocker.MockerTestCase):
         self.kwargs["code"] = "SH123A"
         new_shot1 = Shot(**self.kwargs)
         
-        self.kwargs["sequence"] = self.mock_sequence3
+        self.kwargs["sequence"] = self.test_data.sequence3
         new_shot2 = Shot(**self.kwargs)
         # an entity with the same parameters
         # just set the name to the code too
@@ -654,7 +722,7 @@ class ShotTester(mocker.MockerTestCase):
         new_entity = Entity(**self.kwargs)
         
         # another shot with different code
-        self.kwargs["code"] = "SHOnetherShot"
+        self.kwargs["code"] = "SHAnotherShot"
         new_shot3 = Shot(**self.kwargs)
         
         self.assertTrue(new_shot1!=new_shot2)
@@ -761,8 +829,9 @@ class ShotTester(mocker.MockerTestCase):
         """testing the represantation of Shot
         """
         self.assertEqual(
-            self.mock_shot.__repr__(),
-            "<Shot (%s, %s)>" % (self.mock_shot.code, self.mock_shot.code)
+            self.test_data.test_shot.__repr__(),
+            "<Shot (%s, %s)>" % (self.test_data.test_shot.code,
+                                 self.test_data.test_shot.code)
         )
     
     
@@ -782,5 +851,167 @@ class ShotTester(mocker.MockerTestCase):
         """
         self.assertEqual(Shot.__strictly_typed__, False)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_argument_is_skipped(self):
+        """testing if the assets attribute will be an empty list when the
+        assets argument is skipped
+        """
+        self.kwargs["code"] = "SHAnotherShot"
+        self.kwargs.pop("assets")
+        new_shot = Shot(**self.kwargs)
+        self.assertEqual(new_shot.assets, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_argument_is_None(self):
+        """testing if the assets attribute will be an empty list when the
+        assets argument is None
+        """
+        self.kwargs["code"] = "SHAnotherShot"
+        self.kwargs["assets"] = None
+        new_shot = Shot(**self.kwargs)
+        self.assertEqual(new_shot.assets, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_None(self):
+        """testing if the assets attribute will be an empty list when it is set
+        to None
+        """
+        
+        self.test_data.test_shot.assets = None
+        self.assertEqual(self.test_data.test_shot.assets, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_argument_is_not_a_list(self):
+        """testing if a TypeError will be raised when the assets argument is
+        not a list
+        """
+        self.kwargs["code"] = "SHAnotherShot"
+        self.kwargs["assets"] = 1
+        self.assertRaises(TypeError, Shot, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_not_a_list(self):
+        """testing if a TypeError will be raised when the assets attribute is
+        set to a non list value
+        """
+        
+        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
+                          "assets", 1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_argument_is_not_a_list_of_Asset_instances(self):
+        """testing if a TypeError will be raised when the assets argument is
+        a list but not a list of Asset instances
+        """
+        self.kwargs["code"] = "SHAnotherShot"
+        self.kwargs["assets"] = [1, "a string", ["a", "list"]]
+        self.assertRaises(TypeError, Shot, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_not_a_list_of_Asset_instances(self):
+        """testing if a TypeError will be raised when the assets attribute is
+        set to a list but not a list of Asset instances
+        """
+        
+        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
+                          "assets", [1, "a string", ["a", "list"]])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_a_ValidatedList(self):
+        """testing if the assets attribute is a ValidatedList instance
+        """
+        
+        self.assertIsInstance(self.test_data.test_shot.assets, ValidatedList)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_argument_is_a_list_of_Asset_instances(self):
+        """testing if the assets shots attribute will contain the current shot
+        when the assets argument is a list of Asset instances
+        """
+        
+        self.kwargs["code"] = "SHAnotherShot"
+        self.kwargs["assets"] = [self.test_data.asset1, self.test_data.asset2]
+        new_shot = Shot(**self.kwargs)
+        
+        self.assertIn(new_shot, self.test_data.asset1.shots)
+        self.assertIn(new_shot, self.test_data.asset2.shots)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_is_a_list_of_Asset_instances(self):
+        """testing if the assets shots attribute will contain the current shot
+        when the assets attribute is set to a list of Asset instances
+        """
+        
+        self.kwargs["code"] = "SHAnotherShot"
+        self.kwargs.pop("assets")
+        new_shot = Shot(**self.kwargs)
+        new_shot.assets = [self.test_data.asset1, self.test_data.asset2]
+        
+        self.assertIn(new_shot, self.test_data.asset1.shots)
+        self.assertIn(new_shot, self.test_data.asset2.shots)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_assets_attribute_will_update_the_Asset_shot_attribute(self):
+        """testing if the assets attribute will update the Asset.shots
+        attribute
+        """
+        
+        self.kwargs["code"] = "SHAnotherShot"
+        self.kwargs.pop("assets")
+        new_shot = Shot(**self.kwargs)
+        
+        new_shot.assets = [self.test_data.asset1, self.test_data.asset2]
+        
+        self.assertIn(new_shot, self.test_data.asset1.shots)
+        self.assertIn(new_shot, self.test_data.asset2.shots)
+        
+        new_shot.assets = [self.test_data.asset3]
+        
+        self.assertIn(new_shot, self.test_data.asset3.shots)
+        self.assertNotIn(new_shot, self.test_data.asset1.shots)
+        self.assertNotIn(new_shot, self.test_data.asset2.shots)
+        
+        # now append a new asset
+        new_shot.assets.append(self.test_data.asset1)
+        self.assertIn(new_shot, self.test_data.asset1.shots)
+        
+        # remove one
+        new_shot.assets.remove(self.test_data.asset3)
+        self.assertNotIn(new_shot, self.test_data.asset3.shots)
+        
+        # pop one
+        new_shot.assets.pop()
+        self.assertNotIn(new_shot, self.test_data.asset1.shots)
+        
+        # extend
+        new_shot.assets.extend([self.test_data.asset1,
+                                self.test_data.asset2,
+                                self.test_data.asset3])
+        
+        self.assertIn(new_shot, self.test_data.asset1.shots)
+        self.assertIn(new_shot, self.test_data.asset2.shots)
+        self.assertIn(new_shot, self.test_data.asset3.shots)
     
     

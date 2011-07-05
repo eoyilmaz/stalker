@@ -372,13 +372,61 @@ class ProjectTester(mocker.MockerTestCase):
         
         self.kwargs["sequences"] = []
         self.kwargs["assets"] = []
-        self.kwargs["tasks"] = [self.mock_task1, self.mock_task2,
-                                self.mock_task3]
-        
         new_project = Project(**self.kwargs)
         
+        # Users
+        new_user1 = User(
+            login_name="user1",
+            email="user1@test.com",
+            password="user1",
+            first_name="user1",
+            last_name="user1"
+        )
+        
+        new_user2 = User(
+            login_name="user2",
+            email="user2@test.com",
+            password="user2",
+            first_name="user2",
+            last_name="user2"
+        )
+        
+        status_complete = Status(name="Complete", code="CMPLT")
+        status_wip = Status(name="Work In Progress", code="WIP")
+        
+        task_status_list = StatusList(
+            name="Task Status List",
+            statuses=[status_complete, status_wip],
+            target_entity_type=Task,
+        )
+        
+        # create new tasks
+        new_task1 = Task(
+            name="Task1",
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_project,
+            resources= [new_user1],
+        )
+        
+        new_task2 = Task(
+            name="Task2",
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_project,
+            resources= [new_user1],
+        )
+        
+        new_task3 = Task(
+            name="Task3",
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_project,
+            resources= [new_user2],
+        )
+        
         # task1, task2, task3
-        expected_users = [self.mock_user1, self.mock_user2, self.mock_user3]
+        expected_users = [new_user1, new_user2]
         
         self.assertItemsEqual(new_project.users, expected_users)
     
@@ -1309,17 +1357,39 @@ class ProjectTester(mocker.MockerTestCase):
         
         status1 = Status(name="On Hold", code="OH")
         
-        task_status_list = StatusList(name="Task Statuses",
-                                      statuses=[status1],
-                                      target_entity_type=Task.entity_type)
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[status1],
+            target_entity_type=Project
+        )
         
-        tasks = [self.mock_task1, self.mock_task2]
+        commercial_project_type = Type(
+            name="Commercial Project",
+            target_entity_type=Project,
+        )
         
-        self.kwargs["tasks"] = tasks
+        new_project = Project(
+            name="Test Project",
+            type=commercial_project_type,
+            status_list=project_status_list
+        )
         
-        new_project = Project(**self.kwargs)
         
-        self.assertEqual(new_project.tasks, tasks)
+        task_status_list = StatusList(
+            name="Task Statuses",
+            statuses=[status1],
+            target_entity_type=Task
+        )
+        
+        new_task1 = Task(
+            name="Test Task",
+            status_list=task_status_list,
+            task_of=new_project,
+        )
+        
+        
+        self.assertItemsEqual(new_project.tasks, [new_task1])
+        self.assertEqual(new_project.project, new_project)
     
     
     

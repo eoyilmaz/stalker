@@ -2,14 +2,14 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import Entity, Status, StatusList, Project
 from stalker.ext.validatedList import ValidatedList
 
 
 
 ########################################################################
-class StatusTest(mocker.MockerTestCase):
+class StatusTest(unittest.TestCase):
     """tests the status class
     """
     
@@ -148,7 +148,7 @@ class StatusTest(mocker.MockerTestCase):
 
 
 ########################################################################
-class StatusListTest(mocker.MockerTestCase):
+class StatusListTest(unittest.TestCase):
     """testing the StatusList class
     """
     

@@ -2,9 +2,9 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import (Asset, Task, Entity, Project, Link, Status,
-                                 StatusList, Shot, Type)
+                                 StatusList, Shot, Type, Sequence)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -13,7 +13,7 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class AssetTester(mocker.MockerTestCase):
+class AssetTester(unittest.TestCase):
     """tests Asset class
     """
     
@@ -24,65 +24,140 @@ class AssetTester(mocker.MockerTestCase):
         """setup the test
         """
         
-        self.mock_project = self.mocker.mock(Project)
+        # statuses
+        self.test_data_status_complete = Status(
+            name="Complete",
+            code="CMPLT",
+        )
         
-        self.mock_type1 = self.mocker.mock(Type)
-        self.mock_type2 = self.mocker.mock(Type)
+        self.test_data_status_wip = Status(
+            name="Work In Progress",
+            code="WIP",
+        )
         
-        self.expect(self.mock_type1.__eq__(self.mock_type2)).result(False).\
-            count(0, None)
+        # status lists
+        self.test_data_project_status_list = StatusList(
+            name="Project Status List",
+            target_entity_type=Project,
+            statuses=[self.test_data_status_complete,
+                      self.test_data_status_wip]
+        )
         
-        self.expect(self.mock_type2.__eq__(self.mock_type1)).result(False).\
-            count(0, None)
+        self.test_data_task_status_list = StatusList(
+            name="Task Status List",
+            target_entity_type=Task,
+            statuses=[self.test_data_status_complete,
+                      self.test_data_status_wip]
+        )
         
-        self.expect(self.mock_type1.__ne__(self.mock_type2)).result(True).\
-            count(0, None)
+        self.test_data_asset_status_list = StatusList(
+            name="Asset Status List",
+            target_entity_type=Asset,
+            statuses=[self.test_data_status_complete,
+                      self.test_data_status_wip]
+        )
         
-        self.expect(self.mock_type2.__ne__(self.mock_type1)).result(True).\
-            count(0, None)
+        self.test_data_shot_status_list = StatusList(
+            name="Shot Status List",
+            target_entity_type=Shot,
+            statuses=[self.test_data_status_complete,
+                      self.test_data_status_wip]
+        )
         
-        self.mock_task1 = self.mocker.mock(Task)
-        self.mock_task2 = self.mocker.mock(Task)
-        self.mock_task3 = self.mocker.mock(Task)
+        self.test_data_sequence_status_list = StatusList(
+            name="Sequence Status List",
+            target_entity_type=Sequence,
+            statuses=[self.test_data_status_complete,
+                      self.test_data_status_wip]
+        )
         
-        self.mock_status1 = self.mocker.mock(Status)
-        self.mock_status2 = self.mocker.mock(Status)
-        self.mock_status3 = self.mocker.mock(Status)
+        # types
+        self.test_data_commmercial_project = Type(
+            name="Commercial Project",
+            target_entity_type=Project,
+        )
         
-        self.mock_status_list1 = self.mocker.mock(StatusList)
+        self.test_data_asset_type1 = Type(
+            name="Character",
+            target_entity_type=Asset
+        )
         
-        self.expect(self.mock_status_list1.target_entity_type).\
-            result(Asset.entity_type).count(0, None)
-        self.expect(self.mock_status_list1.statuses).result(
-            [self.mock_status1, self.mock_status2, self.mock_status3]).\
-            count(0, None)
+        self.test_data_asset_type2 = Type(
+            name="Environment",
+            target_entity_type=Asset
+        )
         
-        self.mock_shot1 = self.mocker.mock(Shot)
-        self.mock_shot2 = self.mocker.mock(Shot)
-        self.mock_shot3 = self.mocker.mock(Shot)
+        # project
+        self.test_data_project1 = Project(
+            name="Test Project1",
+            type=self.test_data_commmercial_project,
+            status_list=self.test_data_project_status_list,
+        )
         
-        self.mocker.replay()
+        # sequence
+        self.test_data_sequence = Sequence(
+            name="Test Sequence",
+            project=self.test_data_project1,
+            status_list=self.test_data_sequence_status_list,
+        )
+        
+        # shots
+        self.test_data_shot1 = Shot(
+            code="TestSH001",
+            status_list=self.test_data_shot_status_list,
+            sequence=self.test_data_sequence,
+        )
+        
+        self.test_data_shot2 = Shot(
+            code="TestSH002",
+            status_list=self.test_data_shot_status_list,
+            sequence=self.test_data_sequence,
+        )
+        
+        self.test_data_shot3 = Shot(
+            code="TestSH003",
+            status_list=self.test_data_shot_status_list,
+            sequence=self.test_data_sequence,
+        )
+        
+        self.test_data_shot4 = Shot(
+            code="TestSH004",
+            status_list=self.test_data_shot_status_list,
+            sequence=self.test_data_sequence,
+        )
         
         self.kwargs = {
             "name": "Test Asset",
             "description": "This is a test Asset object",
-            "project": self.mock_project,
-            "type": self.mock_type1,
-            "tasks": [self.mock_task1, self.mock_task2, self.mock_task3],
+            "project": self.test_data_project1,
+            "type": self.test_data_asset_type1,
+            "shots": [self.test_data_shot1,
+                      self.test_data_shot2,
+                      self.test_data_shot3],
             "status": 0,
-            "status_list": self.mock_status_list1,
+            "status_list": self.test_data_asset_status_list,
         }
         
-        self.mock_asset = Asset(**self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_test_setup(self):
-        """testing if the test setup is correct
-        """
-        self.assertFalse(self.mock_type1==self.mock_type2)
-        self.assertTrue(self.mock_type1!=self.mock_type2)
+        self.test_data_test_asset = Asset(**self.kwargs)
+        
+        # tasks
+        self.test_data_task1 = Task(
+            name="Task1",
+            task_of=self.test_data_test_asset,
+            status_list=self.test_data_task_status_list
+        )
+        
+        self.test_data_task2 = Task(
+            name="Task2",
+            task_of=self.test_data_test_asset,
+            status_list=self.test_data_task_status_list
+        )
+        
+        self.test_data_task3 = Task(
+            name="Task3",
+            task_of=self.test_data_test_asset,
+            status_list=self.test_data_task_status_list
+        )
     
     
     
@@ -96,7 +171,7 @@ class AssetTester(mocker.MockerTestCase):
         
         new_entity1 = Entity(**self.kwargs)
         
-        self.kwargs["type"] = self.mock_type2
+        self.kwargs["type"] = self.test_data_asset_type2
         new_asset3 = Asset(**self.kwargs)
         
         self.kwargs["name"] = "another name"
@@ -120,7 +195,7 @@ class AssetTester(mocker.MockerTestCase):
         
         new_entity1 = Entity(**self.kwargs)
         
-        self.kwargs["type"] = self.mock_type2
+        self.kwargs["type"] = self.test_data_asset_type2
         new_asset3 = Asset(**self.kwargs)
         
         self.kwargs["name"] = "another name"
@@ -187,13 +262,16 @@ class AssetTester(mocker.MockerTestCase):
         
         status1 = Status(name="On Hold", code="OH")
         
-        task_status_list = StatusList(name="Task Statuses",
-                                      statuses=[status1],
-                                      target_entity_type=Task.entity_type)
+        task_status_list = StatusList(
+            name="Task Statuses",
+            statuses=[status1],
+            target_entity_type=Task
+        )
         
         project_status_list = StatusList(
-            name="Project Statuses", statuses=[status1],
-            target_entity_type=Project.entity_type
+            name="Project Statuses",
+            statuses=[status1],
+            target_entity_type=Project
         )
         
         commercial_project_type = Type(
@@ -207,57 +285,40 @@ class AssetTester(mocker.MockerTestCase):
             status_list=project_status_list,
         )
         
-        character_asset_type = Type(name="Character", target_entity_type=Asset)
+        character_asset_type = Type(
+            name="Character",
+            target_entity_type=Asset
+        )
+        
+        asset_status_list = StatusList(
+            name="Asset Status List",
+            statuses=[status1],
+            target_entity_type=Asset
+        )
         
         new_asset = Asset(
             name="test asset",
             type=character_asset_type,
             code="tstasset",
+            status_list=asset_status_list,
+            project=new_project,
         )
         
         task1 = Task(
             name="Modeling",
             status_list=task_status_list,
-            project=new_project,
             task_of=new_asset
         )
         
         task2 = Task(
             name="Lighting",
             status_list=task_status_list,
-            project=new_project,
             task_of=new_asset
         )
         
         tasks = [task1, task2]
         
-        self.assertItemsEqual(new_asset.tasks, tasks)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_ProjectMixin_initialization(self):
-        """testing if the ProjectMixin part is initialized correctly
-        """
-        
-        status1 = Status(name="On Hold", code="OH")
-        
-        project_status_list = StatusList(
-            name="Project Statuses", statuses=[status1],
-            target_entity_type=Project.entity_type
-        )
-        
-        project_type = Type(name="Commercial", target_entity_type=Project)
-        
-        new_project = Project(name="Test Project", status=0,
-                              status_list=project_status_list,
-                              type=project_type)
-        
-        self.kwargs["project"] = new_project
-        
-        new_asset = Asset(**self.kwargs)
-        
-        self.assertEqual(new_asset.project, new_project)
+        self.assertItemsEqual(new_asset.tasks, tasks)    
     
     
     
@@ -276,5 +337,164 @@ class AssetTester(mocker.MockerTestCase):
         """
         
         self.assertEqual(Asset.__strictly_typed__, True)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_argument_is_skipped(self):
+        """testing if the shots attribute will be an empty list when the shots
+        argument is skipped
+        """
+        self.kwargs.pop("shots")
+        new_asset = Asset(**self.kwargs)
+        self.assertEqual(new_asset.shots, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_argument_is_None(self):
+        """testing if the shots attribute will be an empty list when the shots
+        argument is None
+        """
+        self.kwargs["shots"] = None
+        new_asset = Asset(**self.kwargs)
+        self.assertEqual(new_asset.shots, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_is_None(self):
+        """testing if the shots attribute will be an empty list when it is set
+        to None
+        """
+        self.test_data_test_asset.shots = None
+        self.assertEqual(self.test_data_test_asset.shots, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_argument_is_not_a_list(self):
+        """testing if a TypeError will be raised when the shots argument is not
+        a list
+        """
+        self.kwargs["shots"] = "1"
+        self.assertRaises(TypeError, Asset, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_is_not_a_list(self):
+        """testing if a TypeError will be raised when the shots attribute is
+        set to a value other than a list
+        """
+        self.assertRaises(TypeError, setattr, self.test_data_test_asset,
+                          "shots", "1")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_argument_is_not_a_list_of_Shots(self):
+        """testing if a TypeError will be raised when the shots argument is not
+        a list of Shot instances
+        """
+        self.kwargs["shots"] = [1, 1.2, "a shot"]
+        self.assertRaises(TypeError, Asset, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_is_not_a_list_of_Shots(self):
+        """testing if a TypeError will be raised when the shots attribute is
+        set to a value other than a list of Shot instances
+        """
+        self.assertRaises(TypeError, setattr, self.test_data_test_asset,
+                          "shots", [1, 1.2, "a shot"])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_argument_is_a_list_of_Shot_instances(self):
+        """testing if the assets attribute of the Shot instances will be
+        updated and have the current asset in their assets list when the shots
+        argument is a list of Shot instances
+        """
+        
+        self.kwargs["shots"] = [self.test_data_shot1,
+                                self.test_data_shot2]
+        
+        new_asset = Asset(**self.kwargs)
+        
+        self.assertIn(new_asset, self.test_data_shot1.assets)
+        self.assertIn(new_asset, self.test_data_shot2.assets)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_is_a_list_of_Shot_instances(self):
+        """testing if the assets attribute of the Shot instances will be
+        updated and have the current asset in their assets list when the shots
+        attribute is a list of Shot instances
+        """
+        
+        self.kwargs["name"] = "New Test Asset"
+        self.kwargs["shots"] = [self.test_data_shot1,
+                                self.test_data_shot2]
+        
+        #print "creating new asset"
+        new_asset = Asset(**self.kwargs)
+        
+        #print "appending new shots"
+        new_asset.shots = [self.test_data_shot3,
+                           self.test_data_shot4]
+        
+        self.assertIn(new_asset, self.test_data_shot3.assets)
+        self.assertIn(new_asset, self.test_data_shot4.assets)
+        
+        self.assertNotIn(new_asset, self.test_data_shot1.assets)
+        self.assertNotIn(new_asset, self.test_data_shot2.assets)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_is_a_ValidatedList_instance(self):
+        """testing if the shots attribute is a ValidatedList instance
+        """
+        
+        self.assertIsInstance(self.test_data_test_asset.shots, ValidatedList)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_shots_attribute_will_update_the_backreference_value_assets_in_Shot_instances(self):
+        """testing if the shots attribute will update the backreference
+        attribute in Shot instances
+        """
+        
+        self.kwargs["name"] = "New Test Asset"
+        self.kwargs["shots"] = [self.test_data_shot1, self.test_data_shot2]
+        
+        new_asset = Asset(**self.kwargs)
+        
+        # append
+        new_asset.shots.append(self.test_data_shot3)
+        self.assertIn(new_asset, self.test_data_shot3.assets)
+        
+        # extend
+        new_asset.shots.extend([self.test_data_shot4])
+        self.assertIn(new_asset, self.test_data_shot4.assets)
+        
+        # remove
+        new_asset.shots.remove(self.test_data_shot1)
+        self.assertNotIn(new_asset, self.test_data_shot1.assets)
+        
+        # pop
+        new_asset.shots.pop(0)
+        self.assertNotIn(new_asset, self.test_data_shot2.assets)
+        
+        # pop again
+        new_asset.shots.pop()
+        self.assertNotIn(new_asset, self.test_data_shot4.assets)
+    
+    
     
     

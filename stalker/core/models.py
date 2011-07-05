@@ -183,7 +183,7 @@ class SimpleEntity(object):
     
     
     __metaclass__ = EntityMeta
-    _nice_name = None
+    #_nice_name = None
     
     
     #----------------------------------------------------------------------
@@ -221,6 +221,16 @@ class SimpleEntity(object):
         self._date_updated = self._validate_date_updated(date_updated)
         
         self._type = self._validate_type(type)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance creted with
+        SQLAlchemy
+        """
+        self._nice_name = None
     
     
     
@@ -680,6 +690,16 @@ class Entity(SimpleEntity):
         self._tags = self._validate_tags(tags)
         self._notes = self._validate_notes(notes)
     
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance creted with
+        SQLAlchemy
+        """
+        
+        super(Entity, self).__init_on_load__()
     
     
     #----------------------------------------------------------------------
@@ -1186,10 +1206,6 @@ class ImageFormat(Entity):
     
     
     
-    _device_aspect = None
-    
-    
-    
     #----------------------------------------------------------------------
     def __init__(self,
                  width=None,
@@ -1209,7 +1225,21 @@ class ImageFormat(Entity):
         self._device_aspect = 1.0
         
         self._update_device_aspect()
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance creted with
+        SQLAlchemy
+        """
         
+        self._device_aspect = None
+        
+        # call supers __init_on_load__
+        super(ImageFormat, self).__init_on_load__()
+    
     
     
     #----------------------------------------------------------------------
@@ -1582,7 +1612,7 @@ class Link(Entity):
 
 # mixin class imports should be placed after StatusList and Link definitions
 from stalker.core.mixins import (ReferenceMixin, ScheduleMixin, StatusMixin,
-                                 TaskMixin, ProjectMixin)
+                                 TaskMixin)
 
 
 
@@ -2065,6 +2095,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
                  is_stereoscopic=False,
                  display_width=1.0,
                  **kwargs):
+        
+        # a projects project should be self
+        # initialize the project argument to self
+        kwargs["project"] = self
         
         super(Project, self).__init__(**kwargs)
         # call the mixin __init__ methods
@@ -2605,8 +2639,7 @@ class Sequence(Entity,
                ReferenceMixin,
                StatusMixin,
                ScheduleMixin,
-               TaskMixin,
-               ProjectMixin):
+               TaskMixin):
     """Stores data about Sequences.
     
     Sequences are holders of the :class:`~stalker.core.models.Shot` objects.
@@ -2621,7 +2654,6 @@ class Sequence(Entity,
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 shots=[],
                  lead=None,
                  **kwargs
                  ):
@@ -2633,7 +2665,6 @@ class Sequence(Entity,
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
         TaskMixin.__init__(self, **kwargs)
-        ProjectMixin.__init__(self, **kwargs)
         
         self._lead = self._validate_lead(lead)
         self._shots = self._validate_shots(None)
@@ -2763,11 +2794,19 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     :attr:`~stalker.core.models.Shot.cut_out` can be set to the same value
     so the :attr:`~stalker.core.models.Shot.cut_duration` can be set to zero.
     
+    Because Shot is getting is relation to a
+    :class:`~stalker.core.models.Project` from the
+    passed :class:`~stalker.core.models.Sequence`, you can skip the
+    ``project`` argument, and if you not the value of the ``project`` argument
+    is not going to be used.
+    
     :param sequence: The :class:`~stalker.core.models.Sequence` that this shot
       blengs to. A shot can only be created with a
       :class:`~stalker.core.models.Sequence` instance, so it can not be None.
       The shot itself will be added to the
       :attr:`~stalker.core.models.Sequence.shots` list of the given sequence.
+      Also the ``project`` of the :class:`~stalker.core.models.Sequence` will
+      be used to set the ``project`` of the current Shot.
     
     :type sequence: :class:`~stalker.core.models.Sequence`
     
@@ -2802,6 +2841,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
                  cut_in=1,
                  cut_out=None,
                  cut_duration=None,
+                 assets=[],
                  **kwargs):
         
         kwargs["name"] = code
@@ -2809,7 +2849,6 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         super(Shot, self).__init__(**kwargs)
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
-        TaskMixin.__init__(self, **kwargs)
         
         # set the code
         self._code = self._validate_code(code)
@@ -2822,20 +2861,31 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         # add the shot to the sequences shot list
         self._sequence.shots.append(self)
         
+        # initialize TaskMixin
+        kwargs["project"] = self._sequence.project
+        TaskMixin.__init__(self, **kwargs)
         
         self._cut_in = cut_in
         self._cut_duration = cut_duration
         self._cut_out = cut_out
         
         self._update_cut_info(cut_in, cut_duration, cut_out)
+        
+        self._assets = self._validate_assets(assets)
     
     
     
     #----------------------------------------------------------------------
     @orm.reconstructor
-    def init_on_load(self):
-        self._cut_out = None
-        self._update_cut_info(cut_in, cut_duration, cut_out)
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance creted with
+        SQLAlchemy
+        """
+        self._cut_duration = None
+        self._update_cut_info(self._cut_in, self._cut_duration, self._cut_out)
+        
+        # call supers __init_on_load__
+        super(Shot, self).__init_on_load__()
     
     
     
@@ -2889,23 +2939,24 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     
-    ##----------------------------------------------------------------------
-    #def _validate_assets(self, assets_in):
-        #"""validates the given assets_in value
-        #"""
+    #----------------------------------------------------------------------
+    def _validate_assets(self, assets_in):
+        """validates the given assets_in value
+        """
         
-        #if assets_in is None:
-            #assets_in = []
+        if assets_in is None:
+            assets_in = []
         
-        #if not isinstance(assets_in, list):
-            #raise TypeError("assets should be an instance of list")
+        if not isinstance(assets_in, list):
+            raise TypeError("assets should be an instance of list")
         
-        #for item in assets_in:
-            #if not isinstance(item, Asset):
-                #raise TypeError("all the items in the assets list should be"
-                                 #"an instance of stalker.core.models.Asset")
+        for item in assets_in:
+            if not isinstance(item, Asset):
+                raise TypeError("all the items in the assets list should be"
+                                 "an instance of stalker.core.models.Asset")
         
-        #return ValidatedList(assets_in, Asset)
+        return ValidatedList(assets_in, Asset,
+                             self.__assets_backreference_updater__)
     
     
     
@@ -2977,7 +3028,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         """
         
         if not isinstance(sequence_in, Sequence):
-            raise TypeError("the sequence should be an instance of"
+            raise TypeError("the sequence should be an instance of "
                              "stalker.core.models.Sequence instance")
         
         for shot in sequence_in.shots:
@@ -2991,23 +3042,43 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     
-    ##----------------------------------------------------------------------
-    #def assets():
-        
-        #def fget(self):
-            #return self._assets
-        
-        #def fset(self, assets_in):
-            #self._assets = self._validate_assets(assets_in)
-        
-        #doc = """The list of :class:`~stalker.core.models.Asset`\ s used in this shot.
-        
-        #When it is set to None, it defaults to the default value and the
-        #default value is an empty list."""
-        
-        #return locals()
     
-    #assets = property(**assets())
+    #----------------------------------------------------------------------
+    def __assets_backreference_updater__(self, assets_added, assets_removed):
+        """updates the backreference in the Asset class
+        """
+        
+        for asset in assets_added:
+            # append without calling the validator of the backreference
+            super(ValidatedList, asset._shots).append(self)
+        
+        for asset in assets_removed:
+            # remove without calling the validator of the backreference
+            super(ValidatedList, asset._shots).remove(self)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def assets():
+        
+        def fget(self):
+            return self._assets
+        
+        def fset(self, assets_in):
+            # remove the previous ones
+            for asset in self.assets:
+                super(ValidatedList, asset._shots).remove(self)
+            
+            self._assets = self._validate_assets(assets_in)
+        
+        doc = """The list of :class:`~stalker.core.models.Asset`\ s used in this shot.
+        
+        When it is set to None, it defaults to the default value and the
+        default value is an empty list."""
+        
+        return locals()
+    
+    assets = property(**assets())
     
     
     
@@ -3394,7 +3465,7 @@ class Tag(SimpleEntity):
 
 
 ########################################################################
-class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin, ProjectMixin):
+class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     """The Asset class is the whole idea behind Stalker.
     
     *Assets* are containers of :class:`~stalker.core.models.Task`\ s. And
@@ -3415,12 +3486,11 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin, ProjectMixin):
     
     
     __strictly_typed__ = True
-    _shots = None
     
     
     
     #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
+    def __init__(self, shots=[], **kwargs):
         
         super(Asset, self).__init__(**kwargs)
         
@@ -3428,9 +3498,22 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin, ProjectMixin):
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         TaskMixin.__init__(self, **kwargs)
-        ProjectMixin.__init__(self, **kwargs)
         
-        self._shots = self._validate_shots(None)
+        self._shots = None
+        self.shots = shots
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance creted with
+        SQLAlchemy
+        """
+        self._shots = None
+        
+        # call supers __init_on_load__
+        super(Asset, self).__init_on_load__()
     
     
     
@@ -3451,8 +3534,22 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin, ProjectMixin):
             raise TypeError("shots should be set to a list of "
                             "stalker.core.models.Shot objects")
         
-        return ValidatedList(shots_in, Shot)
+        return ValidatedList(shots_in, Shot, self.__shots_item_validator__)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __shots_item_validator__(self, shots_added, shots_removed):
+        """updates the backreferences in the Shot instance
+        """
         
+        for shot in shots_added:
+            # do not invoke the asset.shots by calling the super
+            super(ValidatedList, shot.assets).append(self)
+    
+        for shot in shots_removed:
+            # do not invoke the asset.shots by calling the super
+            super(ValidatedList, shot.assets).remove(self)
     
     
     
@@ -3462,6 +3559,12 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin, ProjectMixin):
             return self._shots
         
         def fset(self, shots_in):
+            # remove the previous ones
+            if not self._shots is None:
+                for shot in self._shots:
+                    super(ValidatedList, shot.assets).remove(self)
+            
+            # set it to the ValidatedList that already has the new shots
             self._shots = self._validate_shots(shots_in)
         
         doc = """The :class:`~stalker.core.models.Shot`\ s that this :class:`~stalker.core.models.Asset` has been used in.
@@ -3523,10 +3626,6 @@ class Version(Entity, StatusMixin):
     #:param bool published: A bool value shows if this version is published or
       #not.
     
-    
-    
-    
-    
     pass
 
 
@@ -3535,7 +3634,7 @@ class Version(Entity, StatusMixin):
 
 
 ########################################################################
-class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
+class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
     Tasks are the smallest meaningful part that should be accomplished to
@@ -3674,11 +3773,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
     
     
     
-    _bookings = ValidatedList([], Booking)
-    _versions = ValidatedList([], Version)
-    
-    
-    
     #----------------------------------------------------------------------
     def __init__(self,
                  depends=None,
@@ -3693,7 +3787,9 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-        ProjectMixin.__init__(self, **kwargs)
+        
+        self._bookings = ValidatedList([], Booking)
+        self._versions = ValidatedList([], Version)
         
         self._milestone = self._validate_milestone(milestone)
         
@@ -3707,8 +3803,23 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         self._priority = self._validate_priority(priority)
         
         self._task_of = None
-        self.task_of = self._validate_task_of(task_of)
+        #self.task_of = self._validate_task_of(task_of)
+        self.task_of = task_of
     
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance creted with
+        SQLAlchemy
+        """
+        self._bookings = ValidatedList([], Booking)
+        self._versions = ValidatedList([], Version)
+        
+        # call supers __init_on_load__
+        super(Task, self).__init_on_load__()
+
     
     
     #----------------------------------------------------------------------
@@ -4055,10 +4166,12 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         
         # add the task to the resources
         for resource in resources_added:
-            resource._tasks.append(self)
+            #print resource._tasks
+            #print type(resource._tasks)
+            super(ValidatedList, resource._tasks).append(self)
         
         for resource in resources_removed:
-            resource._tasks.remove(self)
+            super(ValidatedList, resource._tasks).remove(self)
     
     
     
@@ -4069,22 +4182,16 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
         
         def fset(self, resources_in):
             
-            # validate the incoming resources
-            resources_in = self._validate_resources(resources_in)
-            
             # remove the current task from the previous resources tasks list
             for resource in self._resources:
                 try:
-                    resource.tasks.remove(self)
+                    super(ValidatedList, resource._tasks).remove(self)
                 except ValueError:
                     pass
             
-            self._resources = resources_in
-            
             # now append the task to every one of the users in the resources_in
-            for resource in self._resources:
-                if self not in resource.tasks:
-                    resource._tasks.append(self)
+            self._resources = self._validate_resources(resources_in)
+        
         
         doc = """The list of :class:`stalker.core.models.User`\ s instances
         assigned to this Task.
@@ -4102,15 +4209,18 @@ class Task(Entity, StatusMixin, ScheduleMixin, ProjectMixin):
             return self._task_of
         
         def fset(self, task_of_in):
-            task_of_in = self._validate_task_of(task_of_in)
+            #task_of_in = self._validate_task_of(task_of_in)
             
             # remove it from the current task_of attribute
             if not self._task_of is None:
-                self._task_of.tasks.remove(self)
+                # to avoid any errors raised when the tasks has been set to
+                # None, use "no update remove" by skipping ValidatedList and
+                # using the list.remove directly
+                super(ValidatedList, self._task_of.tasks).remove(self)
             
             # update the back reference attribute tasks
-            self._task_of = task_of_in
-            self._task_of.tasks.append(self)
+            self._task_of = self._validate_task_of(task_of_in)
+            self._task_of._tasks.append(self)
         
         doc = """An object that this Task is a part of.
         
@@ -4172,7 +4282,7 @@ def _check_circular_dependency(task, check_for_task):
     """checks the circular dependency in task if it has check_for_task in its
     depends list
     
-    !!!!WARNING NO TEST FOR THIS FUNCTION!!!!
+    !!!!WARNING THERE IS NO TEST FOR THIS FUNCTION!!!!
     """
     
     for dependent_task in task.depends:
@@ -4743,11 +4853,6 @@ class User(Entity):
     
     
     
-    # fix __new__ errors
-    _projects = []
-    
-    
-    
     #----------------------------------------------------------------------
     def __init__(self,
                  department=None,
@@ -4803,6 +4908,19 @@ class User(Entity):
         self._tasks = self._validate_tasks(tasks)
         
         self._last_login = self._validate_last_login(last_login)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance creted with
+        SQLAlchemy
+        """
+        
+        self._projects = []
+        # call the Entity __init_on_load__
+        super(User, self).__init_on_load__()
     
     
     
@@ -5387,7 +5505,7 @@ class User(Entity):
             #return self._projects
             projects = []
             for task in self.tasks:
-                projects.append(task.project)
+                projects.append(task.task_of.project)
             
             return list(set(projects))
         

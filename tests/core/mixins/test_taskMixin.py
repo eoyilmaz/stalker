@@ -26,30 +26,31 @@ class TaskMixinTester(mocker.MockerTestCase):
         """setup the test
         """
         
+        self.mock_project1 = self.mocker.mock(Project)
+        self.mock_project2 = self.mocker.mock(Project)
+        
         self.mock_task1 = self.mocker.mock(Task)
         self.mock_task2 = self.mocker.mock(Task)
         self.mock_task3 = self.mocker.mock(Task)
         
         self.mocker.replay()
         
-        #self.kwargs = {
-            #"tasks": [self.mock_task1, self.mock_task2, self.mock_task3],
-        #}
+        self.kwargs = {
+            "project": self.mock_project1,
+        }
         
         class BarClass(object):
-            pass
-        
-        class FooMixedInClass(BarClass, TaskMixin):
-            pass
-        
-        class FooMixedInClassWithInit(BarClass, TaskMixin):
-            def __init__(self):
+            def __init__(self, **kwargs):
                 pass
         
-        self.FooMixedInClass = FooMixedInClass
-        self.FooMixedInClassWithInit = FooMixedInClassWithInit
+        class FooMixedInClass(BarClass, TaskMixin):
+            def __init__(self, **kwargs):
+                super(FooMixedInClass, self).__init__(**kwargs)
+                TaskMixin.__init__(self, **kwargs)
         
-        self.mock_foo_obj = FooMixedInClass()
+        self.FooMixedInClass = FooMixedInClass
+        
+        self.mock_foo_obj = FooMixedInClass(**self.kwargs)
     
     
     
@@ -169,28 +170,24 @@ class TaskMixinTester(mocker.MockerTestCase):
         new_task1 = Task(
             name="Test1",
             status_list=task_statusList,
-            project=new_project2,
             task_of=new_project2,
         )
         
         new_task2 = Task(
             name="Test2",
             status_list=task_statusList,
-            project=new_project2,
             task_of=new_project2,
         )
         
         new_task3 = Task(
             name="Test3",
             status_list=task_statusList,
-            project=new_project2,
             task_of=new_project2,
         )
         
         new_task4 = Task(
             name="Test4",
             status_list=task_statusList,
-            project=new_project2,
             task_of=new_project2,
         )
         
@@ -228,16 +225,85 @@ class TaskMixinTester(mocker.MockerTestCase):
         # check it
         self.assertEqual(new_task1.task_of, self.mock_foo_obj)
         
-        # poping or removing elements should raise TypeError
-        self.assertRaises(TypeError, self.mock_foo_obj.tasks.pop, 0)
-        self.assertRaises(TypeError, self.mock_foo_obj.tasks.remove, new_task1)
-        
+        # poping or removing elements should raise RuntimeError
+        self.assertRaises(RuntimeError, self.mock_foo_obj.tasks.pop, 0)
+        self.assertRaises(RuntimeError, self.mock_foo_obj.tasks.remove,
+                          new_task1)
         
         # extend it
         self.mock_foo_obj.tasks.extend([new_task2, new_task4])
         
         self.assertEqual(new_task2.task_of, self.mock_foo_obj)
         self.assertEqual(new_task4.task_of, self.mock_foo_obj)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_project_argument_is_skipped(self):
+        """testing if a TypeError will be raised when the project argument is
+        skipped
+        """
+        self.kwargs.pop("project")
+        self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_project_argument_is_None(self):
+        """testing if a TypeError will be raised when the project argument is
+        None
+        """
+        self.kwargs["project"] = None
+        self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_project_attribute_is_None(self):
+        #"""testing if a TypeError will be raised when the project attribute is
+        #set to None
+        #"""
+        #self.assertRaises(TypeError, setattr, self.mock_foo_obj, "project",
+                          #None)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_project_argument_is_not_a_Project_instance(self):
+        #"""testing if a TypeError will be raised when the project argument is
+        #not a stalker.core.models.Project instance
+        #"""
+        #self.kwargs["project"] = "a project"
+        #self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_project_attribute_is_not_a_Project_instance(self):
+        #"""testing if a TypeError will be raised when the project attribute is
+        #set to something other than a stalker.core.models.Project instance
+        #"""
+        #self.assertRaises(TypeError, setattr, self.mock_foo_obj, "project",
+                          #"a project")
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_project_attribute_is_working_properly(self):
+        #"""testing if the project attribute is working properly
+        #"""
+        #self.mock_foo_obj.project = self.mock_project2
+        #self.assertEqual(self.mock_foo_obj.project, self.mock_project2)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_project_attribute_is_read_only(self):
+        """testing if the project attribute is read only
+        """
+        
+        self.assertRaises(AttributeError, setattr, self.mock_foo_obj,
+                          "project", self.mock_project2)
     
     
     

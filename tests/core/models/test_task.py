@@ -3,11 +3,13 @@
 
 
 import datetime
-import mocker
+import unittest
+
 from stalker.conf import defaults
 from stalker.core.errors import CircularDependencyError
 from stalker.core.models import (SimpleEntity, Entity, Task, User, Status,
                                  StatusList, Project, Type)
+from stalker.core.mixins import TaskMixin
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -15,7 +17,7 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class TaskTester(mocker.MockerTestCase):
+class TaskTester(unittest.TestCase):
     """Tests the stalker.core.models.Task class
     """
     
@@ -26,85 +28,111 @@ class TaskTester(mocker.MockerTestCase):
         """setup the test
         """
         
-        status_wip = Status(name="Work In Progress", code="WIP")
-        status_complete = Status(name="Complete", code="CMPLT")
-        status_pending_review = Status(name="Pending Review", code="PNDR")
+        #class TestData(object):
+            #pass
         
-        task_status_list = StatusList(
-            name="Task Statuses",
-            statuses=[status_wip, status_pending_review, status_complete],
-            target_entity_type="Task",
+        #self.test_data = TestData()
+        
+        self.test_data_status_wip = Status(
+            name="Work In Progress",
+            code="WIP"
         )
         
-        self.mock_user1 = self.mocker.mock(User)
-        self.mock_user2 = self.mocker.mock(User)
+        self.test_data_status_complete = Status(
+            name="Complete",
+            code="CMPLT"
+        )
         
-        self.expect(self.mock_user1.tasks).result([]).count(0, None)
-        self.expect(self.mock_user2.tasks).result([]).count(0, None)
-        self.expect(self.mock_user1._tasks).result([]).count(0, None)
-        self.expect(self.mock_user2._tasks).result([]).count(0, None)
+        self.test_data_status_pending_review = Status(
+            name="Pending Review",
+            code="PNDR"
+        )
         
-        self.mock_dependent_task1 = self.mocker.mock(Task)
-        self.mock_dependent_task2 = self.mocker.mock(Task)
+        self.test_data_task_status_list = StatusList(
+            name="Task Statuses",
+            statuses=[self.test_data_status_wip,
+                      self.test_data_status_pending_review,
+                      self.test_data_status_complete],
+            target_entity_type=Task,
+        )
         
-        self.expect(self.mock_dependent_task1.depends).\
-            result([]).count(0, None)
+        self.test_data_project_status_list = StatusList(
+            name="Project Statuses",
+            statuses=[self.test_data_status_wip,
+                      self.test_data_status_pending_review,
+                      self.test_data_status_complete],
+            target_entity_type=Project,
+        )
         
-        self.expect(self.mock_dependent_task2.depends).\
-            result([]).count(0, None)
+        self.test_data_movie_project_type = Type(
+            name="Movie Project",
+            target_entity_type=Project,
+        )
+        
+        self.test_data_project1 = Project(
+            name="Test Project1",
+            type=self.test_data_movie_project_type,
+            status_list=self.test_data_project_status_list,
+        )
+        
+        self.test_data_user1 = User(
+            login_name="user1",
+            email="user1@user1.com",
+            first_name="user1",
+            last_name="user1",
+            password="1234"
+        )
+        
+        self.test_data_user2 = User(
+            login_name="user2",
+            email="user2@user2.com",
+            first_name="user2",
+            last_name="user2",
+            password="1234"
+        )
+        
+        self.test_data_dependent_task1 = Task(
+            name="Dependent Task1",
+            task_of=self.test_data_project1,
+            status_list=self.test_data_task_status_list,
+        )
+        
+        self.test_data_dependent_task2 = Task(
+            name="Dependent Task2",
+            task_of=self.test_data_project1,
+            status_list=self.test_data_task_status_list,
+        )
         
         # for task_of attribute tests
-        self.mock_simpleEntity = self.mocker.mock(SimpleEntity)
-        self.mock_entity = self.mocker.mock(Entity)
+        self.test_data_simpleEntity = SimpleEntity(
+            name="Test SimpleEntity",
+        )
         
-        self.expect(self.mock_simpleEntity.tasks).result([]).count(0, None)
-        self.expect(self.mock_entity.tasks).result([]).count(0, None)
+        self.mock_entity = Entity(
+            name="Test Entity"
+        )
         
-        ## task dependency relation 1
-        #self.mock_taskDependencyRelation1 =\
-            #self.mocker.mock(TaskDependencyRelation)
-        
-        #self.expect(self.mock_taskDependencyRelation1.depends).\
-            #result(self.mock_dependent_task1).count(0, None)
-        
-        #self.expect(self.mock_taskDependencyRelation1.lag).\
-            #result(0).count(0, None)
-        
-        ## task dependency relation 2
-        #self.mock_taskDependencyRelation2 =\
-            #self.mocker.mock(TaskDependencyRelation)
-        
-        #self.expect(self.mock_taskDependencyRelation2.depends).\
-            #result(self.mock_dependent_task2).count(0, None)
-        
-        #self.expect(self.mock_taskDependencyRelation2.lag).\
-            #result(0).count(0, None)
-        
-        self.mock_project = self.mocker.mock(Project)
-        
-        self.mocker.replay()
         
         self.kwargs = {
             "name": "Modeling",
             "description": "A Modeling Task",
             "priority": 500,
-            "resources": [self.mock_user1, self.mock_user2],
+            "resources": [self.test_data_user1, self.test_data_user2],
             "effort": datetime.timedelta(4),
             "duration": datetime.timedelta(2),
-            "depends": [self.mock_dependent_task1,
-                        self.mock_dependent_task2],
+            "depends": [self.test_data_dependent_task1,
+                        self.test_data_dependent_task2],
             "complete": False,
             "bookings": [],
             "versions": [],
             "milestone": False,
             "status": 0,
-            "status_list": task_status_list,
-            "project": self.mock_project,
-            "task_of": self.mock_simpleEntity,
+            "status_list": self.test_data_task_status_list,
+            "task_of": self.test_data_project1,
         }
         
         # create a mock Task
-        self.mock_task = Task(**self.kwargs)
+        self.test_data_task = Task(**self.kwargs)
     
     
     
@@ -138,8 +166,8 @@ class TaskTester(mocker.MockerTestCase):
         priority attribute to DEFAULT_TASK_PRIORITY.
         """
         
-        self.mock_task.priority = None
-        self.assertEqual(self.mock_task.priority,
+        self.test_data_task.priority = None
+        self.assertEqual(self.test_data_task.priority,
                          defaults.DEFAULT_TASK_PRIORITY)
     
     
@@ -168,8 +196,8 @@ class TaskTester(mocker.MockerTestCase):
         test_values = ["a324", None, []]
         
         for test_value in test_values:
-            self.mock_task.priority = test_value
-            self.assertEqual(self.mock_task.priority,
+            self.test_data_task.priority = test_value
+            self.assertEqual(self.test_data_task.priority,
                              defaults.DEFAULT_TASK_PRIORITY)
     
     
@@ -192,8 +220,8 @@ class TaskTester(mocker.MockerTestCase):
         set the priority attribute to zero.
         """
         
-        self.mock_task.priority = -1
-        self.assertEqual(self.mock_task.priority, 0)
+        self.test_data_task.priority = -1
+        self.assertEqual(self.test_data_task.priority, 0)
     
     
     
@@ -215,8 +243,8 @@ class TaskTester(mocker.MockerTestCase):
         will clamp the value to 1000
         """
         
-        self.mock_task.priority = 1001
-        self.assertEqual(self.mock_task.priority, 1000)
+        self.test_data_task.priority = 1001
+        self.assertEqual(self.test_data_task.priority, 1000)
     
     
     
@@ -244,8 +272,8 @@ class TaskTester(mocker.MockerTestCase):
         test_values = [500.1, 334.23]
         
         for test_value in test_values:
-            self.mock_task.priority = test_value
-            self.assertEqual(self.mock_task.priority, int(test_value))
+            self.test_data_task.priority = test_value
+            self.assertEqual(self.test_data_task.priority, int(test_value))
     
     
     
@@ -255,8 +283,8 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         test_value = 234
-        self.mock_task.priority = test_value
-        self.assertEqual(self.mock_task.priority, test_value)
+        self.test_data_task.priority = test_value
+        self.assertEqual(self.test_data_task.priority, test_value)
     
     
     
@@ -290,8 +318,8 @@ class TaskTester(mocker.MockerTestCase):
         set to None
         """
         
-        self.mock_task.resources = None
-        self.assertEqual(self.mock_task.resources, [])
+        self.test_data_task.resources = None
+        self.assertEqual(self.test_data_task.resources, [])
     
     
     
@@ -312,7 +340,7 @@ class TaskTester(mocker.MockerTestCase):
         is set to any other value then a list
         """
         
-        self.assertRaises(TypeError, setattr, self.mock_task, "resources",
+        self.assertRaises(TypeError, setattr, self.test_data_task, "resources",
                           "a resource")
     
     
@@ -324,7 +352,7 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         self.kwargs["resources"] = ["a", "list", "of", "resources",
-                                    self.mock_user1]
+                                    self.test_data_user1]
         self.assertRaises(TypeError, Task, **self.kwargs)
     
     
@@ -336,8 +364,8 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         self.kwargs["resources"] = ["a", "list", "of", "resources",
-                                    self.mock_user1]
-        self.assertRaises(TypeError, self.mock_task, **self.kwargs)
+                                    self.test_data_user1]
+        self.assertRaises(TypeError, self.test_data_task, **self.kwargs)
     
     
     
@@ -346,7 +374,7 @@ class TaskTester(mocker.MockerTestCase):
         """testing if the resources attribute is an instance of ValidatedList
         """
         
-        self.assertIsInstance(self.mock_task.resources, ValidatedList)
+        self.assertIsInstance(self.test_data_task.resources, ValidatedList)
     
     
     
@@ -355,9 +383,9 @@ class TaskTester(mocker.MockerTestCase):
         """testing if the resources attribute is working properly
         """
         
-        test_value = [self.mock_user1]
-        self.mock_task.resources = test_value
-        self.assertEqual(self.mock_task.resources, test_value)
+        test_value = [self.test_data_user1]
+        self.test_data_task.resources = test_value
+        self.assertEqual(self.test_data_task.resources, test_value)
     
     
     
@@ -953,9 +981,9 @@ class TaskTester(mocker.MockerTestCase):
         calculated from duration and count of resources
         """
         
-        self.mock_task.effort = None
-        self.assertEqual(self.mock_task.effort, self.mock_task.duration *
-                         len(self.mock_task.resources))
+        self.test_data_task.effort = None
+        self.assertEqual(self.test_data_task.effort, self.test_data_task.duration *
+                         len(self.test_data_task.resources))
     
     
     
@@ -979,10 +1007,10 @@ class TaskTester(mocker.MockerTestCase):
         attribute when it is set to something else then a timedelta instance.
         """
         
-        self.mock_task.effort = "not a timedelta"
-        self.assertIsInstance(self.mock_task.effort, datetime.timedelta)
-        self.assertEqual(self.mock_task.effort, self.mock_task.duration *
-                         len(self.mock_task.resources))
+        self.test_data_task.effort = "not a timedelta"
+        self.assertIsInstance(self.test_data_task.effort, datetime.timedelta)
+        self.assertEqual(self.test_data_task.effort, self.test_data_task.duration *
+                         len(self.test_data_task.resources))
     
     
     
@@ -992,8 +1020,8 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         test_value = datetime.timedelta(18)
-        self.mock_task.effort = test_value
-        self.assertEqual(self.mock_task.effort, test_value)
+        self.test_data_task.effort = test_value
+        self.assertEqual(self.test_data_task.effort, test_value)
     
     
     
@@ -1019,14 +1047,14 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         test_effort = datetime.timedelta(100)
-        test_duration = test_effort / len(self.mock_task.resources)
+        test_duration = test_effort / len(self.test_data_task.resources)
         
         # be sure it is not already in the current value
-        self.assertNotEqual(self.mock_task.duration, test_duration)
+        self.assertNotEqual(self.test_data_task.duration, test_duration)
         
-        self.mock_task.effort = test_effort
+        self.test_data_task.effort = test_effort
         
-        self.assertEqual(self.mock_task.duration, test_duration)
+        self.assertEqual(self.test_data_task.duration, test_duration)
     
     
     
@@ -1037,14 +1065,14 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         test_duration = datetime.timedelta(100)
-        test_effort = test_duration * len(self.mock_task.resources)
+        test_effort = test_duration * len(self.test_data_task.resources)
         
         # be sure it is not already in the current value
-        self.assertNotEqual(self.mock_task.effort, test_effort)
+        self.assertNotEqual(self.test_data_task.effort, test_effort)
         
-        self.mock_task.duration = test_duration
+        self.test_data_task.duration = test_duration
         
-        self.assertEqual(self.mock_task.effort, test_effort)
+        self.assertEqual(self.test_data_task.effort, test_effort)
     
     
     
@@ -1092,7 +1120,7 @@ class TaskTester(mocker.MockerTestCase):
         not a list
         """
         
-        self.kwargs["depends"] = self.mock_dependent_task1
+        self.kwargs["depends"] = self.test_data_dependent_task1
         self.assertRaises(TypeError, Task, **self.kwargs)
     
     
@@ -1103,8 +1131,8 @@ class TaskTester(mocker.MockerTestCase):
         set to something else then a list
         """
         
-        self.assertRaises(TypeError, setattr, self.mock_task, "depends",
-                          self.mock_dependent_task1)
+        self.assertRaises(TypeError, setattr, self.test_data_task, "depends",
+                          self.test_data_dependent_task1)
     
     
     
@@ -1127,7 +1155,7 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         test_value = ["a", "dependent", "task", 1, 1.2]
-        self.assertRaises(TypeError, setattr, self.mock_task, "depends",
+        self.assertRaises(TypeError, setattr, self.test_data_task, "depends",
                           test_value)
     
     
@@ -1137,7 +1165,7 @@ class TaskTester(mocker.MockerTestCase):
         """testing if the depends attribute is a ValidatedList instance
         """
         
-        self.assertIsInstance(self.mock_task.depends, ValidatedList)
+        self.assertIsInstance(self.test_data_task.depends, ValidatedList)
     
     
     
@@ -1270,8 +1298,8 @@ class TaskTester(mocker.MockerTestCase):
         """testing if the complete attribute will be False when set to None
         """
         
-        self.mock_task.complete = None
-        self.assertEqual(self.mock_task.complete, False)
+        self.test_data_task.complete = None
+        self.assertEqual(self.test_data_task.complete, False)
     
     
     
@@ -1299,8 +1327,8 @@ class TaskTester(mocker.MockerTestCase):
         test_values = [1, 0, 1.2, "A string", "", [], [1]]
         
         for test_value in test_values:
-            self.mock_task.complete = test_value
-            self.assertEqual(self.mock_task.complete, bool(test_value))
+            self.test_data_task.complete = test_value
+            self.assertEqual(self.test_data_task.complete, bool(test_value))
     
     
     
@@ -1333,8 +1361,8 @@ class TaskTester(mocker.MockerTestCase):
         """testing if the milestone attribute will be False when set to None
         """
         
-        self.mock_task.milestone = None
-        self.assertEqual(self.mock_task.milestone, False)
+        self.test_data_task.milestone = None
+        self.assertEqual(self.test_data_task.milestone, False)
     
     
     
@@ -1362,8 +1390,8 @@ class TaskTester(mocker.MockerTestCase):
         test_values = [1, 0, 1.2, "A string", "", [], [1]]
         
         for test_value in test_values:
-            self.mock_task.milestone = test_value
-            self.assertEqual(self.mock_task.milestone, bool(test_value))
+            self.test_data_task.milestone = test_value
+            self.assertEqual(self.test_data_task.milestone, bool(test_value))
     
     
     
@@ -1374,7 +1402,8 @@ class TaskTester(mocker.MockerTestCase):
         """
         
         self.kwargs["milestone"] = True
-        self.kwargs["resources"] = [self.mock_user1, self.mock_user2]
+        self.kwargs["resources"] = [self.test_data_user1,
+                                    self.test_data_user2]
         
         new_task = Task(**self.kwargs)
         self.assertEqual(new_task.resources, [])
@@ -1387,9 +1416,10 @@ class TaskTester(mocker.MockerTestCase):
         attribute is given as True
         """
         
-        self.mock_task.resources = [self.mock_user1, self.mock_user2]
-        self.mock_task.milestone = True
-        self.assertEqual(self.mock_task.resources, [])
+        self.test_data_task.resources = [self.test_data_user1,
+                                         self.test_data_user2]
+        self.test_data_task.milestone = True
+        self.assertEqual(self.test_data_task.resources, [])
     
     
     
@@ -1421,8 +1451,8 @@ class TaskTester(mocker.MockerTestCase):
         set to None
         """
         
-        self.mock_task.bookings = None
-        self.assertEqual(self.mock_task.bookings, [])
+        self.test_data_task.bookings = None
+        self.assertEqual(self.test_data_task.bookings, [])
     
     
     
@@ -1442,7 +1472,7 @@ class TaskTester(mocker.MockerTestCase):
         not set to a list
         """
         
-        self.assertRaises(TypeError, setattr, self.mock_task, "bookings", 123)
+        self.assertRaises(TypeError, setattr, self.test_data_task, "bookings", 123)
     
     
     
@@ -1462,7 +1492,7 @@ class TaskTester(mocker.MockerTestCase):
         not a list of Booking instances
         """
         
-        self.assertRaises(TypeError, setattr, self.mock_task, "bookings",
+        self.assertRaises(TypeError, setattr, self.test_data_task, "bookings",
                           [1, "1", 1.2, "a booking", []])
     
     
@@ -1472,7 +1502,7 @@ class TaskTester(mocker.MockerTestCase):
         """testing if the bookings attribute is a ValidatedList instance
         """
         
-        self.assertIsInstance(self.mock_task.bookings, ValidatedList)
+        self.assertIsInstance(self.test_data_task.bookings, ValidatedList)
     
     
     
@@ -1502,8 +1532,8 @@ class TaskTester(mocker.MockerTestCase):
         set to None
         """
         
-        self.mock_task.versions = None
-        self.assertEqual(self.mock_task.versions, [])
+        self.test_data_task.versions = None
+        self.assertEqual(self.test_data_task.versions, [])
     
     
     
@@ -1523,7 +1553,7 @@ class TaskTester(mocker.MockerTestCase):
         set to a value other than a list
         """
         
-        self.assertRaises(TypeError, setattr, self.mock_task, "versions", 1)
+        self.assertRaises(TypeError, setattr, self.test_data_task, "versions", 1)
     
     
     
@@ -1543,7 +1573,7 @@ class TaskTester(mocker.MockerTestCase):
         set to a list of other objects than Version instances
         """
         
-        self.assertRaises(TypeError, setattr, self.mock_task, "versions",
+        self.assertRaises(TypeError, setattr, self.test_data_task, "versions",
                           [1, 1.2, "a version"])
     
     
@@ -1553,7 +1583,7 @@ class TaskTester(mocker.MockerTestCase):
         """testing if the versions attribute is a ValidatedList instance
         """
         
-        self.assertIsInstance(self.mock_task.versions, ValidatedList)
+        self.assertIsInstance(self.test_data_task.versions, ValidatedList)
     
     
     
@@ -1635,8 +1665,8 @@ class TaskTester(mocker.MockerTestCase):
         entity1 = Entity(**self.kwargs)
         task1 = Task(**self.kwargs)
         
-        self.assertFalse(self.mock_task==entity1)
-        self.assertTrue(self.mock_task==task1)
+        self.assertFalse(self.test_data_task==entity1)
+        self.assertTrue(self.test_data_task==task1)
     
     
     
@@ -1648,72 +1678,76 @@ class TaskTester(mocker.MockerTestCase):
         entity1 = Entity(**self.kwargs)
         task1 = Task(**self.kwargs)
         
-        self.assertTrue(self.mock_task!=entity1)
-        self.assertFalse(self.mock_task!=task1)
+        self.assertTrue(self.test_data_task!=entity1)
+        self.assertFalse(self.test_data_task!=task1)
     
     
     
     #----------------------------------------------------------------------
-    def test_ProjectMixin_initialization(self):
-        """testing if the ProjectMixin part is initialized correctly
-        """
-        
-        status1 = Status(name="On Hold", code="OH")
-        
-        project_status_list = StatusList(
-            name="Project Statuses", statuses=[status1],
-            target_entity_type=Project.entity_type
-        )
-        
-        project_type = Type(name="Commercial", target_entity_type=Project)
-        
-        new_project = Project(name="Test Project", status=0,
-                              status_list=project_status_list,
-                              type=project_type)
-        
-        self.kwargs["project"] = new_project
-        
-        new_task = Task(**self.kwargs)
-        
-        self.assertEqual(new_task.project, new_project)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_task_of_argument_skipped_raises_AttributeError(self):
-        """testing if an AttributeError will be raised when the task_of
+    def test_task_of_argument_skipped_raises_TypeError(self):
+        """testing if an TypeError will be raised when the task_of
         argument has been skipped
         """
         
         self.kwargs.pop("task_of")
-        self.assertRaises(AttributeError, Task, **self.kwargs)
+        self.assertRaises(TypeError, Task, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_task_of_argument_None_raises_AttributeError(self):
+    def test_task_of_argument_None_raises_TypeError(self):
         """testing if an AttributeError will be raised when the task_of
         argument is None
         """
         
         self.kwargs["task_of"] = None
-        self.assertRaises(AttributeError, Task, **self.kwargs)
+        self.assertRaises(TypeError, Task, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_task_of_argument_accepts_anything_that_has_a_tasks_attribute(self):
-        """testing if the task_of attribute accepts anything that has a
-        ``tasks`` attribute
+    def test_task_of_attribute_None_raises_TypeError(self):
+        """testing if an AttributeError will be raised when the task_of
+        attribute is None
         """
         
-        class SomeClass(object):
-            tasks = []
+        self.assertRaises(TypeError, setattr, self.test_data_task, "task_of", None)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_task_of_argument_accepts_anything_thats_been_mixed_with_TaskMixin(self):
+        """testing if the task_of argument accepts anything that has mixed
+        with TaskMixin
+        """
+        
+        class SomeClass(TaskMixin):
+            pass
         
         class SomeOtherClass(object):
             pass
         
-        someClass_ins = SomeClass()
+        status_complete = Status(name="Complete", code="CMPLT")
+        status_wip = Status(name="Work In Progress", code="WIP")
+        
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[status_complete, status_wip],
+            target_entity_type=Project
+        )
+        
+        commercial_project_type = Type(
+            name="Commercial Project",
+            target_entity_type=Project,
+        )
+        
+        new_project = Project(
+            name="Test Project",
+            status_list=project_status_list,
+            type=commercial_project_type,
+        )
+        
+        someClass_ins = SomeClass(project=new_project)
         someOtherClass_ins = SomeOtherClass()
         
         self.kwargs["task_of"] = someClass_ins
@@ -1724,23 +1758,47 @@ class TaskTester(mocker.MockerTestCase):
     
     
     #----------------------------------------------------------------------
-    def test_task_of_attribute_accepts_anything_that_has_a_tasks_attribute(self):
-        """testing if  the task_of attribute accepts anything that has a
-        ``tasks`` attribute
+    def test_task_of_attribute_accepts_anything_thats_been_mixed_with_TaskMixin(self):
+        """testing if the task_of attribute accepts anything that has mixed
+        with TaskMixin
         """
         
-        class SomeClass(object):
-            tasks = []
+        class SomeClass(TaskMixin):
+            pass
         
         class SomeOtherClass(object):
             pass
         
-        someClass_ins = SomeClass()
+        status_complete = Status(name="Complete", code="CMPLT")
+        status_wip = Status(name="Work In Progress", code="WIP")
+        
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[status_complete, status_wip],
+            target_entity_type=Project
+        )
+        
+        commercial_project_type = Type(
+            name="Commercial Project",
+            target_entity_type=Project,
+        )
+        
+        new_project = Project(
+            name="Test Project",
+            status_list=project_status_list,
+            type=commercial_project_type,
+        )
+        
+        someClass_ins = SomeClass(project=new_project)
         someOtherClass_ins = SomeOtherClass()
         
-        self.mock_task.task_of = someClass_ins
+        self.kwargs["task_of"] = new_project
+        new_task = Task(**self.kwargs)
         
-        self.assertRaises(AttributeError, setattr, self.mock_task, "task_of",
+        # it should accept the SomeClass instance
+        new_task.task_of = someClass_ins
+        
+        self.assertRaises(AttributeError, setattr, new_task, "task_of",
                           someOtherClass_ins)
     
     
@@ -1786,30 +1844,25 @@ class TaskTester(mocker.MockerTestCase):
             target_entity_type=Task,
             statuses=[status_complete, status_wip],
         )
-        #print "new_project1.tasks", new_project1.tasks
-        #print "new_project2.tasks", new_project2.tasks
-        
-        #print "id(new_project1.tasks)", id(new_project1.tasks)
-        #print "id(new_project2.tasks)", id(new_project2.tasks)
         
         new_task = Task(
             name="Modeling",
-            project=new_project1,
             status_list=task_status_list,
             task_of=new_project1,
         )
-        #print "id(new_project1)", id(new_project1)
-        #print "id(new_project2)", id(new_project2)
         
         # now assign a new project to the task_of attribute
-        #print "new_project1.tasks", new_project1.tasks
-        #print "new_project2.tasks", new_project2.tasks
         new_task.task_of = new_project2
-        #print "new_project1.tasks", new_project1.tasks
-        #print "new_project2.tasks", new_project2.tasks
-        
         self.assertNotIn(new_task, new_project1.tasks)
         self.assertIn(new_task, new_project2.tasks)
+        
+        new_project1.tasks.append(new_task)
+        self.assertIn(new_task, new_project1.tasks)
+        self.assertNotIn(new_task, new_project2.tasks)
+        
+        new_task.task_of = new_project2
+        self.assertIn(new_task, new_project2.tasks)
+        self.assertNotIn(new_task, new_project1.tasks)
     
     
     

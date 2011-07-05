@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import FilenameTemplate, Type, Asset, Entity
 from stalker.ext.validatedList import ValidatedList
 
@@ -11,7 +11,7 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class FilenameTemplateTester(mocker.MockerTestCase):
+class FilenameTemplateTester(unittest.TestCase):
     """tests the stalker.core.models.FilenameTemplate class
     """
     

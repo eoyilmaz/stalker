@@ -559,31 +559,17 @@ class DatabaseModelsTester(unittest.TestCase):
         
         commercial_type = Type(name="Commercial", target_entity_type=Project)
         
-        mock_project = Project(name="Test Project",
-                               status_list=project_statusList,
-                               status=0,
-                               type=commercial_type)
+        mock_project = Project(
+            name="Test Project",
+            status_list=project_statusList,
+            status=0,
+            type=commercial_type
+        )
         
         task_status_list = StatusList(
             name="Task Status List",
             statuses=[status1, status2, status3],
             target_entity_type=Task.entity_type,
-        )
-        
-        mock_task1 = Task(
-            name="test task 1", status=0,
-            status_list=task_status_list,
-            project=mock_project,
-        )
-        mock_task2 = Task(
-            name="test task 2", status=0,
-            status_list=task_status_list,
-            project=mock_project,
-        )
-        mock_task3 = Task(
-            name="test task 3", status=0,
-            status_list=task_status_list,
-            project=mock_project,
         )
         
         asset_statusList = StatusList(
@@ -596,13 +582,33 @@ class DatabaseModelsTester(unittest.TestCase):
             "name": "Test Asset",
             "description": "This is a test Asset object",
             "type": asset_type,
-            "tasks": [mock_task1, mock_task2, mock_task3],
             "project": mock_project,
             "status": 0,
             "status_list": asset_statusList,
         }
         
         test_asset = Asset(**kwargs)
+        
+        mock_task1 = Task(
+            name="test task 1", status=0,
+            status_list=task_status_list,
+            project=mock_project,
+            task_of=test_asset,
+        )
+        
+        mock_task2 = Task(
+            name="test task 2", status=0,
+            status_list=task_status_list,
+            project=mock_project,
+            task_of=test_asset,
+        )
+        
+        mock_task3 = Task(
+            name="test task 3", status=0,
+            status_list=task_status_list,
+            project=mock_project,
+            task_of=test_asset,
+        )
         
         db.session.add(test_asset)
         db.session.commit()
@@ -614,10 +620,12 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type="Sequence"
         )
         
-        mock_sequence = Sequence(name="Test Sequence",
-                                 project=mock_project,
-                                 status=0,
-                                 status_list=sequence_status_list)
+        mock_sequence = Sequence(
+            name="Test Sequence",
+            project=mock_project,
+            status=0,
+            status_list=sequence_status_list
+        )
         
         shot_status_list = StatusList(
             name="Shot Statuses",
@@ -625,20 +633,23 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type="Shot",
         )
         
-        mock_shot1 = Shot(code="SH001",
-                          sequence=mock_sequence,
-                          status=0,
-                          status_list=shot_status_list)
+        mock_shot1 = Shot(
+            code="SH001",
+            sequence=mock_sequence,
+            status_list=shot_status_list
+        )
         
-        mock_shot2 = Shot(code="SH002",
-                          sequence=mock_sequence,
-                          status=0,
-                          status_list=shot_status_list)
+        mock_shot2 = Shot(
+            code="SH002",
+            sequence=mock_sequence,
+            status_list=shot_status_list
+        )
         
-        mock_shot3 = Shot(code="SH003",
-                          sequence=mock_sequence,
-                          status=0,
-                          status_list=shot_status_list)
+        mock_shot3 = Shot(
+            code="SH003",
+            sequence=mock_sequence,
+            status_list=shot_status_list
+        )
         
         test_asset.shots = [mock_shot1, mock_shot2, mock_shot3]
         
@@ -1248,10 +1259,12 @@ class DatabaseModelsTester(unittest.TestCase):
             type=structure_type,
         )
         
-        repo = Repository(name="Commercials Repository",
-                          linux_path="/mnt/M/Projects",
-                          windows_path="M:\\Projects",
-                          osx_path="/Volumes/M/Projects")
+        repo = Repository(
+            name="Commercials Repository",
+            linux_path="/mnt/M/Projects",
+            windows_path="M:\\Projects",
+            osx_path="/Volumes/M/Projects"
+        )
         
         status1 = Status(name="On Hold", code="OH")
         status2 = Status(name="Complete", code="CMPLT")
@@ -1316,17 +1329,15 @@ class DatabaseModelsTester(unittest.TestCase):
             name="task1",
             status_list=task_status_list,
             status=0,
-            project=new_project,
+            task_of=new_project,
         )
         
         task2 = Task(
             name="task2",
             status_list=task_status_list,
             status=0,
-            project=new_project,
+            task_of=new_project,
         )
-        
-        new_project.tasks = [task1, task2]
         
         db.session.add_all([task1, task2])
         db.session.commit()

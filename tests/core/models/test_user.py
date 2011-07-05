@@ -1231,7 +1231,6 @@ class UserTest(mocker.MockerTestCase):
             name="Modeling",
             resources=[new_user],
             type=modeling_task_type,
-            project=new_project1,
             status_list=task_status_list,
             task_of=new_project1,
         )
@@ -1240,7 +1239,6 @@ class UserTest(mocker.MockerTestCase):
             name="Shading",
             resources=[new_user],
             type=shading_task_type,
-            project=new_project1,
             status_list=task_status_list,
             task_of=new_project1,
         )
@@ -1249,7 +1247,6 @@ class UserTest(mocker.MockerTestCase):
             name="Design",
             resources=[new_user],
             type=design_task_type,
-            project=new_project2,
             status_list=task_status_list,
             task_of=new_project2,
         )

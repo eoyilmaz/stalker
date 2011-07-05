@@ -9,17 +9,40 @@ v0.1.1.a10
 
  * each of the mixin classes now has their own test modules.
 
- * :attr:`~stalker.core.models.Task.part_of` attribute in
-   :class:`~stalker.core.models.Task` class now accepts anything that has a
-   ``tasks`` attribute, it is not limited with some classes derived from the
-   :class:`~stalker.core.models.SimpleEntity`.
-
  * in :class:`~stalker.core.models.Shot`, now the
    :attr:`~stalker.core.models.Shot.cut_out` attribute is mapped to the
    database instead of the :attr:`~stalker.core.models.Shot.cut_duration`.
 
  * in :class:`~stalker.core.models.Task` the ``part_of`` attribute is renamed
-   to :attr:`~stalker.core.modles.Task.task_of` to reflect its duty clearly.
+   to :attr:`~stalker.core.models.Task.task_of` to reflect its duty clearly.
+
+ * removed the ``ProjectMixin``. The ``project`` attribute has been moved to
+   the :class:`~stalker.core.mixins.TaskMixin`. Now anything mixed with the
+   :class:`~stalker.core.mixins.TaskMixin` also has a 
+   :attr:`~stalker.core.mixins.TaskMixin.project` attribute.
+
+ * :attr:`~stalker.core.models.Task.task_of` attribute in
+   :class:`~stalker.core.models.Task` class now accepts anything that has been
+   derived from :class:`~stalker.core.mixins.TaskMixin` or anything that has
+   both a ``tasks`` attribute and a ``project`` attribute but use the
+   :class:`~stalker.core.mixins.TaskMixin` preferably.
+
+ * :class:`~stalker.core.models.Sequence` now doesn't accept any ``shots``
+   argument. There is no way to create a :class:`~stalker.core.models.Shot`
+   without passing a :class:`~stalker.core.models.Sequence` instance.
+
+ * all the classes that needs to be initialized properly now has a method
+   called __init_on_load__ which is called by SQLAlchemy on load.
+
+ * fixed the :attr:`~stalker.core.models.Task.task_of` attribute in
+   :class:`~stalker.core.models.Task` and
+   :attr:`~stalker.core.mixins.TaskMixin.tasks` attribute in
+   :class:`~stalker.core.mixins.TaskMixin`, they are now updating each other
+   correctly.
+
+ * added :attr:`~stalker.core.models.Shot.assets` to the
+   :class:`~stalker.core.models.Shot` class to track down which asset is used
+   in this shot.
 
 v0.1.1.a9
 ---------

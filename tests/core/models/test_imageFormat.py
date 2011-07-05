@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import ImageFormat
 
 
@@ -11,7 +11,7 @@ from stalker.core.models import ImageFormat
 
 
 ########################################################################
-class ImageFormatTest(mocker.MockerTestCase):
+class ImageFormatTest(unittest.TestCase):
     """the test case for the image format
     """
     

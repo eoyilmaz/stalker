@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import Version
 
 
@@ -11,7 +11,7 @@ from stalker.core.models import Version
 
 
 ########################################################################
-class VersionTester(mocker.MockerTestCase):
+class VersionTester(unittest.TestCase):
     """tests stalker.core.models.Version class
     """
     

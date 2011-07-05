@@ -494,21 +494,33 @@ class ScheduleMixin(object):
 class TaskMixin(object):
     """Gives the abilitiy to connect to a list of taks to the mixed in object.
     
-    :param list tasks: The list of :class:`~stalker.core.models.Task`\ s.
-      Should be a list of :class:`~stalker.core.models.Task` instances. Default
-      value is an empty list.
+    TaskMixin lets the mixed object to have :class:`~stalker.core.model.Task`
+    instances to be attached it self. And because
+    :class:`~stalker.core.models.Task`\ s are related to
+    :class:`~stalker.core.models.Project`\ s, it also adds ability to relate
+    the object to a :class:`~stalker.core.models.Project` instance. So every
+    object which is mixed with TaskMixin will have a
+    :attr:`~stalker.core.mixins.TaskMixin.tasks` and a
+    :attr:`~stalker.core.mixins.TaskMixin.project` attribute. Only the
+    ``project`` argument needs to be initialized.
+    
+    :param project: A :class:`~stalker.core.models.Project` instance holding
+      the project which this object is related to. It can not be None, or
+      anything other than a :class:`~stalker.core.models.Project` instance.
+    
+    :type project: :class:`~stalker.core.models.Project`
     """
     
     
     
-    #_tasks = ValidatedList([], "stalker.core.models.Task")
-    
-    
-    
     #----------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        self._tasks = ValidatedList([], "stalker.core.models.Task",
-                                    self.__task_item_validator__)
+    def __init__(self, project=None, **kwargs):
+        self._project = self._validate_project(project)
+        self._tasks = ValidatedList(
+            [],
+            "stalker.core.models.Task",
+            self.__task_item_validator__
+        )
     
     
     
@@ -541,57 +553,21 @@ class TaskMixin(object):
         
         # add the current instance to tasks._task_of attribute
         for task in tasks_added:
+            # remove it from the current owner
+            try:
+                # invoke no remove update by calling the supers remove
+                super(ValidatedList, task._task_of.tasks).remove(task)
+            except ValueError: # there is no owner, probably it was
+                pass           # initializing for the first time
+            
+            # set self to task_of of the Task
             task._task_of = self
         
-        for task in tasks_removed:
-            task.task_of = None # which will raise an TypeError
-    
-    
-    
-    #----------------------------------------------------------------------
-    def tasks():
-        def fget(self):
-            return self._tasks
-        def fset(self, task_in):
-            self._tasks = self._validate_tasks(task_in)
-        
-        doc = """The list of :class:`~stalker.core.models.Task` instances.
-        
-        Be careful that you can not remove any of the elements in the ``tasks``
-        list. The removed :class:`~stalker.core.models.Task` will raise a
-        TypeError. To remove a :class:`~stalker.core.models.Task` from this
-        object you need to append the :class:`~stalker.core.models.Task` to
-        another objects ``tasks`` attribute.
-        """
-        
-        return locals()
-    
-    tasks = property(**tasks())
-
-
-
-
-
-
-########################################################################
-class ProjectMixin(object):
-    """Lets the mixed in object to have a relation with a :class:`~stalker.core.models.Project`.
-    
-    Anything that needs to be directly connected can be mixed with this mixin
-    class.
-    
-    :param project: A :class:`~stalker.core.models.Project` instance holding
-      the project which this object is related to. It can not be None, or
-      anything other than a :class:`~stalker.core.models.Project` instance.
-    
-    :type project: :class:`~stalker.core.models.Project`
-    """
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, project=None, **kwargs):
-        self._project = self._validate_project(project)
+        # removing tasks by removing it from the tasks list of a taskable
+        # object is not allowed
+        if len(tasks_removed) > 0:
+            raise RuntimeError("tasks can not be removed in this way, please "
+                            "assign the task to a new taskable object")
     
     
     
@@ -619,12 +595,13 @@ class ProjectMixin(object):
         def fget(self):
             return self._project
         
-        def fset(self, project_in):
-            self._project = self._validate_project(project_in)
+        #def fset(self, project_in):
+            #self._project = self._validate_project(project_in)
         
         doc = """A :class:`~stalker.core.models.Project` instance showing the
         relation of this object to a Stalker
-        :class:`~stalker.core.models.Project`
+        :class:`~stalker.core.models.Project`. It is a read only attribute, so
+        you can not change the Project of an already created object.
         """
         
         return locals()
@@ -633,5 +610,25 @@ class ProjectMixin(object):
     
     
     
+    #----------------------------------------------------------------------
+    def tasks():
+        def fget(self):
+            return self._tasks
+        
+        def fset(self, task_in):
+            self._tasks = self._validate_tasks(task_in)
+        
+        doc = """The list of :class:`~stalker.core.models.Task` instances.
+        
+        Be careful that you can not remove any of the elements of the ``tasks``
+        list. Trying to remove a :class:`~stalker.core.models.Task` by removing
+        it from the list will raise a RunTimeError. This is because the
+        :class:`~stalker.core.models.Task` will become an orphan task it is
+        removed by this way. To remove the
+        :class:`~stalker.core.models.Task` from the list you should delete it
+        or append it to another objects ``tasks`` attribute.
+        """
+        
+        return locals()
     
-    
+    tasks = property(**tasks())
