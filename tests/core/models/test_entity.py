@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import (Entity, User, Tag, Note)
 from stalker.ext.validatedList import ValidatedList
 
@@ -10,7 +10,7 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class EntityTester(mocker.MockerTestCase):
+class EntityTester(unittest.TestCase):
     """tests the Entity class
     """
     
@@ -20,52 +20,53 @@ class EntityTester(mocker.MockerTestCase):
     def setUp(self):
         """seting up some proper values
         """
-        # create a mock user
-        self.mock_user = self.mocker.mock(User)
+        # create a user
+        self.test_user = User(
+            first_name="Test",
+            last_name="User",
+            login_name="testuser",
+            email="test@user.com",
+            password="test"
+        )
         
-        # create some mock Tag objects, not neccessarly needed but create them
-        self.mock_tag1 = self.mocker.mock(Tag)
-        self.mock_tag2 = self.mocker.mock(Tag)
-        self.mock_tag3 = self.mocker.mock(Tag)
+        # create some test Tag objects, not neccessarly needed but create them
+        self.test_tag1 = Tag(name="Test Tag 1")
+        self.test_tag2 = Tag(name="Test Tag 1") # make it equal to tag1
+        self.test_tag3 = Tag(name="Test Tag 3")
         
-        self.expect(self.mock_tag1.__eq__(self.mock_tag2))\
-            .result(True).count(0, None)
+        #self.expect(self.test_tag1.__eq__(self.test_tag2))\
+            #.result(True).count(0, None)
         
-        self.expect(self.mock_tag1.__ne__(self.mock_tag2))\
-            .result(False).count(0, None)
+        #self.expect(self.test_tag1.__ne__(self.test_tag2))\
+            #.result(False).count(0, None)
         
+        #self.expect(self.test_tag1.__eq__(self.test_tag3))\
+            #.result(False).count(0, None)
         
+        #self.expect(self.test_tag1.__ne__(self.test_tag3))\
+            #.result(True).count(0, None)
         
-        self.expect(self.mock_tag1.__eq__(self.mock_tag3))\
-            .result(False).count(0, None)
+        self.tags = [self.test_tag1, self.test_tag2]
         
-        self.expect(self.mock_tag1.__ne__(self.mock_tag3))\
-            .result(True).count(0, None)
+        # create a couple of test Note objects
+        self.test_note1 = Note(name="test note1", content="test note1")
+        self.test_note2 = Note(name="test note2", content="test note2")
+        self.test_note3 = Note(name="test note3", content="test note3")
         
-        self.tags = [self.mock_tag1, self.mock_tag2]
-        
-        # create a couple of mock Note objects
-        self.mock_note1 = self.mocker.mock(Note)
-        self.mock_note2 = self.mocker.mock(Note)
-        self.mock_note3 = self.mocker.mock(Note)
-        
-        self.notes = [self.mock_note1, self.mock_note2]
-        
-        # now replay it
-        self.mocker.replay()
+        self.notes = [self.test_note1, self.test_note2]
         
         self.kwargs = {
             "name": "Test Entity",
             "description": "This is a test entity, and this is a proper \
             description for it",
-            "created_by": self.mock_user,
-            "updated_by": self.mock_user,
+            "created_by": self.test_user,
+            "updated_by": self.test_user,
             "tags": self.tags,
             "notes": self.notes,
         }
         
         # create a proper SimpleEntity to use it later in the tests
-        self.mock_entity = Entity(**self.kwargs)
+        self.test_entity = Entity(**self.kwargs)
     
     
     
@@ -99,7 +100,7 @@ class EntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_entity,
+            self.test_entity,
             "notes",
             None
         )
@@ -132,7 +133,7 @@ class EntityTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_entity,
+                self.test_entity,
                 "notes",
                 test_value
             )
@@ -163,7 +164,7 @@ class EntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_entity,
+            self.test_entity,
             "notes",
             test_value
         )
@@ -175,9 +176,9 @@ class EntityTester(mocker.MockerTestCase):
         """testing if the notes attribute works properly
         """
         
-        test_value = [self.mock_note3]
-        self.mock_entity.notes = test_value
-        self.assertEqual(self.mock_entity.notes, test_value)
+        test_value = [self.test_note3]
+        self.test_entity.notes = test_value
+        self.assertEqual(self.test_entity.notes, test_value)
     
     
     
@@ -187,8 +188,8 @@ class EntityTester(mocker.MockerTestCase):
         stalker.ext.validatedList.ValidatedList instance
         """
         
-        self.mock_entity.notes = []
-        self.assertIsInstance(self.mock_entity.notes, ValidatedList)
+        self.test_entity.notes = []
+        self.assertIsInstance(self.test_entity.notes, ValidatedList)
     
     
     
@@ -200,7 +201,7 @@ class EntityTester(mocker.MockerTestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_entity.notes.__setitem__,
+            self.test_entity.notes.__setitem__,
             0,
             0
         )
@@ -252,11 +253,11 @@ class EntityTester(mocker.MockerTestCase):
     def test_tags_attribute_works_properly(self):
         """testing if tags attribute works properly
         """
-        test_value = [self.mock_tag1]
+        test_value = [self.test_tag1]
         
-        self.mock_entity.tags = test_value
+        self.test_entity.tags = test_value
         
-        self.assertEqual(self.mock_entity.tags, test_value)
+        self.assertEqual(self.test_entity.tags, test_value)
     
     
     
@@ -266,8 +267,8 @@ class EntityTester(mocker.MockerTestCase):
         stalker.ext.validatedList.ValidatedList instance
         """
         
-        self.mock_entity.tags = []
-        self.assertIsInstance(self.mock_entity.tags, ValidatedList)
+        self.test_entity.tags = []
+        self.assertIsInstance(self.test_entity.tags, ValidatedList)
     
     
     
@@ -279,7 +280,7 @@ class EntityTester(mocker.MockerTestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_entity.tags.__setitem__,
+            self.test_entity.tags.__setitem__,
             0,
             0
         )
@@ -296,7 +297,7 @@ class EntityTester(mocker.MockerTestCase):
         entity2 = Entity(**self.kwargs)
         
         self.kwargs["name"] = "another entity"
-        self.kwargs["tags"] = [self.mock_tag3]
+        self.kwargs["tags"] = [self.test_tag3]
         self.kwargs["notes"] = []
         entity3 = Entity(**self.kwargs)
         
@@ -315,7 +316,7 @@ class EntityTester(mocker.MockerTestCase):
         entity2 = Entity(**self.kwargs)
         
         self.kwargs["name"] = "another entity"
-        self.kwargs["tags"] = [self.mock_tag3]
+        self.kwargs["tags"] = [self.test_tag3]
         self.kwargs["notes"] = []
         entity3 = Entity(**self.kwargs)
         

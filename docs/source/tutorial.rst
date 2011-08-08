@@ -7,11 +7,12 @@ Tutorial
 Introduction
 ============
 
-Using Stalker is all about interacting with a database by using the Stalker
-Object Model. Stalker uses the powerfull `SQLAlchemy ORM`_.
+Using Stalker along with Python is all about interacting with a database by
+using the Stalker Object Model (SOM). Stalker uses the powerfull `SQLAlchemy
+ORM`_.
 
 .. _SQLAlchemy ORM: http://www.sqlalchemy.org/docs/orm/tutorial.html
- 
+
 This tutorial section let you familiarise with the Stalker Python API and
 Stalker Object Model (SOM). If you used SQLAlchemy before you will feel at
 home and if you aren't you will see that it is fun dealing with databases with
@@ -39,6 +40,10 @@ database::
 
   db.setup("sqlite:///C:\\studio.db") # assumed Windows
 
+or::
+
+  db.setup("sqlite:////home/ozgur/studio.db") # under linux or osx
+
 This command will do the following:
  1. setup the database connection, by creating an `engine`_
  2. create the SQLite3 database file if doesn't exist
@@ -49,28 +54,32 @@ This command will do the following:
 .. _engine: http://www.sqlalchemy.org/docs/core/engines.html
 .. _mapping: http://www.sqlalchemy.org/docs/orm/mapper_config.html
 
-Lets continue by creating a **User** for ourself in the database. The first
-thing we need to do is to import the :class:`~stalker.core.models.User`
-class in to the current namespace::
+Lets continue by creating a :class:`~stalker.core.models.User` for ourself in
+the database. The first thing we need to do is to import the
+:class:`~stalker.core.models.User` class in to the current namespace::
 
   from stalker.core.models import User
 
 then create the :class:`~stalker.core.models.User` object::
 
-  myUser = User(first_name="Erkan Ozgur",
-                last_name="Yilmaz",
-                login_name="eoyilmaz",
-                email="eoyilmaz@gmail.com",
-                password="secret",
-                description="This is me")
+  myUser = User(
+      first_name="Erkan Ozgur",
+      last_name="Yilmaz",
+      login_name="eoyilmaz",
+      email="eoyilmaz@gmail.com",
+      password="secret",
+      description="This is me"
+  )
 
 Our studio possibly has **Departments**. Lets add a new
 :class:`~stalker.core.models.Department` object to define your
 department::
 
-  from satlker.core.models.department import Department
-  tds_department = Department(name="TDs",
-                              description="This is the TDs department")
+  from stalker.core.models import Department
+  tds_department = Department(
+      name="TDs",
+      description="This is the TDs department"
+  )
 
 Now add your user to the department::
 
@@ -78,42 +87,113 @@ Now add your user to the department::
 
 We have created successfully a :class:`~stalker.core.models.User` and a
 :class:`~stalker.core.models.Department` and we assigned the user as one of the
-member of the *TDs Department*.
+member of the **TDs Department**.
 
 For now, because we didn't tell Stalker to commit the changes, no data has been
-saved to the database yet. But it doesn't keep us using Stalker, as if these
-information are in the database already. Lets show this by querying all the
-departments, then getting the first one and getting its first members name::
+saved to the database yet. So lets send it the data to the database::
 
-  all_departments = db.query(Department).all()
-  all_members = all_departments[0].members
-  print all_members[0].first_name
-
-this should print out "Erkan Ozgur". So even though we didn't commit the data
-to the database, Stalker lets us use the ``db.query`` to get objects out of the 
-database.
-
-So lets send all these data to database::
-  
   db.session.add(myUser)
   db.session.add(tds_department)
   db.session.commit()
 
-Now all the data is persisted in the database.
+These information are in the database right now. Lets show this by querying all
+the departments, then getting the second one (the first department is always
+the "admins" which is created by default) and getting its first members name::
+
+  all_departments = db.query(Department).all()
+  all_members = all_departments[1].members
+  print all_members[0].first_name
+
+this should print out "Erkan Ozgur".
 
 Part II/A - Creating Simple Data
 ================================
 
-Lets say that we have this new project coming and you want to start using
-Stalker with it. So we need to create a
-:class:`~stalker.core.models.Project` object to hold data about it::
+Lets say that we have this new commercial project coming and you want to start
+using Stalker with it. So we need to create a
+:class:`~stalker.core.models.Project` object to hold data about it.
 
-  from stalker.core.models import Project
-  new_project = Project(name="Fancy Commercial")
+A project instance needs to have its *type* (commercial in our case) defined
+and it needs to have a suitable status list::
+
+  # lets create a couple of generic Statuses
+  from stalker.core.models import Status
+  
+  status_waiting = Status(name="Waiting To Start", code="WTS")
+  status_wip = Status(name="Work in Progress", code="WIP")
+  status_pendrev = Status(name="Pending Review", code="PREV")
+  status_approved = Status(name="Approved", code="APP")
+  status_complete = Status(name="Complete", code="CMPLT")
+  status_stopped = Status(name="Stopped", code="STOP")
+
+For now we have just created generic statuses. These
+:class:`~stalker.core.models.Status` instances can be used with any kind of
+objects. The idea behind is to define the statuses only once, and use them in
+mixtures suitable for different type of object. So you can define all the
+possible Statuses for your entities, then you can create a list of them for
+specific objects.
+
+Lets create a :class:`~stalker.core.models.StatusList` suitable for
+:class:`~stalker.core.models.Project` instances::
+
+  # a status list which is suitable for Project instances
+  from stalker.core.models import StatusList, Project
+  
+  project_statuses = StatusList(
+      name="Project Status List",
+      statuses=[status_waiting,
+                status_wip,
+                status_stopped,
+                status_complete],
+      target_entity_type=Project
+  )
+
+So we defined a status list which is suitable for Project instances. As you
+see we didn't used all the generic Statuses in our ``project_statuses`` because
+for a Project object we thinked that these statuses are enough.
+
+We also need to specify the type of the project, which is *commercial* in our
+case::
+
+  from stalker.core.models import Type
+  commercial_project_type = Type(
+      name="Commercial Project",
+      target_entity_type=Project
+  )
+
+class:`~stalker.core.models.Type`\ s are generic entities that is accepted by
+any kind of entity created in Stalker. So in Stalker you can define a type for
+anything. But a couple of them, like the :class:`~stalker.core.models.Project`
+class, needs the type to be defined in the creation of the instance::
+
+So::
+
+  new_project = Project(
+      name="Fancy Commercial",
+      status_list=project_statuses,
+  )
+
+will produce::
+
+  TypeError: Project.type must be an instance of stalker.core.models.Type
+
+so create the project with its type set::
+
+  new_project = Project(
+      name="Fancy Commercial",
+      status_list=project_statuses,
+      type=commercial_project_type,
+  )
+
+One of the biggest income of having the type set to something is to be able to
+filter the projects quickly. Think about querying "Commercials" and
+distinguishing them from the "Movie" projects or "Print" projects.
+
+So we have created our project now.
 
 Lets enter more information about this new project::
 
-  from datetime import datetime
+  import datetime
   from stalker.core.models import ImageFormat
   
   new_project.description = """The commercial is about this fancy product. The
@@ -121,47 +201,63 @@ Lets enter more information about this new project::
                                product bla bla bla..."""
   new_project.image_format = ImageFormat(name="HD 1080", width=1920, height=1080)
   new_project.fps = 25
-  new_project.due = datetime(2011,2,15)
+  new_project.due_date = datetime.date(2011, 2, 15)
   new_project.lead = myUser
 
-Grouping your projects by their types is one of the best thing that lets you
-filter them later. Think about querying "Commercials" and distinguishing them
-from the "Movie" projects or "Print" projects. To accomplish this you can use a
-:class:`~stalker.core.models.ProjectType` object::
-
-  from stalker.core.models import ProjectType
-  
-  commercial_project_type = ProjectType(name="Commercial")
-  new_project.type = commercial_project_type
-
-To save all the data to the database::
+Lets save all the new data to the database::
 
   db.session.add(new_project)
   db.session.commit()
 
-Even though we have created multiple objects (new_project,
-commercial_project_type) we've just added the ``new_project`` object, don't
-worry Stalker is smart enough to add all the connected objects to the database.
+As you see, even though we have created multiple objects (new_project, satuses,
+status lists, types etc.) we've just added the ``new_project`` object to the
+database, but don't worry all the related objects will be added to the
+database.
 
 A Project generally contains :class:`~stalker.core.models.Sequence`\ s, so lets
-create one::
+create one, again we need to create a status list suitable for sequences and a
+sequence should be initialized with a project instance::
 
   from stalker.core.models import Sequence
-  seq1 = Sequence(name="Sequence 1", code="SEQ1")
   
-  # add it to the project
-  new_project.sequences.append(seq1)
+  seq_statuses = StatusList(
+      name="Sequence Status List",
+      statuses=[status_waiting,
+                status_wip,
+                status_stopped,
+                status_complete],
+      target_entity_type=Sequence,
+  )
+  
+  seq1 = Sequence(
+      name="Sequence 1",
+      code="SEQ1",
+      status_list = seq_statuses,
+      project=new_project,
+  )
 
 And a Sequence generally has :class:`~stalker.core.models.Shot`\ s::
 
   from stalker.core.models import Shot
   
-  sh001 = Shot(code="SH001")
-  sh002 = Shot(code="SH002")
-  sh003 = Shot(code="SH003")
+  shot_statuses = StatusList(
+      name="Shot Status List",
+      statuses=[status_waiting,
+                status_wip,
+                status_stopped,
+                status_pendrev,
+                status_approved],
+      target_entity_type=Shot,
+  )
   
-  # assign them to the sequence
-  seq1.shots.extend([sh001, sh002, sh003])
+  sh001 = Shot(code="SH001", sequence=seq1, status_list=shot_statuses)
+  sh002 = Shot(code="SH002", sequence=seq1, status_list=shot_statuses)
+  sh003 = Shot(code="SH003", sequence=seq1, status_list=shot_statuses)
+
+send them to the database::
+
+  db.session.add_all([sh001, sh002, sh003])
+  db.session.commit()
 
 Part II/B - Querying, Updating and Deleting Data
 ================================================
@@ -169,8 +265,9 @@ Part II/B - Querying, Updating and Deleting Data
 So far we always created some simple data. What about updating them. Let say
 that we created a new shot with wrong info::
 
-  sh004 = Shot(code="SH005)
+  sh004 = Shot(code="SH005", sequence=seq1, status_list=shot_statuses)
   db.session.add(sh004)
+  db.session.commit()
 
 and you figured out that you have created and committed a wrong info and you
 want to correct it::
@@ -188,9 +285,6 @@ and let say that you decided to delete the data::
 
   db.session.delete(wrong_shot)
   db.session.commit()
-  
-  # or with a shortcut
-  db.query(Shot).filter_by(code="SH005").delete()
 
 for more info about update and delete options (like cascades) in SQLAlchemy
 please see the `SQLAlchemy documentation`_.
@@ -200,183 +294,106 @@ please see the `SQLAlchemy documentation`_.
 Part III - Pipeline
 ===================
 
-Until now, we skipped a lot of stuff here to take little steps every time.
+Up until now, we skipped a lot of stuff here to take little steps every time.
 Eventough we have created users, departments, projects, sequences and shots,
 Stalker still doesn't know much about our studio. For example, it doesn't have
 any information about the pipeline that we are following and what steps we do
 to complete those shots, thus to complete the project.
 
-Lets try to explain the **Shot Pipeline** we are following to Stalker.
+In Stalker, pipeline is managed by :class:`~stalker.core.models.Task`\ s. So
+you create Tasks for Shots and then you can create dependencies between tasks.
 
-A pipeline is a group of :class:`~stalker.core.models.PipelineStep`\ s. And we
-follow these steps for one specific :class:`~stalker.core.models.AssetType`. So
-a **Shot** has a different pipeline than a **Character** or an **Environment**
-asset.
+So lets create a couple of tasks for one of the shots we have created before::
 
-Lets create the pipeline steps we need::
+  from stalker.core.models import Task
   
-  from stalker.core.models.pipelineStep import PipelineStep
+  task_statuses = StatusList(
+      name="Task Status List",
+      statuses=[status_waiting,
+                status_wip,
+                status_pendrev,
+                status_approved,
+                status_complete],
+      target_entity_type=Task
+  )
   
-  previs      = PipelineStep(name="Previs"     , code="PREVIS")
-  matchmove   = PipelineStep(name="Match Move" , code="MM")
-  anim        = PipelineStep(name="Animation"  , code="ANIM")
-  layout      = PipelineStep(name="Layout"     , code="LAYOUT")
-  light       = PipelineStep(name="Ligting"    , code="LIGHT")
-  comp        = PipelineStep(name="Compositing", code="COMP")
+  previs = Task(
+      name="Previs of SH001",
+      status_list=task_statuses,
+      task_of=sh001
+  )
+  
+  matchmove = Task(
+      name="Matchmove of SH001",
+      status_list=task_statuses,
+      task_of=sh001
+  )
+  
+  anim = Task(
+      name="Animation",
+      status_list=task_statuses,
+      task_of=sh001
+  )
+  
+  lighting = Task(
+      name="Lighting",
+      status_list=task_statuses,
+      task_of=sh001
+  )
+  
+  compositing = Task(
+      name="Compositing",
+      status_list=task_statuses,
+      task_of=sh001
+  )
 
+Now create the dependecies::
 
+  compositing.depends = [lighting]
+  lighting.depends = [anim]
+  anim.depends = [previs, matchmove]
 
-
-.. will think about this part later, it is making the tutorial unnecessarily
-   complex
-    
-    design      = PipelineStep(name="Design"     , code="DESIGN")
-    model       = PipelineStep(name="Model"      , code="MODEL")
-    rig         = PipelineStep(name="Rig"        , code="RIG")
-    shading     = PipelineStep(name="Shading"    , code="SHADING")
-    matte_paint = PipelineStep(name="Matte Paint", code="MATTE")
-
-
-
-
-and create a the Shot asset type::
-  
-  from stalker.core.models import AssetType
-  
-  # the order of the PipelineSteps are not important
-  shot_pSteps = [previs, match, anim, layout, light, comp]
-  
-  # create the asset type
-  shot_asset_type = AssetType(name="Shot", steps=shot_pSteps)
-  
-  # and set our shot objects asset_type to shot_asset_type
-  # 
-  # instead of writing down shot1.type = shot_asset_type
-  # we are going to do something more interesting
-  # (even though it is inefficient)
-  
-  for shot in seq1.shots:
-      shot.type = shot_asset_type
-  
-  
-  
-  
-.. this part is making things complex
-  from stalker.core.models import AssetType
-  
-  # the order of the PipelineSteps are not important
-  simple_shot_pSteps = [previs, match, anim, layout, light, comp]
-  character_pSteps   = [design, model, rig, shading]
-  prop_pSteps        = [design, model, shading]
-  env_pSteps         = [design, model, shading, matte_paint]
-  
-  # create the asset types
-  shot_asset_type      = AssetType(name="Shot"       , steps=shot_pSteps)
-  character_asset_type = AssetType(name="Character"  , steps=character_pSteps)
-  prop_asset_type      = AssetType(name="Prop"       , steps=prop_pSteps)
-  env_asset_type       = AssetType(name="Environment", steps=env_pSteps)
-  
-  # and set our shot objects asset_type to shot_asset_type
-  # 
-  # instead of writing down shot1.type = shot_asset_type
-  # we are going to do something more interesting
-  for shot in seq1.shots:
-      shot.type = shot_asset_type
-
-
-
-
-So by doing that we informed Stalker about the steps of one kind of asset
-(**Shot** in our case).
+For now the dependencies are only usefull to have an information about the
+relation of the tasks, but in the future releases of Stalker it is also going
+to be used in the planned Project Scheduler.
 
 Part IV - Task & Resource Management
 ====================================
 
-Now we have a couple of Shots with couple of steps inside it but we didn't
-created any :class:`~stalker.core.models.Task` to let somebody to finish
-this job.
+Now we have a couple of Shots with couple of tasks inside it but we didn't
+assign the tasks to anybody to let them finish this job.
 
-Lets assign all this stuff to our self (for now)::
+Lets assign all this stuff to our self (for now :) )::
 
-  from datetime import timedelta
-  from stalker.core.models import Task
+  previs.resources = [myUser]
+  previs.effort = timedelta(days=1)
   
-  previs_task = Task(
-                    name="Previs",
-                    resources=[myUser],
-                    bid=timedelta(days=1),
-                    pipeline_step=previs
-                )
+  matchmove.resources = [myUser]
+  matchmove.effort = timedelta(days=2)
   
-  mm_task     = Task(
-                    name="Match Move",
-                    resources=[myUser],
-                    bid=timedelta(days=2),
-                    pipeline_step=matchmove
-                )
+  anim.resources = [myUser]
+  anim.effort = timedelta(2) # the default argument is days in timedelta
   
-  anim_task   = Task(
-                    name="Animation",
-                    resources=[myUser],
-                    bid=timedelta(days=2),
-                    pipeline_step=anim
-                )
+  lighting.resources = [myUser]
+  lighting.effort = timdelta(hours=2)
   
-  layout_task = Task(
-                    name="Layout",
-                    resources=[myUser],
-                    bid=timdelta(hours=2),
-                    pipeline_step=layout
-                )
-  
-  light_task  = Task(
-                    name="Lighting",
-                    resources=[myUser],
-                    bid=timedelta(days=2),
-                    pipeline_step=light
-                )
-  
-  comp_task   = Task(
-                    name="Compositing",
-                    resources=[myUser],
-                    bid=timedelta(days=2),
-                    pipeline_step=comp
-                )
+  # one another way is to add the task to the users tasks
+  # it will have the same effect of assign a user to a task
+  myUser.tasks.append(comp)
+  comp.effort = timedelta(days=2)
 
-Now we are created all the tasks, but they are not connected to our Shots yet.
-Lets connect them to the ``shot001``::
-  
-  sh001.tasks = [previs_task,
-                 mm_task,
-                 anim_task,
-                 layout_task,
-                 light_task,
-                 comp_task]
-
-And one of the good sides of the tasks are, dependencies can be defined between
-them, so Stalker nows which job should be done before the others::
-  
-  # animation needs match moving and previs to be finished
-  anim_task.depends = [mm_task, previs_task]
-  
-  # compositing can not start before anything rendered or animated
-  comp_task.depends = [light_task, anim_task]
-  
-  # lighting can not be done before the layout is finished
-  light_task.depends = [layout_task]
-
-Now Stalker knows the hierarchy of the tasks. Next versions of Stalker will have
-a ``Scheduler`` included to solve the task timings and create data for things
-like Gantt Charts.
+Now Stalker knows the hierarchy of the tasks. Next versions of Stalker will
+have a ``Project Scheduler`` included to solve the task timings and create data
+for things like Gantt Charts.
 
 Lets commit the changes again::
 
   session.commit()
 
 If you noticed, this time we didn't add anything to the session, cause we have
-added the ``new_project`` in a previous commit, and because all the objects are
-attached to the project object in some way, Stalker can track this changes and
-add the missing related objects to the database.
+added the ``sh001`` in a previous commit, and because all the objects are
+attached to this shot object in some way, all the changes has been tracked
+and added to the database.
 
 Part V - Asset Management
 =========================
@@ -390,11 +407,11 @@ your data that you are going to create while completing this tasks.
 So what we need to define is a place in our file structure. It doesn't need to
 be a network shared directory but if you are not working alone than it means
 that everyone needs to reach your data and the simplest way to do this is to
-place your files in a network share, there are other alternatives like storing
-your files locally and sharing your revisions with a Software Configuration
-Management (SCM) system. We are going to see the first alternative, which uses
-a network share in our fileserver, and this network share is called a
-:class:`~stalker.core.models.Reposiory` in Stalker.
+place your files in a network share or a SAN storage, there are other
+alternatives like storing your files locally and sharing your revisions with a
+Software Configuration Management (SCM) system. We are going to see the first
+alternative, which uses a network share in our fileserver, and this network
+share is called a :class:`~stalker.core.models.Reposiory` in Stalker.
 
 A repository is a file path, preferably a path which is mapped or mounted to
 the same path on every computer in our studio. You can have several
@@ -403,17 +420,13 @@ projects. You can define repositories and assign projects to those
 repositories. Lets create one repository for our commercial project::
 
   from stalker.core.models import Repository
-  repo1 = Repository(
-      name="Commercial Repository",
-      description="""This is where the commercial projects are going to be
-      stored"""
-  )
+  repo1 = Repository(name="Commercial Repository")
 
 A Repository object could show the root path of the repository according to
 your operating system. Lets enter the paths for all the major operating
 systems::
   
-  repo1.windows_path = "M:/PROJECTS"
+  repo1.windows_path = "M:\\PROJECTS"
   repo1.linux_path   = "/mnt/M"
   repo1.osx_path     = "/Volumes/M"
 
@@ -421,9 +434,7 @@ And if you ask for the path to a repository object it will always give the
 correct answer according to your operating system::
 
   print repo1.path
-  # outputs:
-  # if you are running in Windows it will output:
-  #
+  # under Windows outputs:
   # M:\PROJECTS
   # 
   # in Linux and variants:
@@ -441,6 +452,12 @@ project. To explain the project structure we can use the
 
   from stalker.core.models import Structure
   
+  # Structure is `strictly typed` so we need to create a type for it
+  commercial_structure_type = Type(
+      name="Commercial",
+      target_entity_type=Structure
+  )
+  
   commercial_project_structure = Structure(
       name="Commercial Projects Structure",
       description="""This is a project structure, which can be used for simple
@@ -448,9 +465,12 @@ project. To explain the project structure we can use the
   )
   
   # lets create the folder structure as a Jinja2 template
-  project_template = """
+  custom_template = """
      {{ project.code }}
      {{ project.code }}/Assets
+     {{ project.code }}/References/Storyboard
+     {{ project.code }}/References/Videos
+     {{ project.code }}/References/Images
      {{ project.code }}/Sequences"
      
      {% if project.sequences %}
@@ -460,7 +480,6 @@ project. To explain the project structure we can use the
              {{ seq_path }}/Edit
              {{ seq_path }}/Edit/AnimaticStoryboard
              {{ seq_path }}/Edit/Export
-             {{ seq_path }}/Storyboard
              {{ seq_path }}/Shots
              
              {% if sequence.shots %}
@@ -477,7 +496,7 @@ project. To explain the project structure we can use the
      {{ project.code }}/References
   """
   
-  commercial_project_structure.project_template = project_template
+  commercial_project_structure.custom_template = custom_template
   
   # now assign this structure to our project
   new_project.structure = commercial_project_structure
@@ -495,6 +514,8 @@ The above template will produce the following folders for our project::
   M:/PROJECTS/FANCY_COMMERCIAL
   M:/PROJECTS/FANCY_COMMERCIAL/Assets
   M:/PROJECTS/FANCY_COMMERCIAL/References
+  M:/PROJECTS/FANCY_COMMERCIAL/References/Videos
+  M:/PROJECTS/FANCY_COMMERCIAL/References/Images
   M:/PROJECTS/FANCY_COMMERCIAL/Sequences
   M:/PROJECTS/FANCY_COMMERCIAL/Sequences/SEQ1
   M:/PROJECTS/FANCY_COMMERCIAL/Sequences/SEQ1/Edit
@@ -508,46 +529,52 @@ The above template will produce the following folders for our project::
 
 We are still not done with defining the templates. Even though Stalker now
 knows what is the project structure like, it is not aware of the placements of
-individual asset :class:`~stalker.core.models.Version` files specific for an
-:class:`~stalker.core.models.AssetType`. An asset
+individual :class:`~stalker.core.models.Version` files specific for a Task. A
 :class:`~stalker.core.models.Version` is an object holding information about
-every single iteration of one asset and has a connection to files in the
-repository. So before creating a new version for any kind of asset, we need to
-tell Stalker where to place the related files. This can be done by using a
+every single iteration of one Task and has a connection to files in the
+repository.
+
+So before creating a new version for any kind of task, we need to tell Stalker
+where to place the related files. This can be done by using a
 :class:`~stalker.core.models.FilenameTemplate` object.
 
 A :class:`~stalker.core.models.FilenameTemplate` object has information about
-the path, the filename, and the Type of the asset to apply this template to::
+the path, the filename, and the target entity type to apply this template to::
 
   from stalker.core.models import FilenameTemplate
   
-  shot_version_template = FilenameTemplate(name="Shot Template")
+  shot_version_template = FilenameTemplate(
+      name="Shot Template",
+      target_entity_type=Shot
+  )
   
   # lets create the templates
   #
-  # shot = version.asset
-  # asset = version.asset
-  # if shot is not None:
-  #     sequence = shot.sequence
   # task = version.task
-  # pipeline_step = task.pipeline_step
-  # user = auth.get_user()
+  # shot = task.part_of
+  # asset = task.part_of
+  # try:
+  #     sequence = shot.sequence
+  # except AttributeError:
+  #     sequence = asset.sequences[0]
   # 
-  path_code = "Sequences/{{ sequence.code }}/Shots/{{ shot.code }}/{{ pipeline_step.code }}"
-  filename_code = "{{ shot.code }}_{{ version.take }}_{{ pipeline_step.code }}_v{{ version.version }}"
+  # task_type = task.type
+  # user = auth.get_user()
+  #
   
-  # we can use the shot_asset_type we have previously defined
-  shot_version_template.type = shot_asset_type
+  path_code = "Sequences/{{ sequence.code }}/Shots/{{ shot.code }}/{{ task_type.code }}"
+  filename_code = "{{ shot.code }}_{{ version.take }}_{{ task_type.code }}_v{{ version.version }}"
+  
   shot_version_template.path_code = path_code
   shot_version_template.filename_code = filename_code
   
   # now assign this template to our project structure
   # do you remember the "structure1" we have created before
-  commercial_project_structure.assetTemplates.append(shot_version_template)
+  commercial_project_structure.templates.append(shot_version_template)
 
 Now Stalker knows "Kung-Fu". It can place any version related file to the
 repository and organise your works. You can define all the templates for all
-your assetTypes independently, or you can use a common template for them etc.
+your entities independently.
 
 Part VI - Collaboration (coming)
 ================================
@@ -574,101 +601,3 @@ Part VIII - Extending SOM (coming)
 ==================================
 
 This part will be covered soon
-
-
-.. PART REMOVED FROM THE DESIGN DOCUMENTATION! (filter and remove):
-  
-  Usage Examples
-  --------------
-  
-  Let's dance with Stalker a little bit.
-  
-  When you first setup Stalker you will have nothing but an empty database. So
-  lets create some data and store them in the database.
-  
-  First import some modules:
-  
-  First of all import and setup the default database (an in-memory SQLite
-  database)
-  
-  >>> from stalker import db # the database module
-  >>> db.setup()
-  
-  By calling the :func:`~stalker.db.setup` we have created all the mappings for
-  SOM and also we have created the ``session`` object
-  which is stored under ``stalker.db.meta.session`` (this is used to have a
-  Singleton SQLAlchemy metadata).
-  
-  Lets import the SOM which is stalker.core.models
-  
-  >>> from stalker.core.models import User
-  
-  Stalker comes with an *admin* user already defined in to it. To create other
-  things in the database we need to have the admin user by querying it.
-  
-  >>> dbSession = db.meta.session
-  >>> admin = dbSession.query(User).filter_by(name="admin").first()
-  
-  Lets create another user
-  
-  >>> newUser = User(name="eoyilmaz",
-                     login_name="eoyilmaz",
-                     first_name="Erkan Ozgur",
-                     last_name="Yilmaz",
-                     password="secret",
-                     email="eoyilmaz@gmail.com")
-  
-  Save the data to the database
-  
-  >>> session.add(newUser)
-  >>> session.commit()
-  
-  Create a query for users:
-  
-  >>> query = session.query(user.User)
-  
-  Get all the users:
-  
-  >>> users = query.all()
-  
-  or select a couple of users by filters:
-  
-  >>> users = query.filter_by(name="Ozgur")
-  
-  or select the first user matching query criteria:
-  
-  >>> user_ozgur = query.filter_by(name="Ozgur").first()
-  
-  
-  ***** UPDATE BELOW *****
-  
-  Now add them to the project:
-  
-  >>> newProject.users.append(users)
-  
-  Save the new project to the database:
-  
-  >>> db.session.add(newProject)
-  >>> db.session.commit()
-  
-  Let's ask the tasks of one user:
-  
-  >>> ozgur = query.filter_by(name="ozgur").first()
-  >>> tasks = ozgur.tasks
-  
-  Get the on going tasks of this user:
-  
-  >>> onGoingTasks = [task for task in ozgur.tasks if not task.isComplete]
-  
-  Get the on going tasks of this user by using the database:
-  
-  >>> taskQuery = mapper.sessison.query(user.User).filter_by(name="ozgur").join(task.Task).filter_by(status!="complete")
-  >>> onGoingTasks = taskQuery.all()
-  
-  Get the "rig" tasks of ozgur:
-  
-  >>> rigTasks =  taskQuery.join(PipelineStep).filter(PipelineStep.name="Rig").all()
-  
-  As you see all the functionalities of SQLAlchemy is fully supported. At the end
-  all the models are plain old python objects (POPO) and the persistence part is
-  handled with SQLAlchemy.

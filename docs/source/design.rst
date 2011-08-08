@@ -60,32 +60,20 @@ An animation/vfx studios duty is to complete a
 :class:`~stalker.core.models.Project`. A project, generally is about to create
 a :class:`~stalker.core.models.Sequence` of :class:`~stalker.core.models.Shot`\
 s which are a series of images those at the end converts to a movie. So a
-sequence in general contains Shots. Shots are a special type of
-:class:`~stalker.core.models.Asset`\ s which are related to a range of time. So
-basically to complete a project the studio should complete the sequences thus
-the shots and assets.
+sequence in general contains Shots. Shots can contain
+:class:`~stalker.core.models.Asset`\ s. So basically to complete a project the
+studio should complete the sequences thus the shots and assets.
 
-We have considered Shots as a special form or *type* of assets, so assets have
-:class:`~stalker.core.models.AssetType`\ s showing this relationship,
-thus it is :class:`~stalker.core.models.Shot` for a Shot asset, and lets
-say, it is *Character* for a character asset, or *Vehicle* for a vehicle asset
-(pretty straight).
-
-AssetType also defines the :class:`~stalker.core.models.PipelineStep`\ s of
-that special asset type. For example a Shot can have steps like *Animation*,
-*FX*, *Layout*, *Lighting*, *Compositing* etc. and a character can have
-*Design*, *Model*, *Rig*, *Shading* steps. All these steps defines
-differentiable **Tasks** those need to be done sequentially or in parallel to
-complete that shot or asset. Again, an asset or shot has an asset type, which
-defines the steps thus tasks those needs to be done.
+Furthermore all the Projects, Sequences, Shots or Assets are splitted in to
+different :class:`~stalker.core.models.Task`\ s those need to be done
+sequentially or in parallel to complete that project.
 
 A Task relates to a work, a work is a quantity of time spend or going to be
 spend for that specific task. The time spend on the course of completion of a
-Task can be recorded with *Bookings*. Bookings shows the time an artist is
-booked for a certain Task. But, Bookings are not related with the future work
-but the work it is already done and generally the booking info is entered by
-the artist him or herself. So it holds information about how much time has been
-spent to complete a Task.
+Task can be recorded with :class:`~stalker.core.models.Booking`\ s. Bookings
+shows the time of an artist is booked for a certain Task. It can be showing a
+past work or a future work. So it holds information about how much time has
+been spent to complete a Task.
 
 At the end of the work a **User** creates **Versions** for a task. Versions are
 list of files showing the different incarnations or the progress of a subject
@@ -102,7 +90,7 @@ Stalker is a configurable and expandable system. Both of these feature allows
 the system to have a flexible structure.
 
 There are two levels of expansion, the first level is the simplest one, by just
-adding different statuses, different assetTypes or these kind of things in
+adding different statuses, different types or these kind of things in
 which Stalker's current design is ready to. This is expalined in `How To
 Customize Stalker`_
 
@@ -120,8 +108,8 @@ Features:
  
  2. SQLAlchemy for the database back-end and ORM
  
- 3. PyQt/PySide and web based user interfaces. All the interfaces designed in
-    MVC structure.
+ 3. PyQt/PySide and Pyramid based web interfaces. All the interfaces designed
+    in MVC structure.
  
  4. Jinja2 as the template engine
  
@@ -136,27 +124,24 @@ Features:
     In an SQLite setup, the database can be backed up with the project folder
     itself.
  
- 7. Configuration files lets the user to configure all the aspects of the
-    asset/project management.
- 
- 8. Uses Jinja2 as the template system for the file and folder naming
+ 7. Uses Jinja2 as the template system for the file and folder naming
     convention will be used like:
     
     {repository.path}/{project.name}/assets/{asset.name}/{pipelineStep.name}/
     {asset.variation.name}/{asset.name}_{asset.type.name}_v{asset.version}.{
     asset.fileFormat.extension}
  
- 9. file and folders and file sequences can be uploaded to the server as
+ 8. file and folders and file sequences can be uploaded to the server as
     assets, and the server decides where to place the folder or file by using
     the template system.
  
- 10. The event system gives full control for every CRUD (create/insert, read,
-     update, delete) by giving step like before insert, after insert
-     call-backs.
+ 9. The event system gives full control for every CRUD (create/insert, read,
+    update, delete) by giving step like before insert, after insert
+    call-backs.
  
- 11. The messaging system allows the users collaborate more efficiently.
+ 10. The messaging system allows the users collaborate efficiently.
 
-For usage exmamples see :ref:`tutorial_toplevel`
+For usage exmaples see :ref:`tutorial_toplevel`
 
 How To Customize Stalker
 ========================
@@ -168,3 +153,4 @@ How To Extend SOM
 =================
 
 This part explains how to extend Stalker Object Model or SOM.
+

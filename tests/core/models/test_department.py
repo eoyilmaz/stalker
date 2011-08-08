@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 import datetime
 from stalker.core.models import Department, User, Entity
 from stalker.ext.validatedList import ValidatedList
@@ -13,9 +13,10 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class DepartmentTester(mocker.MockerTestCase):
+class DepartmentTester(unittest.TestCase):
     """tests the Department class
     """
+    
     
     
     #----------------------------------------------------------------------
@@ -23,37 +24,64 @@ class DepartmentTester(mocker.MockerTestCase):
         """lets setup the tests
         """
         
-        # create a couple of mock users
-        self.mock_user1 = self.mocker.mock(User)
-        self.mock_user2 = self.mocker.mock(User)
-        self.mock_user3 = self.mocker.mock(User)
-        self.mock_user4 = self.mocker.mock(User)
+        # create a couple of test users
+        self.test_user1 = User(
+            login_name="user1",
+            first_name="user1",
+            last_name="user1",
+            email="user1@test.com",
+            password="123456",
+        )
+        self.test_user2 =  User(
+            login_name="user2",
+            first_name="user2",
+            last_name="user2",
+            email="user2@test.com",
+            password="123456",
+        )
+        self.test_user3 =  User(
+            login_name="user3",
+            first_name="user3",
+            last_name="user3",
+            email="user3@test.com",
+            password="123456",
+        )
+        self.test_user4 =  User(
+            login_name="user4",
+            first_name="user4",
+            last_name="user4",
+            email="user4@test.com",
+            password="123456",
+        )
         
-        self.members_list = [self.mock_user1,
-                             self.mock_user2,
-                             self.mock_user3,
-                             self.mock_user4,
-                             ]
+        self.members_list = [self.test_user1,
+                             self.test_user2,
+                             self.test_user3,
+                             self.test_user4]
         
-        self.mock_admin = self.mocker.mock(User)
-        
-        self.mocker.replay()
+        self.test_admin =  User(
+            login_name="admin",
+            first_name="admin",
+            last_name="admin",
+            email="admin@test.com",
+            password="admin",
+        )
         
         self.date_created = self.date_updated = datetime.datetime.now()
         
         self.kwargs = {
             "name": "Test Department",
             "description": "This is a department for testing purposes",
-            "created_by": self.mock_admin,
-            "updated_by": self.mock_admin,
+            "created_by": self.test_admin,
+            "updated_by": self.test_admin,
             "date_created": self.date_created,
             "date_updated": self.date_updated,
             "members": self.members_list,
-            "lead": self.mock_user1
+            "lead": self.test_user1
         }
         
         # create a default department object
-        self.mock_department = Department(**self.kwargs)
+        self.test_department = Department(**self.kwargs)
     
     
     
@@ -75,7 +103,7 @@ class DepartmentTester(mocker.MockerTestCase):
         """
         
         # this should work without raising any error
-        self.mock_department.members = []
+        self.test_department.members = []
     
     
     
@@ -107,7 +135,7 @@ class DepartmentTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_department,
+            self.test_department,
             "members",
             test_value
         )
@@ -119,7 +147,7 @@ class DepartmentTester(mocker.MockerTestCase):
         """testing if the members attribute is an instance of ValidatedList
         """
         
-        self.assertIsInstance(self.mock_department.members, ValidatedList)
+        self.assertIsInstance(self.test_department.members, ValidatedList)
     
     
     
@@ -132,14 +160,14 @@ class DepartmentTester(mocker.MockerTestCase):
         # append
         self.assertRaises(
             TypeError,
-            self.mock_department.members.append,
+            self.test_department.members.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
             TypeError,
-            self.mock_department.members.__setitem__,
+            self.test_department.members.__setitem__,
             0,
             0
         )
@@ -169,7 +197,7 @@ class DepartmentTester(mocker.MockerTestCase):
         test_values = [1, 1.2, "a user"]
         
         for test_value in test_values:
-            self.assertRaises(TypeError, setattr, self.mock_department,
+            self.assertRaises(TypeError, setattr, self.test_department,
                               "members", test_value)
     
     
@@ -205,7 +233,7 @@ class DepartmentTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_department,
+                self.test_department,
                 "lead",
                 test_value
             )

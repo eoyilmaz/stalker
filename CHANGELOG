@@ -7,16 +7,16 @@ v0.1.1.a10
  * :class:`~stalker.core.mixins.TaskMixin` from now on doesn't have a ``tasks``
    argument in its ``__init__`` method.
 
- * each of the mixin classes now has their own test modules.
+ * Each of the mixin classes now has their own test modules.
 
- * in :class:`~stalker.core.models.Shot`, now the
+ * In :class:`~stalker.core.models.Shot`, now the
    :attr:`~stalker.core.models.Shot.cut_out` attribute is mapped to the
    database instead of the :attr:`~stalker.core.models.Shot.cut_duration`.
 
- * in :class:`~stalker.core.models.Task` the ``part_of`` attribute is renamed
+ * In :class:`~stalker.core.models.Task` the ``part_of`` attribute is renamed
    to :attr:`~stalker.core.models.Task.task_of` to reflect its duty clearly.
 
- * removed the ``ProjectMixin``. The ``project`` attribute has been moved to
+ * Removed the ``ProjectMixin``. The ``project`` attribute has been moved to
    the :class:`~stalker.core.mixins.TaskMixin`. Now anything mixed with the
    :class:`~stalker.core.mixins.TaskMixin` also has a 
    :attr:`~stalker.core.mixins.TaskMixin.project` attribute.
@@ -31,21 +31,27 @@ v0.1.1.a10
    argument. There is no way to create a :class:`~stalker.core.models.Shot`
    without passing a :class:`~stalker.core.models.Sequence` instance.
 
- * all the classes that needs to be initialized properly now has a method
+ * All the classes that needs to be initialized properly now has a method
    called __init_on_load__ which is called by SQLAlchemy on load.
 
- * fixed the :attr:`~stalker.core.models.Task.task_of` attribute in
+ * Fixed the :attr:`~stalker.core.models.Task.task_of` attribute in
    :class:`~stalker.core.models.Task` and
    :attr:`~stalker.core.mixins.TaskMixin.tasks` attribute in
    :class:`~stalker.core.mixins.TaskMixin`, they are now updating each other
    correctly.
 
- * added :attr:`~stalker.core.models.Shot.assets` to the
+ * Added :attr:`~stalker.core.models.Shot.assets` to the
    :class:`~stalker.core.models.Shot` class to track down which asset is used
    in this shot.
 
- * merged the ``ProjectMixinDB`` with ``TaskMixinDB`` and
+ * Merged the ``ProjectMixinDB`` with ``TaskMixinDB`` and
    removed the ``ProjectMixinDB`` from the database part of the mixins.
+
+ * The tests for the :class:`~stalker.core.models.SimpleEntity`,
+   :class:`~stalker.core.models.Entity`,
+   :class:`~stalker.core.models.Repository` and
+   :class:`~stalker.core.models.Department` are not using the Mocker library
+   anymore.
 
 
 v0.1.1.a9

@@ -1946,6 +1946,10 @@ class Note(SimpleEntity):
     
     :param content: the content of the note
     
+    :param attached_to: holds the simple_entity that this note is attached to
+    
+    
+    
     """
     
     
@@ -2113,9 +2117,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         self._structure = self._validate_structure(structure)
         self._sequences = self._validate_sequences(sequences)
         self._assets = self._validate_assets(assets)
-        
-        # do not persist this attribute
-        self._project_duration = self._due_date - self._start_date
         
         self._image_format = self._validate_image_format(image_format)
         self._fps = self._validate_fps(fps)
@@ -3499,7 +3500,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         StatusMixin.__init__(self, **kwargs)
         TaskMixin.__init__(self, **kwargs)
         
-        self._shots = None
+        self._shots = []
         self.shots = shots
     
     
@@ -3560,9 +3561,8 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         
         def fset(self, shots_in):
             # remove the previous ones
-            if not self._shots is None:
-                for shot in self._shots:
-                    super(ValidatedList, shot.assets).remove(self)
+            for shot in self._shots:
+                super(ValidatedList, shot.assets).remove(self)
             
             # set it to the ValidatedList that already has the new shots
             self._shots = self._validate_shots(shots_in)

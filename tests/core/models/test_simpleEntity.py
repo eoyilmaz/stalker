@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 import datetime
 from stalker.core.models import (SimpleEntity, Type, User)
 
@@ -11,10 +11,8 @@ from stalker.core.models import (SimpleEntity, Type, User)
 
 
 
-
-
 ########################################################################
-class SimpleEntityTester(mocker.MockerTestCase):
+class SimpleEntityTester(unittest.TestCase):
     """testing the SimpleEntity class
     """
     
@@ -24,9 +22,14 @@ class SimpleEntityTester(mocker.MockerTestCase):
     def setUp(self):
         """seting up some proper values
         """
-        # create a mock user
-        self.mock_user = self.mocker.mock(User)
-        self.mocker.replay()
+        # create a user
+        self.test_user = User(
+            first_name="Test",
+            last_name="User",
+            login_name="testuser",
+            email="test@user.com",
+            password="test"
+        )
         
         self.date_created = datetime.datetime(2010, 10, 21, 3, 8, 0)
         self.date_updated = self.date_created
@@ -35,16 +38,19 @@ class SimpleEntityTester(mocker.MockerTestCase):
             "name": "Test Entity",
             "description": "This is a test entity, and this is a proper \
             description for it",
-            "created_by": self.mock_user,
-            "updated_by": self.mock_user,
+            "created_by": self.test_user,
+            "updated_by": self.test_user,
             "date_created": self.date_created,
             "date_updated": self.date_updated,
         }
         
         # create a proper SimpleEntity to use it later in the tests
-        self.mock_simple_entity = SimpleEntity(**self.kwargs)
+        self.test_simple_entity = SimpleEntity(**self.kwargs)
         
-        self.mock_type = self.mocker.mock(Type)
+        self.test_type = Type(
+            name="Test Type",
+            target_entity_type=SimpleEntity
+        )
         
         # a couple of test values
         
@@ -259,8 +265,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
         attribute when it is set to an empty string
         """
         
-        self.mock_simple_entity.code = ""
-        self.assertEqual(self.mock_simple_entity.code, "test_entity")
+        self.test_simple_entity.code = ""
+        self.assertEqual(self.test_simple_entity.code, "test_entity")
     
     
     
@@ -270,8 +276,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
         set to None.
         """
         
-        self.mock_simple_entity.code = None
-        self.assertEqual(self.mock_simple_entity.code, "test_entity")
+        self.test_simple_entity.code = None
+        self.assertEqual(self.test_simple_entity.code, "test_entity")
     
     
     
@@ -304,7 +310,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "name",
             ""
         )
@@ -319,7 +325,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "name",
             None
         )
@@ -365,10 +371,10 @@ class SimpleEntityTester(mocker.MockerTestCase):
         
         for test_value in self.name_test_values:
             # set the new name
-            self.mock_simple_entity.name = test_value[0]
+            self.test_simple_entity.name = test_value[0]
             
             self.assertEqual(
-                self.mock_simple_entity.name,
+                self.test_simple_entity.name,
                 test_value[1],
                 "the name attribute is not correctly formatted for, %s, %s" % \
                     (str(test_value[0]), test_value[1])
@@ -382,10 +388,10 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         for test_value in self.nice_name_test_values:
-            self.mock_simple_entity.name = test_value[0]
+            self.test_simple_entity.name = test_value[0]
             
             self.assertEqual(
-                self.mock_simple_entity.nice_name,
+                self.test_simple_entity.nice_name,
                 test_value[1],
                 "the nice name attribute is not correctly formatted for, " + \
                     test_value[0] + ", " + test_value[1]
@@ -401,7 +407,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             AttributeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "nice_name",
             "a text"
         )
@@ -427,8 +433,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
         string if None is given as the description attribute
         """
         
-        self.mock_simple_entity.description = None
-        self.assertEqual(self.mock_simple_entity.description, "")
+        self.test_simple_entity.description = None
+        self.assertEqual(self.test_simple_entity.description, "")
     
     
     
@@ -458,8 +464,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
         test_values = [["a description"], {"a": "description"}]
         
         for test_value in test_values:
-            self.mock_simple_entity.description = test_value
-            self.assertIsInstance(self.mock_simple_entity.description,
+            self.test_simple_entity.description = test_value
+            self.assertIsInstance(self.test_simple_entity.description,
                                   (str, unicode))
     
     
@@ -517,7 +523,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "created_by",
             test_value
         )
@@ -540,7 +546,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "created_by",
             test_value
         )
@@ -563,7 +569,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "updated_by",
             test_value
         )
@@ -586,7 +592,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "updated_by",
             test_value
         )
@@ -627,7 +633,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "date_created",
             test_value
         )
@@ -652,7 +658,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "date_created",
             test_value
         )
@@ -668,7 +674,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "date_created",
             None
         )
@@ -690,7 +696,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "date_updated",
             test_value
         )
@@ -712,7 +718,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "date_updated",
             test_value
         )
@@ -728,7 +734,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_simple_entity,
+            self.test_simple_entity,
             "date_updated",
             None
         )
@@ -741,8 +747,8 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         test_value = datetime.datetime.now()
-        self.mock_simple_entity.date_updated = test_value
-        self.assertEqual(self.mock_simple_entity.date_updated, test_value)
+        self.test_simple_entity.date_updated = test_value
+        self.assertEqual(self.test_simple_entity.date_updated, test_value)
     
     
     
@@ -768,11 +774,11 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         self.assertEqual(
-            self.mock_simple_entity.__repr__(),
+            self.test_simple_entity.__repr__(),
             "<%s (%s, %s)>" % (
-                self.mock_simple_entity.entity_type,
-                self.mock_simple_entity.name,
-                self.mock_simple_entity.code)
+                self.test_simple_entity.entity_type,
+                self.test_simple_entity.name,
+                self.test_simple_entity.code)
         )
     
     
@@ -792,7 +798,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         None.
         """
         
-        self.mock_simple_entity.type = None
+        self.test_simple_entity.type = None
     
     
     
@@ -817,7 +823,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         # test with a proper Type
-        self.kwargs["type"] = self.mock_type
+        self.kwargs["type"] = self.test_type
         # no error is expected
         new_simple_entity = SimpleEntity(**self.kwargs)
     
@@ -832,7 +838,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         test_values = [1, 1.2, "a type"]
         
         for test_value in test_values:
-            self.assertRaises(TypeError, setattr, self.mock_simple_entity,
+            self.assertRaises(TypeError, setattr, self.test_simple_entity,
                               "type", test_value)
     
     
@@ -844,7 +850,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         """
         
         # test with a proper Type
-        self.mock_simple_entity.type = self.mock_type
+        self.test_simple_entity.type = self.test_type
     
     
     
@@ -854,7 +860,7 @@ class SimpleEntityTester(mocker.MockerTestCase):
         False
         """
         
-        self.assertEqual(self.mock_simple_entity.__strictly_typed__, False)
+        self.assertEqual(self.test_simple_entity.__strictly_typed__, False)
     
     
     

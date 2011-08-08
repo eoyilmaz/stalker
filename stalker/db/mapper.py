@@ -9,7 +9,7 @@ You can use your also use your own mappers. See the docs.
 from sqlalchemy.orm import mapper, relationship, backref, synonym
 from stalker.db import tables
 from stalker.db.mixin import (ReferenceMixinDB, StatusMixinDB, ScheduleMixinDB,
-                              TaskMixinDB, ProjectMixinDB)
+                              TaskMixinDB)
 from stalker.core.models import (
     Asset,
     Booking,
@@ -54,7 +54,7 @@ def setup():
         SimpleEntity,
         tables.SimpleEntities,
         polymorphic_on=tables.SimpleEntities.c.db_entity_type,
-        polymorphic_identity=SimpleEntity.entity_type,
+        polymorphic_identity="SimpleEntity",
         properties={
             "_code": tables.SimpleEntities.c.code,
             "code": synonym("_code"),
@@ -99,7 +99,7 @@ def setup():
         Tag,
         tables.Tags,
         inherits=Tag.__base__,
-        polymorphic_identity=Tag.entity_type
+        polymorphic_identity="Tag"
     )
     
     
@@ -109,7 +109,7 @@ def setup():
         PermissionGroup,
         tables.PermissionGroups,
         inherits=PermissionGroup.__base__,
-        polymorphic_identity=PermissionGroup.entity_type
+        polymorphic_identity="PermissionGrou"
     )
     
     # *******************************************************************
@@ -119,7 +119,7 @@ def setup():
         tables.Entities,
         inherits=Entity.__base__,
         inherit_condition=tables.Entities.c.id==tables.SimpleEntities.c.id,
-        polymorphic_identity=Entity.entity_type,
+        polymorphic_identity="Entity",
         properties={
             "_tags": relationship(
                 Tag,
@@ -145,7 +145,7 @@ def setup():
         tables.Users,
         inherits=User.__base__,
         inherit_condition=tables.Users.c.id==tables.Entities.c.id,
-        polymorphic_identity=User.entity_type,
+        polymorphic_identity="User",
         properties={
             "enitites_created": synonym("_entities_created"),
             "enitites_updated": synonym("_entities_updated"),
@@ -178,7 +178,7 @@ def setup():
             "sequences_lead": synonym("_sequences_lead"),
             "_tasks": relationship(
                 Task,
-                secondary=tables.Tasks,
+                secondary=tables.User_Tasks,
                 primaryjoin=tables.Users.c.id==tables.User_Tasks.c.user_id,
                 secondaryjoin=tables.User_Tasks.c.task_id==tables.Tasks.c.id,
                 backref="_resources",
@@ -196,7 +196,7 @@ def setup():
         tables.Departments,
         inherits=Department.__base__,
         inherit_condition=tables.Departments.c.id==tables.Entities.c.id,
-        polymorphic_identity=Department.entity_type,
+        polymorphic_identity="Department",
         properties={
             "_members": relationship(
                 User,
@@ -224,7 +224,7 @@ def setup():
         tables.Statuses,
         inherits=Status.__base__,
         inherit_condition=tables.Statuses.c.id==tables.Entities.c.id,
-        polymorphic_identity=Status.entity_type,
+        polymorphic_identity="Status",
     )
     
     
@@ -236,7 +236,7 @@ def setup():
         tables.StatusLists,
         inherits=StatusList.__base__,
         inherit_condition=tables.StatusLists.c.id==tables.Entities.c.id,
-        polymorphic_identity=StatusList.entity_type,
+        polymorphic_identity="StatusList",
         properties={
             "_statuses": relationship(
                 Status,
@@ -257,7 +257,7 @@ def setup():
         tables.Repositories,
         inherits=Repository.__base__,
         inherit_condition=tables.Repositories.c.id==tables.Entities.c.id,
-        polymorphic_identity=Repository.entity_type,
+        polymorphic_identity="Repository",
         properties={
             "_linux_path": tables.Repositories.c.linux_path,
             "linux_path": synonym("_linux_path"),
@@ -278,7 +278,7 @@ def setup():
         tables.ImageFormats,
         inherits=ImageFormat.__base__,
         inherit_condition=tables.ImageFormats.c.id==tables.Entities.c.id,
-        polymorphic_identity=ImageFormat.entity_type,
+        polymorphic_identity="ImageFormat",
         properties={
             "_width": tables.ImageFormats.c.width,
             "width": synonym("_width"),
@@ -302,7 +302,7 @@ def setup():
         tables.Types,
         inherits=Type.__base__,
         inherit_condition=tables.Types.c.id==tables.Entities.c.id,
-        polymorphic_identity=Type.entity_type,
+        polymorphic_identity="Type",
     )
     
     
@@ -314,7 +314,7 @@ def setup():
         tables.FilenameTemplates,
         inherits=FilenameTemplate.__base__,
         inherit_condition=tables.FilenameTemplates.c.id==tables.Entities.c.id,
-        polymorphic_identity=FilenameTemplate.entity_type,
+        polymorphic_identity="FilenameTemplate",
         properties={
             "_path_code": tables.FilenameTemplates.c.path_code,
             "path_code": synonym("_path_code"),
@@ -342,7 +342,7 @@ def setup():
         tables.Structures,
         inherits=Structure.__base__,
         inherit_condition=tables.Structures.c.id==tables.Entities.c.id,
-        polymorphic_identity=Structure.entity_type,
+        polymorphic_identity="Structure",
         properties={
             "_templates": relationship(
                 FilenameTemplate,
@@ -363,7 +363,7 @@ def setup():
         tables.Links,
         inherits=Link.__base__,
         inherit_condition=tables.Links.c.id==tables.Entities.c.id,
-        polymorphic_identity=Link.entity_type,
+        polymorphic_identity="Link",
         properties={
             "_path": tables.Links.c.path,
             "path": synonym("_path"),
@@ -382,7 +382,7 @@ def setup():
         tables.Notes,
         inherits=Note.__base__,
         inherit_condition=tables.Notes.c.id==tables.SimpleEntities.c.id,
-        polymorphic_identity=Note.entity_type,
+        polymorphic_identity="Note",
         properties={
             "_content": tables.Notes.c.content,
             "content": synonym("_content"),
@@ -395,7 +395,7 @@ def setup():
     # Project
     project_mapper_arguments = dict(
         inherits=Project.__base__,
-        polymorphic_identity=Project.entity_type,
+        polymorphic_identity="Project",
         inherit_condition=tables.Projects.c.id==tables.Entities.c.id,
         properties={
             "_lead": relationship(
@@ -458,13 +458,30 @@ def setup():
         **project_mapper_arguments
     )
     
+    # ------------------------------------------------------------------------
+    # NOTES:
+    #
+    # Because a Project instance is mixed with the TaskMixin it has a project
+    # attribute. In SOM, the project instantly assigns itself to the project
+    # attribute (in __init__). But this creates a weird position in database
+    # table and mapper configuration where for the Project class the mapper
+    # should configure the _project attribute with the post_update flag is set
+    # to True, and this implies the project_id coloumn to be Null for a while,
+    # at least SQLAlchemy does an UPDATE to assign the Project itself to the
+    # project attribute, thus the project_id column shouldn't be nullable for
+    # Project class, but it is not neccessary for the others.
+    # 
+    # And because SOM is also checking if the project attribute is None or Null
+    # for the created instance, I consider doing this safe.
+    # ------------------------------------------------------------------------
+    
     
     
     # *******************************************************************
     # Task
     task_mapper_arguments = dict(
         inherits=Task.__base__,
-        polymorphic_identity=Task.entity_type,
+        polymorphic_identity="Task",
         inherit_condition=tables.Tasks.c.id==tables.Entities.c.id,
         properties={
             "resources": synonym("_resources"),
@@ -490,16 +507,9 @@ def setup():
     # Asset
     asset_mapper_arguments = dict(
         inherits=Asset.__base__,
-        polymorphic_identity=Asset.entity_type,
+        polymorphic_identity="Asset",
         inherit_condition=tables.Assets.c.id==tables.Entities.c.id,
         properties={
-            "_project": relationship(
-                Project,
-                primaryjoin=\
-                    tables.Assets.c.project_id==tables.Projects.c.id,
-                backref="_assets"
-            ),
-            "project": synonym("_project"),
             "shots": synonym("_shots"),
         }
     )
@@ -513,9 +523,6 @@ def setup():
     # then with TaskMixin
     TaskMixinDB.setup(Asset, tables.Assets, asset_mapper_arguments)
     
-    # then with ProjectMixin
-    ProjectMixinDB.setup(Asset, tables.Assets, asset_mapper_arguments)
-    
     # complete mapping
     mapper(Asset, tables.Assets, **asset_mapper_arguments)
     
@@ -526,7 +533,7 @@ def setup():
     shot_mapper_arguments = dict(
         inherits=Shot.__base__,
         inherit_condition=tables.Shots.c.id==tables.Entities.c.id,
-        polymorphic_identity=Shot.entity_type,
+        polymorphic_identity="Shot",
         properties={
             "_assets": relationship(
                 Asset,
@@ -577,16 +584,16 @@ def setup():
     # Sequence
     sequence_mapper_arguments = dict(
         inherits=Sequence.__base__,
-        polymorphic_identity=Sequence.entity_type,
+        polymorphic_identity="Sequence",
         inherit_condition=tables.Sequences.c.id==tables.Entities.c.id,
         properties={
-            "_project": relationship(
-                Project,
-                primaryjoin=tables.Sequences.c.project_id==\
-                    tables.Projects.c.id,
-                backref="_sequences"
-            ),
-            "project": synonym("project"),
+            #"_project": relationship(
+                #Project,
+                #primaryjoin=tables.Sequences.c.project_id==\
+                    #tables.Projects.c.id,
+                #backref="_sequences"
+            #),
+            #"project": synonym("project"),
             "_shots": relationship(
                 Shot,
                 primaryjoin=tables.Shots.c.sequence_id==\

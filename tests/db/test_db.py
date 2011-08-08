@@ -559,146 +559,148 @@ class DatabaseModelsTester(unittest.TestCase):
         
         commercial_type = Type(name="Commercial", target_entity_type=Project)
         
-        mock_project = Project(
+        test_project = Project(
             name="Test Project",
             status_list=project_statusList,
-            status=0,
-            type=commercial_type
+            type=commercial_type,
         )
         
-        task_status_list = StatusList(
-            name="Task Status List",
-            statuses=[status1, status2, status3],
-            target_entity_type=Task.entity_type,
-        )
+        print test_project.project
+        print test_project._project
         
-        asset_statusList = StatusList(
-            name="Asset Status List",
-            statuses=[status1, status2, status3],
-            target_entity_type=Asset.entity_type
-        )
-        
-        kwargs = {
-            "name": "Test Asset",
-            "description": "This is a test Asset object",
-            "type": asset_type,
-            "project": mock_project,
-            "status": 0,
-            "status_list": asset_statusList,
-        }
-        
-        test_asset = Asset(**kwargs)
-        
-        mock_task1 = Task(
-            name="test task 1", status=0,
-            status_list=task_status_list,
-            project=mock_project,
-            task_of=test_asset,
-        )
-        
-        mock_task2 = Task(
-            name="test task 2", status=0,
-            status_list=task_status_list,
-            project=mock_project,
-            task_of=test_asset,
-        )
-        
-        mock_task3 = Task(
-            name="test task 3", status=0,
-            status_list=task_status_list,
-            project=mock_project,
-            task_of=test_asset,
-        )
-        
-        db.session.add(test_asset)
+        db.session.add(test_project)
         db.session.commit()
         
-        # create a couple of shots
-        sequence_status_list = StatusList(
-            name="Sequence Statuses",
-            statuses=[status1, status2, status3],
-            target_entity_type="Sequence"
-        )
+        #task_status_list = StatusList(
+            #name="Task Status List",
+            #statuses=[status1, status2, status3],
+            #target_entity_type=Task.entity_type,
+        #)
         
-        mock_sequence = Sequence(
-            name="Test Sequence",
-            project=mock_project,
-            status=0,
-            status_list=sequence_status_list
-        )
+        #asset_statusList = StatusList(
+            #name="Asset Status List",
+            #statuses=[status1, status2, status3],
+            #target_entity_type=Asset.entity_type
+        #)
         
-        shot_status_list = StatusList(
-            name="Shot Statuses",
-            statuses=[status1, status2, status3],
-            target_entity_type="Shot",
-        )
+        #kwargs = {
+            #"name": "Test Asset",
+            #"description": "This is a test Asset object",
+            #"type": asset_type,
+            #"project": test_project,
+            #"status": 0,
+            #"status_list": asset_statusList,
+        #}
         
-        mock_shot1 = Shot(
-            code="SH001",
-            sequence=mock_sequence,
-            status_list=shot_status_list
-        )
+        #test_asset = Asset(**kwargs)
         
-        mock_shot2 = Shot(
-            code="SH002",
-            sequence=mock_sequence,
-            status_list=shot_status_list
-        )
+        #mock_task1 = Task(
+            #name="test task 1", status=0,
+            #status_list=task_status_list,
+            #task_of=test_asset,
+        #)
         
-        mock_shot3 = Shot(
-            code="SH003",
-            sequence=mock_sequence,
-            status_list=shot_status_list
-        )
+        #mock_task2 = Task(
+            #name="test task 2", status=0,
+            #status_list=task_status_list,
+            #task_of=test_asset,
+        #)
         
-        test_asset.shots = [mock_shot1, mock_shot2, mock_shot3]
+        #mock_task3 = Task(
+            #name="test task 3", status=0,
+            #status_list=task_status_list,
+            #task_of=test_asset,
+        #)
         
-        db.session.add_all([mock_shot1, mock_shot2, mock_shot3])
-        db.session.commit()
+        #db.session.add(test_asset)
+        #db.session.commit()
         
-        code = test_asset.code
-        created_by = test_asset.created_by
-        date_created = test_asset.date_created
-        date_updated = test_asset.date_updated
-        description = test_asset.description
-        name = test_asset.name
-        nice_name = test_asset.nice_name
-        notes = test_asset.notes
-        project= test_asset.project
-        references = test_asset.references
-        shots = test_asset.shots
-        status = test_asset.status
-        status_list = test_asset.status_list
-        tags = test_asset.tags
-        tasks = test_asset.tasks
-        type = test_asset.type
-        updated_by = test_asset.updated_by
+        ## create a couple of shots
+        #sequence_status_list = StatusList(
+            #name="Sequence Statuses",
+            #statuses=[status1, status2, status3],
+            #target_entity_type="Sequence"
+        #)
         
-        del(test_asset)
+        #mock_sequence = Sequence(
+            #name="Test Sequence",
+            #project=test_project,
+            #status=0,
+            #status_list=sequence_status_list
+        #)
         
-        test_asset_DB = db.query(Asset).\
-                      filter_by(name=kwargs["name"]).one()
+        #shot_status_list = StatusList(
+            #name="Shot Statuses",
+            #statuses=[status1, status2, status3],
+            #target_entity_type="Shot",
+        #)
         
-        assert(isinstance(test_asset_DB, Asset))
+        #mock_shot1 = Shot(
+            #code="SH001",
+            #sequence=mock_sequence,
+            #status_list=shot_status_list
+        #)
         
-        #self.assertEqual(test_asset, test_asset_DB)
-        self.assertEqual(code, test_asset_DB.code)
-        self.assertEqual(created_by, test_asset_DB.created_by)
-        self.assertEqual(date_created, test_asset_DB.date_created)
-        self.assertEqual(date_updated, test_asset_DB.date_updated)
-        self.assertEqual(description, test_asset_DB.description)
-        self.assertEqual(name, test_asset_DB.name)
-        self.assertEqual(nice_name, test_asset_DB.nice_name)
-        self.assertEqual(notes, test_asset_DB.notes)
-        self.assertEqual(project, test_asset_DB.project)
-        self.assertEqual(references, test_asset_DB.references)
-        self.assertEqual(shots, test_asset_DB.shots)
-        self.assertEqual(status, test_asset_DB.status)
-        self.assertEqual(status_list, test_asset_DB.status_list)
-        self.assertEqual(tags, test_asset_DB.tags)
-        self.assertEqual(tasks, test_asset_DB.tasks)
-        self.assertEqual(type, test_asset_DB.type)
-        self.assertEqual(updated_by, test_asset_DB.updated_by)
+        #mock_shot2 = Shot(
+            #code="SH002",
+            #sequence=mock_sequence,
+            #status_list=shot_status_list
+        #)
+        
+        #mock_shot3 = Shot(
+            #code="SH003",
+            #sequence=mock_sequence,
+            #status_list=shot_status_list
+        #)
+        
+        #test_asset.shots = [mock_shot1, mock_shot2, mock_shot3]
+        
+        #db.session.add_all([mock_shot1, mock_shot2, mock_shot3])
+        #db.session.commit()
+        
+        #code = test_asset.code
+        #created_by = test_asset.created_by
+        #date_created = test_asset.date_created
+        #date_updated = test_asset.date_updated
+        #description = test_asset.description
+        #name = test_asset.name
+        #nice_name = test_asset.nice_name
+        #notes = test_asset.notes
+        #project= test_asset.project
+        #references = test_asset.references
+        #shots = test_asset.shots
+        #status = test_asset.status
+        #status_list = test_asset.status_list
+        #tags = test_asset.tags
+        #tasks = test_asset.tasks
+        #type = test_asset.type
+        #updated_by = test_asset.updated_by
+        
+        #del(test_asset)
+        
+        #test_asset_DB = db.query(Asset).\
+                      #filter_by(name=kwargs["name"]).one()
+        
+        #assert(isinstance(test_asset_DB, Asset))
+        
+        ##self.assertEqual(test_asset, test_asset_DB)
+        #self.assertEqual(code, test_asset_DB.code)
+        #self.assertEqual(created_by, test_asset_DB.created_by)
+        #self.assertEqual(date_created, test_asset_DB.date_created)
+        #self.assertEqual(date_updated, test_asset_DB.date_updated)
+        #self.assertEqual(description, test_asset_DB.description)
+        #self.assertEqual(name, test_asset_DB.name)
+        #self.assertEqual(nice_name, test_asset_DB.nice_name)
+        #self.assertEqual(notes, test_asset_DB.notes)
+        #self.assertEqual(project, test_asset_DB.project)
+        #self.assertEqual(references, test_asset_DB.references)
+        #self.assertEqual(shots, test_asset_DB.shots)
+        #self.assertEqual(status, test_asset_DB.status)
+        #self.assertEqual(status_list, test_asset_DB.status_list)
+        #self.assertEqual(tags, test_asset_DB.tags)
+        #self.assertEqual(tasks, test_asset_DB.tasks)
+        #self.assertEqual(type, test_asset_DB.type)
+        #self.assertEqual(updated_by, test_asset_DB.updated_by)
     
     
     

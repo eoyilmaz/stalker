@@ -294,7 +294,10 @@ class TaskMixinDB(object):
                 "project_id",
                 Integer,
                 ForeignKey(tables.Projects.c.id),
-                nullable=False
+                # cannot use nullable cause a Project object needs
+                # insert itself as the project and it needs post_update
+                # thus nullable should be True
+                #nullable=False,
             )
         )
         
@@ -327,8 +330,10 @@ class TaskMixinDB(object):
             "_project": relationship(
                 Project,
                 primaryjoin=\
-                    class_table.c.project_id==\
-                    tables.Projects.c.id,
+                    class_table.c.project_id==tables.Projects.c.id,
+                post_update=True, # for project itself
+                uselist=False,
+                #remote_side=[tables.Projects.c.id],
             ),
             "project": synonym("_project"),
             "_tasks": relationship(

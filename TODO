@@ -1,11 +1,6 @@
 TODO:
 =====
 
- * Shot should also have start_date, due_date and duration attributes, but
-   instead of a real Schedule part it should calculate these values from the
-   Tasks it contains. And any change in the end_date should also scale the
-   date values of the contained Tasks.
-
  * All the attributes that has a back reference on other objects should reset
    the back reference value to Null or to the default value whenever they are
    set to None or empty list. For example, when the Project objects sequences
@@ -23,6 +18,19 @@ TODO:
    unicode.
 
  * Convert all the list comparison test to assertItemsEqual
+
+ * All the classes which are mixed with TaskMixin should have a start and end
+   date attribute which will be set to the start date of the first task to the
+   due_date of the last task.
+
+ * In the Task class all the time calculation should be done over the
+   datetime.datetime class instead of datetime.date object. This will let us
+   to increase the granularity of the scheduling.
+
+ * Replace all the Mocker based tests with Unittest's which are using real
+   objects. It was necessary to use the Mocker library while designing the rest
+   of the system, but it is now making things complex and started to hide the
+   changes of one object from the others in the system.
 
 DONE:
 =====

@@ -1,8 +1,8 @@
 #-*- coding: utf-8 -*-
 
 
-
-import mocker
+import platform
+import unittest
 from stalker.core.models import Repository, Tag
 
 
@@ -11,7 +11,7 @@ from stalker.core.models import Repository, Tag
 
 
 ########################################################################
-class RepositoryTester(mocker.MockerTestCase):
+class RepositoryTester(unittest.TestCase):
     """tests the Repository class
     """
     
@@ -22,31 +22,20 @@ class RepositoryTester(mocker.MockerTestCase):
         """setup the test
         """
         
-        # create a couple of mock tags
-        self.mock_tag1 = self.mocker.mock(Tag)
-        self.mock_tag2 = self.mocker.mock(Tag)
-        
-        # ------------
-        # replace platform
-        # weirdly I need to do it here...
-        # then call it for a second time inside the test method
-        tmp = self.mocker.replace("platform.system")
-        tmp()
-        self.mocker.count(0,1000)
-        # ------------
-        
-        self.mocker.replay()
+        # create a couple of test tags
+        self.test_tag1 = Tag(name="test tag 1")
+        self.test_tag2 = Tag(name="test tag 2")
         
         self.kwargs = {
             "name": "a repository",
             "description": "this is for testing purposes",
-            "tags": [self.mock_tag1, self.mock_tag2],
+            "tags": [self.test_tag1, self.test_tag2],
             "linux_path": "~/M/Projects",
             "osx_path": "/Volumes/M/Projects",
             "windows_path": "M:\\Projects"
         }
         
-        self.mock_repo = Repository(**self.kwargs)
+        self.test_repo = Repository(**self.kwargs)
     
     
     
@@ -76,7 +65,7 @@ class RepositoryTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_repo,
+                self.test_repo,
                 "linux_path",
                 test_value
             )
@@ -89,8 +78,8 @@ class RepositoryTester(mocker.MockerTestCase):
         """
         
         test_value = "~/newRepoPath/Projects"
-        self.mock_repo.linux_path = test_value
-        self.assertEqual(self.mock_repo.linux_path, test_value)
+        self.test_repo.linux_path = test_value
+        self.assertEqual(self.test_repo.linux_path, test_value)
     
     
     
@@ -120,7 +109,7 @@ class RepositoryTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_repo,
+                self.test_repo,
                 "windows_path",
                 test_value
             )
@@ -133,8 +122,8 @@ class RepositoryTester(mocker.MockerTestCase):
         """
         
         test_value = "~/newRepoPath/Projects"
-        self.mock_repo.windows_path = test_value
-        self.assertEqual(self.mock_repo.windows_path, test_value)
+        self.test_repo.windows_path = test_value
+        self.assertEqual(self.test_repo.windows_path, test_value)
     
     
     
@@ -164,7 +153,7 @@ class RepositoryTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_repo,
+                self.test_repo,
                 "osx_path",
             test_value
             )
@@ -177,70 +166,38 @@ class RepositoryTester(mocker.MockerTestCase):
         """
         
         test_value = "~/newRepoPath/Projects"
-        self.mock_repo.osx_path = test_value
-        self.assertEqual(self.mock_repo.osx_path, test_value)
+        self.test_repo.osx_path = test_value
+        self.assertEqual(self.test_repo.osx_path, test_value)
     
     
     
     #----------------------------------------------------------------------
+    @unittest.skipUnless(platform.system()=="Windows", "requires Windows")
     def test_path_returns_properly_for_windows(self):
         """testing if path returns the correct value for the os
         """
         
-        assert(isinstance(self.mocker, mocker.Mocker))
-        
-        # test for windows
-        tmp = self.mocker.replace("platform.system")
-        tmp()
-        
-        self.mocker.result("Windows")
-        self.mocker.count(0, 1000)
-        self.mocker.replay()
-        
-        #import platform
-        #self.assertEqual(platform.system(), "Windows")
-        
-        new_mock_repo = Repository(**self.kwargs)
-        
-        self.assertEqual(new_mock_repo.path, new_mock_repo.windows_path)
+        self.assertEqual(self.test_repo.path, self.test_repo.windows_path)
     
     
     
     #----------------------------------------------------------------------
+    @unittest.skipUnless(platform.system()=="Linux", "requires Linux")
     def test_path_returns_properly_for_linux(self):
         """testing if path returns the correct value for the os
         """
         
-        assert(isinstance(self.mocker, mocker.Mocker))
-        
-        tmp = self.mocker.replace("platform.system")
-        tmp()
-        
-        # test for linux
-        self.mocker.result("Linux")
-        self.mocker.count(0, 1000)
-        self.mocker.replay()
-        
-        self.assertEqual(self.mock_repo.path, self.mock_repo.linux_path)
+        self.assertEqual(self.test_repo.path, self.test_repo.linux_path)
     
     
     
     #----------------------------------------------------------------------
+    @unittest.skipUnless(platform.system()=="Darwin", "requires OSX")
     def test_path_returns_properly_for_osx(self):
         """testing if path returns the correct value for the os
         """
         
-        assert(isinstance(self.mocker, mocker.Mocker))
-        
-        tmp = self.mocker.replace("platform.system")
-        tmp()
-        
-        # test for osx
-        self.mocker.result("Darwin")
-        self.mocker.count(0, 1000)
-        self.mocker.replay()
-        
-        self.assertEqual(self.mock_repo.path, self.mock_repo.osx_path)
+        self.assertEqual(self.test_repo.path, self.test_repo.osx_path)
     
     
     
