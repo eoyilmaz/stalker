@@ -47,17 +47,6 @@ v0.1.1.a10
  * Merged the ``ProjectMixinDB`` with ``TaskMixinDB`` and
    removed the ``ProjectMixinDB`` from the database part of the mixins.
 
- * The tests of the :class:`~stalker.core.models.SimpleEntity`,
-   :class:`~stalker.core.models.Entity`,
-   :class:`~stalker.core.models.Repository`,
-   :class:`~stalker.core.models.Department`, :class:`~stalker.core.models.User`
-   :class:`~stalker.core.models.Project`,
-   :class:`~stalker.core.models.Sequence`,
-   :class:`~stalker.core.models.Structure`,
-   :class:`~stalker.core.models.Comment`, :class:`~stalker.core.models.Link`
-   and :class:`~stalker.core.mixins.StatusMixin` classes are not using the
-   Mocker library anymore.
-
  * The :class:`~stalker.core.models.Project` doesn't accept an ``assets`` nor
    a ``sequences`` arguments anymore. Which was meaningles previously, cause it
    is not possible to create an :class:`~stalker.core.models.Asset` or a
@@ -71,6 +60,10 @@ v0.1.1.a10
  * The :class:`~stalker.core.models.Asset` now updates the
    :attr:`~stalker.core.models.Project.assets` attribute in the
    :class:`~stalker.core.models.Project` class.
+
+ * From now on none of the tests are using the Mocker library. Thus all the
+   little changes to any of the classes are present in all the tests which are
+   using those classes. This makes the tests more robust and current.
 
 v0.1.1.a9
 ---------

@@ -2,8 +2,8 @@
 
 
 
+import unittest
 import datetime
-import mocker
 
 from stalker.core.mixins import TaskMixin
 from stalker.core.models import (Status, StatusList, Task, Type, Project,
@@ -16,7 +16,7 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class TaskMixinTester(mocker.MockerTestCase):
+class TaskMixinTester(unittest.TestCase):
     """Tests the TaskMixin
     """
     
@@ -38,17 +38,46 @@ class TaskMixinTester(mocker.MockerTestCase):
             type=self.repository_type,
         )
         
-        self.mock_project1 = self.mocker.mock(Project)
-        self.mock_project2 = self.mocker.mock(Project)
+        # statuses
+        self.status1 = Status(name="Status1", code="STS1")
+        self.status2 = Status(name="Status2", code="STS2")
+        self.status3 = Status(name="Status3", code="STS3")
         
-        self.mock_task1 = self.mocker.mock(Task)
-        self.mock_task2 = self.mocker.mock(Task)
-        self.mock_task3 = self.mocker.mock(Task)
+        # project status list
+        self.project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[
+                self.status1,
+                self.status2,
+                self.status3,
+            ],
+            target_entity_type=Project
+        )
         
-        self.mocker.replay()
+        # project type
+        self.test_project_type = Type(
+            name="Test Project Type",
+            target_entity_type=Project,
+        )
+        
+        # create projects
+        self.test_project1 = Project(
+            name="Test Project 1",
+            type=self.test_project_type,
+            status_list=self.project_status_list,
+            repository=self.test_repository,
+        )
+        
+        self.test_project2 = Project(
+            name="Test Project 2",
+            type=self.test_project_type,
+            status_list=self.project_status_list,
+            repository=self.test_repository,
+        )
+        
         
         self.kwargs = {
-            "project": self.mock_project1,
+            "project": self.test_project1,
         }
         
         class BarClass(object):
@@ -62,7 +91,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         
         self.FooMixedInClass = FooMixedInClass
         
-        self.mock_foo_obj = FooMixedInClass(**self.kwargs)
+        self.test_foo_obj = FooMixedInClass(**self.kwargs)
     
     
     
@@ -72,8 +101,8 @@ class TaskMixinTester(mocker.MockerTestCase):
         #set to None
         #"""
         
-        #self.mock_foo_obj.tasks = None
-        #self.assertEqual(self.mock_foo_obj.tasks, [])
+        #self.test_foo_obj.tasks = None
+        #self.assertEqual(self.test_foo_obj.tasks, [])
     
     
     #----------------------------------------------------------------------
@@ -81,7 +110,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         """testing if the tasks attribute is read-only
         """
         
-        self.assertRaises(AttributeError, setattr, self.mock_foo_obj, "tasks",
+        self.assertRaises(AttributeError, setattr, self.test_foo_obj, "tasks",
                           [])
     
     
@@ -98,7 +127,7 @@ class TaskMixinTester(mocker.MockerTestCase):
             #self.assertRaises(
                 #TypeError,
                 #setattr,
-                #self.mock_foo_obj,
+                #self.test_foo_obj,
                 #"tasks",
                 #test_value
             #)
@@ -115,7 +144,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         #self.assertRaises(
             #TypeError,
             #setattr,
-            #self.mock_foo_obj,
+            #self.test_foo_obj,
             #"tasks",
             #test_value
         #)
@@ -134,7 +163,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
-                self.mock_foo_obj.tasks.__setitem__,
+                self.test_foo_obj.tasks.__setitem__,
                 "0",
                 test_value
             )
@@ -146,7 +175,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         """testing if the tasks attribute is a ValidatedList instance
         """
         
-        self.assertIsInstance(self.mock_foo_obj.tasks, ValidatedList)
+        self.assertIsInstance(self.test_foo_obj.tasks, ValidatedList)
     
     
     
@@ -214,7 +243,7 @@ class TaskMixinTester(mocker.MockerTestCase):
             task_of=new_project2,
         )
         
-        #self.mock_foo_obj.tasks = [new_task1, new_task2]
+        #self.test_foo_obj.tasks = [new_task1, new_task2]
         
         # now check if the task_of of the tasks are also having a reference
         # to the new_project1
@@ -243,21 +272,21 @@ class TaskMixinTester(mocker.MockerTestCase):
         self.assertEqual(new_task4.task_of, new_project1)
         
         # now append one of the old ones
-        self.mock_foo_obj.tasks.append(new_task1)
+        self.test_foo_obj.tasks.append(new_task1)
         
         # check it
-        self.assertEqual(new_task1.task_of, self.mock_foo_obj)
+        self.assertEqual(new_task1.task_of, self.test_foo_obj)
         
         # poping or removing elements should raise RuntimeError
-        self.assertRaises(RuntimeError, self.mock_foo_obj.tasks.pop, 0)
-        self.assertRaises(RuntimeError, self.mock_foo_obj.tasks.remove,
+        self.assertRaises(RuntimeError, self.test_foo_obj.tasks.pop, 0)
+        self.assertRaises(RuntimeError, self.test_foo_obj.tasks.remove,
                           new_task1)
         
         # extend it
-        self.mock_foo_obj.tasks.extend([new_task2, new_task4])
+        self.test_foo_obj.tasks.extend([new_task2, new_task4])
         
-        self.assertEqual(new_task2.task_of, self.mock_foo_obj)
-        self.assertEqual(new_task4.task_of, self.mock_foo_obj)
+        self.assertEqual(new_task2.task_of, self.test_foo_obj)
+        self.assertEqual(new_task4.task_of, self.test_foo_obj)
     
     
     
@@ -286,7 +315,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         #"""testing if a TypeError will be raised when the project attribute is
         #set to None
         #"""
-        #self.assertRaises(TypeError, setattr, self.mock_foo_obj, "project",
+        #self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
                           #None)
     
     
@@ -306,7 +335,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         #"""testing if a TypeError will be raised when the project attribute is
         #set to something other than a stalker.core.models.Project instance
         #"""
-        #self.assertRaises(TypeError, setattr, self.mock_foo_obj, "project",
+        #self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
                           #"a project")
     
     
@@ -315,8 +344,8 @@ class TaskMixinTester(mocker.MockerTestCase):
     #def test_project_attribute_is_working_properly(self):
         #"""testing if the project attribute is working properly
         #"""
-        #self.mock_foo_obj.project = self.mock_project2
-        #self.assertEqual(self.mock_foo_obj.project, self.mock_project2)
+        #self.test_foo_obj.project = self.test_project2
+        #self.assertEqual(self.test_foo_obj.project, self.test_project2)
     
     
     
@@ -325,8 +354,8 @@ class TaskMixinTester(mocker.MockerTestCase):
         """testing if the project attribute is read only
         """
         
-        self.assertRaises(AttributeError, setattr, self.mock_foo_obj,
-                          "project", self.mock_project2)
+        self.assertRaises(AttributeError, setattr, self.test_foo_obj,
+                          "project", self.test_project2)
     
     
     

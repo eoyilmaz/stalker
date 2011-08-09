@@ -2,8 +2,9 @@
 
 
 
-import datetime
 import unittest
+import datetime
+
 from stalker.conf import defaults
 from stalker.core.mixins import StatusMixin
 from stalker.core.models import (Status, StatusList)

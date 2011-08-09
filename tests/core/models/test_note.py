@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import Note
 
 
@@ -11,7 +11,7 @@ from stalker.core.models import Note
 
 
 ########################################################################
-class NoteTester(mocker.MockerTestCase):
+class NoteTester(unittest.TestCase):
     """tests  the Note class
     """
     
@@ -29,7 +29,7 @@ class NoteTester(mocker.MockerTestCase):
         }
         
         # create a Note object
-        self.mock_note = Note(**self.kwargs)
+        self.test_note = Note(**self.kwargs)
     
     
     
@@ -62,7 +62,7 @@ class NoteTester(mocker.MockerTestCase):
         """
         
         # nothing should happen
-        self.mock_note.content = None
+        self.test_note.content = None
     
     
     
@@ -84,7 +84,7 @@ class NoteTester(mocker.MockerTestCase):
         """
         
         # nothing should happen
-        self.mock_note.content = ""
+        self.test_note.content = ""
     
     
     
@@ -115,7 +115,7 @@ class NoteTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_note,
+                self.test_note,
                 "content",
                 test_value
             )
@@ -130,9 +130,9 @@ class NoteTester(mocker.MockerTestCase):
         new_content = "This is my new content for the note, and I expect it to\
         work fine when I assign it to a Note object"
         
-        self.mock_note.content = new_content
+        self.test_note.content = new_content
         
-        self.assertEqual(self.mock_note.content, new_content)
+        self.assertEqual(self.test_note.content, new_content)
     
     
     
