@@ -8,7 +8,7 @@ import unittest
 from stalker.conf import defaults
 from stalker.core.errors import CircularDependencyError
 from stalker.core.models import (SimpleEntity, Entity, Task, User, Status,
-                                 StatusList, Project, Type)
+                                 StatusList, Project, Type, Repository)
 from stalker.core.mixins import TaskMixin
 from stalker.ext.validatedList import ValidatedList
 
@@ -69,10 +69,21 @@ class TaskTester(unittest.TestCase):
             target_entity_type=Project,
         )
         
+        self.test_data_test_repository_type = Type(
+            name="Test Repository Type",
+            target_entity_type=Repository,
+        )
+        
+        self.test_data_test_repository = Repository(
+            name="Test Repsitory",
+            type=self.test_data_test_repository_type
+        )
+        
         self.test_data_project1 = Project(
             name="Test Project1",
             type=self.test_data_movie_project_type,
             status_list=self.test_data_project_status_list,
+            repository=self.test_data_test_repository
         )
         
         self.test_data_user1 = User(
@@ -1745,6 +1756,7 @@ class TaskTester(unittest.TestCase):
             name="Test Project",
             status_list=project_status_list,
             type=commercial_project_type,
+            repository=self.test_data_test_repository
         )
         
         someClass_ins = SomeClass(project=new_project)
@@ -1787,6 +1799,7 @@ class TaskTester(unittest.TestCase):
             name="Test Project",
             status_list=project_status_list,
             type=commercial_project_type,
+            repository=self.test_data_test_repository,
         )
         
         someClass_ins = SomeClass(project=new_project)
@@ -1830,12 +1843,14 @@ class TaskTester(unittest.TestCase):
             name="Test Project 1",
             status_list=project_status_list,
             type=project_type_commercial,
+            repository=self.test_data_test_repository,
         )
         
         new_project2 = Project(
             name="Test Project 2",
             status_list=project_status_list,
             type=project_type_commercial,
+            repository=self.test_data_test_repository,
         )
         
         # create a Task

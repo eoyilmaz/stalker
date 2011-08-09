@@ -6,7 +6,8 @@ import datetime
 import mocker
 
 from stalker.core.mixins import TaskMixin
-from stalker.core.models import (Status, StatusList, Task, Type, Project)
+from stalker.core.models import (Status, StatusList, Task, Type, Project,
+                                 Repository)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -25,6 +26,17 @@ class TaskMixinTester(mocker.MockerTestCase):
     def setUp(self):
         """setup the test
         """
+        
+        # create a repository
+        self.repository_type = Type(
+            name="Test Repository Type",
+            target_entity_type=Repository
+        )
+        
+        self.test_repository = Repository(
+            name="Test Repository",
+            type=self.repository_type,
+        )
         
         self.mock_project1 = self.mocker.mock(Project)
         self.mock_project2 = self.mocker.mock(Project)
@@ -54,50 +66,59 @@ class TaskMixinTester(mocker.MockerTestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_tasks_attribute_is_None(self):
-        """testing if the tasks attribute will be set to empty list when it is
-        set to None
-        """
+    ##----------------------------------------------------------------------
+    #def test_tasks_attribute_is_None(self):
+        #"""testing if the tasks attribute will be set to empty list when it is
+        #set to None
+        #"""
         
-        self.mock_foo_obj.tasks = None
-        self.assertEqual(self.mock_foo_obj.tasks, [])
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tasks_attribute_is_not_a_list(self):
-        """testing if a TypeError will be raised when the tasks attribute is
-        tried to set to a non list object
-        """
-        
-        test_values = [1, 1.2, "a str"]
-        
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.mock_foo_obj,
-                "tasks",
-                test_value
-            )
-    
+        #self.mock_foo_obj.tasks = None
+        #self.assertEqual(self.mock_foo_obj.tasks, [])
     
     
     #----------------------------------------------------------------------
-    def test_tasks_attribute_is_set_to_a_list_of_other_objects_than_Task(self):
-        """testing if a TypeError will be raised when the items in the tasks
-        attribute is not Task instance
+    def test_tasks_attribute_is_read_only(self):
+        """testing if the tasks attribute is read-only
         """
         
-        test_value = [1, 1.2, "a str", ["a", "list"]]
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.mock_foo_obj,
-            "tasks",
-            test_value
-        )
+        self.assertRaises(AttributeError, setattr, self.mock_foo_obj, "tasks",
+                          [])
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_tasks_attribute_is_not_a_list(self):
+        #"""testing if a TypeError will be raised when the tasks attribute is
+        #tried to set to a non list object
+        #"""
+        
+        #test_values = [1, 1.2, "a str"]
+        
+        #for test_value in test_values:
+            #self.assertRaises(
+                #TypeError,
+                #setattr,
+                #self.mock_foo_obj,
+                #"tasks",
+                #test_value
+            #)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_tasks_attribute_is_set_to_a_list_of_other_objects_than_Task(self):
+        #"""testing if a TypeError will be raised when the items in the tasks
+        #attribute is not Task instance
+        #"""
+        
+        #test_value = [1, 1.2, "a str", ["a", "list"]]
+        #self.assertRaises(
+            #TypeError,
+            #setattr,
+            #self.mock_foo_obj,
+            #"tasks",
+            #test_value
+        #)
     
     
     
@@ -147,7 +168,7 @@ class TaskMixinTester(mocker.MockerTestCase):
         project_statusList = StatusList(
             name="Project Statuses",
             statuses=[status_wip, status_complete],
-            target_entity_type=Project
+            target_entity_type=Project,
         )
         
         commercial_project_type = Type(
@@ -158,13 +179,15 @@ class TaskMixinTester(mocker.MockerTestCase):
         new_project1 = Project(
             name="Test Project 1",
             status_list=project_statusList,
-            type=commercial_project_type
+            type=commercial_project_type,
+            repository=self.test_repository,
         )
         
         new_project2 = Project(
             name="Test Project 2",
             status_list=project_statusList,
-            type=commercial_project_type
+            type=commercial_project_type,
+            repository=self.test_repository,
         )
         
         new_task1 = Task(

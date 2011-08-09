@@ -4,7 +4,7 @@
 
 import unittest
 from stalker.core.models import (Asset, Task, Entity, Project, Link, Status,
-                                 StatusList, Shot, Type, Sequence)
+                                 StatusList, Shot, Type, Sequence, Repository)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -87,11 +87,23 @@ class AssetTester(unittest.TestCase):
             target_entity_type=Asset
         )
         
+        self.test_data_repository_type = Type(
+            name="Test Repository Type",
+            target_entity_type=Repository,
+        )
+        
+        # repository
+        self.test_data_repository = Repository(
+            name="Test Repository",
+            type=self.test_data_repository_type,
+        )
+        
         # project
         self.test_data_project1 = Project(
             name="Test Project1",
             type=self.test_data_commmercial_project,
             status_list=self.test_data_project_status_list,
+            repository=self.test_data_repository,
         )
         
         # sequence
@@ -271,7 +283,7 @@ class AssetTester(unittest.TestCase):
         project_status_list = StatusList(
             name="Project Statuses",
             statuses=[status1],
-            target_entity_type=Project
+            target_entity_type=Project,
         )
         
         commercial_project_type = Type(
@@ -283,6 +295,7 @@ class AssetTester(unittest.TestCase):
             name="Commercial",
             type=commercial_project_type,
             status_list=project_status_list,
+            repository=self.test_data_repository,
         )
         
         character_asset_type = Type(
@@ -351,6 +364,7 @@ class AssetTester(unittest.TestCase):
             name="Commercial",
             type=commercial_project_type,
             status_list=project_status_list,
+            repository=self.test_data_repository,
         )
         
         character_asset_type = Type(

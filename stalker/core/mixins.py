@@ -567,7 +567,7 @@ class TaskMixin(object):
         # object is not allowed
         if len(tasks_removed) > 0:
             raise RuntimeError("tasks can not be removed in this way, please "
-                            "assign the task to a new taskable object")
+                               "assign the task to a new taskable object")
     
     
     
@@ -626,7 +626,10 @@ class TaskMixin(object):
         :class:`~stalker.core.models.Task` will become an orphan task if it is
         removed by this way. To remove the
         :class:`~stalker.core.models.Task` from the list you should delete it
-        or append it to another objects ``tasks`` attribute.
+        or append it to another objects ``tasks`` attribute. This attribute is
+        read-only so you can not set it to another list than it has, but you
+        can change the elements inside, but again be careful about orphan
+        tasks (though you will be warned by a RuntimeError).
         """
         
         return locals()

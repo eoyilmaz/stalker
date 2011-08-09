@@ -3586,7 +3586,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         for shot in shots_added:
             # do not invoke the asset.shots by calling the super
             super(ValidatedList, shot.assets).append(self)
-    
+        
         for shot in shots_removed:
             # do not invoke the asset.shots by calling the super
             super(ValidatedList, shot.assets).remove(self)

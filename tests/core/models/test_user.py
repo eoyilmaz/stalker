@@ -5,7 +5,8 @@
 import unittest
 import datetime
 from stalker.core.models import (User, Department, PermissionGroup, Task,
-                                 Project, Sequence, Type, StatusList, Status)
+                                 Project, Sequence, Type, StatusList, Status,
+                                 Repository)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -66,30 +67,44 @@ class UserTest(unittest.TestCase):
             target_entity_type=Project,
         )
         
-        # a project type
+        # a repository type
+        self.test_repository_type = Type(
+            name="Test",
+            target_entity_type=Repository,
+        )
         
+        # a repository
+        self.test_repository = Repository(
+            name="Test Repository",
+            type=self.test_repository_type
+        )
+        
+        # a project type
         self.commercial_project_type = Type(
             name="Commercial Project",
-            target_entity_type=Project
+            target_entity_type=Project,
         )
         
         # a couple of projects
         self.test_project1 = Project(
             name="Test Project 1",
             status_list=self.project_status_list,
-            type=self.commercial_project_type
+            type=self.commercial_project_type,
+            repository=self.test_repository,
         )
         
         self.test_project2 = Project(
             name="Test Project 2",
             status_list=self.project_status_list,
-            type=self.commercial_project_type
+            type=self.commercial_project_type,
+            repository=self.test_repository,
         )
         
         self.test_project3 = Project(
             name="Test Project 3",
             status_list=self.project_status_list,
-            type=self.commercial_project_type
+            type=self.commercial_project_type,
+            repository=self.test_repository,
         )
         
         # a task status list
@@ -1274,13 +1289,15 @@ class UserTest(unittest.TestCase):
         new_project1 = Project(
             name="New Project 1",
             type=commercial_project_type,
-            status_list=project_status_list
+            status_list=project_status_list,
+            repository=self.test_repository,
         )
         
         new_project2 = Project(
             name="New Project 2",
             type=commercial_project_type,
-            status_list=project_status_list
+            status_list=project_status_list,
+            repository=self.test_repository,
         )
         
         task_status_list = StatusList(

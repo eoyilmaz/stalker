@@ -4,7 +4,7 @@
 
 import unittest
 from stalker.core.models import (Entity, Shot, Sequence, Asset, Task, Link,
-                                 Status, StatusList, Type, Project)
+                                 Status, StatusList, Type, Project, Repository)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -78,11 +78,23 @@ class ShotTester(unittest.TestCase):
             target_entity_type=Asset,
         )
         
+        self.test_data.repository_type = Type(
+            name="Test Repository Type",
+            target_entity_type=Repository
+        )
+        
+        # repository
+        self.test_data.repository = Repository(
+            name="Test Repository",
+            type=self.test_data.repository_type,
+        )
+        
         # project and sequences
         self.test_data.project1 = Project(
             name="Test Project1",
             type=self.test_data.commercial_project_type,
             status_list = self.test_data.project_status_list,
+            repository=self.test_data.repository,
         )
         
         self.test_data.sequence1 = Sequence(
@@ -793,11 +805,17 @@ class ShotTester(unittest.TestCase):
             target_entity_type=Project.entity_type
         )
         
-        project_type = Type(name="Commercial", target_entity_type=Project)
+        project_type = Type(
+            name="Commercial",
+            target_entity_type=Project
+        )
         
-        new_project = Project(name="Commercial",
-                              status_list=project_status_list,
-                              type=project_type)
+        new_project = Project(
+            name="Commercial",
+            status_list=project_status_list,
+            type=project_type,
+            repository=self.test_data.repository,
+        )
         
         self.kwargs["code"] = "SH12314"
         

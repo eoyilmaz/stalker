@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 from stalker.core.models import Link, Type
 
 
@@ -11,7 +11,7 @@ from stalker.core.models import Link, Type
 
 
 ########################################################################
-class LinkTester(mocker.MockerTestCase):
+class LinkTester(unittest.TestCase):
     """tests the :class:`stalker.core.models.Link` class
     """
     
@@ -21,37 +21,24 @@ class LinkTester(mocker.MockerTestCase):
         """setup the test 
         """
         
-        assert(isinstance(self.mocker, mocker.Mocker))
-        
         # create a mock LinkType object
-        self.mock_link_type1 = self.mocker.mock(Type)
-        self.mock_link_type2 = self.mocker.mock(Type)
-        
-        # for __eq__
-        self.mock_link_type1.__eq__(self.mock_link_type2)
-        self.mocker.result(False)
-        self.mocker.count(0, None)
-        
-        
-        self.mock_link_type1.__eq__(self.mock_link_type1)
-        self.mocker.result(True)
-        self.mocker.count(0, None)
-        
-        # for __ne__
-        self.mock_link_type1.__ne__(self.mock_link_type2)
-        self.mocker.result(True)
-        self.mocker.count(0, None)
-        
-        self.mocker.replay()
+        self.test_link_type1 = Type(
+            name="Test Type 1",
+            target_entity_type=Link,
+        )
+        self.test_link_type2 = Type(
+            name="Test Type 2",
+            target_entity_type=Link,
+        )
         
         self.kwargs= {
             "name": "An Image Link",
             "path": "C:/A_NEW_PROJECT/",
             "filename": "this_is_an_image.jpg",
-            "type": self.mock_link_type1
+            "type": self.test_link_type1
         }
         
-        self.mock_link = Link(**self.kwargs)
+        self.test_link = Link(**self.kwargs)
     
     
     #----------------------------------------------------------------------
@@ -80,7 +67,7 @@ class LinkTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_link,
+                self.test_link,
                 "path",
                 test_value
             )
@@ -107,7 +94,7 @@ class LinkTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.mock_link,
+            self.test_link,
             "path",
             ""
         )
@@ -132,7 +119,7 @@ class LinkTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_link,
+            self.test_link,
             "path",
             None
         )
@@ -147,9 +134,9 @@ class LinkTester(mocker.MockerTestCase):
         windows_path = "M:\\path\\to\\object"
         expected_result = "M:/path/to/object"
         
-        self.mock_link.path = windows_path
+        self.test_link.path = windows_path
         
-        self.assertEqual(self.mock_link.path, expected_result)
+        self.assertEqual(self.test_link.path, expected_result)
     
     
     
@@ -179,7 +166,7 @@ class LinkTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_link,
+                self.test_link,
                 "filename",
                 test_value
             )
@@ -206,7 +193,7 @@ class LinkTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.mock_link,
+            self.test_link,
             "filename",
             ""
         )
@@ -232,7 +219,7 @@ class LinkTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_link,
+            self.test_link,
             "filename",
             None
         )
@@ -246,13 +233,13 @@ class LinkTester(mocker.MockerTestCase):
         
         # with same parameters
         mock_link1 = Link(**self.kwargs)
-        self.assertTrue(self.mock_link==mock_link1)
+        self.assertTrue(self.test_link==mock_link1)
         
         # with different parameters
-        self.kwargs["type"] = self.mock_link_type2
+        self.kwargs["type"] = self.test_link_type2
         mock_link2 = Link(**self.kwargs)
         
-        self.assertFalse(self.mock_link==mock_link2)
+        self.assertFalse(self.test_link==mock_link2)
     
     
     
@@ -262,14 +249,14 @@ class LinkTester(mocker.MockerTestCase):
         """
         # with same parameters
         mock_link1 = Link(**self.kwargs)
-        self.assertTrue(self.mock_link==mock_link1)
+        self.assertTrue(self.test_link==mock_link1)
         
         # with different parameters
-        self.kwargs["type"] = self.mock_link_type2
+        self.kwargs["type"] = self.test_link_type2
         mock_link2 = Link(**self.kwargs)
         
-        self.assertFalse(self.mock_link!=mock_link1)
-        self.assertTrue(self.mock_link!=mock_link2)
+        self.assertFalse(self.test_link!=mock_link1)
+        self.assertTrue(self.test_link!=mock_link2)
     
     
     

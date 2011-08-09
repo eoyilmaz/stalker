@@ -2,8 +2,9 @@
 
 
 
-import mocker
-from stalker.core.models import Structure, FilenameTemplate, Type
+import unittest
+from stalker.core.models import (Structure, FilenameTemplate, Type, Asset,
+                                 Shot, Link)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -12,7 +13,7 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class StructureTester(mocker.MockerTestCase):
+class StructureTester(unittest.TestCase):
     """tests the stalker.core.models.Structure class
     """
     
@@ -23,35 +24,45 @@ class StructureTester(mocker.MockerTestCase):
         """seting up the tests
         """
         
-        # create mocks
+        # type templates
+        self.asset_template = FilenameTemplate(
+            name="Test Asset Template",
+            target_entity_type=Asset,
+        )
         
-        # mock type templates
-        self.asset_template = self.mocker.mock(FilenameTemplate)
-        self.shot_template = self.mocker.mock(FilenameTemplate)
-        self.reference_template = self.mocker.mock(FilenameTemplate)
+        self.shot_template = FilenameTemplate(
+            name="Test Shot Template",
+            target_entity_type=Shot,
+        )
         
-        self.mock_templates = [self.asset_template,
+        self.reference_template = FilenameTemplate(
+            name="Test Reference Tempalte",
+            target_entity_type=Link,
+        )
+        
+        self.test_templates = [self.asset_template,
                                self.shot_template,
                                self.reference_template]
         
-        self.mock_templates2 = [self.asset_template]
+        self.test_templates2 = [self.asset_template]
         
         self.custom_template = "a custom template"
         
-        self.mock_type = self.mocker.mock(Type)
-        
-        self.mocker.replay()
+        self.test_type = Type(
+            name="Commercial Structure",
+            target_entity_type=Structure,
+        )
         
         # keyword arguments
         self.kwargs = {
             "name": "Test Structure",
             "description": "This is a test structure",
-            "templates": self.mock_templates,
+            "templates": self.test_templates,
             "custom_template": self.custom_template,
-            "type": self.mock_type,
+            "type": self.test_type,
         }
         
-        self.mock_structure = Structure(**self.kwargs)
+        self.test_structure = Structure(**self.kwargs)
     
     
     
@@ -115,7 +126,7 @@ class StructureTester(mocker.MockerTestCase):
         set to None
         """
         
-        self.mock_structure.templates = None
+        self.test_structure.templates = None
     
     
     
@@ -136,11 +147,11 @@ class StructureTester(mocker.MockerTestCase):
         is tried to be set to an object which is not a list instance.
         """
         
-        self.assertRaises(TypeError, setattr, self.mock_structure, "templates",
+        self.assertRaises(TypeError, setattr, self.test_structure, "templates",
                           1.121)
         
         # test the correct value
-        self.mock_structure.templates = self.mock_templates
+        self.test_structure.templates = self.test_templates
     
     
     
@@ -156,7 +167,7 @@ class StructureTester(mocker.MockerTestCase):
         self.assertRaises(TypeError, Structure, **self.kwargs)
         
         # test the correct value
-        self.kwargs["templates"] = self.mock_templates
+        self.kwargs["templates"] = self.test_templates
         new_structure = Structure(**self.kwargs)
     
     
@@ -169,7 +180,7 @@ class StructureTester(mocker.MockerTestCase):
         """
         
         test_value = [1, 1.2, "a string"]
-        self.assertRaises(TypeError, setattr, self.mock_structure, "templates",
+        self.assertRaises(TypeError, setattr, self.test_structure, "templates",
                           test_value)
     
     
@@ -179,7 +190,7 @@ class StructureTester(mocker.MockerTestCase):
         """testing if the templates attribute is an instance of ValidatedList
         """
         
-        self.assertIsInstance(self.mock_structure.templates, ValidatedList)
+        self.assertIsInstance(self.test_structure.templates, ValidatedList)
     
     
     
@@ -199,16 +210,16 @@ class StructureTester(mocker.MockerTestCase):
         
         new_structure2 = Structure(**self.kwargs)
         
-        self.kwargs["custom_template"] = "a mock custom template"
+        self.kwargs["custom_template"] = "a test custom template"
         new_structure3 = Structure(**self.kwargs)
         
-        self.kwargs["custom_template"] = self.mock_structure.custom_template
-        self.kwargs["templates"] = self.mock_templates2
+        self.kwargs["custom_template"] = self.test_structure.custom_template
+        self.kwargs["templates"] = self.test_templates2
         new_structure4 = Structure(**self.kwargs)
         
-        self.assertTrue(self.mock_structure==new_structure2)
-        self.assertFalse(self.mock_structure==new_structure3)
-        self.assertFalse(self.mock_structure==new_structure4)
+        self.assertTrue(self.test_structure==new_structure2)
+        self.assertFalse(self.test_structure==new_structure3)
+        self.assertFalse(self.test_structure==new_structure4)
     
     
     
@@ -219,16 +230,16 @@ class StructureTester(mocker.MockerTestCase):
         
         new_structure2 = Structure(**self.kwargs)
         
-        self.kwargs["custom_template"] = "a mock custom template"
+        self.kwargs["custom_template"] = "a test custom template"
         new_structure3 = Structure(**self.kwargs)
         
-        self.kwargs["custom_template"] = self.mock_structure.custom_template
-        self.kwargs["templates"] = self.mock_templates2
+        self.kwargs["custom_template"] = self.test_structure.custom_template
+        self.kwargs["templates"] = self.test_templates2
         new_structure4 = Structure(**self.kwargs)
         
-        self.assertFalse(self.mock_structure!=new_structure2)
-        self.assertTrue(self.mock_structure!=new_structure3)
-        self.assertTrue(self.mock_structure!=new_structure4)
+        self.assertFalse(self.test_structure!=new_structure2)
+        self.assertTrue(self.test_structure!=new_structure3)
+        self.assertTrue(self.test_structure!=new_structure4)
     
     
     

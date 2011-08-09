@@ -2,10 +2,10 @@
 
 
 
+import unittest
 import datetime
-import mocker
 from stalker.core.models import (Sequence, Project, User, Shot, Entity, Status,
-                                 StatusList, Link, Task, Type)
+                                 StatusList, Link, Task, Type, Repository)
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -14,7 +14,7 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class SequenceTester(mocker.MockerTestCase):
+class SequenceTester(unittest.TestCase):
     """Tests Sequence class
     """
     
@@ -25,47 +25,97 @@ class SequenceTester(mocker.MockerTestCase):
         """setup the test
         """
         
-        # create a mock project, user and a couple of shots
+        # create statuses
+        self.test_status1 = Status(name="Status1", code="STS1")
+        self.test_status2 = Status(name="Status2", code="STS2")
+        self.test_status3 = Status(name="Status3", code="STS3")
+        self.test_status4 = Status(name="Status4", code="STS4")
+        self.test_status5 = Status(name="Status5", code="STS5")
         
-        self.mock_project = self.mocker.mock(Project)
-        self.mock_project2 = self.mocker.mock(Project)
-        self.mock_lead = self.mocker.mock(User)
-        self.mock_lead2 = self.mocker.mock(User)
+        # create a test project, user and a couple of shots
+        self.project_type = Type(
+            name="Test Project Type",
+            target_entity_type=Project,
+        )
         
-        #self.mock_shot1 = self.mocker.mock(Shot)
-        #self.mock_shot2 = self.mocker.mock(Shot)
-        #self.mock_shot3 = self.mocker.mock(Shot)
+        # create a status list for project
+        self.project_status_list = StatusList(
+            name="Project Statuses",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type=Project,
+        )
         
-        self.mock_status1 = self.mocker.mock(Status)
-        self.mock_status2 = self.mocker.mock(Status)
-        self.mock_status3 = self.mocker.mock(Status)
+        # create a repository
+        self.repository_type = Type(
+            name="Test Type",
+            target_entity_type=Repository
+        )
         
-        self.mock_status_list1 = self.mocker.mock(StatusList)
-        self.expect(self.mock_status_list1.target_entity_type).\
-            result(Sequence.entity_type).count(0, None)
-        self.expect(self.mock_status_list1.statuses).result(
-            [self.mock_status1, self.mock_status2, self.mock_status3]).\
-            count(0, None)
+        self.test_repository = Repository(
+            name="Test Repository",
+            type=self.repository_type,
+        )
         
-        self.mocker.replay()
+        # create projects
+        self.test_project = Project(
+            name="Test Project 1",
+            type=self.project_type,
+            status_list=self.project_status_list,
+            repository=self.test_repository,
+        )
+        
+        self.test_project2 = Project(
+            name="Test Project 2",
+            type=self.project_type,
+            status_list=self.project_status_list,
+            repository=self.test_repository,
+        )
+        
+        self.test_lead = User(
+            login_name="testuser1",
+            first_name="user1",
+            last_name="user1",
+            email="user1@users.com",
+            password="user1",
+        )
+        
+        self.test_lead2 = User(
+            login_name="testuser2",
+            first_name="user2",
+            last_name="user2",
+            email="user2@users.com",
+            password="user2",
+        )
+        
+        self.sequence_status_list = StatusList(
+            name="Sequence Statuses",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type=Sequence,
+        )
         
         # the parameters
         self.kwargs = {
             "name": "Test Sequence",
             "description": "A test sequence",
-            "project": self.mock_project,
-            "lead": self.mock_lead,
-            "status_list": self.mock_status_list1
+            "project": self.test_project,
+            "lead": self.test_lead,
+            "status_list": self.sequence_status_list
         }
         
         # the mock seuqence
-        self.mock_sequence = Sequence(**self.kwargs)
-        
-        # assign the shots
-        self.mock_sequence.shots.append(self.mock_shot1)
-        self.mock_sequence.shots.append(self.mock_shot2)
-        self.mock_sequence.shots.append(self.mock_shot3)
-
+        self.test_sequence = Sequence(**self.kwargs)
     
     
     
@@ -181,7 +231,7 @@ class SequenceTester(mocker.MockerTestCase):
         None
         """
         
-        self.mock_sequence.lead = None
+        self.test_sequence.lead = None
     
     
     
@@ -211,7 +261,7 @@ class SequenceTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_sequence,
+                self.test_sequence,
                 "lead",
                 test_value
             )
@@ -222,8 +272,8 @@ class SequenceTester(mocker.MockerTestCase):
         """testing if the lead attribute is working properly
         """
         
-        self.mock_sequence.lead = self.mock_lead2
-        self.assertEqual(self.mock_sequence.lead, self.mock_lead2)
+        self.test_sequence.lead = self.test_lead2
+        self.assertEqual(self.test_sequence.lead, self.test_lead2)
     
     
     
@@ -232,7 +282,7 @@ class SequenceTester(mocker.MockerTestCase):
         """testing if the shots attribute defaults to an empty list
         """
         
-        self.kwargs.pop("shots")
+        #self.kwargs.pop("shots")
         new_sequence = Sequence(**self.kwargs)
         self.assertEqual(new_sequence.shots, [])
     
@@ -244,8 +294,8 @@ class SequenceTester(mocker.MockerTestCase):
         is set to None
         """
         
-        self.mock_sequence.shots = None
-        self.assertEqual(self.mock_sequence.shots, [])
+        self.test_sequence.shots = None
+        self.assertEqual(self.test_sequence.shots, [])
     
     
     
@@ -261,7 +311,7 @@ class SequenceTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_sequence,
+                self.test_sequence,
                 "shots",
                 test_value
             )
@@ -278,7 +328,7 @@ class SequenceTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_sequence,
+            self.test_sequence,
             "shots",
             test_value
         )
@@ -296,7 +346,7 @@ class SequenceTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.assertRaises(TypeError,
-                              self.mock_sequence.shots.__setitem__,
+                              self.test_sequence.shots.__setitem__,
                               0,
                               test_value)
     
@@ -307,7 +357,7 @@ class SequenceTester(mocker.MockerTestCase):
         """testing if the shots attribute holds an instance of ValidateList
         """
         
-        self.assertIsInstance(self.mock_sequence.shots, ValidatedList)
+        self.assertIsInstance(self.test_sequence.shots, ValidatedList)
     
     
     
@@ -427,7 +477,7 @@ class SequenceTester(mocker.MockerTestCase):
         
         project_status_list = StatusList(
             name="Project Statuses", statuses=[status1],
-            target_entity_type=Project.entity_type
+            target_entity_type=Project.entity_type,
         )
         
         project_type = Type(
@@ -438,7 +488,8 @@ class SequenceTester(mocker.MockerTestCase):
         new_project = Project(
             name="Commercial",
             status_list=project_status_list,
-            type=project_type
+            type=project_type,
+            repository=self.test_repository,
         )
         
         self.kwargs["new_project"] = new_project
@@ -489,13 +540,14 @@ class SequenceTester(mocker.MockerTestCase):
         
         project_type = Type(
             name="Commercial",
-            target_entity_type=Project
+            target_entity_type=Project,
         )
         
         new_project = Project(
             name="Commercial",
             status_list=project_status_list,
-            type=project_type
+            type=project_type,
+            repository=self.test_repository,
         )
         
         self.kwargs["project"] = new_project
@@ -540,7 +592,8 @@ class SequenceTester(mocker.MockerTestCase):
         
         new_project = Project(name="Test Project", status=0,
                               status_list=project_status_list,
-                              type=project_type)
+                              type=project_type,
+                              repository=self.test_repository)
         
         self.kwargs["project"] = new_project
         

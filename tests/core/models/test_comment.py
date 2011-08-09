@@ -2,7 +2,7 @@
 
 
 
-import mocker
+import unittest
 import datetime
 from stalker.core.models import Comment, Entity, User, Tag
 
@@ -12,8 +12,8 @@ from stalker.core.models import Comment, Entity, User, Tag
 
 
 ########################################################################
-class CommentTest(mocker.MockerTestCase):
-    """testing the Comment model
+class CommentTest(unittest.TestCase):
+    """testing the Comment class
     """
     
     
@@ -23,39 +23,43 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         # will need:
-        # a mock entity object
-        # a couple of mock tag objects
+        # a test entity object
+        # a couple of test tag objects
         
-        # a couple of mock tags
-        self.mock_tag1 = self.mocker.mock(Tag)
-        self.mock_tag2 = self.mocker.mock(Tag)
+        # a couple of test tags
+        self.test_tag1 = Tag(name="Test Tag 1")
+        self.test_tag2 = Tag(name="Test Tag 2")
         
-        # a mock entity object
-        self.mock_entity = self.mocker.mock(Entity)
-        self.mock_entity2 = self.mocker.mock(Entity)
+        # a test entity object
+        self.test_entity = Entity(name="Test Entity 1")
+        self.test_entity2 = Entity(name="Test Entity 2")
         
         # creation and update dates
         self.date_created = datetime.datetime.now()
         self.date_updated = self.date_created
         
-        # a mock user object
-        self.mock_user = self.mocker.mock(User)
-        
-        self.mocker.replay()
+        # a test user object
+        self.test_user = User(
+            login_name="user1",
+            first_name="user1",
+            last_name="user1",
+            email="user1@users.com",
+            password="1234",
+        )
         
         self.kwargs = {
             "name": "Test Comment",
             "description": "this is a test object",
-            "tags": [self.mock_tag1, self.mock_tag2],
-            "created_by": self.mock_user,
-            "updated_by": self.mock_user,
+            "tags": [self.test_tag1, self.test_tag2],
+            "created_by": self.test_user,
+            "updated_by": self.test_user,
             "date_created": self.date_created,
             "date_updated": self.date_updated,
             "body": "This is the content of the comment",
-            "to": self.mock_entity
+            "to": self.test_entity
         }
         
-        self.mock_comment = Comment(**self.kwargs)
+        self.test_comment = Comment(**self.kwargs)
     
     
     
@@ -93,7 +97,7 @@ class CommentTest(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_comment,
+                self.test_comment,
                 "body",
                 test_value
             )
@@ -106,8 +110,8 @@ class CommentTest(mocker.MockerTestCase):
         """
         
         new_body = "This is a new comment body"
-        self.mock_comment.body = new_body
-        self.assertEqual(new_body, self.mock_comment.body)
+        self.test_comment.body = new_body
+        self.assertEqual(new_body, self.test_comment.body)
     
     
     
@@ -146,7 +150,7 @@ class CommentTest(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_comment,
+            self.test_comment,
             "to",
             None
         )
@@ -182,7 +186,7 @@ class CommentTest(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_comment,
+            self.test_comment,
             "to",
             "an Entity"
         )
@@ -210,9 +214,9 @@ class CommentTest(mocker.MockerTestCase):
         """testing if to attribute is set properly
         """
         
-        new_to = self.mock_entity2
-        self.mock_comment.to = new_to
-        self.assertEqual(new_to, self.mock_comment.to)
+        new_to = self.test_entity2
+        self.test_comment.to = new_to
+        self.assertEqual(new_to, self.test_comment.to)
     
     
     
