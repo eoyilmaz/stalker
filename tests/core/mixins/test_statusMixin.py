@@ -3,7 +3,7 @@
 
 
 import datetime
-import unit
+import unittest
 from stalker.conf import defaults
 from stalker.core.mixins import StatusMixin
 from stalker.core.models import (Status, StatusList)
@@ -15,7 +15,7 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class StatusMixinTester(mocker.MockerTestCase):
+class StatusMixinTester(unittest.TestCase):
     """tests the StatusMixin class
     """
     
@@ -26,38 +26,40 @@ class StatusMixinTester(mocker.MockerTestCase):
         """setup the test
         """
         
-        assert(isinstance(self.mocker, mocker.Mocker))
+        self.test_status1 = Status(name="Status1", code="STS1")
+        self.test_status2 = Status(name="Status2", code="STS2")
+        self.test_status3 = Status(name="Status3", code="STS3")
+        self.test_status4 = Status(name="Status4", code="STS4")
+        self.test_status5 = Status(name="Status5", code="STS5")
         
-        # a mock StatusList object
-        self.mock_status_list1 = self.mocker.mock(StatusList)
-        self.expect(len(self.mock_status_list1.statuses)).result(5).\
-            count(0, None)
+        # a test StatusList object
+        self.test_status_list1 = StatusList(
+            name="Test Status List 1",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type="Dummy",
+        )
         
-        self.expect(self.mock_status_list1.target_entity_type).\
-            result("Dummy").count(0, None)
-        
-        # another mock StatusList object
-        self.mock_status_list2 = self.mocker.mock(StatusList)
-        self.expect(len(self.mock_status_list2.statuses)).result(5)\
-            .count(0, None)
-        
-        self.expect(self.mock_status_list2.target_entity_type).\
-            result("Dummy").count(0, None)
-        
-        #self.mock_status_list1.__eq__(self.mock_status_list2)
-        #self.mocker.result(False)
-        #self.mocker.count(0, None)
-        
-        #self.mock_status_list1.__ne__(self.mock_status_list2)
-        #self.mocker.result(True)
-        #self.mocker.count(0, None)
-        
-        self.mocker.replay()
-        
-        
+        # another test StatusList object
+        self.test_status_list2 = StatusList(
+            name="Test Status List 2",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type="Dummy",
+        )
         
         self.kwargs = {
-            "status_list": self.mock_status_list1,
+            "status_list": self.test_status_list1,
             "status": 0,
         }
         
@@ -79,13 +81,13 @@ class StatusMixinTester(mocker.MockerTestCase):
         class MixedClass_with_MixinInit(DummyWithoutInit, StatusMixin):
             pass
         
-        self.mock_class_for_init_test = MixedClass_with_MixinInit
+        self.test_class_for_init_test = MixedClass_with_MixinInit
         
-        self.mock_mixed_obj = MixedClass()
-        self.mock_mixed_obj.status_list = self.mock_status_list1
+        self.test_mixed_obj = MixedClass()
+        self.test_mixed_obj.status_list = self.test_status_list1
         
         # create another one without status_list set to something
-        self.mock_mixed_obj2 = MixedClass()
+        self.test_mixed_obj2 = MixedClass()
     
     
     
@@ -99,7 +101,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         
         for testValue in testValues:
             self.kwargs["status_list"] = testValue
-            self.assertRaises(TypeError, self.mock_class_for_init_test,
+            self.assertRaises(TypeError, self.test_class_for_init_test,
                               **self.kwargs)
     
     
@@ -110,7 +112,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         initialize status_list with None
         """
         self.kwargs["status_list"] = None
-        self.assertRaises(TypeError, self.mock_class_for_init_test,
+        self.assertRaises(TypeError, self.test_class_for_init_test,
                           **self.kwargs)
     
     
@@ -128,7 +130,7 @@ class StatusMixinTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_mixed_obj,
+                self.test_mixed_obj,
                 "status_list",
                 test_value
             )
@@ -144,7 +146,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_mixed_obj,
+            self.test_mixed_obj,
             "status_list",
             None
         )
@@ -157,7 +159,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         status_list argument
         """
         self.kwargs.pop("status_list")
-        self.assertRaises(TypeError, self.mock_class_for_init_test,
+        self.assertRaises(TypeError, self.test_class_for_init_test,
                           **self.kwargs)
     
     
@@ -185,7 +187,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_mixed_obj,
+            self.test_mixed_obj,
             "status_list",
             new_status_list
         )
@@ -200,7 +202,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         )
         
         # this shouldn't raise any error
-        self.mock_mixed_obj.status_list = new_suitable_list
+        self.test_mixed_obj.status_list = new_suitable_list
     
     
     
@@ -210,7 +212,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         argument to None
         """
         self.kwargs["status"] = None
-        self.assertRaises(TypeError, self.mock_class_for_init_test,
+        self.assertRaises(TypeError, self.test_class_for_init_test,
                           **self.kwargs)
     
     
@@ -223,7 +225,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_mixed_obj,
+            self.test_mixed_obj,
             "status",
             None
         )
@@ -241,7 +243,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         
         for test_value in test_values:
             self.kwargs["status"] = test_value
-            self.assertRaises(TypeError, self.mock_class_for_init_test,
+            self.assertRaises(TypeError, self.test_class_for_init_test,
                               **self.kwargs)
     
     
@@ -258,7 +260,7 @@ class StatusMixinTester(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_mixed_obj,
+                self.test_mixed_obj,
                 "status",
                 test_value
             )
@@ -272,12 +274,12 @@ class StatusMixinTester(mocker.MockerTestCase):
         couldn't be set a value higher than len(statusList.statuses - 1)
         """
         
-        test_value = len(self.mock_status_list1.statuses)
+        test_value = len(self.test_status_list1.statuses)
         
         self.assertRaises(
             ValueError,
             setattr,
-            self.mock_mixed_obj,
+            self.test_mixed_obj,
             "status",
             test_value
         )
@@ -294,7 +296,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_mixed_obj2,
+            self.test_mixed_obj2,
             "status",
             0,
         )
@@ -312,7 +314,7 @@ class StatusMixinTester(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.mock_mixed_obj,
+            self.test_mixed_obj,
             "status",
             test_value
         )
@@ -326,8 +328,8 @@ class StatusMixinTester(mocker.MockerTestCase):
         
         test_value = 1
         
-        self.mock_mixed_obj.status = test_value
-        self.assertEqual(self.mock_mixed_obj.status, test_value)
+        self.test_mixed_obj.status = test_value
+        self.assertEqual(self.test_mixed_obj.status, test_value)
 
 
 

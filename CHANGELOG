@@ -54,9 +54,9 @@ v0.1.1.a10
    :class:`~stalker.core.models.Project`,
    :class:`~stalker.core.models.Sequence`,
    :class:`~stalker.core.models.Structure`,
-   :class:`~stalker.core.models.Comment` and :class:`~stalker.core.models.Link`
-   classes are not using the Mocker
-   library anymore.
+   :class:`~stalker.core.models.Comment`, :class:`~stalker.core.models.Link`
+   and :class:`~stalker.core.mixins.StatusMixin` classes are not using the
+   Mocker library anymore.
 
  * The :class:`~stalker.core.models.Project` doesn't accept an ``assets`` nor
    a ``sequences`` arguments anymore. Which was meaningles previously, cause it
