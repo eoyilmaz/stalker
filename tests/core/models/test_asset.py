@@ -318,7 +318,73 @@ class AssetTester(unittest.TestCase):
         
         tasks = [task1, task2]
         
-        self.assertItemsEqual(new_asset.tasks, tasks)    
+        self.assertItemsEqual(new_asset.tasks, tasks)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_asset_appends_itself_to_the_assets_list_of_project_instance(self):
+        """testing if the created Asset instance will append itself to the
+        assets list of the given Project instance.
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        
+        task_status_list = StatusList(
+            name="Task Statuses",
+            statuses=[status1],
+            target_entity_type=Task
+        )
+        
+        project_status_list = StatusList(
+            name="Project Statuses",
+            statuses=[status1],
+            target_entity_type=Project
+        )
+        
+        commercial_project_type = Type(
+            name="Commercial",
+            target_entity_type=Project,
+        )
+        
+        new_project = Project(
+            name="Commercial",
+            type=commercial_project_type,
+            status_list=project_status_list,
+        )
+        
+        character_asset_type = Type(
+            name="Character",
+            target_entity_type=Asset
+        )
+        
+        asset_status_list = StatusList(
+            name="Asset Status List",
+            statuses=[status1],
+            target_entity_type=Asset
+        )
+        
+        new_asset = Asset(
+            name="test asset",
+            type=character_asset_type,
+            code="tstasset",
+            status_list=asset_status_list,
+            project=new_project,
+        )
+        
+        task1 = Task(
+            name="Modeling",
+            status_list=task_status_list,
+            task_of=new_asset
+        )
+        
+        task2 = Task(
+            name="Lighting",
+            status_list=task_status_list,
+            task_of=new_asset
+        )
+        
+        self.assertIn(new_asset, new_project.assets)
     
     
     

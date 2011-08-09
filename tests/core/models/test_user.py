@@ -2,8 +2,8 @@
 
 
 
+import unittest
 import datetime
-import mocker
 from stalker.core.models import (User, Department, PermissionGroup, Task,
                                  Project, Sequence, Type, StatusList, Status)
 from stalker.ext.validatedList import ValidatedList
@@ -13,9 +13,10 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class UserTest(mocker.MockerTestCase):
+class UserTest(unittest.TestCase):
     """Tests the user class
     """
+    
     
     
     #----------------------------------------------------------------------
@@ -23,67 +24,160 @@ class UserTest(mocker.MockerTestCase):
         """setup the test
         """
         
-        # need to have some mock object for
-        assert(isinstance(self.mocker, mocker.Mocker))
+        # need to have some test object for
         
         # a department
-        self.mock_department1 = self.mocker.mock(Department)
-        self.mock_department2 = self.mocker.mock(Department)
-        self.mock_department3 = self.mocker.mock(Department)
-        
-        ## the __eq__
-        #self.expect(self.mock_department1.__eq__(self.mock_department2)).\
-            #result(True).count(0, None)
-        
-        #self.expect(self.mock_department1.__eq__(self.mock_department3)).\
-            #result(False).count(0, None)
-        
-        ## the __ne__
-        #self.expect(self.mock_department1.__ne__(self.mock_department2)).\
-            #result(False).count(0, None)
-        
-        #self.expect(self.mock_department1.__ne__(self.mock_department3)).\
-            #result(True).count(0, None)
+        self.test_department1 = Department(
+            name="Test Department 1"
+        )
+        self.test_department2 = Department(
+            name="Test Department 2"
+        )
+        self.test_department3 = Department(
+            name="Test Department 3"
+        )
         
         # a couple of permission groups
-        self.mock_permission_group1 = self.mocker.mock(PermissionGroup)
-        self.mock_permission_group2 = self.mocker.mock(PermissionGroup)
-        self.mock_permission_group3 = self.mocker.mock(PermissionGroup)
+        self.test_permission_group1 = PermissionGroup(
+            name="Test PermissionGroup 1"
+        )
+        self.test_permission_group2 = PermissionGroup(
+            name="Test PermissionGroup 2"
+        )
+        self.test_permission_group3 = PermissionGroup(
+            name="Test PermissionGroup 3"
+        )
+        
+        # a couple of statuses
+        self.test_status1 = Status(name="Completed", code="CMPLT")
+        self.test_status2 = Status(name="Work In Progress", code="WIP")
+        self.test_status3 = Status(name="Waiting To Start", code="WTS")
+        self.test_status4 = Status(name="Pending Review", code="PRev")
+        
+        # a project status list
+        self.project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4
+            ],
+            target_entity_type=Project,
+        )
+        
+        # a project type
+        
+        self.commercial_project_type = Type(
+            name="Commercial Project",
+            target_entity_type=Project
+        )
         
         # a couple of projects
-        self.mock_project1 = self.mocker.mock(Project)
-        self.mock_project2 = self.mocker.mock(Project)
-        self.mock_project3 = self.mocker.mock(Project)
+        self.test_project1 = Project(
+            name="Test Project 1",
+            status_list=self.project_status_list,
+            type=self.commercial_project_type
+        )
+        
+        self.test_project2 = Project(
+            name="Test Project 2",
+            status_list=self.project_status_list,
+            type=self.commercial_project_type
+        )
+        
+        self.test_project3 = Project(
+            name="Test Project 3",
+            status_list=self.project_status_list,
+            type=self.commercial_project_type
+        )
+        
+        # a task status list
+        self.task_status_list = StatusList(
+            name="Task Status List",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4
+            ],
+            target_entity_type=Task
+        )
         
         # a couple of tasks
-        self.mock_task1 = self.mocker.mock(Task)
-        self.mock_task2 = self.mocker.mock(Task)
-        self.mock_task3 = self.mocker.mock(Task)
-        self.mock_task4 = self.mocker.mock(Task)
+        self.test_task1 = Task(
+            name="Test Task 1",
+            status_list = self.task_status_list,
+            project=self.test_project1,
+            task_of=self.test_project1
+        )
+        
+        self.test_task2 = Task(
+            name="Test Task 2",
+            status_list = self.task_status_list,
+            project=self.test_project1,
+            task_of=self.test_project1
+        )
+        
+        self.test_task3 = Task(
+            name="Test Task 3",
+            status_list = self.task_status_list,
+            project=self.test_project2,
+            task_of=self.test_project1
+        )
+        
+        self.test_task4 = Task(
+            name="Test Task 4",
+            status_list = self.task_status_list,
+            project=self.test_project3,
+            task_of=self.test_project1
+        )
+        
+        # a status list for sequence
+        self.sequence_satus_list = StatusList(
+            name="Sequence Status List",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4
+            ],
+            target_entity_type=Sequence
+        )
         
         # a couple of sequences
-        self.mock_sequence1 = self.mocker.mock(Sequence)
-        self.mock_sequence2 = self.mocker.mock(Sequence)
-        self.mock_sequence3 = self.mocker.mock(Sequence)
-        self.mock_sequence4 = self.mocker.mock(Sequence)
+        self.test_sequence1 = Sequence(
+            name="Test Seq 1",
+            project=self.test_project1,
+            status_list=self.sequence_satus_list
+        )
         
-        # a mock user
-        self.mock_admin = self.mocker.mock(User)
+        self.test_sequence2 = Sequence(
+            name="Test Seq 2",
+            project=self.test_project1,
+            status_list=self.sequence_satus_list
+        )
         
-        # assign projects to tasks
-        self.expect(self.mock_task1.project).\
-            result(self.mock_project1).count(0, None)
+        self.test_sequence3 = Sequence(
+            name="Test Seq 3",
+            project=self.test_project1,
+            status_list=self.sequence_satus_list
+        )
         
-        self.expect(self.mock_task2.project).\
-            result(self.mock_project1).count(0, None)
+        self.test_sequence4 = Sequence(
+            name="Test Seq 4",
+            project=self.test_project1,
+            status_list=self.sequence_satus_list
+        )
         
-        self.expect(self.mock_task3.project).\
-            result(self.mock_project2).count(0, None)
-        
-        self.expect(self.mock_task4.project).\
-            result(self.mock_project3).count(0, None)
-        
-        self.mocker.replay()
+        # a test admin
+        self.test_admin = User(
+            login_name="admin",
+            first_name="admin",
+            last_name="admin",
+            email="admin@admin.com",
+            password="admin"
+        )
         
         # create the default values for parameters
         
@@ -94,38 +188,22 @@ class UserTest(mocker.MockerTestCase):
             "login_name": "eoyilmaz",
             "password": "hidden",
             "email": "eoyilmaz@fake.com",
-            "department": self.mock_department1,
-            "permission_groups": [self.mock_permission_group1,
-                                  self.mock_permission_group2],
-            #"tasks": [self.mock_task1,
-                      #self.mock_task2,
-                      #self.mock_task3,
-                      #self.mock_task4],
-            "projects_lead": [self.mock_project1,
-                              self.mock_project2],
-            "sequences_lead": [self.mock_sequence1,
-                               self.mock_sequence2,
-                               self.mock_sequence3,
-                               self.mock_sequence4],
-            "created_by": self.mock_admin,
-            "updated_by": self.mock_admin,
+            "department": self.test_department1,
+            "permission_groups": [self.test_permission_group1,
+                                  self.test_permission_group2],
+            "projects_lead": [self.test_project1,
+                              self.test_project2],
+            "sequences_lead": [self.test_sequence1,
+                               self.test_sequence2,
+                               self.test_sequence3,
+                               self.test_sequence4],
+            "created_by": self.test_admin,
+            "updated_by": self.test_admin,
             "last_login": None
         }
         
         # create a proper user object
-        self.mock_user = User(**self.kwargs)
-        
-        #self.expect(self.mock_task2.resources).\
-            #result([self.mock_user]).count(0, None)
-        
-        #self.expect(self.mock_task2.resources).\
-            #result([self.mock_user]).count(0, None)
-        
-        #self.expect(self.mock_task3.resources).\
-            #result([self.mock_user]).count(0, None)
-        
-        #self.expect(self.mock_task4.resources).\
-            #result([self.mock_user]).count(0, None)
+        self.test_user = User(**self.kwargs)
     
     
     
@@ -321,7 +399,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_user,
+            self.test_user,
             "email",
             test_value
         )
@@ -331,7 +409,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_user,
+            self.test_user,
             "email",
             test_value
         )
@@ -374,7 +452,7 @@ class UserTest(mocker.MockerTestCase):
             self.assertRaises(
                 ValueError,
                 setattr,
-                self.mock_user,
+                self.test_user,
                 "email",
                 value
             )
@@ -387,8 +465,8 @@ class UserTest(mocker.MockerTestCase):
         """
         
         test_email = "eoyilmaz@somemail.com"
-        self.mock_user.email = test_email
-        self.assertEqual(self.mock_user.email, test_email)
+        self.test_user.email = test_email
+        self.assertEqual(self.test_user.email, test_email)
     
     
     
@@ -426,7 +504,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.mock_user,
+            self.test_user,
             "login_name",
             ""
         )
@@ -453,7 +531,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_user,
+            self.test_user,
             "login_name",
             None
         )
@@ -509,10 +587,10 @@ class UserTest(mocker.MockerTestCase):
         
         for valuePair in test_values:
             # set the input and expect the expected output
-            self.mock_user.login_name = valuePair[0]
+            self.test_user.login_name = valuePair[0]
             
             self.assertEqual(
-                self.mock_user.login_name,
+                self.test_user.login_name,
                 valuePair[1]
             )
     
@@ -548,8 +626,8 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # give a new value to login_name and
-        self.mock_user.login_name = "newusername"
-        self.assertEqual(self.mock_user.login_name, self.mock_user.name)
+        self.test_user.login_name = "newusername"
+        self.assertEqual(self.test_user.login_name, self.test_user.name)
     
     
     
@@ -588,9 +666,9 @@ class UserTest(mocker.MockerTestCase):
         attribute
         """
         
-        self.mock_user.name = "EoYilmaz"
+        self.test_user.name = "EoYilmaz"
         
-        self.assertEqual(self.mock_user.login_name, "eoyilmaz")
+        self.assertEqual(self.test_user.login_name, "eoyilmaz")
     
     
     
@@ -615,7 +693,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_user,
+            self.test_user,
             "first_name",
             None
         )
@@ -643,7 +721,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertRaises(
             ValueError,
             setattr,
-            self.mock_user,
+            self.test_user,
             "first_name",
             ""
         )
@@ -693,10 +771,10 @@ class UserTest(mocker.MockerTestCase):
         for valuePair in test_values:
             # set the input and expect the expected output
             
-            self.mock_user.first_name = valuePair[0]
+            self.test_user.first_name = valuePair[0]
             
             self.assertEqual(
-                self.mock_user.first_name,
+                self.test_user.first_name,
                 valuePair[1]
             )
     
@@ -729,7 +807,7 @@ class UserTest(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_user,
+                self.test_user,
                 "first_name",
                 value
             )
@@ -756,7 +834,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # nothing should happen
-        self.mock_user.last_login = None
+        self.test_user.last_login = None
     
     
     
@@ -803,7 +881,7 @@ class UserTest(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_user,
+                self.test_user,
                 "last_login",
                 test_value
             )
@@ -816,8 +894,8 @@ class UserTest(mocker.MockerTestCase):
         """
         
         test_value = datetime.datetime.now()
-        self.mock_user.last_login = test_value
-        self.assertEqual(self.mock_user.last_login, test_value)
+        self.test_user.last_login = test_value
+        self.assertEqual(self.test_user.last_login, test_value)
     
     
     
@@ -839,8 +917,8 @@ class UserTest(mocker.MockerTestCase):
         assigned to last_name attribute
         """
         
-        self.mock_user.last_name = None
-        self.assertEqual(self.mock_user.last_name, "")
+        self.test_user.last_name = None
+        self.assertEqual(self.test_user.last_name, "")
     
     
     
@@ -888,8 +966,8 @@ class UserTest(mocker.MockerTestCase):
                     ]
         
         for valuePair in test_values:
-            self.mock_user.last_name = valuePair[0]
-            self.assertEqual(self.mock_user.last_name, valuePair[1])
+            self.test_user.last_name = valuePair[0]
+            self.assertEqual(self.test_user.last_name, valuePair[1])
     
     
     
@@ -917,7 +995,7 @@ class UserTest(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_user,
+                self.test_user,
                 "last_name",
                 test_value
             )
@@ -952,7 +1030,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_user,
+            self.test_user,
             "department",
             test_value
         )
@@ -965,8 +1043,8 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # try to set and get the same value back
-        self.mock_user.department = self.mock_department2
-        self.assertEqual(self.mock_user.department, self.mock_department2)
+        self.test_user.department = self.test_department2
+        self.assertEqual(self.test_user.department, self.test_department2)
         
     
     
@@ -991,7 +1069,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_user,
+            self.test_user,
             "password",
             None
         )
@@ -1004,8 +1082,8 @@ class UserTest(mocker.MockerTestCase):
         """
         
         test_password = "a new test password"
-        self.mock_user.password = test_password
-        self.assertNotEquals(self.mock_user.password, test_password)
+        self.test_user.password = test_password
+        self.assertNotEquals(self.test_user.password, test_password)
     
     
     
@@ -1027,10 +1105,10 @@ class UserTest(mocker.MockerTestCase):
         """
         
         test_password = "a new test password"
-        self.mock_user.password = test_password
+        self.test_user.password = test_password
         
         # test if they are not the same any more
-        self.assertNotEquals(self.mock_user.password, test_password)
+        self.assertNotEquals(self.test_user.password, test_password)
     
     
     
@@ -1040,16 +1118,16 @@ class UserTest(mocker.MockerTestCase):
         """
         
         test_password = "a new test password"
-        self.mock_user.password = test_password
+        self.test_user.password = test_password
         
         # check if it is scrambled
-        self.assertNotEquals(self.mock_user.password, test_password)
+        self.assertNotEquals(self.test_user.password, test_password)
         
         # check if check_password returns True
-        self.assertTrue(self.mock_user.check_password(test_password))
+        self.assertTrue(self.test_user.check_password(test_password))
         
         # check if check_password returns False
-        self.assertFalse(self.mock_user.check_password("wrong pass"))
+        self.assertFalse(self.test_user.check_password("wrong pass"))
     
     
     
@@ -1071,8 +1149,8 @@ class UserTest(mocker.MockerTestCase):
         when it is set to None
         """
         
-        self.mock_user.permission_groups = None
-        self.assertEqual(self.mock_user.permission_groups, [])
+        self.test_user.permission_groups = None
+        self.assertEqual(self.test_user.permission_groups, [])
     
     
     
@@ -1112,7 +1190,7 @@ class UserTest(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_user,
+                self.test_user,
                 "permission_groups",
                 test_value
             )
@@ -1124,9 +1202,9 @@ class UserTest(mocker.MockerTestCase):
         """testing if permission_groups attribute works properly
         """
         
-        test_pg = [self.mock_permission_group3]
-        self.mock_user.permission_groups = test_pg
-        self.assertEqual(self.mock_user.permission_groups, test_pg)
+        test_pg = [self.test_permission_group3]
+        self.test_user.permission_groups = test_pg
+        self.assertEqual(self.test_user.permission_groups, test_pg)
     
     
     
@@ -1136,7 +1214,7 @@ class UserTest(mocker.MockerTestCase):
         ValidatedList
         """
         
-        self.assertIsInstance(self.mock_user.permission_groups, ValidatedList)
+        self.assertIsInstance(self.test_user.permission_groups, ValidatedList)
     
     
     
@@ -1150,14 +1228,14 @@ class UserTest(mocker.MockerTestCase):
         # append
         self.assertRaises(
             TypeError,
-            self.mock_user.permission_groups.append,
+            self.test_user.permission_groups.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
             TypeError,
-            self.mock_user.permission_groups.__setitem__,
+            self.test_user.permission_groups.__setitem__,
             0,
             0
         )
@@ -1169,7 +1247,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if the project attribute is read-only
         """
         
-        self.assertRaises(AttributeError, setattr, self.mock_user, "projects",
+        self.assertRaises(AttributeError, setattr, self.test_user, "projects",
                          [])
     
     
@@ -1306,8 +1384,8 @@ class UserTest(mocker.MockerTestCase):
         is set to None
         """
         
-        self.mock_user.projects_lead = None
-        self.assertEqual(self.mock_user.projects_lead, [])
+        self.test_user.projects_lead = None
+        self.assertEqual(self.test_user.projects_lead, [])
     
     
     
@@ -1319,7 +1397,7 @@ class UserTest(mocker.MockerTestCase):
         self.kwargs["projects_lead"] = []
         
         # this should work without any problems
-        self.mock_user = User(**self.kwargs)
+        self.test_user = User(**self.kwargs)
     
     
     
@@ -1329,7 +1407,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # this should work without any problem
-        self.mock_user.projects_lead = []
+        self.test_user.projects_lead = []
     
     
     
@@ -1374,7 +1452,7 @@ class UserTest(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_user,
+                self.test_user,
                 "projects_lead",
                 test_value
             )
@@ -1393,7 +1471,7 @@ class UserTest(mocker.MockerTestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.mock_user,
+            self.test_user,
             "projects_lead",
             test_value
         )
@@ -1405,13 +1483,13 @@ class UserTest(mocker.MockerTestCase):
         """testing if the proejcts_lead attribute is working properly
         """
         
-        projects_lead = [self.mock_project1,
-                         self.mock_project2,
-                         self.mock_project3]
+        projects_lead = [self.test_project1,
+                         self.test_project2,
+                         self.test_project3]
         
-        self.mock_user.projects_lead = projects_lead
+        self.test_user.projects_lead = projects_lead
         
-        self.assertEqual(self.mock_user.projects_lead, projects_lead)
+        self.assertEqual(self.test_user.projects_lead, projects_lead)
     
     
     
@@ -1421,7 +1499,7 @@ class UserTest(mocker.MockerTestCase):
         ValidatedList
         """
         
-        self.assertIsInstance(self.mock_user.projects_lead, ValidatedList)
+        self.assertIsInstance(self.test_user.projects_lead, ValidatedList)
     
     
     
@@ -1434,14 +1512,14 @@ class UserTest(mocker.MockerTestCase):
         # append
         self.assertRaises(
             TypeError,
-            self.mock_user.projects_lead.append,
+            self.test_user.projects_lead.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
             TypeError,
-            self.mock_user.projects_lead.__setitem__,
+            self.test_user.projects_lead.__setitem__,
             0,
             0
         )
@@ -1466,8 +1544,8 @@ class UserTest(mocker.MockerTestCase):
         it is set to None
         """
         
-        self.mock_user.sequences_lead = None
-        self.assertEqual(self.mock_user.sequences_lead, [])
+        self.test_user.sequences_lead = None
+        self.assertEqual(self.test_user.sequences_lead, [])
     
     
     
@@ -1489,7 +1567,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # this should work without any error
-        self.mock_user.leader_of_seuqences = []
+        self.test_user.leader_of_seuqences = []
     
     
     
@@ -1539,7 +1617,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if sequence_lead attribute works properly
         """
         
-        self.assertEqual(self.mock_user.sequences_lead,
+        self.assertEqual(self.test_user.sequences_lead,
                          self.kwargs["sequences_lead"]
         )
     
@@ -1551,7 +1629,7 @@ class UserTest(mocker.MockerTestCase):
         ValidatedList
         """
         
-        self.assertIsInstance(self.mock_user.sequences_lead, ValidatedList)
+        self.assertIsInstance(self.test_user.sequences_lead, ValidatedList)
     
     
     
@@ -1564,14 +1642,14 @@ class UserTest(mocker.MockerTestCase):
         # append
         self.assertRaises(
             TypeError,
-            self.mock_user.sequences_lead.append,
+            self.test_user.sequences_lead.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
             TypeError,
-            self.mock_user.sequences_lead.__setitem__,
+            self.test_user.sequences_lead.__setitem__,
             0,
             0
         )
@@ -1596,8 +1674,8 @@ class UserTest(mocker.MockerTestCase):
         to None
         """
         
-        self.mock_user.tasks = None
-        self.assertEqual(self.mock_user.tasks, [])
+        self.test_user.tasks = None
+        self.assertEqual(self.test_user.tasks, [])
     
     
     
@@ -1627,7 +1705,7 @@ class UserTest(mocker.MockerTestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_user,
+                self.test_user,
                 "tasks",
                 test_value
             )
@@ -1654,7 +1732,7 @@ class UserTest(mocker.MockerTestCase):
         """
         
         # this should work without any error
-        self.mock_user.tasks = []
+        self.test_user.tasks = []
     
     
     
@@ -1663,14 +1741,14 @@ class UserTest(mocker.MockerTestCase):
         """testing if tasks attribute is working properly
         """
         
-        tasks = [self.mock_task1,
-                 self.mock_task2,
-                 self.mock_task3,
-                 self.mock_task4]
+        tasks = [self.test_task1,
+                 self.test_task2,
+                 self.test_task3,
+                 self.test_task4]
         
-        self.mock_user.tasks = tasks
+        self.test_user.tasks = tasks
         
-        self.assertEqual(self.mock_user.tasks, tasks)
+        self.assertEqual(self.test_user.tasks, tasks)
     
     
     
@@ -1679,7 +1757,7 @@ class UserTest(mocker.MockerTestCase):
         """testing if the tasks attribute is an instance of ValidatedList
         """
         
-        self.assertIsInstance(self.mock_user.tasks, ValidatedList)
+        self.assertIsInstance(self.test_user.tasks, ValidatedList)
     
     
     
@@ -1692,14 +1770,14 @@ class UserTest(mocker.MockerTestCase):
         # append
         self.assertRaises(
             TypeError,
-            self.mock_user.tasks.append,
+            self.test_user.tasks.append,
             0
         )
         
         # __setitem__
         self.assertRaises(
             TypeError,
-            self.mock_user.tasks.__setitem__,
+            self.test_user.tasks.__setitem__,
             0,
             0
         )
@@ -1725,8 +1803,8 @@ class UserTest(mocker.MockerTestCase):
         
         new_user = User(**self.kwargs)
         
-        self.assertTrue(self.mock_user==same_user)
-        self.assertFalse(self.mock_user==new_user)
+        self.assertTrue(self.test_user==same_user)
+        self.assertFalse(self.test_user==new_user)
     
     
     
@@ -1749,8 +1827,8 @@ class UserTest(mocker.MockerTestCase):
         
         new_user = User(**self.kwargs)
         
-        self.assertFalse(self.mock_user!=same_user)
-        self.assertTrue(self.mock_user!=new_user)
+        self.assertFalse(self.test_user!=same_user)
+        self.assertTrue(self.test_user!=new_user)
     
     
     
@@ -1817,8 +1895,8 @@ class UserTest(mocker.MockerTestCase):
         
         test_value = "eoy"
         
-        self.mock_user.initials = test_value
-        self.assertEqual(self.mock_user.initials, test_value)
+        self.test_user.initials = test_value
+        self.assertEqual(self.test_user.initials, test_value)
     
     
     
@@ -1828,11 +1906,11 @@ class UserTest(mocker.MockerTestCase):
         """
         
         self.assertEqual(
-            self.mock_user.__repr__(),
+            self.test_user.__repr__(),
             "<User (%s %s ('%s'))>" % (
-                self.mock_user.first_name,
-                self.mock_user.last_name,
-                self.mock_user.login_name)
+                self.test_user.first_name,
+                self.test_user.last_name,
+                self.test_user.login_name)
         )
     
     

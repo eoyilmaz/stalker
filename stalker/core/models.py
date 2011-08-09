@@ -2038,14 +2038,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     
     :type lead: :class:`~stalker.core.models.User`
     
-    :param list sequences: The sequences of the project, it should be a list of
-      :class:`~stalker.core.models.Sequence` instances, if set to None it is
-      converted to an empty list. Default value is an empty list.
-    
-    :param list assets: The assets used in this project, it should be a list of
-      :class:`~stalker.core.models.Asset` instances, if set to None it is
-      converted to an empty list. Default value is an empty list.
-    
     :param image_format: The output image format of the project. Default
       value is None.
     
@@ -2064,10 +2056,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     :type structure: :class:`~stalker.core.models.Structure`
     
     :param repository: The repository that the project files are going to be
-      stored in. You can not create the project folder structure if the project
-      doesn't have a connection to a
-      :class:`~stalker.core.models.Repository`. Default value is
-      None.
+      stored in. You can not create a project without specifying the
+      repository argument and passing a
+      :class:`~stalker.core.models.Repository` to it. Default value is None
+      which raises a TypeError.
     
     :type repository: :class:`~stalker.core.models.Repository`.
     
@@ -2081,6 +2073,14 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
       converted to the positive values. Default value is 1.
     """
     
+    #:param list assets: The assets used in this project, it should be a list of
+      #:class:`~stalker.core.models.Asset` instances, if set to None it is
+      #converted to an empty list. Default value is an empty list.
+    
+    #:param list sequences: The sequences of the project, it should be a list of
+      #:class:`~stalker.core.models.Sequence` instances, if set to None it is
+      #converted to an empty list. Default value is an empty list.
+    
     
     
     __strictly_typed__ = True
@@ -2092,8 +2092,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
                  lead=None,
                  repository=None,
                  structure=None,
-                 sequences=[],
-                 assets=[],
+                 #sequences=[],
+                 #assets=[],
                  image_format=None,
                  fps=25.0,
                  is_stereoscopic=False,
@@ -2115,8 +2115,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         self._users = []
         self._repository = self._validate_repository(repository)
         self._structure = self._validate_structure(structure)
-        self._sequences = self._validate_sequences(sequences)
-        self._assets = self._validate_assets(assets)
+        #self._sequences = self._validate_sequences(sequences)
+        #self._assets = self._validate_assets(assets)
+        self._sequences = ValidatedList([], Sequence)
+        self._assets = ValidatedList([], Asset)
         
         self._image_format = self._validate_image_format(image_format)
         self._fps = self._validate_fps(fps)
@@ -2125,24 +2127,24 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     
     
     
-    #----------------------------------------------------------------------
-    def _validate_assets(self, assets_in):
-        """validates the given assets_in lists
-        """
+    ##----------------------------------------------------------------------
+    #def _validate_assets(self, assets_in):
+        #"""validates the given assets_in lists
+        #"""
         
-        if assets_in is None:
-            assets_in = []
+        #if assets_in is None:
+            #assets_in = []
         
-        if not isinstance(assets_in, list):
-            raise TypeError("assets should be a list of "
-                            "stalker.core.models.Assets instances")
+        #if not isinstance(assets_in, list):
+            #raise TypeError("assets should be a list of "
+                            #"stalker.core.models.Assets instances")
         
-        if not all([isinstance(element, Asset)
-                    for element in assets_in]):
-            raise TypeError("the elements in assets lists should be all "
-                            "stalker.core.models.Asset instances")
+        #if not all([isinstance(element, Asset)
+                    #for element in assets_in]):
+            #raise TypeError("the elements in assets lists should be all "
+                            #"stalker.core.models.Asset instances")
         
-        return ValidatedList(assets_in)
+        #return ValidatedList(assets_in)
     
     
     
@@ -2199,8 +2201,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         """validates the given repository_in value
         """
         
-        if repository_in is not None and \
-           not isinstance(repository_in, Repository):
+        if not isinstance(repository_in, Repository):
             raise TypeError("the repsoitory should be an instance of "
                             "stalker.core.models.Repository")
         
@@ -2208,24 +2209,24 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     
     
     
-    #----------------------------------------------------------------------
-    def _validate_sequences(self, sequences_in):
-        """validates the given sequences_in value
-        """
+    ##----------------------------------------------------------------------
+    #def _validate_sequences(self, sequences_in):
+        #"""validates the given sequences_in value
+        #"""
         
-        if sequences_in is None:
-            sequences_in = []
+        #if sequences_in is None:
+            #sequences_in = []
         
-        if not isinstance(sequences_in, list):
-            raise TypeError("sequences should be a list of "
-                            "stalker.core.models.Sequence instances")
+        #if not isinstance(sequences_in, list):
+            #raise TypeError("sequences should be a list of "
+                            #"stalker.core.models.Sequence instances")
         
-        if not all([isinstance(seq, Sequence)
-                    for seq in sequences_in]):
-            raise TypeError("sequences should be a list of "
-                            "stalker.core.models.Sequence instances")
+        #if not all([isinstance(seq, Sequence)
+                    #for seq in sequences_in]):
+            #raise TypeError("sequences should be a list of "
+                            #"stalker.core.models.Sequence instances")
         
-        return ValidatedList(sequences_in, Sequence)
+        #return ValidatedList(sequences_in, Sequence)
     
     
     
@@ -2269,10 +2270,16 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         def fget(self):
             return self._assets
         
-        def fset(self, assets_in):
-            self._assets = self._validate_assets(assets_in)
+        #def fset(self, assets_in):
+            #self._assets = self._validate_assets(assets_in)
         
-        doc = """the list of assets created in this project"""
+        doc = """The list of :class:`~stalker.core.models.Asset`\ s created in this project.
+        
+        It is a read-only list. To add an :class:`~stalker.core.models.Asset`
+        to this project, the :class:`~stalker.core.models.Asset` need to be
+        created with this project is given in the ``project`` argument in the
+        :class:`~stalker.core.models.Asset`.
+        """
         
         return locals()
     
@@ -2368,12 +2375,15 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     def repository():
         def fget(self):
             return self._repository
-        def fset(self, repository_in):
-            self._repository = self._validate_repository(repository_in)
         
-        doc = """the repository that this project should reside, should be an
-        instance of :class:`~stalker.core.models.Repository`, can
-        not be skipped"""
+        #def fset(self, repository_in):
+            #self._repository = self._validate_repository(repository_in)
+        
+        doc = """The :class:`~stalker.core.models.Repository` that this project should reside.
+        
+        Should be an instance of :class:`~stalker.core.models.Repository`.
+        It is a read-only attribute. So it is not possible to change the
+        repository of one project"""
         
         return locals()
     
@@ -2385,12 +2395,22 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     def sequences():
         def fget(self):
             return self._sequences
-        def fset(self, sequences_in):
-            self._sequences = self._validate_sequences(sequences_in)
+        #def fset(self, sequences_in):
+            #self._sequences = self._validate_sequences(sequences_in)
         
-        doc = """the sequences contained in this project, should be a list
-        containing all of :class:`~stalker.core.models.Sequence`
-        instances, when set to None it is converted to an empty list"""
+        doc = """The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
+        
+        This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
+        that this :class:`~stalker.core.models.Project` has. It is a list of
+        :class:`~stalker.core.models.Sequence` instances. The attribute is
+        read-only. The only way to attach a
+        :class:`~stalker.core.models.Sequence` to this
+        :class:`~stalker.core.models.Project` is to create the
+        :class:`~stalker.core.models.Sequence` with this
+        :class:`~stalker.core.models.Project` by passing this
+        :class:`~stalker.core.models.Project` in the ``project`` argument of
+        the :class:`~stalker.core.models.Sequence`.
+        """
         
         return locals()
     
@@ -2646,6 +2666,11 @@ class Sequence(Entity,
     Sequences are holders of the :class:`~stalker.core.models.Shot` objects.
     They orginize the conceptual data with another level of complexity.
     
+    The Sequence class updates the
+    :attr:`~stalker.core.models.Project.sequence` attribute in the
+    :class:`~stalker.core.models.Project` class when the Sequence is
+    initialized.
+    
     :param lead: The lead of this Seuqence. The default value is None.
     
     :type lead: :class:`~stalker.core.models.User`
@@ -2669,6 +2694,10 @@ class Sequence(Entity,
         
         self._lead = self._validate_lead(lead)
         self._shots = self._validate_shots(None)
+        
+        # update the Project._sequences attribute
+        if not self in self._project._sequences:
+            self._project._sequences.append(self)
     
     
     
@@ -3482,6 +3511,12 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     :class:`~stalker.core.models.Type` object created specifically for
     :class:`~stalker.core.models.Asset` (ie. has its
     :attr:`~stalker.core.models.Type.target_entity_type` set to "Asset"),
+    
+    An :class:`~stalker.core.models.Asset` instance should be initialized with
+    a :class:`~stalker.core.models.Project` instance (as the other classes
+    which are mixed with the :class:`~stalekr.core.mixins.TaskMixin`). And when
+    a :class:`~stalker.core.models.Project` instance is given then the asset
+    will append itself to the :attr:`~stalker.core.models.Project.assets` list.
     """
     
     
@@ -3502,6 +3537,10 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         
         self._shots = []
         self.shots = shots
+        
+        # append it self to the given projects assets attribute
+        if not self in self.project._assets:
+            self.project._assets.append(self)
     
     
     

@@ -32,9 +32,9 @@ class SequenceTester(mocker.MockerTestCase):
         self.mock_lead = self.mocker.mock(User)
         self.mock_lead2 = self.mocker.mock(User)
         
-        self.mock_shot1 = self.mocker.mock(Shot)
-        self.mock_shot2 = self.mocker.mock(Shot)
-        self.mock_shot3 = self.mocker.mock(Shot)
+        #self.mock_shot1 = self.mocker.mock(Shot)
+        #self.mock_shot2 = self.mocker.mock(Shot)
+        #self.mock_shot3 = self.mocker.mock(Shot)
         
         self.mock_status1 = self.mocker.mock(Status)
         self.mock_status2 = self.mocker.mock(Status)
@@ -55,7 +55,6 @@ class SequenceTester(mocker.MockerTestCase):
             "description": "A test sequence",
             "project": self.mock_project,
             "lead": self.mock_lead,
-            "shots": [self.mock_shot1, self.mock_shot2, self.mock_shot3],
             "status_list": self.mock_status_list1
         }
         
@@ -442,6 +441,8 @@ class SequenceTester(mocker.MockerTestCase):
             type=project_type
         )
         
+        self.kwargs["new_project"] = new_project
+        
         new_sequence = Sequence(**self.kwargs)
         
         task1 = Task(
@@ -465,6 +466,61 @@ class SequenceTester(mocker.MockerTestCase):
         
         self.assertItemsEqual(new_sequence.tasks, tasks)
     
+    
+    
+    #----------------------------------------------------------------------
+    def test_sequences_attribute_is_updated_in_the_project_instance(self):
+        """testing if the sequences attribute is updated in the Project
+        instance.
+        """
+        
+        status1 = Status(name="On Hold", code="OH")
+        
+        task_status_list = StatusList(
+            name="Task Statuses",
+            statuses=[status1],
+            target_entity_type=Task.entity_type
+        )
+        
+        project_status_list = StatusList(
+            name="Project Statuses", statuses=[status1],
+            target_entity_type=Project.entity_type
+        )
+        
+        project_type = Type(
+            name="Commercial",
+            target_entity_type=Project
+        )
+        
+        new_project = Project(
+            name="Commercial",
+            status_list=project_status_list,
+            type=project_type
+        )
+        
+        self.kwargs["project"] = new_project
+        
+        new_sequence = Sequence(**self.kwargs)
+        
+        task1 = Task(
+            name="Modeling",
+            status=0,
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_sequence,
+        )
+        
+        task2 = Task(
+            name="Lighting",
+            status=0,
+            status_list=task_status_list,
+            project=new_project,
+            task_of=new_sequence,
+        )
+        
+        tasks = [task1, task2]
+        
+        self.assertIn(new_sequence, new_project.sequences)
     
     
     

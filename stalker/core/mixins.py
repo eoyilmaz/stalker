@@ -492,7 +492,7 @@ class ScheduleMixin(object):
 
 ########################################################################
 class TaskMixin(object):
-    """Gives the abilitiy to connect to a list of taks to the mixed in object.
+    """Gives the abilitiy to connect to a list of :class:`~stalker.core.models.Task`\ s to the mixed in object.
     
     TaskMixin lets the mixed object to have :class:`~stalker.core.model.Task`
     instances to be attached it self. And because
@@ -615,15 +615,15 @@ class TaskMixin(object):
         def fget(self):
             return self._tasks
         
-        def fset(self, task_in):
-            self._tasks = self._validate_tasks(task_in)
+        #def fset(self, task_in):
+            #self._tasks = self._validate_tasks(task_in)
         
         doc = """The list of :class:`~stalker.core.models.Task` instances.
         
         Be careful that you can not remove any of the elements of the ``tasks``
         list. Trying to remove a :class:`~stalker.core.models.Task` by removing
         it from the list will raise a RunTimeError. This is because the
-        :class:`~stalker.core.models.Task` will become an orphan task it is
+        :class:`~stalker.core.models.Task` will become an orphan task if it is
         removed by this way. To remove the
         :class:`~stalker.core.models.Task` from the list you should delete it
         or append it to another objects ``tasks`` attribute.
