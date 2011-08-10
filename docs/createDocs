@@ -1,6 +1,7 @@
 clear
 clear
-rm -R build
+rm -R build/doctrees
+rm -R build/html
 rm -R source/generated
 make html
 #make latexpdf

@@ -30,9 +30,9 @@ class RepositoryTester(unittest.TestCase):
             "name": "a repository",
             "description": "this is for testing purposes",
             "tags": [self.test_tag1, self.test_tag2],
-            "linux_path": "~/M/Projects",
+            "linux_path": "/mnt/M/Projects",
             "osx_path": "/Volumes/M/Projects",
-            "windows_path": "M:\\Projects"
+            "windows_path": "M:/Projects"
         }
         
         self.test_repo = Repository(**self.kwargs)
@@ -253,6 +253,84 @@ class RepositoryTester(unittest.TestCase):
         """
         
         self.assertTrue(Repository.plural_name, "Repositories")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_linux_path_argument_backward_slashes_are_converted_to_forward_slashes(self):
+        """testing if the backward slashes are converted to forward slashes
+        in the linux_path argument
+        """
+        
+        self.kwargs["linux_path"] = r"\mnt\M\Projects"
+        new_repo = Repository(**self.kwargs)
+        
+        self.assertNotIn("\\", new_repo.linux_path)
+        self.assertEqual(new_repo.linux_path, "/mnt/M/Projects")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_linux_path_attribute_backward_slashes_are_converted_to_forward_slashes(self):
+        """testing if the backward slashes are converted to forward slashes
+        in the linux_path attribute
+        """
+        
+        self.test_repo.linux_path = r"\mnt\M\Projects"
+        self.assertNotIn("\\", self.test_repo.linux_path)
+        self.assertEqual(self.test_repo.linux_path, "/mnt/M/Projects")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_osx_path_argument_backward_slashes_are_converted_to_forward_slashes(self):
+        """testing if the backward slashes are converted to forward slashes
+        in the osx_path argument
+        """
+        
+        self.kwargs["osx_path"] = r"\Volumes\M\Projects"
+        new_repo = Repository(**self.kwargs)
+        
+        self.assertNotIn("\\", new_repo.linux_path)
+        self.assertEqual(new_repo.osx_path, "/Volumes/M/Projects")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_osx_path_attribute_backward_slashes_are_converted_to_forward_slashes(self):
+        """testing if the backward slashes are converted to forward slashes
+        in the osx_path attribute
+        """
+        
+        self.test_repo.osx_path = r"\Volumes\M\Projects"
+        self.assertNotIn("\\", self.test_repo.osx_path)
+        self.assertEqual(self.test_repo.osx_path, "/Volumes/M/Projects")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_windows_path_argument_backward_slashes_are_converted_to_forward_slashes(self):
+        """testing if the backward slashes are converted to forward slashes
+        in the windows_path argument
+        """
+        
+        self.kwargs["windows_path"] = r"M:\Projects"
+        new_repo = Repository(**self.kwargs)
+        
+        self.assertNotIn("\\", new_repo.linux_path)
+        self.assertEqual(new_repo.windows_path, "M:/Projects")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_windows_path_attribute_backward_slashes_are_converted_to_forward_slashes(self):
+        """testing if the backward slashes are converted to forward slashes
+        in the windows_path attribute
+        """
+        
+        self.test_repo.windows_path = r"M:\Projects"
+        self.assertNotIn("\\", self.test_repo.windows_path)
+        self.assertEqual(self.test_repo.windows_path, "M:/Projects")
     
     
     

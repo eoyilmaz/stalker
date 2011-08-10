@@ -1,3 +1,4 @@
+===============
 Stalker Changes
 ===============
 
@@ -64,6 +65,12 @@ v0.1.1.a10
  * From now on none of the tests are using the Mocker library. Thus all the
    little changes to any of the classes are present in all the tests which are
    using those classes. This makes the tests more robust and current.
+
+ * Fixed latex PDF output of the documentation, now the formatting is nice and
+   correct.
+
+ * :class:`~stalker.core.models.Repository` now replaces backward slashes with
+   forward slashes in the given path arguments and attributes.
 
 v0.1.1.a9
 ---------

@@ -113,8 +113,9 @@ Lets say that we have this new commercial project coming and you want to start
 using Stalker with it. So we need to create a
 :class:`~stalker.core.models.Project` object to hold data about it.
 
-A project instance needs to have its *type* (commercial in our case) defined
-and it needs to have a suitable status list::
+A project instance needs to have its *type* (commercial in our case) defined,
+it needs to have a suitable status list and it needs to be attached to a
+:class:`~stalker.core.models.Repository` instance::
 
   # lets create a couple of generic Statuses
   from stalker.core.models import Status
@@ -150,7 +151,7 @@ Lets create a :class:`~stalker.core.models.StatusList` suitable for
 
 So we defined a status list which is suitable for Project instances. As you
 see we didn't used all the generic Statuses in our ``project_statuses`` because
-for a Project object we thinked that these statuses are enough.
+for a Project object we thought that these statuses are enough.
 
 We also need to specify the type of the project, which is *commercial* in our
 case::
@@ -164,13 +165,28 @@ case::
 class:`~stalker.core.models.Type`\ s are generic entities that is accepted by
 any kind of entity created in Stalker. So in Stalker you can define a type for
 anything. But a couple of them, like the :class:`~stalker.core.models.Project`
-class, needs the type to be defined in the creation of the instance::
+class, needs the type to be defined in the creation of the instance.
+
+And finally, the :class:`~stalker.core.models.Repository`. The Repository (or
+Repo if you like) is a path in our file server, where we place files and which
+is visible to all the workstations/render farmers::
+
+  from stalker.core.models import Repository
+  
+  # and the repository itself
+  commercial_repo = Repository(
+    name="Commercial Repository",
+  )
+
+:class:`~stalker.core.models.Repository` class will be explained in deatil in
+upcomming sections.
 
 So::
 
   new_project = Project(
       name="Fancy Commercial",
       status_list=project_statuses,
+      repository=commercial_repo,
   )
 
 will produce::
@@ -182,6 +198,7 @@ so create the project with its type set::
   new_project = Project(
       name="Fancy Commercial",
       status_list=project_statuses,
+      repository=commercial_repo,
       type=commercial_project_type,
   )
 
@@ -262,8 +279,8 @@ send them to the database::
 Part II/B - Querying, Updating and Deleting Data
 ================================================
 
-So far we always created some simple data. What about updating them. Let say
-that we created a new shot with wrong info::
+So far we just created some simple data. What about updating them. Let say that
+we created a new shot with wrong info::
 
   sh004 = Shot(code="SH005", sequence=seq1, status_list=shot_statuses)
   db.session.add(sh004)
@@ -392,8 +409,8 @@ Lets commit the changes again::
 
 If you noticed, this time we didn't add anything to the session, cause we have
 added the ``sh001`` in a previous commit, and because all the objects are
-attached to this shot object in some way, all the changes has been tracked
-and added to the database.
+attached to this shot object in some way, all the changes has been tracked and
+added to the database.
 
 Part V - Asset Management
 =========================
@@ -417,32 +434,32 @@ A repository is a file path, preferably a path which is mapped or mounted to
 the same path on every computer in our studio. You can have several
 repositories let say one for Commercials and another one for big Movie
 projects. You can define repositories and assign projects to those
-repositories. Lets create one repository for our commercial project::
-
-  from stalker.core.models import Repository
-  repo1 = Repository(name="Commercial Repository")
-
-A Repository object could show the root path of the repository according to
-your operating system. Lets enter the paths for all the major operating
-systems::
+repositories. We have already created a repository while creating our first
+project. But the repository has missing informations. A Repository object shows
+the path that we create our projects into. Lets enter the paths for all the
+major operating systems::
   
-  repo1.windows_path = "M:\\PROJECTS"
-  repo1.linux_path   = "/mnt/M"
-  repo1.osx_path     = "/Volumes/M"
+  commercial_repo.windows_path = "M:/PROJECTS"
+  commercial_repo.linux_path   = "/mnt/M/PROJECTS"
+  commercial_repo.osx_path     = "/Volumes/M/PROJECTS"
 
 And if you ask for the path to a repository object it will always give the
 correct answer according to your operating system::
 
   print repo1.path
   # under Windows outputs:
-  # M:\PROJECTS
+  # M:/PROJECTS
   # 
   # in Linux and variants:
-  # /mnt/M 
+  # /mnt/M/PROJECTS 
   # 
   # and in OSX:
-  # /Volumes/M
+  # /Volumes/M/PROJECTS
   #
+
+.. note::
+  Stalker always uses forward slashes no matter what operating system you are
+  using.
 
 Assigning this repository to our project is not enough, Stalker still doesn't
 know about the project :class:`~stalker.core.models.Structure`\ , or in other

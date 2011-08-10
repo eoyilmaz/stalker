@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Stalker'
-copyright = u'2010, Erkan Ozgur Yilmaz'
+copyright = u'2010-2011, the Stalker authors and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -197,7 +197,7 @@ latex_paper_size = 'a4'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Stalker.tex', u'Stalker Documentation',
+  ('contents', 'Stalker.tex', u'Stalker Documentation',
    u'Erkan Ozgur Yilmaz', 'manual'),
 ]
 
@@ -216,7 +216,7 @@ latex_documents = [
 #latex_show_urls = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+latex_preamble = '\setcounter{tocdepth}{3}'
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []

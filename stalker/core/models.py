@@ -2501,7 +2501,9 @@ class Repository(Entity):
     projects and one for commercial projects.
     
     A repository also defines the default paths for linux, windows and mac
-    fileshares.
+    fileshares. The path seperator is always forward slashes ("/"). Setting a
+    path that contains backward slashes ("\\"), will be converted to a path
+    with forward slashes.
     
     :param linux_path: shows the linux path of the repository root, should be a
       string
@@ -2535,7 +2537,7 @@ class Repository(Entity):
             raise TypeError("linux_path should be an instance of string or "
                              "unicode")
         
-        return linux_path_in
+        return linux_path_in.replace("\\", "/")
     
     
     
@@ -2548,7 +2550,7 @@ class Repository(Entity):
             raise TypeError("osx_path should be an instance of string or "
                              "unicode")
         
-        return osx_path_in
+        return osx_path_in.replace("\\", "/")
     
     
     
@@ -2561,7 +2563,7 @@ class Repository(Entity):
             raise TypeError("windows_path should be an instance of string or "
                              "unicode")
         
-        return windows_path_in
+        return windows_path_in.replace("\\", "/")
     
     
     
@@ -3639,7 +3641,7 @@ class Version(Entity, StatusMixin):
     :class:`~stalker.core.models.Version` instance.
     
     :param str take: A short string holding the current take name. Can be
-      any alphanumeric value (a-zA-Z0-0_)
+      any alphanumeric value (a-zA-Z0-0\_)
     
     :param int version: An integer value showing the current version number.
     
