@@ -317,7 +317,6 @@ Links = Table(
         primary_key=True,
     ),
     Column("path", String),
-    Column("filename", String),
 )
 
 

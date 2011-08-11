@@ -1107,8 +1107,7 @@ class DatabaseModelsTester(unittest.TestCase):
         kwargs = {
             "name": "My Sound",
             "created_by": admin,
-            "path": "M:/PROJECTS",
-            "filename": "my_movie_sound.wav",
+            "path": "M:/PROJECTS/my_movie_sound.wav",
             "type": sound_link_type
         }
         
@@ -1124,7 +1123,6 @@ class DatabaseModelsTester(unittest.TestCase):
         date_created = new_link.date_created
         date_updated = new_link.date_updated
         description = new_link.description
-        filename = new_link.filename
         name = new_link.name
         nice_name = new_link.nice_name
         notes = new_link.notes
@@ -1149,7 +1147,6 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(date_created, new_link_DB.date_created)
         self.assertEqual(date_updated, new_link_DB.date_updated)
         self.assertEqual(description, new_link_DB.description)
-        self.assertEqual(filename, new_link_DB.filename)
         self.assertEqual(name, new_link_DB.name)
         self.assertEqual(nice_name, new_link_DB.nice_name)
         self.assertEqual(notes, new_link_DB.notes)

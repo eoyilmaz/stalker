@@ -367,8 +367,6 @@ def setup():
         properties={
             "_path": tables.Links.c.path,
             "path": synonym("_path"),
-            "_filename": tables.Links.c.filename,
-            "filename": synonym("_filename"),
         },
     )
     
