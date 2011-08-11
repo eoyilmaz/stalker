@@ -72,6 +72,11 @@ v0.1.1.a10
  * :class:`~stalker.core.models.Repository` now replaces backward slashes with
    forward slashes in the given path arguments and attributes.
 
+ * The ``filename`` attribute has been removed from the
+   :class:`~stalker.core.models.Link` class. And it doesn't need an
+   ``filename`` argument anymore. The :attr:`~stalker.core.models.Link.path`
+   is enough to hold the neccessary data.
+
 v0.1.1.a9
 ---------
 

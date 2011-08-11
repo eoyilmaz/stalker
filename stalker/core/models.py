@@ -1460,22 +1460,22 @@ class ImageFormat(Entity):
 class Link(Entity):
     """Holds data about external links.
     
-    Links are all about to give some external information to the current entity
+    Links are all about giving some external information to the current entity
     (external to the database, so it can be something on the
-    :class:`~stalker.core.models.Repository` or in the Web). The
-    link type is defined by the :class:`~stalker.core.models.LinkType` object
-    and it can be anything like *General*, *File*, *Folder*, *WebPage*,
-    *Image*, *ImageSequence*, *Movie*, *Text* etc. (you can also use multiple
-    :class:`~stalker.core.models.Tag` objects to adding more information,
-    and filtering back). Again it is defined by the needs of the studio.
+    :class:`~stalker.core.models.Repository` or in the Web). The type of the
+    link (general, file, folder, webpage, image, image sequence, video, movie,
+    sound, text etc.) can be defined by a :class:`~stalker.core.models.Type`
+    instance (you can also use multiple :class:`~stalker.core.models.Tag`
+    instances to add more information, and to filter them back). Again it is
+    defined by the needs of the studio.
     
-    :param path: The Path to the link, it can be a path to a file in the file
-      system, or a web page.  Setting path to None or an empty string is not
-      accepted.
+    For sequences of files the file name may contain "#" or muptiple of them
+    like "###" to define pading.
     
-    :param filename: The file name part of the link url, for file sequences use
-      "#" in place of the numerator (`Nuke`_ style). Setting filename to None
-      or an empty string is not accepted.
+    :param path: The Path to the link, it can be a path to a folder or a file
+      in the file system, or a web page. For file sequences use "#" in place of
+      the numerator (`Nuke`_ style). Setting the path to None or an empty
+      string is not accepted.
     
     .. _Nuke: http://www.thefoundry.co.uk
     """
@@ -1487,12 +1487,9 @@ class Link(Entity):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, path="", filename="", **kwargs):
+    def __init__(self, path="", **kwargs):
         super(Link, self).__init__(**kwargs)
-        
         self._path = self._validate_path(path)
-        self._filename = self._validate_filename(filename)
-        #self._type = self._validate_type(type)
     
     
     
@@ -1525,25 +1522,6 @@ class Link(Entity):
     
     
     #----------------------------------------------------------------------
-    def _validate_filename(self, filename_in):
-        """validates the given filename
-        """
-        
-        if filename_in is None:
-            raise TypeError("filename can not be None")
-        
-        if not isinstance(filename_in, (str, unicode)):
-            raise TypeError("filename should be an instance of string or "
-                             "unicode")
-        
-        if filename_in=="":
-            raise ValueError("filename can not be an empty string")
-        
-        return filename_in
-    
-    
-    
-    #----------------------------------------------------------------------
     def path():
         def fget(self):
             return self._path
@@ -1561,41 +1539,6 @@ class Link(Entity):
     
     
     #----------------------------------------------------------------------
-    def filename():
-        def fget(self):
-            return self._filename
-        
-        def fset(self, filename_in):
-            self._filename = self._validate_filename(filename_in)
-        
-        doc="""the filename part of the url to the link, it can not be None or
-        an empty string, it should be a string or unicode"""
-        
-        return locals()
-    
-    filename = property(**filename())
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def type():
-        #def fget(self):
-            #return self._type
-        
-        #def fset(self, type_in):
-            #self._type = self._validate_type(type_in)
-        
-        #doc="""the type of the link, it should be a
-        #:class:`~stalker.core.models.LinkType` object and it can not be
-        #None"""
-        
-        #return locals()
-    
-    #type = property(**type())
-    
-    
-    
-    #----------------------------------------------------------------------
     def __eq__(self, other):
         """the equality operator
         """
@@ -1603,7 +1546,6 @@ class Link(Entity):
         return super(Link, self).__eq__(other) and \
                isinstance(other, Link) and \
                self.path == other.path and \
-               self.filename == other.filename and \
                self.type == other.type
 
 
@@ -3641,9 +3583,13 @@ class Version(Entity, StatusMixin):
     :class:`~stalker.core.models.Version` instance.
     
     :param str take: A short string holding the current take name. Can be
-      any alphanumeric value (a-zA-Z0-0\_)
+      any alphanumeric value (a-zA-Z0-0\_). The default is the string "MAIN".
+      When skipped or given as None or an empty string then it will use the
+      default value.
     
     :param int version: An integer value showing the current version number.
+      The default is "1". If skipped or given as zero or as a negative value a
+      ValueError will be raised.
     
     :param source_file: A :class:`~stalker.core.models.Link` instance, showing
       the source file of this version.

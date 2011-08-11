@@ -140,89 +140,89 @@ class LinkTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_filename_argument_accepts_string_or_unicode_only(self):
-        """testing if filename argument accepts string or unicode only and
-        raises TypeError otherwise
-        """
+    ##----------------------------------------------------------------------
+    #def test_filename_argument_accepts_string_or_unicode_only(self):
+        #"""testing if filename argument accepts string or unicode only and
+        #raises TypeError otherwise
+        #"""
         
-        test_values = [1, 1.1, ["a filename"], {"a": "filename"}]
+        #test_values = [1, 1.1, ["a filename"], {"a": "filename"}]
         
-        for test_value in test_values:
-            self.kwargs["filename"] = test_value
-            self.assertRaises(TypeError, Link, **self.kwargs)
+        #for test_value in test_values:
+            #self.kwargs["filename"] = test_value
+            #self.assertRaises(TypeError, Link, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_filename_attribute_accpets_string_or_unicode_only(self):
-        """testing if filename attribute accepts string or unicode only and
-        raises TypeError otherwise
-        """
+    ##----------------------------------------------------------------------
+    #def test_filename_attribute_accpets_string_or_unicode_only(self):
+        #"""testing if filename attribute accepts string or unicode only and
+        #raises TypeError otherwise
+        #"""
         
-        test_values = [1, 1.1, ["a filename"], {"a": "filename"}]
+        #test_values = [1, 1.1, ["a filename"], {"a": "filename"}]
         
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_link,
-                "filename",
-                test_value
-            )
+        #for test_value in test_values:
+            #self.assertRaises(
+                #TypeError,
+                #setattr,
+                #self.test_link,
+                #"filename",
+                #test_value
+            #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_filename_argument_being_empty(self):
-        """testing if setting the filename argument to an empty string raises a
-        ValueError
-        """
+    ##----------------------------------------------------------------------
+    #def test_filename_argument_being_empty(self):
+        #"""testing if setting the filename argument to an empty string raises a
+        #ValueError
+        #"""
         
-        self.kwargs["filename"] = ""
-        self.assertRaises(ValueError, Link, **self.kwargs)
+        #self.kwargs["filename"] = ""
+        #self.assertRaises(ValueError, Link, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_filename_attribute_being_empty(self):
-        """testing if setting the filename attribute to an empty string raises
-        a ValueError
-        """
+    ##----------------------------------------------------------------------
+    #def test_filename_attribute_being_empty(self):
+        #"""testing if setting the filename attribute to an empty string raises
+        #a ValueError
+        #"""
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.test_link,
-            "filename",
-            ""
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.test_link,
+            #"filename",
+            #""
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_filename_argument_being_None(self):
-        """testing if setting the filename argument to None raises a TypeError
-        """
+    ##----------------------------------------------------------------------
+    #def test_filename_argument_being_None(self):
+        #"""testing if setting the filename argument to None raises a TypeError
+        #"""
         
-        self.kwargs["filename"] = None
-        self.assertRaises(TypeError, Link, **self.kwargs)
+        #self.kwargs["filename"] = None
+        #self.assertRaises(TypeError, Link, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_filename_attribute_being_None(self):
-        """testing if setting the filename attribute to None raises a
-        TypeError
-        """
+    ##----------------------------------------------------------------------
+    #def test_filename_attribute_being_None(self):
+        #"""testing if setting the filename attribute to None raises a
+        #TypeError
+        #"""
         
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_link,
-            "filename",
-            None
-        )
+        #self.assertRaises(
+            #TypeError,
+            #setattr,
+            #self.test_link,
+            #"filename",
+            #None
+        #)
     
     
     
