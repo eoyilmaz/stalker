@@ -1,6 +1,11 @@
 TODO:
 =====
 
+ * create a commandline module which resembles the mercurials "hg" command to
+   let the users to manage their assets and data. Examples: stalker create
+   project "Deneme". Also, to let the users easily use the commandline tool
+   all the models should be easy to create.
+ 
  * All the attributes that has a back reference on other objects should reset
    the back reference value to Null or to the default value whenever they are
    set to None or empty list. For example, when the Project objects sequences

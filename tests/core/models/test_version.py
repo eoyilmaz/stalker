@@ -174,7 +174,7 @@ class VersionTester(unittest.TestCase):
     def test_take_argument_is_None_defaults_to_default_value(self):
         """testing if the take argument is None the take attribute is going to
         be set to the default value which is
-        stalker.conf.defaults.DEFAULT_VERSION_TAKE
+        stalker.conf.defaults.DEFAULT_VERSION_TAKE_NAME
         """
         
         self.kwargs["take"] = None
@@ -187,7 +187,7 @@ class VersionTester(unittest.TestCase):
     def test_take_attribute_is_None_defaults_to_default_value(self):
         """testing if the take attribute is set to None it is going to be set
         to the default value which is
-        stalker.conf.defaults.DEFAULT_VERSION_TAKE
+        stalker.conf.defaults.DEFAULT_VERSION_TAKE_NAME
         """
         
         self.test_version.take = None
@@ -403,6 +403,13 @@ class VersionTester(unittest.TestCase):
         """testinf if the reviews attribute is a ValidatedList instance
         """
         
+        self.assertIsInstance(self.test_version.reviews, ValidatedList)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_review_attribute_updating_backref_attribute(self):
+        
         self.fail("test is not implemented yet")
     
     
@@ -413,7 +420,9 @@ class VersionTester(unittest.TestCase):
         be converted to a bool value
         """
         
-        self.fail("test is not implemented yet")
+        test_value = "no bool value"
+        self.test_version.published = test_value
+        self.assertEquals(self.test_version.published, bool(test_value))
     
     
     
@@ -423,7 +432,8 @@ class VersionTester(unittest.TestCase):
         is False
         """
         
-        self.fail("test is not implemented yet")
+        new_version = Version(**self.kwargs)
+        self.assertEquals(new_version.published, False)
     
     
     
@@ -432,7 +442,14 @@ class VersionTester(unittest.TestCase):
         """testing if the published attribute is working properly
         """
         
-        self.fail("test is not implemented yet")
+        test_value = True
+        new_version = Version(**self.kwargs)
+        new_version.published = test_value
+        self.assertEquals(new_version.published, test_value)
+        
+        test_value = False
+        new_version.published = test_value
+        self.assertEquals(new_version.published, test_value)
     
     
     
