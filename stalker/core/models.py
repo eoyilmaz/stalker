@@ -99,7 +99,7 @@ class SimpleEntity(object):
     
     The formatting rules for the code attribute is as follows:
       
-      * only alphanumerics and underscore is allowed \[a-zA-Z0-9_\]
+      * only alphanumerics and underscore is allowed \[a-zA-Z0-9\_\]
       
       * no number is allowed at the beggining
       
@@ -1482,7 +1482,7 @@ class Link(Entity):
     
     
     
-    __strictly_typed__ = True
+    #__strictly_typed__ = True
     
     
     
@@ -1585,8 +1585,8 @@ class Comment(Entity):
       Anything other than a string or unicode will raise a TypeError.
     
     :param to: the relation variable, that holds the connection that this
-      comment is related to. it should be an Entity object, any other will
-      raise a TypeError.
+      comment is related to. it should be an instance of SimpleEntity object,
+      any other will raise a TypeError.
     """
     
     
@@ -1620,11 +1620,6 @@ class Comment(Entity):
     def _validate_to(self, to_in):
         """validates the given to variable
         """
-        
-        
-        # the to variable should be:
-        # - not None
-        # - an instance of Entity object
         
         if to_in is None:
             raise TypeError("the to attribute could not be None")
@@ -1662,7 +1657,10 @@ class Comment(Entity):
         def fset(self, to_in):
             self._to = self._validate_to(to_in)
         
-        doc = """this is the property that sets and returns the to attribute
+        doc = """The object that this Comment is created about.
+        
+        It can be anything that is mixed with the
+        :class:`~stalker.core.mixins.ReviewMixin`.
         """
         
         return locals()
@@ -2144,8 +2142,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         """
         
         if not isinstance(repository_in, Repository):
-            raise TypeError("the repsoitory should be an instance of "
-                            "stalker.core.models.Repository")
+            raise TypeError("The stalker.core.models.Project instance should "
+                            "be created with a stalker.core.models.Repository "
+                            "instance passed through the 'repository' "
+                            "argument, the current value is "
+                            "'%s'" % repository_in)
         
         return repository_in
     
@@ -2768,7 +2769,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     :attr:`~stalker.core.models.Shot.cut_out` can be set to the same value
     so the :attr:`~stalker.core.models.Shot.cut_duration` can be set to zero.
     
-    Because Shot is getting is relation to a
+    Because Shot is getting its relation to a
     :class:`~stalker.core.models.Project` from the
     passed :class:`~stalker.core.models.Sequence`, you can skip the
     ``project`` argument, and if you not the value of the ``project`` argument
@@ -3580,10 +3581,13 @@ class Version(Entity, StatusMixin):
     incarnations of the files in the :class:`~stalker.core.models.Repository`.
     So if one creates a new version for a file or a sequences of file for a
     :class:`~stalker.core.models.Task` then the information is hold in the
-    :class:`~stalker.core.models.Version` instance.
+    :class:`~stalker.core.models.Version` instance
+    
+    The :attr:`~stalker.core.models.Version.version` attribute is read-only.
+    Trying to change it will produce an AttributeError.
     
     :param str take: A short string holding the current take name. Can be
-      any alphanumeric value (a-zA-Z0-0\_). The default is the string "MAIN".
+      any alphanumeric value (a-zA-Z0-9\_). The default is the string "Main".
       When skipped or given as None or an empty string then it will use the
       default value.
     
@@ -3592,12 +3596,18 @@ class Version(Entity, StatusMixin):
       ValueError will be raised.
     
     :param source_file: A :class:`~stalker.core.models.Link` instance, showing
-      the source file of this version.
+      the source file of this version. It can be a Maya scene file
+      (*.ma, *.mb), a Nuke file (*.nk) or anything that is opened with the
+      application you have created this version.
     
     :type source_file: :class:`~stalker.core.models.Link`
     
     :param outputs: A list of :class:`~stalker.core.models.Link` instances,
-      holding the outputs of the current version.
+      holding the outputs of the current version. It could be the rendered
+      image sequences out of Maya or Nuke, or it can be a Targa file which is
+      the output of a Photoshop file (*.psd), or anything that you can think as
+      the output which is created using the
+      :attr:`~stalker.core.models.Version.source_file`\ .
     
     :type outputs: list of :class:`~stalker.core.models.Link` instances
     
@@ -3605,6 +3615,11 @@ class Version(Entity, StatusMixin):
       owner of this Version.
     
     :type task: :class:`~stalker.core.models.Task`
+    
+    .. todo::
+      Think about using Tickets instead of review notes for reporting desired
+      changes.
+    
     """
     #:param review: A list of :class:`~stalker.core.models.Comment` instances,
       #holding all the comments made for this Version.

@@ -70,10 +70,6 @@ These python modules should be installed to test Stalker properly:
 
  * Nose
  * Coverage
- * Mocker
-
-The Mocker library should be used to isolate the currently tested part of the
-code.
 
 The coverage of the tests should be kept as close as possible to %100.
 
@@ -81,14 +77,42 @@ There is a helper script in the root of the project, called *doTests*. This is
 a shell script for linux, which runs all the necessary tests and prints the
 tests results and the coverage table.
 
-Code Style
-==========
+.. note::
+  
+  From version 0.1.1 the use of Mocker library is discontinued. The tests are
+  done using real objects. It is done in this way cause the design of the
+  objects were changing too quickly, and it started to be a guess work to see
+  which of the tests are effected by this changes. So the Mocker is removed and
+  it will not be used in future tests.
+
+Coding Style
+============
 
 For the general coding style every participant should strictly follow `PEP 8`_
 rules, and there are some extra rules as listed below:
  
  * Class names should start with an upper-case letter, function and method
-   names should start with lower-case letter
+   names should start with lower-case letter::
+   
+     ########################################################################
+     class MyClass(object):
+         """the doc string of the class
+         """
+         
+         
+         
+         #----------------------------------------------------------------------
+         def __init__(self):
+             pass
+         
+         
+         
+         #----------------------------------------------------------------------
+         def my_method(self):
+             pass
+         
+         
+         
  
  * The class definitions should be preceded by 72 `#` characters, if you are
    using `Wing IDE`_ it is trivial cause it has these kind of templates::
@@ -179,7 +203,8 @@ rules, and there are some extra rules as listed below:
          
          return name.title()
    
-   This rule is not followed for the first line of the docstrings.
+   This rule is not followed for the first line of the docstrings and in long
+   function or method names (particularly in tests).
  
  * If anything is going to be checked against being None you should do it in
    this way::
