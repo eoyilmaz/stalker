@@ -635,3 +635,26 @@ class TaskMixin(object):
         return locals()
     
     tasks = property(**tasks())
+
+
+
+
+
+
+########################################################################
+class ReviewMixin(object):
+    """Adds the ability of being reviewed to the mixed in object.
+    
+    Adds the ``reviews`` attribute to the mixed in object. The ``reivews`` is a
+    :class:`~satlker.ext.validatedList.ValidatedList` accepting
+    :class:`~stalker.core.models.Comment` instances.
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self):
+        pass
+    
+    
+    

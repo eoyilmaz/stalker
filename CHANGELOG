@@ -77,6 +77,10 @@ v0.1.1.a10
    ``filename`` argument anymore. The :attr:`~stalker.core.models.Link.path`
    is enough to hold the neccessary data.
 
+ * The :class:`~stalker.core.models.Link` is not strictly typed anymore. So
+   you can skip the ``type`` argument while creating a
+   :class:`~stalker.core.models.Link` instance.
+
 v0.1.1.a9
 ---------
 

@@ -269,12 +269,12 @@ class LinkTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test___strictly_typed___is_True(self):
-        """testing if the __strictly_typed__ class attribute is True
-        """
+    ##----------------------------------------------------------------------
+    #def test___strictly_typed___is_True(self):
+        #"""testing if the __strictly_typed__ class attribute is True
+        #"""
         
-        self.assertEqual(Link.__strictly_typed__, True)
+        #self.assertEqual(Link.__strictly_typed__, True)
     
     
     
