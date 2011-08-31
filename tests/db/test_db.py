@@ -22,7 +22,6 @@ from stalker.core.errors import LoginError, DBError
 from stalker.core.models import (
     Asset,
     Booking,
-    Comment,
     Department,
     Entity,
     SimpleEntity,
@@ -32,6 +31,7 @@ from stalker.core.models import (
     PermissionGroup,
     Project,
     Repository,
+    Review,
     Sequence,
     Shot,
     Status,
@@ -725,8 +725,8 @@ class DatabaseModelsTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_persistence_Comment(self):
-        """testing the persistence of Comment
+    def test_persistence_Review(self):
+        """testing the persistence of Review
         """
         
         self.fail("test is not implemented yet")

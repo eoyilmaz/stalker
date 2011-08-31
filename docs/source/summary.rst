@@ -11,10 +11,10 @@ Summary
    stalker.db.engine
    stalker.db.mapper
    stalker.db.metadata
-   stalker.db.mixin
-   stalker.db.mixin.ReferenceMixinDB
-   stalker.db.mixin.StatusMixinDB
-   stalker.db.mixin.ScheduleMixinDB
+   stalker.db.mixins
+   stalker.db.mixins.ReferenceMixinDB
+   stalker.db.mixins.StatusMixinDB
+   stalker.db.mixins.ScheduleMixinDB
    stalker.db.tables
    stalker.db.query
    stalker.db.session

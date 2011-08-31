@@ -4,7 +4,7 @@
 
 import unittest
 import datetime
-from stalker.core.models import Comment, Entity, User, Tag
+from stalker.core.models import Review, Entity, User, Tag
 
 
 
@@ -12,8 +12,8 @@ from stalker.core.models import Comment, Entity, User, Tag
 
 
 ########################################################################
-class CommentTest(unittest.TestCase):
-    """testing the Comment class
+class ReviewTest(unittest.TestCase):
+    """testing the Review class
     """
     
     
@@ -48,18 +48,18 @@ class CommentTest(unittest.TestCase):
         )
         
         self.kwargs = {
-            "name": "Test Comment",
+            "name": "Test Review",
             "description": "this is a test object",
             "tags": [self.test_tag1, self.test_tag2],
             "created_by": self.test_user,
             "updated_by": self.test_user,
             "date_created": self.date_created,
             "date_updated": self.date_updated,
-            "body": "This is the content of the comment",
+            "body": "This is the content of the review",
             "to": self.test_entity
         }
         
-        self.test_comment = Comment(**self.kwargs)
+        self.test_review = Review(**self.kwargs)
     
     
     
@@ -69,7 +69,7 @@ class CommentTest(unittest.TestCase):
         anything other than a string or unicode
         """
         
-        # create a new comment with false values
+        # create a new review with false values
         
         test_values = [1, 1.0, ["this is the bodybody"],
                        {"this": "is the body"}]
@@ -78,7 +78,7 @@ class CommentTest(unittest.TestCase):
             self.kwargs["body"] = test_value
             self.assertRaises(
                 TypeError,
-                Comment,
+                Review,
                 **self.kwargs
             )
     
@@ -97,7 +97,7 @@ class CommentTest(unittest.TestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.test_comment,
+                self.test_review,
                 "body",
                 test_value
             )
@@ -109,9 +109,9 @@ class CommentTest(unittest.TestCase):
         """testing if body attribute is set properly
         """
         
-        new_body = "This is a new comment body"
-        self.test_comment.body = new_body
-        self.assertEqual(new_body, self.test_comment.body)
+        new_body = "This is a new review body"
+        self.test_review.body = new_body
+        self.assertEqual(new_body, self.test_review.body)
     
     
     
@@ -121,9 +121,9 @@ class CommentTest(unittest.TestCase):
         nothing
         """
         
-        # creating a new comment and skipping the body should work fine
+        # creating a new review and skipping the body should work fine
         self.kwargs.pop("body")
-        a_new_comment =  Comment(**self.kwargs)
+        a_new_review =  Review(**self.kwargs)
     
     
     
@@ -133,9 +133,9 @@ class CommentTest(unittest.TestCase):
         set to None
         """
         
-        # create a new comment with no "to" argument
+        # create a new review with no "to" argument
         self.kwargs["to"] = None
-        self.assertRaises(TypeError, Comment, **self.kwargs)
+        self.assertRaises(TypeError, Review, **self.kwargs)
     
     
     
@@ -150,7 +150,7 @@ class CommentTest(unittest.TestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.test_comment,
+            self.test_review,
             "to",
             None
         )
@@ -170,7 +170,7 @@ class CommentTest(unittest.TestCase):
             
             self.assertRaises(
                 TypeError,
-                Comment,
+                Review,
                 **self.kwargs
             )
     
@@ -186,7 +186,7 @@ class CommentTest(unittest.TestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.test_comment,
+            self.test_review,
             "to",
             "an Entity"
         )
@@ -203,7 +203,7 @@ class CommentTest(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            Comment,
+            Review,
             **self.kwargs
         )
     
@@ -215,17 +215,17 @@ class CommentTest(unittest.TestCase):
         """
         
         new_to = self.test_entity2
-        self.test_comment.to = new_to
-        self.assertEqual(new_to, self.test_comment.to)
+        self.test_review.to = new_to
+        self.assertEqual(new_to, self.test_review.to)
     
     
     
     #----------------------------------------------------------------------
     def test_plural_name(self):
-        """testing the plural name of Comment class
+        """testing the plural name of Review class
         """
         
-        self.assertTrue(Comment.plural_name, "Comments")
+        self.assertTrue(Review.plural_name, "Reviews")
     
     
     

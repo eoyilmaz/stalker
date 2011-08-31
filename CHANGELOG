@@ -124,6 +124,11 @@ v0.1.1.a10
    :class:`~stalker.core.models.SimpleEntity` to track down in which version of
    Stalker that data is created. This is mostly related with the database part.
 
+ * Renamed ``stalker.db.mixin`` module to :mod:`stalker.db.mixins`.
+
+ * Renamed ``stalker.core.models.Comment`` class to
+   :class:`~stalker.core.models.Review`.
+
 v0.1.1.a9
 ---------
 

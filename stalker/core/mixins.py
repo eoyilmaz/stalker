@@ -5,9 +5,9 @@ Mixins are, you know, things that we love. Ok I don't have anything to write,
 just use and love them.
 
 For SQLAlchemy part of the mixins (tables and mappers) refer to the
-:mod:`~stalker.db.mixin`. There is a corresponding helper class for every mixin
-implemented in this module. Also the documentation explains how to mixin tables
-and mappers.
+:mod:`~stalker.db.mixins`. There is a corresponding helper class for every
+mixin implemented in this module. Also the documentation explains how to mixin
+tables and mappers.
 """ 
 
 
@@ -628,7 +628,7 @@ class ReviewMixin(object):
     
     Adds the ``reviews`` attribute to the mixed in object. The ``reivews`` is a
     :class:`~satlker.ext.validatedList.ValidatedList` accepting
-    :class:`~stalker.core.models.Comment` instances.
+    :class:`~stalker.core.models.Review` instances.
     """
     
     

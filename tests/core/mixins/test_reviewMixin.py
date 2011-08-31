@@ -4,7 +4,7 @@
 
 import unittest
 from stalker.core.mixins import ReviewMixin
-from stalker.core.models import Comment
+from stalker.core.models import Review
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -70,15 +70,15 @@ class ReviewMixinTester(unittest.TestCase):
     
     
     
-    def test_reviews_attribute_is_not_accepting_anything_other_than_list_of_Comments(self):
+    def test_reviews_attribute_is_not_accepting_anything_other_than_list_of_Reviews(self):
         """testing if a TypeError will be raised when the elements of the
-        reivews attribute is set to something other than a Comment
+        reivews attribute is set to something other than a Review
         """
         
         self.assertRaises(TypeError, setattr, self.test_foo_obj, "review",
                           [123])
         
-        # create a couple of Comments
+        # create a couple of Reviews
     
     
     
@@ -92,7 +92,7 @@ class ReviewMixinTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_reviews_attribute_updates_the_to_attribute_in_the_Comment_instance(self):
+    def test_reviews_attribute_updates_the_to_attribute_in_the_Review_instance(self):
         """testing if the "to" attribute is updated with the current object
         when it is set
         """

@@ -6,7 +6,7 @@ import unittest
 from stalker.conf import defaults
 from stalker.core.models import (Version, Repository, Type, Project, Status,
                                  StatusList, Sequence, Shot, Task, Link,
-                                 Comment)
+                                 Review)
 
 
 
@@ -376,7 +376,7 @@ class VersionTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_reviews_attribute_is_not_a_list_of_Comment_instances(self):
+    def test_reviews_attribute_is_not_a_list_of_Review_instances(self):
         """testing if a TypeError will be raised when the reviews attribute is
         set to a list of other objects
         """
@@ -392,8 +392,8 @@ class VersionTester(unittest.TestCase):
         """
         
         # create a review
-        new_comment = Comment(
-            name="Test Comment",
+        new_review = Review(
+            name="Test Review",
             
         )
     

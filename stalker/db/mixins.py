@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
-"""contains helper classes which helps mixed in classes table and mapper setups
+"""contains helper classes which helps in setting up mixed-in classes database
+table and mappers
 """
 
 

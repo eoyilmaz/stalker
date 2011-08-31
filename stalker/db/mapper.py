@@ -8,12 +8,11 @@ You can use your also use your own mappers. See the docs.
 
 from sqlalchemy.orm import mapper, relationship, backref, synonym
 from stalker.db import tables
-from stalker.db.mixin import (ReferenceMixinDB, StatusMixinDB, ScheduleMixinDB,
-                              TaskMixinDB)
+from stalker.db.mixins import (ReferenceMixinDB, StatusMixinDB,
+                               ScheduleMixinDB, TaskMixinDB)
 from stalker.core.models import (
     Asset,
     Booking,
-    Comment,
     Department,
     Entity,
     ImageFormat,
@@ -23,6 +22,7 @@ from stalker.core.models import (
     Project,
     ReferenceMixin,
     Repository,
+    Review,
     ScheduleMixin,
     StatusMixin,
     Sequence,

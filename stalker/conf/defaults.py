@@ -53,7 +53,6 @@ MAPPERS = [
 CORE_MODEL_CLASSES = [
     "stalker.core.models.Asset",
     "stalker.core.models.Booking",
-    "stalker.core.models.Comment",
     "stalker.core.models.Department",
     "stalker.core.models.Entity",
     "stalker.core.models.FilenameTemplate",
@@ -64,6 +63,7 @@ CORE_MODEL_CLASSES = [
     "stalker.core.models.PermissionGroup",
     "stalker.core.models.Project",
     "stalker.core.models.Repository",
+    "stalker.core.models.Review",
     "stalker.core.models.Sequence",
     "stalker.core.models.Shot",
     "stalker.core.models.SimpleEntity",

@@ -1539,15 +1539,15 @@ class Booking(Entity):
 
 
 ########################################################################
-class Comment(Entity):
+class Review(Entity):
     """User reviews and comments about other entities.
     
-    :param body: the body of the comment, it is a string or unicode variable,
-      it can be empty but it is then meaningless to have an empty comment.
+    :param body: the body of the review, it is a string or unicode variable,
+      it can be empty but it is then meaningless to have an empty review.
       Anything other than a string or unicode will raise a TypeError.
     
     :param to: the relation variable, that holds the connection that this
-      comment is related to. it should be an instance of SimpleEntity object,
+      review is related to. it should be an instance of SimpleEntity object,
       any other will raise a TypeError.
     """
     
@@ -1555,7 +1555,7 @@ class Comment(Entity):
     
     #----------------------------------------------------------------------
     def __init__(self, body="", to=None, **kwargs):
-        super(Comment, self).__init__(**kwargs)
+        super(Review, self).__init__(**kwargs)
         
         self._body = self._validate_body(body)
         self._to = self._validate_to(to)
@@ -1597,7 +1597,7 @@ class Comment(Entity):
     #----------------------------------------------------------------------
     @property
     def body(self):
-        """The body of this Comment.
+        """The body of this Review.
         """
         
         return self._body
@@ -1613,7 +1613,7 @@ class Comment(Entity):
     #----------------------------------------------------------------------
     @property
     def to(self):
-        """The object that this Comment is created about.
+        """The object that this Review is created about.
         
         It can be anything that is mixed with the
         :class:`~stalker.core.mixins.ReviewMixin`.
@@ -3501,8 +3501,8 @@ class Version(Entity, StatusMixin):
       changes.
     
     """
-    #:param review: A list of :class:`~stalker.core.models.Comment` instances,
-      #holding all the comments made for this Version.
+    #:param review: A list of :class:`~stalker.core.models.Review` instances,
+      #holding all the reviews made for this Version.
     
     #:type review: :class:`~stalker.core.models.Stalker`
     #:param bool published: A bool value shows if this version is published or
