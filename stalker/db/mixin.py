@@ -34,7 +34,7 @@ class ReferenceMixinDB(object):
     
     #----------------------------------------------------------------------
     @classmethod
-    def setup(cls, class_, class_table, mapper_arguments={}):
+    def setup(cls, class_, class_table, mapper_arguments=None):
         """Creates the necessary tables and properties for the mappers for the mixed in class.
         
         Use the returning dictionary (mapper_arguments) in your mapper.
@@ -52,6 +52,9 @@ class ReferenceMixinDB(object):
         
         :returns: a dictionary holding the mapper_arguments
         """
+        
+        if mapper_arguments is None:
+            mapper_arguments = {}
         
         class_name = class_.__name__
         
@@ -123,7 +126,7 @@ class StatusMixinDB(object):
     
     #----------------------------------------------------------------------
     @classmethod
-    def setup(cls, class_, class_table, mapper_arguments={}):
+    def setup(cls, class_, class_table, mapper_arguments=None):
         """Creates the necessary tables and properties for the mappers for the mixed in class.
         
         Use the returning dictionary (mapper_arguments) in your mapper.
@@ -142,7 +145,10 @@ class StatusMixinDB(object):
         :returns: a dictionary holding the mapper_arguments
         """
         
-        class_name = class_.__name__
+        if mapper_arguments is None:
+            mapper_arguments = {}
+        
+        #class_name = class_.__name__
         
         # update the given class table with new columns
         class_table.append_column(
@@ -197,7 +203,7 @@ class ScheduleMixinDB(object):
     
     #----------------------------------------------------------------------
     @classmethod
-    def setup(cls, class_, class_table, mapper_arguments={}):
+    def setup(cls, class_, class_table, mapper_arguments=None):
         """Creates the necessary tables and properties for the mappers for the mixed in class.
         
         Use the returning dictionary (mapper_arguments) in your mapper.
@@ -216,7 +222,10 @@ class ScheduleMixinDB(object):
         :returns: a dictionary holding the mapper_arguments
         """
         
-        class_name = class_.__name__
+        if mapper_arguments is None:
+            mapper_arguments = {}
+        
+        #class_name = class_.__name__
         
         # update the given class table with new columns
         class_table.append_column(
@@ -267,7 +276,7 @@ class TaskMixinDB(object):
     
     #----------------------------------------------------------------------
     @classmethod
-    def setup(cls, class_, class_table, mapper_arguments={}):
+    def setup(cls, class_, class_table, mapper_arguments=None):
         """Creates the necessary tables and properties for the mappers for the mixed in class.
         
         Use the returning dictionary (mapper_arguments) in your mapper.
@@ -285,6 +294,9 @@ class TaskMixinDB(object):
         
         :returns: a dictionary holding the mapper_arguments
         """
+        
+        if mapper_arguments is None:
+            mapper_arguments = {}
         
         class_name = class_.__name__
         

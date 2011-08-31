@@ -86,7 +86,7 @@ class DepartmentTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_members_argument_accepts_an_empy_list(self):
+    def test_members_argument_accepts_an_empty_list(self):
         """testing if members argument accepts an empty list
         """
         
@@ -98,7 +98,7 @@ class DepartmentTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_members_attribute_accepts_an_empy_list(self):
+    def test_members_attribute_accepts_an_empty_list(self):
         """testing if members attribute accepts an empty list
         """
         
@@ -199,6 +199,28 @@ class DepartmentTester(unittest.TestCase):
         for test_value in test_values:
             self.assertRaises(TypeError, setattr, self.test_department,
                               "members", test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_members_attribute_defaults_to_empty_list(self):
+        """testing if the members attribute defaults to an empty list if the
+         members argument is skipped
+        """
+        
+        self.kwargs.pop("members")
+        new_department = Department(**self.kwargs)
+        self.assertEqual(new_department.members, [])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_members_attribute_set_to_None_defaults_to_empty_list(self):
+        """testing if the members attribute defaults to an empty list when it
+        is set to None
+        """
+        self.test_department.members = None
+        self.assertEqual(self.test_department.members, [])
     
     
     

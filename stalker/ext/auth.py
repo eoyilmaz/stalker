@@ -220,7 +220,7 @@ def login_required(view, error_message=None):
             if view():
                 func(*args, **kwargs)
             else:
-                if error_message and isinstance(error_meesage, (str, unicode)):
+                if error_message and isinstance(error_message, (str, unicode)):
                     raise LoginError(error_message)
                 else:
                     raise LoginError("You should be logged in before "
@@ -252,7 +252,7 @@ def permission_required(permission_group, error_message=None):
             if get_user() in permission_group:
                 func(*args, **kwargs)
             else:
-                if error_message and isinstance(error_meesage, (str, unicode)):
+                if error_message and isinstance(error_message, (str, unicode)):
                     raise LoginError(error_message)
                 else:
                     raise LoginError("You don't have permission to complete "

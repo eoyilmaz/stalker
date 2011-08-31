@@ -1,12 +1,20 @@
 TODO:
 =====
 
- * create a commandline module which resembles the mercurials "hg" command to
+ * Scrum:
+   
+   Use scrum.
+
+ * Commanline Module:
+   
+   Create a commandline module which resembles the mercurials "hg" command to
    let the users to manage their assets and data. Examples: stalker create
    project "Deneme". Also, to let the users easily use the commandline tool
    all the models should be easy to create.
  
- * All the attributes that has a back reference on other objects should reset
+ * Back References:
+   
+   All the attributes that has a back reference on other objects should reset
    the back reference value to Null or to the default value whenever they are
    set to None or empty list. For example, when the Project objects sequences
    attribute is set to an empty list or None, the referring Sequence objects
@@ -15,30 +23,38 @@ TODO:
    Stalker should do it too, to allow others who are not willing to use
    SQLAlchemy as their ORM to be able to have this property automatically.
 
- * The repository can be a local path, and the project can be managed with an
+ * SCM Integration:
+   
+   The repository can be a local path, and the project can be managed with an
    SCM, preferably with Mercurial.
 
- * All the string attributes should be unicode so for string attributes which
+ * Unicode:
+   
+   All the string attributes should be unicode so for string attributes which
    are checked against being a string should now be checked agains being
    unicode.
 
- * Convert all the list comparison test to assertItemsEqual
-
- * All the classes which are mixed with TaskMixin should have a start and end
+ * Start & End Date For Classes Mixed With TaskMixin:
+   
+   All the classes which are mixed with TaskMixin should have a start and end
    date attribute which will be set to the start date of the first task to the
    due_date of the last task.
 
- * In the Task class all the time calculation should be done over the
+ * datetime instead of date
+   
+   In the Task class all the time calculation should be done over the
    datetime.datetime class instead of datetime.date object. This will let us
    to increase the granularity of the scheduling.
+
+DONE:
+=====
 
  * Replace all the Mocker based tests with Unittest's which are using real
    objects. It was necessary to use the Mocker library while designing the rest
    of the system, but it is now making things complex and started to hide the
    changes of one object from the others in the system.
 
-DONE:
-=====
+ * Convert all the list comparison test to assertItemsEqual
 
  * Add a slot in the ValidatedList which will hold the callable for the
    validation process when any of the objects are changed (set, remove, delete

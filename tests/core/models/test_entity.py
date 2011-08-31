@@ -71,8 +71,8 @@ class EntityTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_notes_argument_being_omited(self):
-        """testing if no error raised when omited the notes argument
+    def test_notes_argument_being_omitted(self):
+        """testing if no error raised when omitted the notes argument
         """
         
         self.kwargs.pop("notes")
@@ -82,28 +82,24 @@ class EntityTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_notes_argument_is_set_to_None(self):
-        """testing if a TypeError will be raised when setting the notes
-        argument to None
+        """testing if the notes attribute will be set to an empty list when the
+        notes argument is set to None
         """
         
         self.kwargs["notes"] = None
-        self.assertRaises(TypeError, Entity, **self.kwargs)
+        new_entity = Entity(**self.kwargs)
+        self.assertEqual(new_entity.notes, [])
     
     
     
     #----------------------------------------------------------------------
     def test_notes_attribute_is_set_to_None(self):
-        """testing if a TypeError will be raised when setting the notes
-        attribute to None
+        """testing if the notes attribute will be an empty list when it is set
+        to None
         """
         
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_entity,
-            "notes",
-            None
-        )
+        self.test_entity.notes = None
+        self.assertEqual(self.test_entity.notes, [])
     
     
     
@@ -209,7 +205,7 @@ class EntityTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tags_argument_being_omited(self):
+    def test_tags_argument_being_omitted(self):
         """testing if nothing is raised when creating an entity without setting
         a tags argument
         """
@@ -222,7 +218,7 @@ class EntityTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_tags_argument_being_initialized_as_an_empty_list(self):
-        """testing if nothing happends when tags argument an empty list
+        """testing if nothing happens when tags argument an empty list
         """
         
         # this should work without errors

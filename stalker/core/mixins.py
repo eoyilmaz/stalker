@@ -45,6 +45,7 @@ class ReferenceMixin(object):
     def __init__(self,
                  references=ValidatedList([], "stalker.core.models.Entity"),
                  **kwargs):
+        # pylint: disable=W0613
         
         self._references = self._validate_references(references)
     
@@ -60,7 +61,7 @@ class ReferenceMixin(object):
                 hasattr(references_in, "__getitem__")):
             raise TypeError("the references_in should support indexing")
         
-        from stalker.core import models
+        from stalker.core import models  # pylint: disable=W0404
         
         # all the elements should be instance of stalker.core.models.Link
         if not all([isinstance(element, models.Entity)
@@ -73,21 +74,18 @@ class ReferenceMixin(object):
     
     
     #----------------------------------------------------------------------
-    def references():
-        
-        def fget(self):
-            return self._references
-        
-        def fset(self, references_in):
-            self._references = self._validate_references(references_in)
-        
-        doc="""References are lists containing :class:`~stalker.core.models.Entity` instances.
+    @property
+    def references(self):
+        """References are lists containing :class:`~stalker.core.models.Entity` instances.
         """
         
-        return locals()
+        return self._references
     
-    references = property(**references())
-
+    #----------------------------------------------------------------------
+    @references.setter # pylint: disable=E1101
+    def references(self, references_in):
+        # pylint: disable=E0102, C0111
+        self._references = self._validate_references(references_in)
 
 
 
@@ -123,6 +121,7 @@ class StatusMixin(object):
     
     #----------------------------------------------------------------------
     def __init__(self, status=0, status_list=None, **kwargs):
+        # pylint: disable=W0613
         
         self._status_list = self._validate_status_list(status_list)
         self._status = self._validate_status(status)
@@ -135,7 +134,7 @@ class StatusMixin(object):
         """
         
         # raise TypeError when:
-        from stalker.core import models
+        from stalker.core import models # pylint: disable=W0404
         
         # it is not an instance of status_list
         if not isinstance(status_list_in, models.StatusList):
@@ -158,7 +157,7 @@ class StatusMixin(object):
         """validates the given status_in value
         """
         
-        from stalker.core.models import StatusList
+        from stalker.core.models import StatusList # pylint: disable=W0404
         
         if not isinstance(self.status_list, StatusList):
             raise TypeError("please set the status_list attribute first")
@@ -185,44 +184,40 @@ class StatusMixin(object):
     
     
     #----------------------------------------------------------------------
-    def status():
-        
-        def fget(self):
-            return self._status
-        
-        def fset(self, status_in):
-            self._status = self._validate_status(status_in)
-        
-        doc = """The current status index of the object.
+    @property
+    def status(self):
+        """The current status index of the object.
         
         This is an integer value and shows the index of the
         :class:`~stalker.core.models.Status` object in the
         :class:`~stalker.core.models.StatusList` of this object.
         """
         
-        return locals()
+        return self._status
     
-    status = property(**status())
+    
+    #----------------------------------------------------------------------
+    @status.setter # pylint: disable=E1101
+    def status(self, status_in):
+        # pylint: disable=E0102, C0111
+        self._status = self._validate_status(status_in)
     
     
     
     #----------------------------------------------------------------------
-    def status_list():
-        
-        def fget(self):
-            return self._status_list
-        
-        def fset(self, status_list_in):
-            self._status_list = self._validate_status_list(status_list_in)
-        
-        doc = """The list of statuses that this object can have.
-        
-        
+    @property
+    def status_list(self):
+        """The list of statuses that this object can have.
         """
         
-        return locals()
+        return self._status_list
     
-    status_list = property(**status_list())
+    
+    #----------------------------------------------------------------------
+    @status_list.setter # pylint: disable=E1101
+    def status_list(self, status_list_in):
+        # pylint: disable=E0102, C0111
+        self._status_list = self._validate_status_list(status_list_in)
 
 
 
@@ -319,6 +314,7 @@ class ScheduleMixin(object):
                  duration=None,
                  **kwargs
                  ):
+        # pylint: disable=W0613
         
         self._start_date = None
         self._due_date = None
@@ -329,53 +325,31 @@ class ScheduleMixin(object):
     
     
     #----------------------------------------------------------------------
-    def due_date():
-        def fget(self):
-            return self._due_date
-        
-        def fset(self, due_date_in):
-            #self._due_date = self._validate_due_date(due_date_in)
-            
-            # update the project duration
-            #self.update_duration()
-            
-            self._validate_dates(self.start_date,
-                                 due_date_in,
-                                 self.duration)
-        
-        doc = """The date that the entity should be delivered.
+    @property
+    def due_date(self):
+        """The date that the entity should be delivered.
         
         The due_date can be set to a datetime.timedelta and in this case it
         will be calculated as an offset from the start_date and converted to
         datetime.date again. Setting the start_date to a date passing the
         due_date will also set the due_date so the timedelta between them is
-        preserved, default value is 10 days"""
+        preserved, default value is 10 days
+        """
         
-        return locals()
+        return self._due_date
     
-    due_date = property(**due_date())
+    #----------------------------------------------------------------------
+    @due_date.setter # pylint: disable=E1101
+    def due_date(self, due_date_in):
+        # pylint: disable=E0102, C0111
+        self._validate_dates(self.start_date, due_date_in, self.duration)
     
     
     
     #----------------------------------------------------------------------
-    def start_date():
-        def fget(self):
-            return self._start_date
-        
-        def fset(self, start_date_in):
-            #self._start_date = self._validate_start_date(start_date_in)
-            
-            # check if start_date is passing due_date and offset due_date
-            # accordingly
-            #if self._start_date > self._due_date:
-                #self._due_date = self._start_date + self._duration
-            
-            # update the project duration
-            #self.update_duration()
-            
-            self._validate_dates(start_date_in, self.due_date, self.duration)
-        
-        doc = """The date that this entity should start.
+    @property
+    def start_date(self):
+        """The date that this entity should start.
         
         Also effects the
         :attr:`~stalker.core.mixins.ScheduleMixin.due_date` attribute value in
@@ -388,31 +362,20 @@ class ScheduleMixin(object):
         an instance of class:`datetime.date` and the default value is
         :func:`datetime.date.today()`
         """
-        
-        return locals()
-
-    start_date = property(**start_date())
+        return self._start_date
+    
+    #----------------------------------------------------------------------
+    @start_date.setter # pylint: disable=E1101
+    def start_date(self, start_date_in):
+        # pylint: disable=E0102, C0111
+        self._validate_dates(start_date_in, self.due_date, self.duration)
     
     
     
     #----------------------------------------------------------------------
-    def duration():
-        def fget(self):
-            return self._duration
-        
-        def fset(self, duration_in):
-            
-            if not duration_in is None:
-                if isinstance(duration_in, datetime.timedelta):
-                    # set the due_date to None
-                    # to make it recalculated
-                    self._validate_dates(self.start_date, None, duration_in)
-                else:
-                    self._validate_dates(self.start_date, self.due_date, duration_in)
-            else:
-                self._validate_dates(self.start_date, self.due_date, duration_in)
-        
-        doc = """Duration of the entity.
+    @property
+    def duration(self):
+        """Duration of the entity.
         
         It is a datetime.timedelta instance. Showing the difference of the
         :attr:`~stalker.core.mixins.ScheduleMixin.start_date` and the
@@ -420,13 +383,26 @@ class ScheduleMixin(object):
         changes the :attr:`~stalker.core.mixins.ScheduleMixin.due_date`
         attribute value.
         """
+        return self._duration
+    
+    #----------------------------------------------------------------------
+    @duration.setter # pylint: disable=E1101
+    def duration(self, duration_in):
+        # pylint: disable=E0102, C0111
         
-        return locals()
+        if not duration_in is None:
+            if isinstance(duration_in, datetime.timedelta):
+                # set the due_date to None
+                # to make it recalculated
+                self._validate_dates(self.start_date, None, duration_in)
+            else:
+                self._validate_dates(self.start_date, self.due_date, duration_in)
+        else:
+            self._validate_dates(self.start_date, self.due_date, duration_in)
     
-    duration = property(**duration())
     
     
-    
+    #----------------------------------------------------------------------
     def _validate_dates(self, start_date, due_date, duration):
         """updates the date values
         """
@@ -482,8 +458,6 @@ class ScheduleMixin(object):
         self._start_date = start_date
         self._due_date = due_date
         self._duration = self._due_date - self._start_date
-        
-        
 
 
 
@@ -514,7 +488,7 @@ class TaskMixin(object):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, project=None, **kwargs):
+    def __init__(self, project=None, **kwargs): # pylint: disable=W0613
         self._project = self._validate_project(project)
         self._tasks = ValidatedList(
             [],
@@ -535,7 +509,7 @@ class TaskMixin(object):
         if not isinstance(tasks_in, list):
             raise TypeError("tasks should be a list")
         
-        from stalker.core.models import Task
+        from stalker.core.models import Task # pylint: disable=W0404
         
         for item in tasks_in:
             if not isinstance(item, Task):
@@ -550,12 +524,13 @@ class TaskMixin(object):
     def __task_item_validator__(self, tasks_added, tasks_removed):
         """a callable for more granular control over tasks list
         """
+        # pylint: disable=E1003
         
         # add the current instance to tasks._task_of attribute
         for task in tasks_added:
             # remove it from the current owner
             try:
-                # invoke no remove update by calling the supers remove
+                # invoke no remove update by calling the supers (list) remove
                 super(ValidatedList, task._task_of.tasks).remove(task)
             except ValueError: # there is no owner, probably it was
                 pass           # initializing for the first time
@@ -580,7 +555,7 @@ class TaskMixin(object):
             raise TypeError("project can not be None it must be an instance "
                             "of stalker.core.models.Project instance")
         
-        from stalker.core.models import Project
+        from stalker.core.models import Project # pylint: disable=W0404
         
         if not isinstance(project_in, Project):
             raise TypeError("project must be an instance of "
@@ -591,34 +566,22 @@ class TaskMixin(object):
     
     
     #----------------------------------------------------------------------
-    def project():
-        def fget(self):
-            return self._project
-        
-        #def fset(self, project_in):
-            #self._project = self._validate_project(project_in)
-        
-        doc = """A :class:`~stalker.core.models.Project` instance showing the
+    @property
+    def project(self):
+        """A :class:`~stalker.core.models.Project` instance showing the
         relation of this object to a Stalker
         :class:`~stalker.core.models.Project`. It is a read only attribute, so
         you can not change the Project of an already created object.
         """
         
-        return locals()
-    
-    project = property(**project())
+        return self._project
     
     
     
     #----------------------------------------------------------------------
-    def tasks():
-        def fget(self):
-            return self._tasks
-        
-        #def fset(self, task_in):
-            #self._tasks = self._validate_tasks(task_in)
-        
-        doc = """The list of :class:`~stalker.core.models.Task` instances.
+    @property
+    def tasks(self):
+        """The list of :class:`~stalker.core.models.Task` instances.
         
         Be careful that you can not remove any of the elements of the ``tasks``
         list. Trying to remove a :class:`~stalker.core.models.Task` by removing
@@ -632,9 +595,7 @@ class TaskMixin(object):
         tasks (though you will be warned by a RuntimeError).
         """
         
-        return locals()
-    
-    tasks = property(**tasks())
+        return self._tasks
 
 
 

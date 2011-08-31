@@ -133,10 +133,10 @@ class TaskTester(unittest.TestCase):
             "duration": datetime.timedelta(2),
             "depends": [self.test_data_dependent_task1,
                         self.test_data_dependent_task2],
-            "complete": False,
+            "is_complete": False,
             "bookings": [],
             "versions": [],
-            "milestone": False,
+            "is_milestone": False,
             "status": 0,
             "status_list": self.test_data_task_status_list,
             "task_of": self.test_data_project1,
@@ -1281,138 +1281,139 @@ class TaskTester(unittest.TestCase):
     
     
     ##----------------------------------------------------------------------
-    #def test_complete_argument_is_skipped(self):
-        #"""testing if the default value of the complete attribute is going to
-        #be False when the complete argument is skipped
+    #def test_is_complete_argument_is_skipped(self):
+        #"""testing if the default value of the is_complete attribute is going to
+        #be False when the is_complete argument is skipped
         #"""
         
-        #self.kwargs.pop("complete")
+        #self.kwargs.pop("is_complete")
         #new_task = Task(**self.kwargs)
-        #self.assertEqual(new_task.complete, False)
+        #self.assertEqual(new_task.is_complete, False)
     
     
     
     ##----------------------------------------------------------------------
-    #def test_complete_argument_is_None(self):
-        #"""testing if the complete attribute will be set to False when the
-        #complete argument is given as None
+    #def test_is_complete_argument_is_None(self):
+        #"""testing if the is_complete attribute will be set to False when the
+        #is_complete argument is given as None
         #"""
         
-        #self.kwargs["complete"] = None
+        #self.kwargs["is_complete"] = None
         #new_task = Task(**self.kwargs)
-        #self.assertEqual(new_task.complete, False)
+        #self.assertEqual(new_task.is_complete, False)
     
     
     
     #----------------------------------------------------------------------
-    def test_complete_attribute_is_None(self):
-        """testing if the complete attribute will be False when set to None
+    def test_is_complete_attribute_is_None(self):
+        """testing if the is_complete attribute will be False when set to None
         """
         
-        self.test_data_task.complete = None
-        self.assertEqual(self.test_data_task.complete, False)
+        self.test_data_task.is_complete = None
+        self.assertEqual(self.test_data_task.is_complete, False)
     
     
     
     ##----------------------------------------------------------------------
-    #def test_complete_argument_evaluates_the_given_value_to_a_bool(self):
-        #"""testing if the complete attribute is evaluated correctly to a bool
-        #value when the complete argument is anything other than a bool value.
+    #def test_is_complete_argument_evaluates_the_given_value_to_a_bool(self):
+        #"""testing if the is_complete attribute is evaluated correctly to a bool
+        #value when the is_complete argument is anything other than a bool value.
         #"""
         
         #test_values = [1, 0, 1.2, "A string", "", [], [1]]
         
         #for test_value in test_values:
-            #self.kwargs["complete"] = test_value
+            #self.kwargs["is_complete"] = test_value
             #new_task = Task(**self.kwargs)
-            #self.assertEqual(new_task.complete, bool(test_value))
+            #self.assertEqual(new_task.is_complete, bool(test_value))
     
     
     
     #----------------------------------------------------------------------
-    def test_complete_attribute_evaluates_the_given_value_to_a_bool(self):
-        """testing if the complete attribute is evaluated correctly to a bool
+    def test_is_complete_attribute_evaluates_the_given_value_to_a_bool(self):
+        """testing if the is_complete attribute is evaluated correctly to a bool
         valnue when set to anything other than a bool value.
         """
         
         test_values = [1, 0, 1.2, "A string", "", [], [1]]
         
         for test_value in test_values:
-            self.test_data_task.complete = test_value
-            self.assertEqual(self.test_data_task.complete, bool(test_value))
+            self.test_data_task.is_complete = test_value
+            self.assertEqual(self.test_data_task.is_complete, bool(test_value))
     
     
     
     #----------------------------------------------------------------------
-    def test_milestone_argument_is_skipped(self):
-        """testing if the default value of the milestone attribute is going to
-        be False when the milestone argument is skipped
+    def test_is_milestone_argument_is_skipped(self):
+        """testing if the default value of the is_milestone attribute is going
+        to be False when the is_milestone argument is skipped
         """
         
-        self.kwargs.pop("milestone")
+        self.kwargs.pop("is_milestone")
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.milestone, False)
+        self.assertEqual(new_task.is_milestone, False)
     
     
     
     #----------------------------------------------------------------------
-    def test_milestone_argument_is_None(self):
-        """testing if the milestone attribute will be set to False when the
-        milestone argument is given as None
+    def test_is_milestone_argument_is_None(self):
+        """testing if the is_milestone attribute will be set to False when the
+        is_milestone argument is given as None
         """
         
-        self.kwargs["milestone"] = None
+        self.kwargs["is_milestone"] = None
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.milestone, False)
+        self.assertEqual(new_task.is_milestone, False)
     
     
     
     #----------------------------------------------------------------------
-    def test_milestone_attribute_is_None(self):
-        """testing if the milestone attribute will be False when set to None
+    def test_is_milestone_attribute_is_None(self):
+        """testing if the is_milestone attribute will be False when set to None
         """
         
-        self.test_data_task.milestone = None
-        self.assertEqual(self.test_data_task.milestone, False)
+        self.test_data_task.is_milestone = None
+        self.assertEqual(self.test_data_task.is_milestone, False)
     
     
     
     #----------------------------------------------------------------------
-    def test_milestone_argument_evaluates_the_given_value_to_a_bool(self):
-        """testing if the milestone attribute is evaluated correctly to a bool
-        value when the milestone argument is anything other than a bool value.
+    def test_is_milestone_argument_evaluates_the_given_value_to_a_bool(self):
+        """testing if the is_milestone attribute is evaluated correctly to a
+        bool value when the is_milestone argument is anything other than a bool
+        value.
         """
         
         test_values = [1, 0, 1.2, "A string", "", [], [1]]
         
         for test_value in test_values:
-            self.kwargs["milestone"] = test_value
+            self.kwargs["is_milestone"] = test_value
             new_task = Task(**self.kwargs)
-            self.assertEqual(new_task.milestone, bool(test_value))
+            self.assertEqual(new_task.is_milestone, bool(test_value))
     
     
     
     #----------------------------------------------------------------------
-    def test_milestone_attribute_evaluates_the_given_value_to_a_bool(self):
-        """testing if the milestone attribute is evaluated correctly to a bool
-        valnue when set to anything other than a bool value.
+    def test_is_milestone_attribute_evaluates_the_given_value_to_a_bool(self):
+        """testing if the is_milestone attribute is evaluated correctly to a
+        bool valnue when set to anything other than a bool value.
         """
         
         test_values = [1, 0, 1.2, "A string", "", [], [1]]
         
         for test_value in test_values:
-            self.test_data_task.milestone = test_value
-            self.assertEqual(self.test_data_task.milestone, bool(test_value))
+            self.test_data_task.is_milestone = test_value
+            self.assertEqual(self.test_data_task.is_milestone, bool(test_value))
     
     
     
     #----------------------------------------------------------------------
-    def test_milestone_argument_makes_the_resources_list_an_empty_list(self):
-        """testing if the resources will be an empty list when the milestone
+    def test_is_milestone_argument_makes_the_resources_list_an_empty_list(self):
+        """testing if the resources will be an empty list when the is_milestone
         argument is given as True
         """
         
-        self.kwargs["milestone"] = True
+        self.kwargs["is_milestone"] = True
         self.kwargs["resources"] = [self.test_data_user1,
                                     self.test_data_user2]
         
@@ -1422,14 +1423,14 @@ class TaskTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_milestone_attribute_makes_the_resource_list_an_empty_list(self):
-        """testing if the resources will be an empty list when the milestone
+    def test_is_milestone_attribute_makes_the_resource_list_an_empty_list(self):
+        """testing if the resources will be an empty list when the is_milestone
         attribute is given as True
         """
         
         self.test_data_task.resources = [self.test_data_user1,
                                          self.test_data_user2]
-        self.test_data_task.milestone = True
+        self.test_data_task.is_milestone = True
         self.assertEqual(self.test_data_task.resources, [])
     
     

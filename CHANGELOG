@@ -49,8 +49,8 @@ v0.1.1.a10
    removed the ``ProjectMixinDB`` from the database part of the mixins.
 
  * The :class:`~stalker.core.models.Project` doesn't accept an ``assets`` nor
-   a ``sequences`` arguments anymore. Which was meaningles previously, cause it
-   is not possible to create an :class:`~stalker.core.models.Asset` or a
+   a ``sequences`` arguments anymore. Which was meaningless previously, cause
+   it is not possible to create an :class:`~stalker.core.models.Asset` or a
    :class:`~stalker.core.models.Sequence` without specifying the
    :class:`~stalker.core.models.Project` first.
 
@@ -75,11 +75,42 @@ v0.1.1.a10
  * The ``filename`` attribute has been removed from the
    :class:`~stalker.core.models.Link` class. And it doesn't need an
    ``filename`` argument anymore. The :attr:`~stalker.core.models.Link.path`
-   is enough to hold the neccessary data.
+   is enough to hold the necessary data.
 
  * The :class:`~stalker.core.models.Link` is not strictly typed anymore. So
    you can skip the ``type`` argument while creating a
    :class:`~stalker.core.models.Link` instance.
+
+ * Fixed the ``Mutable Default`` problem in the following classes:
+   
+   * :class:`~stalker.core.models.Department` classes ``members`` argument.
+   
+   * :class:`~stalker.core.models.Entity` classes ``tags`` and ``notes`` 
+     argument.
+   
+   * :class:`~stalker.core.models.StatusList` classes ``statuses`` argument
+   
+   * :class:`~stalker.core.models.Project` classes ``assets`` argument
+   
+   * :class:`~stalker.core.models.Assets` classes ``shots`` argument
+   
+   * :class:`~stalker.core.models.User` classes ``permission_groups``,
+     ``projects_lead``, ``sequences_lead`` and tasks attributes.
+
+ * The ``milestone`` attribute is renamed to
+   :attr:`~stalker.core.models.Task.is_milestone` in
+   :class:`~stalker.core.models.Task` class.
+
+ * The ``complete`` attribute is renamed to
+   :attr:`~stalker.core.models.Task.is_complete`` in
+   :class:`~stalker.core.models.Task` class.
+
+ * Replaced the python property idiom which uses a function which contains an
+   fget, an fset functions and a doc string variable and returns the result of
+   locals() with the property idiom that uses @property and @x.setter. Thus
+   dropped the support for python versions <= 2.5. This is done to increase the
+   PyLint rate. And with its final state, the PyLint rate of Stalker increased
+   from around 1 to around 9.
 
 v0.1.1.a9
 ---------

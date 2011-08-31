@@ -44,7 +44,12 @@ class ValidatedList(list):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, list_=[], element_type=None, validator=None):
+    def __init__(self, list_=None, element_type=None, validator=None):
+        
+        super(ValidatedList, self).__init__()
+        
+        if list_ is None:
+            list_ = []
         
         self.__type__ = None
         self.__lazy_load_type__ = False
@@ -165,7 +170,7 @@ class ValidatedList(list):
     
     
     #----------------------------------------------------------------------
-    def append(self, object):
+    def append(self, object_):
         """L.append(object) -- append object to end
         
         This is the overriden version of the original method.
@@ -174,20 +179,20 @@ class ValidatedList(list):
         #print "inside ValidatedList.append"
         
         if self.__type__ is None:
-            self.__set_type__(type(object))
+            self.__set_type__(type(object_))
         else:
             
             if self.__lazy_load_type__:
                 self.__do_import__(self.__type__)
             
-            if not isinstance(object, self.__type__):
+            if not isinstance(object_, self.__type__):
                 raise TypeError(self.__error_message__)
         
         # call the validator
         if not self._validator is None:
-            self._validator([object], [])
+            self._validator([object_], [])
         
-        super(ValidatedList, self).append(object)
+        super(ValidatedList, self).append(object_)
     
     
     
@@ -220,7 +225,7 @@ class ValidatedList(list):
     
     
     #----------------------------------------------------------------------
-    def insert(self, index, object):
+    def insert(self, index, object_):
         """L.insert(index, object) -- insert object before index
         
         This is the overriden version of the original method.
@@ -230,16 +235,16 @@ class ValidatedList(list):
             self.__do_import__(self.__type__)
         
         if self.__type__ is None:
-            self.__set_type__(type(object))
+            self.__set_type__(type(object_))
         else:
-            if not isinstance(object, self.__type__):
+            if not isinstance(object_, self.__type__):
                 raise TypeError(self.__error_message__)
         
         # call the callable with the value
         if not self._validator is None:
-            self._validator([object], [])
+            self._validator([object_], [])
         
-        super(ValidatedList, self).insert(index, object)
+        super(ValidatedList, self).insert(index, object_)
     
     
     

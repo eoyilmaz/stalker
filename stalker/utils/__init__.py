@@ -37,3 +37,20 @@ def path_to_exec(full_module_path):
 
 
 
+#----------------------------------------------------------------------
+def Property(func):
+    """A convenient way of using property
+    
+    taken from:
+    http://adam.gomaa.us/blog/2008/aug/11/the-python-property-builtin/
+    """
+    
+    locals_ = func()
+    
+    # update the docs with the func doc
+    if not func.__doc__ is None:
+        #print "updating the doc ('%s')for %s with %s" % \
+              #(locals_["doc"], func.__name__, func.__doc__)
+        locals_.update({"doc": func.__doc__})
+    
+    return property(**locals_)

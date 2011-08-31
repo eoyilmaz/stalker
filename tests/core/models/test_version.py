@@ -422,7 +422,7 @@ class VersionTester(unittest.TestCase):
         
         test_value = "no bool value"
         self.test_version.published = test_value
-        self.assertEquals(self.test_version.published, bool(test_value))
+        self.assertEqual(self.test_version.published, bool(test_value))
     
     
     
@@ -433,7 +433,7 @@ class VersionTester(unittest.TestCase):
         """
         
         new_version = Version(**self.kwargs)
-        self.assertEquals(new_version.published, False)
+        self.assertEqual(new_version.published, False)
     
     
     
@@ -445,11 +445,11 @@ class VersionTester(unittest.TestCase):
         test_value = True
         new_version = Version(**self.kwargs)
         new_version.published = test_value
-        self.assertEquals(new_version.published, test_value)
+        self.assertEqual(new_version.published, test_value)
         
         test_value = False
         new_version.published = test_value
-        self.assertEquals(new_version.published, test_value)
+        self.assertEqual(new_version.published, test_value)
     
     
     

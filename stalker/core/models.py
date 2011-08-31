@@ -4,14 +4,15 @@
 import re
 import datetime
 import platform
+import uuid
 
 try:
     from sqlalchemy import orm
 except ImportError:
-    class orm(object):
+    class orm(object): # pylint: disable=C0103, C0111, R0903
         @classmethod
-        def reconstructor(self, f):
-            return f
+        def reconstructor(cls, function): # pylint: disable=C0111
+            return function
 
 from stalker.ext.validatedList import ValidatedList
 from stalker.core.errors import CircularDependencyError
@@ -34,7 +35,7 @@ class EntityMeta(type):
     
     
     #----------------------------------------------------------------------
-    def __new__(cls, classname, bases, dict_):
+    def __new__(mcs, classname, bases, dict_):
         
         # create the entity_type
         dict_["entity_type"] = unicode(classname)
@@ -58,7 +59,7 @@ class EntityMeta(type):
         if not dict_.has_key("__strictly_typed__"):
             dict_["__strictly_typed__"] = False
         
-        return super(EntityMeta, cls).__new__(cls, classname, bases, dict_)
+        return super(EntityMeta, mcs).__new__(mcs, classname, bases, dict_)
 
 
 
@@ -73,7 +74,7 @@ class SimpleEntity(object):
     Stalker Object Model, it starts by adding the basic information about an
     entity which are :attr:`~stalker.core.models.SimpleEntity.name`,
     :attr:`~stalker.core.models.SimpleEntity.description`, the audit
-    informations like :attr:`~stalker.core.models.SimpleEntity.created_by`,
+    information like :attr:`~stalker.core.models.SimpleEntity.created_by`,
     :attr:`~stalker.core.models.SimpleEntity.updated_by`,
     :attr:`~stalker.core.models.SimpleEntity.date_created`,
     :attr:`~stalker.core.models.SimpleEntity.date_updated` and a couple of
@@ -137,13 +138,13 @@ class SimpleEntity(object):
     :param string name: A string or unicode value that holds the name of this
       entity. It can not be empty, the first letter should be an alphabetic
       ([a-zA-z]) (not alphanumeric [a-zA-Z0-9]) letter and it should not
-      contain any white space at the beggining and at the end of the string,
+      contain any white space at the beginning and at the end of the string,
       giving an object the object will be converted to string and then the
       resulting string will be conditioned.
     
     :param str description: A string or unicode attribute that holds the
       description of this entity object, it could be an empty string, and it
-      could not again have white spaces at the beggining and at the end of the
+      could not again have white spaces at the beginning and at the end of the
       string, again any given objects will be converted to strings
     
     :param created_by: The :class:`~stalker.core.models.User` who has created
@@ -160,8 +161,8 @@ class SimpleEntity(object):
     :type date_created: :class:`datetime.datetime`
     
     :param date_updated: The date that this object is updated lastly. For newly
-      created entities this is equal to date_created and thedate_updated cannot
-      point a date which is before date_created.
+      created entities this is equal to date_created and the date_updated
+      cannot point a date which is before date_created.
     
     :type date_updated: :class:`datetime.datetime`
     
@@ -184,6 +185,9 @@ class SimpleEntity(object):
     
     __metaclass__ = EntityMeta
     #_nice_name = None
+    entity_type = ""
+    __strictly_typed__ = False
+    
     
     
     #----------------------------------------------------------------------
@@ -197,7 +201,7 @@ class SimpleEntity(object):
                  date_updated=datetime.datetime.now(),
                  code=None,
                  **kwargs
-                 ):
+                 ): # pylint: disable=W0613
         
         # code attribute
         # just set it to None for now
@@ -227,7 +231,7 @@ class SimpleEntity(object):
     #----------------------------------------------------------------------
     @orm.reconstructor
     def __init_on_load__(self):
-        """initialized the instance variables when the instance creted with
+        """initialized the instance variables when the instance created with
         SQLAlchemy
         """
         self._nice_name = None
@@ -340,58 +344,48 @@ class SimpleEntity(object):
     
     
     #----------------------------------------------------------------------
-    def description():
+    @property
+    def description(self):
+        """Description of this object."""
         
-        def fget(self):
-            return self._description
-        
-        def fset(self, description_in):
-            self._description = self._validate_description(description_in)
-        
-        doc = """Description of this object."""
-        
-        return locals()
+        return self._description
     
-    description = property(**description())
+    #----------------------------------------------------------------------
+    @description.setter # pylint: disable=E1101
+    def description(self, description_in):
+        # pylint: disable=E0102, C0111
+        self._description = self._validate_description(description_in)
     
     
     
     #----------------------------------------------------------------------
-    def name():
+    @property
+    def name(self): # pylint: disable=E0202
+        """Name of this object"""
         
-        def fget(self):
-            return self._name
-        
-        def fset(self, name_in):
-            assert(isinstance(self, SimpleEntity))
-            self._name = self._validate_name(name_in)
-            
-            # also set the nice_name
-            self._nice_name = self._condition_nice_name(self._name)
-            
-            # set the code
-            #self.code = self._nice_name.upper()
-            self.code = self._name
-        
-        doc = """Name of this object"""
-        
-        return locals()
+        return self._name
     
-    name = property(**name())
+    #----------------------------------------------------------------------
+    @name.setter # pylint: disable=E1101
+    def name(self, name_in):
+        # pylint: disable=E0102, E0202, C0111
+        
+        assert(isinstance(self, SimpleEntity))
+        self._name = self._validate_name(name_in)
+        
+        # also set the nice_name
+        self._nice_name = self._condition_nice_name(self._name)
+        
+        # set the code
+        #self.code = self._nice_name.upper()
+        self.code = self._name
     
     
     
     #----------------------------------------------------------------------
-    def nice_name():
-        
-        def fget(self):
-            # also set the nice_name
-            if self._nice_name is None or self._nice_name == "":
-                self._nice_name = self._condition_nice_name(self._name)
-            
-            return self._nice_name
-        
-        doc = """Nice name of this object.
+    @property
+    def nice_name(self):
+        """Nice name of this object.
         
         It has the same value with the name (contextually) but with a different
         format like, all the white spaces replaced by underscores ("\_"), all
@@ -402,9 +396,12 @@ class SimpleEntity(object):
         form of ``nice_name`` if it is not defined differently (i.e set to
         another value)."""
         
-        return locals()
-    
-    nice_name = property(**nice_name())
+        
+        # also set the nice_name
+        if self._nice_name is None or self._nice_name == "":
+            self._nice_name = self._condition_nice_name(self._name)
+        
+        return self._nice_name
     
     
     
@@ -414,7 +411,7 @@ class SimpleEntity(object):
         """
         
         # check if the code_in is None or empty string
-        if code_in is None or code_in=="":
+        if code_in is None or code_in == "":
             # restore the value from nice_name and let it be reformatted
             #code_in = self.nice_name.upper()
             code_in = self.nice_name
@@ -447,7 +444,7 @@ class SimpleEntity(object):
             # set it to what created_by attribute has
             updated_by_in = self._created_by
         
-        from stalker.core.models import User
+        #from stalker.core.models import User
         
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
@@ -523,34 +520,28 @@ class SimpleEntity(object):
     
     
     #----------------------------------------------------------------------
-    def type():
-        def fget(self):
-            return self._type
-        
-        def fset(self, type_in):
-            self._type = self._validate_type(type_in)
-        
-        doc = """The type of the object.
+    @property
+    def type(self):
+        """The type of the object.
         
         It is an instance of :class:`~stalker.core.models.Type` with a proper
         :attr:`~stalker.core.models.Type.target_entity_type`.
         """
         
-        return locals()
+        return self._type
     
-    type = property(**type())
+    #----------------------------------------------------------------------
+    @type.setter # pylint: disable=E1101
+    def type(self, type_in):
+        # pylint: disable=E0102, C0111
+        self._type = self._validate_type(type_in)
     
     
     
     #----------------------------------------------------------------------
-    def code():
-        def fget(self):
-            return self._code
-        
-        def fset(self, code_in):
-            self._code = self._validate_code(code_in)
-        
-        doc = """The code name of this object.
+    @property
+    def code(self): # pylint: disable=E0202
+        """The code name of this object.
         
         It accepts string or unicode values and any other kind of objects will
         be converted to string. In any update to the name attribute the code
@@ -559,78 +550,73 @@ class SimpleEntity(object):
         Setting the code attribute to None will reset it to the default value.
         The default value is the upper case form of the nice_name."""
         
-        return locals()
+        return self._code
     
-    code = property(**code())
+    #----------------------------------------------------------------------
+    @code.setter # pylint: disable=E1101
+    def code(self, code_in):
+        # pylint: disable=E0102, E0202, C0111
+        self._code = self._validate_code(code_in)
     
     
     
     #----------------------------------------------------------------------
-    def created_by():
+    @property
+    def created_by(self):
+        """The :class:`~stalker.core.models.User` who has created this object."""
         
-        def fget(self):
-            return self._created_by
-        
-        def fset(self, created_by_in):
-            self._created_by = self._validate_created_by(created_by_in)
-        
-        doc = """The :class:`~stalker.core.models.User` who has created this object."""
-        
-        return locals()
+        return self._created_by
     
-    created_by = property(**created_by())
+    #----------------------------------------------------------------------
+    @created_by.setter # pylint: disable=E1101
+    def created_by(self, created_by_in):
+        # pylint: disable=E0102, C0111
+        self._created_by = self._validate_created_by(created_by_in)
     
     
     
     #----------------------------------------------------------------------
-    def updated_by():
+    @property
+    def updated_by(self):
+        """The :class:`~stalker.core.models.User` who has updated this object."""
         
-        def fget(self):
-            return self._updated_by
-        
-        def fset(self, updated_by_in):
-            self._updated_by = self._validate_updated_by(updated_by_in)
-        
-        doc = """The :class:`~stalker.core.models.User` who has updated this object."""
-
-        
-        return locals()
+        return self._updated_by
     
-    updated_by = property(**updated_by())
+    #----------------------------------------------------------------------
+    @updated_by.setter # pylint: disable=E1101
+    def updated_by(self, updated_by_in):
+        # pylint: disable=E0102, C0111
+        self._updated_by = self._validate_updated_by(updated_by_in)
     
     
     
     #----------------------------------------------------------------------
-    def date_created():
+    @property
+    def date_created(self):
+        """A :class:`datetime.datetime` instance showing the creation date and time of this object."""
         
-        def fget(self):
-            return self._date_created
-        
-        def fset(self, date_created_in):
-            self._date_created = self._validate_date_created(date_created_in)
-        
-        doc = """A :class:`datetime.datetime` instance showing the creation date and time of this object."""
-        
-        return locals()
+        return self._date_created
     
-    date_created = property(**date_created())
+    #----------------------------------------------------------------------
+    @date_created.setter # pylint: disable=E1101
+    def date_created(self, date_created_in):
+        # pylint: disable=E0102, C0111
+        self._date_created = self._validate_date_created(date_created_in)
     
     
     
     #----------------------------------------------------------------------
-    def date_updated():
+    @property
+    def date_updated(self):
+        """A :class:`datetime.datetime` instance showing the update date and time of this object."""
         
-        def fget(self):
-            return self._date_updated
-        
-        def fset(self, date_updated_in):
-            self._date_updated = self._validate_date_updated(date_updated_in)
-        
-        doc = """A :class:`datetime.datetime` instance showing the update date and time of this object."""
-        
-        return locals()
+        return self._date_updated
     
-    date_updated = property(**date_updated())
+    #----------------------------------------------------------------------
+    @date_updated.setter # pylint: disable=E1101
+    def date_updated(self, date_updated_in):
+        # pylint: disable=E0102, C0111
+        self._date_updated = self._validate_date_updated(date_updated_in)
     
     
     
@@ -680,8 +666,8 @@ class Entity(SimpleEntity):
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 tags=[],
-                 notes=[],
+                 tags=None,
+                 notes=None,
                  **kwargs
                  ):
         
@@ -695,7 +681,7 @@ class Entity(SimpleEntity):
     #----------------------------------------------------------------------
     @orm.reconstructor
     def __init_on_load__(self):
-        """initialized the instance variables when the instance creted with
+        """initialized the instance variables when the instance created with
         SQLAlchemy
         """
         
@@ -707,10 +693,13 @@ class Entity(SimpleEntity):
         """validates the given notes value
         """
         
+        if notes_in is None:
+            notes_in = []
+        
         if not isinstance(notes_in, list):
             raise TypeError("notes should be an instance of list")
         
-        from stalker.core.models import Note
+        #from stalker.core.models import Note
         
         for element in notes_in:
             if not isinstance(element, Note):
@@ -727,6 +716,9 @@ class Entity(SimpleEntity):
         """validates the given tags_in value
         """
         
+        if tags_in is None:
+            tags_in = []
+        
         # it is not an instance of list
         if not isinstance(tags_in, list):
             raise TypeError("the tags attribute should be set to a list")
@@ -736,41 +728,41 @@ class Entity(SimpleEntity):
     
     
     #----------------------------------------------------------------------
-    def notes():
-        def fget(self):
-            return self._notes
-        def fset(self, notes_in):
-            self._notes = self._validate_notes(notes_in)
-        
-        doc = """All the notes about this entity.
+    @property
+    def notes(self):
+        """All the notes about this entity.
         
         It is a list of :class:`~stalker.core.models.Note` objects or an empty
         list, None will be converted to an empty list.
         """
         
-        return locals()
+        return self._notes
     
-    notes = property(**notes())
+    #----------------------------------------------------------------------
+    @notes.setter # pylint: disable=E1101
+    def notes(self, notes_in):
+        # pylint: disable=E0102, C0111
+        self._notes = self._validate_notes(notes_in)
+        
+        return locals()
     
     
     
     #----------------------------------------------------------------------
-    def tags():
-        
-        def fget(self):
-            return self._tags
-        
-        def fset(self, tags_in):
-            self._tags = self._validate_tags(tags_in)
-        
-        doc = """A list of tags attached to this object.
+    @property
+    def tags(self):
+        """A list of tags attached to this object.
         
         It is a list of :class:`~stalker.core.models.Tag` instances which shows
         the tags of this object"""
         
-        return locals()
+        return self._tags
     
-    tags = property(**tags())
+    #----------------------------------------------------------------------
+    @tags.setter # pylint: disable=E1101
+    def tags(self, tags_in):
+        # pylint: disable=E0102, C0111
+        self._tags = self._validate_tags(tags_in)
     
     
     
@@ -836,7 +828,7 @@ class Type(Entity):
     def __init__(self, target_entity_type=None, **kwargs):
         super(Type, self).__init__(**kwargs)
         
-        self._target_entity_type =\
+        self._target_entity_type = \
             self._validate_target_entity_type(target_entity_type)
     
     
@@ -884,20 +876,15 @@ class Type(Entity):
     
     
     #----------------------------------------------------------------------
-    def target_entity_type():
-        def fget(self):
-            return self._target_entity_type
-        
-        doc = """The target type of this Type instance.
+    @property
+    def target_entity_type(self):
+        """The target type of this Type instance.
         
         It is a string, showing the name of the target type class. It is a
         read-only attribute.
         """
         
-        return locals()
-    
-    target_entity_type = property(**target_entity_type())
-    
+        return self._target_entity_type
 
 
 
@@ -932,7 +919,7 @@ class Status(Entity):
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         
-        super(Status,self).__init__(**kwargs)
+        super(Status, self).__init__(**kwargs)
     
     
     
@@ -1022,12 +1009,12 @@ class StatusList(Entity):
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 statuses=[],
+                 statuses=None,
                  target_entity_type="",
                  **kwargs
                  ):
         
-        super(StatusList,self).__init__(**kwargs)
+        super(StatusList, self).__init__(**kwargs)
         
         self._statuses = self._validate_statuses(statuses)
         
@@ -1040,6 +1027,9 @@ class StatusList(Entity):
     def _validate_statuses(self, statuses):
         """validates the given status_list
         """
+        
+        if statuses is None:
+            statuses = []
         
         if not isinstance(statuses, list):
             raise TypeError("statuses should be an instance of list")
@@ -1088,30 +1078,25 @@ class StatusList(Entity):
     
     
     #----------------------------------------------------------------------
-    def statuses():
-        
-        def fget(self):
-            return self._statuses
-        
-        def fset(self, statuses):
-            self._statuses = self._validate_statuses(statuses)
-        
-        doc = """list of :class:`~stalker.core.models.Status` objects,
+    @property
+    def statuses(self):
+        """list of :class:`~stalker.core.models.Status` objects,
         showing the possible statuses"""
         
-        return locals()
+        return self._statuses
     
-    statuses = property(**statuses())
+    #----------------------------------------------------------------------
+    @statuses.setter # pylint: disable=E1101
+    def statuses(self, statuses):
+        # pylint: disable=E0102, C0111
+        self._statuses = self._validate_statuses(statuses)
     
     
     
     #----------------------------------------------------------------------
-    def target_entity_type():
-        
-        def fget(self):
-            return self._target_entity_type
-        
-        doc="""the entity type which this StatusList is valid for, usally it
+    @property
+    def target_entity_type(self):
+        """the entity type which this StatusList is valid for, usally it
         is set to the TargetClass.entity_type class attribute of the target
         class::
           
@@ -1123,9 +1108,7 @@ class StatusList(Entity):
           status3 = Status(name="Complete", code="CMPLT")
         """
         
-        return locals()
-    
-    target_entity_type = property(**target_entity_type())
+        return self._target_entity_type
     
     
     
@@ -1147,7 +1130,7 @@ class StatusList(Entity):
         """
         if isinstance(key, (str, unicode)):
             for item in self._statuses:
-                if item==key:
+                if item == key:
                     return item
         else:
             return self._statuses[key]
@@ -1215,7 +1198,7 @@ class ImageFormat(Entity):
                  **kwargs
                  ):
         
-        super(ImageFormat,self).__init__(**kwargs)
+        super(ImageFormat, self).__init__(**kwargs)
         
         self._width = self._validate_width(width)
         self._height = self._validate_height(height)
@@ -1231,7 +1214,7 @@ class ImageFormat(Entity):
     #----------------------------------------------------------------------
     @orm.reconstructor
     def __init_on_load__(self):
-        """initialized the instance variables when the instance creted with
+        """initialized the instance variables when the instance created with
         SQLAlchemy
         """
         
@@ -1312,88 +1295,70 @@ class ImageFormat(Entity):
     
     
     #----------------------------------------------------------------------
-    def width():
-        def fget(self):
-            """returns the width
-            """
-            return self._width
-        
-        def fset(self, width):
-            """sets the width
-            """
-            self._width = self._validate_width(width)
-            # also update the device_aspect
-            self._update_device_aspect()
-        
-        doc = """this is a property to set and get the width of the
-        image_format
+    @property
+    def width(self):
+        """The width of this format.
         
         * the width should be set to a positif non-zero integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
         """
         
-        return locals()
+        return self._width
     
-    width = property(**width())
+    #----------------------------------------------------------------------
+    @width.setter # pylint: disable=E1101
+    def width(self, width):
+        # pylint: disable=E0102, C0111
+        self._width = self._validate_width(width)
+        # also update the device_aspect
+        self._update_device_aspect()
     
     
     
     #----------------------------------------------------------------------
-    def height():
-        def fget(self):
-            """returns the height
-            """
-            return self._height
-        
-        def fset(self, height):
-            """sets the height
-            """
-            self._height = self._validate_height(height)
-            
-            # also update the device_aspect
-            self._update_device_aspect()
-        
-        doc = """this is a property to set and get the height of the
-        image_format
+    @property
+    def height(self):
+        """The height of this format
         
         * the height should be set to a positif non-zero integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
         """
         
-        return locals()
+        return self._height
     
-    height = property(**height())
+    #----------------------------------------------------------------------
+    @height.setter # pylint: disable=E1101
+    def height(self, height):
+        # pylint: disable=E0102, C0111
+        self._height = self._validate_height(height)
+        
+        # also update the device_aspect
+        self._update_device_aspect()
     
     
     
     #----------------------------------------------------------------------
-    def pixel_aspect():
-        def fget(self):
-            """returns the pixel_aspect ratio
-            """
-            return self._pixel_aspect
-        
-        def fset(self, pixel_aspect):
-            """sets the pixel_aspect ratio
-            """
-            self._pixel_aspect = self._validate_pixel_aspect(pixel_aspect)
-            
-            # also update the device_aspect
-            self._update_device_aspect()
-        
-        doc = """this is a property to set and get the pixel_aspect of the
-        ImageFormat
+    @property
+    def pixel_aspect(self):
+        """The pixel aspect ratio of this format.
         
         * the pixel_aspect should be set to a positif non-zero float
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception
         """
         
-        return locals()
+        return self._pixel_aspect
     
-    pixel_aspect = property(**pixel_aspect())
+    #----------------------------------------------------------------------
+    @pixel_aspect.setter # pylint: disable=E1101
+    def pixel_aspect(self, pixel_aspect):
+        # pylint: disable=E0102, C0111
+        self._pixel_aspect = self._validate_pixel_aspect(pixel_aspect)
+        
+        # also update the device_aspect
+        self._update_device_aspect()
     
     
     
@@ -1412,31 +1377,23 @@ class ImageFormat(Entity):
     
     
     #----------------------------------------------------------------------
-    def print_resolution():
-        
-        def fget(self):
-            """returns the print resolution
-            """
-            return self._print_resolution
-        
-        def fset(self, print_resolution):
-            """sets the print resolution
-            """
-            self._print_resolution = \
-                self._validate_print_resolution(print_resolution)
-        
-        doc = """this is a property to set and get the print_resolution of the
-        ImageFormat
+    @property
+    def print_resolution(self):
+        """The print resolution of this format
         
         * it should be set to a positif non-zero float or integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
         """
         
-        return locals()
+        return self._print_resolution
     
-    print_resolution = property(**print_resolution())
-    
+    #----------------------------------------------------------------------
+    @print_resolution.setter # pylint: disable=E1101
+    def print_resolution(self, print_resolution):
+        # pylint: disable=E0102, C0111
+        self._print_resolution = \
+            self._validate_print_resolution(print_resolution)
     
     
     
@@ -1504,7 +1461,7 @@ class Link(Entity):
         if not isinstance(path_in, (str, unicode)):
             raise TypeError("path should be an instance of string or unicode")
         
-        if path_in=="":
+        if path_in == "":
             raise ValueError("path can not be an empty string")
         
         return self._format_path(path_in)
@@ -1522,19 +1479,21 @@ class Link(Entity):
     
     
     #----------------------------------------------------------------------
-    def path():
-        def fget(self):
-            return self._path
+    @property
+    def path(self):
+        """The path of the url to the link.
         
-        def fset(self, path_in):
-            self._path = self._validate_path(path_in)
+        It can not be None or an empty string, it should be a string or
+        unicode.
+        """
         
-        doc="""the path part of the url to the link, it can not be None or an
-        empty string, it should be a string or unicode"""
-        
-        return locals()
+        return self._path
     
-    path = property(**path())
+    #----------------------------------------------------------------------
+    @path.setter # pylint: disable=E1101
+    def path(self, path_in):
+        # pylint: disable=E0102, C0111
+        self._path = self._validate_path(path_in)
     
     
     
@@ -1633,39 +1592,37 @@ class Comment(Entity):
     
     
     #----------------------------------------------------------------------
-    def body():
-        def fget(self):
-            return self._body
-        
-        def fset(self, body_in):
-            self._body = self._validate_body(body_in)
-        
-        doc = """this is the property that sets and returns the body attribute
+    @property
+    def body(self):
+        """The body of this Comment.
         """
         
-        return locals()
+        return self._body
     
-    body = property(**body())
+    #----------------------------------------------------------------------
+    @body.setter # pylint: disable=E1101
+    def body(self, body_in):
+        # pylint: disable=E0102, C0111
+        self._body = self._validate_body(body_in)
     
     
     
     #----------------------------------------------------------------------
-    def to():
-        def fget(self):
-            return self._to
-        
-        def fset(self, to_in):
-            self._to = self._validate_to(to_in)
-        
-        doc = """The object that this Comment is created about.
+    @property
+    def to(self):
+        """The object that this Comment is created about.
         
         It can be anything that is mixed with the
         :class:`~stalker.core.mixins.ReviewMixin`.
         """
         
-        return locals()
+        return self._to
     
-    to = property(**to())
+    #----------------------------------------------------------------------
+    @to.setter # pylint: disable=E1101
+    def to(self, to_in):
+        # pylint: disable=E0102, C0111
+        self._to = self._validate_to(to_in)
 
 
 
@@ -1676,7 +1633,7 @@ class Comment(Entity):
 class Department(Entity):
     """The departments that forms the studio itself.
     
-    The informations that a Department object holds is like:
+    The information that a Department object holds is like:
     
       * The members of the department
       * The lead of the department
@@ -1702,29 +1659,33 @@ class Department(Entity):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, members=[], lead=None, **kwargs):
+    def __init__(self, members=None, lead=None, **kwargs):
         super(Department, self).__init__(**kwargs)
         
+        # fix the mutable default problem in members argument
         self._members = self._validate_members(members)
         self._lead = self._validate_lead(lead)
     
     
     
     #----------------------------------------------------------------------
-    def _validate_members(self, members):
+    def _validate_members(self, members_in):
         """validates the given members attribute
         """
         
-        if not isinstance(members, list):
+        if members_in is None:
+            members_in = []
+        
+        if not isinstance(members_in, list):
             raise TypeError("members should be a list of "
                              "stalker.core.models.User instances")
         
-        if not all([isinstance(member, User) for member in members]):
+        if not all([isinstance(member, User) for member in members_in]):
             raise TypeError("every element in the members list should be "
                              "an instance of stalker.core.models.User"
                              " class")
         
-        return ValidatedList(members, User)
+        return ValidatedList(members_in, User)
     
     
     
@@ -1744,37 +1705,32 @@ class Department(Entity):
     
     
     #----------------------------------------------------------------------
-    def members():
+    @property
+    def members(self):
+        """List of users representing the members of this department."""
         
-        def fget(self):
-            return self._members
-        
-        def fset(self, members):
-            self._members = self._validate_members(members)
-        
-        doc = """members are a list of users representing the members of this
-        department"""
-        
-        return locals()
+        return self._members
     
-    members = property(**members())
+    #----------------------------------------------------------------------
+    @members.setter # pylint: disable=E1101
+    def members(self, members):
+        # pylint: disable=E0102, C0111
+        self._members = self._validate_members(members)
     
     
     
     #----------------------------------------------------------------------
-    def lead():
+    @property
+    def lead(self):
+        """The lead of this department, it is a User object"""
         
-        def fget(self):
-            return self._lead
-        
-        def fset(self, lead):
-            self._lead = self._validate_lead(lead)
-        
-        doc = """lead is the lead of this department, it is a User object"""
-        
-        return locals()
+        return self._lead
     
-    lead = property(**lead())
+    #----------------------------------------------------------------------
+    @lead.setter # pylint: disable=E1101
+    def lead(self, lead):
+        # pylint: disable=E0102, C0111
+        self._lead = self._validate_lead(lead)
     
     
     
@@ -1829,8 +1785,6 @@ class PermissionGroup(SimpleEntity):
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(PermissionGroup, self).__init__(**kwargs)
-        
-        pass
 
 
 
@@ -1919,20 +1873,20 @@ class Note(SimpleEntity):
     
     
     #----------------------------------------------------------------------
-    def content():
-        def fget(self):
-            return self._content
+    @property
+    def content(self):
+        """content is a string representing the content of this Note, can be
+        given as an empty string or can be even None, but anything other than
+        None or string or unicode will raise a TypeError
+        """
         
-        def fset(self, content_in):
-            self._content = self._validate_content(content_in)
-        
-        doc = """content is a string representing the content of this Note,
-        can be given as an empty string or can be even None, but anything other
-        than None or string or unicode will raise a TypeError"""
-        
-        return locals()
+        return self._content
     
-    content = property(**content())
+    #----------------------------------------------------------------------
+    @content.setter # pylint: disable=E1101
+    def content(self, content_in):
+        # pylint: disable=E0102, C0111
+        self._content = self._validate_content(content_in)
     
     
     
@@ -2032,8 +1986,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
                  lead=None,
                  repository=None,
                  structure=None,
-                 #sequences=[],
-                 #assets=[],
                  image_format=None,
                  fps=25.0,
                  is_stereoscopic=False,
@@ -2209,14 +2161,9 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     
     
     #----------------------------------------------------------------------
-    def assets():
-        def fget(self):
-            return self._assets
-        
-        #def fset(self, assets_in):
-            #self._assets = self._validate_assets(assets_in)
-        
-        doc = """The list of :class:`~stalker.core.models.Asset`\ s created in this project.
+    @property
+    def assets(self):
+        """The list of :class:`~stalker.core.models.Asset`\ s created in this project.
         
         It is a read-only list. To add an :class:`~stalker.core.models.Asset`
         to this project, the :class:`~stalker.core.models.Asset` need to be
@@ -2224,124 +2171,112 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         :class:`~stalker.core.models.Asset`.
         """
         
-        return locals()
-    
-    assets = property(**assets())
+        return self._assets
     
     
     
     #----------------------------------------------------------------------
-    def display_width():
-        def fget(self):
-            return self._display_width
+    @property
+    def display_width(self):
+        """the target display width that this project is going to be displayed
+        on, meaningfull if this project is a stereoscopic project
+        """
         
-        def fset(self, display_width_in):
-            self._display_width = \
-                self._validate_display_width(display_width_in)
-        
-        doc = """the target display width that this project is going to be
-        displayed on, meaningfull if this project is a stereoscopic project"""
-        
-        return locals()
+        return self._display_width
     
-    display_width = property(**display_width())
+    #----------------------------------------------------------------------
+    @display_width.setter # pylint: disable=E1101
+    def display_width(self, display_width_in):
+        # pylint: disable=E0102, C0111
+        self._display_width = \
+            self._validate_display_width(display_width_in)
     
     
     
     #----------------------------------------------------------------------
-    def fps():
-        def fget(self):
-            return self._fps
-        def fset(self, fps_in):
-            self._fps = self._validate_fps(fps_in)
+    @property
+    def fps(self):
+        """the fps of the project, it is a float value, any other types will be
+        converted to float. The default value is 25.0
+        """
         
-        doc = """the fps of the project, it is a float value, any other types
-        will be converted to float. The default value is 25.0"""
-        
-        return locals()
+        return self._fps
     
-    fps = property(**fps())
+    #----------------------------------------------------------------------
+    @fps.setter # pylint: disable=E1101
+    def fps(self, fps_in):
+        # pylint: disable=E0102, C0111
+        self._fps = self._validate_fps(fps_in)
     
     
     
     #----------------------------------------------------------------------
-    def image_format():
-        def fget(self):
-            return self._image_format
-        def fset(self, image_format_in):
-            self._image_format = \
-                self._validate_image_format(image_format_in)
+    @property
+    def image_format(self):
+        """the image format of the current project. This value defines the
+        output image format of the project, should be an instance of
+        :class:`~stalker.core.models.ImageFormat`, can not be skipped
+        """
         
-        doc = """the image format of the current project. This value defines
-        the output image format of the project, should be an instance of
-        :class:`~stalker.core.models.ImageFormat`, can not be
-        skipped"""
-        
-        return locals()
+        return self._image_format
     
-    image_format = property(**image_format())
+    #----------------------------------------------------------------------
+    @image_format.setter # pylint: disable=E1101
+    def image_format(self, image_format_in):
+        # pylint: disable=E0102, C0111
+        self._image_format = \
+            self._validate_image_format(image_format_in)
     
     
     
     #----------------------------------------------------------------------
-    def is_stereoscopic():
-        def fget(self):
-            return self._is_stereoscopic
-        def fset(self, is_stereoscopic_in):
-            self._is_stereoscopic = bool(is_stereoscopic_in)
+    @property
+    def is_stereoscopic(self):
+        """True if the project is a stereoscopic project"""
         
-        doc= """True if the project is a stereoscopic project"""
-        
-        return locals()
+        return self._is_stereoscopic
     
-    is_stereoscopic = property(**is_stereoscopic())
+    #----------------------------------------------------------------------
+    @is_stereoscopic.setter # pylint: disable=E1101
+    def is_stereoscopic(self, is_stereoscopic_in):
+        # pylint: disable=E0102, C0111
+        self._is_stereoscopic = bool(is_stereoscopic_in)
     
     
     
     #----------------------------------------------------------------------
-    def lead():
-        def fget(self):
-            return self._lead
-        def fset(self, lead_in):
-            self._lead = self._validate_lead(lead_in)
-        
-        doc = """the lead of the project, should be an instance of
+    @property
+    def lead(self):
+        """the lead of the project, should be an instance of
         :class:`~stalker.core.models.User`, also can set to None"""
-        
-        return locals()
     
-    lead = property(**lead())
+        return self._lead
+    
+    #----------------------------------------------------------------------
+    @lead.setter # pylint: disable=E1101
+    def lead(self, lead_in):
+        # pylint: disable=E0102, C0111
+        self._lead = self._validate_lead(lead_in)
     
     
     
     #----------------------------------------------------------------------
-    def repository():
-        def fget(self):
-            return self._repository
-        
-        #def fset(self, repository_in):
-            #self._repository = self._validate_repository(repository_in)
-        
-        doc = """The :class:`~stalker.core.models.Repository` that this project should reside.
+    @property
+    def repository(self):
+        """The :class:`~stalker.core.models.Repository` that this project should reside.
         
         Should be an instance of :class:`~stalker.core.models.Repository`.
         It is a read-only attribute. So it is not possible to change the
         repository of one project"""
         
-        return locals()
-    
-    repository = property(**repository())
+        return self._repository
     
     
     
     #----------------------------------------------------------------------
-    def sequences():
-        def fget(self):
-            return self._sequences
-        #def fset(self, sequences_in):
-            #self._sequences = self._validate_sequences(sequences_in)
-        
-        doc = """The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
+    @property
+    def sequences(self):
+        """The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
         
         This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
         that this :class:`~stalker.core.models.Project` has. It is a list of
@@ -2355,58 +2290,30 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         the :class:`~stalker.core.models.Sequence`.
         """
         
-        return locals()
-    
-    sequences = property(**sequences())
+        return self._sequences
     
     
     
     #----------------------------------------------------------------------
-    def structure():
-        def fget(self):
-            return self._structure
-        def fset(self, structure_in):
-            self._structure = self._validate_structure(structure_in)
-        
-        doc = """The structure of the project. Should be an instance of
+    @property
+    def structure(self):
+        """The structure of the project. Should be an instance of
         :class:`~stalker.core.models.Structure` class"""
         
-        return locals()
+        return self._structure
     
-    structure = property(**structure())
+    #----------------------------------------------------------------------
+    @structure.setter # pylint: disable=E1101
+    def structure(self, structure_in):
+        # pylint: disable=E0102, C0111
+        self._structure = self._validate_structure(structure_in)
     
     
     
     #----------------------------------------------------------------------
-    def users():
-        def fget(self):
-            #return self._users
-            
-            self._users = []
-            # project tasks
-            for task in self.tasks:
-                self._users.extend(task.resources)
-            
-            # sequence tasks
-            for seq in self.sequences:
-                for task in seq.tasks:
-                    self._users.extend(task.resources)
-                
-                # shot tasks
-                for shot in seq.shots:
-                    for task in shot.tasks:
-                        self._users.extend(task.resources)
-            
-            # asset tasks
-            for asset in self.assets:
-                for task in asset.tasks:
-                    self._users.extend(task.resources)
-            
-            self._users = list(set(self._users))
-            
-            return self._users
-        
-        doc = """The users assigned to this project.
+    @property
+    def users(self):
+        """The users assigned to this project.
         
         This is a list of :class:`~stalker.core.models.User` instances. All the
         elements are gathered from all the
@@ -2416,9 +2323,29 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
         :class:`~stalker.core.models.Asset`\ s.
         """
         
-        return locals()
-    
-    users = property(**users())
+        self._users = []
+        # project tasks
+        for task in self.tasks:
+            self._users.extend(task.resources)
+        
+        # sequence tasks
+        for seq in self.sequences:
+            for task in seq.tasks:
+                self._users.extend(task.resources)
+            
+            # shot tasks
+            for shot in seq.shots:
+                for task in shot.tasks:
+                    self._users.extend(task.resources)
+        
+        # asset tasks
+        for asset in self.assets:
+            for task in asset.tasks:
+                self._users.extend(task.resources)
+        
+        self._users = list(set(self._users))
+        
+        return self._users
     
     
     
@@ -2511,76 +2438,64 @@ class Repository(Entity):
     
     
     #----------------------------------------------------------------------
-    def linux_path():
+    @property
+    def linux_path(self):
+        """The path used in Linux"""
         
-        def fget(self):
-            return self._linux_path
-        
-        def fset(self, linux_path_in):
-            self._linux_path = self._validate_linux_path(linux_path_in)
-        
-        doc = """property that helps to set and get linux_path values"""
-        
-        return locals()
+        return self._linux_path
     
-    linux_path = property(**linux_path())
+    #----------------------------------------------------------------------
+    @linux_path.setter # pylint: disable=E1101
+    def linux_path(self, linux_path_in):
+        # pylint: disable=E0102, C0111
+        self._linux_path = self._validate_linux_path(linux_path_in)
     
     
     
     #----------------------------------------------------------------------
-    def osx_path():
+    @property
+    def osx_path(self):
+        """The path used in OSX"""
         
-        def fget(self):
-            return self._osx_path
-        
-        def fset(self, osx_path_in):
-            self._osx_path = self._validate_osx_path(osx_path_in)
-        
-        doc = """property that helps to set and get osx_path values"""
-        
-        return locals()
+        return self._osx_path
     
-    osx_path = property(**osx_path())
+    #----------------------------------------------------------------------
+    @osx_path.setter # pylint: disable=E1101
+    def osx_path(self, osx_path_in):
+        # pylint: disable=E0102, C0111
+        self._osx_path = self._validate_osx_path(osx_path_in)
     
     
     
     #----------------------------------------------------------------------
-    def windows_path():
+    @property
+    def windows_path(self):
+        """The path used in Windows"""
         
-        def fget(self):
-            return self._windows_path
-        
-        def fset(self, windows_path_in):
-            self._windows_path = self._validate_windows_path(windows_path_in)
-        
-        doc = """property that helps to set and get windows_path values"""
-        
-        return locals()
+        return self._windows_path
     
-    windows_path = property(**windows_path())
+    #----------------------------------------------------------------------
+    @windows_path.setter # pylint: disable=E1101
+    def windows_path(self, windows_path_in):
+        # pylint: disable=E0102, C0111
+        self._windows_path = self._validate_windows_path(windows_path_in)
     
     
     
     #----------------------------------------------------------------------
-    def path():
+    @property
+    def path(self):
+        """The path for the current os"""
         
-        def fget(self):
-            
-            # return the proper value according to the current os
-            platform_system = platform.system()
-            
-            if platform_system == "Linux":
-                return self.linux_path
-            elif platform_system == "Windows":
-                return self.windows_path
-            elif platform_system == "Darwin":
-                return self.osx_path
+        # return the proper value according to the current os
+        platform_system = platform.system()
         
-        doc = """property that helps to get path for the current os"""
-        
-        return locals()
-    
-    path = property(**path())
+        if platform_system == "Linux":
+            return self.linux_path
+        elif platform_system == "Windows":
+            return self.windows_path
+        elif platform_system == "Darwin":
+            return self.osx_path
     
     
     
@@ -2683,32 +2598,32 @@ class Sequence(Entity,
     
     
     #----------------------------------------------------------------------
-    def lead():
-        def fget(self):
-            return self._lead
-        def fset(self, lead_in):
-            self._lead = self._validate_lead(lead_in)
+    @property
+    def lead(self):
+        """The lead of this sequence object."""
         
-        doc = """The lead of this sequence object."""
-        
-        return locals()
+        return self._lead
     
-    lead = property(**lead())
+    #----------------------------------------------------------------------
+    @lead.setter # pylint: disable=E1101
+    def lead(self, lead_in):
+        # pylint: disable=E0102, C0111
+        self._lead = self._validate_lead(lead_in)
     
     
     
     #----------------------------------------------------------------------
-    def shots():
-        def fget(self):
-            return self._shots
-        def fset(self, shots_in):
-            self._shots = self._validate_shots(shots_in)
+    @property
+    def shots(self):
+        """The shots of this sequence object."""
         
-        doc = """The shots of this sequence object."""
-        
-        return locals()
+        return self._shots
     
-    shots = property(**shots())
+    #----------------------------------------------------------------------
+    @shots.setter # pylint: disable=E1101
+    def shots(self, shots_in):
+        # pylint: disable=E0102, C0111
+        self._shots = self._validate_shots(shots_in)
     
     
     
@@ -2816,7 +2731,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
                  cut_in=1,
                  cut_out=None,
                  cut_duration=None,
-                 assets=[],
+                 assets=None,
                  **kwargs):
         
         kwargs["name"] = code
@@ -2829,7 +2744,6 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         self._code = self._validate_code(code)
         
         # set the name atribute
-        import uuid
         self._name = uuid.uuid4().hex
         
         self._sequence = self._validate_sequence(sequence)
@@ -2853,7 +2767,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     #----------------------------------------------------------------------
     @orm.reconstructor
     def __init_on_load__(self):
-        """initialized the instance variables when the instance creted with
+        """initialized the instance variables when the instance created with
         SQLAlchemy
         """
         self._cut_duration = None
@@ -2944,7 +2858,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         if code_in is None:
             raise TypeError("the code can not be None")
         
-        if code_in=="":
+        if code_in == "":
             raise ValueError("the code can not be empty string")
         
         return self._condition_code(str(code_in))
@@ -3019,7 +2933,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     #----------------------------------------------------------------------
-    def __assets_backreference_updater__(self, assets_added, assets_removed):
+    def __assets_backreference_updater__(self, assets_added, assets_removed): # pylint: disable=E1003
         """updates the backreference in the Asset class
         """
         
@@ -3034,123 +2948,89 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     #----------------------------------------------------------------------
-    def assets():
-        
-        def fget(self):
-            return self._assets
-        
-        def fset(self, assets_in):
-            # remove the previous ones
-            for asset in self.assets:
-                super(ValidatedList, asset._shots).remove(self)
-            
-            self._assets = self._validate_assets(assets_in)
-        
-        doc = """The list of :class:`~stalker.core.models.Asset`\ s used in this shot.
+    @property
+    def assets(self):
+        """The list of :class:`~stalker.core.models.Asset`\ s used in this shot.
         
         When it is set to None, it defaults to the default value and the
         default value is an empty list."""
         
-        return locals()
+        return self._assets
     
-    assets = property(**assets())
+    #----------------------------------------------------------------------
+    @assets.setter # pylint: disable=E1101
+    def assets(self, assets_in): # pylint: disable=E1003
+        # pylint: disable=E0102, C0111
+        # remove the previous ones
+        for asset in self.assets:
+            super(ValidatedList, asset._shots).remove(self)
+        
+        self._assets = self._validate_assets(assets_in)
     
     
     
     #----------------------------------------------------------------------
-    def code():
-        def fget(self):
-            return self._code
-        
-        def fset(self, code_in):
-            self._code = self._validate_code(code_in)
-        
-        doc = """The code of this :class:`~stalker.core.models.Shot`.
+    @property
+    def code(self): # pylint: disable=E0202
+        """The code of this :class:`~stalker.core.models.Shot`.
         
         Contrary to the original attribute from the inherited parent
         (:attr:`~stalker.core.models.SimpleEntity.code`), the code attribute
         can not be set to None or empty string."""
         
-        return locals()
+        return self._code
     
-    code = property(**code())
-        
+    #----------------------------------------------------------------------
+    @code.setter # pylint: disable=E1101
+    def code(self, code_in):
+        # pylint: disable=E0102, E0202, W0221
+        self._code = self._validate_code(code_in)
     
     
     
     #----------------------------------------------------------------------
-    def cut_duration():
-        
-        def fget(self):
-            return self._cut_duration
-        
-        def fset(self, cut_duration_in):
-            #self._cut_duration = self._validate_cut_duration(cut_duration_in)
-            
-            # also set the cut_out
-            #self._cut_out = self._cut_in + self._cut_duration - 1
-            
-            self._update_cut_info(self._cut_in, cut_duration_in, self._cut_out)
-        
-        doc = """The duration of this shot in frames.
+    @property
+    def cut_duration(self):
+        """The duration of this shot in frames.
         
         It should be a positive integer value. If updated also updates the
         :attr:`~stalker.core.models.Shot.cut_duration` attribute. The default
         value is 100."""
         
-        return locals()
+        return self._cut_duration
     
-    cut_duration = property(**cut_duration())
+    #----------------------------------------------------------------------
+    @cut_duration.setter # pylint: disable=E1101
+    def cut_duration(self, cut_duration_in):
+        # pylint: disable=E0102, C0111
+        self._update_cut_info(self._cut_in, cut_duration_in, self._cut_out)
     
     
     
     #----------------------------------------------------------------------
-    def cut_in():
-        
-        def fget(self):
-            return self._cut_in
-        
-        def fset(self, cut_in_in):
-            #self._cut_in = self._validate_cut_in(cut_in_in)
-            
-            #if self._cut_in > self._cut_out:
-                ## udpate the cut_out value
-                #self._cut_out = self._cut_in + 1
-            
-            #self._update_cut_duration()
-            
-            self._update_cut_info(cut_in_in, self._cut_duration, self._cut_out)
-        
-        doc = """The in frame number taht this shot starts.
+    @property
+    def cut_in(self):
+        """The in frame number taht this shot starts.
         
         The default value is 1. When the cut_in is bigger then
         :attr:`~stalker.core.models.Shot.cut_out`, the
         :attr:`~stalker.core.models.Shot.cut_out` value is update to
         :attr:`~stalker.core.models.Shot.cut_in` + 1."""
         
-        return locals()
+        return self._cut_in
     
-    cut_in = property(**cut_in())
+    #----------------------------------------------------------------------
+    @cut_in.setter # pylint: disable=E1101
+    def cut_in(self, cut_in_in):
+        # pylint: disable=E0102, C0111
+        self._update_cut_info(cut_in_in, self._cut_duration, self._cut_out)
     
     
     
     #----------------------------------------------------------------------
-    def cut_out():
-        def fget(self):
-            if self._cut_out is None:
-                self._update_cut_info(self._cut_in, self._cut_duration, None)
-            return self._cut_out
-        
-        def fset(self, cut_out_in):
-            #self._cut_out = self._validate_cut_out(cut_out_in)
-            
-            #if self._cut_out is None:
-                #self._cut_out = self._cut_in + self._cut_duration - 1
-            
-            #self._update_cut_duration()
-            self._update_cut_info(self._cut_in, self._cut_duration, cut_out_in)
-        
-        doc = """The out frame number that this shot ends.
+    @property
+    def cut_out(self):
+        """The out frame number that this shot ends.
         
         When the :attr:`~stalker.core.models.Shot.cut_out` is set to a value
         lower than :attr:`~stalker.core.models.Shot.cut_in`,
@@ -3159,21 +3039,22 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         :attr:`~stalker.core.models.Shot.cut_in` +
         :attr:`~stalker.core.models.Shot.cut_duration`."""
         
-        return locals()
+        if self._cut_out is None:
+            self._update_cut_info(self._cut_in, self._cut_duration, None)
+        return self._cut_out
     
-    cut_out = property(**cut_out())
+    #----------------------------------------------------------------------
+    @cut_out.setter # pylint: disable=E1101
+    def cut_out(self, cut_out_in):
+        # pylint: disable=E0102, C0111
+        self._update_cut_info(self._cut_in, self._cut_duration, cut_out_in)
     
     
     
     #----------------------------------------------------------------------
-    def name():
-        def fget(self):
-            return self._name
-        
-        def fset(self, name_in):
-            pass
-        
-        doc = """Name of this Shot.
+    @property
+    def name(self): # pylint: disable=E0202
+        """Name of this Shot.
         
         Different than other :class:`~stalker.core.models.SimpleEntity`
         derivatives, the :class:`~stalker.core.models.Shot` classes
@@ -3181,25 +3062,24 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
         stored value is a uuid4 sequence.
         """
         
-        return locals()
+        return self._name
     
-    name = property(**name())
+    #----------------------------------------------------------------------
+    @name.setter # pylint: disable=E1101
+    def name(self, name_in):
+        # pylint: disable=E0102, E0202, W0221
+        pass
     
     
     
     #----------------------------------------------------------------------
-    def sequence():
-        def fget(self):
-            return self._sequence
-        
-        doc = """The :class:`~stalker.core.models.Sequence` instance that this :class:`~stalker.core.models.Shot` instance belongs to.
+    @property
+    def sequence(self):
+        """The :class:`~stalker.core.models.Sequence` instance that this :class:`~stalker.core.models.Shot` instance belongs to.
         
         It is a read-only attribute."""
         
-        return locals()
-    
-    sequence = property(**sequence())
-        
+        return self._sequence
 
 
 
@@ -3312,7 +3192,7 @@ class Structure(Entity):
         super(Structure, self).__init__(**kwargs)
         
         self._templates = self._validate_templates(templates)
-        self._custom_template= self._validate_custom_template(custom_template)
+        self._custom_template = self._validate_custom_template(custom_template)
     
     
     
@@ -3360,45 +3240,42 @@ class Structure(Entity):
     
     
     #----------------------------------------------------------------------
-    def custom_template():
-        def fget(self):
-            return self._custom_template
-        
-        def fset(self, custom_template_in):
-            self._custom_template =\
-                self._validate_custom_template(custom_template_in)
-        
-        doc = """A string value, which is a list of folder names.
+    @property
+    def custom_template(self):
+        """A string value, which is a list of folder names.
         
         It can also contain Jinja2 direction. See the\
         :class:`~stalker.core.models.Structure` documentaion for more details.
         """
         
-        return locals()
+        return self._custom_template
     
-    custom_template = property(**custom_template())
+    #----------------------------------------------------------------------
+    @custom_template.setter # pylint: disable=E1101
+    def custom_template(self, custom_template_in):
+        # pylint: disable=E0102, C0111
+        self._custom_template = \
+            self._validate_custom_template(custom_template_in)
     
     
     
     #----------------------------------------------------------------------
-    def templates():
-        def fget(self):
-            return self._templates
-        
-        def fset(self, templates_in):
-            self._templates = self._validate_templates(templates_in)
-        
-        doc = """A list of :class:`~stalker.core.models.FilenameTemplate` instances.
+    @property
+    def templates(self):
+        """A list of :class:`~stalker.core.models.FilenameTemplate` instances.
         
         This list shows possible filenaming conventions created along with this
         :class:`~stalker.core.models.Structure` instance. It should be a list
         of :class:`~stalker.core.models.FilenameTemplate` instances.
         """
         
-        return locals()
+        return self._templates
     
-    templates = property(**templates())
-    
+    #----------------------------------------------------------------------
+    @templates.setter # pylint: disable=E1101
+    def templates(self, templates_in):
+        # pylint: disable=E0102, C0111
+        self._templates = self._validate_templates(templates_in)
 
 
 
@@ -3471,7 +3348,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     #----------------------------------------------------------------------
-    def __init__(self, shots=[], **kwargs):
+    def __init__(self, shots=None, **kwargs):
         
         super(Asset, self).__init__(**kwargs)
         
@@ -3492,7 +3369,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     #----------------------------------------------------------------------
     @orm.reconstructor
     def __init_on_load__(self):
-        """initialized the instance variables when the instance creted with
+        """initialized the instance variables when the instance created with
         SQLAlchemy
         """
         self._shots = None
@@ -3527,6 +3404,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     def __shots_item_validator__(self, shots_added, shots_removed):
         """updates the backreferences in the Shot instance
         """
+        # pylint: disable=E1003
         
         for shot in shots_added:
             # do not invoke the asset.shots by calling the super
@@ -3539,24 +3417,23 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     #----------------------------------------------------------------------
-    def shots():
-        def fget(self):
-            return self._shots
-        
-        def fset(self, shots_in):
-            # remove the previous ones
-            for shot in self._shots:
-                super(ValidatedList, shot.assets).remove(self)
-            
-            # set it to the ValidatedList that already has the new shots
-            self._shots = self._validate_shots(shots_in)
-        
-        doc = """The :class:`~stalker.core.models.Shot`\ s that this :class:`~stalker.core.models.Asset` has been used in.
+    @property
+    def shots(self): # pylint: disable=E0202
+        """The :class:`~stalker.core.models.Shot`\ s that this :class:`~stalker.core.models.Asset` has been used in.
         """
         
-        return locals()
+        return self._shots
     
-    shots = property(**shots())
+    #----------------------------------------------------------------------
+    @shots.setter # pylint: disable=E1101
+    def shots(self, shots_in):
+        # pylint: disable=E0102, E0202, C0111, E1003
+        # remove the previous ones
+        for shot in self._shots:
+            super(ValidatedList, shot.assets).remove(self)
+        
+        # set it to the ValidatedList that already has the new shots
+        self._shots = self._validate_shots(shots_in)
     
     
     
@@ -3780,7 +3657,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  depends=None,
                  effort=None,
                  resources=None,
-                 milestone=False,
+                 is_milestone=False,
                  priority=defaults.DEFAULT_TASK_PRIORITY,
                  task_of=None,
                  **kwargs):
@@ -3793,7 +3670,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         self._bookings = ValidatedList([], Booking)
         self._versions = ValidatedList([], Version)
         
-        self._milestone = self._validate_milestone(milestone)
+        self._is_milestone = self._validate_milestone(is_milestone)
+        self._is_complete = False
         
         self._depends = self._validate_depends(depends)
         self._resources = []
@@ -3813,7 +3691,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #----------------------------------------------------------------------
     @orm.reconstructor
     def __init_on_load__(self):
-        """initialized the instance variables when the instance creted with
+        """initialized the instance variables when the instance created with
         SQLAlchemy
         """
         self._bookings = ValidatedList([], Booking)
@@ -3851,7 +3729,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     
     #----------------------------------------------------------------------
-    def _validate_complete(self, complete_in):
+    def _validate_is_complete(self, complete_in):
         """validates the given complete value
         """
         
@@ -3970,7 +3848,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             raise TypeError("resources should be a list of "
                             "stalker.core.models.User instances")
         
-        if self.milestone:
+        if self.is_milestone:
             resources_in = []
         
         return ValidatedList(resources_in, User,
@@ -3995,32 +3873,26 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     
     #----------------------------------------------------------------------
-    def bookings():
-        def fget(self):
-            return self._bookings
-        
-        def fset(self, bookings_in):
-            self._bookings = self._validate_bookings(bookings_in)
-        
-        doc = """A list of :class:`~stalker.core.models.Booking` objects
-        showing who and when spent how much effort on this task.
+    @property
+    def bookings(self):
+        """A list of :class:`~stalker.core.models.Booking` objects showing who
+        and when spent how much effort on this task.
         """
         
-        return locals()
+        return self._bookings
     
-    bookings = property(**bookings())
+    #----------------------------------------------------------------------
+    @bookings.setter # pylint: disable=E1101
+    def bookings(self, bookings_in):
+        # pylint: disable=E0102, C0111
+        self._bookings = self._validate_bookings(bookings_in)
     
     
     
     #----------------------------------------------------------------------
-    def complete():
-        def fget(self):
-            return self._complete
-        
-        def fset(self, complete_in):
-            self._complete = self._validate_complete(complete_in)
-        
-        doc = """A bool value showing if this task is completed or not.
+    @property
+    def is_complete(self):
+        """A bool value showing if this task is completed or not.
         
         There is a good article_ about why not to use an attribute called
         ``percent_complete`` to measure how much the task is completed.
@@ -4028,21 +3900,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
         """
         
-        return locals()
+        return self._is_complete
     
-    complete = property(**complete())
+    #----------------------------------------------------------------------
+    @is_complete.setter # pylint: disable=E1101
+    def is_complete(self, is_complete_in):
+        # pylint: disable=E0102, C0111
+        self._is_complete = self._validate_is_complete(is_complete_in)
     
     
     
     #----------------------------------------------------------------------
-    def depends():
-        def fget(self):
-            return self._depends
-        
-        def fset(self, depends_in):
-            self._depends = self._validate_depends(depends_in)
-        
-        doc = """A list of :class:`~stalker.core.models.Task`\ s that this one is depending on.
+    @property
+    def depends(self):
+        """A list of :class:`~stalker.core.models.Task`\ s that this one is depending on.
         
         A CircularDependencyError will be raised when the task dependency
         creates a circlar dependency which means it is not allowed to create
@@ -4050,30 +3921,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         some way depends to this one again.
         """
         
-        return locals()
+        return self._depends
     
-    depends = property(**depends())
+    #----------------------------------------------------------------------
+    @depends.setter # pylint: disable=E1101
+    def depends(self, depends_in):
+        # pylint: disable=E0102, C0111
+        self._depends = self._validate_depends(depends_in)
     
     
     
     #----------------------------------------------------------------------
-    def duration():
-        def fget(self):
-            return self._duration
-        
-        def fset(self, duration_in):
-            
-            # just call the fset method of the duration property in the super
-            ScheduleMixin.duration.fset(self, duration_in)
-            
-            # then update the effort
-            num_of_resources = len(self.resources)
-            if num_of_resources == 0:
-                num_of_resources = 1
-            
-            self._effort = self.duration * num_of_resources
-        
-        doc = """The overriden duration attribute.
+    @property
+    def duration(self): # pylint: disable=E0202
+        """The overriden duration attribute.
         
         It is a datetime.timedelta instance. Showing the difference of the
         :attr:`~stalker.core.mixins.ScheduleMixin.start_date` and the
@@ -4082,28 +3943,29 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         attribute value.
         """
         
-        return locals()
+        return self._duration
     
-    duration = property(**duration())
+    #----------------------------------------------------------------------
+    @duration.setter # pylint: disable=E1101
+    def duration(self, duration_in):
+        # pylint: disable=E0102, E0202, W0221
+        
+        # just call the fset method of the duration property in the super
+        ScheduleMixin.duration.fset(self, duration_in)
+        
+        # then update the effort
+        num_of_resources = len(self.resources)
+        if num_of_resources == 0:
+            num_of_resources = 1
+        
+        self._effort = self.duration * num_of_resources
     
     
     
     #----------------------------------------------------------------------
-    def effort():
-        def fget(self):
-            return self._effort
-        
-        def fset(self, effort_in):
-            self._effort = self._validate_effort(effort_in)
-            
-            # update the duration
-            num_of_resources = len(self.resources)
-            if num_of_resources == 0:
-                num_of_resources = 1
-            
-            self.duration = self._effort / num_of_resources
-        
-        doc = """The total effort that needs to be spend to complete this Task.
+    @property
+    def effort(self): # pylint: disable=E0202
+        """The total effort that needs to be spend to complete this Task.
         
         Can be used to create an initial bid of how long this task going to
         take. The effort is equaly divided to the assigned resources. So if the
@@ -4131,33 +3993,43 @@ class Task(Entity, StatusMixin, ScheduleMixin):
            {effort} = {duration} \\times {n_{resources}}
         """
         
-        return locals()
+        return self._effort
     
-    effort = property(**effort())
+    #----------------------------------------------------------------------
+    @effort.setter # pylint: disable=E1101
+    def effort(self, effort_in):
+        # pylint: disable=E0102, E0202, C0111
+        self._effort = self._validate_effort(effort_in)
+        
+        # update the duration
+        num_of_resources = len(self.resources)
+        if num_of_resources == 0:
+            num_of_resources = 1
+        
+        self.duration = self._effort / num_of_resources
     
     
     
     #----------------------------------------------------------------------
-    def milestone():
-        def fget(self):
-            return self._milestone
-        
-        def fset(self, milestone_in):
-            self._milestone = self._validate_milestone(milestone_in)
-            
-            if self._milestone:
-                self._resources = []
-        
-        doc = """Specifies if this Task is a milestone.
+    @property
+    def is_milestone(self):
+        """Specifies if this Task is a milestone.
         
         Milestones doesn't need any duration, any effort and any resources. It
         is used to create meaningfull dependencies between the critical stages
         of the project.
         """
         
-        return locals()
+        return self._is_milestone
     
-    milestone = property(**milestone())
+    #----------------------------------------------------------------------
+    @is_milestone.setter # pylint: disable=E1101
+    def is_milestone(self, milestone_in):
+        # pylint: disable=E0102, C0111
+        self._is_milestone = self._validate_milestone(milestone_in)
+        
+        if self._is_milestone:
+            self._resources = []
     
     
     
@@ -4165,7 +4037,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def __resource_item_validator__(self, resources_added, resources_removed):
         """a callable for more granular control over resources list
         """
-        
+        # pylint: disable=E1003
+         
         # add the task to the resources
         for resource in resources_added:
             #print resource._tasks
@@ -4178,101 +4051,92 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     
     #----------------------------------------------------------------------
-    def resources():
-        def fget(self):
-            return self._resources
-        
-        def fset(self, resources_in):
-            
-            # remove the current task from the previous resources tasks list
-            for resource in self._resources:
-                try:
-                    super(ValidatedList, resource._tasks).remove(self)
-                except ValueError:
-                    pass
-            
-            # now append the task to every one of the users in the resources_in
-            self._resources = self._validate_resources(resources_in)
-        
-        
-        doc = """The list of :class:`stalker.core.models.User`\ s instances
-        assigned to this Task.
+    @property
+    def resources(self): # pylint: disable=E0202
+        """The list of :class:`stalker.core.models.User`\ s instances assigned to this Task.
         """
         
-        return locals()
+        return self._resources
     
-    resources = property(**resources())
+    #----------------------------------------------------------------------
+    @resources.setter # pylint: disable=E1101
+    def resources(self, resources_in):
+        # pylint: disable=E0102, E0202, C0111, E1003
+        
+        # remove the current task from the previous resources tasks list
+        for resource in self._resources:
+            try:
+                super(ValidatedList, resource._tasks).remove(self)
+            except ValueError:
+                pass
+        
+        # now append the task to every one of the users in the resources_in
+        self._resources = self._validate_resources(resources_in)
     
     
     
     #----------------------------------------------------------------------
-    def task_of():
-        def fget(self):
-            return self._task_of
-        
-        def fset(self, task_of_in):
-            #task_of_in = self._validate_task_of(task_of_in)
-            
-            # remove it from the current task_of attribute
-            if not self._task_of is None:
-                # to avoid any errors raised when the tasks has been set to
-                # None, use "no update remove" by skipping ValidatedList and
-                # using the list.remove directly
-                super(ValidatedList, self._task_of.tasks).remove(self)
-            
-            # update the back reference attribute tasks
-            self._task_of = self._validate_task_of(task_of_in)
-            self._task_of._tasks.append(self)
-        
-        doc = """An object that this Task is a part of.
+    @property
+    def task_of(self): # pylint: disable=E0202
+        """An object that this Task is a part of.
         
         The assigned object should have an attribute called ``tasks``. Any
         object which doesn't have a ``tasks`` attribute will raise an
         AttributeError.
         """
         
-        return locals()
+        return self._task_of
     
-    task_of = property(**task_of())
+    #----------------------------------------------------------------------
+    @task_of.setter # pylint: disable=E1101
+    def task_of(self, task_of_in):
+        # pylint: disable=E0102, E0202, C0111, E1003
+        
+        # remove it from the current task_of attribute
+        if not self._task_of is None:
+            # to avoid any errors raised when the tasks has been set to
+            # None, use "no update remove" by skipping ValidatedList and
+            # using the list.remove directly
+            super(ValidatedList, self._task_of.tasks).remove(self)
+        
+        # update the back reference attribute tasks
+        self._task_of = self._validate_task_of(task_of_in)
+        self._task_of._tasks.append(self)
     
     
     
     #----------------------------------------------------------------------
-    def priority():
-        def fget(self):
-            return self._priority
-        
-        def fset(self, priority_in):
-            self._priority = self._validate_priority(priority_in)
-        
-        doc = """The priority of the current Task.
+    @property
+    def priority(self):
+        """The priority of the current Task.
         
         It is a number between 0 and 1000 shows how important this task is
         among the others.
         """
         
-        return locals()
+        return self._priority
     
-    priority = property(**priority())
+    #----------------------------------------------------------------------
+    @priority.setter # pylint: disable=E1101
+    def priority(self, priority_in):
+        # pylint: disable=E0102, C0111
+        self._priority = self._validate_priority(priority_in)
     
     
     
     #----------------------------------------------------------------------
-    def versions():
-        def fget(self):
-            return self._versions
-        
-        def fset(self, versions_in):
-            self._versions = self._validate_versions(versions_in)
-        
-        doc = """A list of :class:`~stalker.core.models.Version` instances
-        showing the files created for this task.
+    @property
+    def versions(self):
+        """A list of :class:`~stalker.core.models.Version` instances showing the files created for this task.
         """
         
-        return locals()
+        return self._versions
     
-    versions = property(**versions())
-    
+    #----------------------------------------------------------------------
+    @versions.setter # pylint: disable=E1101
+    def versions(self, versions_in):
+        # pylint: disable=E0102, C0111
+        self._versions = self._validate_versions(versions_in)
 
 
 
@@ -4501,15 +4365,15 @@ Character assets",
                  **kwargs):
         super(FilenameTemplate, self).__init__(**kwargs)
         
-        self._target_entity_type =\
+        self._target_entity_type = \
             self._validate_target_entity_type(target_entity_type)
         self._path_code = self._validate_path_code(path_code)
         self._file_code = self._validate_file_code(file_code)
-        self._output_is_relative =\
+        self._output_is_relative = \
             self._validate_output_is_relative(output_is_relative)
-        self._output_path_code =\
+        self._output_path_code = \
             self._validate_output_path_code(output_path_code)
-        self._output_file_code =\
+        self._output_file_code = \
             self._validate_output_file_code(output_file_code)
     
     
@@ -4602,66 +4466,51 @@ Character assets",
     
     
     #----------------------------------------------------------------------
-    def path_code():
+    @property
+    def path_code(self):
+        """The templating code for the path of this FilenameTemplate."""
         
-        def fget(self):
-            return self._path_code
-        
-        def fset(self, path_code_in):
-            self._path_code = self._validate_path_code(path_code_in)
-        
-        doc = """this is the property that helps you assign values to
-        path_code attribute"""
-        
-        return locals()
+        return self._path_code
     
-    path_code = property(**path_code())
+    #----------------------------------------------------------------------
+    @path_code.setter # pylint: disable=E1101
+    def path_code(self, path_code_in):
+        # pylint: disable=E0102, C0111
+        self._path_code = self._validate_path_code(path_code_in)
     
     
     
     #----------------------------------------------------------------------
-    def file_code():
+    @property
+    def file_code(self):
+        """The templating code for the file part of the FilenameTemplate."""
         
-        def fget(self):
-            return self._file_code
-        
-        def fset(self, file_code_in):
-            self._file_code = self._validate_file_code(file_code_in)
-        
-        doc = """this is the property that helps you assign values to
-        file_code attribute"""
-        
-        return locals()
+        return self._file_code
     
-    file_code = property(**file_code())
+    #----------------------------------------------------------------------
+    @file_code.setter # pylint: disable=E1101
+    def file_code(self, file_code_in):
+        # pylint: disable=E0102, C0111
+        self._file_code = self._validate_file_code(file_code_in)
     
     
     
     #----------------------------------------------------------------------
-    def target_entity_type():
+    @property
+    def target_entity_type(self):
+        """The target entity type this FilenameTemplate object should work on.
         
-        def fget(self):
-            return self._target_entity_type
+        Should be a string value or the class itself
+        """
         
-        doc = """the target entity type this FilenameTemplate object should
-        work on, should be a string value or the class itself"""
-        
-        return locals()
-    
-    target_entity_type = property(**target_entity_type())
+        return self._target_entity_type
     
     
     
     #----------------------------------------------------------------------
-    def output_path_code():
-        def fget(self):
-            return self._output_path_code
-        
-        def fset(self, output_path_code_in):
-            self._output_path_code =\
-                self._validate_output_path_code(output_path_code_in)
-        
-        doc = """The output_path_code of this FilenameTemplate object.
+    @property
+    def output_path_code(self):
+        """The output_path_code of this FilenameTemplate object.
         
         Should be a unicode string. None and empty string is also accepted, but
         in this case the value is copied from the
@@ -4672,22 +4521,21 @@ Character assets",
         True then it will left as an empty string.
         """
         
-        return locals()
+        return self._output_path_code
     
-    output_path_code = property(**output_path_code())
+    #----------------------------------------------------------------------
+    @output_path_code.setter # pylint: disable=E1101
+    def output_path_code(self, output_path_code_in):
+        # pylint: disable=E0102, C0111
+        self._output_path_code = \
+            self._validate_output_path_code(output_path_code_in)
     
     
     
     #----------------------------------------------------------------------
-    def output_file_code():
-        def fget(self):
-            return self._output_file_code
-        
-        def fset(self, output_file_code_in):
-            self._output_file_code =\
-                self._validate_output_file_code(output_file_code_in)
-        
-        doc = """The output_file_code of this FilenameTemplate object.
+    @property
+    def output_file_code(self):
+        """The output_file_code of this FilenameTemplate object.
         
         Should be a unicode string. None and empty string is also accepted, but
         in this case the value is copied from the
@@ -4698,27 +4546,31 @@ Character assets",
         True then it will left as an empty string.
         """
         
-        return locals()
+        return self._output_file_code
     
-    output_file_code = property(**output_file_code())
+    #----------------------------------------------------------------------
+    @output_file_code.setter # pylint: disable=E1101
+    def output_file_code(self, output_file_code_in):
+        # pylint: disable=E0102, C0111
+        self._output_file_code = \
+            self._validate_output_file_code(output_file_code_in)
     
     
     
     #----------------------------------------------------------------------
-    def output_is_relative():
-        def fget(self):
-            return self._output_is_relative
-        
-        def fset(self, output_is_relative_in):
-            self._output_is_relative =\
-                self._validate_output_is_relative(output_is_relative_in)
-        
-        doc = """
+    @property
+    def output_is_relative(self):
+        """Specifies if the output should be calculated relative to the path attribute.
         """
         
-        return locals()
+        return self._output_is_relative
     
-    output_is_relative = property(**output_is_relative())
+    #----------------------------------------------------------------------
+    @output_is_relative.setter # pylint: disable=E1101
+    def output_is_relative(self, output_is_relative_in):
+        # pylint: disable=E0102, C0111
+        self._output_is_relative = \
+            self._validate_output_is_relative(output_is_relative_in)
     
     
     
@@ -4863,11 +4715,10 @@ class User(Entity):
                  last_name="",
                  login_name="",
                  password="",
-                 permission_groups=[],
-                 #projects=[],
-                 projects_lead=[],
-                 sequences_lead=[],
-                 tasks=[],
+                 permission_groups=None,
+                 projects_lead=None,
+                 sequences_lead=None,
+                 tasks=None,
                  last_login=None,
                  initials="",
                  **kwargs
@@ -4904,7 +4755,8 @@ class User(Entity):
         
         self._permission_groups = \
             self._validate_permission_groups(permission_groups)
-        #self._projects = self._validate_projects(projects)
+        
+        self._projects = []
         self._projects_lead = self._validate_projects_lead(projects_lead)
         self._sequences_lead = self._validate_sequences_lead(sequences_lead)
         self._tasks = self._validate_tasks(tasks)
@@ -4916,7 +4768,7 @@ class User(Entity):
     #----------------------------------------------------------------------
     @orm.reconstructor
     def __init_on_load__(self):
-        """initialized the instance variables when the instance creted with
+        """initialized the instance variables when the instance created with
         SQLAlchemy
         """
         
@@ -5288,230 +5140,206 @@ class User(Entity):
         password.
         """
         
-        from stalker.ext import auth
+        from stalker.ext import auth # pylint: disable=W0404
         return auth.check_password(raw_password, self._password)
     
     
     
     #----------------------------------------------------------------------
-    def department():
+    @property
+    def department(self):
+        """department of the user, it is a :class:`~stalker.core.models.Department` object"""
         
-        def fget(self):
-            return self._department
-        
-        def fset(self, department_in):
-            self._department = self._validate_department(department_in)
-        
-        doc = """department of the user, it is a
-        :class:`~stalker.core.models.Department` object"""
-        
-        return locals()
+        return self._department
     
-    department = property(**department())
-    
+    #----------------------------------------------------------------------
+    @department.setter # pylint: disable=E1101
+    def department(self, department_in):
+        # pylint: disable=E0102, C0111
+        self._department = self._validate_department(department_in)
+
     
     
     #----------------------------------------------------------------------
-    def email():
-        
-        def fget(self):
-            return self._email
-        
-        def fset(self, email_in):
-            self._email = self._validate_email(email_in)
-        
-        doc = """email of the user, accepts strings or unicodes
+    @property
+    def email(self):
+        """email of the user, accepts strings or unicodes
         """
         
-        return locals()
+        return self._email
     
-    email = property(**email())
+    #----------------------------------------------------------------------
+    @email.setter # pylint: disable=E1101
+    def email(self, email_in):
+        # pylint: disable=E0102, C0111
+        self._email = self._validate_email(email_in)
     
     
     
     #----------------------------------------------------------------------
-    def first_name():
+    @property
+    def first_name(self):
+        """first name of the user, accepts string or unicode"""
         
-        def fget(self):
-            return self._first_name
-        
-        def fset(self, first_name_in):
-            self._first_name = self._validate_first_name(first_name_in)
-        
-        doc = """first name of the user, accepts string or unicode"""
-        
-        return locals()
+        return self._first_name
     
-    first_name = property(**first_name())
+    #----------------------------------------------------------------------
+    @first_name.setter # pylint: disable=E1101
+    def first_name(self, first_name_in):
+        # pylint: disable=E0102, C0111
+        self._first_name = self._validate_first_name(first_name_in)
     
     
     
     #----------------------------------------------------------------------
-    def initials():
-        
-        def fget(self):
-            return self._initials
-        
-        def fset(self, initials_in):
-            self._intials = self._validate_initials(initials_in)
-        
-        doc = """The initials of the user.
+    @property
+    def initials(self):
+        """The initials of the user.
         
         If not spesified, it is the upper case form of first letters of the
         :attr:`~stalker.core.models.User.first_name` and
         :attr:`~stalker.core.models.User.last_name`"""
         
-        return locals()
+        return self._initials
     
-    initials = property(**initials())
+    #----------------------------------------------------------------------
+    @initials.setter # pylint: disable=E1101
+    def initials(self, initials_in):
+        # pylint: disable=E0102, C0111
+        self._initials = self._validate_initials(initials_in)
     
     
     
     #----------------------------------------------------------------------
-    def last_login():
-        
-        def fget(self):
-            return self._last_login
-        
-        def fset(self, last_login_in):
-            self._last_login = self._validate_last_login(last_login_in)
-        
-        doc = """The last login time of this user.
+    @property
+    def last_login(self):
+        """The last login time of this user.
         
         It is an instance of datetime.datetime class."""
         
-        return locals()
+        return self._last_login
     
-    last_login = property(**last_login())
+    #----------------------------------------------------------------------
+    @last_login.setter # pylint: disable=E1101
+    def last_login(self, last_login_in):
+        # pylint: disable=E0102, C0111
+        self._last_login = self._validate_last_login(last_login_in)
     
     
     
     #----------------------------------------------------------------------
-    def last_name():
-        
-        def fget(self):
-            return self._last_name
-        
-        def fset(self, last_name_in):
-            self._last_name = self._validate_last_name(last_name_in)
-        
-        doc = """The last name of the user.
+    @property
+    def last_name(self):
+        """The last name of the user.
         
         It is a string and can be None or empty string"""
         
-        return locals()
+        return self._last_name
     
-    last_name = property(**last_name())
+    #----------------------------------------------------------------------
+    @last_name.setter # pylint: disable=E1101
+    def last_name(self, last_name_in):
+        # pylint: disable=E0102, C0111
+        self._last_name = self._validate_last_name(last_name_in)
     
     
     
     #----------------------------------------------------------------------
-    def login_name():
-        
-        def fget(self):
-            return self._name
-        
-        def fset(self, login_name_in):
-            self._name = self._validate_login_name(login_name_in)
-            # set the name attribute
-            #self._login_name = self._validate_name(login_name_in)
-            self._login_name = self._name
-            
-            # also set the code
-            self._code = self._validate_code(self._name)
-        
-        doc = """The login name of the user.
+    @property
+    def login_name(self):
+        """The login name of the user.
         
         It is a string and also sets the :attr:`~stalker.core.models.User.name`
-        attribute"""
+        attribute.
+        """
         
-        return locals()
+        return self._name
     
-    login_name = property(**login_name())
+    #----------------------------------------------------------------------
+    @login_name.setter # pylint: disable=E1101
+    def login_name(self, login_name_in):
+        # pylint: disable=E0102, C0111
+        self._name = self._validate_login_name(login_name_in)
+        # set the name attribute
+        #self._login_name = self._validate_name(login_name_in)
+        self._login_name = self._name
+        
+        # also set the code
+        self._code = self._validate_code(self._name)
     
     
     
     #----------------------------------------------------------------------
-    def name():
-        
-        def fget(self):
-            return self._name
-        
-        def fset(self, name_in):
-            
-            # set the login name first
-            self._login_name = self._validate_login_name(name_in)
-            self._name = self._login_name
-            
-            # also set the nice_name
-            self._nice_name = self._condition_nice_name(self._name)
-            
-            # and also the code
-            #self.code = self._nice_name.upper()
-            self.code = self._name
-        
-        doc = """The name of this user.
+    @property
+    def name(self): # pylint: disable=E0202
+        """The name of this user.
         
         It is the synonym for the
-        :attr:`~stalker.core.models.User.login_name`\."""
+        :attr:`~stalker.core.models.User.login_name`\.
+        """
         
-        return locals()
+        return self._name
     
-    name = property(**name())
+    #----------------------------------------------------------------------
+    @name.setter # pylint: disable=E1101
+    def name(self, name_in):
+        # pylint: disable=E0102, E0202, W0221
+        
+        # set the login name first
+        self._login_name = self._validate_login_name(name_in)
+        self._name = self._login_name
+        
+        # also set the nice_name
+        self._nice_name = self._condition_nice_name(self._name)
+        
+        # and also the code
+        #self.code = self._nice_name.upper()
+        self.code = self._name
     
     
     
     #----------------------------------------------------------------------
-    def password():
+    @property
+    def password(self): # pylint: disable=E0202
+        """The password of the user.
         
-        def fget(self):
-            return self._password
+        It is scrambled before it is stored.
+        """
         
-        def fset(self, password_in):
-            from stalker.ext import auth
-            self._password = auth.set_password(password_in)
-        
-        doc = """The password of the user.
-        
-        It is scrambled before it is stored."""
-        
-        return locals()
+        return self._password
     
-    password = property(**password())
+    #----------------------------------------------------------------------
+    @password.setter # pylint: disable=E1101
+    def password(self, password_in):
+        # pylint: disable=E0102, E0202, C0111
+        from stalker.ext import auth  # pylint: disable=W0404
+        self._password = auth.set_password(password_in)
     
     
     
     #----------------------------------------------------------------------
-    def permission_groups():
+    @property
+    def permission_groups(self):
+        """Permission groups that this users is a member of.
         
-        def fget(self):
-            return self._permission_groups
+        Accepts :class:`~stalker.core.models.PermissionGroup` object.
+        """
         
-        def fset(self, permission_groups_in):
-            self._permission_groups = \
-                self._validate_permission_groups(permission_groups_in)
-        
-        doc = """permission groups that this users is a member of, accepts
-        :class:`~stalker.core.models.PermissionGroup` object"""
-        
-        return locals()
+        return self._permission_groups
     
-    permission_groups = property(**permission_groups())
+    #----------------------------------------------------------------------
+    @permission_groups.setter # pylint: disable=E1101
+    def permission_groups(self, permission_groups_in):
+        # pylint: disable=E0102, C0111
+        self._permission_groups = \
+            self._validate_permission_groups(permission_groups_in)
     
     
     
     #----------------------------------------------------------------------
-    def projects():
-        
-        def fget(self):
-            #return self._projects
-            projects = []
-            for task in self.tasks:
-                projects.append(task.task_of.project)
-            
-            return list(set(projects))
-        
-        doc = """The list of :class:`~stlalker.core.models.Project`\ s those the current user assigned to.
+    @property
+    def projects(self):
+        """The list of :class:`~stlalker.core.models.Project`\ s those the current user assigned to.
         
         returns a list of :class:`~stalker.core.models.Project` objects.
         It is a read-only attribute. To assign a
@@ -5527,65 +5355,65 @@ class User(Entity):
         :class:`~stalker.core.models.Project`.
         """
         
-        return locals()
-    
-    projects = property(**projects())
+        #return self._projects
+        projects = []
+        for task in self.tasks:
+            projects.append(task.task_of.project)
+        
+        return list(set(projects))
     
     
     
     #----------------------------------------------------------------------
-    def projects_lead():
+    @property
+    def projects_lead(self):
+        """projects lead by this current user.
         
-        def fget(self):
-            return self._projects_lead
+        Accepts :class:`~stalker.core.models.Project` object
+        """
         
-        def fset(self, projects_lead_in):
-            self._projects_lead = \
-                self._validate_projects_lead(projects_lead_in)
-        
-        doc = """projects lead by this current user, accepts
-        :class:`~stalker.core.models.Project` object"""
-        
-        return locals()
+        return self._projects_lead
     
-    projects_lead = property(**projects_lead())
+    #----------------------------------------------------------------------
+    @projects_lead.setter # pylint: disable=E1101
+    def projects_lead(self, projects_lead_in):
+        # pylint: disable=E0102, C0111
+        self._projects_lead = \
+            self._validate_projects_lead(projects_lead_in)
     
     
     
     #----------------------------------------------------------------------
-    def sequences_lead():
+    @property
+    def sequences_lead(self):
+        """Sequences lead by this user.
         
-        def fget(self):
-            return self._sequences_lead
+        Accpets :class:`~stalker.core.models.Sequence` objects
+        """
         
-        def fset(self, sequences_lead_in):
-            self._sequences_lead = \
-                self._validate_sequences_lead(sequences_lead_in)
-        
-        doc = """sequences lead by this user, accpets
-        :class:`~stalker.core.models.Sequence` objects"""
-        
-        return locals()
+        return self._sequences_lead
     
-    sequences_lead = property(**sequences_lead())
+    #----------------------------------------------------------------------
+    @sequences_lead.setter # pylint: disable=E1101
+    def sequences_lead(self, sequences_lead_in):
+        # pylint: disable=E0102, C0111
+        self._sequences_lead = \
+            self._validate_sequences_lead(sequences_lead_in)
     
     
     
     #----------------------------------------------------------------------
-    def tasks():
+    @property
+    def tasks(self):
+        """Tasks assigned to the current user.
         
-        def fget(self):
-            return self._tasks
+        Accepts :class:`~stalker.core.models.Task` objects"""
         
-        def fset(self, tasks_in):
-            self._tasks = self._validate_tasks(tasks_in)
-        
-        doc = """tasks assigned to the current user, accepts
-        :class:`~stalker.core.models.Task` objects"""
-        
-        return locals()
+        return self._tasks
     
-    tasks = property(**tasks())
-
-
+    #----------------------------------------------------------------------
+    @tasks.setter # pylint: disable=E1101
+    def tasks(self, tasks_in):
+        # pylint: disable=E0102, C0111
+        self._tasks = self._validate_tasks(tasks_in)
 

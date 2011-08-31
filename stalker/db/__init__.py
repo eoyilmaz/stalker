@@ -31,7 +31,7 @@ __mappers__ = []
 
 
 #----------------------------------------------------------------------
-def setup(database=None, mappers=[]):
+def setup(database=None, mappers=None):
     """Utillty function that helps to connect the system to the given database.
     
     if the database is None then the it setups using the default database in
@@ -52,6 +52,9 @@ def setup(database=None, mappers=[]):
     
     :param engine_settings: the settings for the SQLAlchemy engine
     """
+    
+    if mappers is None:
+        mappers = []
     
     from stalker import db
     
@@ -112,8 +115,8 @@ def __create_admin__():
         return
     
     # create the admin department
-    adminDep = Department(name=defaults.ADMIN_DEPARTMENT_NAME)
-    db.session.add(adminDep)
+    admin_department = Department(name=defaults.ADMIN_DEPARTMENT_NAME)
+    db.session.add(admin_department)
     
     # create the admin user
     admin = User(
@@ -122,14 +125,14 @@ def __create_admin__():
         login_name=defaults.ADMIN_NAME,
         password=defaults.ADMIN_PASSWORD,
         email=defaults.ADMIN_EMAIL,
-        department=adminDep,
+        department=admin_department,
     )
     
     admin.created_by = admin
     admin.updated_by = admin
     
-    adminDep.created_by = admin
-    adminDep.updated_by = admin
+    admin_department.created_by = admin
+    admin_department.updated_by = admin
     
     db.session.add(admin)
     db.session.commit()
@@ -176,12 +179,12 @@ def __fill_entity_types_table__():
     
     # get the current values in the table
     conn = db.engine.connect()
-    s = sqlalchemy.sql.select([tables.EntityTypes.c.entity_type])
-    result = conn.execute(s)
+    select = sqlalchemy.sql.select([tables.EntityTypes.c.entity_type])
+    result = conn.execute(select)
     
-    entity_types_DB = []
+    entity_types_db = []
     for row in result:
-        entity_types_DB.append(row[0])
+        entity_types_db.append(row[0])
     
     result.close()
     
@@ -204,7 +207,7 @@ def __fill_entity_types_table__():
     
     # now for all the values not in the table insert them
     for entity_type in default_entity_types:
-        if entity_type not in entity_types_DB:
+        if entity_type not in entity_types_db:
             db.engine.execute(
                 tables.EntityTypes.insert(),
                 entity_type=entity_type

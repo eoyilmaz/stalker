@@ -18,6 +18,7 @@ class LoginError(Exception):
     
     #----------------------------------------------------------------------
     def __init__(self, value=""):
+        super(LoginError, self).__init__(value)
         self.value = value
     
     
@@ -40,6 +41,7 @@ class DBError(Exception):
     
     #----------------------------------------------------------------------
     def __init__(self, value=""):
+        super(DBError, self).__init__(value)
         self.value = value
     
     
@@ -62,6 +64,7 @@ class CircularDependencyError(Exception):
     
     #----------------------------------------------------------------------
     def __init__(self, value=""):
+        super(CircularDependencyError, self).__init__(value)
         self.value = value
     
     

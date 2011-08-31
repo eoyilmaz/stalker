@@ -98,7 +98,7 @@ def setup():
     mapper(
         Tag,
         tables.Tags,
-        inherits=Tag.__base__,
+        inherits=Tag.__base__, # pylint: disable=E1101
         polymorphic_identity="Tag"
     )
     
@@ -108,7 +108,7 @@ def setup():
     mapper(
         PermissionGroup,
         tables.PermissionGroups,
-        inherits=PermissionGroup.__base__,
+        inherits=PermissionGroup.__base__, # pylint: disable=E1101
         polymorphic_identity="PermissionGrou"
     )
     
@@ -117,7 +117,7 @@ def setup():
     mapper(
         Entity,
         tables.Entities,
-        inherits=Entity.__base__,
+        inherits=Entity.__base__, # pylint: disable=E1101
         inherit_condition=tables.Entities.c.id==tables.SimpleEntities.c.id,
         polymorphic_identity="Entity",
         properties={
@@ -143,7 +143,7 @@ def setup():
     mapper(
         User,
         tables.Users,
-        inherits=User.__base__,
+        inherits=User.__base__, # pylint: disable=E1101
         inherit_condition=tables.Users.c.id==tables.Entities.c.id,
         polymorphic_identity="User",
         properties={
@@ -194,7 +194,7 @@ def setup():
     mapper(
         Department,
         tables.Departments,
-        inherits=Department.__base__,
+        inherits=Department.__base__, # pylint: disable=E1101
         inherit_condition=tables.Departments.c.id==tables.Entities.c.id,
         polymorphic_identity="Department",
         properties={
@@ -222,7 +222,7 @@ def setup():
     mapper(
         Status,
         tables.Statuses,
-        inherits=Status.__base__,
+        inherits=Status.__base__, # pylint: disable=E1101
         inherit_condition=tables.Statuses.c.id==tables.Entities.c.id,
         polymorphic_identity="Status",
     )
@@ -234,7 +234,7 @@ def setup():
     mapper(
         StatusList,
         tables.StatusLists,
-        inherits=StatusList.__base__,
+        inherits=StatusList.__base__, # pylint: disable=E1101
         inherit_condition=tables.StatusLists.c.id==tables.Entities.c.id,
         polymorphic_identity="StatusList",
         properties={
@@ -255,7 +255,7 @@ def setup():
     mapper(
         Repository,
         tables.Repositories,
-        inherits=Repository.__base__,
+        inherits=Repository.__base__, # pylint: disable=E1101
         inherit_condition=tables.Repositories.c.id==tables.Entities.c.id,
         polymorphic_identity="Repository",
         properties={
@@ -276,7 +276,7 @@ def setup():
     mapper(
         ImageFormat,
         tables.ImageFormats,
-        inherits=ImageFormat.__base__,
+        inherits=ImageFormat.__base__, # pylint: disable=E1101
         inherit_condition=tables.ImageFormats.c.id==tables.Entities.c.id,
         polymorphic_identity="ImageFormat",
         properties={
@@ -300,7 +300,7 @@ def setup():
     mapper(
         Type,
         tables.Types,
-        inherits=Type.__base__,
+        inherits=Type.__base__, # pylint: disable=E1101
         inherit_condition=tables.Types.c.id==tables.Entities.c.id,
         polymorphic_identity="Type",
     )
@@ -312,7 +312,7 @@ def setup():
     mapper(
         FilenameTemplate,
         tables.FilenameTemplates,
-        inherits=FilenameTemplate.__base__,
+        inherits=FilenameTemplate.__base__, # pylint: disable=E1101
         inherit_condition=tables.FilenameTemplates.c.id==tables.Entities.c.id,
         polymorphic_identity="FilenameTemplate",
         properties={
@@ -340,7 +340,7 @@ def setup():
     mapper(
         Structure,
         tables.Structures,
-        inherits=Structure.__base__,
+        inherits=Structure.__base__, # pylint: disable=E1101
         inherit_condition=tables.Structures.c.id==tables.Entities.c.id,
         polymorphic_identity="Structure",
         properties={
@@ -361,7 +361,7 @@ def setup():
     mapper(
         Link,
         tables.Links,
-        inherits=Link.__base__,
+        inherits=Link.__base__, # pylint: disable=E1101
         inherit_condition=tables.Links.c.id==tables.Entities.c.id,
         polymorphic_identity="Link",
         properties={
@@ -378,7 +378,7 @@ def setup():
     mapper(
         Note,
         tables.Notes,
-        inherits=Note.__base__,
+        inherits=Note.__base__, # pylint: disable=E1101
         inherit_condition=tables.Notes.c.id==tables.SimpleEntities.c.id,
         polymorphic_identity="Note",
         properties={
@@ -392,7 +392,7 @@ def setup():
     # *******************************************************************
     # Project
     project_mapper_arguments = dict(
-        inherits=Project.__base__,
+        inherits=Project.__base__, # pylint: disable=E1101
         polymorphic_identity="Project",
         inherit_condition=tables.Projects.c.id==tables.Entities.c.id,
         properties={
@@ -478,7 +478,7 @@ def setup():
     # *******************************************************************
     # Task
     task_mapper_arguments = dict(
-        inherits=Task.__base__,
+        inherits=Task.__base__, # pylint: disable=E1101
         polymorphic_identity="Task",
         inherit_condition=tables.Tasks.c.id==tables.Entities.c.id,
         properties={
@@ -504,7 +504,7 @@ def setup():
     # *******************************************************************
     # Asset
     asset_mapper_arguments = dict(
-        inherits=Asset.__base__,
+        inherits=Asset.__base__, # pylint: disable=E1101
         polymorphic_identity="Asset",
         inherit_condition=tables.Assets.c.id==tables.Entities.c.id,
         properties={
@@ -529,7 +529,7 @@ def setup():
     # *******************************************************************
     # Shot
     shot_mapper_arguments = dict(
-        inherits=Shot.__base__,
+        inherits=Shot.__base__, # pylint: disable=E1101
         inherit_condition=tables.Shots.c.id==tables.Entities.c.id,
         polymorphic_identity="Shot",
         properties={
@@ -581,7 +581,7 @@ def setup():
     # *******************************************************************
     # Sequence
     sequence_mapper_arguments = dict(
-        inherits=Sequence.__base__,
+        inherits=Sequence.__base__, # pylint: disable=E1101
         polymorphic_identity="Sequence",
         inherit_condition=tables.Sequences.c.id==tables.Entities.c.id,
         properties={
