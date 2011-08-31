@@ -60,7 +60,8 @@ SimpleEntities = Table(
         Integer,
         ForeignKey("Types.id", use_alter=True, name="y")
     ),
-    UniqueConstraint("name", "db_entity_type")
+    UniqueConstraint("name", "db_entity_type"),
+    Column("stalker_version", String(256)),
 )
 
 

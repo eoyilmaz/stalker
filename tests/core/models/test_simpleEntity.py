@@ -4,6 +4,7 @@
 
 import unittest
 import datetime
+import stalker
 from stalker.core.models import (SimpleEntity, Type, User)
 
 
@@ -920,6 +921,38 @@ class SimpleEntityTester(unittest.TestCase):
             # set it and expect a TypeError
             self.kwargs["type"] = test_value
             self.assertRaises(TypeError, newClass, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___stalker_version__attribute_is_automatically_set_to_the_current_version_of_Stalker(self):
+        """testing if the __stalker_version__ is automatically set to the
+        current version for the newly created SimpleEntities
+        """
+        
+        new_simpleEntity = SimpleEntity(**self.kwargs)
+        
+        self.assertEqual(new_simpleEntity.__stalker_version__,
+                         stalker.__version__)
+        
+        # update stalker.__version__ to a test value
+        current_version = stalker.__version__
+        
+        test_version = "test_version"
+        stalker.__version__ = test_version
+        
+        # test if it is updated
+        self.assertEqual(stalker.__version__, test_version)
+        
+        # create a new SimpleEntity and check if it is following the version
+        new_simpleEntity2 = SimpleEntity(**self.kwargs)
+        self.assertEqual(new_simpleEntity2.__stalker_version__, test_version)
+        
+        # restore the stalker.__version__
+        stalker.__version__ = current_version
+        
+        
+    
     
     
     

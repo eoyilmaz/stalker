@@ -89,6 +89,7 @@ def setup():
                 primaryjoin=tables.SimpleEntities.c.type_id==tables.Types.c.id
             ),
             "type": synonym("_type"),
+            "__stalker_version__": tables.SimpleEntities.c.stalker_version,
         },
     )
     

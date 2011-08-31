@@ -1736,6 +1736,7 @@ class DatabaseModelsTester(unittest.TestCase):
         name = test_simple_entity.name
         nice_name = test_simple_entity.nice_name
         updated_by = test_simple_entity.updated_by
+        __stalker_version__ = test_simple_entity.__stalker_version__
         
         del(test_simple_entity)
         
@@ -1754,6 +1755,8 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(name, test_simple_entity_DB.name)
         self.assertEqual(nice_name, test_simple_entity_DB.nice_name)
         self.assertEqual(updated_by, test_simple_entity_DB.updated_by)
+        self.assertEqual(__stalker_version__,
+                         test_simple_entity_DB.__stalker_version__)
     
     
     

@@ -463,20 +463,9 @@ class ScheduleMixin(object):
 
 
 
-
 ########################################################################
-class TaskMixin(object):
-    """Gives the abilitiy to connect to a list of :class:`~stalker.core.models.Task`\ s to the mixed in object.
-    
-    TaskMixin lets the mixed object to have :class:`~stalker.core.model.Task`
-    instances to be attached it self. And because
-    :class:`~stalker.core.models.Task`\ s are related to
-    :class:`~stalker.core.models.Project`\ s, it also adds ability to relate
-    the object to a :class:`~stalker.core.models.Project` instance. So every
-    object which is mixed with TaskMixin will have a
-    :attr:`~stalker.core.mixins.TaskMixin.tasks` and a
-    :attr:`~stalker.core.mixins.TaskMixin.project` attribute. Only the
-    ``project`` argument needs to be initialized.
+class ProjectMixin(object):
+    """Gives the ability to connect to a :class:`~stalker.core.models.Project` to the mixed in object.
     
     :param project: A :class:`~stalker.core.models.Project` instance holding
       the project which this object is related to. It can not be None, or
@@ -490,6 +479,69 @@ class TaskMixin(object):
     #----------------------------------------------------------------------
     def __init__(self, project=None, **kwargs): # pylint: disable=W0613
         self._project = self._validate_project(project)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_project(self, project_in):
+        """validates the given project value
+        """
+        
+        if project_in is None:
+            raise TypeError("project can not be None it must be an instance "
+                            "of stalker.core.models.Project instance")
+        
+        from stalker.core.models import Project # pylint: disable=W0404
+        
+        if not isinstance(project_in, Project):
+            raise TypeError("project must be an instance of "
+                            "stalker.core.models.Project instance")
+        
+        return project_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    @property
+    def project(self):
+        """A :class:`~stalker.core.models.Project` instance showing the
+        relation of this object to a Stalker
+        :class:`~stalker.core.models.Project`. It is a read only attribute, so
+        you can not change the Project of an already created object.
+        """
+        
+        return self._project
+    
+    
+    
+
+
+
+
+
+########################################################################
+class TaskMixin(ProjectMixin):
+    """Gives the abilitiy to connect to a list of :class:`~stalker.core.models.Task`\ s to the mixed in object.
+    
+    TaskMixin is a variant of :class:`~stalker.core.mixins.ProjectMixin` and
+    lets the mixed object to have :class:`~stalker.core.model.Task` instances
+    to be attached it self. And because :class:`~stalker.core.models.Task`\ s
+    are related to :class:`~stalker.core.models.Project`\ s, it also adds
+    ability to relate the object to a :class:`~stalker.core.models.Project`
+    instance. So every object which is mixed with TaskMixin will have a
+    :attr:`~stalker.core.mixins.TaskMixin.tasks` and a
+    :attr:`~stalker.core.mixins.TaskMixin.project` attribute. Only the
+    ``project`` argument needs to be initialized. See the
+    :class:`~stalker.core.mixins.ProjectMixin` for more detail.
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs): # pylint: disable=W0613
+        # call ProjectMixin.__init__
+        super(TaskMixin, self).__init__(**kwargs)
+        
         self._tasks = ValidatedList(
             [],
             "stalker.core.models.Task",
@@ -547,38 +599,6 @@ class TaskMixin(object):
     
     
     #----------------------------------------------------------------------
-    def _validate_project(self, project_in):
-        """validates the given project value
-        """
-        
-        if project_in is None:
-            raise TypeError("project can not be None it must be an instance "
-                            "of stalker.core.models.Project instance")
-        
-        from stalker.core.models import Project # pylint: disable=W0404
-        
-        if not isinstance(project_in, Project):
-            raise TypeError("project must be an instance of "
-                            "stalker.core.models.Project instance")
-        
-        return project_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    @property
-    def project(self):
-        """A :class:`~stalker.core.models.Project` instance showing the
-        relation of this object to a Stalker
-        :class:`~stalker.core.models.Project`. It is a read only attribute, so
-        you can not change the Project of an already created object.
-        """
-        
-        return self._project
-    
-    
-    
-    #----------------------------------------------------------------------
     @property
     def tasks(self):
         """The list of :class:`~stalker.core.models.Task` instances.
@@ -587,12 +607,12 @@ class TaskMixin(object):
         list. Trying to remove a :class:`~stalker.core.models.Task` by removing
         it from the list will raise a RunTimeError. This is because the
         :class:`~stalker.core.models.Task` will become an orphan task if it is
-        removed by this way. To remove the
-        :class:`~stalker.core.models.Task` from the list you should delete it
-        or append it to another objects ``tasks`` attribute. This attribute is
-        read-only so you can not set it to another list than it has, but you
-        can change the elements inside, but again be careful about orphan
-        tasks (though you will be warned by a RuntimeError).
+        removed by this way. To remove the :class:`~stalker.core.models.Task`
+        from the list you should delete it or append it to another objects
+        ``tasks`` attribute. This attribute is read-only so you can not set it
+        to another list than it has, but you can change the elements inside,
+        but again be careful about orphan tasks (though you will be warned by a
+        RuntimeError).
         """
         
         return self._tasks

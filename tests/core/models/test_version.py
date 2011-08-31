@@ -304,7 +304,8 @@ class VersionTester(unittest.TestCase):
         attribute is set to something
         """
         
-        self.assertRaises(AttributeError, self.test_version, "version", 123)
+        self.assertRaises(AttributeError, setattr, self.test_version,
+                          "version", 123)
     
     
     
@@ -414,42 +415,42 @@ class VersionTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_published_attribute_is_set_to_non_bool_value(self):
-        """testing if the published attribute is set to a non bool value will
-        be converted to a bool value
-        """
+    ##----------------------------------------------------------------------
+    #def test_published_attribute_is_set_to_non_bool_value(self):
+        #"""testing if the published attribute is set to a non bool value will
+        #be converted to a bool value
+        #"""
         
-        test_value = "no bool value"
-        self.test_version.published = test_value
-        self.assertEqual(self.test_version.published, bool(test_value))
+        #test_value = "no bool value"
+        #self.test_version.published = test_value
+        #self.assertEqual(self.test_version.published, bool(test_value))
     
     
     
-    #----------------------------------------------------------------------
-    def test_published_attribute_defaults_to_false(self):
-        """testing if the default value of published for newly created Versions
-        is False
-        """
+    ##----------------------------------------------------------------------
+    #def test_published_attribute_defaults_to_false(self):
+        #"""testing if the default value of published for newly created Versions
+        #is False
+        #"""
         
-        new_version = Version(**self.kwargs)
-        self.assertEqual(new_version.published, False)
+        #new_version = Version(**self.kwargs)
+        #self.assertEqual(new_version.published, False)
     
     
     
-    #----------------------------------------------------------------------
-    def test_published_attribute_is_working_properly(self):
-        """testing if the published attribute is working properly
-        """
+    ##----------------------------------------------------------------------
+    #def test_published_attribute_is_working_properly(self):
+        #"""testing if the published attribute is working properly
+        #"""
         
-        test_value = True
-        new_version = Version(**self.kwargs)
-        new_version.published = test_value
-        self.assertEqual(new_version.published, test_value)
+        #test_value = True
+        #new_version = Version(**self.kwargs)
+        #new_version.published = test_value
+        #self.assertEqual(new_version.published, test_value)
         
-        test_value = False
-        new_version.published = test_value
-        self.assertEqual(new_version.published, test_value)
+        #test_value = False
+        #new_version.published = test_value
+        #self.assertEqual(new_version.published, test_value)
     
     
     

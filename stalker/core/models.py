@@ -14,6 +14,7 @@ except ImportError:
         def reconstructor(cls, function): # pylint: disable=C0111
             return function
 
+import stalker
 from stalker.ext.validatedList import ValidatedList
 from stalker.core.errors import CircularDependencyError
 from stalker.conf import defaults
@@ -225,6 +226,8 @@ class SimpleEntity(object):
         self._date_updated = self._validate_date_updated(date_updated)
         
         self._type = self._validate_type(type)
+        
+        self.__stalker_version__ = stalker.__version__
     
     
     
@@ -1540,7 +1543,7 @@ class Comment(Entity):
     """User reviews and comments about other entities.
     
     :param body: the body of the comment, it is a string or unicode variable,
-      it can be empty but it is then meaningles to have an empty comment.
+      it can be empty but it is then meaningless to have an empty comment.
       Anything other than a string or unicode will raise a TypeError.
     
     :param to: the relation variable, that holds the connection that this
@@ -3505,7 +3508,44 @@ class Version(Entity, StatusMixin):
     #:param bool published: A bool value shows if this version is published or
       #not.
     
-    pass
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 take="MAIN",
+                 version=1,
+                 source_file=None,
+                 outputs=None,
+                 **kwargs):
+        
+        # call supers __init__
+        super(Version, self).__init__(**kwargs)
+        
+        #self._published = False
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@property
+    #def published(self):
+        #"""The published state of this Version.
+        
+        #It is a bool value showing if this version is a published version or
+        #not.
+        #"""
+        #return self._published
+    
+    ##----------------------------------------------------------------------
+    #@published.setter # pylint: disable=E1101
+    #def published(self, published_in):
+        ## pylint: disable=E0102, C0111
+        #self._published = bool(published_in)
+    
+    
+    
+    
+    
+    
 
 
 

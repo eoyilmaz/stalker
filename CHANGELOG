@@ -112,6 +112,18 @@ v0.1.1.a10
    PyLint rate. And with its final state, the PyLint rate of Stalker increased
    from around 1 to around 9.
 
+ * Reintroduced the :class:`~stalker.core.mixins.ProjectMixin` and the
+   :class:`~stalker.core.mixins.TaskMixin` is now inherited from
+   :class:`~stalker.core.mixins.ProjectMixin`. It is done in that way to allow
+   other types to have relation with a :class:`~stalker.core.models.Project`
+   instance. Without the :class:`~stalker.core.mixins.ProjectMixin` it was
+   going to introduce some code repetition. Also updated the database part of
+   the TaskMixin and created a helper class for the ProjectMixin.
+
+ * Added an attribute called "__stalker_version__" to the
+   :class:`~stalker.core.models.SimpleEntity` to track down in which version of
+   Stalker that data is created. This is mostly related with the database part.
+
 v0.1.1.a9
 ---------
 

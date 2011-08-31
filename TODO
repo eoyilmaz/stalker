@@ -49,6 +49,13 @@ TODO:
 DONE:
 =====
 
+ * "__stalker_version__" in SimpleEntity:
+   
+   Create an attribute called __stalker_version__ in the SimpleEntity, and
+   automatically update it to the current version string of Stalker to be able
+   to see with which version of Stalker this data is created, mainly important
+   for the database part.
+
  * Replace all the Mocker based tests with Unittest's which are using real
    objects. It was necessary to use the Mocker library while designing the rest
    of the system, but it is now making things complex and started to hide the
