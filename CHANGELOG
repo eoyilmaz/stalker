@@ -129,6 +129,10 @@ v0.1.1.a10
  * Renamed ``stalker.core.models.Comment`` class to
    :class:`~stalker.core.models.Review`.
 
+ * The :attr:`~stalker.core.models.Review.to` attribute in
+   :class:`~stalker.core.models.Review` class now accepts anything which has a
+   list-like attribute called "reviews".
+
 v0.1.1.a9
 ---------
 

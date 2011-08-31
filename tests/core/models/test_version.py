@@ -351,67 +351,67 @@ class VersionTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_reviews_attribute_is_set_to_None(self):
-        """testing if nothing happens when the reviews attribute is set to None
-        """
+    ##----------------------------------------------------------------------
+    #def test_reviews_attribute_is_set_to_None(self):
+        #"""testing if nothing happens when the reviews attribute is set to None
+        #"""
         
-        # should work without giving any errors
-        self.test_version.reviews = None
+        ## should work without giving any errors
+        #self.test_version.reviews = None
         
-        # and it should set it to an empty list (or something like a list)
-        self.assertIsInstance(self.test_version.reviews, list)
-        self.assertEqual(len(self.test_version), 0)
+        ## and it should set it to an empty list (or something like a list)
+        #self.assertIsInstance(self.test_version.reviews, list)
+        #self.assertEqual(len(self.test_version), 0)
     
     
     
-    #----------------------------------------------------------------------
-    def test_reviews_attribute_is_not_a_list(self):
-        """testing if a TypeError will be raised when the reviews attribute is
-        not a list instance
-        """
+    ##----------------------------------------------------------------------
+    #def test_reviews_attribute_is_not_a_list(self):
+        #"""testing if a TypeError will be raised when the reviews attribute is
+        #not a list instance
+        #"""
         
-        self.assertRaises(TypeError, setattr, self.test_version, "reviews", 1)
+        #self.assertRaises(TypeError, setattr, self.test_version, "reviews", 1)
     
     
     
-    #----------------------------------------------------------------------
-    def test_reviews_attribute_is_not_a_list_of_Review_instances(self):
-        """testing if a TypeError will be raised when the reviews attribute is
-        set to a list of other objects
-        """
+    ##----------------------------------------------------------------------
+    #def test_reviews_attribute_is_not_a_list_of_Review_instances(self):
+        #"""testing if a TypeError will be raised when the reviews attribute is
+        #set to a list of other objects
+        #"""
         
-        self.assertRaises(TypeError, setattr, self.test_version, "reviews",
-                          ["test", "reviews"])
+        #self.assertRaises(TypeError, setattr, self.test_version, "reviews",
+                          #["test", "reviews"])
     
     
     
-    #----------------------------------------------------------------------
-    def test_reviews_attribute_is_working_properly(self):
-        """testing if the reviews attribute is working properly
-        """
+    ##----------------------------------------------------------------------
+    #def test_reviews_attribute_is_working_properly(self):
+        #"""testing if the reviews attribute is working properly
+        #"""
         
-        # create a review
-        new_review = Review(
-            name="Test Review",
+        ## create a review
+        #new_review = Review(
+            #name="Test Review",
             
-        )
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_reviews_attribute_is_a_ValidatedList(self):
-        """testinf if the reviews attribute is a ValidatedList instance
-        """
+    ##----------------------------------------------------------------------
+    #def test_reviews_attribute_is_a_ValidatedList(self):
+        #"""testinf if the reviews attribute is a ValidatedList instance
+        #"""
         
-        self.assertIsInstance(self.test_version.reviews, ValidatedList)
+        #self.assertIsInstance(self.test_version.reviews, ValidatedList)
     
     
     
-    #----------------------------------------------------------------------
-    def test_review_attribute_updating_backref_attribute(self):
+    ##----------------------------------------------------------------------
+    #def test_review_attribute_updating_backref_attribute(self):
         
-        self.fail("test is not implemented yet")
+        #self.fail("test is not implemented yet")
     
     
     
@@ -451,6 +451,15 @@ class VersionTester(unittest.TestCase):
         #test_value = False
         #new_version.published = test_value
         #self.assertEqual(new_version.published, test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_ReviewMixin_initialization(self):
+        """testing the ReviewMixin initialization
+        """
+        
+        self.fail("test is not implemented yet")
     
     
     

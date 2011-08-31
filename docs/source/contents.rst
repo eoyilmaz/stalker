@@ -13,3 +13,4 @@ Table of Contents
     contribute.rst
     roadmap.rst
     changelog.rst
+    todo.rst

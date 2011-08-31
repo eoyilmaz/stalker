@@ -12,9 +12,11 @@ Summary
    stalker.db.mapper
    stalker.db.metadata
    stalker.db.mixins
+   stalker.db.mixins.ProjectMixinDB
    stalker.db.mixins.ReferenceMixinDB
    stalker.db.mixins.StatusMixinDB
    stalker.db.mixins.ScheduleMixinDB
+   stalker.db.mixins.TaskMixinDB
    stalker.db.tables
    stalker.db.query
    stalker.db.session
@@ -24,14 +26,15 @@ Summary
    stalker.core.errors.LoginError
    stalker.core.errors.DBError
    stalker.core.mixins
+   stalker.core.mixins.ProjectMixin
    stalker.core.mixins.ReferenceMixin
+   stalker.core.mixins.ReviewMixin
    stalker.core.mixins.ScheduleMixin
    stalker.core.mixins.StatusMixin
    stalker.core.mixins.TaskMixin
    stalker.core.models
    stalker.core.models.Asset
    stalker.core.models.Booking
-   stalker.core.models.Comment
    stalker.core.models.Department
    stalker.core.models.FilenameTemplate
    stalker.core.models.Entity
@@ -42,6 +45,7 @@ Summary
    stalker.core.models.PermissionGroup
    stalker.core.models.Project
    stalker.core.models.Repository
+   stalker.core.models.Review
    stalker.core.models.Sequence
    stalker.core.models.Shot
    stalker.core.models.SimpleEntity

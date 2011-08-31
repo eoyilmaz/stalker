@@ -635,7 +635,49 @@ class ReviewMixin(object):
     
     #----------------------------------------------------------------------
     def __init__(self):
-        pass
+        
+        from stalker.core.models import Review
+        self._reviews = ValidatedList([], Review)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_reviews(self, reviews_in):
+        """validates the given reviews value
+        """
+        
+        # check the reviews_in it self
+        if not isinstance(reviews_in, list):
+            raise TypeError("The reviews should be a list of "
+                            "stalker.core.models.Review instances")
+        
+        from stalker.core.models import Review
+        
+        # check the elements
+        for element in reviews_in:
+            if not isinstance(element, Review):
+                raise TypeError("The reviews should be a list of "
+                                "stalker.core.models.Review instances")
+        
+        return reviews_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    @property
+    def reviews(self):
+        """The list of :class:`~stalker.core.models.Review`\ s attached to this object.
+        """
+        return self._reviews
+    
+    #----------------------------------------------------------------------
+    @reviews.setter # pylint: disable=E1101
+    def reviews(self, reviews_in):
+        # pylint: disable=E0102, C0111
+        self._reviews = self._validate_reviews(reviews_in)
+    
+    
+    
     
     
     

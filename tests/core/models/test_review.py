@@ -23,16 +23,22 @@ class ReviewTest(unittest.TestCase):
         """
         
         # will need:
-        # a test entity object
         # a couple of test tag objects
         
         # a couple of test tags
         self.test_tag1 = Tag(name="Test Tag 1")
         self.test_tag2 = Tag(name="Test Tag 2")
         
-        # a test entity object
-        self.test_entity = Entity(name="Test Entity 1")
-        self.test_entity2 = Entity(name="Test Entity 2")
+        ## a test entity object
+        #self.test_entity = Entity(name="Test Entity 1")
+        #self.test_entity2 = Entity(name="Test Entity 2")
+        
+        class AnObjectWithReviews(object):
+            def __init__(self):
+                self.reviews = []
+        
+        self.test_to_object = AnObjectWithReviews()
+        self.test_to_object2 = AnObjectWithReviews()
         
         # creation and update dates
         self.date_created = datetime.datetime.now()
@@ -50,13 +56,8 @@ class ReviewTest(unittest.TestCase):
         self.kwargs = {
             "name": "Test Review",
             "description": "this is a test object",
-            "tags": [self.test_tag1, self.test_tag2],
-            "created_by": self.test_user,
-            "updated_by": self.test_user,
-            "date_created": self.date_created,
-            "date_updated": self.date_updated,
             "body": "This is the content of the review",
-            "to": self.test_entity
+            "to": self.test_to_object
         }
         
         self.test_review = Review(**self.kwargs)
@@ -158,9 +159,9 @@ class ReviewTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_to_argument_accepts_entity_only(self):
-        """testing if a TypeError will be raised if **to** argument tried
-        to be set to something other than an entity object
+    def test_to_argument_accepts_anything_that_has_list_like_reviews_attribute(self):
+        """testing if an AttributeError will be raised if **to** argument tried
+        to be set to something that has no "reviews" attribute
         """
         
         test_values = [1, 1.2, "an Entity"]
@@ -173,13 +174,30 @@ class ReviewTest(unittest.TestCase):
                 Review,
                 **self.kwargs
             )
+        
+        # lets check with something that has `reviews` attribute
+        #class AnObjectWithReviews(object):
+            #def __init__(self):
+                #self.reviews = []
+        
+        #an_object = AnObjectWithReviews()
+        
+        # this should work
+        self.kwargs["to"] = self.test_to_object2
+        new_review = Review(**self.kwargs)
+        
+        # check if it is related to the object
+        self.assertEqual(new_review.to, self.test_to_object2)
+        
+        # check if the back reference is updated
+        self.assertIn(new_review, self.test_to_object2.reviews)
     
     
     
     #----------------------------------------------------------------------
-    def test_to_attribute_being_set_to_other_than_entity(self):
-        """testing if a TypeError will be raised if the to attribute tried to
-        be set to a something other than an entity object
+    def test_to_attribute_accepts_anything_that_has_list_like_reviews_attribute(self):
+        """testing if an AttributeError will be raised if the to attribute
+        tried to be set to something that has no "reveiews" attribute
         """
         
         # try to set the to attribute to something other than an entity object
@@ -190,6 +208,67 @@ class ReviewTest(unittest.TestCase):
             "to",
             "an Entity"
         )
+        
+        
+        # lets check with something that has `reviews` attribute
+        #class AnObjectWithReviews(object):
+            #def __init__(self):
+                #self.reviews = []
+        
+        #an_object = AnObjectWithReviews()
+        
+        prev_owner = self.test_review.to
+        
+        # this should work
+        self.test_review.to = self.test_to_object2
+        
+        # check if it is related to the object
+        self.assertEqual(self.test_review.to, self.test_to_object2)
+        
+        # check if the back reference is updated
+        self.assertIn(self.test_review, self.test_to_object2.reviews)
+        
+        # check if the review is removed from the previous owner
+        self.assertNotIn(self.test_review, prev_owner.reviews)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_to_argument_has_reviews_attribute_but_not_list_like(self):
+        """testing if an AttributeError will be raised when the object given
+        with the `to` argument has an "review" attribute but it is not
+        list-like
+        """
+        
+        # lets check with something that has `reviews` attribute
+        class AnObjectWithReviews(object):
+            def __init__(self):
+                self.reviews = "" # not list
+        
+        an_object = AnObjectWithReviews()
+        
+        self.kwargs["to"] = an_object
+        
+        self.assertRaises(TypeError, Review, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_to_attribute_has_reviews_attribute_but_not_list_like(self):
+        """testing if an AttributeError will be raised when the object given
+        with the `to` attribute has an "review" attribute but it is not
+        list-like
+        """
+        
+        # lets check with something that has `reviews` attribute
+        class AnObjectWithReviews(object):
+            def __init__(self):
+                self.reviews = "" # not list
+        
+        an_object = AnObjectWithReviews()
+        
+        self.assertRaises(TypeError, setattr, self.test_review, "to",
+                          an_object)
     
     
     
@@ -214,7 +293,7 @@ class ReviewTest(unittest.TestCase):
         """testing if to attribute is set properly
         """
         
-        new_to = self.test_entity2
+        new_to = self.test_to_object2
         self.test_review.to = new_to
         self.assertEqual(new_to, self.test_review.to)
     

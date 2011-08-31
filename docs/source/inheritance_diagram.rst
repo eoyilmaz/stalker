@@ -12,7 +12,6 @@ Inheritance Diagram
      stalker.core.mixins.TaskMixin
      stalker.core.models.Asset
      stalker.core.models.Booking
-     stalker.core.models.Comment
      stalker.core.models.Department
      stalker.core.models.FilenameTemplate
      stalker.core.models.Entity
@@ -23,6 +22,7 @@ Inheritance Diagram
      stalker.core.models.PermissionGroup
      stalker.core.models.Project
      stalker.core.models.Repository
+     stalker.core.models.Review
      stalker.core.models.Sequence
      stalker.core.models.Shot
      stalker.core.models.SimpleEntity

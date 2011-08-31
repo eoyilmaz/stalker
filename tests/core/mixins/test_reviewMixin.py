@@ -24,6 +24,8 @@ class ReviewMixinTester(unittest.TestCase):
         """setup the test
         """
         
+        self.kwargs = {}
+        
         class BarClass(object):
             def __init__(self, **kwargs):
                 pass
@@ -66,7 +68,8 @@ class ReviewMixinTester(unittest.TestCase):
         not set to a list instance
         """
         
-        self.assertRaises(TypeError, setattr, self.test_foo_obj, "review", 123)
+        self.assertRaises(TypeError, setattr, self.test_foo_obj, "reviews",
+                          123)
     
     
     
@@ -75,7 +78,7 @@ class ReviewMixinTester(unittest.TestCase):
         reivews attribute is set to something other than a Review
         """
         
-        self.assertRaises(TypeError, setattr, self.test_foo_obj, "review",
+        self.assertRaises(TypeError, setattr, self.test_foo_obj, "reviews",
                           [123])
         
         # create a couple of Reviews
@@ -87,7 +90,11 @@ class ReviewMixinTester(unittest.TestCase):
         """testing if the reviews attribute is working properly
         """
         
-        
+        # create a review
+        new_review = Review(
+            name="Test Review",
+        )
+
     
     
     

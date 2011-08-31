@@ -1546,9 +1546,9 @@ class Review(Entity):
       it can be empty but it is then meaningless to have an empty review.
       Anything other than a string or unicode will raise a TypeError.
     
-    :param to: the relation variable, that holds the connection that this
-      review is related to. it should be an instance of SimpleEntity object,
-      any other will raise a TypeError.
+    :param to: The relation variable, that holds the connection that this
+      review is related to. Any object which has a list-like attribute called
+      "reviews" is accepted. Anything other will raise AttributeError.
     """
     
     
@@ -1558,7 +1558,8 @@ class Review(Entity):
         super(Review, self).__init__(**kwargs)
         
         self._body = self._validate_body(body)
-        self._to = self._validate_to(to)
+        self._to = None
+        self.to = to
     
     
     
@@ -1586,9 +1587,15 @@ class Review(Entity):
         if to_in is None:
             raise TypeError("the to attribute could not be None")
         
-        if not isinstance(to_in, Entity):
-            raise TypeError("the to attibute should be an instance of "
-                             "Entity class")
+        error_msg = "the object which is given with the `to` should have a \
+list-like attribute called `review`"
+        
+        if not hasattr(to_in, "reviews"):
+            raise TypeError(error_msg)
+        
+        if not (hasattr(to_in.reviews, "__setitem__") and
+                hasattr(to_in.reviews, "__getitem__")):
+            raise TypeError(error_msg)
         
         return to_in
     
@@ -1625,7 +1632,20 @@ class Review(Entity):
     @to.setter # pylint: disable=E1101
     def to(self, to_in):
         # pylint: disable=E0102, C0111
-        self._to = self._validate_to(to_in)
+        
+        prev_owner = self._to
+        new_owner = self._validate_to(to_in)
+        
+        # update the previous_owner
+        if not prev_owner is None:
+            prev_owner.reviews.remove(self)
+        
+        # update the new owner
+        if not self in new_owner.reviews:
+            new_owner.reviews.append(self)
+        
+        # update self
+        self._to = new_owner
 
 
 

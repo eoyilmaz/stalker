@@ -1,5 +1,20 @@
-TODO:
-=====
+TODO
+====
+
+ * Implicit instance creation with back references:
+   
+   Instead of::
+   
+     object2 = AClass(name="A Data", related_to=object1)
+   
+   Allow object creation with the following idiom::
+   
+     object1.data_list.append( AClass(name="A Data") )
+   
+   This is much easier to understand, because it both shows where is the new
+   data connected to and the user doesn't need to come up with a name for the
+   new object, but the first usage needs less knowledge about the internals of
+   the system (ex: to know that ``object2`` should go to ``object1.data_list``)
 
  * Scrum:
    
