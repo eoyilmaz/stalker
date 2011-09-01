@@ -270,10 +270,10 @@ class StatusListTest(unittest.TestCase):
         # this shouldn't raise a TypeError
         status1 = self.test_status_list[0]
         
-        self.test_status_list[-1] = status1
+        #self.test_status_list[-1] = status1
         
         # check the equality
-        self.assertEqual(self.test_status_list.statuses[-1], status1)
+        self.assertEqual(self.test_status_list.statuses[0], status1)
     
     
     

@@ -1619,7 +1619,7 @@ class Review(Entity):
     
     #----------------------------------------------------------------------
     @property
-    def to(self):
+    def to(self): # pylint: disable=E0202
         """The object that this Review is created about.
         
         It can be anything that is mixed with the
@@ -1629,12 +1629,13 @@ class Review(Entity):
         return self._to
     
     #----------------------------------------------------------------------
-    @to.setter
+    @to.setter # pylint: disable=E1101
     def to(self, to_in):
+        # pylint: disable=E0102, E0202
         
         # update the back reference attribute "reviews"
         new_owner = self._validate_to(to_in)
-        prev_owner = self._to
+        prev_owner = self.to
         
         # check if the owners are the same with previous
         if new_owner is prev_owner:
@@ -4104,7 +4105,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def __resource_item_validator__(self, resources_added, resources_removed):
         """a callable for more granular control over resources list
         """
-        # pylint: disable=E1003
          
         # add the task to the resources
         for resource in resources_added:
@@ -4157,18 +4157,25 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #----------------------------------------------------------------------
     @task_of.setter # pylint: disable=E1101
     def task_of(self, task_of_in):
-        # pylint: disable=E0102, E0202, C0111, E1003
+        ## pylint: disable=E0102, E0202, C0111, E1003
         
-        # remove it from the current task_of attribute
-        if not self._task_of is None:
-            # to avoid any errors raised when the tasks has been set to
-            # None, use "no update remove" by skipping ValidatedList and
-            # using the list.remove directly
-            super(ValidatedList, self._task_of.tasks).remove(self)
+        # update the back reference attribute "tasks"
+        new_owner = self._validate_task_of(task_of_in)
+        prev_owner = self.task_of
         
-        # update the back reference attribute tasks
-        self._task_of = self._validate_task_of(task_of_in)
-        self._task_of._tasks.append(self)
+        # check if the owners are the same with previous
+        if new_owner is prev_owner:
+            # do nothing
+            print "new and prev owners are same"
+            return
+        
+        self._task_of = new_owner
+        if self not in new_owner.tasks:
+            print "self is not in new_owner.tasks"
+            new_owner.tasks.append(self)
+        
+        if not prev_owner is None:
+            prev_owner.tasks.remove(self)
     
     
     

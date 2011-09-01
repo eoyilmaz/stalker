@@ -577,26 +577,25 @@ class TaskMixin(ProjectMixin):
         """a callable for more granular control over tasks list
         """
         # pylint: disable=E1003
-        
         # add the current instance to tasks._task_of attribute
         for task in tasks_added:
-            # remove it from the current owner
-            try:
-                # invoke no remove update by calling the supers (list) remove
-                super(ValidatedList, task._task_of.tasks).remove(task)
-            except ValueError: # there is no owner, probably it was
-                pass           # initializing for the first time
-            
-            # set self to task_of of the Task
-            task._task_of = self
+            if task.task_of != self:
+                task.task_of = self
         
-        # removing tasks by removing it from the tasks list of a taskable
-        # object is not allowed
-        if len(tasks_removed) > 0:
-            raise RuntimeError("tasks can not be removed in this way, please "
-                               "assign the task to a new taskable object or "
-                               "delete this review")
-    
+        # do not deal with removing, it is done in the super already, just
+        # update correct things like the backrefence attribute "task_of" and
+        # prevent Orphan Tasks
+        for task in tasks_removed:
+            # check if the task has a new owner
+            if task in self.tasks:
+                if task.task_of == self:
+                    # if not it will produce an Orphan Task
+                    # raise a RuntimeError
+                    raise RuntimeError(
+                        "To prevent orphan tasks, please do not remove any "
+                        "tasks in this way but rather assign them to a new "
+                        "taskable object."
+                    )
     
     
     #----------------------------------------------------------------------
@@ -617,6 +616,20 @@ class TaskMixin(ProjectMixin):
         """
         
         return self._tasks
+    
+    
+    
+    #----------------------------------------------------------------------
+    @tasks.setter # pylint: disable=E1101
+    def tasks(self, tasks_in):
+        # pylint: disable=E0102, C0111
+        
+        self._tasks = self._validate_tasks(tasks_in)
+        
+        # udpate the "to" attributes of the given reviews
+        for task in self._tasks:
+            task.task_of = self
+
 
 
 

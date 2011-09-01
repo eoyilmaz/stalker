@@ -133,6 +133,18 @@ v0.1.1.a10
    :class:`~stalker.core.models.Review` class now accepts anything which has a
    list-like attribute called "reviews".
 
+ * :class:`~stalker.ext.validatedList.ValidatedList` now works uniquely. Means
+   the list of items are always unique.
+
+ * The :attr:`~stalker.core.mixins.TaskMixin.tasks` attribute in
+   :class:`~stalker.core.mixins.TaskMixin` is not read-only anymore. But will
+   produce RuntimeError if removing items will produce orphan children.
+
+ * Optimized the back reference update procedure in
+   :class:`~stalker.core.models.Task` and
+   :class:`~stalker.core.mixins.TaskMixin` classes. They are not touching
+   their internal variables anymore.
+
 v0.1.1.a9
 ---------
 

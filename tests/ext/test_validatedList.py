@@ -30,16 +30,16 @@ class ValidetedListTester(unittest.TestCase):
     #----------------------------------------------------------------------
     def setUp(self):
         
-        # create a mock ValidetedList
+        # create a test ValidetedList
         
         self.normal_list = [1, 2, 3, 4, 5]
         
-        self.mock_valideted_list1 = ValidatedList(self.normal_list)
-        self.mock_valideted_list2 = ValidatedList()
+        self.test_validated_list1 = ValidatedList(self.normal_list)
+        self.test_validated_list2 = ValidatedList()
         
         # now append something to the second list which is not initialized with
         # a list
-        self.mock_valideted_list2.append(1)
+        self.test_validated_list2.append(1)
     
     
     
@@ -50,14 +50,14 @@ class ValidetedListTester(unittest.TestCase):
         
         test_value = "a string value"
         
-        mock_valideted_list = ValidatedList()
-        mock_valideted_list.append(test_value)
+        test_valideted_list = ValidatedList()
+        test_valideted_list.append(test_value)
         
         # check if the __type__ is set to str
-        self.assertEqual(mock_valideted_list.__type__, type(test_value))
+        self.assertEqual(test_valideted_list.__type__, type(test_value))
         
         # check if the __type_as_str__ is set to str
-        self.assertEqual(mock_valideted_list.__type_as_str__, "str")
+        self.assertEqual(test_valideted_list.__type_as_str__, "str")
     
     
     
@@ -71,9 +71,9 @@ class ValidetedListTester(unittest.TestCase):
         test_list = [1, 2, "ozgur", 3.2, 4, 5]
         test_expected_list = [1, 2, 4, 5]
         
-        mock_validated_list = ValidatedList(test_list)
+        test_validated_list = ValidatedList(test_list)
         
-        self.assertEqual(mock_validated_list, test_expected_list)
+        self.assertEqual(test_validated_list, test_expected_list)
     
     
     
@@ -168,13 +168,13 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___setitem__(self):
+    def test___setitem__with_wrong_type(self):
         """testing __setitem__ method
         """
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list1.__setitem__,
+            self.test_validated_list1.__setitem__,
             -1,
             "string value"
         )
@@ -182,13 +182,13 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___setitem__2(self):
+    def test___setitem__with_uninitialized_class(self):
         """testing __setitem__ method with un-initialized class
         """
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list2.__setitem__,
+            self.test_validated_list2.__setitem__,
             -1,
             "string value"
         )
@@ -196,26 +196,35 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___setitem__3(self):
+    def test___setitem__works_properly(self):
         """testing __setitem__ functionality
         """
-        
-        test_value = 5
-        
-        self.mock_valideted_list1[0] = test_value
-        
-        self.assertEqual(self.mock_valideted_list1[0], test_value)
+        test_value = 50
+        self.test_validated_list1[0] = test_value
+        self.assertEqual(self.test_validated_list1[0], test_value)
     
     
     
     #----------------------------------------------------------------------
-    def test___setslice__(self):
+    def test__setitem___works_uniquely(self):
+        """testing if __setitem__ works uniquely
+        """
+        
+        new_list = ValidatedList()
+        new_list.extend([1, 2, 3])
+        new_list[1] = 3
+        self.assertItemsEqual(new_list, [1, 2, 3])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___setslice___with_wrong_type(self):
         """testing __setslice__ method
         """
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list1.__setslice__,
+            self.test_validated_list1.__setslice__,
             0,
             3,
             "string value"
@@ -224,13 +233,13 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___setslice__2(self):
+    def test___setslice___uninitialized_class(self):
         """testing __setslice__ method with un-initialized class
         """
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list2.__setslice__,
+            self.test_validated_list2.__setslice__,
             0,
             3,
             "string value"
@@ -239,14 +248,39 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___setslice__3(self):
+    def test___setslice___works_properly(self):
         """testing __setslice__ functionality
         """
         
         test_value = [7, 8, 9]
-        self.mock_valideted_list1[1:3] = test_value
-        self.assertEqual(self.mock_valideted_list1[1:4], test_value)
+        self.test_validated_list1[1:3] = test_value
+        self.assertEqual(self.test_validated_list1[1:4], test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___setslice___works_uniquly(self):
+        """testing if __setslice__ works uniquely
+        """
         
+        new_list = ValidatedList([1, 2, 3, 4, 5])
+        new_list[0:2] = [3, 4]
+        self.assertItemsEqual(new_list, [3, 4, 5])
+        
+        new_list = ValidatedList([1, 2, 3, 4, 5])
+        new_list[0:2] = [1, 2, 3]
+        self.assertItemsEqual(new_list, [1, 2, 3, 4, 5])
+        
+        new_lislt = ValidatedList([1, 2, 3, 4, 5])
+        new_list[3:1] = [1, 2, 3, 4, 5, 6]
+        #[1, 2, 3, 1, 2, 3, 4, 5, 6, 4, 5]
+        self.assertItemsEqual([1, 2, 3, 4, 5, 6], new_list)
+        
+        new_list = ValidatedList([1, 2, 3, 4, 5])
+        new_list[3:1] = [11, 12, 13, 14, 15, 16]
+        #[1, 2, 3, 11, 12, 13, 14, 15, 16, 4, 5]
+        self.assertItemsEqual([1, 2, 3, 11, 12, 13, 14, 15, 16, 4, 5],
+                              new_list)
     
     
     
@@ -258,7 +292,7 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list1.append,
+            self.test_validated_list1.append,
             "a string value"
         )
     
@@ -270,7 +304,7 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list2.append,
+            self.test_validated_list2.append,
             "a string value"
         )
     
@@ -297,8 +331,27 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         test_value = 45
-        self.mock_valideted_list1.append(test_value)
-        self.assertEqual(self.mock_valideted_list1[-1], test_value)
+        self.test_validated_list1.append(test_value)
+        self.assertEqual(self.test_validated_list1[-1], test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_append_works_uniquely(self):
+        """testing if append will not add same item twice
+        """
+        
+        test_value = 45
+        self.test_validated_list1.append(test_value)
+        
+        # append it again
+        self.test_validated_list1.append(test_value)
+        
+        # now check if it is equal to the set of the items
+        self.assertItemsEqual(
+            self.test_validated_list1,
+            list(set(self.test_validated_list1))
+        )
     
     
     
@@ -361,7 +414,7 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list1.extend,
+            self.test_validated_list1.extend,
             ["a", "string", "list"]
         )
     
@@ -374,7 +427,7 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list2.extend,
+            self.test_validated_list2.extend,
             ["a", "string", "list"]
         )
     
@@ -397,8 +450,27 @@ class ValidetedListTester(unittest.TestCase):
         
         test_value = [34, 32]
         
-        self.mock_valideted_list1.extend(test_value)
-        self.assertEqual(self.mock_valideted_list1[-2:], test_value)
+        self.test_validated_list1.extend(test_value)
+        self.assertEqual(self.test_validated_list1[-2:], test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_extend_works_uniquely(self):
+        """testing if extend will not add same item twice
+        """
+        
+        test_value = [1, 2, 45]
+        self.test_validated_list1.extend(test_value)
+        
+        # extend it again
+        self.test_validated_list1.extend(test_value)
+        
+        # now check if it is equal to the set of the items
+        self.assertItemsEqual(
+            self.test_validated_list1,
+            list(set(self.test_validated_list1))
+        )
     
     
     
@@ -461,7 +533,7 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list1.insert,
+            self.test_validated_list1.insert,
             0,
             "a str"
         )
@@ -476,7 +548,7 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list2.insert,
+            self.test_validated_list2.insert,
             0,
             "a str"
         )
@@ -507,8 +579,27 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         test_value = 101
-        self.mock_valideted_list1.insert(0, test_value)
-        self.assertEqual(self.mock_valideted_list1[0], test_value)
+        self.test_validated_list1.insert(0, test_value)
+        self.assertEqual(self.test_validated_list1[0], test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_insert_works_uniquely(self):
+        """testing if insert will not add same item twice
+        """
+        
+        test_value = 1
+        self.test_validated_list1.insert(1, test_value)
+        
+        # insert it again
+        self.test_validated_list1.insert(2, test_value)
+        
+        # now check if it is equal to the set of the items
+        self.assertItemsEqual(
+            self.test_validated_list1,
+            list(set(self.test_validated_list1))
+        )
     
     
     
@@ -573,7 +664,7 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list1.__add__,
+            self.test_validated_list1.__add__,
             test_value
         )
     
@@ -588,7 +679,7 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list2.__add__,
+            self.test_validated_list2.__add__,
             test_value
         )
     
@@ -615,8 +706,8 @@ class ValidetedListTester(unittest.TestCase):
         """
         
         test_value = [1002, 1004]
-        self.mock_valideted_list1 = self.mock_valideted_list1 + test_value
-        self.assertEqual(self.mock_valideted_list1[-2:], test_value)
+        self.test_validated_list1 = self.test_validated_list1 + test_value
+        self.assertEqual(self.test_validated_list1[-2:], test_value)
     
     
     
@@ -672,6 +763,29 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
+    def test___add___returns_ValidatedList(self):
+        """testing if __add__ returns a ValidatedList
+        """
+        
+        new_list = ValidatedList()
+        new_list.append(1)
+        self.assertIsInstance( new_list + [1, 2, 3], ValidatedList)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___add___works_uniquely(self):
+        """testing if __add__ works uniquely
+        """
+        
+        new_list = ValidatedList([1, 2, 3])
+        new_list = new_list + [1, 2, 3, 4]
+        
+        self.assertItemsEqual(list(set(new_list)), new_list)
+    
+    
+    
+    #----------------------------------------------------------------------
     def test___iadd___with_wrong_type(self):
         """testing if a TypeError will be raised in the __iadd__ (+=) method
         when the given item type is wrong
@@ -681,14 +795,14 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list1.__iadd__,
+            self.test_validated_list1.__iadd__,
             test_value
         )
     
     
     
     #----------------------------------------------------------------------
-    def test___iadd__with_uninit_class(self):
+    def test___iadd___with_uninit_class(self):
         """testing if a TypeError will be raised in the __iadd__ (+=) method
         of the un-initialized class when the given item is in wrong type
         """
@@ -697,14 +811,14 @@ class ValidetedListTester(unittest.TestCase):
         
         self.assertRaises(
             TypeError,
-            self.mock_valideted_list2.__iadd__,
+            self.test_validated_list2.__iadd__,
             test_value
         )
     
     
     
     #----------------------------------------------------------------------
-    def test___iadd__with_new_uninit_class(self):
+    def test___iadd___with_new_uninit_class(self):
         """testing __iadd__ with newly created un-initialized list and an empty
         list
         """
@@ -719,13 +833,15 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___iadd__works_properly(self):
+    def test___iadd___works_properly(self):
         """testing __iadd__ functionality
         """
-        
+        # id should not change
+        prev_id = id(self.test_validated_list1)
         test_value = [1032, 12304]
-        self.mock_valideted_list1 += test_value
-        self.assertEqual(self.mock_valideted_list1[-2:], test_value)
+        self.test_validated_list1 += test_value
+        self.assertEqual(self.test_validated_list1[-2:], test_value)
+        self.assertEqual(prev_id, id(self.test_validated_list1))
     
     
     
@@ -777,6 +893,25 @@ class ValidetedListTester(unittest.TestCase):
         new_list.__iadd__([datetime.datetime.now()])
         
         self.assertEqual(new_list.__type__, datetime.datetime)
+    
+    
+    #----------------------------------------------------------------------
+    def test___iadd___works_uniquely(self):
+        """testing if __iadd__ works uniquely
+        """
+        new_list = ValidatedList([1, 2, 3])
+        new_list += [1, 2, 3]
+        self.assertItemsEqual(list(set(new_list)), new_list)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___iadd__returns_ValidatedList(self):
+        """test if __iadd__ returns ValidatedList instance
+        """
+        new_list = ValidatedList([1, 2, 3])
+        new_list += [1, 2, 3]
+        self.assertIsInstance(new_list, ValidatedList)
     
     
     

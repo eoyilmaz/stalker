@@ -105,13 +105,13 @@ class TaskMixinTester(unittest.TestCase):
         #self.assertEqual(self.test_foo_obj.tasks, [])
     
     
-    #----------------------------------------------------------------------
-    def test_tasks_attribute_is_read_only(self):
-        """testing if the tasks attribute is read-only
-        """
+    ##----------------------------------------------------------------------
+    #def test_tasks_attribute_is_read_only(self):
+        #"""testing if the tasks attribute is read-only
+        #"""
         
-        self.assertRaises(AttributeError, setattr, self.test_foo_obj, "tasks",
-                          [])
+        #self.assertRaises(AttributeError, setattr, self.test_foo_obj, "tasks",
+                          #[])
     
     
     

@@ -93,8 +93,8 @@ class ReviewMixinTester(unittest.TestCase):
         
         # create a couple of Reviews
         rev1 = Review(name="Test Rev 1", to=self.test_foo_obj)
-        rev2 = Review(name="Test Rev 1", to=self.test_foo_obj)
-        rev3 = Review(name="Test Rev 1", to=self.test_foo_obj)
+        rev2 = Review(name="Test Rev 2", to=self.test_foo_obj)
+        rev3 = Review(name="Test Rev 3", to=self.test_foo_obj)
         
         # create a new FooMixedInClass with no previews
         new_foo_obj = self.FooMixedInClass()

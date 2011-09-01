@@ -1861,24 +1861,46 @@ class TaskTester(unittest.TestCase):
             statuses=[status_complete, status_wip],
         )
         
+        #print "*********************"
+        #print new_project1.tasks
+        #print new_project2.tasks
+        
         new_task = Task(
             name="Modeling",
             status_list=task_status_list,
             task_of=new_project1,
         )
         
+        #print "*********************"
+        #print new_task.task_of
+        #print new_project1.tasks
+        #print new_project2.tasks
+        
         # now assign a new project to the task_of attribute
         new_task.task_of = new_project2
         self.assertNotIn(new_task, new_project1.tasks)
         self.assertIn(new_task, new_project2.tasks)
         
+        #print "*********************"
+        #print new_task.task_of
+        #print new_project1.tasks
+        #print new_project2.tasks
+        
+        new_project1.tasks.append(new_task)
+        new_project1.tasks.append(new_task)
+        new_project1.tasks.append(new_task)
         new_project1.tasks.append(new_task)
         self.assertIn(new_task, new_project1.tasks)
         self.assertNotIn(new_task, new_project2.tasks)
         
+        #print "*********************"
+        #print new_task.task_of
+        #print new_project1.tasks
+        #print new_project2.tasks
+        
         new_task.task_of = new_project2
-        self.assertIn(new_task, new_project2.tasks)
         self.assertNotIn(new_task, new_project1.tasks)
-    
+        self.assertIn(new_task, new_project2.tasks)
+        
     
     

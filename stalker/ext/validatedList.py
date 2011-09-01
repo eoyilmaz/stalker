@@ -17,6 +17,10 @@ class ValidatedList(list):
     element if the type\_ argument is None or uses the type\_ argument if
     given.
     
+    ValidatedList works uniquely, it is kind of in between with list and sets.
+    Works like a list but the elements are always unique. So be carefull what
+    you do and what you expect to get with them.
+    
     :param list\_: The list to initialize this ValidatedList instance, simply
       all the data will be copied to the current ValidatedList instance. Also
       sets the type that this ValidatedList instance works on if no type\_
@@ -137,8 +141,10 @@ class ValidatedList(list):
             # call the callable with the value
             if not self._validator is None:
                 self._validator([value], [self[key]])
-
-            super(ValidatedList, self).__setitem__(key, value)
+            
+            if value not in self:
+                super(ValidatedList, self).__setitem__(key, value)
+            
         else:
             raise TypeError(self.__error_message__)
     
@@ -165,7 +171,11 @@ class ValidatedList(list):
         if not self._validator is None:
             self._validator(sequence, self[i:j])
         
-        super(ValidatedList, self).__setslice__(i, j, sequence)
+        # copy it to a normal list
+        new_seq = [item for item in sequence
+                   if item not in self[0:i] and item not in self[j:] ]
+        
+        super(ValidatedList, self).__setslice__(i, j, new_seq)
     
     
     
@@ -192,7 +202,8 @@ class ValidatedList(list):
         if not self._validator is None:
             self._validator([object_], [])
         
-        super(ValidatedList, self).append(object_)
+        if object_ not in self:
+            super(ValidatedList, self).append(object_)
     
     
     
@@ -220,7 +231,8 @@ class ValidatedList(list):
         if not self._validator is None:
             self._validator(iterable, [])
         
-        super(ValidatedList, self).extend(iterable)
+        [super(ValidatedList, self).append(item)
+         for item in iterable if item not in self]
     
     
     
@@ -244,7 +256,8 @@ class ValidatedList(list):
         if not self._validator is None:
             self._validator([object_], [])
         
-        super(ValidatedList, self).insert(index, object_)
+        if object_ not in self:
+            super(ValidatedList, self).insert(index, object_)
     
     
     
@@ -272,7 +285,7 @@ class ValidatedList(list):
         if not self._validator is None:
             self._validator(other, [])
         
-        return super(ValidatedList, self).__add__(other)
+        return ValidatedList(super(ValidatedList, self).__add__(other))
     
     
     
@@ -300,7 +313,10 @@ class ValidatedList(list):
         if not self._validator is None:
             self._validator(other, [])
         
-        return super(ValidatedList, self).__iadd__(other)
+        #return ValidatedList(super(ValidatedList, self).__iadd__(other))
+        [super(ValidatedList, self).append(item) for item in other if item not in self]
+        
+        return self
     
     
     
