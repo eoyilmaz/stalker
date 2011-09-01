@@ -1,6 +1,11 @@
 TODO
 ====
 
+ * ValidatedList checks:
+   
+   Don't just check newly initialized classes, but also attribute assignments
+   for against being ValidatedList.
+
  * Implicit instance creation with back references:
    
    Instead of::
@@ -46,7 +51,7 @@ TODO
  * Unicode:
    
    All the string attributes should be unicode so for string attributes which
-   are checked against being a string should now be checked agains being
+   are checked against being a string should now be checked against being
    unicode.
 
  * Start & End Date For Classes Mixed With TaskMixin:

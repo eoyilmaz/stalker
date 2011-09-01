@@ -326,16 +326,12 @@ class ValidatedList(list):
         Raises ValueError if the value is not present.
         """
         
-        #print "inside ValidatedList.remove"
-        
         if not self._validator is None:
             try:
                 index = self.index(value)
                 self._validator([], [self[index]])
             except ValueError:
                 pass
-        
-        #print "ValidatedList.remove"
         
         # call the original method
         super(ValidatedList, self).remove(value)

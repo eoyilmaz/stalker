@@ -1587,8 +1587,8 @@ class Review(Entity):
         if to_in is None:
             raise TypeError("the to attribute could not be None")
         
-        error_msg = "the object which is given with the `to` should have a \
-list-like attribute called `review`"
+        error_msg = "the object which is given with the `to` should have " + \
+                    "a list-like attribute called `review`"
         
         if not hasattr(to_in, "reviews"):
             raise TypeError(error_msg)
@@ -1629,23 +1629,30 @@ list-like attribute called `review`"
         return self._to
     
     #----------------------------------------------------------------------
-    @to.setter # pylint: disable=E1101
+    @to.setter
     def to(self, to_in):
-        # pylint: disable=E0102, C0111
         
-        prev_owner = self._to
+        # update the back reference attribute "reviews"
         new_owner = self._validate_to(to_in)
+        prev_owner = self._to
         
-        # update the previous_owner
-        if not prev_owner is None:
-            prev_owner.reviews.remove(self)
+        # check if the owners are the same with previous
+        if new_owner is prev_owner:
+            # do nothing
+            return
         
-        # update the new owner
+        self._to = new_owner
+        
+        # add it to the current owner
         if not self in new_owner.reviews:
             new_owner.reviews.append(self)
         
-        # update self
-        self._to = new_owner
+        # remove it from the previous owner
+        if not prev_owner is None:
+            if self in prev_owner.reviews:
+                prev_owner.reviews.remove(self)
+
+
 
 
 

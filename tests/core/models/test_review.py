@@ -26,8 +26,8 @@ class ReviewTest(unittest.TestCase):
         # a couple of test tag objects
         
         # a couple of test tags
-        self.test_tag1 = Tag(name="Test Tag 1")
-        self.test_tag2 = Tag(name="Test Tag 2")
+        #self.test_tag1 = Tag(name="Test Tag 1")
+        #self.test_tag2 = Tag(name="Test Tag 2")
         
         ## a test entity object
         #self.test_entity = Entity(name="Test Entity 1")
@@ -39,10 +39,6 @@ class ReviewTest(unittest.TestCase):
         
         self.test_to_object = AnObjectWithReviews()
         self.test_to_object2 = AnObjectWithReviews()
-        
-        # creation and update dates
-        self.date_created = datetime.datetime.now()
-        self.date_updated = self.date_created
         
         # a test user object
         self.test_user = User(
@@ -195,7 +191,7 @@ class ReviewTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_to_attribute_accepts_anything_that_has_list_like_reviews_attribute(self):
+    def test_to_attribute_doesnt_accept_everything(self):
         """testing if an AttributeError will be raised if the to attribute
         tried to be set to something that has no "reveiews" attribute
         """
@@ -208,14 +204,14 @@ class ReviewTest(unittest.TestCase):
             "to",
             "an Entity"
         )
-        
-        
-        # lets check with something that has `reviews` attribute
-        #class AnObjectWithReviews(object):
-            #def __init__(self):
-                #self.reviews = []
-        
-        #an_object = AnObjectWithReviews()
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_to_attribute_updates_the_back_reference_attribute(self):
+        """testing if the "to" attribute updates the back reference "review"
+        attribute in the corresponding object
+        """
         
         prev_owner = self.test_review.to
         
@@ -230,6 +226,16 @@ class ReviewTest(unittest.TestCase):
         
         # check if the review is removed from the previous owner
         self.assertNotIn(self.test_review, prev_owner.reviews)
+        
+        # check if assigning the same review to the same object will not brake
+        # anything
+        self.test_review.to = self.test_to_object2
+        self.test_review.to = self.test_to_object2
+        self.test_review.to = self.test_to_object2
+        self.test_review.to = self.test_to_object2
+        self.test_review.to = self.test_to_object2
+        self.test_review.to = self.test_to_object2
+        self.test_review.to = self.test_to_object2
     
     
     

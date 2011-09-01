@@ -594,7 +594,8 @@ class TaskMixin(ProjectMixin):
         # object is not allowed
         if len(tasks_removed) > 0:
             raise RuntimeError("tasks can not be removed in this way, please "
-                               "assign the task to a new taskable object")
+                               "assign the task to a new taskable object or "
+                               "delete this review")
     
     
     
@@ -637,7 +638,37 @@ class ReviewMixin(object):
     def __init__(self):
         
         from stalker.core.models import Review
-        self._reviews = ValidatedList([], Review)
+        self._reviews = ValidatedList(
+            [], Review, self.__reviews_item_validator__
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __reviews_item_validator__(self, reviews_added, reviews_removed):
+        """validates the individual items in the reviews list
+        """
+        
+        # update the to attribute in reviews_added list
+        for review in reviews_added:
+            # set self to "to" of the review
+            if review.to != self:
+                review.to = self
+        
+        # do not deal with removing, it is done in the super already, just
+        # update correct things like the backrefence attribute "to" and prevent
+        # Orphan Reviews
+        for review in reviews_removed:
+            # check if the review has a new owner
+            if review in self.reviews:
+                if review.to == self:
+                    # if not it will produce an Orphan Review
+                    # raise a RuntimeError
+                    raise RuntimeError(
+                        "To prevent orphan reviews, please do not remove any "
+                        "review in this way but rather assign them to a new "
+                        "revieable object."
+                    )
     
     
     
@@ -659,7 +690,8 @@ class ReviewMixin(object):
                 raise TypeError("The reviews should be a list of "
                                 "stalker.core.models.Review instances")
         
-        return reviews_in
+        return ValidatedList(reviews_in, Review,
+                             self.__reviews_item_validator__)
     
     
     
@@ -674,7 +706,12 @@ class ReviewMixin(object):
     @reviews.setter # pylint: disable=E1101
     def reviews(self, reviews_in):
         # pylint: disable=E0102, C0111
+        
         self._reviews = self._validate_reviews(reviews_in)
+        
+        # udpate the "to" attributes of the given reviews
+        for review in self._reviews:
+            review.to = self
     
     
     

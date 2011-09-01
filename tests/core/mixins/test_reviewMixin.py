@@ -59,6 +59,9 @@ class ReviewMixinTester(unittest.TestCase):
         """
         
         self.assertIsInstance(self.test_foo_obj.reviews, ValidatedList)
+        self.test_foo_obj.reviews = []
+        self.assertIsInstance(self.test_foo_obj.reviews, ValidatedList)
+        
     
     
     
@@ -80,8 +83,6 @@ class ReviewMixinTester(unittest.TestCase):
         
         self.assertRaises(TypeError, setattr, self.test_foo_obj, "reviews",
                           [123])
-        
-        # create a couple of Reviews
     
     
     
@@ -90,11 +91,20 @@ class ReviewMixinTester(unittest.TestCase):
         """testing if the reviews attribute is working properly
         """
         
-        # create a review
-        new_review = Review(
-            name="Test Review",
-        )
-
+        # create a couple of Reviews
+        rev1 = Review(name="Test Rev 1", to=self.test_foo_obj)
+        rev2 = Review(name="Test Rev 1", to=self.test_foo_obj)
+        rev3 = Review(name="Test Rev 1", to=self.test_foo_obj)
+        
+        # create a new FooMixedInClass with no previews
+        new_foo_obj = self.FooMixedInClass()
+        
+        # now try to assign all thre rev1 to the new object
+        # this should work fine
+        test_reviews = [rev1, rev2, rev3]
+        new_foo_obj.reviews = test_reviews
+        
+        self.assertEqual(new_foo_obj.reviews, test_reviews)
     
     
     
@@ -104,8 +114,56 @@ class ReviewMixinTester(unittest.TestCase):
         when it is set
         """
         
-        self.fail("test is not implemented yet")
+        # create a couple of Reviews
+        rev1 = Review(name="Test Rev 1", to=self.test_foo_obj)
+        rev2 = Review(name="Test Rev 2", to=self.test_foo_obj)
+        rev3 = Review(name="Test Rev 3", to=self.test_foo_obj)
+        
+        # create a new FooMixedInClass with no reviews
+        new_foo_obj = self.FooMixedInClass()
+        
+        #print self.test_foo_obj
+        #print new_foo_obj
+        
+        # now try to assign all the reviews to the new object
+        new_foo_obj.reviews = [rev1, rev2, rev3]
+        
+        # now check if the reviews "to" attribute is pointing to the correct
+        # object
+        self.assertEqual(rev1.to, new_foo_obj)
+        self.assertEqual(rev2.to, new_foo_obj)
+        self.assertEqual(rev3.to, new_foo_obj)
+        
+        # check the reviews are in the reviews list
+        self.assertIn(rev1, new_foo_obj.reviews)
+        self.assertIn(rev2, new_foo_obj.reviews)
+        self.assertIn(rev3, new_foo_obj.reviews)
+        
+        # now try to remove the review from the reviews list and expect a
+        # TypeError
+        #print "trying to remove"
+        #print "new_foo_obj.reviews : %s" % new_foo_obj.reviews
+        #print rev1
+        
+        self.assertRaises(RuntimeError, new_foo_obj.reviews.remove, rev1)
     
     
     
-    
+    #----------------------------------------------------------------------
+    def test_reviews_attribute_handles_assigning_the_same_review_twice(self):
+        """testing if assigning the same review twice or more will not breake
+        anything or raise any exception
+        """
+        
+        # create a couple of Reviews
+        rev1 = Review(name="Test Rev 1", to=self.test_foo_obj)
+        rev2 = Review(name="Test Rev 2", to=self.test_foo_obj)
+        rev3 = Review(name="Test Rev 3", to=self.test_foo_obj)
+        
+        # now try to assign the same review again to the same object
+        self.test_foo_obj.reviews.append(rev1)
+        
+        # now try the reverse
+        rev1.to = self.test_foo_obj
+        
+        
