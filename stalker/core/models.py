@@ -2964,10 +2964,10 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     
     #----------------------------------------------------------------------
-    def __assets_backreference_updater__(self, assets_added, assets_removed): # pylint: disable=E1003
+    def __assets_backreference_updater__(self, assets_added, assets_removed):
         """updates the backreference in the Asset class
         """
-        
+
         for asset in assets_added:
             # append without calling the validator of the backreference
             super(ValidatedList, asset._shots).append(self)
@@ -2990,7 +2990,7 @@ class Shot(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     
     #----------------------------------------------------------------------
     @assets.setter # pylint: disable=E1101
-    def assets(self, assets_in): # pylint: disable=E1003
+    def assets(self, assets_in):
         # pylint: disable=E0102, C0111
         # remove the previous ones
         for asset in self.assets:
@@ -3435,7 +3435,6 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     def __shots_item_validator__(self, shots_added, shots_removed):
         """updates the backreferences in the Shot instance
         """
-        # pylint: disable=E1003
         
         for shot in shots_added:
             # do not invoke the asset.shots by calling the super
@@ -3458,7 +3457,7 @@ class Asset(Entity, ReferenceMixin, StatusMixin, TaskMixin):
     #----------------------------------------------------------------------
     @shots.setter # pylint: disable=E1101
     def shots(self, shots_in):
-        # pylint: disable=E0102, E0202, C0111, E1003
+        # pylint: disable=E0102, E0202, C0111
         # remove the previous ones
         for shot in self._shots:
             super(ValidatedList, shot.assets).remove(self)
@@ -4132,7 +4131,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #----------------------------------------------------------------------
     @resources.setter # pylint: disable=E1101
     def resources(self, resources_in):
-        # pylint: disable=E0102, E0202, C0111, E1003
+        # pylint: disable=E0202
         
         new_resources = self._validate_resources(resources_in)
         prev_resources = self.resources
@@ -4170,7 +4169,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #----------------------------------------------------------------------
     @task_of.setter # pylint: disable=E1101
     def task_of(self, task_of_in):
-        ## pylint: disable=E0102, E0202, C0111, E1003
+        # pylint: disable=E0202
         
         # update the back reference attribute "tasks"
         new_owner = self._validate_task_of(task_of_in)
