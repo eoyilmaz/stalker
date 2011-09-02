@@ -11,8 +11,7 @@ import sqlalchemy
 from stalker.conf import defaults
 from stalker import utils
 from stalker.core.models import User, Department
-
-
+from stalker.core.declarativeModels import Base
 
 # SQLAlchemy database engine
 engine = None
@@ -22,8 +21,8 @@ secondary_engine = None
 session = None
 query = None
 
-# SQLAlchemy metadata
-metadata = sqlalchemy.MetaData()
+## SQLAlchemy metadata
+#metadata = sqlalchemy.MetaData()
 
 # a couple of helper attributes
 __mappers__ = []
@@ -70,11 +69,12 @@ def setup(database=None, mappers=None):
     if len(mappers):
         defaults.MAPPERS = list(set(defaults.MAPPERS.extend(mappers)))
     
-    # create mappers
-    __create_mappers__(defaults.MAPPERS)
+    ## create mappers
+    #__create_mappers__(defaults.MAPPERS)
     
     # create the database
-    db.metadata.create_all(db.engine)
+    Base.metadata.create_all(db.engine)
+    #db.metadata.create_all(db.engine)
     
     # create the Session class
     Session = sqlalchemy.orm.sessionmaker(bind=db.engine,
@@ -84,8 +84,8 @@ def setup(database=None, mappers=None):
     db.session = Session()
     db.query = db.session.query
     
-    # init database
-    __init_db__()
+    ## init database
+    #__init_db__()
 
 
 

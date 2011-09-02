@@ -52,7 +52,8 @@ SimpleEntities = Table(
         ForeignKey("Users.id", use_alter=True, name="x")
     ),
     
-    Column("date_created", DateTime), Column("date_updated", DateTime),
+    Column("date_created", DateTime),
+    Column("date_updated", DateTime),
     Column("db_entity_type", String(128), nullable=False),
     #Column("entity_type",String(128), nullable=False),
     Column(
