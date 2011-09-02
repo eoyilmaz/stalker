@@ -2,6 +2,11 @@
 Stalker Changes
 ===============
 
+v0.1.2.a1
+----------
+
+ * Started to switch to SQLAlchemy ORM Declarative for SOM.
+
 v0.1.1.a10
 ----------
 

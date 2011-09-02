@@ -373,7 +373,6 @@ class SimpleEntity(object):
     def name(self, name_in):
         # pylint: disable=E0102, E0202, C0111
         
-        assert(isinstance(self, SimpleEntity))
         self._name = self._validate_name(name_in)
         
         # also set the nice_name

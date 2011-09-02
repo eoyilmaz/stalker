@@ -1,5 +1,13 @@
 TODO
 ====
+ 
+ * Stop the fight between SimpleEntity.name and SimpleEntity.code.
+   
+   Currently name superseeds code, but it is annoying to change the code over
+   and over again just because the name is changed. So change the behaviour to
+   something like that; the code is only updated to the same value with name if
+   it is set to None or empty string. In any other case the code should remain
+   in the same value.
 
  * SQLAlchemy ORM Declarative:
    

@@ -163,8 +163,8 @@ class SimpleEntity(Base):
         "polymorphic_identity": "SimpleEntity",
     }
     
-    _code = Column("code", String(256), nullable=False)
-    _name = Column("name", String(256), nullable=False)
+    code = Column(String(256), nullable=False)
+    name = Column(String(256), nullable=False)
     description = Column("description", String)
     
     created_by_id = Column(
@@ -193,18 +193,19 @@ class SimpleEntity(Base):
         post_update=True,
     )
     
-    _date_created = Column(DateTime, default=datetime.datetime.now())
-    _date_updated = Column(DateTime, default=datetime.datetime.now())
+    date_created = Column(DateTime, default=datetime.datetime.now())
+    date_updated = Column(DateTime, default=datetime.datetime.now())
     
-    #type_id = Column(
-        #Integer,
-        #ForeignKey("Types.id", use_alter=True, name="y")
-    #)
+    type_id = Column(
+        "type_id",
+        Integer,
+        ForeignKey("Types.id", use_alter=True, name="y")
+    )
     
-    #_type = relationship(
-        #Type,
-        #primaryjoin=type_id==Types.id
-    #)
+    type = relationship(
+        "Type",
+        primaryjoin="SimpleEntity.type_id==Type.type_id_local",
+    )
     
     UniqueConstraint("name", "db_entity_type")
     __stalker_version__ = Column("stalker_version", String(256))
@@ -240,16 +241,14 @@ class SimpleEntity(Base):
             #self._code = self._validate_code(code)
             self.code = code
         
-        #self._description = self._validate_description(description)
-        #self._created_by = self._validate_created_by(created_by)
-        #self._updated_by = self._validate_updated_by(updated_by)
-        #self.date_created = self._validate_date_created(date_created)
-        #self.date_updated = self._validate_date_updated(date_updated)
+        self.description = description
+        self.created_by = created_by
+        self.updated_by = updated_by
+        date_created = date_created
+        date_updated = date_updated
         self.date_created = date_created
         self.date_updated = date_updated
-        
-        self._type = self._validate_type(type)
-        
+        self.type = type
         self.__stalker_version__ = stalker.__version__
 
     
@@ -275,7 +274,21 @@ class SimpleEntity(Base):
     
     
     #----------------------------------------------------------------------
-    def _validate_name(self, name_in):
+    @validates("description")
+    def _validate_description(self, key, description_in):
+        """validates the given description_in value
+        """
+        
+        if description_in is None:
+            description_in = ""
+        
+        return str(description_in)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("name")
+    def _validate_name(self, key, name_in):
         """validates the given name_in value
         """
         
@@ -289,6 +302,12 @@ class SimpleEntity(Base):
         if name_in == "":
             raise ValueError("the name couldn't be an empty string")
         
+        # also set the nice_name
+        self._nice_name = self._condition_nice_name(name_in)
+        
+        # set the code
+        self.code = name_in
+        
         return name_in
     
     
@@ -300,7 +319,7 @@ class SimpleEntity(Base):
         
         # just set it to the uppercase of what nice_name gives
         # remove unnecesary characters from the string
-        code_in = self._validate_name(code_in)
+        code_in = self._condition_name(str(code_in))
         
         # replace camel case letters
         #code_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", code_in)
@@ -335,11 +354,8 @@ class SimpleEntity(Base):
         """conditions the given nice name
         """
         
-        ## remove unnecesary characters from the beginning
-        #nice_name_in = re.sub("(^[^A-Za-z]+)", r"", nice_name_in)
-        
         # remove unnecesary characters from the string
-        nice_name_in = self._validate_name(nice_name_in)
+        nice_name_in = self._condition_name(str(nice_name_in))
         
         # replace camel case letters
         nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
@@ -358,38 +374,6 @@ class SimpleEntity(Base):
     
     
     #----------------------------------------------------------------------
-    def _name_getter(self):
-        """getter of the name property
-        """
-        
-        return self._name
-    
-    #----------------------------------------------------------------------
-    def _name_setter(self, name_in):
-        """setter of the name property
-        """
-        assert(isinstance(self, SimpleEntity))
-        self._name = self._validate_name(name_in)
-        
-        # also set the nice_name
-        self._nice_name = self._condition_nice_name(self._name)
-        
-        # set the code
-        #self.code = self._nice_name.upper()
-        self.code = self._name
-    
-    name = synonym(
-        "_name",
-        descriptor=property(
-            fget=_name_getter,
-            fset=_name_setter,
-            doc="""The name of this object"""
-        )
-    )
-    
-    
-    
-    #----------------------------------------------------------------------
     @property
     def nice_name(self):
         """Nice name of this object.
@@ -403,7 +387,6 @@ class SimpleEntity(Base):
         form of ``nice_name`` if it is not defined differently (i.e set to
         another value)."""
         
-        
         # also set the nice_name
         if self._nice_name is None or self._nice_name == "":
             self._nice_name = self._condition_nice_name(self.name)
@@ -413,7 +396,8 @@ class SimpleEntity(Base):
     
     
     #----------------------------------------------------------------------
-    def _validate_code(self, code_in):
+    @validates("code")
+    def _validate_code(self, key, code_in):
         """validates the given code value
         """
         
@@ -422,14 +406,50 @@ class SimpleEntity(Base):
             # restore the value from nice_name and let it be reformatted
             #code_in = self.nice_name.upper()
             code_in = self.nice_name
-            
         
         return self._condition_code(str(code_in))
     
     
     
     #----------------------------------------------------------------------
-    def _validate_date_created(self, date_created_in):
+    @validates("created_by")
+    def _validate_created_by(self, key, created_by_in):
+        """validates the given created_by_in attribute
+        """
+        
+        if created_by_in is not None:
+            if not isinstance(created_by_in, User):
+                raise TypeError("the created_by attribute should be an "
+                                 "instance of stalker.core.models.User")
+        
+        return created_by_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("updated_by")
+    def _validate_updated_by(self, key, updated_by_in):
+        """validates the given updated_by_in attribute
+        """
+        
+        if updated_by_in is None:
+            # set it to what created_by attribute has
+            updated_by_in = self.created_by
+        
+        #from stalker.core.models import User
+        
+        if updated_by_in is not None:
+            if not isinstance(updated_by_in, User):
+                raise TypeError("the updated_by attribute should be an "
+                                 "instance of stalker.core.models.User")
+        
+        return updated_by_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("date_created")
+    def _validate_date_created(self, key, date_created_in):
         """validates the given date_creaetd_in
         """
         
@@ -445,7 +465,8 @@ class SimpleEntity(Base):
     
     
     #----------------------------------------------------------------------
-    def _validate_date_updated(self, date_updated_in):
+    @validates("date_updated")
+    def _validate_date_updated(self, key, date_updated_in):
         """validates the given date_updated_in
         """
         
@@ -469,7 +490,8 @@ class SimpleEntity(Base):
     
     
     #----------------------------------------------------------------------
-    def _validate_type(self, type_in):
+    @validates("type")
+    def _validate_type(self, key, type_in):
         """validates the given type value
         """
         
@@ -492,110 +514,23 @@ class SimpleEntity(Base):
     
     
     
-    ##----------------------------------------------------------------------
-    #@synonym_for("_type")
-    #@property
-    #def type(self):
-        #"""The type of the object.
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
         
-        #It is an instance of :class:`~stalker.core.models.Type` with a proper
-        #:attr:`~stalker.core.models.Type.target_entity_type`.
-        #"""
+        return isinstance(other, SimpleEntity) and \
+           self.name == other.name #and \
+           #self.description == other.description
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __ne__(self, other):
+        """the inequality operator
+        """
         
-        #return self._type
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@type.setter # pylint: disable=E1101
-    #def type(self, type_in):
-        ## pylint: disable=E0102, C0111
-        #self._type = self._validate_type(type_in)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _code_getter(self):
-        """getter for the code property
-        """
-        return self._code
-    
-    #----------------------------------------------------------------------
-    def _code_setter(self, code_in):
-        """setter for the code property
-        """
-        self._code = self._validate_code(code_in)
-    
-    _code_doc = """The code name of this object.
-    
-    It accepts string or unicode values and any other kind of objects will be
-    converted to string. In any update to the name attribute the code also will
-    be updated. If the code is not initialized or given as None, it will be set
-    to the uppercase version of the nice_name attribute. Setting the code
-    attribute to None will reset it to the default value. The default value is
-    the upper case form of the nice_name.
-    """
-    
-    code = synonym(
-        "_code",
-        descriptor=property(
-            fget=_code_getter,
-            fset=_code_setter,
-            doc=_code_doc
-        )
-    )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _date_created_getter(self):
-        """getter for date_created property
-        """
-        return self._date_created
-    
-    #----------------------------------------------------------------------
-    def _date_created_setter(self, date_created_in):
-        """setter for date_created property
-        """
-        self._date_created = self._validate_date_created(date_created_in)
-    
-    date_created = synonym(
-        "_date_created",
-        descriptor=property(
-            fget=_date_created_getter,
-            fset=_date_created_setter,
-            doc= \
-            """A :class:`datetime.datetime` instance showing the creation
-            date and time of this object.
-            """
-        )
-    )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _date_updated_getter(self):
-        """getter for date_updated property
-        """
-        return self._date_updated
-    
-    #----------------------------------------------------------------------
-    def _date_updated_setter(self, date_updated_in):
-        """setter for date_updated property
-        """
-        self._date_updated = self._validate_date_updated(date_updated_in)
-    
-    date_updated = synonym(
-        "_date_updated",
-        descriptor=property(
-            fget=_date_updated_getter,
-            fset=_date_updated_setter,
-            doc= \
-            """A :class:`datetime.datetime` instance showing the update
-            date and time of this object.
-            """
-        ),
-    )
+        return not self.__eq__(other)
 
 
 
@@ -605,45 +540,21 @@ class SimpleEntity(Base):
 
 ########################################################################
 class Entity(SimpleEntity):
-    """Everything can have a type.
+    """Another base data class that adds tags and notes to the attributes list.
     
-    .. versionadded:: 0.1.1
-      Types
+    This is the entity class which is derived from the SimpleEntity and adds
+    only tags to the list of parameters.
     
-    Type is a generalized version of the previous design that defines types for
-    specific classes.
+    Two Entities considered equal if they have the same name. It doesn't matter
+    if they have different tags or notes.
     
-    The purpose of the :class:`~stalker.core.models.Type` class is just to
-    define a new type for a specific :class:`~stalker.core.models.Entity`. For
-    example, you can have a ``Character`` :class:`~stalker.core.models.Asset`
-    or you can have a ``Commercial`` :class:`~stalker.core.models.Project` or
-    you can define a :class:`~stalker.core.models.Link` as an ``Image`` etc.,
-    to create a new :class:`~stalker.core.models.Type` for various classes::
+    :param list tags: A list of :class:`~stalker.core.models.Tag` objects
+      related to this entity. tags could be an empty list, or when omitted it
+      will be set to an empty list.
     
-      Type(name="Character", target_entity_type="Asset")
-      Type(name="Commercial", target_entity_type="Project")
-      Type(name="Image", target_entity_type="Link")
-    
-    or::
-      
-      Type(name="Character", target_entity_type=Asset.entity_type)
-      Type(name="Commercial", target_entity_type=Project.entity_type)
-      Type(name="Image", target_entity_type=Link.entity_type)
-    
-    or even better:
-      
-      Type(name="Character", target_entity_type=Asset)
-      Type(name="Commercial", target_entity_type=Project)
-      Type(name="Image", target_entity_type=Link)
-    
-    By using :class:`~stalker.core.models.Type`\ s, one can able to sort and
-    group same type of entities.
-    
-    :class:`~stalker.core.models.Type`\ s are generally used in
-    :class:`~stalker.core.models.Structure`\ s.
-    
-    :param string target_entity_type: The string defining the target type of
-      this :class:`~stalker.core.models.Type`.
+    :param list notes: A list of :class:`~stalker.core.models.Note` instances.
+      Can be an empty list, or when omitted it will be set to an empty list,
+      when set to None it will be converted to an empty list.
     """
     
     
@@ -680,7 +591,8 @@ class Entity(SimpleEntity):
     
     
     ##----------------------------------------------------------------------
-    #def _validate_notes(self, notes_in):
+    #@validates(notes)
+    #def _validate_notes(self, key, notes_in):
         #"""validates the given notes value
         #"""
         
@@ -715,45 +627,6 @@ class Entity(SimpleEntity):
             #raise TypeError("the tags attribute should be set to a list")
         
         #return ValidatedList(tags_in)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def notes(self):
-        #"""All the notes about this entity.
-        
-        #It is a list of :class:`~stalker.core.models.Note` objects or an empty
-        #list, None will be converted to an empty list.
-        #"""
-        
-        #return self._notes
-    
-    ##----------------------------------------------------------------------
-    #@notes.setter # pylint: disable=E1101
-    #def notes(self, notes_in):
-        ## pylint: disable=E0102, C0111
-        #self._notes = self._validate_notes(notes_in)
-        
-        #return locals()
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def tags(self):
-        #"""A list of tags attached to this object.
-        
-        #It is a list of :class:`~stalker.core.models.Tag` instances which shows
-        #the tags of this object"""
-        
-        #return self._tags
-    
-    ##----------------------------------------------------------------------
-    #@tags.setter # pylint: disable=E1101
-    #def tags(self, tags_in):
-        ## pylint: disable=E0102, C0111
-        #self._tags = self._validate_tags(tags_in)
     
     
     
@@ -815,18 +688,18 @@ class Type(Entity):
     """
     
     __tablename__ = "Types"
-    id = Column(Integer, ForeignKey("Entities.id"), primary_key=True)
-    target_entity_type = Column(String)
+    __mapper_args__ = {"polymorphic_identity": "Type"}
     
+    type_id_local = Column("id", Integer, ForeignKey("Entities.id"),
+                           primary_key=True)
+    target_entity_type = Column(String)
     
     
     
     #----------------------------------------------------------------------
     def __init__(self, target_entity_type=None, **kwargs):
         super(Type, self).__init__(**kwargs)
-        
-        self._target_entity_type = \
-            self._validate_target_entity_type(target_entity_type)
+        self.target_entity_type = target_entity_type
     
     
     
@@ -850,7 +723,8 @@ class Type(Entity):
     
     
     #----------------------------------------------------------------------
-    def _validate_target_entity_type(self, target_entity_type_in):
+    @validates("target_entity_type")
+    def _validate_target_entity_type(self, key, target_entity_type_in):
         """validates the given target_entity_type value
         """
         
@@ -869,20 +743,6 @@ class Type(Entity):
             raise ValueError(error_string)
         
         return target_entity_type_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    @property
-    def target_entity_type(self):
-        """The target type of this Type instance.
-        
-        It is a string, showing the name of the target type class. It is a
-        read-only attribute.
-        """
-        
-        return self._target_entity_type
-
 
 
 
@@ -1006,7 +866,7 @@ class User(Entity):
     user_id = Column("id", Integer, ForeignKey("Entities.id"),
                      primary_key=True)
     
-    department_id = Column(Integer, ForeignKey("Departments.id"))
+    #department_id = Column(Integer, ForeignKey("Departments.id"))
     email = Column(String(256), unique=True, nullable=False)
     first_name = Column(String(256), nullable=False)
     last_name = Column(String(256), nullable=True)
@@ -1055,28 +915,22 @@ class User(Entity):
         self.department = department
         
         self.email = email
-        self._first_name = self._validate_first_name(first_name)
-        self._last_name = self._validate_last_name(last_name)
-        
-        #self._login_name = ""
-        #self.login_name = login_name
-        self._login_name = self._validate_login_name(login_name)
-        
-        self._initials = self._validate_initials(initials)
+        self.first_name = first_name
+        self.last_name = last_name
+        self.login_name = login_name
+        self.initials = initials
         
         # to be able to mangle the password do it like this
-        self._password = None
         self.password = password
         
-        self._permission_groups = \
-            self._validate_permission_groups(permission_groups)
+        #self.permission_groups = permission_groups
         
         self._projects = []
-        self._projects_lead = self._validate_projects_lead(projects_lead)
-        self._sequences_lead = self._validate_sequences_lead(sequences_lead)
-        self._tasks = self._validate_tasks(tasks)
+        self.projects_lead = projects_lead
+        self.sequences_lead = sequences_lead
+        self.tasks = tasks
         
-        self._last_login = self._validate_last_login(last_login)
+        self.last_login = last_login
     
     
     
@@ -1128,17 +982,42 @@ class User(Entity):
     
     
     #----------------------------------------------------------------------
-    def _validate_department(self, department_in):
-        """validates the given department value
+    @validates("name")
+    def _validate_name(self, key, name_in):
+        """validates the given name value
         """
         
-        # check if it is intance of Department object
-        if department_in is not None:
-            if not isinstance(department_in, Department):
-                raise TypeError("department should be instance of "
-                                 "stalker.core.models.Department")
+        ## set the login name first
+        ## break recursion
+        #if self.login_name != name_in:
+            #self.login_name = name_in
         
-        return department_in
+        #name_in = self.login_name
+        
+        # also set the nice_name
+        self._nice_name = self._condition_nice_name(name_in)
+        
+        # and also the code
+        #self.code = self._nice_name.upper()
+        self.code = name_in
+        
+        return name_in
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@validates("department")
+    #def _validate_department(self, key, department_in):
+        #"""validates the given department value
+        #"""
+        
+        ## check if it is intance of Department object
+        #if department_in is not None:
+            #if not isinstance(department_in, Department):
+                #raise TypeError("department should be instance of "
+                                 #"stalker.core.models.Department")
+        
+        #return department_in
     
     
     
@@ -1257,21 +1136,73 @@ class User(Entity):
     
     
     
+    ##----------------------------------------------------------------------
+    #@validates("login_name")
+    #def _validate_login_name(self, key, login_name_in):
+        #"""validates the given login_name value
+        #"""
+        
+        #if login_name_in is None:
+            #raise TypeError("login name could not be None")
+        
+        #login_name_in = self._format_login_name(str(login_name_in))
+        
+        #if login_name_in == "":
+            #raise ValueError("login name could not be empty string")
+        
+        ## set the name
+        #if self.name != login_name_in:
+            #self.name = login_name
+        
+        ## set the code
+        #print "setting the code to %s" % self.name
+        #self.code = self.name
+        
+        #return login_name_in
+    
+    
+    
     #----------------------------------------------------------------------
-    @validates("login_name")
-    def _validate_login_name(self, key, login_name_in):
+    def _validate_login_name(self, login_name_in):
         """validates the given login_name value
         """
         
         if login_name_in is None:
             raise TypeError("login name could not be None")
         
+        #if not isinstance(login_name_in, (str, unicode)):
+            #raise TypeError("login_name should be instance of string or "
+                            #"unicode")
         login_name_in = self._format_login_name(str(login_name_in))
         
         if login_name_in == "":
             raise ValueError("login name could not be empty string")
         
         return login_name_in
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@property
+    #def login_name(self):
+        #"""The login name of the user.
+        
+        #It is a string and also sets the :attr:`~stalker.core.models.User.name`
+        #attribute.
+        #"""
+        
+        #return self.name
+    
+    ##----------------------------------------------------------------------
+    #@login_name.setter
+    #def login_name(self, login_name_in):
+        #self._login_name = self._validate_login_name(login_name_in)
+        #self.name = self._login_name
+        
+        ## also set the code
+        #self.code = self._validate_code(self._login_name)
+    
+    login_name = synonym("name")
     
     
     
@@ -1310,6 +1241,10 @@ class User(Entity):
         
         if password_in is None:
             raise TypeError("password cannot be None")
+        
+        # mangle the password
+        from stalker.ext import auth  # pylint: disable=W0404
+        password_in = auth.set_password(password_in)
         
         return password_in
     
@@ -1427,277 +1362,6 @@ class User(Entity):
     
     
     ##----------------------------------------------------------------------
-    #def _department_getter(self):
-        #"""getter for department property
-        #"""
-        #return self._department
-    
-    ##----------------------------------------------------------------------
-    #def _department_setter(self, department_in):
-        #"""setter for department property
-        #"""
-        #self._department = self._validate_department(department_in)
-    
-    #department = synonym(
-        #"_department",
-        #descriptor=property(
-            #fget=_department_getter,
-            #fset=_department_setter,
-            #doc=\
-            #"""department of the user, it is a
-            #:class:`~stalker.core.models.Department` object
-            #"""
-        #)
-    #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _email_getter(self):
-        #"""getter for email propperty
-        #"""
-        #return self._email
-    
-    ##----------------------------------------------------------------------
-    #def _email_setter(self, email_in):
-        #"""setter for email property
-        #"""
-        #self._email = self._validate_email(email_in)
-    
-    #email = synonym(
-        #"_email",
-        #descriptor=property(
-            #fget=_email_getter,
-            #fset=_email_setter,
-            #doc= """email of the user, accepts strings or unicodes"""
-        #)
-    #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _first_name_getter(self):
-        #"""getter for first_name property
-        #"""
-        #return self._first_name
-    
-    ##----------------------------------------------------------------------
-    #def _first_name_setter(self, first_name_in):
-        #"""setter for first_name property
-        #"""
-        #self._first_name = self._validate_first_name(first_name_in)
-    
-    #first_name = synonym(
-        #"_first_name",
-        #descriptor=property(
-            #fget=_first_name_getter,
-            #fset=_first_name_setter,
-            #doc="""first name of the user, accepts string or unicode
-            #"""
-        #)
-    #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _initials_getter(self):
-        #"""getter for initials property
-        #"""
-        #return self._initials
-    
-    ##----------------------------------------------------------------------
-    #def _initials_setter(self, initials_in):
-        #"""setter for initials property
-        #"""
-        #self._initials = self._validate_initials(initials_in)
-    
-    #intials = synonym(
-        #"_initials",
-        #descriptor=property(
-            #fget=_initials_getter,
-            #fset=_initials_setter,
-            #doc= \
-            #"""The initials of the user.
-            
-            #If not spesified, it is the upper case form of first letters of the
-            #:attr:`~stalker.core.models.User.first_name` and
-            #:attr:`~stalker.core.models.User.last_name`
-            #"""
-        #)
-    #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _last_login_getter(self):
-        #"""getter for last_login property
-        #"""
-        #return self._last_login
-    
-    ##----------------------------------------------------------------------
-    #def _last_login_setter(self, last_login_in):
-        #"""setter for last_login property
-        #"""
-        #self._last_login = self._validate_last_login(last_login_in)
-    
-    #last_login = synonym(
-        #"_last_login",
-        #descriptor=property(
-            #fget=_last_login_getter,
-            #fset=_last_login_setter,
-            #doc= """The last login time of this user.
-            
-            #It is an instance of datetime.datetime class.
-            #"""
-        #)
-    #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _last_name_getter(self):
-        #"""getter for last_name property
-        #"""
-        #return self._last_name
-    
-    ##----------------------------------------------------------------------
-    #def _last_name_setter(self, last_name_in):
-        #"""setter for last_name property
-        #"""
-        #self._last_name = self._validate_last_name(last_name_in)
-    
-    #last_name = synonym(
-        #"_last_name",
-        #descriptor=property(
-            #fget=_last_name_getter,
-            #fset=_last_name_setter,
-            #doc= """The last name of the user.
-            
-            #It is a string and can be None or empty string
-            #"""
-        #)
-    #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _login_name_getter(self):
-        #"""getter for login_name property
-        #"""
-        #return self._name
-    
-    ##----------------------------------------------------------------------
-    #def _login_name_setter(self, login_name_in):
-        #"""setter for login_name property
-        #"""
-        #self._name = self._validate_login_name(login_name_in)
-        ## set the name attribute
-        ##self._login_name = self._validate_name(login_name_in)
-        #self._login_name = self._name
-        
-        ## also set the code
-        #self._code = self._validate_code(self._name)
-    
-    #login_name = synonym(
-        #"_login_name",
-        #descriptor=property(
-            #fget=_login_name_getter,
-            #fset=_login_name_setter,
-            #doc="""The login name of the user.
-            
-            #It is a string and also sets the
-            #:attr:`~stalker.core.models.User.name` attribute.
-            #"""
-        #)
-    #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    
-    #def _name_getter(self): # pylint: disable=E0202
-        #"""getter for name property
-        #"""
-        #return self._name
-    
-    ##----------------------------------------------------------------------
-    #def _name_setter(self, name_in):
-        #"""setter for name property
-        #"""
-        ## set the login name first
-        #self._login_name = self._validate_login_name(name_in)
-        #self._name = self._login_name
-        
-        ## also set the nice_name
-        #self._nice_name = self._condition_nice_name(self._name)
-        
-        ## and also the code
-        ##self.code = self._nice_name.upper()
-        #self.code = self._name
-    
-    #name = synonym(
-        #"_name",
-        #descriptor=property(
-            #fget=_name_getter,
-            #fset=_name_setter,
-            #doc="""The name of this user.
-        
-            #It is the synonym for the
-            #:attr:`~stalker.core.models.User.login_name`\.
-            #"""
-        #)
-    #)
-    
-    
-    ##----------------------------------------------------------------------
-    #def _password_getter(self):
-        #"""The password of the user.
-        
-        #It is scrambled before it is stored.
-        #"""
-        #return self._password
-    
-    ##----------------------------------------------------------------------
-    #def _password_setter(self, password_in):
-        #"""setter for password property
-        #"""
-        #from stalker.ext import auth  # pylint: disable=W0404
-        #self._password = auth.set_password(password_in)
-    
-    #password = synonym(
-        #"_password",
-        #descriptor=property(
-            #fget=_password_getter,
-            #fset=_password_setter,
-            #doc="""The password of the user.
-            
-            #It is scrambled before it is stored.
-            #"""
-        #)
-    #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def permission_groups(self):
-        #"""Permission groups that this users is a member of.
-        
-        #Accepts :class:`~stalker.core.models.PermissionGroup` object.
-        #"""
-        
-        #return self._permission_groups
-    
-    ##----------------------------------------------------------------------
-    #@permission_groups.setter # pylint: disable=E1101
-    #def permission_groups(self, permission_groups_in):
-        ## pylint: disable=E0102, C0111
-        #self._permission_groups = \
-            #self._validate_permission_groups(permission_groups_in)
-    
-    
-    
-    ##----------------------------------------------------------------------
     #@property
     #def projects(self):
         #"""The list of :class:`~stlalker.core.models.Project`\ s those the current user assigned to.
@@ -1722,62 +1386,6 @@ class User(Entity):
             #projects.append(task.task_of.project)
         
         #return list(set(projects))
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def projects_lead(self):
-        #"""projects lead by this current user.
-        
-        #Accepts :class:`~stalker.core.models.Project` object
-        #"""
-        
-        #return self._projects_lead
-    
-    ##----------------------------------------------------------------------
-    #@projects_lead.setter # pylint: disable=E1101
-    #def projects_lead(self, projects_lead_in):
-        ## pylint: disable=E0102, C0111
-        #self._projects_lead = \
-            #self._validate_projects_lead(projects_lead_in)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def sequences_lead(self):
-        #"""Sequences lead by this user.
-        
-        #Accpets :class:`~stalker.core.models.Sequence` objects
-        #"""
-        
-        #return self._sequences_lead
-    
-    ##----------------------------------------------------------------------
-    #@sequences_lead.setter # pylint: disable=E1101
-    #def sequences_lead(self, sequences_lead_in):
-        ## pylint: disable=E0102, C0111
-        #self._sequences_lead = \
-            #self._validate_sequences_lead(sequences_lead_in)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def tasks(self):
-        #"""Tasks assigned to the current user.
-        
-        #Accepts :class:`~stalker.core.models.Task` objects"""
-        
-        #return self._tasks
-    
-    ##----------------------------------------------------------------------
-    #@tasks.setter # pylint: disable=E1101
-    #def tasks(self, tasks_in):
-        ## pylint: disable=E0102, C0111
-        #self._tasks = self._validate_tasks(tasks_in)
-    
     
     
     
