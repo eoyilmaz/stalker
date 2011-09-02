@@ -3920,7 +3920,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             resources_in = []
         
         return ValidatedList(resources_in, User,
-                             self.__resource_item_validator__)
+                             self.__resources_item_validator__)
     
     
     
@@ -4102,18 +4102,22 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     
     #----------------------------------------------------------------------
-    def __resource_item_validator__(self, resources_added, resources_removed):
+    def __resources_item_validator__(self, resources_added, resources_removed):
         """a callable for more granular control over resources list
         """
-         
+        
+        #print "*************************"
+        #print resources_added
+        #print resources_removed
+        
         # add the task to the resources
         for resource in resources_added:
-            #print resource._tasks
-            #print type(resource._tasks)
-            super(ValidatedList, resource._tasks).append(self)
+            if self not in resource.tasks:
+                resource.tasks.append(self)
         
         for resource in resources_removed:
-            super(ValidatedList, resource._tasks).remove(self)
+            if self in resource.tasks:
+                resource.tasks.remove(self)
     
     
     
@@ -4130,15 +4134,24 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def resources(self, resources_in):
         # pylint: disable=E0102, E0202, C0111, E1003
         
-        # remove the current task from the previous resources tasks list
-        for resource in self._resources:
-            try:
-                super(ValidatedList, resource._tasks).remove(self)
-            except ValueError:
-                pass
+        new_resources = self._validate_resources(resources_in)
+        prev_resources = self.resources
         
-        # now append the task to every one of the users in the resources_in
-        self._resources = self._validate_resources(resources_in)
+        # assign the new_resources
+        self._resources = new_resources
+        
+        # update the back reference
+        # add it to the new resources
+        for new_resource in new_resources:
+            if self not in new_resource.tasks:
+                new_resource.tasks.append(self)
+        
+        # remove it from the previous resources
+        if not prev_resources is None:
+            for prev_resource in prev_resources:
+                if prev_resource not in self.resources:
+                    if self in prev_resource.tasks:
+                        prev_resource.tasks.remove(self)
     
     
     
@@ -4166,12 +4179,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # check if the owners are the same with previous
         if new_owner is prev_owner:
             # do nothing
-            print "new and prev owners are same"
+            #print "new and prev owners are same"
             return
         
         self._task_of = new_owner
         if self not in new_owner.tasks:
-            print "self is not in new_owner.tasks"
+            #print "self is not in new_owner.tasks"
             new_owner.tasks.append(self)
         
         if not prev_owner is None:
@@ -5490,4 +5503,5 @@ class User(Entity):
     def tasks(self, tasks_in):
         # pylint: disable=E0102, C0111
         self._tasks = self._validate_tasks(tasks_in)
+        
 

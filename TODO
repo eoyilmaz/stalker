@@ -1,6 +1,11 @@
 TODO
 ====
 
+ * ValidatedList Tests for back references:
+   
+   Add tests for backreference updates in the ValidatedList tests (going to be
+   painfull!)
+
  * ValidatedList checks:
    
    Don't just check newly initialized classes, but also attribute assignments

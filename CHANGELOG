@@ -145,6 +145,13 @@ v0.1.1.a10
    :class:`~stalker.core.mixins.TaskMixin` classes. They are not touching
    their internal variables anymore.
 
+ * Fixed backreference updates of :class:`~stalker.core.models.Task` classes
+   :attr:`~stalker.core.models.Task.resources` attribute.
+
+ * Fixed ``__setslice__`` method in
+   :class:`~stalker.ext.validatedList.ValidatedList`. It is now correctly
+   passing the added and removed elements to the given ``validator`` function.
+
 v0.1.1.a9
 ---------
 

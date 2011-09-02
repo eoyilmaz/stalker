@@ -259,7 +259,7 @@ class ValidetedListTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___setslice___works_uniquly(self):
+    def test___setslice___works_uniquely(self):
         """testing if __setslice__ works uniquely
         """
         

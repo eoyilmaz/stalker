@@ -406,19 +406,38 @@ class TaskTester(unittest.TestCase):
         will have the current task in their User.tasks attribute
         """
         
-        # create a new user
-        new_user = User(first_name="Test",
-                        last_name="User",
-                        login_name="testuser",
-                        email="testuser@test.com",
-                        password="testpass")
+        # create a couple of new users
+        new_user1 = User(
+            first_name="test1",
+            last_name="test1",
+            login_name="test1",
+            email="test1@test.com",
+            password="test1"
+        )
+        
+        new_user2 = User(
+            first_name="test2",
+            last_name="test2",
+            login_name="test2",
+            email="test2@test.com",
+            password="test2"
+        )
         
         # assign it to a newly created task
-        self.kwargs["resources"] = [new_user]
+        self.kwargs["resources"] = [new_user1]
         new_task = Task(**self.kwargs)
         
         # now check if the user has the task in its tasks list
-        self.assertIn(new_task, new_user.tasks)
+        self.assertIn(new_task, new_user1.tasks)
+        
+        # now change the resources list
+        new_task.resources = [new_user2]
+        self.assertIn(new_task, new_user2.tasks)
+        self.assertNotIn(new_task, new_user1.tasks)
+        
+        # now append the new resource
+        new_task.resources.append(new_user1)
+        self.assertIn(new_task, new_user1.tasks)
     
     
     

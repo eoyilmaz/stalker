@@ -167,15 +167,19 @@ class ValidatedList(list):
             if not isinstance(element, self.__type__):
                 raise TypeError(self.__error_message__)
         
-        # call the callable with the sequence
+        # crate a new list which holds only the items those are going to be
+        # added
+        added_items = [item for item in sequence
+                       if item not in self[0:i] and item not in self[j:] ]
+        
+        # call the callable with the sequences
         if not self._validator is None:
-            self._validator(sequence, self[i:j])
+            # carefully calculate which is removed and which is added
+            slice_items = self[i:j]
+            removed_items = list(set(slice_items) - set(added_items))
+            self._validator(added_items, removed_items)
         
-        # copy it to a normal list
-        new_seq = [item for item in sequence
-                   if item not in self[0:i] and item not in self[j:] ]
-        
-        super(ValidatedList, self).__setslice__(i, j, new_seq)
+        super(ValidatedList, self).__setslice__(i, j, added_items)
     
     
     
