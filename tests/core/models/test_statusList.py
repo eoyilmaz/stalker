@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.core.models import Entity, Status, StatusList, Project
+from stalker.core.declarativeModels import Entity, Status, StatusList#, Project
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -35,9 +35,9 @@ class StatusListTest(unittest.TestCase):
                 Status(name="Finished", code="FNSH"),
                 Status(name="On Hold", code="OH"),
                 ],
-            "target_entity_type": Project.entity_type,
+            "target_entity_type": "Project",
             }
-            
+        
         self.test_status_list = StatusList(**self.kwargs)
     
     
@@ -82,21 +82,32 @@ class StatusListTest(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_statuses_being_empty(self):
-        """testing status_list against being empty
-        """
+    ##----------------------------------------------------------------------
+    #def test_statuses_argument_being_empty(self):
+        #"""testing status_list against being empty
+        #"""
         
-        #----------------------------------------------------------------------
-        # the list couldn't be empty
-        self.kwargs["statuses"] = []
+        ##----------------------------------------------------------------------
+        ## the list couldn't be empty
+        #self.kwargs["statuses"] = []
         
-        self.assertRaises(ValueError, StatusList, **self.kwargs)
+        #self.assertRaises(ValueError, StatusList, **self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_statuses_attribute_is_set_to_empty_list(self):
+        #"""testing status_list against being empty
+        #"""
+        
+        ##----------------------------------------------------------------------
+        ## the list couldn't be empty
+        #self.assertRasises(ValueError, self.test_status_list, "statuses", [])
     
     
     
     #----------------------------------------------------------------------
-    def test_statuses_elements_being_status_objects(self):
+    def test_statuses_argument_elements_being_status_objects(self):
         """testing status_list elements against not being derived from Status
         class
         """
@@ -139,17 +150,6 @@ class StatusListTest(unittest.TestCase):
             0,
             0
         )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_statuses_attribute_is_converted_to_ValidatedList(self):
-        """testing if the statuses attribute is converted to a ValidetedList
-        instance
-        """
-        
-        self.assertIsInstance(self.test_status_list.statuses,
-                              ValidatedList)
     
     
     
@@ -347,16 +347,19 @@ class StatusListTest(unittest.TestCase):
         """testing if the target_entity_type argument accepts classes
         """
         
-        self.kwargs["target_entity_type"] = Project
+        class TestClass(object):
+            pass
+        
+        self.kwargs["target_entity_type"] = TestClass
         new_status_list = StatusList(**self.kwargs)
         
-        self.assertEqual(new_status_list.target_entity_type, "Project")
+        self.assertEqual(new_status_list.target_entity_type, "TestClass")
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Status class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Status class
+        #"""
         
-        self.assertTrue(Status.plural_name, "Statuses")
+        #self.assertTrue(Status.plural_name, "Statuses")

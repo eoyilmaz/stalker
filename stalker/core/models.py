@@ -1096,16 +1096,22 @@ class StatusList(Entity):
     #----------------------------------------------------------------------
     @property
     def target_entity_type(self):
-        """the entity type which this StatusList is valid for, usally it
-        is set to the TargetClass.entity_type class attribute of the target
-        class::
+        """The entity type which this StatusList is valid for.
+        
+        Usally it is set to the TargetClass directly::
           
           from stalker.core.models import Status, StatusList, Asset
           
-          # now create a StatusList valid only for assets
-          status1 = Status(name="Waiting To Start", code="WTS")
-          status2 = Status(name="Work In Progress", code="WIP")
-          status3 = Status(name="Complete", code="CMPLT")
+          # create a StatusList valid only for Asset class
+          asset_status_list = StatusList(
+              name="Asset Statuses",
+              statuses = [
+                  Status(name="Waiting To Start", code="WTS"),
+                  Status(name="Work In Progress", code="WIP"),
+                  Status(name="Complete", code="CMPLT")
+              ],
+              target_entity_type=Asset # or "Asset" is also valid
+          )
         """
         
         return self._target_entity_type

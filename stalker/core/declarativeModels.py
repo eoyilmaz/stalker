@@ -829,6 +829,227 @@ class Status(Entity):
 
 
 ########################################################################
+class StatusList(Entity):
+    """Type specific list of :class:`~stalker.core.models.Status` instances.
+    
+    Holds multiple :class:`~stalker.core.models.Status`es to be used as a
+    choice list for several other classes.
+    
+    A StatusList can only be assigned to only one entity type. So a
+    :class:`~stalker.core.models.Project` can only have a suitable StatusList
+    object which is designed for :class:`~stalker.core.models.Project`
+    entities.
+    
+    The list of statuses in StatusList can be accessed by using a list like
+    indexing and it also supports string indexes only for getting the item,
+    you can not set an item with string indices:
+    
+    >>> from stalker.core.models import Status, StatusList
+    >>> status1 = Status(name="Complete", code="CMPLT")
+    >>> status2 = Status(name="Work in Progress", code="WIP")
+    >>> status3 = Status(name="Pending Review", code="PRev")
+    >>> a_status_list = StatusList(name="Asset Status List",
+                                   statuses=[status1, status2, status3],
+                                   target_entity_type="Asset")
+    >>> a_status_list[0]
+    <Status (Complete, CMPLT)>
+    >>> a_status_list["complete"]
+    <Status (Complete, CMPLT)>
+    >>> a_status_list["wip"]
+    <Status (Work in Progress, WIP)>
+    
+    :param statuses: this is a list of status objects, so you can prepare
+      different StatusList objects for different kind of entities
+    
+    :param target_entity_type: use this parameter to specify the target entity
+      type that this StatusList is designed for. It accepts classes or names
+      of classes.
+      
+      For example::
+        
+        from stalker.core.models import Status, StatusList, Project
+        
+        status_list = [
+            Status(name="Waiting To Start", code="WTS"),
+            Status(name="On Hold", code="OH"),
+            Status(name="In Progress", code="WIP"),
+            Status(name="Waiting Review", code="WREV"),
+            Status(name="Approved", code="APP"),
+            Status(name="Completed", code="CMPLT"),
+        ]
+        
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=status_list,
+            target_entity_type="Project"
+        )
+        
+        # or
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=status_list,
+            target_entity_type=Project
+        )
+      
+      now with the code above you can not assign the ``project_status_list``
+      object to any other class than a ``Project`` object.
+      
+      The StatusList instance can be empty, means it may not have anything in
+      its :attr:`~stalker.core.models.StatusList.statuses`. But it is useless.
+      The validation for empty statuses list is left to the SOM user.
+    """
+    
+    
+    
+    __tablename__ = "StatusLists"
+    __mapper_args__ = {"polymorphic_identity": "StatusList"}
+    
+    statusList_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True
+    )
+    
+    statuses = relationship(
+        "Status",
+        secondary="StatusList_Statuses",
+    )
+    
+    _target_entity_type = Column(String(128), nullable=False, unique=True)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 statuses=None,
+                 target_entity_type="",
+                 **kwargs
+                 ):
+        
+        super(StatusList, self).__init__(**kwargs)
+        
+        self.statuses = statuses
+        self._target_entity_type = \
+            self._validate_target_entity_type(target_entity_type)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("statuses")
+    def _validate_statuses(self, key, status):
+        """validates the given status
+        """
+        
+        if not isinstance(status, Status):
+            raise TypeError("all elements must be an instance of "
+                            "stalker.core.models.Status in the given statuses"
+                            "list")
+        
+        return status
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_target_entity_type(self, target_entity_type_in):
+        """validates the given target_entity_type value
+        """
+        
+        # it can not be None
+        if target_entity_type_in is None:
+            raise TypeError("target_entity_type can not be None")
+        
+        if str(target_entity_type_in)=="":
+            raise ValueError("target_entity_type can not be empty string")
+        
+        # check if it is a class
+        if isinstance(target_entity_type_in, type):
+            target_entity_type_in = target_entity_type_in.__name__
+        
+        return str(target_entity_type_in)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @property
+    def target_entity_type(self):
+        """The entity type which this StatusList is valid for.
+        
+        Usally it is set to the TargetClass directly::
+          
+          from stalker.core.models import Status, StatusList, Asset
+          
+          # create a StatusList valid only for Asset class
+          asset_status_list = StatusList(
+              name="Asset Statuses",
+              statuses = [
+                  Status(name="Waiting To Start", code="WTS"),
+                  Status(name="Work In Progress", code="WIP"),
+                  Status(name="Complete", code="CMPLT")
+              ],
+              target_entity_type=Asset # or "Asset" is also valid
+          )
+        """
+        
+        return self._target_entity_type
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(StatusList, self).__eq__(other) and \
+               isinstance(other, StatusList) and \
+               self.statuses == other.statuses and \
+               self.target_entity_type == other.target_entity_type
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __getitem__(self, key):
+        """the indexing attributes for getting item
+        """
+        if isinstance(key, (str, unicode)):
+            for item in self.statuses:
+                if item == key:
+                    return item
+        else:
+            return self.statuses[key]
+    
+    
+    #----------------------------------------------------------------------
+    def __setitem__(self, key, value):
+        """the indexing attributes for setting item
+        """
+        
+        self.statuses[key] = self._validate_status(value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __delitem__(self, key):
+        """the indexing attributes for deleting item
+        """
+        
+        del self.statuses[key]
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __len__(self):
+        """the indexing attributes for getting the length
+        """
+        
+        return len(self.statuses)
+
+
+
+
+
+
+########################################################################
 class ImageFormat(Entity):
     """Common image formats for the :class:`~stalker.core.models.Project`\ s.
     
@@ -1752,6 +1973,8 @@ class User(Entity):
 # SECONDARY TABLES
 ######################################
 
+
+
 # ENTITY_TAGS
 Entity_Tags = Table(
     "Entity_Tags", Base.metadata,
@@ -1767,5 +1990,24 @@ Entity_Tags = Table(
         Integer,
         ForeignKey("Tags.id"),
         primary_key=True,
+    )
+)
+
+
+
+# STATUSLIST_STATUSES
+StatusList_Statuses = Table(
+    "StatusList_Statuses", Base.metadata,
+    Column(
+        "statusList_id",
+        Integer,
+        ForeignKey("StatusLists.id"),
+        primary_key=True
+    ),
+    Column(
+        "status_id",
+        Integer,
+        ForeignKey("Statuses.id"),
+        primary_key=True
     )
 )
