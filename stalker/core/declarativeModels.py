@@ -2311,9 +2311,6 @@ class User(Entity):
     last_login = Column(DateTime)
     initials = Column(String(16))
     
-    #enitites_created = synonym("_entities_created")
-    #enitites_updated = synonym("_entities_updated")
-    
     
     
     #----------------------------------------------------------------------
@@ -2348,7 +2345,6 @@ class User(Entity):
         
         super(User, self).__init__(**kwargs)
         
-        #self._department = self._validate_department(department)
         self.department = department
         
         self.email = email
@@ -2360,7 +2356,7 @@ class User(Entity):
         # to be able to mangle the password do it like this
         self.password = password
         
-        #self.permission_groups = permission_groups
+        self.permission_groups = permission_groups
         
         self._projects = []
         self.projects_lead = projects_lead
@@ -2424,18 +2420,10 @@ class User(Entity):
         """validates the given name value
         """
         
-        ## set the login name first
-        ## break recursion
-        #if self.login_name != name_in:
-            #self.login_name = name_in
-        
-        #name_in = self.login_name
-        
         # also set the nice_name
         self._nice_name = self._condition_nice_name(name_in)
         
         # and also the code
-        #self.code = self._nice_name.upper()
         self.code = name_in
         
         return name_in
@@ -2573,71 +2561,23 @@ class User(Entity):
     
     
     
-    ##----------------------------------------------------------------------
-    #@validates("login_name")
-    #def _validate_login_name(self, key, login_name_in):
+    #----------------------------------------------------------------------
+    #def _validate_login_name(self, login_name_in):
         #"""validates the given login_name value
         #"""
         
         #if login_name_in is None:
             #raise TypeError("login name could not be None")
         
+        ##if not isinstance(login_name_in, (str, unicode)):
+            ##raise TypeError("login_name should be instance of string or "
+                            ##"unicode")
         #login_name_in = self._format_login_name(str(login_name_in))
         
         #if login_name_in == "":
             #raise ValueError("login name could not be empty string")
         
-        ## set the name
-        #if self.name != login_name_in:
-            #self.name = login_name
-        
-        ## set the code
-        #print "setting the code to %s" % self.name
-        #self.code = self.name
-        
         #return login_name_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_login_name(self, login_name_in):
-        """validates the given login_name value
-        """
-        
-        if login_name_in is None:
-            raise TypeError("login name could not be None")
-        
-        #if not isinstance(login_name_in, (str, unicode)):
-            #raise TypeError("login_name should be instance of string or "
-                            #"unicode")
-        login_name_in = self._format_login_name(str(login_name_in))
-        
-        if login_name_in == "":
-            raise ValueError("login name could not be empty string")
-        
-        return login_name_in
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def login_name(self):
-        #"""The login name of the user.
-        
-        #It is a string and also sets the :attr:`~stalker.core.models.User.name`
-        #attribute.
-        #"""
-        
-        #return self.name
-    
-    ##----------------------------------------------------------------------
-    #@login_name.setter
-    #def login_name(self, login_name_in):
-        #self._login_name = self._validate_login_name(login_name_in)
-        #self.name = self._login_name
-        
-        ## also set the code
-        #self.code = self._validate_code(self._login_name)
     
     login_name = synonym("name")
     
@@ -2700,28 +2640,19 @@ class User(Entity):
     
     
     
-    ##----------------------------------------------------------------------
-    #@validates("permission_groups")
-    #def _validate_permission_groups(self, key, permission_groups_in):
-        #"""check the given permission_group
-        #"""
+    #----------------------------------------------------------------------
+    @validates("permission_groups")
+    def _validate_permission_groups(self, key, permission_group):
+        """check the given permission_group
+        """
         
-        #if permission_groups_in is None:
-            #permission_groups_in = []
+        if not isinstance(permission_group, PermissionGroup):
+            raise TypeError(
+                "any group in permission_groups should be an instance of"
+                "stalker.core.models.PermissionGroup"
+            )
         
-        #if not isinstance(permission_groups_in, list):
-            #raise TypeError("permission_groups should be a list of group "
-                             #"objects")
-        
-        #for permission_group in permission_groups_in:
-            #if not isinstance(permission_group, PermissionGroup):
-                #raise TypeError(
-                    #"any group in permission_groups should be an instance of"
-                    #"stalker.core.models.PermissionGroup"
-                #)
-        
-        ##return ValidatedList(permission_groups_in, PermissionGroup)
-        #return permission_groups_in
+        return permission_group
     
     
     
