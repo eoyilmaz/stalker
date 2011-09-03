@@ -3,8 +3,7 @@
 
 
 import unittest
-from stalker.core.models import Entity, Status, StatusList, Project
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.declarativeModels import Entity, Status
 
 
 

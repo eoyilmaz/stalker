@@ -770,6 +770,65 @@ class Type(Entity):
 
 
 ########################################################################
+class Status(Entity):
+    """Defins object statutes.
+    
+    No extra parameters, use the *code* attribute to give a short name for the
+    status.
+    
+    A Status object can be compared with a string or unicode value and it will
+    return if the lower case name or lower case code of the status matches the
+    lower case form of the given string:
+    
+    >>> from stalker.core.models import Status
+    >>> a_status = Status(name="On Hold", "OH")
+    >>> a_status == "on hold"
+    True
+    >>> a_status != "complete"
+    True
+    >>> a_status == "oh"
+    True
+    >>> a_status == "another status"
+    False
+    """
+    
+    
+    
+    __tablename__ = "Statuses"
+    __mapper_args__ = {"polymorphic_identity": "Status"}
+    status_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(Status, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        if isinstance(other, (str, unicode)):
+            return self.name.lower() == other.lower() or \
+                   self.code.lower() == other.lower()
+        else:
+            return super(Status, self).__eq__(other) and \
+                   isinstance(other, Status)
+
+
+
+
+
+
+########################################################################
 class ImageFormat(Entity):
     """Common image formats for the :class:`~stalker.core.models.Project`\ s.
     
