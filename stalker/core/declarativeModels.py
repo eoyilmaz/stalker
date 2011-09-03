@@ -689,17 +689,17 @@ class Type(Entity):
     
     __tablename__ = "Types"
     __mapper_args__ = {"polymorphic_identity": "Type"}
-    
     type_id_local = Column("id", Integer, ForeignKey("Entities.id"),
                            primary_key=True)
-    target_entity_type = Column(String)
+    _target_entity_type = Column(String)
     
     
     
     #----------------------------------------------------------------------
     def __init__(self, target_entity_type=None, **kwargs):
         super(Type, self).__init__(**kwargs)
-        self.target_entity_type = target_entity_type
+        self._target_entity_type =\
+            self._validate_target_entity_type(target_entity_type)
     
     
     
@@ -723,8 +723,7 @@ class Type(Entity):
     
     
     #----------------------------------------------------------------------
-    @validates("target_entity_type")
-    def _validate_target_entity_type(self, key, target_entity_type_in):
+    def _validate_target_entity_type(self, target_entity_type_in):
         """validates the given target_entity_type value
         """
         
@@ -743,7 +742,20 @@ class Type(Entity):
             raise ValueError(error_string)
         
         return target_entity_type_in
-
+    
+    
+    
+    #----------------------------------------------------------------------
+    @synonym_for("_target_entity_type")
+    @property
+    def target_entity_type(self):
+        """The target type of this Type instance.
+        
+        It is a string, showing the name of the target type class. It is a
+        read-only attribute.
+        """
+        
+        return self._target_entity_type
 
 
 

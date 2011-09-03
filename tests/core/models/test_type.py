@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.core.models import Entity, Type
+from stalker.core.declarativeModels import Entity, Type
 
 
 
@@ -23,15 +23,15 @@ class TypeTester(unittest.TestCase):
         """
         
         self.kwargs = {
-            "name": "mock type",
-            "description": "this is a mock type",
+            "name": "test type",
+            "description": "this is a test type",
             "target_entity_type": "SimpleEntity",
         }
         
-        self.mock_type = Type(**self.kwargs)
+        self.test_type = Type(**self.kwargs)
         
         # create another Entity with the same name of the
-        # mock_type for __eq__ and __ne__ tests
+        # test_type for __eq__ and __ne__ tests
         self.entity1 = Entity(**self.kwargs)
     
     
@@ -50,10 +50,10 @@ class TypeTester(unittest.TestCase):
         self.kwargs["description"] = "this is a different type"
         new_type4 = Type(**self.kwargs)
         
-        self.assertTrue(self.mock_type==new_type2)
-        self.assertFalse(self.mock_type==new_type3)
-        self.assertFalse(self.mock_type==new_type4)
-        self.assertFalse(self.mock_type==self.entity1)
+        self.assertTrue(self.test_type==new_type2)
+        self.assertFalse(self.test_type==new_type3)
+        self.assertFalse(self.test_type==new_type4)
+        self.assertFalse(self.test_type==self.entity1)
     
     
     
@@ -71,19 +71,19 @@ class TypeTester(unittest.TestCase):
         self.kwargs["description"] = "this is a different type"
         new_type4 = Type(**self.kwargs)
         
-        self.assertFalse(self.mock_type!=new_type2)
-        self.assertTrue(self.mock_type!=new_type3)
-        self.assertTrue(self.mock_type!=new_type4)
-        self.assertTrue(self.mock_type!=self.entity1)
+        self.assertFalse(self.test_type!=new_type2)
+        self.assertTrue(self.test_type!=new_type3)
+        self.assertTrue(self.test_type!=new_type4)
+        self.assertTrue(self.test_type!=self.entity1)
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Entities class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Entities class
+        #"""
         
-        self.assertTrue(Entity.plural_name, "Entities")
+        #self.assertTrue(Entity.plural_name, "Entities")
     
     
     
@@ -150,7 +150,7 @@ class TypeTester(unittest.TestCase):
         """testing if the target_entity_type attribute is read-only
         """
         
-        self.assertRaises(AttributeError, setattr, self.mock_type,
+        self.assertRaises(AttributeError, setattr, self.test_type,
                           "target_entity_type", "Asset")
     
     
@@ -160,7 +160,7 @@ class TypeTester(unittest.TestCase):
         """testing if the target_entity_type attribute is working properly
         """
         
-        self.assertEqual(self.mock_type.target_entity_type,
+        self.assertEqual(self.test_type.target_entity_type,
                          self.kwargs["target_entity_type"])
     
     
