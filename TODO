@@ -1,6 +1,11 @@
 TODO
 ====
 
+ * StatusMixin and string indices:
+   
+   StatusMixin should be able to set the status with a string, because it is
+   possible to use strings in StatusList.
+
  * Refactor target_entity_type attributes
    
    StatusList, FilenameTemplate and Type classes are using the same
