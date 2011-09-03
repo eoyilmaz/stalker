@@ -22,6 +22,7 @@ v0.1.2.a1
    * Link
    * ReferenceMixin
    * StatusMixin
+   * ScheduleMixin
 
  * Empty :class:`~stalker.core.models.StatusList`\ s are now allowed. The
    validation overhead is left to the SOM user.
