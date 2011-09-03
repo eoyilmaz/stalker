@@ -701,8 +701,6 @@ class Entity(SimpleEntity):
         if not isinstance(notes_in, list):
             raise TypeError("notes should be an instance of list")
         
-        #from stalker.core.models import Note
-        
         for element in notes_in:
             if not isinstance(element, Note):
                 raise TypeError("every element in notes should be an "

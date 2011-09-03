@@ -12,7 +12,7 @@ from sqlalchemy import (
     Column,
     #Boolean,
     Integer,
-    #Float,
+    Float,
     String,
     ForeignKey,
     #Date,
@@ -763,6 +763,174 @@ class Type(Entity):
         """
         
         return self._target_entity_type
+
+
+
+
+
+
+########################################################################
+class ImageFormat(Entity):
+    """Common image formats for the :class:`~stalker.core.models.Project`\ s.
+    
+    :param width: The width of the format, it cannot be zero or negative, if a
+      float number is given it will be converted to integer
+    
+    :param height: The height of the format, it cannot be zero or negative, if
+      a float number is given it will be converted to integer
+    
+    :param pixel_aspect: The pixel aspect ratio of the current ImageFormat
+      object, it can not be zero or negative, and if given as an integer it
+      will be converted to a float, the default value is 1.0
+    
+    :param print_resolution: The print resolution of the ImageFormat given as
+      DPI (dot-per-inch). It can not be zero or negative
+    """
+    
+    
+    
+    __tablename__ = "ImageFormats"
+    __mapper_args__ = {"polymorphic_identity": "ImageFormat"}
+    
+    imageFormat_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    )
+    
+    width = Column(Integer)
+    height = Column(Integer)
+    pixel_aspect = Column(Float, default="1.0")
+    print_resolution = Column(Float, default="300.0")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 width=None,
+                 height=None,
+                 pixel_aspect=1.0,
+                 print_resolution=300,
+                 **kwargs
+                 ):
+        
+        super(ImageFormat, self).__init__(**kwargs)
+        
+        self.width = width
+        self.height = height
+        self.pixel_aspect = pixel_aspect
+        self.print_resolution = print_resolution
+        self._device_aspect = 1.0
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance created with
+        SQLAlchemy
+        """
+        
+        self._device_aspect = None
+        self._update_device_aspect()
+        
+        # call supers __init_on_load__
+        super(ImageFormat, self).__init_on_load__()
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("width")
+    def _validate_width(self, key, width):
+        """validates the given width
+        """
+        
+        if not isinstance(width, (int, float)):
+            raise TypeError("width should be an instance of int or float")
+        
+        if width <= 0:
+            raise ValueError("width shouldn't be zero or negative")
+        
+        return int(width)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("height")
+    def _validate_height(self, key, height):
+        """validates the given height
+        """
+        
+        if not isinstance(height, (int, float)):
+            raise TypeError("height should be an instance of int or float")
+        
+        if height <= 0:
+            raise ValueError("height shouldn't be zero or negative")
+        
+        return int(height)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("pixel_aspect")
+    def _validate_pixel_aspect(self, key, pixel_aspect):
+        """validates the given pixel aspect
+        """
+        
+        if not isinstance(pixel_aspect, (int, float)):
+            raise TypeError("pixel_aspect should be an instance of int or "
+                             "float")
+        
+        if pixel_aspect <= 0:
+            raise ValueError("pixel_aspect can not be zero or a negative "
+                             "value")
+        
+        return float(pixel_aspect)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("print_resolution")
+    def _validate_print_resolution(self, key, print_resolution):
+        """validates the print resolution
+        """
+        
+        if not isinstance(print_resolution, (int, float)):
+            raise TypeError("print resolution should be an instance of int "
+                             "or float")
+        
+        if print_resolution <= 0:
+            raise ValueError("print resolution should not be zero or "
+                             "negative")
+        
+        return float(print_resolution)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @property
+    def device_aspect(self):
+        """returns the device aspect
+        
+        because the device_aspect is calculated from the width/height*pixel
+        formula, this property is read-only.
+        """
+        
+        return float(self.width) / float(self.height) * self.pixel_aspect
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(ImageFormat, self).__eq__(other) and \
+               isinstance(other, ImageFormat) and \
+               self.width == other.width and \
+               self.height == other.height and \
+               self.pixel_aspect == other.pixel_aspect
 
 
 
