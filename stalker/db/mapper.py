@@ -110,7 +110,7 @@ def setup():
         PermissionGroup,
         tables.PermissionGroups,
         inherits=PermissionGroup.__base__, # pylint: disable=E1101
-        polymorphic_identity="PermissionGrou"
+        polymorphic_identity="PermissionGroup"
     )
     
     # *******************************************************************

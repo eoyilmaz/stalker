@@ -1220,6 +1220,147 @@ class ImageFormat(Entity):
 
 
 ########################################################################
+class Link(Entity):
+    """Holds data about external links.
+    
+    Links are all about giving some external information to the current entity
+    (external to the database, so it can be something on the
+    :class:`~stalker.core.models.Repository` or in the Web). The type of the
+    link (general, file, folder, webpage, image, image sequence, video, movie,
+    sound, text etc.) can be defined by a :class:`~stalker.core.models.Type`
+    instance (you can also use multiple :class:`~stalker.core.models.Tag`
+    instances to add more information, and to filter them back). Again it is
+    defined by the needs of the studio.
+    
+    For sequences of files the file name may contain "#" or muptiple of them
+    like "###" to define pading.
+    
+    :param path: The Path to the link, it can be a path to a folder or a file
+      in the file system, or a web page. For file sequences use "#" in place of
+      the numerator (`Nuke`_ style). Setting the path to None or an empty
+      string is not accepted.
+    
+    .. _Nuke: http://www.thefoundry.co.uk
+    """
+    
+    
+    
+    __tablename__ = "Links"
+    __mapper_args__ = {"polymorphic_identity": "Link"}
+    link_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    )
+    path = Column(String)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, path="", **kwargs):
+        super(Link, self).__init__(**kwargs)
+        self.path = path
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("path")
+    def _validate_path(self, key, path):
+        """validates the given path
+        """
+        
+        if path is None:
+            raise TypeError("path can not be None")
+        
+        if not isinstance(path, (str, unicode)):
+            raise TypeError("path should be an instance of string or unicode")
+        
+        if path == "":
+            raise ValueError("path can not be an empty string")
+        
+        return self._format_path(path)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _format_path(self, path):
+        """formats the path to internal format, which is Linux forward slashes
+        for path seperation
+        """
+        
+        return path.replace("\\", "/")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Link, self).__eq__(other) and \
+               isinstance(other, Link) and \
+               self.path == other.path and \
+               self.type == other.type
+
+
+
+
+
+########################################################################
+class PermissionGroup(SimpleEntity):    
+    """Manages permission in the system.
+    
+    A PermissionGroup object maps permission for tasks like Create, Read,
+    Update, Delete operations in the system to available classes in the system.
+    
+    It reads the :attr:`~stalker.conf.defaults.CORE_MODEL_CLASSES` list to get
+    the list of available classes which can be created. It then stores a binary
+    value for each of the class.
+    
+    A :class:`~stalker.core.models.User` can be in several
+    :class:`~stalker.core.models.PermissionGroup`\ s. The combined permission
+    for an object is calculated with an ``OR`` (``^``) operation. So if one of
+    the :class:`~stalker.core.models.PermissionGroup`\ s of the
+    :class:`~stalker.core.models.User` is allowing the action then the user is
+    allowed to do the operation.
+    
+    The permissions are stored in a dictionary. The key is the class name and
+    the value is a 4-bit binary integer value like 0b0001.
+    
+    +-------------------+--------+------+--------+--------+
+    |        0b         |   0    |  0   |   0    |   0    |
+    +-------------------+--------+------+--------+--------+
+    | binary identifier | Create | Read | Update | Delete |
+    |                   | Bit    | Bit  | Bit    | Bit    |
+    +-------------------+--------+------+--------+--------+
+    
+    :param dict permissions: A Python dictionary showing the permissions. The
+      key is the name of the Class and the value is the permission bit.
+    
+    
+    NOTE TO DEVELOPERS: a Dictionary-Based Collections should be used in
+    SQLAlchemy.
+    """
+    
+    __tablename__ = "PermissionGroups"
+    __mapper_args__ = {"polymorphic_identity": "PermissionGroup"}
+    
+    permissionGroup_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+                                primary_key=True)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(PermissionGroup, self).__init__(**kwargs)
+
+
+
+
+
+
+########################################################################
 class Note(SimpleEntity):
     """Notes for any of the SOM objects.
     
@@ -1932,6 +2073,120 @@ class Structure(Entity):
 
 
 ########################################################################
+class Department(Entity):
+    """The departments that forms the studio itself.
+    
+    The information that a Department object holds is like:
+    
+      * The members of the department
+      * The lead of the department
+      * and all the other things those are inherited from the AuditEntity class
+    
+    Two Department object considered the same if they have the same name, the
+    the members list nor the lead info is important, a "Modeling" department
+    should of course be the same with another department which has the name
+    "Modeling" again.
+    
+    so creating a department object needs the following parameters:
+    
+    :param members: it can be an empty list, so one department can be created
+      without any member in it. But this parameter should be a list of User
+      objects.
+    
+    :param lead: this is a User object, that holds the lead information, a lead
+      could be in this department but it is not forced to be also a member of
+      the department. So another departments member can be a lead for another
+      department. Lead attribute can not be empty or None.
+    """
+    
+    
+    
+    __tablename__ = "Departments"
+    __mapper_args__ = {"polymorphic_identity": "Department"}
+    department_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True
+    )
+    
+    lead_id = Column(
+        "lead_id",
+        Integer,
+        ForeignKey("Users.id", use_alter=True, name="x")
+    )
+    
+    lead = relationship(
+        "User",
+        uselist=False,
+        primaryjoin="Department.lead_id==User.user_id",
+        post_update=True
+    )
+    
+    members = relationship(
+        "User",
+        backref="department",
+        primaryjoin= "Department.department_id==User.department_id"
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, members=None, lead=None, **kwargs):
+        super(Department, self).__init__(**kwargs)
+        
+        if members is None:
+            members = []
+        
+        self.members = members
+        self.lead = lead
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("members")
+    def _validate_members(self, key, member):
+        """validates the given member attribute
+        """
+        
+        if not isinstance(member, User):
+            raise TypeError("every element in the members list should be "
+                            "an instance of stalker.core.models.User class")
+        
+        return member
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("lead")
+    def _validate_lead(self, key, lead):
+        """validates the given lead attribute
+        """
+        
+        if lead is not None:
+            # the lead should be an instance of User class
+            if not isinstance(lead, User):
+                raise TypeError("lead should be an instance of "
+                                 "stalker.core.models.User")
+        
+        return lead
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Department, self).__eq__(other) and \
+               isinstance(other, Department)
+
+
+
+
+
+
+########################################################################
 class User(Entity):
     """The user class is designed to hold data about a User in the system.
     
@@ -2048,7 +2303,7 @@ class User(Entity):
     user_id = Column("id", Integer, ForeignKey("Entities.id"),
                      primary_key=True)
     
-    #department_id = Column(Integer, ForeignKey("Departments.id"))
+    department_id = Column(Integer, ForeignKey("Departments.id"))
     email = Column(String(256), unique=True, nullable=False)
     first_name = Column(String(256), nullable=False)
     last_name = Column(String(256), nullable=True)
@@ -2187,19 +2442,19 @@ class User(Entity):
     
     
     
-    ##----------------------------------------------------------------------
-    #@validates("department")
-    #def _validate_department(self, key, department_in):
-        #"""validates the given department value
-        #"""
+    #----------------------------------------------------------------------
+    @validates("department")
+    def _validate_department(self, key, department):
+        """validates the given department value
+        """
         
-        ## check if it is intance of Department object
-        #if department_in is not None:
-            #if not isinstance(department_in, Department):
-                #raise TypeError("department should be instance of "
-                                 #"stalker.core.models.Department")
+        # check if it is intance of Department object
+        if department is not None:
+            if not isinstance(department, Department):
+                raise TypeError("department should be instance of "
+                                 "stalker.core.models.Department")
         
-        #return department_in
+        return department
     
     
     
@@ -2621,4 +2876,15 @@ Structure_FilenameTemplates = Table(
     "Structure_FilenameTemplates", Base.metadata,
     Column("structure_id", Integer, ForeignKey("Structures.id")),
     Column("filenametemplate_id", Integer, ForeignKey("FilenameTemplates.id"))
+)
+
+
+
+# USER_PERMISSIONGROUPS
+User_PermissionGroups = Table(
+    "User_PermissionGroups", Base.metadata,
+    Column("user_id", Integer, ForeignKey("Users.id"), primary_key=True),
+    Column("permissionGroup_id", Integer, ForeignKey("PermissionGroups.id"),
+           primary_key=True
+    )
 )

@@ -4,7 +4,7 @@
 
 import unittest
 import datetime
-from stalker.core.models import Department, User, Entity
+from stalker.core.declarativeModels import Department, User, Entity
 from stalker.ext.validatedList import ValidatedList
 
 
@@ -143,15 +143,6 @@ class DepartmentTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_members_attribute_is_a_ValidatedList_instance(self):
-        """testing if the members attribute is an instance of ValidatedList
-        """
-        
-        self.assertIsInstance(self.test_department.members, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_members_attribute_elements_accepts_User_only(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a User object to the members list
@@ -215,12 +206,12 @@ class DepartmentTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_members_attribute_set_to_None_defaults_to_empty_list(self):
-        """testing if the members attribute defaults to an empty list when it
-        is set to None
+    def test_members_attribute_set_to_None(self):
+        """testing if a TypeError will be raised when the members attribute is
+        set to None
         """
-        self.test_department.members = None
-        self.assertEqual(self.test_department.members, [])
+        self.assertRaises(TypeError, setattr, self.test_department, "members",
+                          None)
     
     
     
@@ -229,7 +220,7 @@ class DepartmentTester(unittest.TestCase):
         """testing if lead argument accepts only user objects
         """
         
-        test_values = [ "", 1, 2.3, [], {} ]
+        test_values = ["", 1, 2.3, [], {} ]
         
         # all of the above values should raise an TypeError
         for test_value in test_values:
@@ -262,13 +253,27 @@ class DepartmentTester(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_member_remove_also_removes_department_from_user(self):
-        #"""testing if removing an user from the members list also removes the
-        #department from the users department argument
-        #"""
+    #----------------------------------------------------------------------
+    def test_member_remove_also_removes_department_from_user(self):
+        """testing if removing an user from the members list also removes the
+        department from the users department argument
+        """
         
-        #self.fail("test is not implemented yet")
+        # check if the user is in the department
+        self.assertEqual(self.test_user1.department, self.test_department)
+        
+        # now remove the user from the department
+        self.test_department.members.remove(self.test_user1)
+        
+        # now check if users department became None
+        self.assertEqual(self.test_user1.department, None)
+        
+        # assign the user back
+        self.test_user1.department = self.test_department
+        
+        # check if the user is in the department
+        self.assertIn(self.test_user1, self.test_department.members)
+        
     
     
     
@@ -316,12 +321,12 @@ class DepartmentTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Deparment class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Deparment class
+        #"""
         
-        self.assertTrue(Department.plural_name, "Departments")
+        #self.assertTrue(Department.plural_name, "Departments")
     
     
     

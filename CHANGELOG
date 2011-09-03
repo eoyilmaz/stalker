@@ -18,6 +18,8 @@ v0.1.2.a1
    * Repository
    * Structure
    * FilenameTemplate
+   * Department
+   * Link
 
  * Empty :class:`~stalker.core.models.StatusList`\ s are now allowed. The
    validation overhead is left to the SOM user.
