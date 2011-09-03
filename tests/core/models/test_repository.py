@@ -1,9 +1,10 @@
 #-*- coding: utf-8 -*-
 
 
+
 import platform
 import unittest
-from stalker.core.models import Repository, Tag
+from stalker.core.declarativeModels import Repository, Tag
 
 
 
@@ -247,12 +248,12 @@ class RepositoryTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Repository class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Repository class
+        #"""
         
-        self.assertTrue(Repository.plural_name, "Repositories")
+        #self.assertTrue(Repository.plural_name, "Repositories")
     
     
     

@@ -15,6 +15,7 @@ v0.1.2.a1
    * ImageFormat
    * Status
    * StatusList
+   * Repository
 
  * Empty :class:`~stalker.core.models.StatusList`\ s are now allowed. The
    validation overhead is left to the SOM user.
