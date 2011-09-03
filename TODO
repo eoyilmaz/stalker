@@ -1,6 +1,11 @@
 TODO
 ====
- 
+
+ * Refactor target_entity_type attributes
+   
+   StatusList, FilenameTemplate and Type classes are using the same
+   target_entity_type attribute, create a mixin for that.
+
  * Stop the fight between SimpleEntity.name and SimpleEntity.code.
    
    Currently name superseeds code, but it is annoying to change the code over

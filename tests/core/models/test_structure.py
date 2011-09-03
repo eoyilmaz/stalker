@@ -3,13 +3,13 @@
 
 
 import unittest
-from stalker.core.models import (Structure, FilenameTemplate, Type, Asset,
-                                 Shot, Link)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.declarativeModels import (Structure, FilenameTemplate, Type)
 
 
-
-
+# mock classes
+class Asset(object): pass
+class Shot(object): pass
+class Link(object): pass
 
 
 ########################################################################
@@ -121,12 +121,13 @@ class StructureTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_templates_attribute_can_be_set_to_None(self):
-        """testing if no error will be raised when the templates attribute is
-        set to None
+    def test_templates_attribute_cannot_be_set_to_None(self):
+        """testing if a TypeError will be raised when the templates attribute
+        is set to None
         """
         
-        self.test_structure.templates = None
+        self.assertRaises(TypeError, setattr, self.test_structure, "templates",
+                          None)
     
     
     
@@ -186,15 +187,6 @@ class StructureTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_templates_attribute_is_instance_of_ValidatedList(self):
-        """testing if the templates attribute is an instance of ValidatedList
-        """
-        
-        self.assertIsInstance(self.test_structure.templates, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test___strictly_typed___is_True(self):
         """testing if the __strictly_typed__ is True
         """
@@ -243,12 +235,12 @@ class StructureTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Structure class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Structure class
+        #"""
         
-        self.assertTrue(Structure.plural_name, "Structures")
+        #self.assertTrue(Structure.plural_name, "Structures")
     
     
     
