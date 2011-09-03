@@ -1,6 +1,5 @@
 #-*- coding: utf-8 -*-
 
-
 import re
 import datetime
 import platform
@@ -30,6 +29,7 @@ from stalker.conf import defaults
 
 
 Base = declarative_base()
+
 
 
 
@@ -561,7 +561,20 @@ class Entity(SimpleEntity):
     
     __tablename__ = "Entities"
     __mapper_args__ = {"polymorphic_identity": "Entity"}
-    entity_id = Column("id", ForeignKey("SimpleEntities.id"), primary_key=True)
+    entity_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+                       primary_key=True)
+    
+    tags = relationship(
+        "Tag",
+        secondary="Entity_Tags",
+        backref="entities"
+    )
+    
+    notes = relationship(
+        "Note",
+        primaryjoin="Entity.entity_id==Note.entity_id",
+        backref="entity"
+    )
     
     
     
@@ -574,8 +587,14 @@ class Entity(SimpleEntity):
         
         super(Entity, self).__init__(**kwargs)
         
-        #self._tags = self._validate_tags(tags)
-        #self._notes = self._validate_notes(notes)
+        if tags is None:
+            tags = []
+        
+        if notes is None:
+            notes = []
+        
+        self.tags = tags
+        self.notes = notes
     
     
     
@@ -590,43 +609,31 @@ class Entity(SimpleEntity):
     
     
     
-    ##----------------------------------------------------------------------
-    #@validates(notes)
-    #def _validate_notes(self, key, notes_in):
-        #"""validates the given notes value
-        #"""
+    #----------------------------------------------------------------------
+    @validates("notes")
+    def _validate_notes(self, key, note_in):
+        """validates the given note value
+        """
         
-        #if notes_in is None:
-            #notes_in = []
+        if not isinstance(note_in, Note):
+            raise TypeError("note should be an instance of "
+                            "stalker.core.models.Note")
         
-        #if not isinstance(notes_in, list):
-            #raise TypeError("notes should be an instance of list")
-        
-        ##from stalker.core.models import Note
-        
-        #for element in notes_in:
-            #if not isinstance(element, Note):
-                #raise TypeError("every element in notes should be an "
-                                 #"instance of stalker.core.models.Note "
-                                 #"class")
-        
-        #return ValidatedList(notes_in)
+        return note_in
     
     
     
-    ##----------------------------------------------------------------------
-    #def _validate_tags(self, tags_in):
-        #"""validates the given tags_in value
-        #"""
+    #----------------------------------------------------------------------
+    @validates("tags")
+    def _validate_tags(self, key, tag_in):
+        """validates the given tag
+        """
         
-        #if tags_in is None:
-            #tags_in = []
+        if not isinstance(tag_in, Tag):
+            raise TypeError("tag should be an instance of "
+                            "stalker.core.models.Tag")
         
-        ## it is not an instance of list
-        #if not isinstance(tags_in, list):
-            #raise TypeError("the tags attribute should be set to a list")
-        
-        #return ValidatedList(tags_in)
+        return tag_in
     
     
     
@@ -756,6 +763,74 @@ class Type(Entity):
         """
         
         return self._target_entity_type
+
+
+
+
+
+
+########################################################################
+class Note(SimpleEntity):
+    """Notes for any of the SOM objects.
+    
+    To leave notes in Stalker use the Note class.
+    
+    :param content: the content of the note
+    
+    :param attached_to: The object that this note is attached to.
+    """
+    
+    
+    __tablename__ = "Notes"
+    __mapper_args__ = {"polymorphic_identity": "Note"}
+    
+    note_id = Column(
+        "id",
+        Integer,
+        ForeignKey("SimpleEntities.id"),
+        primary_key=True
+    )
+    
+    entity_id = Column(
+        "entity_id",
+        Integer,
+        ForeignKey("Entities.id")
+    )
+    
+    content = Column(String)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, content="", **kwargs):
+        super(Note, self).__init__(**kwargs)
+        self.content = content
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("content")
+    def _validate_content(self, key, content_in):
+        """validates the given content
+        """
+        
+        if content_in is not None and \
+           not isinstance(content_in, (str, unicode)):
+            raise TypeError("content should be an instance of string or "
+                             "unicode")
+        
+        return content_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Note, self).__eq__(other) and \
+               isinstance(other, Note) and \
+               self.content == other.content
 
 
 

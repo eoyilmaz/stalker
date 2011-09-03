@@ -21,8 +21,9 @@ secondary_engine = None
 session = None
 query = None
 
-## SQLAlchemy metadata
+# SQLAlchemy metadata
 #metadata = sqlalchemy.MetaData()
+metadata = Base.metadata
 
 # a couple of helper attributes
 __mappers__ = []
@@ -73,8 +74,7 @@ def setup(database=None, mappers=None):
     #__create_mappers__(defaults.MAPPERS)
     
     # create the database
-    Base.metadata.create_all(db.engine)
-    #db.metadata.create_all(db.engine)
+    db.metadata.create_all(db.engine)
     
     # create the Session class
     Session = sqlalchemy.orm.sessionmaker(bind=db.engine,

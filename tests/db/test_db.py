@@ -864,7 +864,8 @@ class DatabaseModelsTester(unittest.TestCase):
             created_by=created_by,
             updated_by=updated_by,
             date_created=date_created,
-            date_updated=date_updated)
+            date_updated=date_updated
+        )
         
         # the Tag2
         name = "Tag2_test_creating_an_Entity"
@@ -879,7 +880,11 @@ class DatabaseModelsTester(unittest.TestCase):
             created_by=created_by,
             updated_by=updated_by,
             date_created=date_created,
-            date_updated=date_updated)
+            date_updated=date_updated
+        )
+        
+        # the note
+        note1 = Note(name="test note")
         
         # the entity
         name = "TestEntity"
@@ -896,6 +901,7 @@ class DatabaseModelsTester(unittest.TestCase):
             date_created=date_created,
             date_updated=date_updated,
             tags=[tag1, tag2],
+            notes=[note1],
         )
         
         # persist it to the database

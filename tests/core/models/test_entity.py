@@ -34,18 +34,6 @@ class EntityTester(unittest.TestCase):
         self.test_tag2 = Tag(name="Test Tag 1") # make it equal to tag1
         self.test_tag3 = Tag(name="Test Tag 3")
         
-        #self.expect(self.test_tag1.__eq__(self.test_tag2))\
-            #.result(True).count(0, None)
-        
-        #self.expect(self.test_tag1.__ne__(self.test_tag2))\
-            #.result(False).count(0, None)
-        
-        #self.expect(self.test_tag1.__eq__(self.test_tag3))\
-            #.result(False).count(0, None)
-        
-        #self.expect(self.test_tag1.__ne__(self.test_tag3))\
-            #.result(True).count(0, None)
-        
         self.tags = [self.test_tag1, self.test_tag2]
         
         # create a couple of test Note objects
@@ -94,12 +82,11 @@ class EntityTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_notes_attribute_is_set_to_None(self):
-        """testing if the notes attribute will be an empty list when it is set
-        to None
+        """testing if a TypeError will be raised when the notes attribute is
+        set to None
         """
         
-        self.test_entity.notes = None
-        self.assertEqual(self.test_entity.notes, [])
+        self.assertRaises(TypeError, setattr, self.test_entity, "notes", None)
     
     
     
@@ -179,17 +166,6 @@ class EntityTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_notes_attribute_is_converted_to_a_ValidatedList(self):
-        """testing if the notes attribute is converted to a
-        stalker.ext.validatedList.ValidatedList instance
-        """
-        
-        self.test_entity.notes = []
-        self.assertIsInstance(self.test_entity.notes, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_notes_attribute_element_is_set_to_something_other_than_a_note_object(self):
         """testing if a TypeError will be raised when trying to assign an
         element to the notes list which is not an instance of Note
@@ -258,17 +234,6 @@ class EntityTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tags_attribute_is_converted_to_a_ValidatedList(self):
-        """testing if the tags attribute is converted to a
-        stalker.ext.validatedList.ValidatedList instance
-        """
-        
-        self.test_entity.tags = []
-        self.assertIsInstance(self.test_entity.tags, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_tags_attribute_element_is_set_to_something_other_than_a_tag_object(self):
         """testing if a TypeError will be raised when trying to assign an
         element to the tags list which is not an instance of Tag
@@ -280,6 +245,15 @@ class EntityTester(unittest.TestCase):
             0,
             0
         )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tags_attribute_set_to_None(self):
+        """testing if a TypeError will be raised when the tags attribute is set
+        to None
+        """
+        self.assertRaises(TypeError, setattr, self.test_entity, "tags", None)
     
     
     

@@ -104,6 +104,7 @@ Entities = Table(
     "Entities", metadata,
     Column(
         "id",
+        Integer,
         ForeignKey("SimpleEntities.id"),
         primary_key=True
     ),
