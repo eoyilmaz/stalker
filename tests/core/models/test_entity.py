@@ -3,8 +3,8 @@
 
 
 import unittest
-from stalker.core.models import (Entity, User, Tag, Note)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.declarativeModels import (Entity, User, Tag, Note)
+#from stalker.ext.validatedList import ValidatedList
 
 
 

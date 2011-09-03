@@ -9,7 +9,7 @@ import uuid
 from sqlalchemy import orm
 from sqlalchemy.orm import relationship, synonym, validates
 from sqlalchemy import (
-    #Table,
+    Table,
     Column,
     #Boolean,
     Integer,
@@ -560,7 +560,7 @@ class Entity(SimpleEntity):
     
     
     __tablename__ = "Entities"
-    __mapper_args__ = {'polymorphic_identity': 'Entity'}
+    __mapper_args__ = {"polymorphic_identity": "Entity"}
     entity_id = Column("id", ForeignKey("SimpleEntities.id"), primary_key=True)
     
     
@@ -756,6 +756,51 @@ class Type(Entity):
         """
         
         return self._target_entity_type
+
+
+
+
+
+
+########################################################################
+class Tag(SimpleEntity):
+    """Use it to create tags for any object available in SOM.
+    
+    Doesn't have any other attribute than what is inherited from
+    :class:`~stalker.core.models.SimpleEntity`
+    """
+    
+    
+    
+    __tablename__ = "Tags"
+    __mapper_args__ = {"polymorphic_identity": "Tag"}
+    tag_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+                    primary_key=True)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(Tag, self).__init__(**kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Tag, self).__eq__(other) and isinstance(other, Tag)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __ne__(self, other):
+        """the inequality operator
+        """
+        
+        return not self.__eq__(other)
+
 
 
 
@@ -1398,6 +1443,27 @@ class User(Entity):
             #projects.append(task.task_of.project)
         
         #return list(set(projects))
+
+
+
+######################################
+# SECONDARY TABLES
+######################################
+
+# ENTITY_TAGS
+Entity_Tags = Table(
+    "Entity_Tags", Base.metadata,
+    Column(
+        "entity_id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    ),
     
-    
-    
+    Column(
+        "tag_id",
+        Integer,
+        ForeignKey("Tags.id"),
+        primary_key=True,
+    )
+)

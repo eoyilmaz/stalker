@@ -4,10 +4,14 @@
 
 import unittest
 import datetime
-from stalker.core.models import (User, Department, PermissionGroup, Task,
-                                 Project, Sequence, Type, StatusList, Status,
-                                 Repository)
-from stalker.ext.validatedList import ValidatedList
+#from stalker.core.models import (User, Department, PermissionGroup, Task,
+                                 #Project, Sequence, Type, StatusList, Status,
+                                 #Repository)
+from stalker.core.declarativeModels import (User, Department, PermissionGroup,
+                                            Task, Project, Sequence, Type,
+                                            StatusList, Status, Repository)
+#from stalker.ext.validatedList import ValidatedList
+
 
 
 

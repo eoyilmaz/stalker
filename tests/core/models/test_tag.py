@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.core.models import Tag, SimpleEntity
+from stalker.core.declarativeModels import Tag, SimpleEntity
 
 
 
@@ -79,12 +79,12 @@ class TagTest(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Tag class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Tag class
+        #"""
         
-        self.assertTrue(Tag.plural_name, "Tags")
+        #self.assertTrue(Tag.plural_name, "Tags")
     
     
     
