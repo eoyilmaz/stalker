@@ -1,12 +1,15 @@
 #-*- coding: utf-8 -*-
 
 
+
 import datetime
 import unittest
-from stalker.core.models import (User, Sequence, Asset, ImageFormat, Project,
-                                 Structure, Repository, Entity, Status,
-                                 StatusList, Link, Task, Type, Shot)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.declarativeModels import (User, ImageFormat, Type, Project,
+                                            Structure, Repository, Entity,
+                                            Status, StatusList, Link,
+                                            #Task, Sequence, Asset, Shot,
+                                            )
+
 
 
 
@@ -200,373 +203,373 @@ class ProjectTester(unittest.TestCase):
         self.test_project = Project(**self.kwargs)
         
         
-        # status list for sequence
-        self.sequence_status_list = StatusList(
-            name="Sequence Statuses",
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
-            ],
-            target_entity_type=Sequence
-        )
+        ## status list for sequence
+        #self.sequence_status_list = StatusList(
+            #name="Sequence Statuses",
+            #statuses=[
+                #self.test_status1,
+                #self.test_status2,
+                #self.test_status3,
+                #self.test_status4,
+                #self.test_status5,
+            #],
+            #target_entity_type=Sequence
+        #)
         
-        # sequences without tasks
-        self.test_seq1 = Sequence(
-            name="Seq1",
-            project=self.test_project,
-            status_list=self.sequence_status_list,
-        )
+        ## sequences without tasks
+        #self.test_seq1 = Sequence(
+            #name="Seq1",
+            #project=self.test_project,
+            #status_list=self.sequence_status_list,
+        #)
         
-        self.test_seq2 = Sequence(
-            name="Seq2",
-            project=self.test_project,
-            status_list=self.sequence_status_list,
-        )
+        #self.test_seq2 = Sequence(
+            #name="Seq2",
+            #project=self.test_project,
+            #status_list=self.sequence_status_list,
+        #)
         
-        self.test_seq3 = Sequence(
-            name="Seq3",
-            project=self.test_project,
-            status_list=self.sequence_status_list,
-        )
+        #self.test_seq3 = Sequence(
+            #name="Seq3",
+            #project=self.test_project,
+            #status_list=self.sequence_status_list,
+        #)
         
-        # sequences with tasks
-        self.test_seq4 = Sequence(
-            name="Seq4",
-            project=self.test_project,
-            status_list=self.sequence_status_list,
-        )
+        ## sequences with tasks
+        #self.test_seq4 = Sequence(
+            #name="Seq4",
+            #project=self.test_project,
+            #status_list=self.sequence_status_list,
+        #)
         
-        self.test_seq5 = Sequence(
-            name="Seq5",
-            project=self.test_project,
-            status_list=self.sequence_status_list,
-        )
+        #self.test_seq5 = Sequence(
+            #name="Seq5",
+            #project=self.test_project,
+            #status_list=self.sequence_status_list,
+        #)
         
-        # sequences without tasks but with shots
-        self.test_seq6 = Sequence(
-            name="Seq6",
-            project=self.test_project,
-            status_list=self.sequence_status_list,
-        )
+        ## sequences without tasks but with shots
+        #self.test_seq6 = Sequence(
+            #name="Seq6",
+            #project=self.test_project,
+            #status_list=self.sequence_status_list,
+        #)
         
-        self.test_seq7 = Sequence(
-            name="Seq7",
-            project=self.test_project,
-            status_list=self.sequence_status_list,
-        )
-        
-        
-        # shot status list
-        self.shot_status_list = StatusList(
-            name="Shot Status List",
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
-            ],
-            target_entity_type=Shot,
-        )
-        
-        # shots
-        self.test_shot1 = Shot(
-            code="SH001",
-            sequence=self.test_seq6,
-            status_list=self.shot_status_list,
-        )
-        
-        self.test_shot2 = Shot(
-            code="SH002",
-            sequence=self.test_seq6,
-            status_list=self.shot_status_list,
-        )
-        
-        self.test_shot3 = Shot(
-            code="SH003",
-            sequence=self.test_seq7,
-            status_list=self.shot_status_list,
-        )
-        
-        self.test_shot4 = Shot(
-            code="SH004",
-            sequence=self.test_seq7,
-            status_list=self.shot_status_list,
-        )
+        #self.test_seq7 = Sequence(
+            #name="Seq7",
+            #project=self.test_project,
+            #status_list=self.sequence_status_list,
+        #)
         
         
-        # asset status list
-        self.asset_status_list = StatusList(
-            name="Asset Status List",
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
-            ],
-            target_entity_type=Asset,
-        )
+        ## shot status list
+        #self.shot_status_list = StatusList(
+            #name="Shot Status List",
+            #statuses=[
+                #self.test_status1,
+                #self.test_status2,
+                #self.test_status3,
+                #self.test_status4,
+                #self.test_status5,
+            #],
+            #target_entity_type=Shot,
+        #)
         
-        # asset types
-        self.asset_type = Type(
-            name="Character",
-            target_entity_type=Asset,
-        )
+        ## shots
+        #self.test_shot1 = Shot(
+            #code="SH001",
+            #sequence=self.test_seq6,
+            #status_list=self.shot_status_list,
+        #)
         
-        # assets without tasks
-        self.test_asset1 = Asset(
-            name="Test Asset 1",
-            type=self.asset_type,
-            project=self.test_project,
-            status_list=self.asset_status_list,
-        )
+        #self.test_shot2 = Shot(
+            #code="SH002",
+            #sequence=self.test_seq6,
+            #status_list=self.shot_status_list,
+        #)
         
-        self.test_asset2 = Asset(
-            name="Test Asset 2",
-            type=self.asset_type,
-            project=self.test_project,
-            status_list=self.asset_status_list,
-        )
+        #self.test_shot3 = Shot(
+            #code="SH003",
+            #sequence=self.test_seq7,
+            #status_list=self.shot_status_list,
+        #)
         
-        self.test_asset3 = Asset(
-            name="Test Asset 3",
-            type=self.asset_type,
-            project=self.test_project,
-            status_list=self.asset_status_list,
-        )
-        
-        # assets with tasks
-        self.test_asset4 = Asset(
-            name="Test Asset 4",
-            type=self.asset_type,
-            project=self.test_project,
-            status_list=self.asset_status_list,
-        )
-        
-        self.test_asset5 = Asset(
-            name="Test Asset 5",
-            type=self.asset_type,
-            project=self.test_project,
-            status_list=self.asset_status_list,
-        )
+        #self.test_shot4 = Shot(
+            #code="SH004",
+            #sequence=self.test_seq7,
+            #status_list=self.shot_status_list,
+        #)
         
         
-        # task status list
-        self.task_status_list = StatusList(
-            name="Task Status List",
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
-            ],
-            target_entity_type=Task,
-        )
+        ## asset status list
+        #self.asset_status_list = StatusList(
+            #name="Asset Status List",
+            #statuses=[
+                #self.test_status1,
+                #self.test_status2,
+                #self.test_status3,
+                #self.test_status4,
+                #self.test_status5,
+            #],
+            #target_entity_type=Asset,
+        #)
         
-        # the tasks
+        ## asset types
+        #self.asset_type = Type(
+            #name="Character",
+            #target_entity_type=Asset,
+        #)
         
-        # for project
-        self.test_task1 = Task(
-            name="Test Task 1",
-            task_of=self.test_project,
-            resources=[self.test_user1],
-            status_list=self.task_status_list,
-        )
+        ## assets without tasks
+        #self.test_asset1 = Asset(
+            #name="Test Asset 1",
+            #type=self.asset_type,
+            #project=self.test_project,
+            #status_list=self.asset_status_list,
+        #)
         
-        self.test_task2 = Task(
-            name="Test Task 2",
-            task_of=self.test_project,
-            resources=[self.test_user2],
-            status_list=self.task_status_list,
-        )
+        #self.test_asset2 = Asset(
+            #name="Test Asset 2",
+            #type=self.asset_type,
+            #project=self.test_project,
+            #status_list=self.asset_status_list,
+        #)
         
-        self.test_task3 = Task(
-            name="Test Task 3",
-            task_of=self.test_project,
-            resources=[self.test_user3],
-            status_list=self.task_status_list,
-        )
+        #self.test_asset3 = Asset(
+            #name="Test Asset 3",
+            #type=self.asset_type,
+            #project=self.test_project,
+            #status_list=self.asset_status_list,
+        #)
         
-        # for sequence4
-        self.test_task4 = Task(
-            name="Test Task 4",
-            task_of=self.test_seq4,
-            resources=[self.test_user4],
-            status_list=self.task_status_list,
-        )
+        ## assets with tasks
+        #self.test_asset4 = Asset(
+            #name="Test Asset 4",
+            #type=self.asset_type,
+            #project=self.test_project,
+            #status_list=self.asset_status_list,
+        #)
         
-        self.test_task5 = Task(
-            name="Test Task 5",
-            task_of=self.test_seq4,
-            resources=[self.test_user5],
-            status_list=self.task_status_list,
-        )
+        #self.test_asset5 = Asset(
+            #name="Test Asset 5",
+            #type=self.asset_type,
+            #project=self.test_project,
+            #status_list=self.asset_status_list,
+        #)
         
-        self.test_task6 = Task(
-            name="Test Task 6",
-            task_of=self.test_seq4,
-            resources=[self.test_user6],
-            status_list=self.task_status_list,
-        )
         
-        # for sequence5
-        self.test_task7 = Task(
-            name="Test Task 7",
-            task_of=self.test_seq5,
-            resources=[self.test_user7],
-            status_list=self.task_status_list,
-        )
+        ## task status list
+        #self.task_status_list = StatusList(
+            #name="Task Status List",
+            #statuses=[
+                #self.test_status1,
+                #self.test_status2,
+                #self.test_status3,
+                #self.test_status4,
+                #self.test_status5,
+            #],
+            #target_entity_type=Task,
+        #)
         
-        self.test_task8 = Task(
-            name="Test Task 8",
-            task_of=self.test_seq5,
-            resources=[self.test_user8],
-            status_list=self.task_status_list,
-        )
+        ## the tasks
         
-        self.test_task9 = Task(
-            name="Test Task 9",
-            task_of=self.test_seq5,
-            resources=[self.test_user9],
-            status_list=self.task_status_list,
-        )
+        ## for project
+        #self.test_task1 = Task(
+            #name="Test Task 1",
+            #task_of=self.test_project,
+            #resources=[self.test_user1],
+            #status_list=self.task_status_list,
+        #)
         
-        # for shot1 of seuqence6
-        self.test_task10 = Task(
-            name="Test Task 10",
-            task_of=self.test_shot1,
-            resources=[self.test_user10],
-            status_list=self.task_status_list,
-        )
+        #self.test_task2 = Task(
+            #name="Test Task 2",
+            #task_of=self.test_project,
+            #resources=[self.test_user2],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task11 = Task(
-            name="Test Task 11",
-            task_of=self.test_shot1,
-            resources=[self.test_user1, self.test_user2],
-            status_list=self.task_status_list,
-        )
+        #self.test_task3 = Task(
+            #name="Test Task 3",
+            #task_of=self.test_project,
+            #resources=[self.test_user3],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task12 = Task(
-            name="Test Task 12",
-            task_of=self.test_shot1,
-            resources=[self.test_user3, self.test_user4],
-            status_list=self.task_status_list,
-        )
+        ## for sequence4
+        #self.test_task4 = Task(
+            #name="Test Task 4",
+            #task_of=self.test_seq4,
+            #resources=[self.test_user4],
+            #status_list=self.task_status_list,
+        #)
         
-        # for shot2 of seuqence6
-        self.test_task13 = Task(
-            name="Test Task 13",
-            task_of=self.test_shot2,
-            resources=[self.test_user5, self.test_user6],
-            status_list=self.task_status_list,
-        )
+        #self.test_task5 = Task(
+            #name="Test Task 5",
+            #task_of=self.test_seq4,
+            #resources=[self.test_user5],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task14 = Task(
-            name="Test Task 14",
-            task_of=self.test_shot2,
-            resources=[self.test_user7, self.test_user8],
-            status_list=self.task_status_list,
-        )
+        #self.test_task6 = Task(
+            #name="Test Task 6",
+            #task_of=self.test_seq4,
+            #resources=[self.test_user6],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task15 = Task(
-            name="Test Task 15",
-            task_of=self.test_shot2,
-            resources=[self.test_user9, self.test_user10],
-            status_list=self.task_status_list,
-        )
+        ## for sequence5
+        #self.test_task7 = Task(
+            #name="Test Task 7",
+            #task_of=self.test_seq5,
+            #resources=[self.test_user7],
+            #status_list=self.task_status_list,
+        #)
         
-        # for shot3 of seuqence7
-        self.test_task16 = Task(
-            name="Test Task 16",
-            task_of=self.test_shot3,
-            resources=[self.test_user1, self.test_user2, self.test_user3],
-            status_list=self.task_status_list,
-        )
+        #self.test_task8 = Task(
+            #name="Test Task 8",
+            #task_of=self.test_seq5,
+            #resources=[self.test_user8],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task17 = Task(
-            name="Test Task 17",
-            task_of=self.test_shot3,
-            resources=[self.test_user4, self.test_user5, self.test_user6],
-            status_list=self.task_status_list,
-        )
+        #self.test_task9 = Task(
+            #name="Test Task 9",
+            #task_of=self.test_seq5,
+            #resources=[self.test_user9],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task18 = Task(
-            name="Test Task 18",
-            task_of=self.test_shot3,
-            resources=[self.test_user7, self.test_user8, self.test_user9],
-            status_list=self.task_status_list,
-        )
+        ## for shot1 of seuqence6
+        #self.test_task10 = Task(
+            #name="Test Task 10",
+            #task_of=self.test_shot1,
+            #resources=[self.test_user10],
+            #status_list=self.task_status_list,
+        #)
         
-        # for shot4 of seuqence7
-        self.test_task19 = Task(
-            name="Test Task 19",
-            task_of=self.test_shot4,
-            resources=[self.test_user10, self.test_user1, self.test_user2],
-            status_list=self.task_status_list,
-        )
+        #self.test_task11 = Task(
+            #name="Test Task 11",
+            #task_of=self.test_shot1,
+            #resources=[self.test_user1, self.test_user2],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task20 = Task(
-            name="Test Task 20",
-            task_of=self.test_shot4,
-            resources=[self.test_user3, self.test_user4, self.test_user5],
-            status_list=self.task_status_list,
-        )
+        #self.test_task12 = Task(
+            #name="Test Task 12",
+            #task_of=self.test_shot1,
+            #resources=[self.test_user3, self.test_user4],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task21 = Task(
-            name="Test Task 21",
-            task_of=self.test_shot4,
-            resources=[self.test_user6, self.test_user7, self.test_user8],
-            status_list=self.task_status_list,
-        )
+        ## for shot2 of seuqence6
+        #self.test_task13 = Task(
+            #name="Test Task 13",
+            #task_of=self.test_shot2,
+            #resources=[self.test_user5, self.test_user6],
+            #status_list=self.task_status_list,
+        #)
         
-        # for asset4
-        self.test_task22 = Task(
-            name="Test Task 22",
-            task_of=self.test_asset4,
-            resources=[self.test_user9, self.test_user10, self.test_user1],
-            status_list=self.task_status_list,
-        )
+        #self.test_task14 = Task(
+            #name="Test Task 14",
+            #task_of=self.test_shot2,
+            #resources=[self.test_user7, self.test_user8],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task23 = Task(
-            name="Test Task 23",
-            task_of=self.test_asset4,
-            resources=[self.test_user2, self.test_user3],
-            status_list=self.task_status_list,
-        )
+        #self.test_task15 = Task(
+            #name="Test Task 15",
+            #task_of=self.test_shot2,
+            #resources=[self.test_user9, self.test_user10],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task24 = Task(
-            name="Test Task 24",
-            task_of=self.test_asset4,
-            resources=[self.test_user4, self.test_user5],
-            status_list=self.task_status_list,
-        )
+        ## for shot3 of seuqence7
+        #self.test_task16 = Task(
+            #name="Test Task 16",
+            #task_of=self.test_shot3,
+            #resources=[self.test_user1, self.test_user2, self.test_user3],
+            #status_list=self.task_status_list,
+        #)
         
-        # for asset5
-        self.test_task25 = Task(
-            name="Test Task 25",
-            task_of=self.test_asset5,
-            resources=[self.test_user6, self.test_user7],
-            status_list=self.task_status_list,
-        )
+        #self.test_task17 = Task(
+            #name="Test Task 17",
+            #task_of=self.test_shot3,
+            #resources=[self.test_user4, self.test_user5, self.test_user6],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task26 = Task(
-            name="Test Task 26",
-            task_of=self.test_asset5,
-            resources=[self.test_user8, self.test_user9],
-            status_list=self.task_status_list,
-        )
+        #self.test_task18 = Task(
+            #name="Test Task 18",
+            #task_of=self.test_shot3,
+            #resources=[self.test_user7, self.test_user8, self.test_user9],
+            #status_list=self.task_status_list,
+        #)
         
-        self.test_task27 = Task(
-            name="Test Task 27",
-            task_of=self.test_asset5,
-            resources=[self.test_user10, self.test_user1],
-            status_list=self.task_status_list,
-        )
+        ## for shot4 of seuqence7
+        #self.test_task19 = Task(
+            #name="Test Task 19",
+            #task_of=self.test_shot4,
+            #resources=[self.test_user10, self.test_user1, self.test_user2],
+            #status_list=self.task_status_list,
+        #)
+        
+        #self.test_task20 = Task(
+            #name="Test Task 20",
+            #task_of=self.test_shot4,
+            #resources=[self.test_user3, self.test_user4, self.test_user5],
+            #status_list=self.task_status_list,
+        #)
+        
+        #self.test_task21 = Task(
+            #name="Test Task 21",
+            #task_of=self.test_shot4,
+            #resources=[self.test_user6, self.test_user7, self.test_user8],
+            #status_list=self.task_status_list,
+        #)
+        
+        ## for asset4
+        #self.test_task22 = Task(
+            #name="Test Task 22",
+            #task_of=self.test_asset4,
+            #resources=[self.test_user9, self.test_user10, self.test_user1],
+            #status_list=self.task_status_list,
+        #)
+        
+        #self.test_task23 = Task(
+            #name="Test Task 23",
+            #task_of=self.test_asset4,
+            #resources=[self.test_user2, self.test_user3],
+            #status_list=self.task_status_list,
+        #)
+        
+        #self.test_task24 = Task(
+            #name="Test Task 24",
+            #task_of=self.test_asset4,
+            #resources=[self.test_user4, self.test_user5],
+            #status_list=self.task_status_list,
+        #)
+        
+        ## for asset5
+        #self.test_task25 = Task(
+            #name="Test Task 25",
+            #task_of=self.test_asset5,
+            #resources=[self.test_user6, self.test_user7],
+            #status_list=self.task_status_list,
+        #)
+        
+        #self.test_task26 = Task(
+            #name="Test Task 26",
+            #task_of=self.test_asset5,
+            #resources=[self.test_user8, self.test_user9],
+            #status_list=self.task_status_list,
+        #)
+        
+        #self.test_task27 = Task(
+            #name="Test Task 27",
+            #task_of=self.test_asset5,
+            #resources=[self.test_user10, self.test_user1],
+            #status_list=self.task_status_list,
+        #)
     
     
     
@@ -665,6 +668,8 @@ class ProjectTester(unittest.TestCase):
         project it self
         """
         
+        self.fail("test needs to be updated")
+        
         self.kwargs["sequences"] = []
         self.kwargs["assets"] = []
         new_project = Project(**self.kwargs)
@@ -732,6 +737,8 @@ class ProjectTester(unittest.TestCase):
         """testing if the users attribute is calculated from the tasks of the
         sequences
         """
+        
+        self.fail("test needs to be updated")
         
         self.kwargs["tasks"] = []
         #self.kwargs["assets"] = []
@@ -815,6 +822,8 @@ class ProjectTester(unittest.TestCase):
         assets
         """
         
+        self.fail("test needs to be updated")
+        
         self.kwargs["tasks"] = []
         #self.kwargs["sequences"] = []
         #self.kwargs["assets"] = [self.test_asset4, self.test_asset5]
@@ -896,6 +905,8 @@ class ProjectTester(unittest.TestCase):
         """testing if the users attribute is calculated from the tasks of the
         tasks of the sequence shots
         """
+        
+        self.fail("test needs to be updated")
         
         self.kwargs["tasks"] = []
         #self.kwargs["assets"] = []
@@ -1048,151 +1059,12 @@ class ProjectTester(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_sequences_argument_is_given_as_None(self):
-        #"""testing if sequence attribute is set to an empty list when the
-        #sequences argument is given as None
-        #"""
-        
-        #self.kwargs["sequences"] = None
-        #new_project = Project(**self.kwargs)
-        #self.assertEqual(new_project.sequences, [])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_sequences_attribute_is_set_to_None_converted_to_empty_list(self):
-        #"""testing if sequence attribute is set to an empty list when it is set
-        #to None
-        #"""
-        
-        #self.test_project.sequences = None
-        #self.assertEqual(self.test_project.sequences, [])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_sequences_argument_is_given_as_an_empty_list(self):
-        #"""testing if nothing happens when the sequences argument is given as
-        #an empty list
-        #"""
-        
-        #self.kwargs["sequences"] = []
-        #new_project = Project(**self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_sequences_attribute_is_set_to_an_empty_list(self):
-        #"""testing if nothing happens when the seuqences attribute is set to an
-        #empty list
-        #"""
-        
-        #self.test_project.sequences = []
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_sequences_argument_is_given_as_a_list_containing_non_Sequence_objects(self):
-        #"""testing if a TypeError will be raised when trying the given
-        #sequences argument is a list containing objects other than Sequence
-        #instances
-        #"""
-        
-        #test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-        #self.kwargs["sequences"] = test_value
-        #self.assertRaises(TypeError, Project, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_sequences_attribute_is_set_to_a_list_containing_non_Sequence_objects(self):
-        #"""testing if a TypeError will be raised when trying to set the
-        #sequences list to a list containing objects other than Sequence
-        #instances
-        #"""
-        
-        #test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-        #self.assertRaises(
-            #TypeError,
-            #setattr,
-            #self.test_project,
-            #"sequences",
-            #test_value
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_sequences_argument_is_given_as_non_Sequence_object(self):
-        #"""testing if a TypeError will be raised when trying the given
-        #sequences argument is an object other than Sequence instance
-        #"""
-        
-        #test_values = [1, 1.2, "a user"]
-        
-        #for test_value in test_values:
-            #self.kwargs["sequences"] = test_value
-            #self.assertRaises(TypeError, Project, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_sequences_attribute_is_set_to_a_list_containing_non_Sequence_objects(self):
-        #"""testing if a TypeError will be raised when trying to set the
-        #sequences list to a list containing objects other than Sequence
-        #instances
-        #"""
-        
-        #test_values = [1, 1.2, "a user"]
-        
-        #for test_value in test_values:
-            #self.assertRaises(
-                #TypeError,
-                #setattr,
-                #self.test_project,
-                #"sequences",
-                #test_value
-            #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_sequences_attribute_is_a_ValidatedList_instance(self):
-        #"""testing if the sequences attribute is an instance of ValidatedList
-        #"""
-        
-        #self.assertIsInstance(self.test_project.sequences, ValidatedList)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_sequences_attribute_elements_accepts_Sequence_only(self):
-        #"""testing if a TypeError will be raised when trying to assign
-        #something other than a Sequence object to the sequences list
-        #"""
-        
-        ## append
-        #self.assertRaises(
-            #TypeError,
-            #self.test_project.sequences.append,
-            #0
-        #)
-        
-        ## __setitem__
-        #self.assertRaises(
-            #TypeError,
-            #self.test_project.sequences.__setitem__,
-            #0,
-            #0
-        #)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_sequences_attribute_is_read_only(self):
         """testing if the sequence attribute is read-only
         """
+        
+        self.fail("test needs to be updated")
         
         self.assertRaises(AttributeError, setattr, self.test_project,
                           "sequences", ["some non sequence related data"])
@@ -1204,6 +1076,8 @@ class ProjectTester(unittest.TestCase):
         """testing if the sequences attribute is updated with the newly created
         sequences
         """
+        
+        self.fail("test needs to be updated")
         
         # first get the current sequences of the test_project
         import copy
@@ -1223,152 +1097,6 @@ class ProjectTester(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_assets_argument_is_given_as_None(self):
-        #"""testing if assets attribute is set to an empty list when the assets
-        #argument is given as None
-        #"""
-        
-        #self.kwargs["assets"] = None
-        #new_project = Project(**self.kwargs)
-        #self.assertEqual(new_project.assets, [])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_attribute_is_set_to_None_converted_to_empty_list(self):
-        #"""testing if assets attribute is set to an empty list when it is set
-        #to None
-        #"""
-        
-        #self.test_project.assets = None
-        #self.assertEqual(self.test_project.assets, [])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_argument_skipped_and_intializied_as_an_empty_list(self):
-        #"""testing if skipping the assets list argument will initialize the
-        #assets attribute to an empty list
-        #"""
-        
-        #self.kwargs.pop("assets")
-        #new_project = Project(**self.kwargs)
-        #self.assertEqual(new_project.assets, [])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_argument_is_given_as_an_empty_list(self):
-        #"""testing if nothing happens when the assets argument is given as
-        #an empty list
-        #"""
-        
-        #self.kwargs["assets"] = []
-        #new_project = Project(**self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_attribute_is_set_to_an_empty_list(self):
-        #"""testing if nothing happens when the assets attribute is set to an
-        #empty list
-        #"""
-        
-        #self.test_project.assets = []
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_argument_is_a_list_containing_non_Asset_objects(self):
-        #"""testing if a TypeError will be raised when the assets argument is
-        #given as a list containing objects other than Assets instances
-        #"""
-        
-        #test_value = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-        #self.kwargs["assets"] = test_value
-        #self.assertRaises(TypeError, Project, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_attribute_is_set_to_a_list_containing_non_Asset_objects(self):
-        #"""testing if a TypeError will be raised when trying to set the assets
-        #list to a list containing objects other than Assets instances
-        #"""
-        
-        #test_value = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-        
-        #self.assertRaises(
-            #TypeError,
-            #setattr,
-            #self.test_project,
-            #"assets",
-            #test_value
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_attribute_is_a_ValidatedList_instance(self):
-        #"""testing if the assets attribute is an instance of ValidatedList
-        #"""
-        
-        #self.assertIsInstance(self.test_project.assets, ValidatedList)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_attribute_elements_accepts_Asset_only(self):
-        #"""testing if a TypeError will be raised when trying to assign
-        #something other than a Asset instance to the assets list
-        #"""
-        
-        ## append
-        #self.assertRaises(
-            #TypeError,
-            #self.test_project.assets.append,
-            #0
-        #)
-        
-        ## __setitem__
-        #self.assertRaises(
-            #TypeError,
-            #self.test_project.assets.__setitem__,
-            #0,
-            #0
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_argument_is_not_iterable(self):
-        #"""testing if a TypeError will be raised when the assets argument is
-        #not iterable
-        #"""
-        
-        #test_values = [1, 1.2, "an asset"]
-        
-        #for test_value in test_values:
-            #self.kwargs["assets"] = test_value
-            #self.assertRaises(TypeError, Project, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_assets_attribute_is_not_iterable(self):
-        #"""testing if a TypeError will be raised when a non-iterable value is
-        #tried to be assigned to the assets attribute
-        #"""
-        
-        #test_values = [1, 1.2, "an asset"]
-        
-        #for test_value in test_values:
-            #self.assertRaises(TypeError, setattr, self.test_project, "assets",
-                              #test_value)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_assets_attribute_is_read_only(self):
         """testing if the assets attribute is read only
@@ -1384,6 +1112,8 @@ class ProjectTester(unittest.TestCase):
         """testing if the assets attribute is updated with the newlly created
         assets
         """
+        
+        self.fail("test needs to be updated")
         
         # first get the current assets of the test_project
         import copy
@@ -1943,7 +1673,7 @@ class ProjectTester(unittest.TestCase):
         
         status_list = StatusList(name="Project Statuses",
                                  statuses=[status1, status2],
-                                 target_entity_type=Project.entity_type)
+                                 target_entity_type=Project)
         
         self.kwargs["status"] = 0
         self.kwargs["status_list"] = status_list
@@ -1973,56 +1703,47 @@ class ProjectTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_TaskMixin_initialization(self):
-        """testing if the TaskMixin part is initialized correctly
-        """
+    ##----------------------------------------------------------------------
+    #def test_TaskMixin_initialization(self):
+        #"""testing if the TaskMixin part is initialized correctly
+        #"""
         
-        status1 = Status(name="On Hold", code="OH")
+        #status1 = Status(name="On Hold", code="OH")
         
-        project_status_list = StatusList(
-            name="Project Status List",
-            statuses=[status1],
-            target_entity_type=Project
-        )
+        #project_status_list = StatusList(
+            #name="Project Status List",
+            #statuses=[status1],
+            #target_entity_type=Project
+        #)
         
-        commercial_project_type = Type(
-            name="Commercial Project",
-            target_entity_type=Project,
-        )
+        #commercial_project_type = Type(
+            #name="Commercial Project",
+            #target_entity_type=Project,
+        #)
         
-        new_project = Project(
-            name="Test Project",
-            type=commercial_project_type,
-            status_list=project_status_list,
-            repository=self.kwargs["repository"],
-        )
-        
-        
-        task_status_list = StatusList(
-            name="Task Statuses",
-            statuses=[status1],
-            target_entity_type=Task
-        )
-        
-        new_task1 = Task(
-            name="Test Task",
-            status_list=task_status_list,
-            task_of=new_project,
-        )
+        #new_project = Project(
+            #name="Test Project",
+            #type=commercial_project_type,
+            #status_list=project_status_list,
+            #repository=self.kwargs["repository"],
+        #)
         
         
-        self.assertItemsEqual(new_project.tasks, [new_task1])
-        self.assertEqual(new_project.project, new_project)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Project class
-        """
+        #task_status_list = StatusList(
+            #name="Task Statuses",
+            #statuses=[status1],
+            #target_entity_type=Task
+        #)
         
-        self.assertTrue(Project.plural_name, "Projects")
+        #new_task1 = Task(
+            #name="Test Task",
+            #status_list=task_status_list,
+            #task_of=new_project,
+        #)
+        
+        
+        #self.assertItemsEqual(new_project.tasks, [new_task1])
+        #self.assertEqual(new_project.project, new_project)
     
     
     
@@ -2032,4 +1753,15 @@ class ProjectTester(unittest.TestCase):
         """
         
         self.assertEqual(Project.__strictly_typed__, True)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test___strictly_typed___forces_type_initialization(self):
+        """testing if Project can not be created without defining a type for it
+        """
         
+        self.kwargs.pop("type")
+        self.assertRaises(TypeError, Project, **self.kwargs)
+    
+    

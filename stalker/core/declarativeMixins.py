@@ -17,7 +17,7 @@ from sqlalchemy import (
     Integer,
 )
 from sqlalchemy.orm import relationship, synonym, validates
-from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.ext.declarative import declared_attr, synonym_for
 
 from stalker.conf import defaults
 from stalker.core.declarativeModels import Base
@@ -41,6 +41,16 @@ class ReferenceMixin(object):
     :type references: list of :class:`~stalker.core.models.Entity` objects.
     """
     
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 references=None,
+                 **kwargs):
+        if references is None:
+            references = []
+        
+        self.references = references
+
     
     
     #----------------------------------------------------------------------
@@ -145,43 +155,6 @@ class StatusMixin(object):
     
     
     #----------------------------------------------------------------------
-    @classmethod
-    def create_secondary_tables(cls):
-        """creates any secondary table
-        """
-        
-        class_name = cls.__name__
-        
-        # use the given class_name and the class_table
-        secondary_table_name = class_name + "_References"
-        secondary_table = None
-        
-        # check if the table is already defined
-        if secondary_table_name not in Base.metadata:
-            secondary_table = Table(
-                secondary_table_name, Base.metadata,
-                Column(
-                    class_name.lower() + "_id",
-                    Integer,
-                    ForeignKey(cls.__tablename__ + ".id"),
-                    primary_key=True,
-                ),
-                
-                Column(
-                    "reference_id",
-                    Integer,
-                    ForeignKey("Links.id"),
-                    primary_key=True,
-                )
-            )
-        else:
-            secondary_table = Base.metadata.tables[secondary_table_name]
-        
-        return secondary_table
-    
-    
-    
-    #----------------------------------------------------------------------
     @declared_attr
     def status(cls):
         return Column("status", Integer, default=0)
@@ -208,20 +181,6 @@ class StatusMixin(object):
             primaryjoin=\
                 "%s.status_list_id==StatusList.statusList_id" % cls.__name__
         )
-    
-    
-    
-    #----------------------------------------------------------------------
-    @declared_attr
-    def references(cls):
-        
-        class_name = cls.__name__
-        
-        # get secondary table
-        secondary_table = cls.create_secondary_tables()
-        
-        # return the relationship
-        return relationship("Link", secondary=secondary_table)
     
     
     
@@ -560,6 +519,93 @@ class ScheduleMixin(object):
         self._start_date = start_date
         self._due_date = due_date
         self._duration = self._due_date - self._start_date
+
+
+
+
+
+
+########################################################################
+class ProjectMixin(object):
+    """Gives the ability to connect to a :class:`~stalker.core.models.Project` to the mixed in object.
+    
+    :param project: A :class:`~stalker.core.models.Project` instance holding
+      the project which this object is related to. It can not be None, or
+      anything other than a :class:`~stalker.core.models.Project` instance.
+    
+    :type project: :class:`~stalker.core.models.Project`
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    @declared_attr
+    def project_id(cls):
+        return Column(
+            "project_id",
+            Integer,
+            ForeignKey("Projects.id"),
+            # cannot use nullable cause a Project object needs
+            # insert itself as the project and it needs post_update
+            # thus nullable should be True
+            #nullable=False,
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    @declared_attr
+    def project(cls):
+        return relationship(
+            "Project",
+            primaryjoin=\
+                cls.__name__ + ".project_id==Project.project_id_local",
+            post_update=True, # for project itself
+            uselist=False
+        )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 project=None,
+                 **kwargs):
+        self._project = project
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("project")
+    def _validate_project(self, project):
+        """validates the given project value
+        """
+        
+        if project is None:
+            raise TypeError("project can not be None it must be an instance "
+                            "of stalker.core.models.Project instance")
+        
+        from stalker.core.models import Project # pylint: disable=W0404
+        
+        if not isinstance(project, Project):
+            raise TypeError("project must be an instance of "
+                            "stalker.core.models.Project instance")
+        
+        return project
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@synonym_for("_project")
+    #@property
+    #def project(self):
+        #"""A :class:`~stalker.core.models.Project` instance showing the
+        #relation of this object to a Stalker
+        #:class:`~stalker.core.models.Project`. It is a read only attribute, so
+        #you can not change the Project of an already created object.
+        #"""
+        
+        #return self._project
+
 
 
 

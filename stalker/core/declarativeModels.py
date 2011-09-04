@@ -1307,6 +1307,16 @@ class Link(Entity):
 
 
 
+# mixin class imports should be placed after StatusList and Link definitions
+from stalker.core.declarativeMixins import (ReferenceMixin, ScheduleMixin,
+                                            StatusMixin, #TaskMixin,
+                                            ProjectMixin)
+
+
+
+
+
+
 ########################################################################
 class PermissionGroup(SimpleEntity):    
     """Manages permission in the system.
@@ -1467,6 +1477,328 @@ class Tag(SimpleEntity):
         
         return not self.__eq__(other)
 
+
+
+
+
+
+########################################################################
+#class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
+class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, ProjectMixin):
+    """All the information about a Project in Stalker is hold in this class.
+    
+    Project is one of the main classes that will direct the others. A project
+    in Stalker is a gathering point.
+    
+    It is mixed with :class:`~stalker.core.mixins.ReferenceMixin`,
+    :class:`~stalker.core.mixins.StatusMixin`,
+    :class:`~stalker.core.mixins.ScheduleMixin` and
+    :class:`~stalker.core.mixins.TaskMixin` to give reference, status, schedule
+    and task abilities. Please read the individual documentation of each of the
+    mixins.
+    
+    The :attr:`~stalker.core.models.Project.users` attributes content is
+    gathered from all the :class:`~stalker.core.models.Task`\ s of the project
+    itself and from the :class:`~stalker.core.models.Task`\ s of the
+    :class:`~stalker.core.models.Sequence`\ s stored in the
+    :attr:`~stalker.core.models.Project.sequences` attribute, the
+    :class:`~stalker.core.models.Shot`\ s stored in the
+    :attr:`~stalker.core.models.Sequence.shots` attribute, the
+    :class:`~stalker.core.models.Asset`\ s stored in the
+    :attr:`~stalker.core.models.Project.assets`. It is a read only attribute.
+    
+    :param lead: The lead of the project. Default value is None.
+    
+    :type lead: :class:`~stalker.core.models.User`
+    
+    :param image_format: The output image format of the project. Default
+      value is None.
+    
+    :type image_format: :class:`~stalker.core.models.ImageFormat`
+    
+    :param float fps: The FPS of the project, it should be a integer or float
+      number, or a string literal which can be correctly converted to a float.
+      Default value is 25.0.
+    
+    :param type: The type of the project. Default value is None.
+    
+    :type type: :class:`~stalker.core.models.ProjectType`
+    
+    :param structure: The structure of the project. Default value is None
+    
+    :type structure: :class:`~stalker.core.models.Structure`
+    
+    :param repository: The repository that the project files are going to be
+      stored in. You can not create a project without specifying the
+      repository argument and passing a
+      :class:`~stalker.core.models.Repository` to it. Default value is None
+      which raises a TypeError.
+    
+    :type repository: :class:`~stalker.core.models.Repository`.
+    
+    :param bool is_stereoscopic: a bool value, showing if the project is going
+      to be a stereo 3D project, anything given as the argument will be
+      converted to True or False. Default value is False.
+    
+    :param float display_width: the width of the display that the output of the
+      project is going to be displayed (very unnecessary if you are not using
+      stereo 3D setup). Should be an int or float value, negative values
+      converted to the positive values. Default value is 1.
+    """
+    
+    #:param list assets: The assets used in this project, it should be a list of
+      #:class:`~stalker.core.models.Asset` instances, if set to None it is
+      #converted to an empty list. Default value is an empty list.
+    
+    #:param list sequences: The sequences of the project, it should be a list of
+      #:class:`~stalker.core.models.Sequence` instances, if set to None it is
+      #converted to an empty list. Default value is an empty list.
+    
+    
+    
+    __strictly_typed__ = True
+    __tablename__ = "Projects"
+    __mapper_args__ = {"polymorphic_identity": "Project"}
+    project_id_local = Column("id", Integer, ForeignKey("Entities.id"),
+                              primary_key=True)
+    lead_id = Column(Integer, ForeignKey("Users.id"))
+    lead = relationship(
+        "User",
+        backref="_projects_lead",
+        primaryjoin="Project.lead_id==User.user_id",
+    )
+    
+    repository_id = Column(Integer, ForeignKey("Repositories.id"))
+    repository = relationship(
+        "Repository",
+        primaryjoin="Project.repository_id==Repository.repository_id"
+    )
+    
+    structure_id = Column(Integer, ForeignKey("Structures.id"))
+    structure = relationship(
+        "Structure",
+        primaryjoin="Project.structure_id==Structure.structure_id"
+    )
+    
+    image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
+    image_format = relationship(
+        "ImageFormat",
+        primaryjoin="Project.image_format_id==ImageFormat.imageFormat_id"
+    )
+    
+    fps = Column(Float(precision=3))
+    is_stereoscopic = Column(Boolean)
+    display_width = Column(Float(precision=3))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 lead=None,
+                 repository=None,
+                 structure=None,
+                 image_format=None,
+                 fps=25.0,
+                 is_stereoscopic=False,
+                 display_width=1.0,
+                 **kwargs):
+        
+        # a projects project should be self
+        # initialize the project argument to self
+        kwargs["project"] = self
+        
+        super(Project, self).__init__(**kwargs)
+        # call the mixin __init__ methods
+        ReferenceMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
+        #TaskMixin.__init__(self, **kwargs)
+        ProjectMixin.__init__(self, **kwargs)
+        
+        self.lead = lead
+        self._users = []
+        self.repository = repository
+        self.structure = structure
+        self._sequences = []
+        self._assets = []
+        
+        self.image_format = image_format
+        self.fps = fps
+        self.is_stereoscopic = bool(is_stereoscopic)
+        self.display_width = display_width
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("display_width")
+    def _validate_display_width(self, key, display_width_in):
+        """validates the given display_width_in value
+        """
+        return abs(float(display_width_in))
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("fps")
+    def _validate_fps(self, key, fps):
+        """validates the given fps_in value
+        """
+        return float(fps)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("image_format")
+    def _validate_image_format(self, key, image_format):
+        """validates the given image format
+        """
+        
+        if image_format is not None and \
+           not isinstance(image_format, ImageFormat):
+            raise TypeError("the image_format should be an instance of "
+                            "stalker.core.models.ImageFormat")
+        
+        return image_format
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("lead")
+    def _validate_lead(self, key, lead):
+        """validates the given lead_in value
+        """
+        
+        if lead is not None:
+            if not isinstance(lead, User):
+                raise TypeError("lead must be an instance of "
+                                "stalker.core.models.User")
+        
+        return lead
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("repository")
+    def _validate_repository(self, key, repository):
+        """validates the given repository_in value
+        """
+        
+        if not isinstance(repository, Repository):
+            raise TypeError("The stalker.core.models.Project instance should "
+                            "be created with a stalker.core.models.Repository "
+                            "instance passed through the 'repository' "
+                            "argument, the current value is "
+                            "'%s'" % repository)
+        
+        return repository
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("structure")
+    def _validate_structure(self, key, structure_in):
+        """validates the given structure_in vlaue
+        """
+        
+        if structure_in is not None:
+            if not isinstance(structure_in, Structure):
+                raise TypeError("structure should be an instance of "
+                                 "stalker.core.models.Structure")
+        
+        return structure_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    @synonym_for("_assets")
+    @property
+    def assets(self):
+        """The list of :class:`~stalker.core.models.Asset`\ s created in this project.
+        
+        It is a read-only list. To add an :class:`~stalker.core.models.Asset`
+        to this project, the :class:`~stalker.core.models.Asset` need to be
+        created with this project is given in the ``project`` argument in the
+        :class:`~stalker.core.models.Asset`.
+        """
+        
+        return self._assets
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("is_stereoscopic")
+    def _validate_is_stereoscopic(self, key, is_stereoscopic_in):
+        return bool(is_stereoscopic_in)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@property
+    #def sequences(self):
+        #"""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
+        
+        #This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
+        #that this :class:`~stalker.core.models.Project` has. It is a list of
+        #:class:`~stalker.core.models.Sequence` instances. The attribute is
+        #read-only. The only way to attach a
+        #:class:`~stalker.core.models.Sequence` to this
+        #:class:`~stalker.core.models.Project` is to create the
+        #:class:`~stalker.core.models.Sequence` with this
+        #:class:`~stalker.core.models.Project` by passing this
+        #:class:`~stalker.core.models.Project` in the ``project`` argument of
+        #the :class:`~stalker.core.models.Sequence`.
+        #"""
+        
+        #return self._sequences
+    
+    
+    
+    #----------------------------------------------------------------------
+    @property
+    def users(self):
+        """The users assigned to this project.
+        
+        This is a list of :class:`~stalker.core.models.User` instances. All the
+        elements are gathered from all the
+        :class:`~stalker.core.models.Task`\ s of the project itself and from
+        :class:`~stalker.core.models.Sequence`\ s,
+        :class:`~stalker.core.models.Shot`\ s,
+        :class:`~stalker.core.models.Asset`\ s.
+        """
+        
+        self._users = []
+        # project tasks
+        for task in self.tasks:
+            self._users.extend(task.resources)
+        
+        # sequence tasks
+        for seq in self.sequences:
+            for task in seq.tasks:
+                self._users.extend(task.resources)
+            
+            # shot tasks
+            for shot in seq.shots:
+                for task in shot.tasks:
+                    self._users.extend(task.resources)
+        
+        # asset tasks
+        for asset in self.assets:
+            for task in asset.tasks:
+                self._users.extend(task.resources)
+        
+        self._users = list(set(self._users))
+        
+        return self._users
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Project, self).__eq__(other) and \
+               isinstance(other, Project)
 
 
 
