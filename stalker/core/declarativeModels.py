@@ -2398,11 +2398,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         self.depends = depends
         
+        if self.is_milestone:
+            resources = None
+        
         if resources is None:
             resources = []
         
         self.resources = resources
-        
         self.effort = effort
         
         self.priority = priority
@@ -2632,9 +2634,9 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             raise TypeError("resources should be a list of "
                             "stalker.core.models.User instances")
         
-        # milestones do not need resources
-        if self.is_milestone:
-            resource = None
+        ## milestones do not need resources
+        #if self.is_milestone:
+            #resource = None
         
         return resource
     
@@ -3796,8 +3798,10 @@ StatusList_Statuses = Table(
 # STRUCTURE_FILENAMETEMPLATES
 Structure_FilenameTemplates = Table(
     "Structure_FilenameTemplates", Base.metadata,
-    Column("structure_id", Integer, ForeignKey("Structures.id")),
-    Column("filenametemplate_id", Integer, ForeignKey("FilenameTemplates.id"))
+    Column("structure_id", Integer, ForeignKey("Structures.id"),
+           primary_key=True),
+    Column("filenametemplate_id", Integer, ForeignKey("FilenameTemplates.id"),
+           primary_key=True)
 )
 
 
@@ -3815,13 +3819,14 @@ User_PermissionGroups = Table(
 # TASK_RESOURCES
 Task_Resources = Table(
     "Task_Resources", Base.metadata,
-    Column("task_id", Integer, ForeignKey("Tasks.id")),
-    Column("resource_id", Integer, ForeignKey("Users.id")),
+    Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
+    Column("resource_id", Integer, ForeignKey("Users.id"), primary_key=True),
 )
 
 # TASK_TASKS
 Task_Tasks = Table(
     "Task_Tasks", Base.metadata,
-    Column("task_id", Integer, ForeignKey("Tasks.id")),
-    Column("depends_to_task_id", Integer, ForeignKey("Tasks.id")),
+    Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
+    Column("depends_to_task_id", Integer, ForeignKey("Tasks.id"),
+           primary_key=True),
 )
