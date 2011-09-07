@@ -1765,3 +1765,14 @@ class ProjectTester(unittest.TestCase):
         self.assertRaises(TypeError, Project, **self.kwargs)
     
     
+    
+    #----------------------------------------------------------------------
+    def test_project_attribute_equals_to_self(self):
+        """testing if the Project.project equals to self
+        """
+        
+        self.assertEqual(self.test_project.project, self.test_project)
+    
+    
+    
+    

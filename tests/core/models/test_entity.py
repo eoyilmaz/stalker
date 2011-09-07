@@ -4,8 +4,6 @@
 
 import unittest
 from stalker.core.declarativeModels import (Entity, User, Tag, Note)
-#from stalker.ext.validatedList import ValidatedList
-
 
 
 

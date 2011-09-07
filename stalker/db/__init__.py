@@ -66,13 +66,6 @@ def setup(database=None, mappers=None):
         database, **defaults.DATABASE_ENGINE_SETTINGS
     )
     
-    # extend the default mappers with the given mappers list
-    if len(mappers):
-        defaults.MAPPERS = list(set(defaults.MAPPERS.extend(mappers)))
-    
-    ## create mappers
-    #__create_mappers__(defaults.MAPPERS)
-    
     # create the database
     db.metadata.create_all(db.engine)
     

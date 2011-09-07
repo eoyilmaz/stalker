@@ -2,10 +2,10 @@
 
 import unittest
 
-from stalker.core.declarativeModels import SimpleEntity, Status, StatusList
-from stalker.core.declarativeMixins import StatusMixin
+from stalker.core.declarativeModels import (SimpleEntity, Project, Type,
+                                            Status, StatusList, Repository)
+from stalker.core.declarativeMixins import ProjectMixin
 from sqlalchemy import (
-    Table,
     Column,
     Boolean,
     Integer,
@@ -15,7 +15,7 @@ from sqlalchemy import (
 )
 
 # create a new mixed in SimpleEntity
-class A(SimpleEntity, StatusMixin):
+class A(SimpleEntity, ProjectMixin):
     
     __tablename__ = "As"
     __mapper_args__ = {"polymorphic_identity": "A"}
@@ -25,14 +25,14 @@ class A(SimpleEntity, StatusMixin):
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(A, self).__init__(**kwargs)
-        StatusMixin.__init__(self, **kwargs)
+        ProjectMixin.__init__(self, **kwargs)
 
 
 
 
 
 
-class B(SimpleEntity, StatusMixin):
+class B(SimpleEntity, ProjectMixin):
     
     __tablename__ = "Bs"
     __mapper_args__ = {"polymorphic_identity": "B"}
@@ -42,7 +42,7 @@ class B(SimpleEntity, StatusMixin):
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(B, self).__init__(**kwargs)
-        StatusMixin.__init__(self, **kwargs)
+        ProjectMixin.__init__(self, **kwargs)
 
 
 
@@ -50,8 +50,8 @@ class B(SimpleEntity, StatusMixin):
 
 
 ########################################################################
-class StatusMixinTester(unittest.TestCase):
-    """tests StatusMixin
+class ProjectMixinTester(unittest.TestCase):
+    """tests ProjectMixin
     """
     
     
@@ -67,55 +67,54 @@ class StatusMixinTester(unittest.TestCase):
         self.test_a_statusList = StatusList(
             name="A Statuses",
             statuses=[self.test_stat1, self.test_stat3],
-            target_entity_type="A",
+            target_entity_type=A,
         )
         
         self.test_b_statusList = StatusList(
             name="B Statuses",
             statuses=[self.test_stat2, self.test_stat3],
-            target_entity_type="B"
+            target_entity_type=B
+        )
+        
+        self.test_project_statusList = StatusList(
+            name="Project Statuses",
+            statuses=[self.test_stat2, self.test_stat3],
+            target_entity_type=Project
+        )
+        
+        self.test_project_type = Type(
+            name="Test Project",
+            target_entity_type=Project,
+        )
+        
+        self.test_repository = Repository(
+            name="Test Repo",
+        )
+        
+        self.test_project = Project(
+            name="Test Project",
+            type=self.test_project_type,
+            status_list = self.test_project_statusList,
+            repository=self.test_repository,
         )
         
         self.kwargs = {
             "name": "ozgur",
-            "status_list": self.test_a_statusList
+            "status_list": self.test_a_statusList,
+            "project": self.test_project,
         }
+        
+        self.test_a_obj = A(**self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_status_list_argument_not_set(self):
-        """testing if a TypeError will be raised when the status_list argument
-        is not set
-        """
-        self.kwargs.pop("status_list")
-        self.assertRaises(TypeError, A, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_status_list_argument_is_not_correct(self):
-        """testing if a TypeError will be raised when the given StatusList
-        instance with the status_list argument is not suitable for this class
-        """
-        self.kwargs["status_list"] = self.test_b_statusList
-        self.assertRaises(TypeError, A, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_status_list_working_properly(self):
-        """testing if the status_list attribute is working properly
+    def test_project_attribute_is_working_properly(self):
+        """testing if the project attribute is working properly
         """
         
-        new_a_ins = A(
-            name="Ozgur",
-            status_list=self.test_a_statusList
-        )
-        
-        self.assertIn(self.test_stat1, new_a_ins.status_list)
-        self.assertNotIn(self.test_stat2, new_a_ins.status_list)
-        self.assertIn(self.test_stat3, new_a_ins.status_list)
+        self.assertEqual(self.test_a_obj.project, self.test_project)
+    
     
     
     

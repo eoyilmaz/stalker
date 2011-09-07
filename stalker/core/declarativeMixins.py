@@ -16,7 +16,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
 )
-from sqlalchemy.orm import relationship, synonym, validates
+from sqlalchemy.orm import relationship, synonym, validates, backref
 from sqlalchemy.ext.declarative import declared_attr, synonym_for
 
 from stalker.conf import defaults
@@ -50,12 +50,12 @@ class ReferenceMixin(object):
             references = []
         
         self.references = references
-
+    
     
     
     #----------------------------------------------------------------------
     @classmethod
-    def create_secondary_tables(cls):
+    def create_secondary_tables_for_references(cls):
         """creates any secondary table
         """
         
@@ -97,7 +97,7 @@ class ReferenceMixin(object):
         class_name = cls.__name__
         
         # get secondary table
-        secondary_table = cls.create_secondary_tables()
+        secondary_table = cls.create_secondary_tables_for_references()
         
         # return the relationship
         return relationship("Link", secondary=secondary_table)
@@ -192,6 +192,15 @@ class StatusMixin(object):
         
         # raise TypeError when:
         from stalker.core.declarativeModels import StatusList
+        
+        if status_list is None:
+            raise TypeError("'%s' objects can not be initialized without a "
+                            "stalker.core.models.StatusList instance, please "
+                            "pass a suitable StatusList "
+                            "(StatusList.target_entity_type=%s) "
+                            "with the 'status_list' argument" 
+                            % (self.__class__.__name__,
+                               self.__class__.__name__))
         
         # it is not an instance of status_list
         if not isinstance(status_list, StatusList):
@@ -448,8 +457,6 @@ class ScheduleMixin(object):
         else:
             self._validate_dates(self.start_date, self.due_date, duration_in)
     
-    
-    
     #----------------------------------------------------------------------
     @declared_attr
     def duration(cls):
@@ -544,7 +551,7 @@ class ProjectMixin(object):
         return Column(
             "project_id",
             Integer,
-            ForeignKey("Projects.id"),
+            ForeignKey("Projects.id", use_alter=True, name="project_x_id"),
             # cannot use nullable cause a Project object needs
             # insert itself as the project and it needs post_update
             # thus nullable should be True
@@ -570,13 +577,14 @@ class ProjectMixin(object):
     def __init__(self,
                  project=None,
                  **kwargs):
-        self._project = project
+        
+        self.project = project
     
     
     
     #----------------------------------------------------------------------
     @validates("project")
-    def _validate_project(self, project):
+    def _validate_project(self, key, project):
         """validates the given project value
         """
         
@@ -584,7 +592,7 @@ class ProjectMixin(object):
             raise TypeError("project can not be None it must be an instance "
                             "of stalker.core.models.Project instance")
         
-        from stalker.core.models import Project # pylint: disable=W0404
+        from stalker.core.declarativeModels import Project
         
         if not isinstance(project, Project):
             raise TypeError("project must be an instance of "
@@ -605,9 +613,5 @@ class ProjectMixin(object):
         #"""
         
         #return self._project
-
-
-
-
 
 

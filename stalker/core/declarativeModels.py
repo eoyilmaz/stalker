@@ -15,8 +15,9 @@ from sqlalchemy import (
     Float,
     String,
     ForeignKey,
-    #Date,
+    Date,
     DateTime,
+    Interval,
     UniqueConstraint
 )
 from sqlalchemy.ext.declarative import declarative_base, synonym_for
@@ -29,6 +30,9 @@ from stalker.conf import defaults
 
 
 Base = declarative_base()
+
+
+
 
 
 
@@ -1309,8 +1313,7 @@ class Link(Entity):
 
 # mixin class imports should be placed after StatusList and Link definitions
 from stalker.core.declarativeMixins import (ReferenceMixin, ScheduleMixin,
-                                            StatusMixin, #TaskMixin,
-                                            ProjectMixin)
+                                            StatusMixin, ProjectMixin)
 
 
 
@@ -1477,328 +1480,6 @@ class Tag(SimpleEntity):
         
         return not self.__eq__(other)
 
-
-
-
-
-
-########################################################################
-#class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
-class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, ProjectMixin):
-    """All the information about a Project in Stalker is hold in this class.
-    
-    Project is one of the main classes that will direct the others. A project
-    in Stalker is a gathering point.
-    
-    It is mixed with :class:`~stalker.core.mixins.ReferenceMixin`,
-    :class:`~stalker.core.mixins.StatusMixin`,
-    :class:`~stalker.core.mixins.ScheduleMixin` and
-    :class:`~stalker.core.mixins.TaskMixin` to give reference, status, schedule
-    and task abilities. Please read the individual documentation of each of the
-    mixins.
-    
-    The :attr:`~stalker.core.models.Project.users` attributes content is
-    gathered from all the :class:`~stalker.core.models.Task`\ s of the project
-    itself and from the :class:`~stalker.core.models.Task`\ s of the
-    :class:`~stalker.core.models.Sequence`\ s stored in the
-    :attr:`~stalker.core.models.Project.sequences` attribute, the
-    :class:`~stalker.core.models.Shot`\ s stored in the
-    :attr:`~stalker.core.models.Sequence.shots` attribute, the
-    :class:`~stalker.core.models.Asset`\ s stored in the
-    :attr:`~stalker.core.models.Project.assets`. It is a read only attribute.
-    
-    :param lead: The lead of the project. Default value is None.
-    
-    :type lead: :class:`~stalker.core.models.User`
-    
-    :param image_format: The output image format of the project. Default
-      value is None.
-    
-    :type image_format: :class:`~stalker.core.models.ImageFormat`
-    
-    :param float fps: The FPS of the project, it should be a integer or float
-      number, or a string literal which can be correctly converted to a float.
-      Default value is 25.0.
-    
-    :param type: The type of the project. Default value is None.
-    
-    :type type: :class:`~stalker.core.models.ProjectType`
-    
-    :param structure: The structure of the project. Default value is None
-    
-    :type structure: :class:`~stalker.core.models.Structure`
-    
-    :param repository: The repository that the project files are going to be
-      stored in. You can not create a project without specifying the
-      repository argument and passing a
-      :class:`~stalker.core.models.Repository` to it. Default value is None
-      which raises a TypeError.
-    
-    :type repository: :class:`~stalker.core.models.Repository`.
-    
-    :param bool is_stereoscopic: a bool value, showing if the project is going
-      to be a stereo 3D project, anything given as the argument will be
-      converted to True or False. Default value is False.
-    
-    :param float display_width: the width of the display that the output of the
-      project is going to be displayed (very unnecessary if you are not using
-      stereo 3D setup). Should be an int or float value, negative values
-      converted to the positive values. Default value is 1.
-    """
-    
-    #:param list assets: The assets used in this project, it should be a list of
-      #:class:`~stalker.core.models.Asset` instances, if set to None it is
-      #converted to an empty list. Default value is an empty list.
-    
-    #:param list sequences: The sequences of the project, it should be a list of
-      #:class:`~stalker.core.models.Sequence` instances, if set to None it is
-      #converted to an empty list. Default value is an empty list.
-    
-    
-    
-    __strictly_typed__ = True
-    __tablename__ = "Projects"
-    __mapper_args__ = {"polymorphic_identity": "Project"}
-    project_id_local = Column("id", Integer, ForeignKey("Entities.id"),
-                              primary_key=True)
-    lead_id = Column(Integer, ForeignKey("Users.id"))
-    lead = relationship(
-        "User",
-        backref="_projects_lead",
-        primaryjoin="Project.lead_id==User.user_id",
-    )
-    
-    repository_id = Column(Integer, ForeignKey("Repositories.id"))
-    repository = relationship(
-        "Repository",
-        primaryjoin="Project.repository_id==Repository.repository_id"
-    )
-    
-    structure_id = Column(Integer, ForeignKey("Structures.id"))
-    structure = relationship(
-        "Structure",
-        primaryjoin="Project.structure_id==Structure.structure_id"
-    )
-    
-    image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
-    image_format = relationship(
-        "ImageFormat",
-        primaryjoin="Project.image_format_id==ImageFormat.imageFormat_id"
-    )
-    
-    fps = Column(Float(precision=3))
-    is_stereoscopic = Column(Boolean)
-    display_width = Column(Float(precision=3))
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self,
-                 lead=None,
-                 repository=None,
-                 structure=None,
-                 image_format=None,
-                 fps=25.0,
-                 is_stereoscopic=False,
-                 display_width=1.0,
-                 **kwargs):
-        
-        # a projects project should be self
-        # initialize the project argument to self
-        kwargs["project"] = self
-        
-        super(Project, self).__init__(**kwargs)
-        # call the mixin __init__ methods
-        ReferenceMixin.__init__(self, **kwargs)
-        StatusMixin.__init__(self, **kwargs)
-        ScheduleMixin.__init__(self, **kwargs)
-        #TaskMixin.__init__(self, **kwargs)
-        ProjectMixin.__init__(self, **kwargs)
-        
-        self.lead = lead
-        self._users = []
-        self.repository = repository
-        self.structure = structure
-        self._sequences = []
-        self._assets = []
-        
-        self.image_format = image_format
-        self.fps = fps
-        self.is_stereoscopic = bool(is_stereoscopic)
-        self.display_width = display_width
-    
-    
-    
-    #----------------------------------------------------------------------
-    @validates("display_width")
-    def _validate_display_width(self, key, display_width_in):
-        """validates the given display_width_in value
-        """
-        return abs(float(display_width_in))
-    
-    
-    
-    #----------------------------------------------------------------------
-    @validates("fps")
-    def _validate_fps(self, key, fps):
-        """validates the given fps_in value
-        """
-        return float(fps)
-    
-    
-    
-    #----------------------------------------------------------------------
-    @validates("image_format")
-    def _validate_image_format(self, key, image_format):
-        """validates the given image format
-        """
-        
-        if image_format is not None and \
-           not isinstance(image_format, ImageFormat):
-            raise TypeError("the image_format should be an instance of "
-                            "stalker.core.models.ImageFormat")
-        
-        return image_format
-    
-    
-    
-    #----------------------------------------------------------------------
-    @validates("lead")
-    def _validate_lead(self, key, lead):
-        """validates the given lead_in value
-        """
-        
-        if lead is not None:
-            if not isinstance(lead, User):
-                raise TypeError("lead must be an instance of "
-                                "stalker.core.models.User")
-        
-        return lead
-    
-    
-    
-    #----------------------------------------------------------------------
-    @validates("repository")
-    def _validate_repository(self, key, repository):
-        """validates the given repository_in value
-        """
-        
-        if not isinstance(repository, Repository):
-            raise TypeError("The stalker.core.models.Project instance should "
-                            "be created with a stalker.core.models.Repository "
-                            "instance passed through the 'repository' "
-                            "argument, the current value is "
-                            "'%s'" % repository)
-        
-        return repository
-    
-    
-    
-    #----------------------------------------------------------------------
-    @validates("structure")
-    def _validate_structure(self, key, structure_in):
-        """validates the given structure_in vlaue
-        """
-        
-        if structure_in is not None:
-            if not isinstance(structure_in, Structure):
-                raise TypeError("structure should be an instance of "
-                                 "stalker.core.models.Structure")
-        
-        return structure_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    @synonym_for("_assets")
-    @property
-    def assets(self):
-        """The list of :class:`~stalker.core.models.Asset`\ s created in this project.
-        
-        It is a read-only list. To add an :class:`~stalker.core.models.Asset`
-        to this project, the :class:`~stalker.core.models.Asset` need to be
-        created with this project is given in the ``project`` argument in the
-        :class:`~stalker.core.models.Asset`.
-        """
-        
-        return self._assets
-    
-    
-    
-    #----------------------------------------------------------------------
-    @validates("is_stereoscopic")
-    def _validate_is_stereoscopic(self, key, is_stereoscopic_in):
-        return bool(is_stereoscopic_in)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def sequences(self):
-        #"""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
-        
-        #This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
-        #that this :class:`~stalker.core.models.Project` has. It is a list of
-        #:class:`~stalker.core.models.Sequence` instances. The attribute is
-        #read-only. The only way to attach a
-        #:class:`~stalker.core.models.Sequence` to this
-        #:class:`~stalker.core.models.Project` is to create the
-        #:class:`~stalker.core.models.Sequence` with this
-        #:class:`~stalker.core.models.Project` by passing this
-        #:class:`~stalker.core.models.Project` in the ``project`` argument of
-        #the :class:`~stalker.core.models.Sequence`.
-        #"""
-        
-        #return self._sequences
-    
-    
-    
-    #----------------------------------------------------------------------
-    @property
-    def users(self):
-        """The users assigned to this project.
-        
-        This is a list of :class:`~stalker.core.models.User` instances. All the
-        elements are gathered from all the
-        :class:`~stalker.core.models.Task`\ s of the project itself and from
-        :class:`~stalker.core.models.Sequence`\ s,
-        :class:`~stalker.core.models.Shot`\ s,
-        :class:`~stalker.core.models.Asset`\ s.
-        """
-        
-        self._users = []
-        # project tasks
-        for task in self.tasks:
-            self._users.extend(task.resources)
-        
-        # sequence tasks
-        for seq in self.sequences:
-            for task in seq.tasks:
-                self._users.extend(task.resources)
-            
-            # shot tasks
-            for shot in seq.shots:
-                for task in shot.tasks:
-                    self._users.extend(task.resources)
-        
-        # asset tasks
-        for asset in self.assets:
-            for task in asset.tasks:
-                self._users.extend(task.resources)
-        
-        self._users = list(set(self._users))
-        
-        return self._users
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __eq__(self, other):
-        """the equality operator
-        """
-        
-        return super(Project, self).__eq__(other) and \
-               isinstance(other, Project)
 
 
 
@@ -2519,6 +2200,987 @@ class Department(Entity):
 
 
 ########################################################################
+class Task(Entity, StatusMixin, ScheduleMixin):
+    """Manages Task related data.
+    
+    Tasks are the smallest meaningful part that should be accomplished to
+    complete the a :class:`~stalker.core.models.Project`.
+    
+    In Stalker, currently these items supports Tasks:
+    
+       * :class:`~stalker.core.models.Project`
+    
+       * :class:`~stalker.core.models.Sequence`
+    
+       * :class:`~stalker.core.models.Asset`
+    
+       * :class:`~stalker.core.models.Shot`
+    
+    If you want to have your own class to be *taskable* use the
+    :class:`~stalker.core.mixins.TaskMixin` to add the ability to connect a
+    :class:`~stalker.core.models.Task` to it.
+    
+    The Task class itself is mixed with
+    :class:`~stalker.core.mixins.StatusMixin` and
+    :class:`~stalker.core.mixins.ScheduleMixin`. To be able to give the
+    :class:`~stalker.core.models.Task` a *Status* and a *start* and *end* time.
+    
+    :param int priority: It is a number between 0 to 1000 which defines the
+      priority of the :class:`~stalker.core.models.Task`. The higher the value
+      the higher its priority. The default value is 500.
+    
+    :param resources: The :class:`~stalker.core.models.User`\ s assigned to
+      this :class:`~stalker.core.models.Task`. A
+      :class:`~stalker.core.models.Task` without any resource can not be
+      scheduled.
+    
+    :type resources: list of :class:`~stalker.core.models.User`
+    
+    :param effort: The total effort that needs to be spend to complete this
+      Task. Can be used to create an initial bid of how long this task going to
+      take. The effort is equaly divided to the assigned resources. So if the
+      effort is 10 days and 2 :attr:`~stalker.core.models.Task.resources` is
+      assigned then the :attr:`~stalker.core.models.Task.duration` of the task
+      is going to be 5 days (if both of the resources are free to work). The
+      default value is stalker.conf.defaults.DEFAULT_TASK_DURATION.
+      
+      The effort argument defines the
+      :attr:`~stalker.core.models.Task.duration` of the task. Every resource is
+      counted equally effective and the
+      :attr:`~stalker.core.models.Task.duration` will be calculated by the
+      simple formula:
+      
+      .. math::
+         
+         {duration} = \\frac{{effort}}{n_{resources}}
+      
+      And changing the :attr:`~stalker.core.models.Task.duration` will also
+      effect the :attr:`~stalker.core.models.Task.effort` spend. The
+      :attr:`~stalker.core.models.Task.effort` will be calculated with the
+      formula:
+      
+      .. math::
+         
+         {effort} = {duration} \\times {n_{resources}}
+    
+    :type effort: datetime.timedelta
+    
+    :param depends: A list of :class:`~stalker.core.models.Task`\ s those this
+      :class:`~stalker.core.models.Task` is dependening on.
+    
+    :type depends: list of :class:`~stalker.core.models.Task`
+    
+    :param bool milestone: A bool (True or False) value showing if this task is
+      a milestone which doesn't need any resource and effort.
+    
+    :param task_of: A class instance which has an attribute called ``tasks``.
+      There is no limit in the type of the class. But it would be correct to
+      use something derived from the
+      :class:`~stalker.core.models.SimpleEntity` and mixed with
+      :class:`~stalker.core.mixins.TaskMixin`. If you are going to use the
+      :mod:`stalker.db` module than it have to be something derived from
+      the :class:`~stalker.core.models.SimpleEntity`.
+      
+      Again, only classes that has been mixed with
+      :class:`~stalker.core.mixins.TasksMixin` has the attribute called
+      ``tasks``. And the instance given, have to be something that is mapped to
+      the database if you are going to use the database part of the system.
+    
+    :type task_of: :class:`~stalker.core.models.SimpleEntity`.
+    """
+    #.. :param depends: A list of
+         #:class:`~stalker.core.models.TaskDependencyRelation` objects. Holds
+         #information about the list of other :class:`~stalker.core.models.Task`\ s
+         #which the current one is dependent on.
+         
+      #.. giving information about the dependent tasks. The given list is iterated
+         #and the :attr:`~stalker.core.models.Task.start_date` attribute is set to
+         #the latest found :attr:`~stalker.core.models.Task.due_date` attribute of
+         #the dependent :class:`~stalker.core.models.Task`\ s.
+    
+    #.. :type depends: list of :class:`~stalker.core.models.TaskDependencyRelation`
+    
+       
+       #:param parent_task: Another :class:`~stalker.core.models.Task` which is the
+         #parent of the current :class:`~stalker.core.models.Task`.
+         
+         #:class:`~stalker.core.models.Task`\ s can be grouped by using parent and
+         #child relation.
+       
+       #:type parent_task: :class:`~stalker.core.models.Task`
+       
+       #:param sub_tasks: A list of other :class:`~stalker.core.models.Task`\ s
+         #which are the child of the current one. A
+         #:class:`~stalker.core.models.Task` with other child
+         #:class:`~stalker.core.models.Task`\ s:
+         
+           #* can not have any resources
+           #* can not have any effort set
+           #* can not have any versions
+         
+         #The only reason of a :class:`~stalker.core.models.Task` to have other
+         #:class:`~stalker.core.models.Task`\ s as child is to group them. So it
+         #is meaningles to let a parent :class:`~stalker.core.models.Task` to have
+         #any resource or any effort or any verions. The
+         #:attr:`~stalker.core.models.Task.start_date`,
+         #:attr:`~stalker.core.models.Task.due_date` and
+         #:attr:`~stalker.core.models.Task.duration` attributes of a
+         #:class:`~stalker.core.models.Task` with child classes will be based on
+         #it childrens date attributes.
+       
+       #:type child_tasks: :class:`~stalker.core.models.Task`.
+       
+    #:param versions: A list of :class:`~stalker.core.models.Version` objects
+      #showing the produced work on the repository. This is the relation between
+      #database and the repository.
+    
+    #:type versions: list of :class:`~stalker.core.models.Version`
+    #"""
+    
+    
+    __tablename__ = "Tasks"
+    __mapper_args__ = {"polymorphic_identity": "Task"}
+    task_id = Column("id", Integer, ForeignKey("Entities.id"),
+                     primary_key=True)
+    
+    is_milestone = Column(Boolean)
+    is_complete = Column(Boolean) # UPDATE THIS: is_complete should look to
+                                  # Task.status, but it is may be faster to
+                                  # query in this way, judge later
+    
+    depends = relationship(
+        "Task",
+        secondary="Task_Tasks",
+        primaryjoin="Tasks.c.id==Task_Tasks.c.task_id",
+        secondaryjoin="Task_Tasks.c.depends_to_task_id==Tasks.c.id",
+        backref="dependent_of",
+    )
+    
+    resources = relationship(
+        "User",
+        secondary="Task_Resources",
+        primaryjoin="Tasks.c.id==Task_Resources.c.task_id",
+        secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
+        backref="tasks",
+    )
+    
+    effort = Column(Interval)
+    priority = Column(Integer)
+    
+    task_of_id = Column(Integer, ForeignKey("TaskableEntities.id"))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 depends=None,
+                 effort=None,
+                 resources=None,
+                 is_milestone=False,
+                 priority=defaults.DEFAULT_TASK_PRIORITY,
+                 task_of=None,
+                 **kwargs):
+        super(Task, self).__init__(**kwargs)
+        
+        # call the mixin __init__ methods
+        StatusMixin.__init__(self, **kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
+        
+        self.bookings = []
+        # UPDATE THIS
+        #self.versions = []
+        
+        self.is_milestone = is_milestone
+        self.is_complete = False
+        
+        if depends is None:
+            depends = []
+        
+        self.depends = depends
+        
+        if resources is None:
+            resources = []
+        
+        self.resources = resources
+        
+        self.effort = effort
+        
+        self.priority = priority
+        
+        self.task_of = task_of
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance created with
+        SQLAlchemy
+        """
+        # UPDATE THIS
+        self.bookings = []
+        self.versions = []
+        
+        # call supers __init_on_load__
+        super(Task, self).__init_on_load__()
+
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Task, self).__eq__(other) and isinstance(other, Task)
+    
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_bookings(self, key, bookings_in):
+        """validates the given bookings value
+        """
+        
+        if bookings_in is None:
+            bookings_in = []
+        
+        if not all([isinstance(element, Booking) for element in bookings_in]):
+            raise TypeError("all the elements in the bookings should be "
+                            "an instances of stalker.core.models.Booking")
+        
+        
+        return ValidatedList(bookings_in, Booking)
+    
+    
+    #----------------------------------------------------------------------
+    @validates("is_complete")
+    def _validate_is_complete(self, key, complete_in):
+        """validates the given complete value
+        """
+        return bool(complete_in)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("depends")
+    def _validate_depends(self, key, depends):
+        """validates the given depends value
+        """
+        
+        #if depends_in is None:
+            #depends_in = []
+        
+        #if not isinstance(depends_in, list):
+            #raise TypeError("the depends attribute should be an list of"
+                            #"stalker.core.models.Task instances")
+            
+        
+        if not isinstance(depends, Task):
+            raise TypeError("all the elements in the depends should be an "
+                            "instance of stalker.core.models.Task")
+        
+        # check for the circular dependency
+        _check_circular_dependency(depends, self)
+        
+        return depends
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_effort(self, effort):
+        """validates the given effort
+        """
+        
+        if not isinstance(effort, datetime.timedelta):
+            effort = None
+        
+        if effort is None:
+            # take it from the duration and resources
+            
+            num_of_resources = len(self.resources)
+            if num_of_resources == 0:
+                num_of_resources = 1
+            
+            effort = self.duration * num_of_resources
+        
+        return effort
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _effort_getter(self):
+        """The total effort that needs to be spend to complete this Task.
+        
+        Can be used to create an initial bid of how long this task going to
+        take. The effort is equaly divided to the assigned resources. So if the
+        effort is 10 days and 2 resources is assigned then the
+        :attr:`~stalker.core.models.Task.duration` of the task is going to be 5
+        days (if both of the resources are free to work). The default value is
+        stalker.conf.defaults.DEFAULT_TASK_DURATION.
+      
+        The effort defines the :attr:`~stalker.core.models.Task.duration` of
+        the task. Every resource is counted equally effective and the
+        :attr:`~stalker.core.models.Task.duration` will be calculated by the
+        simple formula:
+        
+        .. math::
+           
+           {duration} = \\frac{{effort}}{n_{resources}}
+        
+        And changing the :attr:`~stalker.core.models.Task.duration` will also
+        effect the :attr:`~stalker.core.models.Task.effort` spend. The
+        :attr:`~stalker.core.models.Task.effort` will be calculated with the
+        formula:
+           
+        .. math::
+           
+           {effort} = {duration} \\times {n_{resources}}
+        """
+        
+        return self._effort
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _effort_setter(self, effort_in):
+        self._effort = self._validate_effort(effort_in)
+        
+        # update the duration
+        num_of_resources = len(self.resources)
+        if num_of_resources == 0:
+            num_of_resources = 1
+        
+        self.duration = self._effort / num_of_resources
+    
+    
+    
+    effort = synonym(
+        "_effort",
+        descriptor=property(
+            fget=_effort_getter,
+            fset=_effort_setter
+        )
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("is_milestone")
+    def _validate_is_milestone(self, key, is_milestone):
+        """validates the given milestone value
+        """
+        
+        if is_milestone:
+            self.resources = []
+        
+        return bool(is_milestone)
+    
+    
+    #----------------------------------------------------------------------
+    @validates("task_of")
+    def _validate_task_of(self, key, task_of):
+        """validates the given task_of value
+        """
+        
+        # the object given withe the task_of argument should have an attribute
+        # called "tasks"
+        if task_of is None:
+            raise TypeError("'task_of' can not be None, this will produce "
+                            "Tasks without a parent, to remove a task from "
+                            "a TaskableEntity, assign the task to another "
+                            "TaskableEntity or delete it.")
+        
+        if not hasattr(task_of, "tasks"):
+            raise AttributeError("the object given with 'task_of' should have "
+                                 "an attribute called 'tasks'")
+        
+        return task_of
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("priority")
+    def _validate_priority(self, key, priority):
+        """validates the given priority value
+        """
+        
+        try:
+            priority = int(priority)
+        except (ValueError, TypeError):
+            pass
+        
+        if not isinstance(priority, int):
+            priority = defaults.DEFAULT_TASK_PRIORITY
+        
+        if priority < 0:
+            priority = 0
+        elif priority > 1000:
+            priority = 1000
+        
+        return priority
+    
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("resources")
+    def _validate_resources(self, key, resource):
+        """validates the given resources value
+        """
+        
+        if not isinstance(resource, User):
+            raise TypeError("resources should be a list of "
+                            "stalker.core.models.User instances")
+        
+        # milestones do not need resources
+        if self.is_milestone:
+            resource = None
+        
+        return resource
+    
+    
+    ## UPDATE THIS
+    ##----------------------------------------------------------------------
+    #@validates("versions")
+    #def _validate_versions(self, key, version):
+        #"""validates the given version value
+        #"""
+        
+        #if not isinstance(version, Version):
+            #raise TypeError("all the elements in the versions list should be "
+                            #"stalker.core.models.Version instances")
+        
+        #return version
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _duration_getter(self):
+        return self._duration
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _duration_setter(self, duration):
+        # just call the fset method of the duration property in the super
+        
+        #------------------------------------------------------------
+        # code copied and pasted from ScheduleMixin - Fix it later
+        if not duration is None:
+            if isinstance(duration, datetime.timedelta):
+                # set the due_date to None
+                # to make it recalculated
+                self._validate_dates(self.start_date, None, duration)
+            else:
+                self._validate_dates(self.start_date, self.due_date, duration)
+        else:
+            self._validate_dates(self.start_date, self.due_date, duration)
+        #------------------------------------------------------------
+        
+        
+        # then update the effort
+        num_of_resources = len(self.resources)
+        if num_of_resources == 0:
+            num_of_resources = 1
+        
+        new_effort_value = self.duration * num_of_resources
+        
+        # break recursion
+        if self.effort != new_effort_value:
+            self.effort = new_effort_value
+        
+        #return duration
+    
+    duration = synonym(
+        "_duration",
+        descriptor=property(
+            _duration_getter,
+            _duration_setter
+        )
+    )
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@property
+    #def is_milestone(self):
+        #"""Specifies if this Task is a milestone.
+        
+        #Milestones doesn't need any duration, any effort and any resources. It
+        #is used to create meaningfull dependencies between the critical stages
+        #of the project.
+        #"""
+        
+        #return self._is_milestone
+    
+    ##----------------------------------------------------------------------
+    #@is_milestone.setter # pylint: disable=E1101
+    #def is_milestone(self, milestone_in):
+        ## pylint: disable=E0102, C0111
+        #self._is_milestone = self._validate_milestone(milestone_in)
+        
+        #if self._is_milestone:
+            #self._resources = []
+
+
+
+
+
+
+#----------------------------------------------------------------------
+def _check_circular_dependency(task, check_for_task):
+    """checks the circular dependency in task if it has check_for_task in its
+    depends list
+    
+    !!!!WARNING THERE IS NO TEST FOR THIS FUNCTION!!!!
+    """
+    
+    for dependent_task in task.depends:
+        if dependent_task is check_for_task:
+            raise CircularDependencyError(
+                "task %s and %s creates a circular dependency" % \
+                (task, check_for_task)
+            )
+        else:
+            _check_circular_dependency(dependent_task, check_for_task)
+
+
+
+
+
+
+#########################################################################
+#class TaskDependencyRelation(object):
+    #"""Holds information about :class:`~stalker.core.models.Task` dependencies.
+    
+    #(DEVELOPERS: It could be an association proxy for the Task class)
+    
+    #A TaskDependencyRelation object basically defines which
+    #:class:`~stalker.core.models.Task` is dependedt
+    #to which other :class:`~stalker.core.models.Task` and what is the lag
+    #between the end of the dependent to the start of the dependee.
+    
+    #A :class:`~stalker.core.models.Task` can not be set dependent to it self.
+    #So the the :attr:`~stalker.core.models.TaskDependencyRelation.depends` list
+    #can not contain the same value with
+    #:attr:`~stalker.core.models.TaskDependencyRelation.task`.
+    
+    #:param task: The :class:`~stalker.core.models.Task` that is dependent to
+      #others.
+    
+    #:type task: :class:`~stalker.core.models.Task`
+    
+    #:param depends: A :class:`~stalker.core.models.Task`\ s that the
+      #:class:`~stalker.core.models.Task` which is held by the
+      #:attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
+      #dependening on. The :attr:`~stalker.core.models.Task.start_date` and the
+      #:attr:`~stalker.core.models.Task.due_date` attributes of the
+      #:class:`~stalker.core.models.Task` is updated if it is before the
+      #``due_date`` of the dependent :class:`~stalker.core.models.Task`.
+    
+    #:type depends: :class:`~stalker.core.models.Task`
+    
+    #:param lag: The lag between the end of the dependent task to the start of
+      #the dependee. It is an instance of timedelta and could be a negative
+      #value. The default is 0. So the end of the task is start of the other.
+    #"""
+    
+    ##----------------------------------------------------------------------
+    #def __init__(self):
+        #pass
+
+
+
+
+
+
+########################################################################
+class TaskableEntity(Entity, ProjectMixin):
+    """Gives the abilitiy to connect to a list of :class:`~stalker.core.models.Task`\ s to the mixed in object.
+    
+    TaskMixin is a variant of :class:`~stalker.core.mixins.ProjectMixin` and
+    lets the mixed object to have :class:`~stalker.core.model.Task` instances
+    to be attached it self. And because :class:`~stalker.core.models.Task`\ s
+    are related to :class:`~stalker.core.models.Project`\ s, it also adds
+    ability to relate the object to a :class:`~stalker.core.models.Project`
+    instance. So every object which is mixed with TaskMixin will have a
+    :attr:`~stalker.core.mixins.TaskMixin.tasks` and a
+    :attr:`~stalker.core.mixins.TaskMixin.project` attribute. Only the
+    ``project`` argument needs to be initialized. See the
+    :class:`~stalker.core.mixins.ProjectMixin` for more detail.
+    """
+    
+    
+    __tablename__ = "TaskableEntities"
+    __mapper_args__ = {"polymorphic_identity": "TaskableEntity"}
+    taskableEntity_id = Column("id", Integer, ForeignKey("Entities.id"),
+                               primary_key=True)
+    
+    tasks = relationship(
+        "Task",
+        primaryjoin=taskableEntity_id==Task.task_of_id,
+        backref="task_of",
+        #single_parent=True,
+        post_update=True,
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, tasks=None, **kwargs):
+        super(TaskableEntity, self).__init__(**kwargs)
+        ProjectMixin.__init__(self, **kwargs)
+        
+        if tasks is None:
+            tasks = []
+        self.tasks = tasks
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("tasks")
+    def _validate_tasks(self, key, task):
+        """validates the given task value
+        """
+        if not isinstance(task, Task):
+            raise TypeError("tasks should be a list of "
+            "stalker.core.models.Task instances")
+        
+        return task
+
+
+
+
+
+
+
+########################################################################
+class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
+    """All the information about a Project in Stalker is hold in this class.
+    
+    Project is one of the main classes that will direct the others. A project
+    in Stalker is a gathering point.
+    
+    It is mixed with :class:`~stalker.core.mixins.ReferenceMixin`,
+    :class:`~stalker.core.mixins.StatusMixin`,
+    :class:`~stalker.core.mixins.ScheduleMixin` and
+    :class:`~stalker.core.mixins.TaskMixin` to give reference, status, schedule
+    and task abilities. Please read the individual documentation of each of the
+    mixins.
+    
+    The :attr:`~stalker.core.models.Project.users` attributes content is
+    gathered from all the :class:`~stalker.core.models.Task`\ s of the project
+    itself and from the :class:`~stalker.core.models.Task`\ s of the
+    :class:`~stalker.core.models.Sequence`\ s stored in the
+    :attr:`~stalker.core.models.Project.sequences` attribute, the
+    :class:`~stalker.core.models.Shot`\ s stored in the
+    :attr:`~stalker.core.models.Sequence.shots` attribute, the
+    :class:`~stalker.core.models.Asset`\ s stored in the
+    :attr:`~stalker.core.models.Project.assets`. It is a read only attribute.
+    
+    :param lead: The lead of the project. Default value is None.
+    
+    :type lead: :class:`~stalker.core.models.User`
+    
+    :param image_format: The output image format of the project. Default
+      value is None.
+    
+    :type image_format: :class:`~stalker.core.models.ImageFormat`
+    
+    :param float fps: The FPS of the project, it should be a integer or float
+      number, or a string literal which can be correctly converted to a float.
+      Default value is 25.0.
+    
+    :param type: The type of the project. Default value is None.
+    
+    :type type: :class:`~stalker.core.models.ProjectType`
+    
+    :param structure: The structure of the project. Default value is None
+    
+    :type structure: :class:`~stalker.core.models.Structure`
+    
+    :param repository: The repository that the project files are going to be
+      stored in. You can not create a project without specifying the
+      repository argument and passing a
+      :class:`~stalker.core.models.Repository` to it. Default value is None
+      which raises a TypeError.
+    
+    :type repository: :class:`~stalker.core.models.Repository`.
+    
+    :param bool is_stereoscopic: a bool value, showing if the project is going
+      to be a stereo 3D project, anything given as the argument will be
+      converted to True or False. Default value is False.
+    
+    :param float display_width: the width of the display that the output of the
+      project is going to be displayed (very unnecessary if you are not using
+      stereo 3D setup). Should be an int or float value, negative values
+      converted to the positive values. Default value is 1.
+    """
+    
+    #:param list assets: The assets used in this project, it should be a list of
+      #:class:`~stalker.core.models.Asset` instances, if set to None it is
+      #converted to an empty list. Default value is an empty list.
+    
+    #:param list sequences: The sequences of the project, it should be a list of
+      #:class:`~stalker.core.models.Sequence` instances, if set to None it is
+      #converted to an empty list. Default value is an empty list.
+    
+    
+    
+    __strictly_typed__ = True
+    __tablename__ = "Projects"
+    project_id_local = Column("id", Integer, ForeignKey("TaskableEntities.id"),
+                              primary_key=True)
+    
+    __mapper_args__ = {"polymorphic_identity": "Project",
+                   "inherit_condition":
+                       project_id_local==TaskableEntity.taskableEntity_id}
+
+    
+    lead_id = Column(Integer, ForeignKey("Users.id"))
+    lead = relationship(
+        "User",
+        primaryjoin="Projects.c.lead_id==Users.c.id",
+        backref="projects_lead",
+    )
+    
+    repository_id = Column(Integer, ForeignKey("Repositories.id"))
+    repository = relationship(
+        "Repository",
+        primaryjoin="Project.repository_id==Repository.repository_id"
+    )
+    
+    structure_id = Column(Integer, ForeignKey("Structures.id"))
+    structure = relationship(
+        "Structure",
+        primaryjoin="Project.structure_id==Structure.structure_id"
+    )
+    
+    image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
+    image_format = relationship(
+        "ImageFormat",
+        primaryjoin="Project.image_format_id==ImageFormat.imageFormat_id"
+    )
+    
+    fps = Column(Float(precision=3))
+    is_stereoscopic = Column(Boolean)
+    display_width = Column(Float(precision=3))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 lead=None,
+                 repository=None,
+                 structure=None,
+                 image_format=None,
+                 fps=25.0,
+                 is_stereoscopic=False,
+                 display_width=1.0,
+                 **kwargs):
+        
+        # a projects project should be self
+        # initialize the project argument to self
+        kwargs["project"] = self
+        
+        super(Project, self).__init__(**kwargs)
+        # call the mixin __init__ methods
+        ReferenceMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
+        #TaskMixin.__init__(self, **kwargs)
+        
+        self.lead = lead
+        self._users = []
+        self.repository = repository
+        self.structure = structure
+        self._sequences = []
+        self._assets = []
+        
+        self.image_format = image_format
+        self.fps = fps
+        self.is_stereoscopic = bool(is_stereoscopic)
+        self.display_width = display_width
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("display_width")
+    def _validate_display_width(self, key, display_width_in):
+        """validates the given display_width_in value
+        """
+        return abs(float(display_width_in))
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("fps")
+    def _validate_fps(self, key, fps):
+        """validates the given fps_in value
+        """
+        return float(fps)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("image_format")
+    def _validate_image_format(self, key, image_format):
+        """validates the given image format
+        """
+        
+        if image_format is not None and \
+           not isinstance(image_format, ImageFormat):
+            raise TypeError("the image_format should be an instance of "
+                            "stalker.core.models.ImageFormat")
+        
+        return image_format
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("lead")
+    def _validate_lead(self, key, lead):
+        """validates the given lead_in value
+        """
+        
+        if lead is not None:
+            if not isinstance(lead, User):
+                raise TypeError("lead must be an instance of "
+                                "stalker.core.models.User")
+        
+        return lead
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("repository")
+    def _validate_repository(self, key, repository):
+        """validates the given repository_in value
+        """
+        
+        if not isinstance(repository, Repository):
+            raise TypeError("The stalker.core.models.Project instance should "
+                            "be created with a stalker.core.models.Repository "
+                            "instance passed through the 'repository' "
+                            "argument, the current value is "
+                            "'%s'" % repository)
+        
+        return repository
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("structure")
+    def _validate_structure(self, key, structure_in):
+        """validates the given structure_in vlaue
+        """
+        
+        if structure_in is not None:
+            if not isinstance(structure_in, Structure):
+                raise TypeError("structure should be an instance of "
+                                 "stalker.core.models.Structure")
+        
+        return structure_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    @synonym_for("_assets")
+    @property
+    def assets(self):
+        """The list of :class:`~stalker.core.models.Asset`\ s created in this project.
+        
+        It is a read-only list. To add an :class:`~stalker.core.models.Asset`
+        to this project, the :class:`~stalker.core.models.Asset` need to be
+        created with this project is given in the ``project`` argument in the
+        :class:`~stalker.core.models.Asset`.
+        """
+        
+        return self._assets
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("is_stereoscopic")
+    def _validate_is_stereoscopic(self, key, is_stereoscopic_in):
+        return bool(is_stereoscopic_in)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@property
+    #def sequences(self):
+        #"""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
+        
+        #This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
+        #that this :class:`~stalker.core.models.Project` has. It is a list of
+        #:class:`~stalker.core.models.Sequence` instances. The attribute is
+        #read-only. The only way to attach a
+        #:class:`~stalker.core.models.Sequence` to this
+        #:class:`~stalker.core.models.Project` is to create the
+        #:class:`~stalker.core.models.Sequence` with this
+        #:class:`~stalker.core.models.Project` by passing this
+        #:class:`~stalker.core.models.Project` in the ``project`` argument of
+        #the :class:`~stalker.core.models.Sequence`.
+        #"""
+        
+        #return self._sequences
+    
+    
+    
+    #----------------------------------------------------------------------
+    @property
+    def users(self):
+        """The users assigned to this project.
+        
+        This is a list of :class:`~stalker.core.models.User` instances. All the
+        elements are gathered from all the
+        :class:`~stalker.core.models.Task`\ s of the project itself and from
+        :class:`~stalker.core.models.Sequence`\ s,
+        :class:`~stalker.core.models.Shot`\ s,
+        :class:`~stalker.core.models.Asset`\ s.
+        """
+        
+        self._users = []
+        # project tasks
+        for task in self.tasks:
+            self._users.extend(task.resources)
+        
+        # sequence tasks
+        for seq in self.sequences:
+            for task in seq.tasks:
+                self._users.extend(task.resources)
+            
+            # shot tasks
+            for shot in seq.shots:
+                for task in shot.tasks:
+                    self._users.extend(task.resources)
+        
+        # asset tasks
+        for asset in self.assets:
+            for task in asset.tasks:
+                self._users.extend(task.resources)
+        
+        self._users = list(set(self._users))
+        
+        return self._users
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Project, self).__eq__(other) and \
+               isinstance(other, Project)
+
+
+
+
+
+
+########################################################################
 class User(Entity):
     """The user class is designed to hold data about a User in the system.
     
@@ -2691,8 +3353,18 @@ class User(Entity):
         self.permission_groups = permission_groups
         
         self._projects = []
+        
+        if projects_lead is None:
+            projects_lead = []
         self.projects_lead = projects_lead
+        
+        if sequences_lead is None:
+            sequences_lead = []
         self.sequences_lead = sequences_lead
+        
+        if tasks is None:
+            tasks = []
+        
         self.tasks = tasks
         
         self.last_login = last_login
@@ -2988,27 +3660,18 @@ class User(Entity):
     
     
     
-    ##----------------------------------------------------------------------
-    #@validates("projects_lead")
-    #def _validate_projects_lead(self, key, projects_lead_in):
-        #"""validates the given projects_lead attribute
-        #"""
+    #----------------------------------------------------------------------
+    @validates("projects_lead")
+    def _validate_projects_lead(self, key, project):
+        """validates the given projects_lead attribute
+        """
         
-        #if projects_lead_in is None:
-            #projects_lead_in = []
+        if not isinstance(project, Project):
+            raise TypeError(
+                "any element in projects_lead should be a"
+                "stalker.core.models.Project instance")
         
-        #if not isinstance(projects_lead_in, list):
-            #raise TypeError("projects_lead should be a list of "
-                             #"stalker.core.models.Project instances")
-        
-        #for a_project in projects_lead_in:
-            #if not isinstance(a_project, Project):
-                #raise TypeError(
-                    #"any element in projects_lead should be a"
-                    #"stalker.core.models.Project instance")
-        
-        ##return ValidatedList(projects_lead_in, Project)
-        #return projects_lead_in
+        return project
     
     
     
@@ -3037,27 +3700,18 @@ class User(Entity):
     
     
     
-    ##----------------------------------------------------------------------
-    #@validates("tasks")
-    #def _validate_tasks(self, key, tasks_in):
-        #"""validates the given taks attribute
-        #"""
+    #----------------------------------------------------------------------
+    @validates("tasks")
+    def _validate_tasks(self, key, task):
+        """validates the given taks attribute
+        """
         
-        #if tasks_in is None:
-            #tasks_in = []
+        if not isinstance(task, Task):
+            raise TypeError(
+                "any element in tasks should be an instance of "
+                "stalker.core.models.Task class")
         
-        #if not isinstance(tasks_in, list):
-            #raise TypeError("tasks should be a list of "
-                             #"stalker.core.models.Task objects")
-        
-        #for a_task in tasks_in:
-            #if not isinstance(a_task, Task):
-                #raise TypeError(
-                    #"any element in tasks should be an instance of "
-                    #"stalker.core.models.Task class")
-        
-        ##return ValidatedList(tasks_in, Task)
-        #return tasks_in
+        return task
     
     
     
@@ -3086,6 +3740,11 @@ class User(Entity):
             #projects.append(task.task_of.project)
         
         #return list(set(projects))
+
+
+
+
+
 
 
 
@@ -3150,4 +3809,19 @@ User_PermissionGroups = Table(
     Column("permissionGroup_id", Integer, ForeignKey("PermissionGroups.id"),
            primary_key=True
     )
+)
+
+
+# TASK_RESOURCES
+Task_Resources = Table(
+    "Task_Resources", Base.metadata,
+    Column("task_id", Integer, ForeignKey("Tasks.id")),
+    Column("resource_id", Integer, ForeignKey("Users.id")),
+)
+
+# TASK_TASKS
+Task_Tasks = Table(
+    "Task_Tasks", Base.metadata,
+    Column("task_id", Integer, ForeignKey("Tasks.id")),
+    Column("depends_to_task_id", Integer, ForeignKey("Tasks.id")),
 )

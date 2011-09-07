@@ -27,6 +27,14 @@ v0.1.2.a1
  * Empty :class:`~stalker.core.models.StatusList`\ s are now allowed. The
    validation overhead is left to the SOM user.
 
+ * Removed the ``TaskMixin`` on the way of moving to declarative. It was not
+   possible to add a one-to-many relation to the
+   :class:`~stalker.core.model.Task`\ s
+   :attr:`~stalker.core.models.Task.task_of` attribute from all the mixed-in
+   classes. So the solution was to introduce a new
+   :class:`~stalker.core.models.TaskableEntity` (yaykh!) inheriting from
+   :class:`~stalker.core.models.Entity`.
+
 v0.1.1.a10
 ----------
 
