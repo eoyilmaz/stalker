@@ -8,25 +8,9 @@ v0.1.2.a1
  * Started to switch to SQLAlchemy ORM Declarative for SOM, implemented these
    classes successfully:
    
-   * SimpleEntity
-   * Type
-   * Tag
-   * Note
-   * ImageFormat
-   * Status
-   * StatusList
-   * Repository
-   * Structure
-   * FilenameTemplate
-   * Department
-   * Link
-   * ReferenceMixin
-   * StatusMixin
-   * ScheduleMixin
-   * Project
-   * Sequence
-   * Shot
-   * Asset
+   SimpleEntity, Type, Tag, Note, ImageFormat, Status, StatusList, Repository,
+   Structure, FilenameTemplate, Department, Link, ReferenceMixin, StatusMixin,
+   ScheduleMixin, Project, Sequence, Shot, Asset, Review.
 
  * Empty :class:`~stalker.core.models.StatusList`\ s are now allowed. The
    validation overhead is left to the SOM user.
@@ -53,6 +37,15 @@ v0.1.2.a1
    :class:`~stalker.core.models.SimpleEntity` is going to be copied from the
    :attr:`~stalker.core.models.SimpleEntity.code` attribute if the ``name``
    argument is skipped, None or empty string.
+
+ * The ``ReviewMixin`` is removed.
+ 
+ * The :class:`~stalker.core.models.Review` class is now inheriting from the
+   :class:`~stalker.core.models.SimpleEntity`.
+
+ * The :class:`~stalker.core.models.Entity` now has a new attribute called
+   :attr:`~stalker.core.models.Entity.reviews` to store a list of
+   :class:`~stalker.core.models.Review` instances.
 
 v0.1.1.a10
 ----------

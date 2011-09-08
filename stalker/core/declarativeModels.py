@@ -610,12 +610,23 @@ class Entity(SimpleEntity):
     
     notes = relationship(
         "Note",
-        primaryjoin="Entity.entity_id==Note.entity_id",
+        primaryjoin="Entities.c.id==Notes.c.entity_id",
         backref="entity",
-        doc="""All the notes about this entity.
+        doc="""All the :class:`~stalker.core.models.Notes`\ s attached to this entity.
         
-        It is a list of :class:`~stalker.core.models.Note` objects or an empty
-        list, None will be converted to an empty list.
+        It is a list of :class:`~stalker.core.models.Note` instances or an
+        empty list, setting it None will raise a TypeError.
+        """
+    )
+    
+    reviews = relationship(
+        "Review",
+        primaryjoin="Entities.c.id==Reviews.c.to_id",
+        back_populates="to",
+        doc="""All the :class:`~stalker.core.models.Review`\ s about this Entity.
+        
+        It is a list of :class:`~stalker.core.models.Review` instances or an
+        empty list, setting it None will raise a TypeError.
         """
     )
     
@@ -654,29 +665,42 @@ class Entity(SimpleEntity):
     
     #----------------------------------------------------------------------
     @validates("notes")
-    def _validate_notes(self, key, note_in):
+    def _validate_notes(self, key, note):
         """validates the given note value
         """
         
-        if not isinstance(note_in, Note):
+        if not isinstance(note, Note):
             raise TypeError("note should be an instance of "
                             "stalker.core.models.Note")
         
-        return note_in
+        return note
     
     
     
     #----------------------------------------------------------------------
     @validates("tags")
-    def _validate_tags(self, key, tag_in):
+    def _validate_tags(self, key, tag):
         """validates the given tag
         """
         
-        if not isinstance(tag_in, Tag):
+        if not isinstance(tag, Tag):
             raise TypeError("tag should be an instance of "
                             "stalker.core.models.Tag")
         
-        return tag_in
+        return tag
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("reviews")
+    def _validate_reviews(self, key, review):
+        """validates the given review value
+        """
+        if not isinstance(review, Review):
+            raise TypeError("The reviews should be a list of "
+                            "stalker.core.models.Review instances")
+        
+        return review
     
     
     
@@ -1398,16 +1422,24 @@ class Link(Entity):
 
 
 
+# mixin class imports should be placed after StatusList and Link definitions
+from stalker.core.declarativeMixins import (ReferenceMixin, ScheduleMixin,
+                                            StatusMixin, ProjectMixin)
+
+
+
+
+
 ########################################################################
 class Booking(Entity):
     """Holds information about the time spend on a specific task by a specific user.
     """
     
     __tablename__ = "Bookings"
-    __mapper_args__ = {"inherit_condition": "Entities.id==Bookings.id"}
+    __mapper_args__ = {"polymorphic_identity": "Booking"}
     booking_id = Column("id", Integer, ForeignKey("Entities.id"),
                         primary_key=True)
-    task_id = Column(Integer, ForeignKey("Tasks.c.id"), nullable=False)
+    task_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
     task = relationship(
         "Task",
         primaryjoin="Bookings.c.task_id==Tasks.c.id",
@@ -1415,6 +1447,8 @@ class Booking(Entity):
         back_populates="bookings",
         doc="The :class:`~stalker.core.models.Task` instance that this booking is created for"
     )
+    
+    
     
     #----------------------------------------------------------------------
     def __init__(self, task=None, **kwargs):
@@ -1441,9 +1475,88 @@ class Booking(Entity):
 
 
 
-# mixin class imports should be placed after StatusList and Link definitions
-from stalker.core.declarativeMixins import (ReferenceMixin, ScheduleMixin,
-                                            StatusMixin, ProjectMixin)
+########################################################################
+class Review(Entity):
+    """User reviews and comments about other entities.
+    
+    :param body: the body of the review, it is a string or unicode variable,
+      it can be empty but it is then meaningless to have an empty review.
+      Anything other than a string or unicode will raise a TypeError.
+    
+    :param to: The relation variable, that holds the connection that this
+      review is related to. Any object which has a list-like attribute called
+      "reviews" is accepted. Anything other will raise AttributeError.
+    """
+    
+    
+    
+    __tablename__ = "Reviews"
+    __mapper_args__ = {"polymorphic_identity": "Review"}
+    review_id = Column("id", ForeignKey("SimpleEntities.id"),
+                       primary_key=True)
+    body = Column(
+        String,
+        doc="""The body (content) of this Review.
+        """
+    )
+    
+    to_id = Column(ForeignKey("Entities.id"))
+    to = relationship(
+        "Entity",
+        primaryjoin="Reviews.c.to_id==Entities.c.id",
+        back_populates="reviews",
+        uselist=False,
+        doc="""The owner object of this Review.
+        """
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, body="", to=None, **kwargs):
+        super(Review, self).__init__(**kwargs)
+        
+        self.body = body
+        self.to = to
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("body")
+    def _validate_body(self, key, body):
+        """validates the given body variable
+        """
+        
+        # the body could be empty
+        # but it should be an instance of string or unicode
+        
+        if not isinstance(body, (str, unicode)):
+            raise TypeError("the body attribute should be an instance of "
+                              "string or unicode")
+        
+        return body
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("to")
+    def _validate_to(self, key, to):
+        """validates the given to variable
+        """
+        
+        if to is None:
+            raise RuntimeError("The review can not be removed from the owner "
+                               "Entity objects `reviews` attribute. If you "
+                               "want to remove the Review instance, either "
+                               "delete it or assign it to a new "
+                               "stalker.core.models.Entity instance")
+        
+        if not isinstance(to, Entity):
+            raise TypeError("the object which is given with the `to` should "
+                            "be inherited from stalker.core.models.Entity "
+                            "class")
+        
+        return to
 
 
 
@@ -2594,6 +2707,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         "Booking",
         primaryjoin="Bookings.c.task_id==Tasks.c.id",
         back_populates="task",
+        doc="""A list of :class:`~stalker.core.models.Booking` instances showing who and when spent how much effort on this task.
+        """
     )
     
     #versions = relationship(

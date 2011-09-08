@@ -4,8 +4,17 @@
 
 import unittest
 from stalker.core.mixins import ReviewMixin
-from stalker.core.models import Review
+from stalker.core.declarativeModels import SimpleEntity, Review
 from stalker.ext.validatedList import ValidatedList
+
+
+
+
+
+class FooMixedInClass(SimpleEntity, ReviewMixin):
+    def __init__(self, **kwargs):
+        super(FooMixedInClass, self).__init__(**kwargs)
+        ReviewMixin.__init__(self, **kwargs)
 
 
 
@@ -25,17 +34,6 @@ class ReviewMixinTester(unittest.TestCase):
         """
         
         self.kwargs = {}
-        
-        class BarClass(object):
-            def __init__(self, **kwargs):
-                pass
-        
-        class FooMixedInClass(BarClass, ReviewMixin):
-            def __init__(self, **kwargs):
-                super(FooMixedInClass, self).__init__(**kwargs)
-                ReviewMixin.__init__(self, **kwargs)
-        
-        self.FooMixedInClass = FooMixedInClass
         
         self.test_foo_obj = FooMixedInClass(**self.kwargs)
     
@@ -97,7 +95,7 @@ class ReviewMixinTester(unittest.TestCase):
         rev3 = Review(name="Test Rev 3", to=self.test_foo_obj)
         
         # create a new FooMixedInClass with no previews
-        new_foo_obj = self.FooMixedInClass()
+        new_foo_obj = FooMixedInClass()
         
         # now try to assign all thre rev1 to the new object
         # this should work fine
@@ -120,7 +118,7 @@ class ReviewMixinTester(unittest.TestCase):
         rev3 = Review(name="Test Rev 3", to=self.test_foo_obj)
         
         # create a new FooMixedInClass with no reviews
-        new_foo_obj = self.FooMixedInClass()
+        new_foo_obj = FooMixedInClass()
         
         #print self.test_foo_obj
         #print new_foo_obj

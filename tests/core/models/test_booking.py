@@ -20,7 +20,16 @@ class BookingTester(unittest.TestCase):
         # create a Task
         # create a Booking
         # and test it
+        
         pass
+    
+    
+    #----------------------------------------------------------------------
+    def test_setup_the_test(self):
+        """
+        """
+        
+        self.fail("test is not implemented yet")
     
     
     

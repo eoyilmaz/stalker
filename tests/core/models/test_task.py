@@ -17,6 +17,24 @@ from stalker.core.declarativeModels import (SimpleEntity, Entity, Task, User,
 
 
 ########################################################################
+class SomeClass(TaskableEntity):
+    pass
+
+
+
+
+
+
+########################################################################
+class SomeOtherClass(object):
+    pass
+
+
+
+
+
+
+########################################################################
 class TaskTester(unittest.TestCase):
     """Tests the stalker.core.models.Task class
     """
@@ -1422,12 +1440,12 @@ class TaskTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_bookings_attribute_is_None(self):
-        """testing if the bookings attribute will be an empty list when it is
-        set to None
+        """testing if a TypeError will be raised when the bookings attribute
+        is set to None
         """
         
-        self.test_data_task.bookings = None
-        self.assertEqual(self.test_data_task.bookings, [])
+        self.assertRaises(TypeError, setattr, self.test_data_task, "bookings",
+                          None)
     
     
     
@@ -1472,15 +1490,6 @@ class TaskTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_bookings_attribute_is_a_ValidatedList_instance(self):
-        """testing if the bookings attribute is a ValidatedList instance
-        """
-        
-        self.assertIsInstance(self.test_data_task.bookings, ValidatedList)
-    
-    
-    
     ##----------------------------------------------------------------------
     #def test_versions_argument_is_skipped(self):
         #"""testing if the versions attribute will be an empty list when the
@@ -1503,12 +1512,12 @@ class TaskTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_versions_attribute_is_None(self):
-        """testing if the versions attribute will be an empty list when it is
-        set to None
+        """testing if a TypeError will be raised when the versions attribute
+        is set to None
         """
         
-        self.test_data_task.versions = None
-        self.assertEqual(self.test_data_task.versions, [])
+        self.assertRaises(TypeError, setattr, self.test_data_task, "versions",
+                          None)
     
     
     
@@ -1550,15 +1559,6 @@ class TaskTester(unittest.TestCase):
         
         self.assertRaises(TypeError, setattr, self.test_data_task, "versions",
                           [1, 1.2, "a version"])
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_versions_attribute_is_a_ValidatedList_instance(self):
-        """testing if the versions attribute is a ValidatedList instance
-        """
-        
-        self.assertIsInstance(self.test_data_task.versions, ValidatedList)
     
     
     
@@ -1696,13 +1696,6 @@ class TaskTester(unittest.TestCase):
         inherited from TaskableEntity
         """
         
-        class SomeClass(TaskableEntity):
-            def __init__(self, **kwargs):
-                super(SomeClass, self).__init__(**kwargs)
-        
-        class SomeOtherClass(object):
-            pass
-        
         status_complete = Status(name="Complete", code="CMPLT")
         status_wip = Status(name="Work In Progress", code="WIP")
         
@@ -1739,12 +1732,6 @@ class TaskTester(unittest.TestCase):
         """testing if the task_of attribute accepts anything that has mixed
         with TaskMixin
         """
-        
-        class SomeClass(TaskableEntity):
-            pass
-        
-        class SomeOtherClass(object):
-            pass
         
         status_complete = Status(name="Complete", code="CMPLT")
         status_wip = Status(name="Work In Progress", code="WIP")

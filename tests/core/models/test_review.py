@@ -4,7 +4,7 @@
 
 import unittest
 import datetime
-from stalker.core.models import Review, Entity, User, Tag
+from stalker.core.declarativeModels import (Review, Entity, User, Tag)
 
 
 
