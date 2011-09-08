@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.core.declarativeModels import Tag, SimpleEntity
+from stalker.core.models import Tag, SimpleEntity
 
 
 

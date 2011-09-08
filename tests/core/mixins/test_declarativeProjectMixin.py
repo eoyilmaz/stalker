@@ -2,9 +2,8 @@
 
 import unittest
 
-from stalker.core.declarativeModels import (SimpleEntity, Project, Type,
-                                            Status, StatusList, Repository)
-from stalker.core.declarativeMixins import ProjectMixin
+from stalker.core.models import (SimpleEntity, Project, Type, Status,
+                                 StatusList, Repository, ProjectMixin)
 from sqlalchemy import (
     Column,
     Boolean,
@@ -15,33 +14,30 @@ from sqlalchemy import (
 )
 
 # create a new mixed in SimpleEntity
-class A(SimpleEntity, ProjectMixin):
+class DeclProjMixA(SimpleEntity, ProjectMixin):
     
-    __tablename__ = "As"
-    __mapper_args__ = {"polymorphic_identity": "A"}
+    __tablename__ = "ProjMixAs"
+    __mapper_args__ = {"polymorphic_identity": "DeclProjMixA"}
     a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
     
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
-        super(A, self).__init__(**kwargs)
+        super(DeclProjMixA, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
 
 
 
-
-
-
-class B(SimpleEntity, ProjectMixin):
+class DeclProjMixB(SimpleEntity, ProjectMixin):
     
-    __tablename__ = "Bs"
-    __mapper_args__ = {"polymorphic_identity": "B"}
+    __tablename__ = "ProjMixBs"
+    __mapper_args__ = {"polymorphic_identity": "DeclProjMixB"}
     b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
     
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
-        super(B, self).__init__(**kwargs)
+        super(DeclProjMixB, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
 
 
@@ -67,13 +63,13 @@ class ProjectMixinTester(unittest.TestCase):
         self.test_a_statusList = StatusList(
             name="A Statuses",
             statuses=[self.test_stat1, self.test_stat3],
-            target_entity_type=A,
+            target_entity_type=DeclProjMixA,
         )
         
         self.test_b_statusList = StatusList(
             name="B Statuses",
             statuses=[self.test_stat2, self.test_stat3],
-            target_entity_type=B
+            target_entity_type=DeclProjMixB
         )
         
         self.test_project_statusList = StatusList(
@@ -104,7 +100,7 @@ class ProjectMixinTester(unittest.TestCase):
             "project": self.test_project,
         }
         
-        self.test_a_obj = A(**self.kwargs)
+        self.test_a_obj = DeclProjMixA(**self.kwargs)
     
     
     

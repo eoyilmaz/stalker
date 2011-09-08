@@ -2,8 +2,7 @@
 import unittest
 import datetime
 
-from stalker.core.declarativeModels import SimpleEntity
-from stalker.core.declarativeMixins import ScheduleMixin
+from stalker.core.models import SimpleEntity, ScheduleMixin
 from sqlalchemy import (
     Table,
     Column,
@@ -19,16 +18,16 @@ from sqlalchemy import (
 
 
 # create a new mixed in SimpleEntity
-class A(SimpleEntity, ScheduleMixin):
+class DeclSchedMixA(SimpleEntity, ScheduleMixin):
     
-    __tablename__ = "As"
-    __mapper_args__ = {"polymorphic_identity": "A"}
+    __tablename__ = "DeclSchedMixAs"
+    __mapper_args__ = {"polymorphic_identity": "DeclSchedMixA"}
     a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
     
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
-        super(A, self).__init__(**kwargs)
+        super(DeclSchedMixA, self).__init__(**kwargs)
         ScheduleMixin.__init__(self, **kwargs)
 
 
@@ -36,16 +35,16 @@ class A(SimpleEntity, ScheduleMixin):
 
 
 
-class B(SimpleEntity, ScheduleMixin):
+class DeclSchedMixB(SimpleEntity, ScheduleMixin):
     
-    __tablename__ = "Bs"
-    __mapper_args__ = {"polymorphic_identity": "B"}
+    __tablename__ = "DeclSchedMixBs"
+    __mapper_args__ = {"polymorphic_identity": "DeclSchedMixB"}
     b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
     
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
-        super(B, self).__init__(**kwargs)
+        super(DeclSchedMixB, self).__init__(**kwargs)
         ScheduleMixin.__init__(self, **kwargs)
 
 
@@ -78,7 +77,7 @@ class ScheduleMixinTester(unittest.TestCase):
         """testing if the mixin setup is working properly
         """
         
-        new_A = A(**self.kwargs) # should not create any problem
+        new_A = DeclSchedMixA(**self.kwargs) # should not create any problem
         self.assertEqual(new_A.start_date, self.kwargs["start_date"])
         self.assertEqual(new_A.due_date, self.kwargs["due_date"])
         self.assertEqual(new_A.duration, self.kwargs["duration"])
@@ -109,7 +108,7 @@ class ScheduleMixinTester(unittest.TestCase):
         #print new_A.duration
         
         # create a new class
-        new_B = B(**self.kwargs)
+        new_B = DeclSchedMixB(**self.kwargs)
         # now check the start_date, due_date and duration
         self.assertEqual(new_B.start_date, self.kwargs["start_date"])
         self.assertEqual(new_B.due_date, self.kwargs["due_date"])

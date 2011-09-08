@@ -4,7 +4,7 @@
 
 import platform
 import unittest
-from stalker.core.declarativeModels import Repository, Tag
+from stalker.core.models import Repository, Tag
 
 
 

@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.core.declarativeModels import Entity, Type
+from stalker.core.models import Entity, Type
 
 
 

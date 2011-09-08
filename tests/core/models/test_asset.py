@@ -3,9 +3,8 @@
 
 
 import unittest
-from stalker.core.declarativeModels import (Asset, Task, Entity, Project, Link,
-                                            Status, StatusList, Shot, Type,
-                                            Sequence, Repository)
+from stalker.core.models import (Asset, Task, Entity, Project, Link, Status,
+                                 StatusList, Shot, Type, Sequence, Repository)
 
 
 

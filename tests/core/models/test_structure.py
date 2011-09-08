@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.core.declarativeModels import (Structure, FilenameTemplate, Type)
+from stalker.core.models import (Structure, FilenameTemplate, Type)
 
 
 # mock classes

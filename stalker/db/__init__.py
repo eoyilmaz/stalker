@@ -11,7 +11,7 @@ import sqlalchemy
 from stalker.conf import defaults
 from stalker import utils
 from stalker.core.models import User, Department
-from stalker.core.declarativeModels import Base
+from stalker.core.models import Base
 
 # SQLAlchemy database engine
 engine = None

@@ -2,6 +2,22 @@
 Stalker Changes
 ===============
 
+v01.2.a2
+--------
+
+ * All the models are now converted to SQLAlchemy's Declarative.
+ 
+ * Because of the move to the SQLAlchemy Declarative extension the
+   stalker.etx.ValidatedList is deprecated. SQLAlchemy is doing (in most of
+   the aspects) a much better job.
+
+ * The ``stalker.core.mixins`` module is merged with
+   :mod:`~stalker.core.models` module.
+
+ * Becase all the models are declaratively defined and thus they have their
+   mappers and tables inside, the ``stalker.db.mapper``, ``stalker.db.tables``
+   and the ``stalker.db.mixins`` modules are removed.
+
 v0.1.2.a1
 ----------
 

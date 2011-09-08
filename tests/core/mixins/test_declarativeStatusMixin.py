@@ -2,8 +2,7 @@
 
 import unittest
 
-from stalker.core.declarativeModels import SimpleEntity, Status, StatusList
-from stalker.core.declarativeMixins import StatusMixin
+from stalker.core.models import SimpleEntity, Status, StatusList, StatusMixin
 from sqlalchemy import (
     Table,
     Column,
@@ -15,16 +14,16 @@ from sqlalchemy import (
 )
 
 # create a new mixed in SimpleEntity
-class A(SimpleEntity, StatusMixin):
+class DeclStatMixA(SimpleEntity, StatusMixin):
     
-    __tablename__ = "As"
-    __mapper_args__ = {"polymorphic_identity": "A"}
+    __tablename__ = "DeclStatMixAs"
+    __mapper_args__ = {"polymorphic_identity": "DeclStatMixA"}
     a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
     
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
-        super(A, self).__init__(**kwargs)
+        super(DeclStatMixA, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
 
 
@@ -32,10 +31,10 @@ class A(SimpleEntity, StatusMixin):
 
 
 
-class B(SimpleEntity, StatusMixin):
+class DeclStatMixB(SimpleEntity, StatusMixin):
     
-    __tablename__ = "Bs"
-    __mapper_args__ = {"polymorphic_identity": "B"}
+    __tablename__ = "DeclStatMixBs"
+    __mapper_args__ = {"polymorphic_identity": "DeclStatMixB"}
     b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
     
@@ -67,13 +66,13 @@ class StatusMixinTester(unittest.TestCase):
         self.test_a_statusList = StatusList(
             name="A Statuses",
             statuses=[self.test_stat1, self.test_stat3],
-            target_entity_type="A",
+            target_entity_type="DeclStatMixA",
         )
         
         self.test_b_statusList = StatusList(
             name="B Statuses",
             statuses=[self.test_stat2, self.test_stat3],
-            target_entity_type="B"
+            target_entity_type="DeclStatMixB"
         )
         
         self.kwargs = {
@@ -89,7 +88,7 @@ class StatusMixinTester(unittest.TestCase):
         is not set
         """
         self.kwargs.pop("status_list")
-        self.assertRaises(TypeError, A, **self.kwargs)
+        self.assertRaises(TypeError, DeclStatMixA, **self.kwargs)
     
     
     
@@ -99,7 +98,7 @@ class StatusMixinTester(unittest.TestCase):
         instance with the status_list argument is not suitable for this class
         """
         self.kwargs["status_list"] = self.test_b_statusList
-        self.assertRaises(TypeError, A, **self.kwargs)
+        self.assertRaises(TypeError, DeclStatMixA, **self.kwargs)
     
     
     
@@ -108,7 +107,7 @@ class StatusMixinTester(unittest.TestCase):
         """testing if the status_list attribute is working properly
         """
         
-        new_a_ins = A(
+        new_a_ins = DeclStatMixA(
             name="Ozgur",
             status_list=self.test_a_statusList
         )

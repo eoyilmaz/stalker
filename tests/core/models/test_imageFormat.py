@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.core.declarativeModels import ImageFormat
+from stalker.core.models import ImageFormat
 
 
 

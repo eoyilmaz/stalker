@@ -16,7 +16,6 @@ from sqlalchemy.sql import select
 from stalker.conf import defaults
 from stalker import utils
 from stalker import db
-from stalker.db import tables
 from stalker.ext import auth
 from stalker.core.errors import LoginError, DBError
 from stalker.core.models import (

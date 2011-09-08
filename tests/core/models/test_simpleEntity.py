@@ -5,7 +5,7 @@
 import unittest
 import datetime
 import stalker
-from stalker.core.declarativeModels import (SimpleEntity, Type, User)
+from stalker.core.models import (SimpleEntity, Type, User)
 
 
 

@@ -4,11 +4,17 @@
 
 import unittest
 import datetime
+import copy
 
 from stalker.conf import defaults
-from stalker.core.mixins import StatusMixin
-from stalker.core.models import (Status, StatusList)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import (SimpleEntity, Status, StatusList, StatusMixin)
+
+
+
+class StatMixClass(SimpleEntity, StatusMixin):
+    def __init__(self, **kwargs):
+        super(StatMixClass, self).__init__(**kwargs)
+        StatusMixin.__init__(self, **kwargs)
 
 
 
@@ -43,7 +49,7 @@ class StatusMixinTester(unittest.TestCase):
                 self.test_status4,
                 self.test_status5,
             ],
-            target_entity_type="Dummy",
+            target_entity_type="StatMixClass",
         )
         
         # another test StatusList object
@@ -56,39 +62,20 @@ class StatusMixinTester(unittest.TestCase):
                 self.test_status4,
                 self.test_status5,
             ],
-            target_entity_type="Dummy",
+            target_entity_type="StatMixClass",
         )
         
         self.kwargs = {
+            "name": "Test Class",
             "status_list": self.test_status_list1,
             "status": 0,
         }
         
-        # create a dummy class
-        class Dummy(object):
-            entity_type = "Dummy"
-            def __init__(self):
-                pass
-        
-        # create another dummy to test the mixin init method
-        class DummyWithoutInit(object):
-            entity_type = "Dummy"
-            pass
-        
-        
-        class MixedClass(Dummy, StatusMixin):
-            pass
-        
-        class MixedClass_with_MixinInit(DummyWithoutInit, StatusMixin):
-            pass
-        
-        self.test_class_for_init_test = MixedClass_with_MixinInit
-        
-        self.test_mixed_obj = MixedClass()
+        self.test_mixed_obj = StatMixClass(**self.kwargs)
         self.test_mixed_obj.status_list = self.test_status_list1
         
         # create another one without status_list set to something
-        self.test_mixed_obj2 = MixedClass()
+        self.test_mixed_obj2 = StatMixClass(**self.kwargs)
     
     
     
@@ -102,8 +89,7 @@ class StatusMixinTester(unittest.TestCase):
         
         for testValue in testValues:
             self.kwargs["status_list"] = testValue
-            self.assertRaises(TypeError, self.test_class_for_init_test,
-                              **self.kwargs)
+            self.assertRaises(TypeError, StatMixClass, **self.kwargs)
     
     
     
@@ -113,8 +99,7 @@ class StatusMixinTester(unittest.TestCase):
         initialize status_list with None
         """
         self.kwargs["status_list"] = None
-        self.assertRaises(TypeError, self.test_class_for_init_test,
-                          **self.kwargs)
+        self.assertRaises(TypeError, StatMixClass, **self.kwargs)
     
     
     
@@ -160,8 +145,7 @@ class StatusMixinTester(unittest.TestCase):
         status_list argument
         """
         self.kwargs.pop("status_list")
-        self.assertRaises(TypeError, self.test_class_for_init_test,
-                          **self.kwargs)
+        self.assertRaises(TypeError, StatMixClass, **self.kwargs)
     
     
     
@@ -199,7 +183,7 @@ class StatusMixinTester(unittest.TestCase):
                 Status(name="On Hold", code="OH"),
                 Status(name="Complete", code="CMPLT"),
             ],
-            target_entity_type="Dummy"
+            target_entity_type="StatMixClass"
         )
         
         # this shouldn't raise any error
@@ -213,8 +197,7 @@ class StatusMixinTester(unittest.TestCase):
         argument to None
         """
         self.kwargs["status"] = None
-        self.assertRaises(TypeError, self.test_class_for_init_test,
-                          **self.kwargs)
+        self.assertRaises(TypeError, StatMixClass, **self.kwargs)
     
     
     
@@ -244,8 +227,7 @@ class StatusMixinTester(unittest.TestCase):
         
         for test_value in test_values:
             self.kwargs["status"] = test_value
-            self.assertRaises(TypeError, self.test_class_for_init_test,
-                              **self.kwargs)
+            self.assertRaises(TypeError, StatMixClass, **self.kwargs)
     
     
     
@@ -287,20 +269,20 @@ class StatusMixinTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_status_attribute_set_before_status_list(self):
-        """testing if a TypeError will be raised when trying to set the status
-        attribute to some value before having a StatusList object in
-        status_list attribute
-        """
+    ##----------------------------------------------------------------------
+    #def test_status_attribute_set_before_status_list(self):
+        #"""testing if a TypeError will be raised when trying to set the status
+        #attribute to some value before having a StatusList object in
+        #status_list attribute
+        #"""
         
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_mixed_obj2,
-            "status",
-            0,
-        )
+        #self.assertRaises(
+            #TypeError,
+            #setattr,
+            #self.test_mixed_obj2,
+            #"status",
+            #0,
+        #)
     
     
     

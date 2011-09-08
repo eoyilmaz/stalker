@@ -4,7 +4,7 @@
 
 import datetime
 import unittest
-from stalker.core.declarativeModels import (User, ImageFormat, Type, Project,
+from stalker.core.models import (User, ImageFormat, Type, Project,
                                             Structure, Repository, Entity,
                                             Status, StatusList, Link,
                                             Task, Sequence, Asset, Shot)

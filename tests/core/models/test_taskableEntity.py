@@ -5,9 +5,8 @@
 import unittest
 import datetime
 
-from stalker.core.declarativeModels import (Status, StatusList, Task,
-                                            TaskableEntity, Project,
-                                            Repository, Type)
+from stalker.core.models import (Status, StatusList, Task, TaskableEntity,
+                                 Project, Repository, Type)
 
 
 

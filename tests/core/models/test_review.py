@@ -4,15 +4,12 @@
 
 import unittest
 import datetime
-from stalker.core.declarativeModels import (Review, Entity, User, Tag)
+from stalker.core.models import (Review, Entity, User, Tag)
 
 
-class AnObjectWithReviews(object):
-    def __init__(self):
-        self.reviews = []
 
-        
-        
+
+
 
 ########################################################################
 class ReviewTest(unittest.TestCase):
@@ -158,13 +155,6 @@ class ReviewTest(unittest.TestCase):
                 Review,
                 **self.kwargs
             )
-        
-        # lets check with something that has `reviews` attribute
-        #class AnObjectWithReviews(object):
-            #def __init__(self):
-                #self.reviews = []
-        
-        #an_object = AnObjectWithReviews()
         
         # this should work
         self.kwargs["to"] = self.test_to_object2

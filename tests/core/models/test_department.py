@@ -4,8 +4,7 @@
 
 import unittest
 import datetime
-from stalker.core.declarativeModels import Department, User, Entity
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import Department, User, Entity
 
 
 

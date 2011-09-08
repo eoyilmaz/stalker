@@ -7,7 +7,7 @@ import unittest
 
 from stalker.conf import defaults
 from stalker.core.errors import CircularDependencyError
-from stalker.core.declarativeModels import (SimpleEntity, Entity, Task, User,
+from stalker.core.models import (SimpleEntity, Entity, Task, User,
                                             Status, StatusList, Project, Type,
                                             Repository, TaskableEntity)
 
