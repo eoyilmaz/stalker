@@ -3,9 +3,9 @@
 
 
 import unittest
-from stalker.core.models import (Asset, Task, Entity, Project, Link, Status,
-                                 StatusList, Shot, Type, Sequence, Repository)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.declarativeModels import (Asset, Task, Entity, Project, Link,
+                                            Status, StatusList, Shot, Type,
+                                            Sequence, Repository)
 
 
 
@@ -255,7 +255,7 @@ class AssetTester(unittest.TestCase):
         
         status_list = StatusList(name="Project Statuses",
                                  statuses=[status1, status2],
-                                 target_entity_type=Asset.entity_type)
+                                 target_entity_type=Asset)
         
         self.kwargs["code"] = "SH12314"
         self.kwargs["status"] = 0
@@ -402,12 +402,12 @@ class AssetTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the default plural name of the Asset class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the default plural name of the Asset class
+        #"""
         
-        self.assertEqual(Asset.plural_name, "Assets")
+        #self.assertEqual(Asset.plural_name, "Assets")
     
     
     
@@ -444,11 +444,11 @@ class AssetTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_shots_attribute_is_None(self):
-        """testing if the shots attribute will be an empty list when it is set
-        to None
+        """testing if a TypeError will be raised when the shots attribute is
+        set to None
         """
-        self.test_data_test_asset.shots = None
-        self.assertEqual(self.test_data_test_asset.shots, [])
+        self.assertRaises(TypeError, setattr, self.test_data_test_asset,
+                          "shots", None)
     
     
     
@@ -532,15 +532,6 @@ class AssetTester(unittest.TestCase):
         
         self.assertNotIn(new_asset, self.test_data_shot1.assets)
         self.assertNotIn(new_asset, self.test_data_shot2.assets)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_shots_attribute_is_a_ValidatedList_instance(self):
-        """testing if the shots attribute is a ValidatedList instance
-        """
-        
-        self.assertIsInstance(self.test_data_test_asset.shots, ValidatedList)
     
     
     

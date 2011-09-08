@@ -2299,9 +2299,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, TaskMixin):
     def repository(self):
         """The :class:`~stalker.core.models.Repository` that this project should reside.
         
-        Should be an instance of :class:`~stalker.core.models.Repository`.
-        It is a read-only attribute. So it is not possible to change the
-        repository of one project"""
+        Should be an instance of :class:`~stalker.core.models.Repository`. It
+        is a read-only attribute. So it is not possible to change the
+        repository of one project.
+        """
         
         return self._repository
     
@@ -5237,7 +5238,7 @@ class User(Entity):
     #----------------------------------------------------------------------
     @property
     def department(self):
-        """department of the user, it is a :class:`~stalker.core.models.Department` object"""
+        """:class:`~stalker.core.models.Department` of the user"""
         
         return self._department
     

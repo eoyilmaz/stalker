@@ -167,9 +167,20 @@ class SimpleEntity(Base):
         "polymorphic_identity": "SimpleEntity",
     }
     
-    code = Column(String(256), nullable=False)
-    name = Column(String(256), nullable=False)
-    description = Column("description", String)
+    code = Column(String(256), nullable=False,
+                  doc="""The code name of this object.
+        
+        It accepts string or unicode values and any other kind of objects will
+        be converted to string. In any update to the name attribute the code
+        also will be updated. If the code is not initialized or given as None,
+        it will be set to the uppercase version of the nice_name attribute.
+        Setting the code attribute to None will reset it to the default value.
+        The default value is the upper case form of the nice_name.""")
+    
+    name = Column(String(256), nullable=False,
+                  doc="""Name of this object""")
+    description = Column("description", String,
+                         doc="""Description of this object.""")
     
     created_by_id = Column(
         "created_by_id",
@@ -182,6 +193,7 @@ class SimpleEntity(Base):
         backref="entities_created",
         primaryjoin="SimpleEntity.created_by_id==User.user_id",
         post_update=True,
+        doc="""The :class:`~stalker.core.models.User` who has created this object.""",
     )
     
     updated_by_id = Column(
@@ -195,10 +207,20 @@ class SimpleEntity(Base):
         backref="entities_updated",
         primaryjoin="SimpleEntity.updated_by_id==User.user_id",
         post_update=True,
+        doc="""The :class:`~stalker.core.models.User` who has updated this object.""",
     )
     
-    date_created = Column(DateTime, default=datetime.datetime.now())
-    date_updated = Column(DateTime, default=datetime.datetime.now())
+    date_created = Column(
+        DateTime,
+        default=datetime.datetime.now(),
+        doc="""A :class:`datetime.datetime` instance showing the creation date and time of this object.""",
+    )
+    
+    date_updated = Column(
+        DateTime,
+        default=datetime.datetime.now(),
+        doc="""A :class:`datetime.datetime` instance showing the update date and time of this object.""",
+    )
     
     type_id = Column(
         "type_id",
@@ -209,9 +231,14 @@ class SimpleEntity(Base):
     type = relationship(
         "Type",
         primaryjoin="SimpleEntity.type_id==Type.type_id_local",
+        doc="""The type of the object.
+        
+        It is an instance of :class:`~stalker.core.models.Type` with a proper
+        :attr:`~stalker.core.models.Type.target_entity_type`.
+        """
     )
     
-    UniqueConstraint("name", "db_entity_type")
+    #UniqueConstraint("name", "db_entity_type")
     __stalker_version__ = Column("stalker_version", String(256))
     
     
@@ -229,13 +256,14 @@ class SimpleEntity(Base):
                  **kwargs
                  ): # pylint: disable=W0613
         
-        # code attribute
-        # just set it to None for now
-        #self._code = ""
-        
         # name and nice_name
         self._nice_name = ""
-        #self._name = ""
+        
+        # check the name
+        if name is None or name == "":
+            name = code # no matter if the code is also None, it will produce
+                        # the desired error in that case
+        
         self.name = name
         
         # code
@@ -244,6 +272,8 @@ class SimpleEntity(Base):
         if code is not None and code is not "":
             #self._code = self._validate_code(code)
             self.code = code
+        else:
+            self.code = name
         
         self.description = description
         self.created_by = created_by
@@ -309,8 +339,8 @@ class SimpleEntity(Base):
         # also set the nice_name
         self._nice_name = self._condition_nice_name(name_in)
         
-        # set the code
-        self.code = name_in
+        ## set the code
+        #self.code = name_in
         
         return name_in
     
@@ -571,13 +601,22 @@ class Entity(SimpleEntity):
     tags = relationship(
         "Tag",
         secondary="Entity_Tags",
-        backref="entities"
+        backref="entities",
+        doc="""A list of tags attached to this object.
+        
+        It is a list of :class:`~stalker.core.models.Tag` instances which shows
+        the tags of this object"""
     )
     
     notes = relationship(
         "Note",
         primaryjoin="Entity.entity_id==Note.entity_id",
-        backref="entity"
+        backref="entity",
+        doc="""All the notes about this entity.
+        
+        It is a list of :class:`~stalker.core.models.Note` objects or an empty
+        list, None will be converted to an empty list.
+        """
     )
     
     
@@ -702,7 +741,10 @@ class Type(Entity):
     __mapper_args__ = {"polymorphic_identity": "Type"}
     type_id_local = Column("id", Integer, ForeignKey("Entities.id"),
                            primary_key=True)
-    _target_entity_type = Column("target_entity_type", String)
+    _target_entity_type = Column(
+        "target_entity_type",
+        String
+    )
     
     
     
@@ -918,6 +960,7 @@ class StatusList(Entity):
     statuses = relationship(
         "Status",
         secondary="StatusList_Statuses",
+        doc="""list of :class:`~stalker.core.models.Status` objects, showing the possible statuses"""
     )
     
     _target_entity_type = Column("target_entity_type", String(128),
@@ -976,8 +1019,8 @@ class StatusList(Entity):
     
     
     #----------------------------------------------------------------------
-    @synonym_for("_target_entity_type")
-    @property
+    @synonym_for("_target_entity_type") # we need it to make the property read
+    @property                           # only
     def target_entity_type(self):
         """The entity type which this StatusList is valid for.
         
@@ -996,7 +1039,6 @@ class StatusList(Entity):
               target_entity_type=Asset # or "Asset" is also valid
           )
         """
-        
         return self._target_entity_type
     
     
@@ -1085,10 +1127,47 @@ class ImageFormat(Entity):
         primary_key=True,
     )
     
-    width = Column(Integer)
-    height = Column(Integer)
-    pixel_aspect = Column(Float, default="1.0")
-    print_resolution = Column(Float, default="300.0")
+    width = Column(
+        Integer,
+        doc="""The width of this format.
+        
+        * the width should be set to a positif non-zero integer
+        * integers are also accepted but will be converted to float
+        * for improper inputs the object will raise an exception.
+        """
+    )
+    
+    height = Column(
+        Integer,
+        doc="""The height of this format
+        
+        * the height should be set to a positif non-zero integer
+        * integers are also accepted but will be converted to float
+        * for improper inputs the object will raise an exception.
+        """
+    )
+    
+    pixel_aspect = Column(
+        Float,
+        default="1.0",
+        doc="""The pixel aspect ratio of this format.
+        
+        * the pixel_aspect should be set to a positif non-zero float
+        * integers are also accepted but will be converted to float
+        * for improper inputs the object will raise an exception
+        """
+    )
+    
+    print_resolution = Column(
+        Float,
+        default="300.0",
+        doc="""The print resolution of this format
+        
+        * it should be set to a positif non-zero float or integer
+        * integers are also accepted but will be converted to float
+        * for improper inputs the object will raise an exception.
+        """
+    )
     
     
     
@@ -1257,7 +1336,14 @@ class Link(Entity):
         ForeignKey("Entities.id"),
         primary_key=True,
     )
-    path = Column(String)
+    path = Column(
+        String,
+        doc="""The path of the url to the link.
+        
+        It can not be None or an empty string, it should be a string or
+        unicode.
+        """
+    )
     
     
     
@@ -1311,6 +1397,50 @@ class Link(Entity):
 
 
 
+
+########################################################################
+class Booking(Entity):
+    """Holds information about the time spend on a specific task by a specific user.
+    """
+    
+    __tablename__ = "Bookings"
+    __mapper_args__ = {"inherit_condition": "Entities.id==Bookings.id"}
+    booking_id = Column("id", Integer, ForeignKey("Entities.id"),
+                        primary_key=True)
+    task_id = Column(Integer, ForeignKey("Tasks.c.id"), nullable=False)
+    task = relationship(
+        "Task",
+        primaryjoin="Bookings.c.task_id==Tasks.c.id",
+        uselist=False,
+        back_populates="bookings",
+        doc="The :class:`~stalker.core.models.Task` instance that this booking is created for"
+    )
+    
+    #----------------------------------------------------------------------
+    def __init__(self, task=None, **kwargs):
+        super(Booking, self).__init__(**kwargs)
+        
+        self.task = task
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("task")
+    def _validate_task(self, key, task):
+        """validates the given task value
+        """
+        
+        if not isinstance(task, Task):
+            raise TypeError("Booking.task should be an instance of "
+                            "stalker.core.models.Task")
+        
+        return task
+
+
+
+
+
+
 # mixin class imports should be placed after StatusList and Link definitions
 from stalker.core.declarativeMixins import (ReferenceMixin, ScheduleMixin,
                                             StatusMixin, ProjectMixin)
@@ -1341,12 +1471,12 @@ class PermissionGroup(SimpleEntity):
     The permissions are stored in a dictionary. The key is the class name and
     the value is a 4-bit binary integer value like 0b0001.
     
-    +-------------------+--------+------+--------+--------+
-    |        0b         |   0    |  0   |   0    |   0    |
-    +-------------------+--------+------+--------+--------+
-    | binary identifier | Create | Read | Update | Delete |
-    |                   | Bit    | Bit  | Bit    | Bit    |
-    +-------------------+--------+------+--------+--------+
+    +-------------------+--------+--------+--------+------+
+    |        0b         |   0    |   0    |   0    |  0   |
+    +-------------------+--------+--------+--------+------+
+    | binary identifier | Delete | Update | Create | Read |
+    |                   | Bit    | Bit    | Bit    | Bit  |
+    +-------------------+--------+--------+--------+------+
     
     :param dict permissions: A Python dictionary showing the permissions. The
       key is the name of the Class and the value is the permission bit.
@@ -1401,7 +1531,15 @@ class Note(SimpleEntity):
         ForeignKey("Entities.id")
     )
     
-    content = Column(String)
+    content = Column(
+        String,
+        doc="""The content of this :class:`~stalker.core.models.Note` instance.
+        
+        Content is a string representing the content of this Note, can be given
+        as an empty string or can be even None, but anything other than None or
+        string or unicode will raise a TypeError.
+        """
+    )
     
     
     
@@ -1764,11 +1902,49 @@ Character assets",
     filenameTemplate_id = Column( "id", Integer,ForeignKey("Entities.id"),
                                   primary_key=True)
     _target_entity_type = Column("target_entity_type", String)
-    path_code = Column(String)
-    file_code = Column(String)
-    output_path_code = Column(String)
-    output_file_code = Column(String)
-    output_is_relative = Column(Boolean)
+    path_code = Column(
+        String,
+        doc="""The templating code for the path of this FilenameTemplate."""
+    )
+    
+    file_code = Column(
+        String,
+        doc="""The templating code for the file part of the FilenameTemplate."""
+    )
+    
+    output_path_code = Column(
+        String,
+        doc="""The output_path_code of this FilenameTemplate object.
+        
+        Should be a unicode string. None and empty string is also accepted, but
+        in this case the value is copied from the
+        :attr:`~stalker.core.models.FilenameTemplate.path_code` if also the
+        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
+        False. If
+        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
+        True then it will left as an empty string.
+        """
+    )
+    
+    output_file_code = Column(
+        String,
+        doc="""The output_file_code of this FilenameTemplate object.
+        
+        Should be a unicode string. None and empty string is also accepted, but
+        in this case the value is copied from the
+        :attr:`~stalker.core.models.FilenameTemplate.file_code` if also the
+        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
+        False. If
+        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
+        True then it will left as an empty string.
+        """
+    )
+    
+    output_is_relative = Column(
+        Boolean,
+        doc="""Specifies if the output should be calculated relative to the path attribute.
+        """
+    )
     
     
     
@@ -2133,13 +2309,16 @@ class Department(Entity):
         "User",
         uselist=False,
         primaryjoin="Department.lead_id==User.user_id",
-        post_update=True
+        post_update=True,
+        doc="""The lead of this department, it is a User object""",
     )
     
     members = relationship(
         "User",
-        backref="department",
-        primaryjoin= "Department.department_id==User.department_id"
+        #backref="department",
+        primaryjoin= "Departments.c.id==Users.c.department_id",
+        back_populates="department",
+        doc="""List of users representing the members of this department.""",
     )
     
     
@@ -2343,10 +2522,28 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     task_id = Column("id", Integer, ForeignKey("Entities.id"),
                      primary_key=True)
     
-    is_milestone = Column(Boolean)
-    is_complete = Column(Boolean) # UPDATE THIS: is_complete should look to
-                                  # Task.status, but it is may be faster to
-                                  # query in this way, judge later
+    is_milestone = Column(
+        Boolean,
+        doc="""Specifies if this Task is a milestone.
+        
+        Milestones doesn't need any duration, any effort and any resources. It
+        is used to create meaningfull dependencies between the critical stages
+        of the project.
+        """
+    )
+    
+    # UPDATE THIS: is_complete should look to Task.status, but it is may be
+    # faster to query in this way, judge later
+    is_complete = Column(
+        Boolean,
+        doc="""A bool value showing if this task is completed or not.
+        
+        There is a good article_ about why not to use an attribute called
+        ``percent_complete`` to measure how much the task is completed.
+        
+        .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
+        """
+    )
     
     depends = relationship(
         "Task",
@@ -2354,6 +2551,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         primaryjoin="Tasks.c.id==Task_Tasks.c.task_id",
         secondaryjoin="Task_Tasks.c.depends_to_task_id==Tasks.c.id",
         backref="dependent_of",
+        doc="""A list of :class:`~stalker.core.models.Task`\ s that this one is depending on.
+        
+        A CircularDependencyError will be raised when the task dependency
+        creates a circlar dependency which means it is not allowed to create
+        a dependency for this Task which is depending on another one which in
+        some way depends to this one again.
+        """
     )
     
     resources = relationship(
@@ -2361,13 +2565,44 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         secondary="Task_Resources",
         primaryjoin="Tasks.c.id==Task_Resources.c.task_id",
         secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
-        backref="tasks",
+        #backref="tasks",
+        back_populates="tasks",
+        doc="""The list of :class:`stalker.core.models.User`\ s instances assigned to this Task.
+        """
     )
     
     effort = Column(Interval)
     priority = Column(Integer)
     
     task_of_id = Column(Integer, ForeignKey("TaskableEntities.id"))
+    
+    task_of = relationship(
+        "TaskableEntity",
+        primaryjoin="Tasks.c.task_of_id==TaskableEntities.c.id",
+        back_populates="tasks",
+        doc="""An object that this Task is a part of.
+        
+        The assigned object should have an attribute called ``tasks``. Any
+        object which is not inherited from
+        :class:`~stalker.core.models.TaskableEntity` thus doesn't have a
+        ``tasks`` attribute which is mapped to the Tasks.task_of attribute
+        will raise an AttributeError.
+        """
+    )
+    
+    bookings = relationship(
+        "Booking",
+        primaryjoin="Bookings.c.task_id==Tasks.c.id",
+        back_populates="task",
+    )
+    
+    #versions = relationship(
+        #"Version",
+        #primaryjoin="Versions.c.version_of_id==Tasks.c.id",
+        #back_populates="version_of",
+        #doc="""A list of :class:`~stalker.core.models.Version` instances showing the files created for this task.
+        #"""
+    #)
     
     
     
@@ -2387,8 +2622,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         ScheduleMixin.__init__(self, **kwargs)
         
         self.bookings = []
-        # UPDATE THIS
-        #self.versions = []
+        self.versions = []
         
         self.is_milestone = is_milestone
         self.is_complete = False
@@ -2511,7 +2745,34 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     #----------------------------------------------------------------------
     def _effort_getter(self):
-        """The total effort that needs to be spend to complete this Task.
+        """the getter for the effort property
+        """
+        return self._effort
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _effort_setter(self, effort_in):
+        """the setter for the effort property
+        """
+        self._effort = self._validate_effort(effort_in)
+        
+        # update the duration
+        num_of_resources = len(self.resources)
+        if num_of_resources == 0:
+            num_of_resources = 1
+        
+        self.duration = self._effort / num_of_resources
+    
+    
+    
+    effort = synonym(
+        "_effort",
+        descriptor=property(
+            fget=_effort_getter,
+            fset=_effort_setter
+        ),
+        doc="""The total effort that needs to be spend to complete this Task.
         
         Can be used to create an initial bid of how long this task going to
         take. The effort is equaly divided to the assigned resources. So if the
@@ -2538,30 +2799,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
            
            {effort} = {duration} \\times {n_{resources}}
         """
-        
-        return self._effort
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _effort_setter(self, effort_in):
-        self._effort = self._validate_effort(effort_in)
-        
-        # update the duration
-        num_of_resources = len(self.resources)
-        if num_of_resources == 0:
-            num_of_resources = 1
-        
-        self.duration = self._effort / num_of_resources
-    
-    
-    
-    effort = synonym(
-        "_effort",
-        descriptor=property(
-            fget=_effort_getter,
-            fset=_effort_setter
-        )
     )
     
     
@@ -2641,18 +2878,18 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         return resource
     
     
-    ## UPDATE THIS
-    ##----------------------------------------------------------------------
-    #@validates("versions")
-    #def _validate_versions(self, key, version):
-        #"""validates the given version value
-        #"""
+    # UPDATE THIS
+    #----------------------------------------------------------------------
+    @validates("versions")
+    def _validate_versions(self, key, version):
+        """validates the given version value
+        """
         
-        #if not isinstance(version, Version):
-            #raise TypeError("all the elements in the versions list should be "
-                            #"stalker.core.models.Version instances")
+        if not isinstance(version, Version):
+            raise TypeError("all the elements in the versions list should be "
+                            "stalker.core.models.Version instances")
         
-        #return version
+        return version
     
     
     
@@ -2698,31 +2935,19 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         descriptor=property(
             _duration_getter,
             _duration_setter
-        )
+        ),
+        doc="""The overriden duration attribute.
+        
+        It is a datetime.timedelta instance. Showing the difference of the
+        :attr:`~stalker.core.mixins.ScheduleMixin.start_date` and the
+        :attr:`~stalker.core.mixins.ScheduleMixin.due_date`. If edited it
+        changes the :attr:`~stalker.core.mixins.ScheduleMixin.due_date`
+        attribute value.
+        """
     )
     
     
     
-    ##----------------------------------------------------------------------
-    #@property
-    #def is_milestone(self):
-        #"""Specifies if this Task is a milestone.
-        
-        #Milestones doesn't need any duration, any effort and any resources. It
-        #is used to create meaningfull dependencies between the critical stages
-        #of the project.
-        #"""
-        
-        #return self._is_milestone
-    
-    ##----------------------------------------------------------------------
-    #@is_milestone.setter # pylint: disable=E1101
-    #def is_milestone(self, milestone_in):
-        ## pylint: disable=E0102, C0111
-        #self._is_milestone = self._validate_milestone(milestone_in)
-        
-        #if self._is_milestone:
-            #self._resources = []
 
 
 
@@ -2821,8 +3046,8 @@ class TaskableEntity(Entity, ProjectMixin):
     tasks = relationship(
         "Task",
         primaryjoin=taskableEntity_id==Task.task_of_id,
-        backref="task_of",
-        #single_parent=True,
+        #backref="task_of",
+        back_populates="task_of",
         post_update=True,
     )
     
@@ -2937,36 +3162,104 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     __mapper_args__ = {"polymorphic_identity": "Project",
                    "inherit_condition":
                        project_id_local==TaskableEntity.taskableEntity_id}
-
+    
+    assets = relationship(
+        "Asset",
+        primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
+        back_populates="project",
+        uselist=True,
+        doc="""The list of :class:`~stalker.core.models.Asset`\ s created in this project.
+        
+        It is a read-only list. To add an :class:`~stalker.core.models.Asset`
+        to this project, the :class:`~stalker.core.models.Asset` need to be
+        created with this project is given in the ``project`` argument in the
+        :class:`~stalker.core.models.Asset`.
+        """
+    )
+    
+    sequences = relationship(
+        "Sequence",
+        primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
+        back_populates="project",
+        uselist=True,
+        doc="""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
+        
+        This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
+        that this :class:`~stalker.core.models.Project` has. It is a list of
+        :class:`~stalker.core.models.Sequence` instances. The attribute is
+        read-only. The only way to attach a
+        :class:`~stalker.core.models.Sequence` to this
+        :class:`~stalker.core.models.Project` is to create the
+        :class:`~stalker.core.models.Sequence` with this
+        :class:`~stalker.core.models.Project` by passing this
+        :class:`~stalker.core.models.Project` in the ``project`` argument of
+        the :class:`~stalker.core.models.Sequence`.
+        """
+    )
     
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
         "User",
         primaryjoin="Projects.c.lead_id==Users.c.id",
-        backref="projects_lead",
+        back_populates="projects_lead",
+        doc="""The lead of the project.
+        
+        Should be an instance of :class:`~stalker.core.models.User`,
+        also can set to None.
+        """
     )
     
     repository_id = Column(Integer, ForeignKey("Repositories.id"))
     repository = relationship(
         "Repository",
-        primaryjoin="Project.repository_id==Repository.repository_id"
+        primaryjoin="Project.repository_id==Repository.repository_id",
+        doc="""The :class:`~stalker.core.models.Repository` that this project should reside.
+        
+        Should be an instance of :class:`~stalker.core.models.Repository`. It
+        is a read-only attribute. So it is not possible to change the
+        repository of one project.
+        """
     )
     
     structure_id = Column(Integer, ForeignKey("Structures.id"))
     structure = relationship(
         "Structure",
-        primaryjoin="Project.structure_id==Structure.structure_id"
+        primaryjoin="Project.structure_id==Structure.structure_id",
+        doc="""The structure of the project. Should be an instance of
+        :class:`~stalker.core.models.Structure` class"""
     )
     
     image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
     image_format = relationship(
         "ImageFormat",
-        primaryjoin="Project.image_format_id==ImageFormat.imageFormat_id"
+        primaryjoin="Projects.c.image_format_id==ImageFormats.c.id",
+        doc="""The :class:`~stalker.core.models.ImageFormat` of this project.
+        
+        This value defines the output image format of the project, should be an
+        instance of :class:`~stalker.core.models.ImageFormat`.
+        """
     )
     
-    fps = Column(Float(precision=3))
-    is_stereoscopic = Column(Boolean)
-    display_width = Column(Float(precision=3))
+    
+    fps = Column(
+        Float(precision=3),
+        doc="""The fps of the project.
+        
+        It is a float value, any other types will be converted to float. The
+        default value is 25.0.
+        """
+    )
+    is_stereoscopic = Column(
+        Boolean,
+        doc="""True if the project is a stereoscopic project"""
+    )
+    #display_width = Column(
+        #Float(precision=3),
+        #doc="""The target display width that this project is going to be displayed on.
+        
+        #Meaningfull if this project is a stereoscopic project.
+        #"""
+    #)
     
     
     
@@ -2978,7 +3271,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
                  image_format=None,
                  fps=25.0,
                  is_stereoscopic=False,
-                 display_width=1.0,
+                 #display_width=1.0,
                  **kwargs):
         
         # a projects project should be self
@@ -3002,16 +3295,16 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         self.image_format = image_format
         self.fps = fps
         self.is_stereoscopic = bool(is_stereoscopic)
-        self.display_width = display_width
+        #self.display_width = display_width
     
     
     
-    #----------------------------------------------------------------------
-    @validates("display_width")
-    def _validate_display_width(self, key, display_width_in):
-        """validates the given display_width_in value
-        """
-        return abs(float(display_width_in))
+    ##----------------------------------------------------------------------
+    #@validates("display_width")
+    #def _validate_display_width(self, key, display_width_in):
+        #"""validates the given display_width_in value
+        #"""
+        #return abs(float(display_width_in))
     
     
     
@@ -3083,22 +3376,6 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
                                  "stalker.core.models.Structure")
         
         return structure_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    @synonym_for("_assets")
-    @property
-    def assets(self):
-        """The list of :class:`~stalker.core.models.Asset`\ s created in this project.
-        
-        It is a read-only list. To add an :class:`~stalker.core.models.Asset`
-        to this project, the :class:`~stalker.core.models.Asset` need to be
-        created with this project is given in the ``project`` argument in the
-        :class:`~stalker.core.models.Asset`.
-        """
-        
-        return self._assets
     
     
     
@@ -3176,6 +3453,682 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         
         return super(Project, self).__eq__(other) and \
                isinstance(other, Project)
+
+
+
+
+
+
+########################################################################
+class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
+    """Stores data about Sequences.
+    
+    Sequences are holders of the :class:`~stalker.core.models.Shot` objects.
+    They orginize the conceptual data with another level of complexity.
+    
+    The Sequence class updates the
+    :attr:`~stalker.core.models.Project.sequence` attribute in the
+    :class:`~stalker.core.models.Project` class when the Sequence is
+    initialized.
+    
+    :param lead: The lead of this Seuqence. The default value is None.
+    
+    :type lead: :class:`~stalker.core.models.User`
+    """
+    
+    
+    
+    __tablename__ = "Sequences"
+    __mapper_args__ = {"polymorphic_identity": "Sequence"}
+    sequence_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
+                         primary_key=True)
+    
+    project_id = Column(Integer, ForeignKey("Projects.id"), nullable=False)
+    project = relationship(
+        "Project",
+        primaryjoin="Sequences.c.project_id==Projects.c.id",
+        back_populates="sequences",
+        uselist=False,
+        doc="""The :class:`~stalker.core.models.Project` instance that this Sequence belongs to.
+        
+        A :class:`~stalker.core.models.Sequence` can not be created without a
+        :class:`~stalker.core.models.Project` instance.
+        """
+    )
+    
+    lead_id = Column(Integer, ForeignKey("Users.id"))
+    lead = relationship(
+        "User",
+        primaryjoin="Sequences.c.lead_id==Users.c.id",
+        back_populates="sequences_lead",
+        uselist=False,
+        doc="""The lead of this sequence.
+        
+        A :class:`~stalker.core.models.User` instance which is assigned as the
+        lead of this :class:`~stalker.core.models.Sequence`.
+        """
+    )
+    
+    shots = relationship(
+        "Shot",
+        primaryjoin="Shots.c.sequence_id==Sequences.c.id",
+        back_populates="_sequence",
+        doc="""The :class:`~stalker.core.models.Shot`\ s assigned to this Sequence.
+        
+        It is a list of :class:`~stalker.core.models.Shot` instances.
+        """
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 lead=None,
+                 **kwargs
+                 ):
+        
+        super(Sequence, self).__init__(**kwargs)
+        
+        # call the mixin __init__ methods
+        ReferenceMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
+        #TaskMixin.__init__(self, **kwargs)
+        
+        #self._lead = self._validate_lead(lead)
+        self.lead = lead
+        self.shots = []
+        
+        ## update the Project._sequences attribute
+        #if not self in self.project.sequences:
+            #self._project._sequences.append(self)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("lead")
+    def _validate_lead(self, key, lead):
+        """validates the given lead_in value
+        """
+        
+        if lead is not None:
+            if not isinstance(lead, User):
+                raise TypeError("lead should be instance of "
+                                "stalker.core.models.User")
+        
+        return lead
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("shots")
+    def _validate_shots(self, key, shot):
+        """validates the given shot value
+        """
+        
+        if not isinstance(shot, Shot):
+            raise TypeError("every item in the shots list should be an "
+                            "instance of stalker.core.models.Shot")
+        
+        return shot
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Sequence, self).__eq__(other) and \
+               isinstance(other, Sequence)
+
+
+
+
+
+
+########################################################################
+class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
+    """Manages Shot related data.
+    
+    .. deprecated:: 0.1.2
+       
+       Because most of the shots in different projects are going to have the
+       same name, which is a kind of a code like SH001, SH012A etc., and in
+       Stalker you can not have two entities with the same name if their types
+       are also matching, to guarantee all the shots are going to have
+       different names the :attr:`~stalker.core.models.Shot.name` attribute of
+       the Shot instances are automatically set to a randomly generated
+       **uuid4** sequence.
+    
+    .. versionadded:: 0.1.2
+       
+       The name of the shot can be freely set without worrying about clashing
+       names.
+    
+    Two shots with the same :attr:`~stalker.core.models.Shot.code` can not be
+    assigned to the same :class:`~stalker.core.models.Sequence`.
+    
+    The :attr:`~stalker.core.models.Shot.cut_out` and
+    :attr:`~stalker.core.models.Shot.cut_duration` attributes effects each
+    other. Setting the :attr:`~stalker.core.models.Shot.cut_out` will change
+    the :attr:`~stalker.core.models.Shot.cut_duration` and setting the
+    :attr:`~stalker.core.models.Shot.cut_duration` will change the
+    :attr:`~stalker.core.models.Shot.cut_out` value. The default value of the
+    :attr:`~stalker.core.models.Shot.cut_out` attribute is calculated from the
+    :attr:`~stalker.core.models.Shot.cut_in` and
+    :attr:`~stalker.core.models.Shot.cut_duration` attributes. If both
+    :attr:`~stalker.core.models.Shot.cut_out` and
+    :attr:`~stalker.core.models.Shot.cut_duration` arguments are set to None,
+    the :attr:`~stalker.core.models.Shot.cut_duration` defaults to 100 and
+    :attr:`~stalker.core.models.Shot.cut_out` will be set to
+    :attr:`~stalker.core.models.Shot.cut_in` +
+    :attr:`~stalker.core.models.Shot.cut_duration`. So the priority of the
+    attributes are as follows:
+    
+      :attr:`~stalker.core.models.Shot.cut_in` >
+      :attr:`~stalker.core.models.Shot.cut_duration` >
+      :attr:`~stalker.core.models.Shot.cut_out`
+    
+    For still images (which can be also managed by shots) the
+    :attr:`~stalker.core.models.Shot.cut_in` and
+    :attr:`~stalker.core.models.Shot.cut_out` can be set to the same value
+    so the :attr:`~stalker.core.models.Shot.cut_duration` can be set to zero.
+    
+    Because Shot is getting its relation to a
+    :class:`~stalker.core.models.Project` from the
+    passed :class:`~stalker.core.models.Sequence`, you can skip the
+    ``project`` argument, and if you not the value of the ``project`` argument
+    is not going to be used.
+    
+    :param sequence: The :class:`~stalker.core.models.Sequence` that this shot
+      blengs to. A shot can only be created with a
+      :class:`~stalker.core.models.Sequence` instance, so it can not be None.
+      The shot itself will be added to the
+      :attr:`~stalker.core.models.Sequence.shots` list of the given sequence.
+      Also the ``project`` of the :class:`~stalker.core.models.Sequence` will
+      be used to set the ``project`` of the current Shot.
+    
+    :type sequence: :class:`~stalker.core.models.Sequence`
+    
+    :param integer cut_in: The in frame number that this shot starts. The
+      default value is 1. When the ``cut_in`` is bigger then
+      ``cut_out``, the :attr:`~stalker.core.models.Shot.cut_out` attribute is
+      set to :attr:`~stalker.core.models.Shot.cut_in` + 1.
+    
+    :param integer cut_duration: The duration of this shot in frames. It should
+      be zero or a positive integer value (natural number?) or . The default
+      value is None.
+    
+    :param integer cut_out: The out frame number that this shot ends. If it is
+      given as a value lower then the ``cut_in`` parameter, then the
+      :attr:`~stalker.core.models.Shot.cut_out` will be set to the same value
+      with :attr:`~stalker.core.models.Shot.cut_in` and the
+      :attr:`~stalker.core.models.Shot.cut_duration` attribute will be set to
+      1. Can be skipped. The default value is None.
+    """
+    
+    
+    __tablename__ = "Shots"
+    __mapper_args__ = {"polymorphic_identity": "Shot"}
+    
+    shot_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
+                     primary_key=True)
+    sequence_id = Column(Integer, ForeignKey("Sequences.id"))
+    _sequence = relationship(
+        "Sequence",
+        primaryjoin="Shots.c.sequence_id==Sequences.c.id",
+        back_populates="shots"
+    )
+    
+    _cut_in = Column(Integer)
+    _cut_out = Column(Integer)
+    
+    assets = relationship(
+        "Asset",
+        secondary="Shot_Assets",
+        #primaryjoin="Shots.c.id==Shot_Assets.c.shot_id",
+        #secondaryjoin="Shot_Assets.c.asset_id==Assets.c.id",
+        back_populates="shots",
+        doc="""The :class:`~stalker.core.models.Asset` instances used in this Shot.
+        
+        Holds the relation of a :class:`~stalker.core.models.Shot` with a list
+        of :class:`~stalker.core.models.Asset`\ s, which are used in this
+        :class:`~stalker.core.models.Shot`.
+        """
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self,
+                 #code=None,
+                 sequence=None,
+                 cut_in=1,
+                 cut_out=None,
+                 cut_duration=None,
+                 assets=None,
+                 **kwargs):
+        
+        sequence = self._validate_sequence(sequence)
+        
+        # initialize TaskableMixin
+        kwargs["project"] = sequence.project
+        
+        super(Shot, self).__init__(**kwargs)
+        ReferenceMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        
+        self.sequence = self._validate_sequence(sequence)
+        
+        self._cut_in = cut_in
+        self._cut_duration = cut_duration
+        self._cut_out = cut_out
+        
+        self._update_cut_info(cut_in, cut_duration, cut_out)
+        
+        #self._assets = self._validate_assets(assets)
+        if assets is None:
+            assets = []
+        self.assets = assets
+        
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance created with
+        SQLAlchemy
+        """
+        self._cut_duration = None
+        self._update_cut_info(self._cut_in, self._cut_duration, self._cut_out)
+        
+        # call supers __init_on_load__
+        super(Shot, self).__init_on_load__()
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __repr__(self):
+        """the representation of the Shot
+        """
+        
+        return "<%s (%s, %s)>" % (self.entity_type, self.code, self.code)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """equality operator
+        """
+        
+        # __eq__ always returns false but to be safe the code will be added
+        # here
+        
+        return self.code == other.code and isinstance(other, Shot) and \
+               self.sequence == other.sequence
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _update_cut_info(self, cut_in, cut_duration, cut_out):
+        """updates the cut_in, cut_duration and cut_out attributes
+        """
+        
+        # validate all the values
+        self._cut_in = self._validate_cut_in(cut_in)
+        self._cut_duration = self._validate_cut_duration(cut_duration)
+        self._cut_out = self._validate_cut_out(cut_out)
+        
+        if self._cut_in is None:
+            self._cut_in = 1
+        
+        if self._cut_out is not None:
+            if self._cut_in > self._cut_out:
+                # just update cut_duration
+                self._cut_duration = 1
+        #else:
+            #self._cut_o
+        
+        if self._cut_duration is None or self._cut_duration <= 0:
+            self._cut_duration = 1
+        
+        self._cut_out = self._cut_in + self._cut_duration - 1
+    
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("assets")
+    def _validate_assets(self, key, asset):
+        """validates the given asset value
+        """
+        
+        if not isinstance(asset, Asset):
+            raise TypeError("all the items in the assets list should be"
+                             "an instance of stalker.core.models.Asset")
+        
+        return asset
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def _validate_code(self, code_in):
+        #"""validates the given code value
+        #"""
+        
+        ## check if the code_in is None or empty string
+        #if code_in is None:
+            #raise TypeError("the code can not be None")
+        
+        #if code_in == "":
+            #raise ValueError("the code can not be empty string")
+        
+        #return self._condition_code(str(code_in))
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_cut_duration(self, cut_duration_in):
+        """validates the given cut_duration value
+        """
+        
+        if cut_duration_in is not None and \
+           not isinstance(cut_duration_in, int):
+            raise TypeError("cut_duration should be an instance of int")
+        
+        return cut_duration_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_cut_in(self, cut_in_in):
+        """validates the given cut_in_in value
+        """
+        
+        if cut_in_in is not None:
+            if not isinstance(cut_in_in, int):
+                raise TypeError("cut_in should be an instance of int")
+        
+        return cut_in_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_cut_out(self, cut_out_in):
+        """validates the given cut_out_in value
+        """
+        
+        if cut_out_in is not None:
+            if not isinstance(cut_out_in, int):
+                raise TypeError("cut_out should be an instance of int")
+        
+        return cut_out_in
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _validate_sequence(self, sequence):
+        """validates the given sequence_in value
+        """
+        
+        if not isinstance(sequence, Sequence):
+            raise TypeError("the sequence should be an instance of "
+                             "stalker.core.models.Sequence instance")
+        
+        for shot in sequence.shots:
+            if self.code ==  shot.code:
+                raise ValueError("the given sequence already has a shot with "
+                                 "a code %s" % self.code)
+        
+        return sequence
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _sequence_getter(self):
+        """The getter for the sequence attribute.
+        """
+        
+        return self._sequence
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _sequence_setter(self, sequence):
+        """the setter for the sequence attribute.
+        """
+        
+        self._sequence = self._validate_sequence(sequence)
+    
+    sequence = synonym(
+        "_sequence",
+        descriptor=property(_sequence_getter, _sequence_setter),
+        doc="""The :class:`~stalker.core.models.Sequence` instance that this :class:`~stalker.core.models.Shot` instance belongs to."""
+    )
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@property
+    #def code(self): # pylint: disable=E0202
+        #"""The code of this :class:`~stalker.core.models.Shot`.
+        
+        #Contrary to the original attribute from the inherited parent
+        #(:attr:`~stalker.core.models.SimpleEntity.code`), the code attribute
+        #can not be set to None or empty string."""
+        
+        #return self._code
+    
+    ##----------------------------------------------------------------------
+    #@code.setter # pylint: disable=E1101
+    #def code(self, code_in):
+        ## pylint: disable=E0102, E0202, W0221
+        #self._code = self._validate_code(code_in)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _cut_duration_getter(self):
+        return self._cut_duration
+    
+    #----------------------------------------------------------------------
+    def _cut_duration_setter(self, cut_duration_in):
+        self._update_cut_info(self._cut_in, cut_duration_in, self._cut_out)
+    
+    cut_duration = synonym(
+        "_cut_duration",
+        descriptor=property(_cut_duration_getter, _cut_duration_setter),
+        doc= """The duration of this shot in frames.
+        
+        It should be a positive integer value. If updated also updates the
+        :attr:`~stalker.core.models.Shot.cut_duration` attribute. The default
+        value is 100."""
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _cut_in_getter(self):
+        return self._cut_in
+    
+    #----------------------------------------------------------------------
+    def _cut_in_setter(self, cut_in_in):
+        self._update_cut_info(cut_in_in, self._cut_duration, self._cut_out)
+    
+    cut_in = synonym(
+        "_cut_in",
+        descriptor=property(_cut_in_getter, _cut_in_setter),
+        doc="""The in frame number taht this shot starts.
+        
+        The default value is 1. When the cut_in is bigger then
+        :attr:`~stalker.core.models.Shot.cut_out`, the
+        :attr:`~stalker.core.models.Shot.cut_out` value is update to
+        :attr:`~stalker.core.models.Shot.cut_in` + 1."""
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _cut_out_getter(self):
+        if self._cut_out is None:
+            self._update_cut_info(self._cut_in, self._cut_duration, None)
+        return self._cut_out
+    
+    #----------------------------------------------------------------------
+    def _cut_out_setter(self, cut_out_in):
+        self._update_cut_info(self._cut_in, self._cut_duration, cut_out_in)
+    
+    cut_out = synonym(
+        "_cut_out",
+        descriptor=property(_cut_out_getter, _cut_out_setter),
+        doc="""The out frame number that this shot ends.
+        
+        When the :attr:`~stalker.core.models.Shot.cut_out` is set to a value
+        lower than :attr:`~stalker.core.models.Shot.cut_in`,
+        :attr:`~stalker.core.models.Shot.cut_out` will be updated to
+        :attr:`~stalker.core.models.Shot.cut_in` + 1. The default value is
+        :attr:`~stalker.core.models.Shot.cut_in` +
+        :attr:`~stalker.core.models.Shot.cut_duration`."""
+    )
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #@property
+    #def name(self): # pylint: disable=E0202
+        #"""Name of this Shot.
+        
+        #Different than other :class:`~stalker.core.models.SimpleEntity`
+        #derivatives, the :class:`~stalker.core.models.Shot` classes
+        #:attr:`~stalker.core.models.Shot.name` attribute is read-only. And the
+        #stored value is a uuid4 sequence.
+        #"""
+        
+        #return self._name
+    
+    ##----------------------------------------------------------------------
+    #@name.setter # pylint: disable=E1101
+    #def name(self, name_in):
+        ## pylint: disable=E0102, E0202, W0221
+        #pass
+
+
+
+
+
+
+########################################################################
+class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
+    """The Asset class is the whole idea behind Stalker.
+    
+    *Assets* are containers of :class:`~stalker.core.models.Task`\ s. And
+    :class:`~stalker.core.models.Task`\ s are the smallest meaningful part that
+    should be accomplished to complete the
+    :class:`~stalker.core.models.Project`.
+    
+    An example could be given as follows; you can create an asset for one of
+    the characters in your project. Than you can divide this character asset in
+    to :class:`~stalker.core.models.Task`\ s. These
+    :class:`~stalker.core.models.Task`\ s can be defined by the type of the
+    :class:`~stalker.core.models.Asset`, which is a
+    :class:`~stalker.core.models.Type` object created specifically for
+    :class:`~stalker.core.models.Asset` (ie. has its
+    :attr:`~stalker.core.models.Type.target_entity_type` set to "Asset"),
+    
+    An :class:`~stalker.core.models.Asset` instance should be initialized with
+    a :class:`~stalker.core.models.Project` instance (as the other classes
+    which are mixed with the :class:`~stalekr.core.mixins.TaskMixin`). And when
+    a :class:`~stalker.core.models.Project` instance is given then the asset
+    will append itself to the :attr:`~stalker.core.models.Project.assets` list.
+    """
+    
+    
+    
+    __strictly_typed__ = True
+    __tablename__ = "Assets"
+    __mapper_args__ = {"polymorphic_identity": "Asset"}
+    
+    asset_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
+                      primary_key=True)
+    
+    shots = relationship(
+        "Shot",
+        secondary="Shot_Assets",
+        back_populates="assets"
+    )
+    
+    project_id = Column(Integer, ForeignKey("Projects.id"), nullable=False)
+    project = relationship(
+        "Project",
+        primaryjoin="Assets.c.project_id==Projects.c.id",
+        back_populates="assets",
+        uselist=False,
+        doc="""The :class:`~stalker.core.models.Project` instance that this Asset belongs to.
+        
+        A :class:`~stalker.core.models.Asset` can not be created without a
+        :class:`~stalker.core.models.Project` instance.
+        """
+    )
+    
+
+    
+    #----------------------------------------------------------------------
+    def __init__(self, shots=None, **kwargs):
+        
+        super(Asset, self).__init__(**kwargs)
+        
+        # call the mixin init methods
+        ReferenceMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        #TaskMixin.__init__(self, **kwargs)
+        
+        #self._shots = []
+        if shots is None:
+            shots = []
+        self.shots = shots
+        
+        ## append it self to the given projects assets attribute
+        #if not self in self.project._assets:
+            #self.project._assets.append(self)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """initialized the instance variables when the instance created with
+        SQLAlchemy
+        """
+        #self._shots = None
+        
+        # call supers __init_on_load__
+        super(Asset, self).__init_on_load__()
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("shots")
+    def _validate_shots(self, key, shot):
+        """validates the given shots_in value
+        """
+        
+        if not isinstance(shot, Shot):
+            raise TypeError("shots should be set to a list of "
+                            "stalker.core.models.Shot objects")
+        
+        return shot
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __eq__(self, other):
+        """the equality operator
+        """
+        
+        return super(Asset, self).__eq__(other) and \
+               isinstance(other, Asset) and self.type == other.type
 
 
 
@@ -3299,14 +4252,116 @@ class User(Entity):
     user_id = Column("id", Integer, ForeignKey("Entities.id"),
                      primary_key=True)
     
-    department_id = Column(Integer, ForeignKey("Departments.id"))
-    email = Column(String(256), unique=True, nullable=False)
-    first_name = Column(String(256), nullable=False)
-    last_name = Column(String(256), nullable=True)
-    password = Column(String(256), nullable=False)
-    last_login = Column(DateTime)
-    initials = Column(String(16))
+    department_id = Column(
+        Integer,
+        ForeignKey("Departments.id", use_alter=True, name="department_x"),
+    )
     
+    department = relationship(
+        "Department",
+        primaryjoin="Users.c.department_id==Departments.c.id",
+        #primaryjoin="User.department_id==Department.department_id",
+        #primaryjoin=department_id==Department.department_id,
+        back_populates="members",
+        uselist=False,
+        doc=""":class:`~stalker.core.models.Department` of the user""",
+    )
+    
+    email = Column(
+        String(256),
+        unique=True,
+        nullable=False,
+        doc="""email of the user, accepts strings or unicodes"""
+    )
+    
+    first_name = Column(
+        String(256),
+        nullable=False,
+        doc="""first name of the user, accepts string or unicode"""
+    )
+    
+    last_name = Column(
+        String(256),
+        nullable=True,
+        doc="""The last name of the user.
+        
+        It is a string and can be None or empty string"""
+    )
+    
+    password = Column(
+        String(256),
+        nullable=False,
+        doc="""The password of the user.
+        
+        It is scrambled before it is stored.
+        """
+    )
+    
+    last_login = Column(
+        DateTime,
+        doc="""The last login time of this user.
+        
+        It is an instance of datetime.datetime class."""
+    )
+    
+    initials = Column(
+        String(16),
+        doc="""The initials of the user.
+        
+        If not spesified, it is the upper case form of first letters of the
+        :attr:`~stalker.core.models.User.first_name` and
+        :attr:`~stalker.core.models.User.last_name`"""
+    )
+    
+    login_name = synonym(
+        "name",
+        doc="""The login name of the user.
+        
+        It is a synonym for the :attr:`~stalker.core.models.User.name`
+        attribute.
+        """
+    )
+    
+    permission_groups = relationship(
+        "PermissionGroup",
+        secondary="User_PermissionGroups",
+        doc="""Permission groups that this users is a member of.
+        
+        Accepts :class:`~stalker.core.models.PermissionGroup` object.
+        """
+    )
+    
+    projects_lead = relationship(
+        "Project",
+        primaryjoin="Projects.c.lead_id==Users.c.id",
+        #uselist=True,
+        back_populates="lead",
+        doc=""":class:`~stalker.coer.models.Project`\ s lead by this user.
+        
+        It is a list of :class:`~stalker.core.models.Project` instances.
+        """
+    )
+    
+    sequences_lead = relationship(
+        "Sequence",
+        primaryjoin="Sequences.c.lead_id==Users.c.id",
+        uselist=True,
+        back_populates="lead",
+        doc=""":class:`~stalker.core.models.Sequence`\ s lead by this user.
+        
+        It is a list of :class:`~stalker.core.models.Sequence` instances.
+        """
+    )
+    
+    tasks = relationship(
+        "Task",
+        secondary="Task_Resources",
+        back_populates="resources",
+        doc=""":class:`~stalker.core..models.Task`\ s assigned to this user.
+        
+        It is a list of :class:`~stalker.core.models.Task` instances.
+        """
+    )
     
     
     #----------------------------------------------------------------------
@@ -3352,6 +4407,8 @@ class User(Entity):
         # to be able to mangle the password do it like this
         self.password = password
         
+        if permission_groups is None:
+            permission_groups = []
         self.permission_groups = permission_groups
         
         self._projects = []
@@ -3564,28 +4621,6 @@ class User(Entity):
             last_name_in = ""
         
         return last_name_in.strip().title()
-    
-    
-    
-    #----------------------------------------------------------------------
-    #def _validate_login_name(self, login_name_in):
-        #"""validates the given login_name value
-        #"""
-        
-        #if login_name_in is None:
-            #raise TypeError("login name could not be None")
-        
-        ##if not isinstance(login_name_in, (str, unicode)):
-            ##raise TypeError("login_name should be instance of string or "
-                            ##"unicode")
-        #login_name_in = self._format_login_name(str(login_name_in))
-        
-        #if login_name_in == "":
-            #raise ValueError("login name could not be empty string")
-        
-        #return login_name_in
-    
-    login_name = synonym("name")
     
     
     
@@ -3829,4 +4864,11 @@ Task_Tasks = Table(
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("depends_to_task_id", Integer, ForeignKey("Tasks.id"),
            primary_key=True),
+)
+
+# SHOT ASSETS
+Shot_Assets = Table(
+    "Shot_Assets", Base.metadata,
+    Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
+    Column("asset_id", Integer, ForeignKey("Assets.id"), primary_key=True),
 )

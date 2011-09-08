@@ -23,6 +23,10 @@ v0.1.2.a1
    * ReferenceMixin
    * StatusMixin
    * ScheduleMixin
+   * Project
+   * Sequence
+   * Shot
+   * Asset
 
  * Empty :class:`~stalker.core.models.StatusList`\ s are now allowed. The
    validation overhead is left to the SOM user.
@@ -34,6 +38,21 @@ v0.1.2.a1
    classes. So the solution was to introduce a new
    :class:`~stalker.core.models.TaskableEntity` (yaykh!) inheriting from
    :class:`~stalker.core.models.Entity`.
+
+ * The :attr:`~stalker.core.models.SimpleEntity.name` attribute in
+   :attr:`~stalker.core.models.SimpleEntity` is no more forced to be unique.
+   This releases the :attr:`~stalker.core.models.Shot.name` attribute in the
+   :class:`~stalker.core.models.Shot` class to be anything it wants (not just
+   uuid4 sequences to get unique names).
+
+ * From now on, the :attr:`~stalker.core.models.SimpleEntity.code` attribute in
+   :class:`~stalker.core.models.SimpleEntity` class is not going to change when
+   the :attr:`~stalker.core.models.SimpleEntity.name` attribute is changed.
+
+ * The :attr:`~stalker.core.models.SimpleEntity.name` attribute in
+   :class:`~stalker.core.models.SimpleEntity` is going to be copied from the
+   :attr:`~stalker.core.models.SimpleEntity.code` attribute if the ``name``
+   argument is skipped, None or empty string.
 
 v0.1.1.a10
 ----------
