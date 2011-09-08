@@ -7,9 +7,12 @@ import datetime
 from stalker.core.declarativeModels import (Review, Entity, User, Tag)
 
 
+class AnObjectWithReviews(object):
+    def __init__(self):
+        self.reviews = []
 
-
-
+        
+        
 
 ########################################################################
 class ReviewTest(unittest.TestCase):
@@ -22,23 +25,8 @@ class ReviewTest(unittest.TestCase):
         """setting up the test
         """
         
-        # will need:
-        # a couple of test tag objects
-        
-        # a couple of test tags
-        #self.test_tag1 = Tag(name="Test Tag 1")
-        #self.test_tag2 = Tag(name="Test Tag 2")
-        
-        ## a test entity object
-        #self.test_entity = Entity(name="Test Entity 1")
-        #self.test_entity2 = Entity(name="Test Entity 2")
-        
-        class AnObjectWithReviews(object):
-            def __init__(self):
-                self.reviews = []
-        
-        self.test_to_object = AnObjectWithReviews()
-        self.test_to_object2 = AnObjectWithReviews()
+        self.test_to_object = Entity(name="Test Entity 1")
+        self.test_to_object2 = Entity(name="Test Entity 2")
         
         # a test user object
         self.test_user = User(
@@ -145,7 +133,7 @@ class ReviewTest(unittest.TestCase):
         # try to set the to attribute to none
         
         self.assertRaises(
-            TypeError,
+            RuntimeError,
             setattr,
             self.test_review,
             "to",
@@ -240,41 +228,24 @@ class ReviewTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_to_argument_has_reviews_attribute_but_not_list_like(self):
-        """testing if an AttributeError will be raised when the object given
-        with the `to` argument has an "review" attribute but it is not
-        list-like
+    def test_to_argument_is_not_Entity_instance(self):
+        """testing if an TypeError will be raised when the object given
+        with the `to` argument is not a stalker.core.models.Entity instance
         """
         
-        # lets check with something that has `reviews` attribute
-        class AnObjectWithReviews(object):
-            def __init__(self):
-                self.reviews = "" # not list
-        
-        an_object = AnObjectWithReviews()
-        
-        self.kwargs["to"] = an_object
-        
+        self.kwargs["to"] = 123123
         self.assertRaises(TypeError, Review, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_to_attribute_has_reviews_attribute_but_not_list_like(self):
-        """testing if an AttributeError will be raised when the object given
-        with the `to` attribute has an "review" attribute but it is not
-        list-like
+    def test_to_attribute_is_not_Entity_instance(self):
+        """testing if an TypeError will be raised when the object given with
+        the `to` is not a stalker.core.models.Entity instance.
         """
         
-        # lets check with something that has `reviews` attribute
-        class AnObjectWithReviews(object):
-            def __init__(self):
-                self.reviews = "" # not list
-        
-        an_object = AnObjectWithReviews()
-        
         self.assertRaises(TypeError, setattr, self.test_review, "to",
-                          an_object)
+                          1243123)
     
     
     
@@ -305,12 +276,12 @@ class ReviewTest(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Review class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Review class
+        #"""
         
-        self.assertTrue(Review.plural_name, "Reviews")
+        #self.assertTrue(Review.plural_name, "Reviews")
     
     
     

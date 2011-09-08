@@ -1545,16 +1545,24 @@ class Review(Entity):
         """
         
         if to is None:
-            raise RuntimeError("The review can not be removed from the owner "
-                               "Entity objects `reviews` attribute. If you "
-                               "want to remove the Review instance, either "
-                               "delete it or assign it to a new "
-                               "stalker.core.models.Entity instance")
+            if not self.to is None:
+                raise RuntimeError(
+                    "The review can not be removed from the owner Entity "
+                    "objects `reviews` attribute. If you want to remove the "
+                    "Review instance, either delete it or assign it to a new "
+                    "stalker.core.models.Entity instance"
+                )
+            else:
+                raise TypeError(
+                    "the object which is given with the `to` should be "
+                    "inherited from stalker.core.models.Entity class"
+                )
         
         if not isinstance(to, Entity):
-            raise TypeError("the object which is given with the `to` should "
-                            "be inherited from stalker.core.models.Entity "
-                            "class")
+            raise TypeError(
+                "the object which is given with the `to` should be inherited "
+                "from stalker.core.models.Entity class"
+            )
         
         return to
 
