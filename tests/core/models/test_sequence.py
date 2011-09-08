@@ -4,9 +4,9 @@
 
 import unittest
 import datetime
-from stalker.core.models import (Sequence, Project, User, Shot, Entity, Status,
-                                 StatusList, Link, Task, Type, Repository)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import (Sequence, Project, User,
+                                            Entity, Status, StatusList, Link,
+                                            Task, Type, Repository)
 
 
 
@@ -114,91 +114,8 @@ class SequenceTester(unittest.TestCase):
             "status_list": self.sequence_status_list
         }
         
-        # the mock seuqence
+        # the test seuqence
         self.test_sequence = Sequence(**self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_default_value_is_None(self):
-        #"""testing if the project attribute defaults to None when no project
-        #argument is given
-        #"""
-        
-        #self.kwargs.pop("project")
-        #new_sequence = Sequence(**self.kwargs)
-        #self.assertEqual(new_sequence.project, None)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_argument_is_None(self):
-        #"""testing if a TypeError will be raised when the project argument is
-        #None
-        #"""
-        
-        #self.kwargs["project"] = None
-        #self.assertRaises(TypeError, Sequence, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_is_set_to_None(self):
-        #"""testing if a TypeError will be raised when the project attribute set
-        #to None
-        #"""
-        
-        ##self.mock_sequence.project = None
-        #self.assertRaises(
-            #TypeError,
-            #setattr,
-            #self.mock_sequence,
-            #"project",
-            #None
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_argument_other_than_a_Project(self):
-        #"""testing if a TypeError will be raised when the project argument is
-        #None
-        #"""
-        
-        #test_values = [1, 1.2, "a project", ["a", "list"]]
-        
-        #for test_value in test_values:
-            #self.kwargs["project"] = test_value
-            #self.assertRaises(TypeError, Sequence, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_other_than_a_Project(self):
-        #"""testing if a TypeError will be raised when the project attribute
-        #is set to None
-        #"""
-        
-        #test_values = [1, 1.2, "project", ["a", "list"]]
-        
-        #for test_value in test_values:
-            #self.assertRaises(
-                #TypeError,
-                #setattr,
-                #self.mock_sequence,
-                #"project",
-                #test_value
-            #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_is_working_properly(self):
-        #"""testing if the project attribute is working properly
-        #"""
-        
-        #self.mock_sequence.project = self.mock_project2
-        #self.assertEqual(self.mock_sequence.project, self.mock_project2)
     
     
     
@@ -290,12 +207,11 @@ class SequenceTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_shots_attribute_is_set_None(self):
-        """testing if the shots attribute will be set to an empty list when it
-        is set to None
+        """testing if a TypeError will be raised when the shots attribute will
+        be set to None
         """
         
-        self.test_sequence.shots = None
-        self.assertEqual(self.test_sequence.shots, [])
+        self.assertRaises(TypeError, self.test_sequence, "shots", None)
     
     
     
@@ -346,18 +262,7 @@ class SequenceTester(unittest.TestCase):
         
         for test_value in test_values:
             self.assertRaises(TypeError,
-                              self.test_sequence.shots.__setitem__,
-                              0,
-                              test_value)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_shots_attribute_is_instance_of_ValidatedList(self):
-        """testing if the shots attribute holds an instance of ValidateList
-        """
-        
-        self.assertIsInstance(self.test_sequence.shots, ValidatedList)
+                              self.test_sequence.shots.append, test_value)
     
     
     
@@ -432,7 +337,7 @@ class SequenceTester(unittest.TestCase):
         
         status_list = StatusList(name="Project Statuses",
                                  statuses=[status1, status2],
-                                 target_entity_type=Sequence.entity_type)
+                                 target_entity_type=Sequence)
         
         self.kwargs["status"] = 0
         self.kwargs["status_list"] = status_list
@@ -463,8 +368,8 @@ class SequenceTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_TaskMixin_initialization(self):
-        """testing if the TaskMixin part is initialized correctly
+    def test_TaskableEntity_initialization(self):
+        """testing if the TaskableEntity part is initialized correctly
         """
         
         status1 = Status(name="On Hold", code="OH")
@@ -472,12 +377,12 @@ class SequenceTester(unittest.TestCase):
         task_status_list = StatusList(
             name="Task Statuses",
             statuses=[status1],
-            target_entity_type=Task.entity_type
+            target_entity_type=Task
         )
         
         project_status_list = StatusList(
             name="Project Statuses", statuses=[status1],
-            target_entity_type=Project.entity_type,
+            target_entity_type=Project,
         )
         
         project_type = Type(
@@ -530,12 +435,12 @@ class SequenceTester(unittest.TestCase):
         task_status_list = StatusList(
             name="Task Statuses",
             statuses=[status1],
-            target_entity_type=Task.entity_type
+            target_entity_type=Task
         )
         
         project_status_list = StatusList(
             name="Project Statuses", statuses=[status1],
-            target_entity_type=Project.entity_type
+            target_entity_type=Project
         )
         
         project_type = Type(
@@ -585,7 +490,7 @@ class SequenceTester(unittest.TestCase):
         
         project_status_list = StatusList(
             name="Project Statuses", statuses=[status1],
-            target_entity_type=Project.entity_type
+            target_entity_type=Project
         )
         
         project_type = Type(name="Commercial", target_entity_type=Project)
@@ -603,12 +508,12 @@ class SequenceTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Sequence class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Sequence class
+        #"""
         
-        self.assertTrue(Sequence.plural_name, "Sequences")
+        #self.assertTrue(Sequence.plural_name, "Sequences")
     
     
     

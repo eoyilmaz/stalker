@@ -581,12 +581,12 @@ class ImageFormatTest(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of ImageFormat class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of ImageFormat class
+        #"""
         
-        self.assertTrue(ImageFormat.plural_name, "ImageFormats")
+        #self.assertTrue(ImageFormat.plural_name, "ImageFormats")
     
     
     

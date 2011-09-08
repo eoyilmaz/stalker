@@ -3,9 +3,9 @@
 
 
 import unittest
-from stalker.core.models import (Entity, Shot, Sequence, Asset, Task, Link,
-                                 Status, StatusList, Type, Project, Repository)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import (Entity, Shot, Sequence, Asset,
+                                            Task, Link, Status, StatusList,
+                                            Type, Project, Repository)
 
 
 
@@ -141,6 +141,7 @@ class ShotTester(unittest.TestCase):
         self.test_data.cut_out_default = 1
         
         self.kwargs = {
+            "name": "SH123",
             "code": "SH123",
             "description": "This is a test Shot",
             "sequence": self.test_data.sequence1,
@@ -158,34 +159,34 @@ class ShotTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_name_attribute_is_a_uuid4_sequence(self):
-        """testing if the name attribute is set to a proper uuid4 sequence
-        """
+    ##----------------------------------------------------------------------
+    #def test_name_attribute_is_a_uuid4_sequence(self):
+        #"""testing if the name attribute is set to a proper uuid4 sequence
+        #"""
         
-        # the length is 32 character
-        self.assertEqual(len(self.test_data.test_shot.name), 32)
+        ## the length is 32 character
+        #self.assertEqual(len(self.test_data.test_shot.name), 32)
         
-        import re
+        #import re
         
-        # and all the characters are in [0-9a-f] range
-        self.assertEqual(
-            re.sub("[0-9a-f]+","", self.test_data.test_shot.name), ""
-        )
+        ## and all the characters are in [0-9a-f] range
+        #self.assertEqual(
+            #re.sub("[0-9a-f]+","", self.test_data.test_shot.name), ""
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_name_attribute_can_not_be_changed(self):
-        """testing if the name attribute can not be changed
-        """
+    ##----------------------------------------------------------------------
+    #def test_name_attribute_can_not_be_changed(self):
+        #"""testing if the name attribute can not be changed
+        #"""
         
-        test_value = "new_name"
-        before_value = self.test_data.test_shot.name
+        #test_value = "new_name"
+        #before_value = self.test_data.test_shot.name
         
-        self.test_data.test_shot.name = test_value
+        #self.test_data.test_shot.name = test_value
         
-        self.assertEqual(self.test_data.test_shot.name, before_value)
+        #self.assertEqual(self.test_data.test_shot.name, before_value)
     
     
     
@@ -233,20 +234,24 @@ class ShotTester(unittest.TestCase):
         
         # lets try to assign the shot to the mock_sequence2 which has another
         # shot with the same code
+        
         self.kwargs["sequence"] = self.test_data.sequence2
         new_shot = Shot(**self.kwargs)
-        
         self.assertRaises(ValueError, Shot, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_sequence_attribute_is_read_only(self):
-        """testing if the sequence attribute is read only
-        """
         
-        self.assertRaises(AttributeError, setattr,self.test_data.test_shot,
-                          "sequence", self.test_data.sequence2)
+        # this should not raise a ValueError
+        self.kwargs["code"] = "DifferentCode"
+        new_shot2 = Shot(**self.kwargs)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_sequence_attribute_is_read_only(self):
+        #"""testing if the sequence attribute is read only
+        #"""
+        
+        #self.assertRaises(AttributeError, setattr,self.test_data.test_shot,
+                          #"sequence", self.test_data.sequence2)
     
     
     
@@ -272,55 +277,55 @@ class ShotTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_argument_is_None(self):
-        """testing if a TypeError will be raised when the code argument is
-        None
-        """
-        self.kwargs["code"] = None
-        self.assertRaises(TypeError, Shot, **self.kwargs)
+    ##----------------------------------------------------------------------
+    #def test_code_argument_is_None(self):
+        #"""testing if a TypeError will be raised when the code argument is
+        #None
+        #"""
+        #self.kwargs["code"] = None
+        #self.assertRaises(TypeError, Shot, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_attribute_is_None(self):
-        """testing if a TypeError will be raised when the code argument is
-        None
-        """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_data.test_shot,
-            "code",
-            None
-        )
+    ##----------------------------------------------------------------------
+    #def test_code_attribute_is_None(self):
+        #"""testing if a TypeError will be raised when the code argument is
+        #None
+        #"""
+        #self.assertRaises(
+            #TypeError,
+            #setattr,
+            #self.test_data.test_shot,
+            #"code",
+            #None
+        #)
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_argument_is_empty_string(self):
-        """testing if a ValueError will be raised when the code argument is
-        empty string
-        """
+    ##----------------------------------------------------------------------
+    #def test_code_argument_is_empty_string(self):
+        #"""testing if the code attribute will be set to the same value with the
+        #name when it is set to an empty string
+        #"""
         
-        self.kwargs["code"] = ""
-        self.assertRaises(ValueError, Shot, **self.kwargs)
+        #self.kwargs["code"] = ""
+        #self.assertRaises(ValueError, Shot, **self.kwargs)
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_attribute_is_empty_string(self):
-        """testing if a ValueError will be raised when the code attribute is
-        empty string
-        """
+    ##----------------------------------------------------------------------
+    #def test_code_attribute_is_empty_string(self):
+        #"""testing if a ValueError will be raised when the code attribute is
+        #empty string
+        #"""
         
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.test_data.test_shot,
-            "code",
-            ""
-        )
+        #self.assertRaises(
+            #ValueError,
+            #setattr,
+            #self.test_data.test_shot,
+            #"code",
+            #""
+        #)
     
     
     
@@ -777,7 +782,7 @@ class ShotTester(unittest.TestCase):
         
         status_list = StatusList(name="Project Statuses",
                                  statuses=[status1, status2],
-                                 target_entity_type=Shot.entity_type)
+                                 target_entity_type=Shot)
         
         self.kwargs["code"] = "SH12314"
         self.kwargs["status"] = 0
@@ -798,11 +803,11 @@ class ShotTester(unittest.TestCase):
         
         task_status_list = StatusList(name="Task Statuses",
                                       statuses=[status1],
-                                      target_entity_type=Task.entity_type)
+                                      target_entity_type=Task)
         
         project_status_list = StatusList(
             name="Project Statuses", statuses=[status1],
-            target_entity_type=Project.entity_type
+            target_entity_type=Project
         )
         
         project_type = Type(
@@ -854,11 +859,11 @@ class ShotTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Shot class
-        """
-        self.assertTrue(Shot.plural_name, "Shots")
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Shot class
+        #"""
+        #self.assertTrue(Shot.plural_name, "Shots")
     
     
     
@@ -897,12 +902,12 @@ class ShotTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_assets_attribute_is_None(self):
-        """testing if the assets attribute will be an empty list when it is set
-        to None
+        """testing if a TypeError will be raised when the assets attribute is
+        set to None
         """
         
-        self.test_data.test_shot.assets = None
-        self.assertEqual(self.test_data.test_shot.assets, [])
+        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
+                          "assets", None)
     
     
     
@@ -947,15 +952,6 @@ class ShotTester(unittest.TestCase):
         
         self.assertRaises(TypeError, setattr, self.test_data.test_shot,
                           "assets", [1, "a string", ["a", "list"]])
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_assets_attribute_is_a_ValidatedList(self):
-        """testing if the assets attribute is a ValidatedList instance
-        """
-        
-        self.assertIsInstance(self.test_data.test_shot.assets, ValidatedList)
     
     
     

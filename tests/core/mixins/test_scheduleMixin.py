@@ -6,10 +6,15 @@ import datetime
 import unittest
 
 from stalker.conf import defaults
-from stalker.core.mixins import ScheduleMixin
+from stalker.core.models import SimpleEntity, ScheduleMixin
 
 
 
+# a class which derives from another which has and __init__ already
+class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
+    def __init__(self, **kwargs):
+        super(SchedMixFooMixedInClass, self).__init__(**kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
 
 
 
@@ -40,27 +45,8 @@ class ScheduleMixinTester(unittest.TestCase):
             "duration": self.duration,
         }
         
-        class Bar(object):
-            pass
-        
-        class Foo(object):
-            def __init__(self, **kwargs):
-                pass
-        
-        # a class which derives from another which has and __init__ already
-        class FooMixedInClass(Foo, ScheduleMixin):
-            def __init__(self, **kwargs):
-                super(FooMixedInClass, self).__init__(**kwargs)
-                ScheduleMixin.__init__(self, **kwargs)
-        
-        # another class which doesn't have an __init__
-        class FooMixedInClass_without_init(Bar, ScheduleMixin):
-            pass
-        
-        self.FooMixedInClass = FooMixedInClass
-        self.FooMixedInClass_without_init = FooMixedInClass_without_init
-        
-        self.mock_foo_obj = FooMixedInClass(**self.kwargs)
+
+        self.mock_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
     
     
     
@@ -75,7 +61,7 @@ class ScheduleMixinTester(unittest.TestCase):
         for test_value in test_values:
             self.kwargs["start_date"] = test_value
             
-            new_foo_obj = self.FooMixedInClass_without_init(**self.kwargs)
+            new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
             
             self.assertEqual(new_foo_obj.start_date,
                              new_foo_obj.due_date - new_foo_obj.duration)
@@ -147,7 +133,7 @@ class ScheduleMixinTester(unittest.TestCase):
         
         for test_value in test_values:
             self.kwargs["due_date"] = test_value
-            new_foo_obj = self.FooMixedInClass_without_init(**self.kwargs)
+            new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
             
             self.assertEqual(new_foo_obj.due_date,
                              new_foo_obj.start_date + new_foo_obj.duration)
@@ -183,7 +169,7 @@ class ScheduleMixinTester(unittest.TestCase):
         self.kwargs["due_date"] = self.kwargs["start_date"] - \
             datetime.timedelta(days=10)
         
-        new_foo_obj = self.FooMixedInClass_without_init(**self.kwargs)
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         
         self.assertEqual(new_foo_obj.due_date,
                          new_foo_obj.start_date + new_foo_obj.duration)
@@ -236,7 +222,7 @@ class ScheduleMixinTester(unittest.TestCase):
         # no problem if there are start_date and due_date arguments
         for test_value in test_values:
             self.kwargs["duration"] = test_value
-            new_foo_obj = self.FooMixedInClass(**self.kwargs)
+            new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
             
             # check the value
             self.assertEqual(new_foo_obj.duration,
@@ -257,7 +243,7 @@ class ScheduleMixinTester(unittest.TestCase):
         
         for test_value in test_values:
             self.kwargs["duration"] = test_value
-            new_foo_obj = self.FooMixedInClass(**self.kwargs)
+            new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
             
             self.assertEqual(new_foo_obj.duration,
                              defaults.DEFAULT_TASK_DURATION)
@@ -277,7 +263,7 @@ class ScheduleMixinTester(unittest.TestCase):
         
         for test_value in test_values:
             self.kwargs["duration"] = test_value
-            new_foo_obj = self.FooMixedInClass(**self.kwargs)
+            new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
             self.assertEqual(new_foo_obj.duration,
                              defaults.DEFAULT_TASK_DURATION)
     
@@ -288,7 +274,7 @@ class ScheduleMixinTester(unittest.TestCase):
         """testing if the duration attribute is calculated correctly
         """
         
-        new_foo_entity = self.FooMixedInClass(**self.kwargs)
+        new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         new_foo_entity.start_date = datetime.date.today()
         new_foo_entity.due_date = new_foo_entity.start_date + \
                       datetime.timedelta(201)
@@ -395,7 +381,7 @@ class ScheduleMixinTester(unittest.TestCase):
         self.kwargs.pop("due_date")
         self.kwargs.pop("duration")
         
-        new_foo_entity = self.FooMixedInClass(**self.kwargs)
+        new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
         self.assertEqual(new_foo_entity.start_date, datetime.date.today())
         self.assertEqual(new_foo_entity.duration,
@@ -416,7 +402,7 @@ class ScheduleMixinTester(unittest.TestCase):
         self.kwargs.pop("due_date")
         self.kwargs.pop("duration")
         
-        new_foo_entity = self.FooMixedInClass(**self.kwargs)
+        new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
         self.assertEqual(new_foo_entity.duration,
                          defaults.DEFAULT_TASK_DURATION)
@@ -434,7 +420,7 @@ class ScheduleMixinTester(unittest.TestCase):
         
         self.kwargs.pop("duration")
         
-        new_foo_entity = self.FooMixedInClass(**self.kwargs)
+        new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
         self.assertEqual(new_foo_entity.duration,
                          new_foo_entity.due_date - new_foo_entity.start_date)
@@ -450,7 +436,7 @@ class ScheduleMixinTester(unittest.TestCase):
         
         self.kwargs.pop("due_date")
         
-        new_foo_entity = self.FooMixedInClass(**self.kwargs)
+        new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
         self.assertEqual(new_foo_entity.due_date,
                          new_foo_entity.start_date + new_foo_entity.duration)
@@ -464,7 +450,7 @@ class ScheduleMixinTester(unittest.TestCase):
         duration = due_date - start_date
         """
         
-        new_foo_entity = self.FooMixedInClass(**self.kwargs)
+        new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
         self.assertEqual(new_foo_entity.duration,
                          new_foo_entity.due_date - new_foo_entity.start_date)
@@ -480,7 +466,7 @@ class ScheduleMixinTester(unittest.TestCase):
         
         self.kwargs.pop("start_date")
         
-        new_foo_entity = self.FooMixedInClass(**self.kwargs)
+        new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
         self.assertEqual(new_foo_entity.start_date,
                          new_foo_entity.due_date - new_foo_entity.duration)
@@ -498,7 +484,7 @@ class ScheduleMixinTester(unittest.TestCase):
         self.kwargs.pop("duration")
         self.kwargs.pop("start_date")
         
-        new_foo_entity = self.FooMixedInClass(**self.kwargs)
+        new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
         self.assertEqual(new_foo_entity.duration,
                          defaults.DEFAULT_TASK_DURATION)
@@ -519,7 +505,7 @@ class ScheduleMixinTester(unittest.TestCase):
         self.kwargs.pop("due_date")
         self.kwargs.pop("start_date")
         
-        new_foo_entity = self.FooMixedInClass(**self.kwargs)
+        new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
         self.assertEqual(new_foo_entity.start_date, datetime.date.today())
         self.assertEqual(new_foo_entity.due_date,

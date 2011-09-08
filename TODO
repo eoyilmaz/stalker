@@ -1,15 +1,23 @@
 TODO
 ====
 
- * ValidatedList Tests for back references:
+ * StatusMixin and string indices:
    
-   Add tests for backreference updates in the ValidatedList tests (going to be
-   painfull!)
+   StatusMixin should be able to set the status with a string, because it is
+   possible to use strings in StatusList.
 
- * ValidatedList checks:
+ * Refactor target_entity_type attributes
    
-   Don't just check newly initialized classes, but also attribute assignments
-   for against being ValidatedList.
+   StatusList, FilenameTemplate and Type classes are using the same
+   target_entity_type attribute, create a mixin for that.
+
+ * Stop the fight between SimpleEntity.name and SimpleEntity.code.
+   
+   Currently name superseeds code, but it is annoying to change the code over
+   and over again just because the name is changed. So change the behaviour to
+   something like that; the code is only updated to the same value with name if
+   it is set to None or empty string. In any other case the code should remain
+   in the same value.
 
  * Implicit instance creation with back references:
    
@@ -73,6 +81,20 @@ TODO
 
 DONE:
 =====
+ * SQLAlchemy ORM Declarative:
+   
+   Use declarative for the whole system. It started to make no sense to use
+   classical approach with Python objects and it started to be very hard to try
+   to update all the relations which is handled automatically by SQLAlchemy.
+   Besides, the work done by all the attributes which are using ValidatedList
+   is replaced with a neat system whenever the mapping has occured. Which is
+   the usage case %90 of the time.
+   
+   Tests are going to be nearly the same. The only programming overhead is the
+   implementation itself.
+   
+   Mixin classes also needs some attention, but as far as I see it is
+   successfully handled withing declarative approach.
 
  * "__stalker_version__" in SimpleEntity:
    

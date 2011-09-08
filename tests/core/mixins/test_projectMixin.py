@@ -5,12 +5,15 @@
 import unittest
 import datetime
 
-from stalker.core.mixins import ProjectMixin
-from stalker.core.models import (Status, StatusList, Type, Project, Repository)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import (Status, StatusList, Type, Project, Repository,
+                                 SimpleEntity, ProjectMixin)
 
 
 
+class ProjMixClass(SimpleEntity, ProjectMixin):
+    def __init__(self, **kwargs):
+        super(ProjMixClass, self).__init__(**kwargs)
+        ProjectMixin.__init__(self, **kwargs)
 
 
 
@@ -76,21 +79,12 @@ class ProjectMixinTester(unittest.TestCase):
         
         
         self.kwargs = {
+            "name": "Test Class",
             "project": self.test_project1,
         }
         
-        class BarClass(object):
-            def __init__(self, **kwargs):
-                pass
-        
-        class FooMixedInClass(BarClass, ProjectMixin):
-            def __init__(self, **kwargs):
-                super(FooMixedInClass, self).__init__(**kwargs)
-                ProjectMixin.__init__(self, **kwargs)
-        
-        self.FooMixedInClass = FooMixedInClass
-        
-        self.test_foo_obj = FooMixedInClass(**self.kwargs)
+
+        self.test_foo_obj = ProjMixClass(**self.kwargs)
     
     
     
@@ -100,7 +94,7 @@ class ProjectMixinTester(unittest.TestCase):
         skipped
         """
         self.kwargs.pop("project")
-        self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
+        self.assertRaises(TypeError, ProjMixClass, **self.kwargs)
     
     
     
@@ -110,56 +104,56 @@ class ProjectMixinTester(unittest.TestCase):
         None
         """
         self.kwargs["project"] = None
-        self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_is_None(self):
-        #"""testing if a TypeError will be raised when the project attribute is
-        #set to None
-        #"""
-        #self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
-                          #None)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_argument_is_not_a_Project_instance(self):
-        #"""testing if a TypeError will be raised when the project argument is
-        #not a stalker.core.models.Project instance
-        #"""
-        #self.kwargs["project"] = "a project"
-        #self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_is_not_a_Project_instance(self):
-        #"""testing if a TypeError will be raised when the project attribute is
-        #set to something other than a stalker.core.models.Project instance
-        #"""
-        #self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
-                          #"a project")
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_is_working_properly(self):
-        #"""testing if the project attribute is working properly
-        #"""
-        #self.test_foo_obj.project = self.test_project2
-        #self.assertEqual(self.test_foo_obj.project, self.test_project2)
+        self.assertRaises(TypeError, ProjMixClass, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_project_attribute_is_read_only(self):
-        """testing if the project attribute is read only
+    def test_project_attribute_is_None(self):
+        """testing if a TypeError will be raised when the project attribute is
+        set to None
         """
+        self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
+                          None)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_project_argument_is_not_a_Project_instance(self):
+        """testing if a TypeError will be raised when the project argument is
+        not a stalker.core.models.Project instance
+        """
+        self.kwargs["project"] = "a project"
+        self.assertRaises(TypeError, ProjMixClass, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_project_attribute_is_not_a_Project_instance(self):
+        """testing if a TypeError will be raised when the project attribute is
+        set to something other than a stalker.core.models.Project instance
+        """
+        self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
+                          "a project")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_project_attribute_is_working_properly(self):
+        """testing if the project attribute is working properly
+        """
+        self.test_foo_obj.project = self.test_project2
+        self.assertEqual(self.test_foo_obj.project, self.test_project2)
+    
+    
+    
+    ##----------------------------------------------------------------------
+    #def test_project_attribute_is_read_only(self):
+        #"""testing if the project attribute is read only
+        #"""
         
-        self.assertRaises(AttributeError, setattr, self.test_foo_obj,
-                          "project", self.test_project2)
+        #self.assertRaises(AttributeError, setattr, self.test_foo_obj,
+                          #"project", self.test_project2)
     
     
     

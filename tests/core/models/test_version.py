@@ -146,7 +146,7 @@ class VersionTester(unittest.TestCase):
             "source_file": self.test_source_link,
             "outputs": [self.test_output_link1,
                         self.test_output_link2,],
-            "task": self.test_task1,
+            "version_of": self.test_task1,
         }
         
         # and the Version
@@ -299,13 +299,12 @@ class VersionTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_version_attribute_is_read_only(self):
-        """testing if an AttributeError will be raised when the version
-        attribute is set to something
+    def test_version_attribute_is_None(self):
+        """testing if a TypeError will be raised when the version attribute is
+        set to None
         """
         
-        self.assertRaises(AttributeError, setattr, self.test_version,
-                          "version", 123)
+        self.assertRaises(TypeError, self.test_version, "version", None)
     
     
     
@@ -320,13 +319,13 @@ class VersionTester(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_version_attribute_is_0(self):
-        #"""testing if a ValueError will be raised when the version attribute is
-        #set to 0
-        #"""
+    #----------------------------------------------------------------------
+    def test_version_attribute_is_0(self):
+        """testing if a ValueError will be raised when the version attribute is
+        set to 0
+        """
         
-        #self.fail("test is not implemented yet")
+        self.fail("test is not implemented yet")
     
     
     
@@ -341,77 +340,14 @@ class VersionTester(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_version_attribute_is_negative(self):
-        #"""testing if a ValueError will be raised when the version attribute is
-        #negative
-        #"""
+    #----------------------------------------------------------------------
+    def test_version_attribute_is_negative(self):
+        """testing if a ValueError will be raised when the version attribute is
+        negative
+        """
         
-        #self.fail("test is not implemented yet")
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_reviews_attribute_is_set_to_None(self):
-        #"""testing if nothing happens when the reviews attribute is set to None
-        #"""
-        
-        ## should work without giving any errors
-        #self.test_version.reviews = None
-        
-        ## and it should set it to an empty list (or something like a list)
-        #self.assertIsInstance(self.test_version.reviews, list)
-        #self.assertEqual(len(self.test_version), 0)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_reviews_attribute_is_not_a_list(self):
-        #"""testing if a TypeError will be raised when the reviews attribute is
-        #not a list instance
-        #"""
-        
-        #self.assertRaises(TypeError, setattr, self.test_version, "reviews", 1)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_reviews_attribute_is_not_a_list_of_Review_instances(self):
-        #"""testing if a TypeError will be raised when the reviews attribute is
-        #set to a list of other objects
-        #"""
-        
-        #self.assertRaises(TypeError, setattr, self.test_version, "reviews",
-                          #["test", "reviews"])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_reviews_attribute_is_working_properly(self):
-        #"""testing if the reviews attribute is working properly
-        #"""
-        
-        ## create a review
-        #new_review = Review(
-            #name="Test Review",
-            
-        #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_reviews_attribute_is_a_ValidatedList(self):
-        #"""testinf if the reviews attribute is a ValidatedList instance
-        #"""
-        
-        #self.assertIsInstance(self.test_version.reviews, ValidatedList)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_review_attribute_updating_backref_attribute(self):
-        
-        #self.fail("test is not implemented yet")
+        self.assertRaises(ValueError, setattr, self.test_version, "version",
+                          -1)
     
     
     
@@ -455,11 +391,88 @@ class VersionTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_ReviewMixin_initialization(self):
-        """testing the ReviewMixin initialization
+    def test_version_of_argument_is_skipped(self):
+        """testing if a TypeError will be raised when the version_of argument
+        is skipped
         """
         
-        self.fail("test is not implemented yet")
+        self.kwargs.pop("version_of")
+        self.assertRaises(TypeError, Version, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_version_of_argument_is_None(self):
+        """testing if a TypeError will be raised when the version_of argument
+        is None
+        """
+        
+        self.kwargs["version_of"] = None
+        self.assertRaises(TypeError, Version, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_version_of_attribute_is_None(self):
+        """testing if a TypeError will be raised when the version_of attribute
+        is None
+        """
+        self.assertRaises(TypeError, setattr, self.test_version, "task", None)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_version_of_argument_is_not_a_Task(self):
+        """testing if a TypeError will be raised when the version_of argumment
+        is not a Task instance
+        """
+        
+        self.kwargs["version_of"] = "a task"
+        self.assertRaises(TypeError, Version, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_version_of_attribute_is_not_a_Task(self):
+        """testing if a TypeError will be raised when the version_of attribute
+        is not a Task instance
+        """
+        
+        self.assertRaises(TypeError, setattr, self.test_version, "task",
+                          "a task")
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_version_of_attribute_is_working_properly(self):
+        """testing if the version_of attribute is working properly
+        """
+        
+        new_task = Task(
+            name="New Test Task",
+            task_of=self.test_shot1,
+            status_list=self.test_task_status_list,
+        )
+        
+        self.assertIsNot(self.test_version.version_of, new_task)
+        
+        self.test_version.version_of = new_task
+        self.assertIs(self.test_version.version_of, new_task)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

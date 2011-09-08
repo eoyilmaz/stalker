@@ -260,12 +260,12 @@ class LinkTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Link class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Link class
+        #"""
         
-        self.assertTrue(Link.plural_name, "Links")
+        #self.assertTrue(Link.plural_name, "Links")
     
     
     

@@ -3,9 +3,7 @@
 
 
 import unittest
-from stalker.core.models import (Entity, User, Tag, Note)
-from stalker.ext.validatedList import ValidatedList
-
+from stalker.core.models import (Entity, User, Tag, Note, Review)
 
 
 
@@ -33,18 +31,6 @@ class EntityTester(unittest.TestCase):
         self.test_tag1 = Tag(name="Test Tag 1")
         self.test_tag2 = Tag(name="Test Tag 1") # make it equal to tag1
         self.test_tag3 = Tag(name="Test Tag 3")
-        
-        #self.expect(self.test_tag1.__eq__(self.test_tag2))\
-            #.result(True).count(0, None)
-        
-        #self.expect(self.test_tag1.__ne__(self.test_tag2))\
-            #.result(False).count(0, None)
-        
-        #self.expect(self.test_tag1.__eq__(self.test_tag3))\
-            #.result(False).count(0, None)
-        
-        #self.expect(self.test_tag1.__ne__(self.test_tag3))\
-            #.result(True).count(0, None)
         
         self.tags = [self.test_tag1, self.test_tag2]
         
@@ -94,12 +80,11 @@ class EntityTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_notes_attribute_is_set_to_None(self):
-        """testing if the notes attribute will be an empty list when it is set
-        to None
+        """testing if a TypeError will be raised when the notes attribute is
+        set to None
         """
         
-        self.test_entity.notes = None
-        self.assertEqual(self.test_entity.notes, [])
+        self.assertRaises(TypeError, setattr, self.test_entity, "notes", None)
     
     
     
@@ -179,17 +164,6 @@ class EntityTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_notes_attribute_is_converted_to_a_ValidatedList(self):
-        """testing if the notes attribute is converted to a
-        stalker.ext.validatedList.ValidatedList instance
-        """
-        
-        self.test_entity.notes = []
-        self.assertIsInstance(self.test_entity.notes, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_notes_attribute_element_is_set_to_something_other_than_a_note_object(self):
         """testing if a TypeError will be raised when trying to assign an
         element to the notes list which is not an instance of Note
@@ -258,17 +232,6 @@ class EntityTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tags_attribute_is_converted_to_a_ValidatedList(self):
-        """testing if the tags attribute is converted to a
-        stalker.ext.validatedList.ValidatedList instance
-        """
-        
-        self.test_entity.tags = []
-        self.assertIsInstance(self.test_entity.tags, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_tags_attribute_element_is_set_to_something_other_than_a_tag_object(self):
         """testing if a TypeError will be raised when trying to assign an
         element to the tags list which is not an instance of Tag
@@ -280,6 +243,15 @@ class EntityTester(unittest.TestCase):
             0,
             0
         )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_tags_attribute_set_to_None(self):
+        """testing if a TypeError will be raised when the tags attribute is set
+        to None
+        """
+        self.assertRaises(TypeError, setattr, self.test_entity, "tags", None)
     
     
     
@@ -318,4 +290,119 @@ class EntityTester(unittest.TestCase):
         
         self.assertFalse(entity1!=entity2)
         self.assertTrue(entity1!=entity3)
-
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_reviews_attribute_is_set_to_None(self):
+        """testing if a TypeError will be raised when the reviews attribute
+        is set to None
+        """
+        
+        self.assertRaises(TypeError, setattr, self.test_entity, "reviews",
+                          None)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_reviews_attribute_is_not_set_to_a_list(self):
+        """testing if a TypeError will be raised when the reviews attribute is
+        not set to a list instance
+        """
+        
+        self.assertRaises(TypeError, setattr, self.test_entity, "reviews",
+                          123)
+    
+    
+    
+    def test_reviews_attribute_is_not_accepting_anything_other_than_list_of_Reviews(self):
+        """testing if a TypeError will be raised when the elements of the
+        reivews attribute is set to something other than a Review
+        """
+        
+        self.assertRaises(TypeError, setattr, self.test_entity, "reviews",
+                          [123])
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_reviews_attribute_is_working_properly(self):
+        """testing if the reviews attribute is working properly
+        """
+        
+        # create a couple of Reviews
+        rev1 = Review(name="Test Rev 1", to=self.test_entity)
+        rev2 = Review(name="Test Rev 2", to=self.test_entity)
+        rev3 = Review(name="Test Rev 3", to=self.test_entity)
+        
+        # create a new Entity with no reviews
+        new_entity = Entity(**self.kwargs)
+        
+        # now try to assign all thre rev1 to the new object
+        # this should work fine
+        test_reviews = [rev1, rev2, rev3]
+        new_entity.reviews = test_reviews
+        
+        self.assertEqual(new_entity.reviews, test_reviews)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_reviews_attribute_updates_the_to_attribute_in_the_Review_instance(self):
+        """testing if the "to" attribute is updated with the current object
+        when it is set
+        """
+        
+        # create a couple of Reviews
+        rev1 = Review(name="Test Rev 1", to=self.test_entity)
+        rev2 = Review(name="Test Rev 2", to=self.test_entity)
+        rev3 = Review(name="Test Rev 3", to=self.test_entity)
+        
+        # create a new Entity with no reviews
+        new_entity = Entity(**self.kwargs)
+        
+        #print self.test_entity
+        #print new_entity
+        
+        # now try to assign all the reviews to the new object
+        new_entity.reviews = [rev1, rev2, rev3]
+        
+        # now check if the reviews "to" attribute is pointing to the correct
+        # object
+        self.assertEqual(rev1.to, new_entity)
+        self.assertEqual(rev2.to, new_entity)
+        self.assertEqual(rev3.to, new_entity)
+        
+        # check the reviews are in the reviews list
+        self.assertIn(rev1, new_entity.reviews)
+        self.assertIn(rev2, new_entity.reviews)
+        self.assertIn(rev3, new_entity.reviews)
+        
+        # now try to remove the review from the reviews list and expect a
+        # TypeError
+        #print "trying to remove"
+        #print "new_entity.reviews : %s" % new_entity.reviews
+        #print rev1
+        self.assertRaises(RuntimeError, new_entity.reviews.remove, rev1)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_reviews_attribute_handles_assigning_the_same_review_twice(self):
+        """testing if assigning the same review twice or more will not breake
+        anything or raise any exception
+        """
+        
+        # create a couple of Reviews
+        rev1 = Review(name="Test Rev 1", to=self.test_entity)
+        rev2 = Review(name="Test Rev 2", to=self.test_entity)
+        rev3 = Review(name="Test Rev 3", to=self.test_entity)
+        
+        # now try to assign the same review again to the same object
+        self.test_entity.reviews.append(rev1)
+        
+        # now try the reverse
+        rev1.to = self.test_entity
+        
+        # the review should be in the list
+        self.assertIn(rev1, self.test_entity.reviews)

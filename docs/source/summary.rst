@@ -9,15 +9,7 @@ Summary
    
    stalker.db
    stalker.db.engine
-   stalker.db.mapper
    stalker.db.metadata
-   stalker.db.mixins
-   stalker.db.mixins.ProjectMixinDB
-   stalker.db.mixins.ReferenceMixinDB
-   stalker.db.mixins.StatusMixinDB
-   stalker.db.mixins.ScheduleMixinDB
-   stalker.db.mixins.TaskMixinDB
-   stalker.db.tables
    stalker.db.query
    stalker.db.session
    stalker.db.setup
@@ -25,13 +17,10 @@ Summary
    stalker.core.errors.CircularDependencyError
    stalker.core.errors.LoginError
    stalker.core.errors.DBError
-   stalker.core.mixins
-   stalker.core.mixins.ProjectMixin
-   stalker.core.mixins.ReferenceMixin
-   stalker.core.mixins.ReviewMixin
-   stalker.core.mixins.ScheduleMixin
-   stalker.core.mixins.StatusMixin
-   stalker.core.mixins.TaskMixin
+   stalker.core.models.ProjectMixin
+   stalker.core.models.ReferenceMixin
+   stalker.core.models.ScheduleMixin
+   stalker.core.models.StatusMixin
    stalker.core.models
    stalker.core.models.Asset
    stalker.core.models.Booking
@@ -54,6 +43,7 @@ Summary
    stalker.core.models.Structure
    stalker.core.models.Tag
    stalker.core.models.Task
+   stalker.core.models.TaskableEntity
    stalker.core.models.Type
    stalker.core.models.User
    stalker.core.models.Version
@@ -66,6 +56,4 @@ Summary
    stalker.ext.auth.logout
    stalker.ext.auth.permission_required
    stalker.ext.auth.set_password
-   stalker.ext.validatedList
-   stalker.ext.validatedList.ValidatedList
    stalker.utils.path_to_exec

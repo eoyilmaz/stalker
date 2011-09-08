@@ -37,6 +37,7 @@ class SimpleEntityTester(unittest.TestCase):
         
         self.kwargs = {
             "name": "Test Entity",
+            "code": "TstEnt",
             "description": "This is a test entity, and this is a proper \
             description for it",
             "created_by": self.test_user,
@@ -187,6 +188,8 @@ class SimpleEntityTester(unittest.TestCase):
              "a_list_for_testing_3"),
         ]
         
+        self.kwargs.pop("code")
+        
         for test_value in code_test_values:
             self.kwargs["name"] = test_value[0]
             new_entity = SimpleEntity(**self.kwargs)
@@ -230,16 +233,16 @@ class SimpleEntityTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_code_attribute_is_changed_after_setting_name(self):
-        """testing if code attribute is changed and reformatted after the name
-        attribute has changed
+    def test_code_attribute_is_not_changed_after_setting_name(self):
+        """testing if code attribute is not changed and reformatted after the
+        name attribute has changed
         """
         
         # create a SimpleEntity with code and name has values in it
         code = "something"
         name = "some name"
         new_name = "something new"
-        expected_new_code = "something_new"
+        expected_new_code = "something"
         
         self.kwargs["code"] = code
         self.kwargs["name"] = name
@@ -252,8 +255,8 @@ class SimpleEntityTester(unittest.TestCase):
         # set the new name
         new_simple_entity.name = new_name
         
-        # first check if it is different then the old_code
-        self.assertNotEquals(new_simple_entity.code, old_code)
+        # first check if it is not different then the old_code
+        self.assertEquals(new_simple_entity.code, old_code)
         
         # then check if it is set to the expected result
         self.assertEqual(new_simple_entity.code, expected_new_code)
@@ -283,22 +286,60 @@ class SimpleEntityTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_name_argument_being_empty(self):
-        """testing if ValueError is raised for empty name argument
+    def test_name_argument_init_as_None_and_also_the_code_is_None(self):
+        """testing if TypeError is raised for None name argument
         """
         
-        self.kwargs["name"] = ""
+        self.kwargs["name"] = None
+        self.kwargs["code"] = None
+        self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_argument_init_as_None_and_also_the_code_is_empty_string(self):
+        """testing if TypeError is raised for None name argument
+        """
+        
+        self.kwargs["name"] = None
+        self.kwargs["code"] = ""
         self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_name_argument_init_as_None(self):
+    def test_name_argument_init_as_empty_string_and_also_the_code_is_None(self):
         """testing if TypeError is raised for None name argument
         """
         
-        self.kwargs["name"] = None
+        self.kwargs["name"] = ""
+        self.kwargs["code"] = None
         self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_argument_init_as_empty_string_and_also_the_code_is_empty_string(self):
+        """testing if TypeError is raised for None name argument
+        """
+        
+        self.kwargs["name"] = ""
+        self.kwargs["code"] = ""
+        self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_name_argument_is_None_but_there_is_code_argument(self):
+        """testing if the name attribute will be calculated from the code
+        arugment if the name argument is given as none
+        """
+        
+        self.kwargs["name"] = None
+        self.assertIsNot(self.kwargs["code"], None)
+        
+        new_simpleEntity = SimpleEntity(**self.kwargs)
+        self.assertEquals(new_simpleEntity.name, new_simpleEntity.code)
     
     
     

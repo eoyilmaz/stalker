@@ -3,10 +3,12 @@
 
 
 import unittest
-from stalker.core.models import FilenameTemplate, Type, Asset, Entity
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import (FilenameTemplate, Type, Entity)
 
 
+# a test class
+class Asset(object):
+    pass
 
 
 

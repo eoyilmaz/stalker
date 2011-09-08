@@ -4,11 +4,11 @@
 
 import unittest
 import datetime
-from stalker.core.models import (User, Department, PermissionGroup, Task,
-                                 Project, Sequence, Type, StatusList, Status,
-                                 Repository)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import (User, Department, PermissionGroup,
+                                            Type, StatusList, Status,
+                                            Repository)
 
+from stalker.core.models import (Task, Project, Sequence)
 
 
 
@@ -222,168 +222,168 @@ class UserTest(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_argument_skipped(self):
-        """testing if a value will be set if code argument is skipped
+    ##----------------------------------------------------------------------
+    #def test_code_argument_skipped(self):
+        #"""testing if a value will be set if code argument is skipped
         
-        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
-        """
+        #THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        #USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
+        #"""
         
-        #code = None
-        #name = "something"
-        # code value ?
+        ##code = None
+        ##name = "something"
+        ## code value ?
         
-        # be sure that we don't have code keyword
-        if self.kwargs.has_key("code"):
-            self.kwargs.pop("code")
+        ## be sure that we don't have code keyword
+        #if self.kwargs.has_key("code"):
+            #self.kwargs.pop("code")
         
-        new_user = User(**self.kwargs)
+        #new_user = User(**self.kwargs)
         
-        # check if it is not None and not an empty string and is an instance of
-        # string or unicode
-        self.assertTrue(new_user.code is not None)
-        self.assertTrue(new_user.code != "")
-        self.assertIsInstance(new_user.code, (str, unicode))
+        ## check if it is not None and not an empty string and is an instance of
+        ## string or unicode
+        #self.assertTrue(new_user.code is not None)
+        #self.assertTrue(new_user.code != "")
+        #self.assertIsInstance(new_user.code, (str, unicode))
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_argument_None(self):
-        """testing if a value will be set if code argument is set to None
+    ##----------------------------------------------------------------------
+    #def test_code_argument_None(self):
+        #"""testing if a value will be set if code argument is set to None
         
-        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
-        """
+        #THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        #USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
+        #"""
         
-        self.kwargs["code"] = None
+        #self.kwargs["code"] = None
         
-        new_user = User(**self.kwargs)
+        #new_user = User(**self.kwargs)
         
-        self.assertTrue(new_user.code is not None)
-        self.assertTrue(new_user.code != "")
-        self.assertIsInstance(new_user.code, (str, unicode))
+        #self.assertTrue(new_user.code is not None)
+        #self.assertTrue(new_user.code != "")
+        #self.assertIsInstance(new_user.code, (str, unicode))
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_argument_empty_string(self):
-        """testing if a value will be set if code argument is set to an empty
-        string
+    ##----------------------------------------------------------------------
+    #def test_code_argument_empty_string(self):
+        #"""testing if a value will be set if code argument is set to an empty
+        #string
         
-        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
-        """
+        #THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        #USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
+        #"""
         
-        self.kwargs["code"] = ""
+        #self.kwargs["code"] = ""
         
-        new_user = User(**self.kwargs)
+        #new_user = User(**self.kwargs)
         
-        self.assertTrue(new_user.code is not None)
-        self.assertTrue(new_user.code != "")
-        self.assertIsInstance(new_user.code, (str, unicode))
+        #self.assertTrue(new_user.code is not None)
+        #self.assertTrue(new_user.code != "")
+        #self.assertIsInstance(new_user.code, (str, unicode))
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_attribute_format_when_code_argument_skipped(self):
-        """testing if code attribute is formatted correctly when skipped as an
-        argument
+    ##----------------------------------------------------------------------
+    #def test_code_attribute_format_when_code_argument_skipped(self):
+        #"""testing if code attribute is formatted correctly when skipped as an
+        #argument
         
-        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
-        """
+        #THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        #USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
+        #"""
         
-        #code = None or ""
-        #name = "something"
-        # code format ?
+        ##code = None or ""
+        ##name = "something"
+        ## code format ?
         
-        code_test_values = [
-            ("testCode","testcode"),
-            ("1testCode", "testcode"),
-            ("_testCode", "testcode"),
-            ("2423$+^^+^'%+%%&_testCode", "testcode"),
-            ("2423$+^^+^'%+%%&_testCode_35", "testcode35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "testcode35"),
-            ("SH001","sh001"),
-            ("My CODE is Ozgur", "mycodeisozgur"),
+        #code_test_values = [
+            #("testCode","testcode"),
+            #("1testCode", "testcode"),
+            #("_testCode", "testcode"),
+            #("2423$+^^+^'%+%%&_testCode", "testcode"),
+            #("2423$+^^+^'%+%%&_testCode_35", "testcode35"),
+            #("2423$ +^^+^ '%+%%&_ testCode_ 35", "testcode35"),
+            #("SH001","sh001"),
+            #("My CODE is Ozgur", "mycodeisozgur"),
             
-            (" this is another code for an asset", 
-             "thisisanothercodeforanasset"),
+            #(" this is another code for an asset", 
+             #"thisisanothercodeforanasset"),
             
-            ([1, 3, "a", "list","for","testing",3],
-             "alistfortesting3"),
-        ]
+            #([1, 3, "a", "list","for","testing",3],
+             #"alistfortesting3"),
+        #]
         
-        # set the name and check the code
-        for test_value in code_test_values:
-            self.kwargs["login_name"] = test_value[0]
-            new_user = User(**self.kwargs)
-            self.assertEqual(new_user.code, test_value[1])
+        ## set the name and check the code
+        #for test_value in code_test_values:
+            #self.kwargs["login_name"] = test_value[0]
+            #new_user = User(**self.kwargs)
+            #self.assertEqual(new_user.code, test_value[1])
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_attribute_is_set_when_both_code_and_name_is_given(self):
-        """testing if both code argument and name argument is given then it is
-        just set to the formatted version of code
+    ##----------------------------------------------------------------------
+    #def test_code_attribute_is_set_when_both_code_and_name_is_given(self):
+        #"""testing if both code argument and name argument is given then it is
+        #just set to the formatted version of code
         
-        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
-        """
+        #THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        #USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
+        #"""
         
-        test_values = [
-            ("aName", "testCode","testCode"),
-            ("aName", "1testCode", "testCode"),
-            ("aName", "_testCode", "testCode"),
-            ("aName", "2423$+^^+^'%+%%&_testCode", "testCode"),
-            ("aName", "2423$+^^+^'%+%%&_testCode_35", "testCode_35"),
-            ("aName", "2423$ +^^+^ '%+%%&_ testCode_ 35", "testCode_35"),
-            ("aName", "SH001","SH001"),
-            ("aName", "My CODE is Ozgur", "My_CODE_is_Ozgur"),
-            ("aName", " this is another code for an asset", 
-             "this_is_another_code_for_an_asset"),
-        ]
+        #test_values = [
+            #("aName", "testCode","testCode"),
+            #("aName", "1testCode", "testCode"),
+            #("aName", "_testCode", "testCode"),
+            #("aName", "2423$+^^+^'%+%%&_testCode", "testCode"),
+            #("aName", "2423$+^^+^'%+%%&_testCode_35", "testCode_35"),
+            #("aName", "2423$ +^^+^ '%+%%&_ testCode_ 35", "testCode_35"),
+            #("aName", "SH001","SH001"),
+            #("aName", "My CODE is Ozgur", "My_CODE_is_Ozgur"),
+            #("aName", " this is another code for an asset", 
+             #"this_is_another_code_for_an_asset"),
+        #]
         
-        # set the name and code and test the code
-        for test_value in test_values:
-            self.kwargs["name"] = test_value[0]
-            self.kwargs["code"] = test_value[1]
+        ## set the name and code and test the code
+        #for test_value in test_values:
+            #self.kwargs["name"] = test_value[0]
+            #self.kwargs["code"] = test_value[1]
             
-            new_user = User(**self.kwargs)
+            #new_user = User(**self.kwargs)
             
-            self.assertEqual(new_user.code, test_value[2])
+            #self.assertEqual(new_user.code, test_value[2])
     
     
     
-    #----------------------------------------------------------------------
-    def test_code_attribute_is_changed_after_setting_name(self):
-        """testing if code is going to change after setting the name attribute
+    ##----------------------------------------------------------------------
+    #def test_code_attribute_is_changed_after_setting_name(self):
+        #"""testing if code is going to change after setting the name attribute
         
-        THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
-        USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
-        """
+        #THE TEST IS A REPEAT OF THE ORIGINAL IN THE SIMPLEENTITY CLASS, IT IS
+        #USED JUST BECAUSE THE USER CLASS OVERRIDES THE NAME ATTRIBUTE
+        #"""
         
-        code = "something"
-        name = "some name"
-        new_name = "something new"
-        expected_new_code = "somethingnew"
+        #code = "something"
+        #name = "some name"
+        #new_name = "something new"
+        #expected_new_code = "somethingnew"
         
-        self.kwargs["code"] = code
-        self.kwargs["name"] = name
+        #self.kwargs["code"] = code
+        #self.kwargs["name"] = name
         
-        new_user = User(**self.kwargs)
+        #new_user = User(**self.kwargs)
         
-        old_code = new_user.code
+        #old_code = new_user.code
         
-        # set the new name
-        new_user.name = new_name
+        ## set the new name
+        #new_user.name = new_name
         
-        # first check if it is different then the old_code
-        self.assertNotEquals(new_user.code, old_code)
+        ## first check if it is different then the old_code
+        #self.assertNotEquals(new_user.code, old_code)
         
-        # then check if it is set to the expected result
-        self.assertEqual(new_user.code, expected_new_code)
+        ## then check if it is set to the expected result
+        #self.assertEqual(new_user.code, expected_new_code)
     
     
     
@@ -533,7 +533,7 @@ class UserTest(unittest.TestCase):
         """
         
         self.kwargs["login_name"] = None
-        self.assertRaises(TypeError, User, **self.kwargs)
+        self.assertRaises(ValueError, User, **self.kwargs)
     
     
     
@@ -763,7 +763,7 @@ class UserTest(unittest.TestCase):
             # set the input and expect the expected output
             self.kwargs["first_name"] = valuePair[0]
             test_user = User(**self.kwargs)
-            self.assertEqual(test_user._first_name, valuePair[1])
+            self.assertEqual(test_user.first_name, valuePair[1])
     
     
     
@@ -960,7 +960,7 @@ class UserTest(unittest.TestCase):
             test_user = User(**self.kwargs)
             
             self.assertEqual(
-                test_user._last_name,
+                test_user.last_name,
                 valuePair[1]
             )
     
@@ -1160,12 +1160,12 @@ class UserTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_permission_groups_attribute_for_None(self):
-        """testing if the permission_groups attribute will be an empty list
-        when it is set to None
+        """testing if a TypeError will be raised when permission_groups
+        attribute is set to None
         """
         
-        self.test_user.permission_groups = None
-        self.assertEqual(self.test_user.permission_groups, [])
+        self.assertRaises(TypeError, setattr, self.test_user,
+                          "permission_groups", None)
     
     
     
@@ -1220,16 +1220,6 @@ class UserTest(unittest.TestCase):
         test_pg = [self.test_permission_group3]
         self.test_user.permission_groups = test_pg
         self.assertEqual(self.test_user.permission_groups, test_pg)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_permission_groups_attribute_is_a_ValidatedList_instance(self):
-        """testing if the permission_groups attribute is an instance of
-        ValidatedList
-        """
-        
-        self.assertIsInstance(self.test_user.permission_groups, ValidatedList)
     
     
     
@@ -1397,12 +1387,12 @@ class UserTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_projects_lead_attribute_None(self):
-        """testing if the project_lead attribute will be an empty list when it
-        is set to None
+        """testing if a TypeError will be raised when the project_lead
+        attribute is set to None
         """
         
-        self.test_user.projects_lead = None
-        self.assertEqual(self.test_user.projects_lead, [])
+        self.assertRaises(TypeError, setattr, self.test_user, "projects_lead",
+                          None)
     
     
     
@@ -1511,16 +1501,6 @@ class UserTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_projects_lead_attribute_is_a_ValidatedList_instance(self):
-        """testing if the projects_lead attribute is an instance of
-        ValidatedList
-        """
-        
-        self.assertIsInstance(self.test_user.projects_lead, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_projects_lead_attribute_elements_accepts_Project_only(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a Project object to the projects_lead list
@@ -1557,12 +1537,12 @@ class UserTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_sequences_lead_attribute_None(self):
-        """testing if the sequences_lead attribute will be an empty list when
-        it is set to None
+        """testing if a TypeError will be raised when the sequences_lead
+        attribute is set to None
         """
         
-        self.test_user.sequences_lead = None
-        self.assertEqual(self.test_user.sequences_lead, [])
+        self.assertRaises(TypeError, setattr, self.test_user, "sequences_lead",
+                          None)
     
     
     
@@ -1641,16 +1621,6 @@ class UserTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_sequences_lead_attribute_is_a_ValidatedList_instance(self):
-        """testing if the sequences_lead attribute is an instance of
-        ValidatedList
-        """
-        
-        self.assertIsInstance(self.test_user.sequences_lead, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_sequences_lead_attribute_elements_accepts_Project_only(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a Sequence object to the sequence_lead list
@@ -1687,12 +1657,10 @@ class UserTest(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_tasks_attribute_None(self):
-        """testing if the tasks attribute will be an empty list when it is set
-        to None
+        """testing if a TypeError will be raised when the tasks attribute is
+        set to None
         """
-        
-        self.test_user.tasks = None
-        self.assertEqual(self.test_user.tasks, [])
+        self.assertRaises(TypeError, setattr, self.test_user, "tasks", None)
     
     
     
@@ -1770,15 +1738,6 @@ class UserTest(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_tasks_attribute_is_a_ValidatedList_instance(self):
-        """testing if the tasks attribute is an instance of ValidatedList
-        """
-        
-        self.assertIsInstance(self.test_user.tasks, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_tasks_attribute_elements_accepts_Tasks_only(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a Task object to the tasks list
@@ -1788,14 +1747,6 @@ class UserTest(unittest.TestCase):
         self.assertRaises(
             TypeError,
             self.test_user.tasks.append,
-            0
-        )
-        
-        # __setitem__
-        self.assertRaises(
-            TypeError,
-            self.test_user.tasks.__setitem__,
-            0,
             0
         )
     
@@ -1932,12 +1883,12 @@ class UserTest(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of User class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of User class
+        #"""
         
-        self.assertTrue(User.plural_name, "Users")
+        #self.assertTrue(User.plural_name, "Users")
     
     
     

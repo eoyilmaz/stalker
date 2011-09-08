@@ -168,12 +168,12 @@ class NoteTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_plural_name(self):
-        """testing the plural name of Note class
-        """
+    ##----------------------------------------------------------------------
+    #def test_plural_name(self):
+        #"""testing the plural name of Note class
+        #"""
         
-        self.assertTrue(Note.plural_name, "Notes")
+        #self.assertTrue(Note.plural_name, "Notes")
     
     
     

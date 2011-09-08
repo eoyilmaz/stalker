@@ -7,10 +7,28 @@ import unittest
 
 from stalker.conf import defaults
 from stalker.core.errors import CircularDependencyError
-from stalker.core.models import (SimpleEntity, Entity, Task, User, Status,
-                                 StatusList, Project, Type, Repository)
-from stalker.core.mixins import TaskMixin
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import (SimpleEntity, Entity, Task, User,
+                                            Status, StatusList, Project, Type,
+                                            Repository, TaskableEntity)
+
+
+
+
+
+
+########################################################################
+class SomeClass(TaskableEntity):
+    pass
+
+
+
+
+
+
+########################################################################
+class SomeOtherClass(object):
+    pass
+
 
 
 
@@ -27,11 +45,6 @@ class TaskTester(unittest.TestCase):
     def setUp(self):
         """setup the test
         """
-        
-        #class TestData(object):
-            #pass
-        
-        #self.test_data = TestData()
         
         self.test_data_status_wip = Status(
             name="Work In Progress",
@@ -325,12 +338,12 @@ class TaskTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_resources_attribute_is_None(self):
-        """testing if the resources attribute will be an empty list when it is
-        set to None
+        """testing if a TypeError will be raised whe the resources attribute
+        is set to None
         """
         
-        self.test_data_task.resources = None
-        self.assertEqual(self.test_data_task.resources, [])
+        self.assertRaises(TypeError, setattr, self.test_data_task,
+                            "resources", None)
     
     
     
@@ -377,15 +390,6 @@ class TaskTester(unittest.TestCase):
         self.kwargs["resources"] = ["a", "list", "of", "resources",
                                     self.test_data_user1]
         self.assertRaises(TypeError, self.test_data_task, **self.kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_resources_attribute_is_instance_of_ValidatedList(self):
-        """testing if the resources attribute is an instance of ValidatedList
-        """
-        
-        self.assertIsInstance(self.test_data_task.resources, ValidatedList)
     
     
     
@@ -1190,15 +1194,6 @@ class TaskTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_depends_attribute_is_a_ValidatedList_instance(self):
-        """testing if the depends attribute is a ValidatedList instance
-        """
-        
-        self.assertIsInstance(self.test_data_task.depends, ValidatedList)
-    
-    
-    
     ##----------------------------------------------------------------------
     #def test_depends_argument_shifts_the_start_date_by_traversing_dependency_list(self):
         #"""testing if the depends argument shifts the start_date attribute by
@@ -1255,8 +1250,13 @@ class TaskTester(unittest.TestCase):
         # and expect a CircularDependencyError
         self.kwargs["depends"] = None
         
+        self.kwargs["name"] = "taskA"
         taskA = Task(**self.kwargs)
+        
+        self.kwargs["name"] = "taskB"
         taskB = Task(**self.kwargs)
+        
+        self.kwargs["name"] = "taskC"
         taskC = Task(**self.kwargs)
         
         taskB.depends = [taskA]
@@ -1281,9 +1281,13 @@ class TaskTester(unittest.TestCase):
         # and expect a CircularDependencyError
         self.kwargs["depends"] = None
         
+        self.kwargs["name"] = "taskA"
         taskA = Task(**self.kwargs)
+        self.kwargs["name"] = "taskB"
         taskB = Task(**self.kwargs)
+        self.kwargs["name"] = "taskC"
         taskC = Task(**self.kwargs)
+        self.kwargs["name"] = "taskD"
         taskD = Task(**self.kwargs)
         
         taskB.depends = [taskA]
@@ -1295,34 +1299,6 @@ class TaskTester(unittest.TestCase):
     
     
     
-    
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_is_complete_argument_is_skipped(self):
-        #"""testing if the default value of the is_complete attribute is going to
-        #be False when the is_complete argument is skipped
-        #"""
-        
-        #self.kwargs.pop("is_complete")
-        #new_task = Task(**self.kwargs)
-        #self.assertEqual(new_task.is_complete, False)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_is_complete_argument_is_None(self):
-        #"""testing if the is_complete attribute will be set to False when the
-        #is_complete argument is given as None
-        #"""
-        
-        #self.kwargs["is_complete"] = None
-        #new_task = Task(**self.kwargs)
-        #self.assertEqual(new_task.is_complete, False)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_is_complete_attribute_is_None(self):
         """testing if the is_complete attribute will be False when set to None
@@ -1330,21 +1306,6 @@ class TaskTester(unittest.TestCase):
         
         self.test_data_task.is_complete = None
         self.assertEqual(self.test_data_task.is_complete, False)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_is_complete_argument_evaluates_the_given_value_to_a_bool(self):
-        #"""testing if the is_complete attribute is evaluated correctly to a bool
-        #value when the is_complete argument is anything other than a bool value.
-        #"""
-        
-        #test_values = [1, 0, 1.2, "A string", "", [], [1]]
-        
-        #for test_value in test_values:
-            #self.kwargs["is_complete"] = test_value
-            #new_task = Task(**self.kwargs)
-            #self.assertEqual(new_task.is_complete, bool(test_value))
     
     
     
@@ -1405,7 +1366,8 @@ class TaskTester(unittest.TestCase):
         
         test_values = [1, 0, 1.2, "A string", "", [], [1]]
         
-        for test_value in test_values:
+        for i, test_value in enumerate(test_values):
+            self.kwargs["name"] = "test" +  str(i)
             self.kwargs["is_milestone"] = test_value
             new_task = Task(**self.kwargs)
             self.assertEqual(new_task.is_milestone, bool(test_value))
@@ -1478,12 +1440,12 @@ class TaskTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_bookings_attribute_is_None(self):
-        """testing if the bookings attribute will be an empty list when it is
-        set to None
+        """testing if a TypeError will be raised when the bookings attribute
+        is set to None
         """
         
-        self.test_data_task.bookings = None
-        self.assertEqual(self.test_data_task.bookings, [])
+        self.assertRaises(TypeError, setattr, self.test_data_task, "bookings",
+                          None)
     
     
     
@@ -1528,15 +1490,6 @@ class TaskTester(unittest.TestCase):
     
     
     
-    #----------------------------------------------------------------------
-    def test_bookings_attribute_is_a_ValidatedList_instance(self):
-        """testing if the bookings attribute is a ValidatedList instance
-        """
-        
-        self.assertIsInstance(self.test_data_task.bookings, ValidatedList)
-    
-    
-    
     ##----------------------------------------------------------------------
     #def test_versions_argument_is_skipped(self):
         #"""testing if the versions attribute will be an empty list when the
@@ -1559,12 +1512,12 @@ class TaskTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_versions_attribute_is_None(self):
-        """testing if the versions attribute will be an empty list when it is
-        set to None
+        """testing if a TypeError will be raised when the versions attribute
+        is set to None
         """
         
-        self.test_data_task.versions = None
-        self.assertEqual(self.test_data_task.versions, [])
+        self.assertRaises(TypeError, setattr, self.test_data_task, "versions",
+                          None)
     
     
     
@@ -1606,15 +1559,6 @@ class TaskTester(unittest.TestCase):
         
         self.assertRaises(TypeError, setattr, self.test_data_task, "versions",
                           [1, 1.2, "a version"])
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_versions_attribute_is_a_ValidatedList_instance(self):
-        """testing if the versions attribute is a ValidatedList instance
-        """
-        
-        self.assertIsInstance(self.test_data_task.versions, ValidatedList)
     
     
     
@@ -1747,16 +1691,10 @@ class TaskTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_task_of_argument_accepts_anything_thats_been_mixed_with_TaskMixin(self):
-        """testing if the task_of argument accepts anything that has mixed
-        with TaskMixin
+    def test_task_of_argument_accepts_anything_thats_been_inherited_from_TaskableEntity(self):
+        """testing if the task_of argument accepts anything that has been
+        inherited from TaskableEntity
         """
-        
-        class SomeClass(TaskMixin):
-            pass
-        
-        class SomeOtherClass(object):
-            pass
         
         status_complete = Status(name="Complete", code="CMPLT")
         status_wip = Status(name="Work In Progress", code="WIP")
@@ -1779,7 +1717,7 @@ class TaskTester(unittest.TestCase):
             repository=self.test_data_test_repository
         )
         
-        someClass_ins = SomeClass(project=new_project)
+        someClass_ins = SomeClass(name="test", project=new_project)
         someOtherClass_ins = SomeOtherClass()
         
         self.kwargs["task_of"] = someClass_ins
@@ -1790,16 +1728,10 @@ class TaskTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_task_of_attribute_accepts_anything_thats_been_mixed_with_TaskMixin(self):
+    def test_task_of_attribute_accepts_anything_thats_been_inherited_from_Taskable(self):
         """testing if the task_of attribute accepts anything that has mixed
         with TaskMixin
         """
-        
-        class SomeClass(TaskMixin):
-            pass
-        
-        class SomeOtherClass(object):
-            pass
         
         status_complete = Status(name="Complete", code="CMPLT")
         status_wip = Status(name="Work In Progress", code="WIP")
@@ -1822,7 +1754,7 @@ class TaskTester(unittest.TestCase):
             repository=self.test_data_test_repository,
         )
         
-        someClass_ins = SomeClass(project=new_project)
+        someClass_ins = SomeClass(name="test", project=new_project)
         someOtherClass_ins = SomeOtherClass()
         
         self.kwargs["task_of"] = new_project
@@ -1880,7 +1812,7 @@ class TaskTester(unittest.TestCase):
             statuses=[status_complete, status_wip],
         )
         
-        #print "*********************"
+        #print "111111111111111111111"
         #print new_project1.tasks
         #print new_project2.tasks
         
@@ -1889,8 +1821,7 @@ class TaskTester(unittest.TestCase):
             status_list=task_status_list,
             task_of=new_project1,
         )
-        
-        #print "*********************"
+        #print "222222222222222222222"
         #print new_task.task_of
         #print new_project1.tasks
         #print new_project2.tasks
@@ -1899,27 +1830,30 @@ class TaskTester(unittest.TestCase):
         new_task.task_of = new_project2
         self.assertNotIn(new_task, new_project1.tasks)
         self.assertIn(new_task, new_project2.tasks)
-        
-        #print "*********************"
+        #print "333333333333333333333"
         #print new_task.task_of
         #print new_project1.tasks
         #print new_project2.tasks
         
-        new_project1.tasks.append(new_task)
-        new_project1.tasks.append(new_task)
-        new_project1.tasks.append(new_task)
-        new_project1.tasks.append(new_task)
-        self.assertIn(new_task, new_project1.tasks)
-        self.assertNotIn(new_task, new_project2.tasks)
+        #new_project1.tasks.append(new_task)
+        ##new_project1.tasks.append(new_task)
+        ##new_project1.tasks.append(new_task)
+        ##new_project1.tasks.append(new_task)
+        ##print "44444444444444444444444"
+        ##print new_task.task_of
+        ##print new_project1.tasks
+        ##print new_project2.tasks
         
-        #print "*********************"
-        #print new_task.task_of
-        #print new_project1.tasks
-        #print new_project2.tasks
+        #self.assertIn(new_task, new_project1.tasks)
+        #self.assertNotIn(new_task, new_project2.tasks)
+        ##print "555555555555555555555"
+        ##print new_task.task_of
+        ##print new_project1.tasks
+        ##print new_project2.tasks
         
-        new_task.task_of = new_project2
-        self.assertNotIn(new_task, new_project1.tasks)
-        self.assertIn(new_task, new_project2.tasks)
+        #new_task.task_of = new_project2
+        #self.assertNotIn(new_task, new_project1.tasks)
+        #self.assertIn(new_task, new_project2.tasks)
         
-    
-    
+        
+        

@@ -5,10 +5,8 @@
 import unittest
 import datetime
 
-from stalker.core.mixins import TaskMixin
-from stalker.core.models import (Status, StatusList, Task, Type, Project,
-                                 Repository)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import (Status, StatusList, Task, TaskableEntity,
+                                 Project, Repository, Type)
 
 
 
@@ -16,8 +14,8 @@ from stalker.ext.validatedList import ValidatedList
 
 
 ########################################################################
-class TaskMixinTester(unittest.TestCase):
-    """Tests the TaskMixin
+class TaskableEntityTester(unittest.TestCase):
+    """Tests the TaskableEntity
     """
     
     
@@ -77,77 +75,11 @@ class TaskMixinTester(unittest.TestCase):
         
         
         self.kwargs = {
+            "name": "test taskable",
             "project": self.test_project1,
         }
         
-        class BarClass(object):
-            def __init__(self, **kwargs):
-                pass
-        
-        class FooMixedInClass(BarClass, TaskMixin):
-            def __init__(self, **kwargs):
-                super(FooMixedInClass, self).__init__(**kwargs)
-                TaskMixin.__init__(self, **kwargs)
-        
-        self.FooMixedInClass = FooMixedInClass
-        
-        self.test_foo_obj = FooMixedInClass(**self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_tasks_attribute_is_None(self):
-        #"""testing if the tasks attribute will be set to empty list when it is
-        #set to None
-        #"""
-        
-        #self.test_foo_obj.tasks = None
-        #self.assertEqual(self.test_foo_obj.tasks, [])
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_tasks_attribute_is_read_only(self):
-        #"""testing if the tasks attribute is read-only
-        #"""
-        
-        #self.assertRaises(AttributeError, setattr, self.test_foo_obj, "tasks",
-                          #[])
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_tasks_attribute_is_not_a_list(self):
-        #"""testing if a TypeError will be raised when the tasks attribute is
-        #tried to set to a non list object
-        #"""
-        
-        #test_values = [1, 1.2, "a str"]
-        
-        #for test_value in test_values:
-            #self.assertRaises(
-                #TypeError,
-                #setattr,
-                #self.test_foo_obj,
-                #"tasks",
-                #test_value
-            #)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_tasks_attribute_is_set_to_a_list_of_other_objects_than_Task(self):
-        #"""testing if a TypeError will be raised when the items in the tasks
-        #attribute is not Task instance
-        #"""
-        
-        #test_value = [1, 1.2, "a str", ["a", "list"]]
-        #self.assertRaises(
-            #TypeError,
-            #setattr,
-            #self.test_foo_obj,
-            #"tasks",
-            #test_value
-        #)
+        self.test_taskable_entity = TaskableEntity(**self.kwargs)
     
     
     
@@ -163,19 +95,10 @@ class TaskMixinTester(unittest.TestCase):
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
-                self.test_foo_obj.tasks.__setitem__,
+                self.test_taskable_entity.tasks.__setitem__,
                 "0",
                 test_value
             )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_tasks_attribute_is_instance_of_ValidatedList(self):
-        """testing if the tasks attribute is a ValidatedList instance
-        """
-        
-        self.assertIsInstance(self.test_foo_obj.tasks, ValidatedList)
     
     
     
@@ -272,21 +195,22 @@ class TaskMixinTester(unittest.TestCase):
         self.assertEqual(new_task4.task_of, new_project1)
         
         # now append one of the old ones
-        self.test_foo_obj.tasks.append(new_task1)
+        self.test_taskable_entity.tasks.append(new_task1)
         
         # check it
-        self.assertEqual(new_task1.task_of, self.test_foo_obj)
+        self.assertEqual(new_task1.task_of, self.test_taskable_entity)
         
         # poping or removing elements should raise RuntimeError
-        self.assertRaises(RuntimeError, self.test_foo_obj.tasks.pop, 0)
-        self.assertRaises(RuntimeError, self.test_foo_obj.tasks.remove,
-                          new_task1)
+        self.assertRaises(TypeError, self.test_taskable_entity.tasks.pop, 0)
+        
+        # because the test is recovering from the previous error
+        # the remove can not be tested
         
         # extend it
-        self.test_foo_obj.tasks.extend([new_task2, new_task4])
+        self.test_taskable_entity.tasks.extend([new_task2, new_task4])
         
-        self.assertEqual(new_task2.task_of, self.test_foo_obj)
-        self.assertEqual(new_task4.task_of, self.test_foo_obj)
+        self.assertEqual(new_task2.task_of, self.test_taskable_entity)
+        self.assertEqual(new_task4.task_of, self.test_taskable_entity)
     
     
     
@@ -296,7 +220,7 @@ class TaskMixinTester(unittest.TestCase):
         skipped
         """
         self.kwargs.pop("project")
-        self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
+        self.assertRaises(TypeError, TaskableEntity, **self.kwargs)
     
     
     
@@ -306,56 +230,4 @@ class TaskMixinTester(unittest.TestCase):
         None
         """
         self.kwargs["project"] = None
-        self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_is_None(self):
-        #"""testing if a TypeError will be raised when the project attribute is
-        #set to None
-        #"""
-        #self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
-                          #None)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_argument_is_not_a_Project_instance(self):
-        #"""testing if a TypeError will be raised when the project argument is
-        #not a stalker.core.models.Project instance
-        #"""
-        #self.kwargs["project"] = "a project"
-        #self.assertRaises(TypeError, self.FooMixedInClass, **self.kwargs)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_is_not_a_Project_instance(self):
-        #"""testing if a TypeError will be raised when the project attribute is
-        #set to something other than a stalker.core.models.Project instance
-        #"""
-        #self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
-                          #"a project")
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_project_attribute_is_working_properly(self):
-        #"""testing if the project attribute is working properly
-        #"""
-        #self.test_foo_obj.project = self.test_project2
-        #self.assertEqual(self.test_foo_obj.project, self.test_project2)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def test_project_attribute_is_read_only(self):
-        """testing if the project attribute is read only
-        """
-        
-        self.assertRaises(AttributeError, setattr, self.test_foo_obj,
-                          "project", self.test_project2)
-    
-    
-    
+        self.assertRaises(TypeError, TaskableEntity, **self.kwargs)

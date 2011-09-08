@@ -5,12 +5,15 @@
 import unittest
 import datetime
 
-from stalker.core.mixins import ReferenceMixin
-from stalker.core.models import (SimpleEntity, Entity, Link, Type)
-from stalker.ext.validatedList import ValidatedList
+from stalker.core.models import (SimpleEntity, Entity, Link, Type,
+                                 ReferenceMixin)
 
 
 
+# create a SimpleEntitty and mix it with the ReferenceMixin
+class RefMixFooClass(SimpleEntity, ReferenceMixin):
+    pass
+    
 
 
 
@@ -76,11 +79,7 @@ class ReferenceMixinTester(unittest.TestCase):
             self.test_link4,
         ]
         
-        # create a SimpleEntitty and mix it with the ReferenceMixin
-        class Foo(SimpleEntity, ReferenceMixin):
-            pass
-        
-        self.test_foo_obj = Foo(name="Ref Mixin Test")
+        self.test_foo_obj = RefMixFooClass(name="Ref Mixin Test")
     
     
     
@@ -151,15 +150,6 @@ class ReferenceMixinTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_references_attribute_is_a_ValidatedList_instance(self):
-        """testing if the references attribute is an instance of ValidatedList
-        """
-        
-        self.assertIsInstance(self.test_foo_obj.references, ValidatedList)
-    
-    
-    
-    #----------------------------------------------------------------------
     def test_references_attribute_elements_accepts_Entity_only(self):
         """testing if a TypeError will be raised when trying to assign
         something other than an instance of Entity or its derived classes to
@@ -170,14 +160,6 @@ class ReferenceMixinTester(unittest.TestCase):
         self.assertRaises(
             TypeError,
             self.test_foo_obj.references.append,
-            0
-        )
-        
-        # __setitem__
-        self.assertRaises(
-            TypeError,
-            self.test_foo_obj.references.__setitem__,
-            0,
             0
         )
     
