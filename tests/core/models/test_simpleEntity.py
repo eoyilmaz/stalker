@@ -287,12 +287,12 @@ class SimpleEntityTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_name_argument_init_as_None_and_also_the_code_is_None(self):
-        """testing if TypeError is raised for None name argument
+        """testing if ValueError is raised for None name argument
         """
         
         self.kwargs["name"] = None
         self.kwargs["code"] = None
-        self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
+        self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
     
     
     
@@ -309,12 +309,12 @@ class SimpleEntityTester(unittest.TestCase):
     
     #----------------------------------------------------------------------
     def test_name_argument_init_as_empty_string_and_also_the_code_is_None(self):
-        """testing if TypeError is raised for None name argument
+        """testing if ValueError is raised for None name argument
         """
         
         self.kwargs["name"] = ""
         self.kwargs["code"] = None
-        self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
+        self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
     
     
     

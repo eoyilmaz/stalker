@@ -18,6 +18,8 @@ v01.2.a2
    mappers and tables inside, the ``stalker.db.mapper``, ``stalker.db.tables``
    and the ``stalker.db.mixins`` modules are removed.
 
+ * Added the :class:`~stalker.core.models.Version` class with all its tests.
+
 v0.1.2.a1
 ----------
 

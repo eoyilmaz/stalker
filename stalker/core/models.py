@@ -81,11 +81,6 @@ class EntityMeta(type):
 
 
 
-
-
-
-
-
 ########################################################################
 class SimpleEntity(Base):
     """The base class of all the others
@@ -160,7 +155,7 @@ class SimpleEntity(Base):
       ([a-zA-z]) (not alphanumeric [a-zA-Z0-9]) letter and it should not
       contain any white space at the beginning and at the end of the string,
       giving an object the object will be converted to string and then the
-      resulting string will be conditioned.
+      resulting string will be formated.
     
     :param str description: A string or unicode attribute that holds the
       description of this entity object, it could be an empty string, and it
@@ -385,14 +380,14 @@ class SimpleEntity(Base):
         if name is None:
             raise TypeError("the name couldn't be set to None")
         
-        name = self._condition_name(str(name))
+        name = self._format_name(str(name))
         
         # it is empty
         if name == "":
             raise ValueError("the name couldn't be an empty string")
         
         # also set the nice_name
-        self._nice_name = self._condition_nice_name(name)
+        self._nice_name = self._format_nice_name(name)
         
         ## set the code
         #self.code = name_in
@@ -402,13 +397,13 @@ class SimpleEntity(Base):
     
     
     #----------------------------------------------------------------------
-    def _condition_code(self, code_in):
+    def _format_code(self, code_in):
         """formats the given code_in value
         """
         
         # just set it to the uppercase of what nice_name gives
         # remove unnecesary characters from the string
-        code_in = self._condition_name(str(code_in))
+        code_in = self._format_name(str(code_in))
         
         # replace camel case letters
         #code_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", code_in)
@@ -424,8 +419,8 @@ class SimpleEntity(Base):
     
     
     #----------------------------------------------------------------------
-    def _condition_name(self, name_in):
-        """conditions the name_in value
+    def _format_name(self, name_in):
+        """formats the name_in value
         """
         
         # remove unnecesary characters from the string
@@ -439,12 +434,12 @@ class SimpleEntity(Base):
     
     
     #----------------------------------------------------------------------
-    def _condition_nice_name(self, nice_name_in):
-        """conditions the given nice name
+    def _format_nice_name(self, nice_name_in):
+        """formats the given nice name
         """
         
         # remove unnecesary characters from the string
-        nice_name_in = self._condition_name(str(nice_name_in))
+        nice_name_in = self._format_name(str(nice_name_in))
         
         # replace camel case letters
         nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
@@ -478,7 +473,7 @@ class SimpleEntity(Base):
         
         # also set the nice_name
         if self._nice_name is None or self._nice_name == "":
-            self._nice_name = self._condition_nice_name(self.name)
+            self._nice_name = self._format_nice_name(self.name)
         
         return self._nice_name
     
@@ -496,7 +491,7 @@ class SimpleEntity(Base):
             #code_in = self.nice_name.upper()
             code_in = self.nice_name
         
-        return self._condition_code(str(code_in))
+        return self._format_code(str(code_in))
     
     
     
@@ -1537,7 +1532,7 @@ class Review(Entity):
     
     __tablename__ = "Reviews"
     __mapper_args__ = {"polymorphic_identity": "Review"}
-    review_id = Column("id", ForeignKey("SimpleEntities.id"),
+    review_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                        primary_key=True)
     body = Column(
         String,
@@ -2899,7 +2894,7 @@ class User(Entity):
         name = self._format_login_name(name)
         
         # also set the nice_name
-        self._nice_name = self._condition_nice_name(name)
+        self._nice_name = self._format_nice_name(name)
         
         # and also the code
         self.code = name
@@ -3065,7 +3060,7 @@ class User(Entity):
     
     
     #----------------------------------------------------------------------
-    def _condition_name(self, name):
+    def _format_name(self, name):
         """formats the given name
         """
         
@@ -3862,7 +3857,8 @@ class Message(Entity, StatusMixin):
     
     __tablename__ = "Messages"
     __mapper_args__ = {"polymorphic_identity": "Message"}
-    message_id = Column("id", ForeignKey("Entities.id"), primary_key=True)
+    message_id = Column("id", Integer, ForeignKey("Entities.id"),
+                        primary_key=True)
     
     
     #----------------------------------------------------------------------
@@ -5334,7 +5330,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         #if code_in == "":
             #raise ValueError("the code can not be empty string")
         
-        #return self._condition_code(str(code_in))
+        #return self._format_code(str(code_in))
     
     
     
@@ -5660,7 +5656,8 @@ class Version(Entity, StatusMixin):
     :param str take: A short string holding the current take name. Can be
       any alphanumeric value (a-zA-Z0-9\_). The default is the string "Main".
       When skipped or given as None or an empty string then it will use the
-      default value.
+      default value. It can not start with a number. It can not have white
+      spaces.
     
     :param int version: An integer value showing the current version number.
       The default is "1". If skipped or given as zero or as a negative value a
@@ -5703,15 +5700,49 @@ class Version(Entity, StatusMixin):
     __tablename__ = "Versions"
     __mapper_args__ = {"polymorphic_identity": "Version"}
     
-    version_id = Column("id", ForeignKey("Entities.id"), primary_key=True)
+    version_id = Column("id", Integer, ForeignKey("Entities.id"),
+                        primary_key=True)
+    version_of_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
+    version_of = relationship(
+        "Task",
+        primaryjoin="Versions.c.version_of_id==Tasks.c.id",
+        doc="""The :class:`~stalker.core.models.Task` instance that this Version is created for.
+        """,
+        uselist=False,
+        back_populates="versions",
+    )
+    
+    take = Column(String(256), default="MAIN")
+    version = Column(Integer)
+    
+    source_id = Column(Integer, ForeignKey("Links.id"))
+    source = relationship(
+        "Link",
+        primaryjoin="Versions.c.source_id==Links.c.id",
+        uselist=False
+    )
+    
+    outputs = relationship(
+        "Link",
+        secondary="Version_Outputs",
+        primaryjoin="Versions.c.id==Version_Outputs.c.version_id",
+        secondaryjoin="Version_Outputs.c.link_id==Links.c.id",
+        doc="""The outputs of the current version.
+        
+        It is a list of :class:`~stalker.core.models.Link` instances.
+        """
+    )
+    
+    published = Column(Boolean, default=False)
     
     
     
     #----------------------------------------------------------------------
     def __init__(self,
-                 take="MAIN",
-                 version=1,
-                 source_file=None,
+                 version_of=None,
+                 take=defaults.DEFAULT_VERSION_TAKE_NAME,
+                 version=None,
+                 source=None,
                  outputs=None,
                  task=None,
                  **kwargs):
@@ -5719,6 +5750,118 @@ class Version(Entity, StatusMixin):
         # call supers __init__
         super(Version, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
+        
+        self.take = take
+        self.source = source
+        self.version = version
+        self.version_of = version_of
+        
+        if outputs is None:
+            outputs = []
+        
+        self.outputs = outputs
+        
+        # set published to False by default
+        self.published = False
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("source")
+    def _validate_source(self, key, source):
+        """validates the given source value
+        """
+        
+        if not source is None:
+            if not isinstance(source, Link):
+                raise TypeError("Version.source attribute should be a "
+                                "stalker.core.models.Link instance, not %s" \
+                                % type(source))
+        
+        return source
+    
+    
+    
+    #----------------------------------------------------------------------
+    def _format_take(self, take):
+        """formats the given take value
+        """
+        
+        # remove unnecessary characters
+        take = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", take).strip().replace(" ","")
+        
+        return re.sub(r"(.+?[^a-zA-Z]+)([a-zA-Z0-9\s_\-]+)", r"\2", take)
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("take")
+    def _validate_take(self, key, take):
+        """validates the given take value
+        """
+        
+        if take is None:
+            raise TypeError("Version.take can not be None, please give a "
+                            "proper string")
+        
+        take = self._format_take(str(take))
+        
+        if take=="":
+            raise ValueError("Version.take can not be an empty string")
+        
+        return take
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("version")
+    def _validate_version(self, key, version):
+        """validates the given version value
+        """
+        
+        if version is None:
+            raise TypeError("Version.version should be an int")
+        
+        if version <= 0:
+            raise ValueError("Version.version can not be zero or a negative "
+                             "number")
+        
+        return version
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("version_of")
+    def _validate_version_of(self, key, version_of):
+        """validates the given version_of value
+        """
+        
+        if version_of is None:
+            raise TypeError("Version.version_of can not be None")
+        
+        if not isinstance(version_of, Task):
+            raise TypeError("Version.version_of should be a "
+                            "stalker.core.models.Task instance")
+        
+        return version_of
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("outputs")
+    def _validate_outputs(self, key, output):
+        """validates the given output
+        """
+        
+        if not isinstance(output, Link):
+            raise TypeError("Version.outputs should be all "
+                            "stalker.core.models.Link instances")
+        
+        return output
+    
+    
+    
+    
     
     
     
@@ -5815,4 +5958,11 @@ Shot_Assets = Table(
     "Shot_Assets", Base.metadata,
     Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
     Column("asset_id", Integer, ForeignKey("Assets.id"), primary_key=True),
+)
+
+# VERSION_OUTPUTS
+Version_Outputs = Table(
+    "Version_Outputs", Base.metadata,
+    Column("version_id", Integer, ForeignKey("Versions.id"), primary_key=True),
+    Column("link_id", Integer, ForeignKey("Links.id"), primary_key=True),
 )

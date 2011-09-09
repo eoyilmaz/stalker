@@ -79,6 +79,18 @@ class VersionTester(unittest.TestCase):
             target_entity_type=Task,
         )
         
+        self.test_version_status_list = StatusList(
+            name="Version Status List",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type=Version,
+        )
+        
         # repository
         self.test_repo = Repository(
             name="Test Repository",
@@ -143,10 +155,12 @@ class VersionTester(unittest.TestCase):
         self.kwargs = {
             "name": "Version1",
             "take": "TestTake",
-            "source_file": self.test_source_link,
+            "source": self.test_source_link,
             "outputs": [self.test_output_link1,
                         self.test_output_link2,],
             "version_of": self.test_task1,
+            "status_list": self.test_version_status_list,
+            "version": 1,
         }
         
         # and the Version
@@ -171,35 +185,29 @@ class VersionTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_take_argument_is_None_defaults_to_default_value(self):
-        """testing if the take argument is None the take attribute is going to
-        be set to the default value which is
-        stalker.conf.defaults.DEFAULT_VERSION_TAKE_NAME
+    def test_take_argument_is_None(self):
+        """testing if a TypeError will be raised when the take argument is None
         """
         
         self.kwargs["take"] = None
-        new_version = Version(**self.kwargs)
-        self.assertEqual(new_version.take, defaults.DEFAULT_VERSION_TAKE_NAME)
+        self.assertRaises(TypeError, Version, **self.kwargs)
     
     
     
     #----------------------------------------------------------------------
-    def test_take_attribute_is_None_defaults_to_default_value(self):
-        """testing if the take attribute is set to None it is going to be set
-        to the default value which is
-        stalker.conf.defaults.DEFAULT_VERSION_TAKE_NAME
+    def test_take_attribute_is_None(self):
+        """testing if a TypeError will be raised when the take attribute is set
+        to None
         """
         
-        self.test_version.take = None
-        self.assertEqual(self.test_version.take,
-                         defaults.DEFAULT_VERSION_TAKE_NAME)
+        self.assertRaises(TypeError, setattr, self.test_version, "take", None)
     
     
     
     #----------------------------------------------------------------------
     def test_take_argument_is_empty_string(self):
-        """testing if a ValueError will be raised when the take argument is an
-        empty string
+        """testing if a ValueError will be raised when the take argument is
+        given as an empty string
         """
         
         self.kwargs["take"] = ""
@@ -225,9 +233,10 @@ class VersionTester(unittest.TestCase):
         
         test_values = [
             (1, "1"),
-            (1.2, "1.2"),
-            (["a list"], "a list"),
-            ({"a": "dict"}, "a dict")]        
+            (1.2, "12"),
+            (["a list"], "alist"),
+            ({"a": "dict"}, "adict")]
+        
         for test_value in test_values:
             self.kwargs["take"] = test_value[0]
             new_version = Version(**self.kwargs)
@@ -244,9 +253,9 @@ class VersionTester(unittest.TestCase):
         
         test_values = [
             (1, "1"),
-            (1.2, "1.2"),
-            (["a list"], "a list"),
-            ({"a": "dict"}, "a dict")]
+            (1.2, "12"),
+            (["a list"], "alist"),
+            ({"a": "dict"}, "adict")]
         
         for test_value in test_values:
             self.test_version.take = test_value[0]
@@ -325,7 +334,7 @@ class VersionTester(unittest.TestCase):
         set to 0
         """
         
-        self.fail("test is not implemented yet")
+        self.assertRaises(ValueError, setattr, self.test_version, "version", 0)
     
     
     
@@ -417,7 +426,8 @@ class VersionTester(unittest.TestCase):
         """testing if a TypeError will be raised when the version_of attribute
         is None
         """
-        self.assertRaises(TypeError, setattr, self.test_version, "task", None)
+        self.assertRaises(TypeError, setattr, self.test_version,
+                          "version_of", None)
     
     
     
@@ -438,7 +448,7 @@ class VersionTester(unittest.TestCase):
         is not a Task instance
         """
         
-        self.assertRaises(TypeError, setattr, self.test_version, "task",
+        self.assertRaises(TypeError, setattr, self.test_version, "version_of",
                           "a task")
     
     
@@ -461,19 +471,167 @@ class VersionTester(unittest.TestCase):
     
     
     
+    #----------------------------------------------------------------------
+    def test_source_argument_is_skipped(self):
+        """testing if the source will be None when the source argument is
+        skipped
+        """
+        
+        self.kwargs.pop("source")
+        new_version = Version(**self.kwargs)
+        self.assertIs(new_version.source, None)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_source_argument_is_None(self):
+        """testing if the source will be None when the source argument is None
+        """
+        
+        self.kwargs["source"] = None
+        new_version = Version(**self.kwargs)
+        self.assertIs(new_version.source, None)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_source_argument_is_not_a_Link_instance(self):
+        """testing if a TypeError will be raised when the source argument is
+        not a stalker.core.models.Link instance
+        """
+        
+        self.kwargs["source"] = 123123
+        self.assertRaises(TypeError, Version, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_source_attribute_is_not_a_Link_instance(self):
+        """testing if a TypeError will be raised when the source attribute is
+        set to something other than a Link instance
+        """
+        
+        self.assertRaises(TypeError, setattr, self.test_version, "source", 121)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_source_argument_is_working_properly(self):
+        """testing if the source argument is working properly
+        """
+        
+        new_source = Link(name="Test Link", path="none")
+        self.kwargs["source"] = new_source
+        new_version = Version(**self.kwargs)
+        self.assertEqual(new_version.source, new_source)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_source_attribute_is_working_properly(self):
+        """testing if the source attribute is working properly
+        """
+        new_source = Link(name="Test Link", path="empty string")
+        self.assertNotEqual(self.test_version.source, new_source)
+        self.test_version.source = new_source
+        self.assertEqual(self.test_version.source, new_source)
     
     
     
     
+    #----------------------------------------------------------------------
+    def test_outputs_argument_is_skipped(self):
+        """testing if the outputs attribute will be an empty list when the
+        outputs argument is skipped
+        """
+        
+        self.kwargs.pop("outputs")
+        new_version = Version(**self.kwargs)
+        self.assertEquals(new_version.outputs, [])
     
     
     
+    #----------------------------------------------------------------------
+    def test_outputs_argument_is_None(self):
+        """testing if the outputs attribute will be an empty list when the
+        outputs argument is None
+        """
+        
+        self.kwargs["outputs"] = None
+        new_version = Version(**self.kwargs)
+        self.assertEquals(new_version.outputs, [])
     
     
     
+    #----------------------------------------------------------------------
+    def test_outputs_attribute_is_None(self):
+        """testing if a TypeError will be raised when the outputs argument is
+        set to None
+        """
+        
+        self.assertRaises(TypeError, setattr, self.test_version, "outputs",
+                          None)
     
     
     
+    #----------------------------------------------------------------------
+    def test_outputs_argument_is_not_a_list_of_Link_instances(self):
+        """testing if a TypeError will be raised when the outputs attribute is
+        set to something other than a Link instance
+        """
+        test_value = [132, "231123"]
+        self.kwargs["outputs"] = test_value
+        self.assertRaises(TypeError, Version, **self.kwargs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_outputs_attribute_is_not_a_list_of_Link_instances(self):
+        """testing if a TypeError will be raised when the outputs attribute is
+        set to something other than a Link instance
+        """
+        test_value = [132, "231123"]
+        self.assertRaises(TypeError, setattr, self.test_version, "outputs",
+                          test_value)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_outputs_attribute_is_working_properly(self):
+        """testing if the outputs attribute is working properly
+        """
+        self.kwargs.pop("outputs")
+        new_version = Version(**self.kwargs)
+        
+        self.assertNotIn(self.test_output_link1, new_version.outputs)
+        self.assertNotIn(self.test_output_link2, new_version.outputs)
+        
+        new_version.outputs = [self.test_output_link1, self.test_output_link2]
+        
+        self.assertIn(self.test_output_link1, new_version.outputs)
+        self.assertIn(self.test_output_link2, new_version.outputs)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_published_attribute_is_False_by_default(self):
+        """tetsing if the published attribute is False by default
+        """
+        
+        self.assertEquals(self.test_version.published, False)
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_published_attribute_is_working_properly(self):
+        """testing if the published attribute is working properly
+        """
+        
+        self.test_version.published = True
+        self.assertEquals(self.test_version.published, True)
+        
+        self.test_version.published = False
+        self.assertEquals(self.test_version.published, False)
     
     
     
