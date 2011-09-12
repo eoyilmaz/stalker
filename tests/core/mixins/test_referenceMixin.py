@@ -1,10 +1,9 @@
 #-*- coding: utf-8 -*-
 
-
-
 import unittest
 import datetime
 
+from sqlalchemy import Column, Integer, ForeignKey
 from stalker.core.models import (SimpleEntity, Entity, Link, Type,
                                  ReferenceMixin)
 
@@ -12,8 +11,17 @@ from stalker.core.models import (SimpleEntity, Entity, Link, Type,
 
 # create a SimpleEntitty and mix it with the ReferenceMixin
 class RefMixFooClass(SimpleEntity, ReferenceMixin):
-    pass
+    __tablename__ = "RefMixFooClasses"
+    __mapper_args__ = {"polymorphic_identity": "RefMixFooClass"}
+    refMixFooClass_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+                             primary_key=True)
     
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(RefMixFooClass, self).__init__(**kwargs)
+
+
+
 
 
 

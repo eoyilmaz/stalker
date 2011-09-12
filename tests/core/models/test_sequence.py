@@ -423,61 +423,62 @@ class SequenceTester(unittest.TestCase):
         self.assertItemsEqual(new_sequence.tasks, tasks)
     
     
-    
-    #----------------------------------------------------------------------
-    def test_sequences_attribute_is_updated_in_the_project_instance(self):
-        """testing if the sequences attribute is updated in the Project
-        instance.
-        """
+    # UPDATE THIS: This test needs to be in the tests.db
+    # because the property it is testing is using db.query
+    ##----------------------------------------------------------------------
+    #def test_sequences_attribute_is_updated_in_the_project_instance(self):
+        #"""testing if the sequences attribute is updated in the Project
+        #instance.
+        #"""
         
-        status1 = Status(name="On Hold", code="OH")
+        #status1 = Status(name="On Hold", code="OH")
         
-        task_status_list = StatusList(
-            name="Task Statuses",
-            statuses=[status1],
-            target_entity_type=Task
-        )
+        #task_status_list = StatusList(
+            #name="Task Statuses",
+            #statuses=[status1],
+            #target_entity_type=Task
+        #)
         
-        project_status_list = StatusList(
-            name="Project Statuses", statuses=[status1],
-            target_entity_type=Project
-        )
+        #project_status_list = StatusList(
+            #name="Project Statuses", statuses=[status1],
+            #target_entity_type=Project
+        #)
         
-        project_type = Type(
-            name="Commercial",
-            target_entity_type=Project,
-        )
+        #project_type = Type(
+            #name="Commercial",
+            #target_entity_type=Project,
+        #)
         
-        new_project = Project(
-            name="Commercial",
-            status_list=project_status_list,
-            type=project_type,
-            repository=self.test_repository,
-        )
+        #new_project = Project(
+            #name="Commercial",
+            #status_list=project_status_list,
+            #type=project_type,
+            #repository=self.test_repository,
+        #)
         
-        self.kwargs["project"] = new_project
+        #self.kwargs["project"] = new_project
         
-        new_sequence = Sequence(**self.kwargs)
+        #new_sequence = Sequence(**self.kwargs)
         
-        task1 = Task(
-            name="Modeling",
-            status=0,
-            status_list=task_status_list,
-            project=new_project,
-            task_of=new_sequence,
-        )
+        #task1 = Task(
+            #name="Modeling",
+            #status=0,
+            #status_list=task_status_list,
+            #project=new_project,
+            #task_of=new_sequence,
+        #)
         
-        task2 = Task(
-            name="Lighting",
-            status=0,
-            status_list=task_status_list,
-            project=new_project,
-            task_of=new_sequence,
-        )
+        #task2 = Task(
+            #name="Lighting",
+            #status=0,
+            #status_list=task_status_list,
+            #project=new_project,
+            #task_of=new_sequence,
+        #)
         
-        tasks = [task1, task2]
+        #tasks = [task1, task2]
         
-        self.assertIn(new_sequence, new_project.sequences)
+        #self.assertIn(new_sequence, new_project.sequences)
     
     
     

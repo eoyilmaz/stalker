@@ -187,8 +187,8 @@ class StructureTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test___strictly_typed___is_True(self):
-        """testing if the __strictly_typed__ is True
+    def test___strictly_typed___is_False(self):
+        """testing if the __strictly_typed__ is False
         """
         
         self.assertTrue(Structure.__strictly_typed__, True)

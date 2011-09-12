@@ -77,8 +77,8 @@ def setup(database=None, mappers=None):
     db.session = Session()
     db.query = db.session.query
     
-    ## init database
-    #__init_db__()
+    # init database
+    __init_db__()
 
 
 
@@ -90,7 +90,7 @@ def __init_db__():
     if defaults.AUTO_CREATE_ADMIN:
         __create_admin__()
     
-    __fill_entity_types_table__()
+    #__fill_entity_types_table__()
 
 
 

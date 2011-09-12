@@ -10,6 +10,12 @@ from stalker.core.models import (SimpleEntity, Type, User)
 
 
 
+# create a new class deriving from the SimpleEntity
+class newClass(SimpleEntity):
+    __strictly_typed__ = True
+
+
+
 
 
 ########################################################################
@@ -913,9 +919,9 @@ class SimpleEntityTester(unittest.TestCase):
         argument defined
         """
         
-        # create a new class deriving from the SimpleEntity
-        class newClass(SimpleEntity):
-            __strictly_typed__ = True
+        ## create a new class deriving from the SimpleEntity
+        #class newClass(SimpleEntity):
+            #__strictly_typed__ = True
         
         self.assertEqual(newClass.__strictly_typed__, True)
         
@@ -935,9 +941,9 @@ class SimpleEntityTester(unittest.TestCase):
         is None
         """
         
-        # create a new class deriving from the SimpleEntity
-        class newClass(SimpleEntity):
-            __strictly_typed__ = True
+        ## create a new class deriving from the SimpleEntity
+        #class newClass(SimpleEntity):
+            #__strictly_typed__ = True
         
         # set it to None and expect a TypeError
         self.kwargs["type"] = None
@@ -952,9 +958,9 @@ class SimpleEntityTester(unittest.TestCase):
         is not a string
         """
         
-        # create a new class deriving from the SimpleEntity
-        class newClass(SimpleEntity):
-            __strictly_typed__ = True
+        ## create a new class deriving from the SimpleEntity
+        #class newClass(SimpleEntity):
+            #__strictly_typed__ = True
         
         test_values = [1, 1.2, ["a", "list"], {"a": "dict"}]
         

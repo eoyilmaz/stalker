@@ -2,8 +2,8 @@
 Stalker Changes
 ===============
 
-v01.2.a2
---------
+v0.1.2.a2
+---------
 
  * All the models are now converted to SQLAlchemy's Declarative.
  
@@ -19,6 +19,22 @@ v01.2.a2
    and the ``stalker.db.mixins`` modules are removed.
 
  * Added the :class:`~stalker.core.models.Version` class with all its tests.
+
+ * Fixed a couple of test setup for mixins.
+
+ * Fixed :attr:`~stalker.core.models.Project.assets` and
+   :attr:`~stalker.core.models.Project.sequences` attributes in
+   :class:`~stalker.core.models.Project` class. It is now using the
+   ``db.query`` to get the info out of the database, which is much easier than
+   setting up a complex relation.
+
+ * Fixed the tests for the database. It is now working properly with the SOM
+   which is using SQLAlchemy declarative. There are still missing tests though.
+
+ * The :class:`~stalker.core.models.Project` and
+   :class:`~stalker.core.models.Structure` classes are not
+   ``__strictly_typed__`` anymore. It was a bump on the road to make them
+   strictly typed.
 
 v0.1.2.a1
 ----------

@@ -6,12 +6,19 @@ import unittest
 import datetime
 import copy
 
+from sqlalchemy import Column, Integer, ForeignKey
 from stalker.conf import defaults
 from stalker.core.models import (SimpleEntity, Status, StatusList, StatusMixin)
 
 
-
 class StatMixClass(SimpleEntity, StatusMixin):
+    
+    __tablename__ = "StatMixClasses"
+    __mapper_args__ = {"polymorphic_identity": "StatMixClass"}
+    StatMixClass_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+                  primary_key=True)
+    
+    
     def __init__(self, **kwargs):
         super(StatMixClass, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)

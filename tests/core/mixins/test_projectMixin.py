@@ -5,12 +5,19 @@
 import unittest
 import datetime
 
+from sqlalchemy import Column, Integer, ForeignKey
 from stalker.core.models import (Status, StatusList, Type, Project, Repository,
                                  SimpleEntity, ProjectMixin)
 
 
 
 class ProjMixClass(SimpleEntity, ProjectMixin):
+    
+    __tablename__ = "ProjMixClasses"
+    __mapper_args__ = {"polymorphic_identity": "ProjMixClass"}
+    projMixClass_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+                             primary_key=True)
+    
     def __init__(self, **kwargs):
         super(ProjMixClass, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)

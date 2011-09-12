@@ -48,7 +48,7 @@ def Property(func):
     locals_ = func()
     
     # update the docs with the func doc
-    if not func.__doc__ is None:
+    if func.__doc__ is not None:
         #print "updating the doc ('%s')for %s with %s" % \
               #(locals_["doc"], func.__name__, func.__doc__)
         locals_.update({"doc": func.__doc__})

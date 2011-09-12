@@ -4,14 +4,9 @@ import unittest
 
 from stalker.core.models import (SimpleEntity, Project, Type, Status,
                                  StatusList, Repository, ProjectMixin)
-from sqlalchemy import (
-    Column,
-    Boolean,
-    Integer,
-    Float,
-    String,
-    ForeignKey,
-)
+from sqlalchemy import Column, Integer, ForeignKey
+
+
 
 # create a new mixed in SimpleEntity
 class DeclProjMixA(SimpleEntity, ProjectMixin):

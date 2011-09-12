@@ -8,6 +8,7 @@ import uuid
 from sqlalchemy import orm
 from sqlalchemy.orm import relationship, synonym, validates
 from sqlalchemy import (
+    join,
     Table,
     Column,
     Boolean,
@@ -203,21 +204,25 @@ class SimpleEntity(Base):
     __tablename__ = "SimpleEntities"
     id = Column("id", Integer, primary_key=True)
     
-    entity_type = Column("db_entity_type", String(128), nullable=False)
+    #entity_type = Column("db_entity_type", String(128), nullable=False)
+    entity_type = Column(String(128), nullable=False)
     __mapper_args__ = {
         "polymorphic_on": entity_type,
         "polymorphic_identity": "SimpleEntity",
     }
     
-    code = Column(String(256), nullable=False,
-                  doc="""The code name of this object.
+    code = Column(
+        String(256),
+        nullable=False,
+        doc="""The code name of this object.
         
         It accepts string or unicode values and any other kind of objects will
         be converted to string. In any update to the name attribute the code
         also will be updated. If the code is not initialized or given as None,
         it will be set to the uppercase version of the nice_name attribute.
         Setting the code attribute to None will reset it to the default value.
-        The default value is the upper case form of the nice_name.""")
+        The default value is the upper case form of the nice_name."""
+    )
     
     name = Column(
         String(256),
@@ -580,7 +585,7 @@ class SimpleEntity(Base):
         raise_error = False
         
         if not self.__strictly_typed__:
-            if not type_in is None:
+            if type_in is not None:
                 if not isinstance(type_in, Type):
                     raise_error = True
         else:
@@ -950,7 +955,7 @@ class Status(Entity):
 class StatusList(Entity):
     """Type specific list of :class:`~stalker.core.models.Status` instances.
     
-    Holds multiple :class:`~stalker.core.models.Status`es to be used as a
+    Holds multiple :class:`~stalker.core.models.Status`\ es to be used as a
     choice list for several other classes.
     
     A StatusList can only be assigned to only one entity type. So a
@@ -1270,7 +1275,7 @@ class ImageFormat(Entity):
         """
         
         self._device_aspect = None
-        self._update_device_aspect()
+        #self._update_device_aspect()
         
         # call supers __init_on_load__
         super(ImageFormat, self).__init_on_load__()
@@ -1585,7 +1590,7 @@ class Review(Entity):
         """
         
         if to is None:
-            if not self.to is None:
+            if self.to is not None:
                 raise RuntimeError(
                     "The review can not be removed from the owner Entity "
                     "objects `reviews` attribute. If you want to remove the "
@@ -2060,6 +2065,7 @@ Character assets",
     
     
     __tablename__ =  "FilenameTemplates"
+    __mapper_args__ = {"polymorphic_identity": "FilenameTemplate"}
     filenameTemplate_id = Column( "id", Integer,ForeignKey("Entities.id"),
                                   primary_key=True)
     _target_entity_type = Column("target_entity_type", String)
@@ -2349,7 +2355,7 @@ class Structure(Entity):
     
     
     
-    __strictly_typed__ = True
+    #__strictly_typed__ = True
     
     __tablename__ = "Structures"
     __mapper_args__ = {"polymorphic_identity": "Structure"}
@@ -3246,6 +3252,12 @@ class ReferenceMixin(object):
     """
     
     
+    
+    # add this lines for Sphinx
+    #__tablename__ = ""
+    
+    
+    
     #----------------------------------------------------------------------
     def __init__(self,
                  references=None,
@@ -3373,7 +3385,7 @@ class StatusMixin(object):
             "status_list_id",
             Integer,
             ForeignKey("StatusLists.id"),
-            nullable=False
+            nullable=False,
         )
     
     
@@ -3384,7 +3396,8 @@ class StatusMixin(object):
         return relationship(
             "StatusList",
             primaryjoin=\
-                "%s.status_list_id==StatusList.statusList_id" % cls.__name__
+                "%s.status_list_id==StatusList.statusList_id" % cls.__name__,
+            #post_update=True,
         )
     
     
@@ -3536,6 +3549,11 @@ class ScheduleMixin(object):
     
     
     
+    # add this lines for Sphinx
+    #__tablename__ = ""
+    
+    
+    
     #----------------------------------------------------------------------
     def __init__(self,
                  start_date=None,
@@ -3652,7 +3670,7 @@ class ScheduleMixin(object):
     #----------------------------------------------------------------------
     def _duration_setter(self, duration_in):
         
-        if not duration_in is None:
+        if duration_in is not None:
             if isinstance(duration_in, datetime.timedelta):
                 # set the due_date to None
                 # to make it recalculated
@@ -3750,6 +3768,11 @@ class ProjectMixin(object):
     
     
     
+    # add this lines for Sphinx
+    #__tablename__ = ""
+    
+    
+    
     #----------------------------------------------------------------------
     @declared_attr
     def project_id(cls):
@@ -3757,6 +3780,7 @@ class ProjectMixin(object):
             "project_id",
             Integer,
             ForeignKey("Projects.id", use_alter=True, name="project_x_id"),
+            #ForeignKey("Projects.id"),
             # cannot use nullable cause a Project object needs
             # insert itself as the project and it needs post_update
             # thus nullable should be True
@@ -3768,12 +3792,33 @@ class ProjectMixin(object):
     #----------------------------------------------------------------------
     @declared_attr
     def project(cls):
+        
+        backref = cls.__tablename__.lower()
+        doc = """The :class:`~stalker.core.models.Project` instance that this object belongs to.
+        """
+        
+        #print cls
+        #print cls.__name__
+        #print cls.__tablename__
+        #print cls.__mapper_args__
+        
+        #if hasattr(cls, "__project_backref_attrname__"):
+            #print "it has a __project_backref_attrname__ attribute"
+            #backref = cls.__project_backref_attrname__
+        #else:
+            #print "it has not a __project_backref_attrname__ attribute"
+        
+        if hasattr(cls, "__project_doc__"):
+            doc = cls.__project_doc__
+        
         return relationship(
             "Project",
             primaryjoin=\
-                cls.__name__ + ".project_id==Project.project_id_local",
+                cls.__tablename__+ ".c.project_id==Projects.c.id",
             post_update=True, # for project itself
-            uselist=False
+            uselist=False,
+            backref=backref,
+            doc=doc
         )
     
     
@@ -4397,7 +4442,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         #------------------------------------------------------------
         # code copied and pasted from ScheduleMixin - Fix it later
-        if not duration is None:
+        if duration is not None:
             if isinstance(duration, datetime.timedelta):
                 # set the due_date to None
                 # to make it recalculated
@@ -4657,7 +4702,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     
     
     
-    __strictly_typed__ = True
+    #__strictly_typed__ = True
     __tablename__ = "Projects"
     project_id_local = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                               primary_key=True)
@@ -4666,39 +4711,41 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
                    "inherit_condition":
                        project_id_local==TaskableEntity.taskableEntity_id}
     
-    assets = relationship(
-        "Asset",
-        primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
-        back_populates="project",
-        uselist=True,
-        doc="""The list of :class:`~stalker.core.models.Asset`\ s created in this project.
+    #assets = relationship(
+        #"Asset",
+        #primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
+        #back_populates="project",
+        ##backref="project",
+        #uselist=True,
+        #doc="""The list of :class:`~stalker.core.models.Asset`\ s created in this project.
         
-        It is a read-only list. To add an :class:`~stalker.core.models.Asset`
-        to this project, the :class:`~stalker.core.models.Asset` need to be
-        created with this project is given in the ``project`` argument in the
-        :class:`~stalker.core.models.Asset`.
-        """
-    )
+        #It is a read-only list. To add an :class:`~stalker.core.models.Asset`
+        #to this project, the :class:`~stalker.core.models.Asset` need to be
+        #created with this project is given in the ``project`` argument in the
+        #:class:`~stalker.core.models.Asset`.
+        #"""
+    #)
     
-    sequences = relationship(
-        "Sequence",
-        primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
-        back_populates="project",
-        uselist=True,
-        doc="""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
+    #sequences = relationship(
+        #"Sequence",
+        #primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
+        #back_populates="project",
+        ##backref="project",
+        #uselist=True,
+        #doc="""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
         
-        This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
-        that this :class:`~stalker.core.models.Project` has. It is a list of
-        :class:`~stalker.core.models.Sequence` instances. The attribute is
-        read-only. The only way to attach a
-        :class:`~stalker.core.models.Sequence` to this
-        :class:`~stalker.core.models.Project` is to create the
-        :class:`~stalker.core.models.Sequence` with this
-        :class:`~stalker.core.models.Project` by passing this
-        :class:`~stalker.core.models.Project` in the ``project`` argument of
-        the :class:`~stalker.core.models.Sequence`.
-        """
-    )
+        #This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
+        #that this :class:`~stalker.core.models.Project` has. It is a list of
+        #:class:`~stalker.core.models.Sequence` instances. The attribute is
+        #read-only. The only way to attach a
+        #:class:`~stalker.core.models.Sequence` to this
+        #:class:`~stalker.core.models.Project` is to create the
+        #:class:`~stalker.core.models.Sequence` with this
+        #:class:`~stalker.core.models.Project` by passing this
+        #:class:`~stalker.core.models.Project` in the ``project`` argument of
+        #the :class:`~stalker.core.models.Sequence`.
+        #"""
+    #)
     
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
@@ -4910,42 +4957,106 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     
     
     
+    ##----------------------------------------------------------------------
+    #@property
+    #def users(self):
+        #"""The users assigned to this project.
+        
+        #This is a list of :class:`~stalker.core.models.User` instances. All the
+        #elements are gathered from all the
+        #:class:`~stalker.core.models.Task`\ s of the project itself and from
+        #:class:`~stalker.core.models.Sequence`\ s,
+        #:class:`~stalker.core.models.Shot`\ s,
+        #:class:`~stalker.core.models.Asset`\ s.
+        #"""
+        
+        #self._users = []
+        ## project tasks
+        #for task in self.tasks:
+            #self._users.extend(task.resources)
+        
+        ## sequence tasks
+        #for seq in self.sequences:
+            #for task in seq.tasks:
+                #self._users.extend(task.resources)
+            
+            ## shot tasks
+            #for shot in seq.shots:
+                #for task in shot.tasks:
+                    #self._users.extend(task.resources)
+        
+        ## asset tasks
+        #for asset in self.assets:
+            #for task in asset.tasks:
+                #self._users.extend(task.resources)
+        
+        #self._users = list(set(self._users))
+        
+        #return self._users
+    
     #----------------------------------------------------------------------
     @property
     def users(self):
-        """The users assigned to this project.
-        
-        This is a list of :class:`~stalker.core.models.User` instances. All the
-        elements are gathered from all the
-        :class:`~stalker.core.models.Task`\ s of the project itself and from
-        :class:`~stalker.core.models.Sequence`\ s,
-        :class:`~stalker.core.models.Shot`\ s,
-        :class:`~stalker.core.models.Asset`\ s.
+        """returns the users related to this project
         """
         
-        self._users = []
-        # project tasks
-        for task in self.tasks:
-            self._users.extend(task.resources)
+        # use joins over the session.query
+        from stalker import db
+        if db.session is not None:
+            return db.query(User).\
+                   join(User.tasks).\
+                   join(Task.task_of).\
+                   join(TaskableEntity.project).\
+                   filter(Project.name==self.name).all()
+        else:
+            RuntimeWarning("There is no database setup, the users can not "
+                           "be queried from this state, please use "
+                           "stalker.db.setup() to setup a database")
+            return []
+    
+    
+    
+    #----------------------------------------------------------------------
+    @property
+    def assets(self):
+        """returns the assets related to this project
+        """
         
-        # sequence tasks
-        for seq in self.sequences:
-            for task in seq.tasks:
-                self._users.extend(task.resources)
-            
-            # shot tasks
-            for shot in seq.shots:
-                for task in shot.tasks:
-                    self._users.extend(task.resources)
+        # use joins over the session.query
+        from stalker import db
+        if db.session is not None:
+            return db.query(Asset).\
+                   join(Asset.project).\
+                   filter(Project.name==self.name).all()
+        else:
+            RuntimeWarning("There is no database setup, the users can not "
+                           "be queried from this state, please use "
+                           "stalker.db.setup() to setup a database")
+            return []
+    
+    
+    
+    #----------------------------------------------------------------------
+    @property
+    def sequences(self):
+        """returns the sequences related to this project
+        """
         
-        # asset tasks
-        for asset in self.assets:
-            for task in asset.tasks:
-                self._users.extend(task.resources)
-        
-        self._users = list(set(self._users))
-        
-        return self._users
+        # use joins over the session.query
+        from stalker import db
+        if db.session is not None:
+            return db.query(Sequence).\
+                   join(Sequence.project).\
+                   filter(Project.name==self.name).all()
+        else:
+            RuntimeWarning("There is no database setup, the sequences can not "
+                           "be queried from this state, please use "
+                           "stalker.db.setup() to setup a database")
+            return []
+    
+    
+    
+    
     
     
     
@@ -4979,6 +5090,12 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     :type lead: :class:`~stalker.core.models.User`
     """
     
+    __project_backref_attrname__ = "sequences_ossuruk"
+    __project_doc__ = """The :class:`~stalker.core.models.Project` instance that this Sequence belongs to.
+    
+    A :class:`~stalker.core.models.Sequence` can not be created without a
+    :class:`~stalker.core.models.Project` instance.
+    """
     
     
     __tablename__ = "Sequences"
@@ -4986,18 +5103,29 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     sequence_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                          primary_key=True)
     
-    project_id = Column(Integer, ForeignKey("Projects.id"), nullable=False)
-    project = relationship(
-        "Project",
-        primaryjoin="Sequences.c.project_id==Projects.c.id",
-        back_populates="sequences",
-        uselist=False,
-        doc="""The :class:`~stalker.core.models.Project` instance that this Sequence belongs to.
-        
-        A :class:`~stalker.core.models.Sequence` can not be created without a
-        :class:`~stalker.core.models.Project` instance.
-        """
-    )
+
+    
+    
+    ##----------------------------------------------------------------------
+    #@declared_attr
+    #def project_id(cls):
+        #return Column("project_id", Integer, ForeignKey("Projects.id"),
+                      #nullable=False)
+    
+    ##----------------------------------------------------------------------
+    #@declared_attr
+    #def project(cls):
+        #return relationship(
+            #"Project",
+            #primaryjoin="Sequence.project_id==Project.project_id_local",
+            #back_populates="sequences",
+            #uselist=False,
+            #doc="""The :class:`~stalker.core.models.Project` instance that this Sequence belongs to.
+            
+            #A :class:`~stalker.core.models.Sequence` can not be created without a
+            #:class:`~stalker.core.models.Project` instance.
+            #"""
+        #)
     
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
@@ -5564,20 +5692,37 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
         back_populates="assets"
     )
     
-    project_id = Column(Integer, ForeignKey("Projects.id"), nullable=False)
-    project = relationship(
-        "Project",
-        primaryjoin="Assets.c.project_id==Projects.c.id",
-        back_populates="assets",
-        uselist=False,
-        doc="""The :class:`~stalker.core.models.Project` instance that this Asset belongs to.
-        
-        A :class:`~stalker.core.models.Asset` can not be created without a
-        :class:`~stalker.core.models.Project` instance.
-        """
-    )
+    #----------------------------------------------------------------------
+    #@declared_attr
+    #def project(self):
+        #return relationship(
+            #"Project",
+            #primaryjoin="Assets.c.project_id==Projects.c.id",
+            #back_populates="assets",
+            #uselist=False,
+            #doc="""The :class:`~stalker.core.models.Project` instance that this Asset belongs to.
+            
+            #A :class:`~stalker.core.models.Asset` can not be created without a
+            #:class:`~stalker.core.models.Project` instance.
+            #"""
+        #)
     
-
+    
+    
+    #project_id = Column(Integer, ForeignKey("Projects.id"), nullable=False)
+    #project = relationship(
+        #"Project",
+        #primaryjoin="Assets.c.project_id==Projects.c.id",
+        #back_populates="assets",
+        #uselist=False,
+        #doc="""The :class:`~stalker.core.models.Project` instance that this Asset belongs to.
+        
+        #A :class:`~stalker.core.models.Asset` can not be created without a
+        #:class:`~stalker.core.models.Project` instance.
+        #"""
+    #)
+    
+    
     
     #----------------------------------------------------------------------
     def __init__(self, shots=None, **kwargs):
@@ -5689,12 +5834,7 @@ class Version(Entity, StatusMixin):
       changes.
     
     """
-    #:param review: A list of :class:`~stalker.core.models.Review` instances,
-      #holding all the reviews made for this Version.
     
-    #:type review: :class:`~stalker.core.models.Stalker`
-    #:param bool published: A bool value shows if this version is published or
-      #not.
     
     
     __tablename__ = "Versions"
@@ -5772,7 +5912,7 @@ class Version(Entity, StatusMixin):
         """validates the given source value
         """
         
-        if not source is None:
+        if source is not None:
             if not isinstance(source, Link):
                 raise TypeError("Version.source attribute should be a "
                                 "stalker.core.models.Link instance, not %s" \

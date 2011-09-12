@@ -2,23 +2,17 @@
 
 import unittest
 
+from sqlalchemy import Column, Integer, ForeignKey
 from stalker.core.models import SimpleEntity, Status, StatusList, StatusMixin
-from sqlalchemy import (
-    Table,
-    Column,
-    Boolean,
-    Integer,
-    Float,
-    String,
-    ForeignKey,
-)
+
+
 
 # create a new mixed in SimpleEntity
 class DeclStatMixA(SimpleEntity, StatusMixin):
     
     __tablename__ = "DeclStatMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclStatMixA"}
-    a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+    declStatMixAs_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
     
     #----------------------------------------------------------------------

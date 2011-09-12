@@ -3,17 +3,7 @@ import unittest
 import datetime
 
 from stalker.core.models import SimpleEntity, ScheduleMixin
-from sqlalchemy import (
-    Table,
-    Column,
-    Boolean,
-    Integer,
-    Float,
-    String,
-    ForeignKey,
-)
-
-
+from sqlalchemy import Column, Integer, ForeignKey
 
 
 

@@ -4,18 +4,7 @@
 import unittest
 
 from stalker.core.models import SimpleEntity, Link, ReferenceMixin
-from sqlalchemy import (
-    Table,
-    Column,
-    Boolean,
-    Integer,
-    Float,
-    String,
-    ForeignKey,
-    #Date,
-    DateTime,
-    UniqueConstraint
-)
+from sqlalchemy import Column, Integer, ForeignKey
 
 
 
@@ -27,7 +16,7 @@ class DeclRefMixA(SimpleEntity, ReferenceMixin):
     """A test class for ReferenceMixin
     """
     
-    __tablename__ = "RefMixAs"
+    __tablename__ = "DeclRefMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclRefMixA"}
     a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)

@@ -5,6 +5,7 @@
 import datetime
 import unittest
 
+from sqlalchemy import Column, Integer, ForeignKey
 from stalker.conf import defaults
 from stalker.core.models import SimpleEntity, ScheduleMixin
 
@@ -12,6 +13,13 @@ from stalker.core.models import SimpleEntity, ScheduleMixin
 
 # a class which derives from another which has and __init__ already
 class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
+    
+    __tablename__ = "SchedMixFooMixedInClasses"
+    __mapper_args__ = {"polymorphic_identity": "SchedMixFooMixedInClass"}
+    schedMixFooMixedInClass_id = Column("id", Integer,
+                                        ForeignKey("SimpleEntities.id"),
+                                        primary_key=True)
+    
     def __init__(self, **kwargs):
         super(SchedMixFooMixedInClass, self).__init__(**kwargs)
         ScheduleMixin.__init__(self, **kwargs)

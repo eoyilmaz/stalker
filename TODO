@@ -1,6 +1,28 @@
 TODO
 ====
 
+ * don't forget to add tests for:
+   
+   * Project.users
+   
+   * Project.assets
+   
+   * Project.sequences
+   
+   * Project.shots
+
+ * SimpleEntity.code attribute:
+   
+   code is a more important field than the name, so replace their roles in the
+   system.
+
+ * ``project`` or ``projects`` field:
+   
+   Most of the data is related with a Project. It is possible to add the
+   ``project`` field to a higher level in the hierarchy than the
+   TaskableEntity. A TaskableEntity needs to have a project but not all of them
+   needs a tasks field. So creating a project field in the super will be nice.
+
  * StatusMixin and string indices:
    
    StatusMixin should be able to set the status with a string, because it is
@@ -10,14 +32,6 @@ TODO
    
    StatusList, FilenameTemplate and Type classes are using the same
    target_entity_type attribute, create a mixin for that.
-
- * Stop the fight between SimpleEntity.name and SimpleEntity.code.
-   
-   Currently name superseeds code, but it is annoying to change the code over
-   and over again just because the name is changed. So change the behaviour to
-   something like that; the code is only updated to the same value with name if
-   it is set to None or empty string. In any other case the code should remain
-   in the same value.
 
  * Implicit instance creation with back references:
    
@@ -44,17 +58,6 @@ TODO
    let the users to manage their assets and data. Examples: stalker create
    project "Deneme". Also, to let the users easily use the commandline tool
    all the models should be easy to create.
- 
- * Back References:
-   
-   All the attributes that has a back reference on other objects should reset
-   the back reference value to Null or to the default value whenever they are
-   set to None or empty list. For example, when the Project objects sequences
-   attribute is set to an empty list or None, the referring Sequence objects
-   project attribute should also be set to None, also there are tons of this
-   kind of relations in the system. SQLAlchemy handles them automatically but
-   Stalker should do it too, to allow others who are not willing to use
-   SQLAlchemy as their ORM to be able to have this property automatically.
 
  * SCM Integration:
    
@@ -81,6 +84,14 @@ TODO
 
 DONE:
 =====
+ * Stop the fight between SimpleEntity.name and SimpleEntity.code.
+   
+   Currently name superseeds code, but it is annoying to change the code over
+   and over again just because the name is changed. So change the behaviour to
+   something like that; the code is only updated to the same value with name if
+   it is set to None or empty string. In any other case the code should remain
+   in the same value.
+
  * SQLAlchemy ORM Declarative:
    
    Use declarative for the whole system. It started to make no sense to use

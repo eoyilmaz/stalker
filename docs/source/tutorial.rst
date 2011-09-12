@@ -44,15 +44,16 @@ or::
 
   db.setup("sqlite:////home/ozgur/studio.db") # under linux or osx
 
-This command will do the following:
- 1. setup the database connection, by creating an `engine`_
- 2. create the SQLite3 database file if doesn't exist
- 3. create a `session`_ instance
- 4. do the `mapping`_
- 
-.. _session: http://www.sqlalchemy.org/docs/orm/session.html
-.. _engine: http://www.sqlalchemy.org/docs/core/engines.html
-.. _mapping: http://www.sqlalchemy.org/docs/orm/mapper_config.html
+.. ::
+   This command will do the following:
+    1. setup the database connection, by creating an `engine`_
+    2. create the SQLite3 database file if doesn't exist
+    3. create a `session`_ instance
+    4. do the `mapping`_
+    
+   .. _session: http://www.sqlalchemy.org/docs/orm/session.html
+   .. _engine: http://www.sqlalchemy.org/docs/core/engines.html
+   .. _mapping: http://www.sqlalchemy.org/docs/orm/mapper_config.html
 
 Lets continue by creating a :class:`~stalker.core.models.User` for ourself in
 the database. The first thing we need to do is to import the
@@ -85,6 +86,10 @@ Now add your user to the department::
 
   tds_department.members.append(myUser)
 
+or::
+
+  myUser.department = tds_department
+
 We have created successfully a :class:`~stalker.core.models.User` and a
 :class:`~stalker.core.models.Department` and we assigned the user as one of the
 member of the **TDs Department**.
@@ -113,9 +118,8 @@ Lets say that we have this new commercial project coming and you want to start
 using Stalker with it. So we need to create a
 :class:`~stalker.core.models.Project` object to hold data about it.
 
-A project instance needs to have its *type* (commercial in our case) defined,
-it needs to have a suitable status list and it needs to be attached to a
-:class:`~stalker.core.models.Repository` instance::
+A project instance needs to have a suitable status list and it needs to be
+attached to a :class:`~stalker.core.models.Repository` instance::
 
   # lets create a couple of generic Statuses
   from stalker.core.models import Status
@@ -132,7 +136,7 @@ For now we have just created generic statuses. These
 objects. The idea behind is to define the statuses only once, and use them in
 mixtures suitable for different type of object. So you can define all the
 possible Statuses for your entities, then you can create a list of them for
-specific objects.
+specific type of objects (Assets, Projects, Shots etc.).
 
 Lets create a :class:`~stalker.core.models.StatusList` suitable for
 :class:`~stalker.core.models.Project` instances::
@@ -153,19 +157,20 @@ So we defined a status list which is suitable for Project instances. As you
 see we didn't used all the generic Statuses in our ``project_statuses`` because
 for a Project object we thought that these statuses are enough.
 
-We also need to specify the type of the project, which is *commercial* in our
-case::
-
-  from stalker.core.models import Type
-  commercial_project_type = Type(
-      name="Commercial Project",
-      target_entity_type=Project
-  )
-
-class:`~stalker.core.models.Type`\ s are generic entities that is accepted by
-any kind of entity created in Stalker. So in Stalker you can define a type for
-anything. But a couple of them, like the :class:`~stalker.core.models.Project`
-class, needs the type to be defined in the creation of the instance.
+.. ::
+  We also need to specify the type of the project, which is *commercial* in our
+  case::
+  
+    from stalker.core.models import Type
+    commercial_project_type = Type(
+        name="Commercial Project",
+        target_entity_type=Project
+    )
+  
+  class:`~stalker.core.models.Type`\ s are generic entities that is accepted by
+  any kind of entity created in Stalker. So in Stalker you can define a type for
+  anything. But a couple of them, like the :class:`~stalker.core.models.Project`
+  class, needs the type to be defined in the creation of the instance.
 
 And finally, the :class:`~stalker.core.models.Repository`. The Repository (or
 Repo if you like) is a path in our file server, where we place files and which
@@ -189,22 +194,10 @@ So::
       repository=commercial_repo,
   )
 
-will produce::
-
-  TypeError: Project.type must be an instance of stalker.core.models.Type
-
-so create the project with its type set::
-
-  new_project = Project(
-      name="Fancy Commercial",
-      status_list=project_statuses,
-      repository=commercial_repo,
-      type=commercial_project_type,
-  )
-
-One of the biggest income of having the type set to something is to be able to
-filter the projects quickly. Think about querying "Commercials" and
-distinguishing them from the "Movie" projects or "Print" projects.
+.. ::
+  One of the biggest income of having the type set to something is to be able to
+  filter the projects quickly. Think about querying "Commercials" and
+  distinguishing them from the "Movie" projects or "Print" projects.
 
 So we have created our project now.
 
@@ -227,9 +220,8 @@ Lets save all the new data to the database::
   db.session.commit()
 
 As you see, even though we have created multiple objects (new_project, satuses,
-status lists, types etc.) we've just added the ``new_project`` object to the
-database, but don't worry all the related objects will be added to the
-database.
+status lists etc.) we've just added the ``new_project`` object to the database,
+but don't worry all the related objects will be added to the database.
 
 A Project generally contains :class:`~stalker.core.models.Sequence`\ s, so lets
 create one, again we need to create a status list suitable for sequences and a
@@ -289,6 +281,11 @@ we created a new shot with wrong info::
 and you figured out that you have created and committed a wrong info and you
 want to correct it::
   
+  sh004.code = "SH004"
+  db.session.commit()
+
+but lets say that you don't have any variable holding the shot alread::
+  
   # first find the data
   wrong_shot = db.query(Shot).filter_by(code="SH005").first()
   
@@ -314,8 +311,8 @@ Part III - Pipeline
 Up until now, we skipped a lot of stuff here to take little steps every time.
 Eventough we have created users, departments, projects, sequences and shots,
 Stalker still doesn't know much about our studio. For example, it doesn't have
-any information about the pipeline that we are following and what steps we do
-to complete those shots, thus to complete the project.
+any information about the **pipeline** that we are following and what steps we
+do to complete those shots, thus to complete the project.
 
 In Stalker, pipeline is managed by :class:`~stalker.core.models.Task`\ s. So
 you create Tasks for Shots and then you can create dependencies between tasks.
@@ -469,12 +466,6 @@ project. To explain the project structure we can use the
 
   from stalker.core.models import Structure
   
-  # Structure is `strictly typed` so we need to create a type for it
-  commercial_structure_type = Type(
-      name="Commercial",
-      target_entity_type=Structure
-  )
-  
   commercial_project_structure = Structure(
       name="Commercial Projects Structure",
       description="""This is a project structure, which can be used for simple
@@ -519,10 +510,12 @@ project. To explain the project structure we can use the
   new_project.structure = commercial_project_structure
 
 Now we have entered a couple of `Jinja2`_ directives as a string. This template
-will be used when creating the project structure by calling
-:func:`~stalker.core.models.Project.create`. It is safe to call the
-:func:`~stalker.core.models.Project.create` over and over or whenever you've
-added new data that will add some extra folders to the project structure.
+will be used when creating the project structure.
+
+.. :: by calling
+  :func:`~stalker.core.models.Project.create`. It is safe to call the
+  :func:`~stalker.core.models.Project.create` over and over or whenever you've
+  added new data that will add some extra folders to the project structure.
 
 .. _Jinja2: http://jinja.pocoo.org/
 
