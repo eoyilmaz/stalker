@@ -18,6 +18,14 @@ v0.1.2.a4
 
  * :class:`~stalker.core.models.Structure` is not ``strictly_typed`` anymore.
 
+ * The initialization of ``status_list`` attribute in classes which 
+   are mixed with :class:`~stalker.core.models.StatusMixin` is now 
+   automatically done if there is a database connection (stalker.db.session 
+   is not None) and there is a suitable
+   :class:`~stalker.core.models.StatusList` instance in the database whom
+   :attr:`~stalker.core.models.StatusList.target_entity_type` attribute is set
+   to the mixed-in class name.
+
 v0.1.2.a3
 ---------
 

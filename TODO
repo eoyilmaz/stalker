@@ -1,13 +1,6 @@
 TODO
 ====
 
- * Auto StatusList connection:
-   
-   StatusLists can be automatically connected to the created instance if there
-   is already a database setup and a StatusList instance already defined for
-   the current class. This means mixing the model part with the control part
-   but it is acceptable.
-
  * don't forget to add tests for:
    
    * Project.users
@@ -91,6 +84,13 @@ TODO
 
 DONE:
 =====
+ * Auto StatusList connection:
+   
+   StatusLists can be automatically connected to the created instance if there
+   is already a database setup and a StatusList instance already defined for
+   the current class. This means mixing the model part with the control part
+   but it is acceptable.
+
  * Stop the fight between SimpleEntity.name and SimpleEntity.code.
    
    Currently name superseeds code, but it is annoying to change the code over

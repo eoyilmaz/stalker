@@ -3352,6 +3352,15 @@ class StatusMixin(object):
       the possible statuses that this entity could be in. This attribute can
       not be empty or None. Giving a StatusList object, the
       StatusList.target_entity_type should match the current class.
+      
+      .. versionadded:: 0.1.2.a4
+        
+        The status_list argument now can be skipped or can be None if there is
+        an active database connection (stalker.db.session is not None) and 
+        there is a suitable
+        :class:`~stalker.core.models.StatusList` instance in the database whom
+        :attr:`~stalker.core.models.StatusList.target_entity_type` attribute
+        is set to the current mixed-in class name.
     
     :param status: an integer value which is the index of the status in the
       status_list attribute. So the value of this attribute couldn't be lower
@@ -3410,12 +3419,19 @@ class StatusMixin(object):
         #from stalker.core.models import StatusList
         
         if status_list is None:
-            
             # check if there is a db setup and try to get the appropriate 
             # StatusList from the database
+            from stalker import db
             if db.session is not None:
-                pass
-            else:
+                # try to get a StatusList with the target_entity_type is 
+                # matching the class name
+                status_list = db.query(StatusList).filter_by\
+                    (target_entity_type=self
+                .__class__.__name__).first()
+        
+        
+        # if it is still None
+        if status_list is None:
                 # there is no db so raise an error because there is no way 
                 # to get an appropriate StatusList
                 raise TypeError("'%s' objects can not be initialized without a "

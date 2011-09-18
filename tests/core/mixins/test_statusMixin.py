@@ -323,6 +323,7 @@ class StatusMixinTester(unittest.TestCase):
 
 
 
+from sqlalchemy import orm
 from stalker import db
 
 
@@ -336,14 +337,25 @@ class StatusListAutoAddClass(SimpleEntity, StatusMixin):
     purposes.
     """
     
+    __tablename__ = "StatusListAutoAddClass"
     __mapper_args__ = {"polymorphic_identity": "StatusListAutoAddClass"}
+    statusListAutoAddClass_id = Column("id", Integer,
+                                       ForeignKey("SimpleEntities.id"),
+                                       primary_key=True)
     
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(SimpleEntity, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
-        
-        pass
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """the init function for instances loaded from the db
+        """
+        super(StatusListAutoAddClass, self).__init_on_load__()
 
 
 
@@ -356,14 +368,26 @@ class StatusListNoAutoAddClass(SimpleEntity, StatusMixin):
     purposes.
     """
     
+    __tablename__ = "StatusListNoAutoAddClass"
     __mapper_args__ = {"polymorphic_identity": "StatusListNoAutoAddClass"}
+    statusListNoAutoAddClass_id = Column("id", Integer,
+                                         ForeignKey("SimpleEntities.id"),
+                                         primary_key=True)
     
     #----------------------------------------------------------------------
     def __init__(self, **kwargs):
         super(SimpleEntity, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
-        
-        pass
+    
+    
+    
+    #----------------------------------------------------------------------
+    @orm.reconstructor
+    def __init_on_load__(self):
+        """the init function for instances loaded from the db
+        """
+        super(StatusListAutoAddClass, self).__init_on_load__()
+
 
 
 
@@ -383,14 +407,11 @@ class StatusMixinDBTester(unittest.TestCase) :
         
         # create a database
         db.setup()
-        
-
-        
     
     
     
     #----------------------------------------------------------------------
-    def test_status_list_attribute_is_skipped_and_there_is_a_db_setup():
+    def test_status_list_attribute_is_skipped_and_there_is_a_db_setup(self):
         """testing if there will be no error and the status_list attribute is
         filled with the correct StatusList instance coming from the database
         if there is already a database setup and there is a StatusList instance
@@ -425,10 +446,8 @@ class StatusMixinDBTester(unittest.TestCase) :
     
     
     
-    
-    
     #----------------------------------------------------------------------
-    def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitable_StatusList():
+    def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitable_StatusList(self):
         """testing if a TypeError will be raised even a database is setup 
         but there is no suitable StatusList for StatusListNoAutoAddClass in 
         the database
@@ -454,7 +473,7 @@ class StatusMixinDBTester(unittest.TestCase) :
         
         self.assertRaises(TypeError,
                           StatusListNoAutoAddClass,
-                          **{"name": "Test StatusListNoAutoAddClass"},
+                          **{"name": "Test StatusListNoAutoAddClass"}
         )
         
         
