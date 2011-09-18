@@ -115,13 +115,9 @@ class SimpleEntity(Base):
     The formatting rules for the code attribute is as follows:
       
       * only alphanumerics and underscore is allowed \[a-zA-Z0-9\_\]
-      
-      * no number is allowed at the beggining
-      
+      * no number is allowed at the beginning
       * no white spaces are allowed
-      
       * all the white spaces will be converted to underscore characters
-      
       * all the underscores are converted to only one underscore character if
         more than one follows each other
     
@@ -892,7 +888,7 @@ class Type(Entity):
 
 ########################################################################
 class Status(Entity):
-    """Defins object statutes.
+    """Defines object statutes.
     
     No extra parameters, use the *code* attribute to give a short name for the
     status.
@@ -1099,7 +1095,7 @@ class StatusList(Entity):
     def target_entity_type(self):
         """The entity type which this StatusList is valid for.
         
-        Usally it is set to the TargetClass directly::
+        Usually it is set to the TargetClass directly::
           
           from stalker.core.models import Status, StatusList, Asset
           
@@ -1206,7 +1202,7 @@ class ImageFormat(Entity):
         Integer,
         doc="""The width of this format.
         
-        * the width should be set to a positif non-zero integer
+        * the width should be set to a positive non-zero integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
         """
@@ -1216,7 +1212,7 @@ class ImageFormat(Entity):
         Integer,
         doc="""The height of this format
         
-        * the height should be set to a positif non-zero integer
+        * the height should be set to a positive non-zero integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
         """
@@ -1227,7 +1223,7 @@ class ImageFormat(Entity):
         default="1.0",
         doc="""The pixel aspect ratio of this format.
         
-        * the pixel_aspect should be set to a positif non-zero float
+        * the pixel_aspect should be set to a positive non-zero float
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception
         """
@@ -1238,7 +1234,7 @@ class ImageFormat(Entity):
         default="300.0",
         doc="""The print resolution of this format
         
-        * it should be set to a positif non-zero float or integer
+        * it should be set to a positive non-zero float or integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
         """
@@ -1384,14 +1380,14 @@ class Link(Entity):
     Links are all about giving some external information to the current entity
     (external to the database, so it can be something on the
     :class:`~stalker.core.models.Repository` or in the Web). The type of the
-    link (general, file, folder, webpage, image, image sequence, video, movie,
-    sound, text etc.) can be defined by a :class:`~stalker.core.models.Type`
-    instance (you can also use multiple :class:`~stalker.core.models.Tag`
-    instances to add more information, and to filter them back). Again it is
-    defined by the needs of the studio.
+    link (general, file, folder, web page, image, image sequence, video, 
+    movie, sound, text etc.) can be defined by a
+    :class:`~stalker.core.models.Type` instance (you can also use multiple
+    :class:`~stalker.core.models.Tag` instances to add more information, and to
+    filter them back). Again it is defined by the needs of the studio.
     
-    For sequences of files the file name may contain "#" or muptiple of them
-    like "###" to define pading.
+    For sequences of files the file name may contain "#" or multiple of them
+    like "###" to define padding.
     
     :param path: The Path to the link, it can be a path to a folder or a file
       in the file system, or a web page. For file sequences use "#" in place of
@@ -1451,7 +1447,7 @@ class Link(Entity):
     #----------------------------------------------------------------------
     def _format_path(self, path):
         """formats the path to internal format, which is Linux forward slashes
-        for path seperation
+        for path separation
         """
         
         return path.replace("\\", "/")
@@ -2325,7 +2321,7 @@ class Structure(Entity):
       created for the :class:`~stalker.core.models.Task`\ s). Anyway, it is
       much suitable and desired to create this details by using
       :class:`~stalker.core.models.FilenameTemplate` objects. Which are
-      spesific to certain
+      specific to certain
       :attr:`~stalker.core.FilenameTemplate.target_entity_type`\ s. And by
       using the :attr:`~stalker.core.models.Structure.custom_template`
       attribute, Stalker can not place any source or output file of a
@@ -2339,14 +2335,14 @@ class Structure(Entity):
       place the file in to the Repository like in Photoshop.
       
       The ``custom_template`` parameter can be None or an empty string if it is
-      not needed. Be carefull not to pass a variable other than a string or
+      not needed. Be careful not to pass a variable other than a string or
       unicode because it will use the string representation of the given
       variable.
     
     A :class:`~stalker.core.models.Structure` can not be created without a
     ``type`` (__strictly_typed__ = True). By giving a ``type`` to the
-    :class:`~stalker.core.models.Strucutre`, you can create one structure for
-    **Commmercials** and another project structure for **Movies** and another
+    :class:`~stalker.core.models.Structure`, you can create one structure for
+    **Commercials** and another project structure for **Movies** and another
     one for **Print** projects etc. and can reuse them with new
     :class:`~stalker.core.models.Project`\ s.
     """
@@ -2431,11 +2427,11 @@ class Department(Entity):
     """The departments that forms the studio itself.
     
     The information that a Department object holds is like:
-    
+      
       * The members of the department
       * The lead of the department
       * and all the other things those are inherited from the AuditEntity class
-    
+      
     Two Department object considered the same if they have the same name, the
     the members list nor the lead info is important, a "Modeling" department
     should of course be the same with another department which has the name
@@ -2548,32 +2544,31 @@ class User(Entity):
     """The user class is designed to hold data about a User in the system.
     
     There are a couple of points to take your attention to:
-     
-     * The :attr:`~stalker.core.models.User.code` attribute is derived from
-       the :attr:`~stalker.core.models.User.nice_name` as it is in a
-       :class:`~stalker.core.models.SimpleEntity`, but the
-       :attr:`~stalker.core.models.User.nice_name` is derived from the
-       :attr:`~stalker.core.models.User.login_name` instead of the
-       :attr:`~stalker.core.models.User.name` attribute, so the
-       :attr:`~stalker.core.models.User.code` of a
-       :class:`~stalker.core.models.User` and a
-       :class:`~stalker.core.models.SimpleEntity` will be different then each
-       other. The formatting of the :attr:`~stalker.core.models.User.code`
-       attribute is as follows:
-         
-         * no underscore character is allowed, so while in the
-           :class:`~stalker.core.models.SimpleEntity` class the code could have
-           underscores, in :class:`~stalker.core.models.User` class it is not
-           allowed.
-        
-         * all the letters in the code will be converted to lower case.
-       
-       Other than this two new rules all the previous formatting rules from the
-       :class:`~stalker.core.models.SimpleEntity` are still in charge.
     
-     * The :attr:`~stalker.core.models.User.name` is a synonym of the
-       :attr:`~stalker.core.models.User.login_name`, so changing one of them
-       will change the other.
+    * The :attr:`~stalker.core.models.User.code` attribute is derived from
+      the :attr:`~stalker.core.models.User.nice_name` as it is in a
+      :class:`~stalker.core.models.SimpleEntity`, but the
+      :attr:`~stalker.core.models.User.nice_name` is derived from the
+      :attr:`~stalker.core.models.User.login_name` instead of the
+      :attr:`~stalker.core.models.User.name` attribute, so the
+      :attr:`~stalker.core.models.User.code` of a
+      :class:`~stalker.core.models.User` and a
+      :class:`~stalker.core.models.SimpleEntity` will be different then each
+      other. The formatting of the :attr:`~stalker.core.models.User.code`
+      attribute is as follows:
+      
+      * no underscore character is allowed, so while in the
+        :class:`~stalker.core.models.SimpleEntity` class the code could have
+        underscores, in :class:`~stalker.core.models.User` class it is not
+        allowed.
+      * all the letters in the code will be converted to lower case.
+      
+      Other than this two new rules all the previous formatting rules from the
+      :class:`~stalker.core.models.SimpleEntity` are still in charge.
+      
+    * The :attr:`~stalker.core.models.User.name` is a synonym of the
+      :attr:`~stalker.core.models.User.login_name`, so changing one of them
+      will change the other.
     
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
@@ -3252,7 +3247,7 @@ class ReferenceMixin(object):
     
     
     # add this lines for Sphinx
-    #__tablename__ = ""
+    __tablename__ = "ReferenceMixins"
     
     
     
@@ -3286,7 +3281,7 @@ class ReferenceMixin(object):
                 Column(
                     class_name.lower() + "_id",
                     Integer,
-                    ForeignKey(cls.__tablename__ + ".id"),
+                    ForeignKey(cls.__tablename__ + ".id"), 
                     primary_key=True,
                 ),
                 
@@ -3572,7 +3567,7 @@ class ScheduleMixin(object):
     
     
     # add this lines for Sphinx
-    #__tablename__ = ""
+    __tablename__ = "ScheduleMixins"
     
     
     
@@ -3791,7 +3786,7 @@ class ProjectMixin(object):
     
     
     # add this lines for Sphinx
-    #__tablename__ = ""
+    __tablename__ = "ProjectMixins"
     
     
     
@@ -3946,13 +3941,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     In Stalker, currently these items supports Tasks:
     
-       * :class:`~stalker.core.models.Project`
-    
-       * :class:`~stalker.core.models.Sequence`
-    
-       * :class:`~stalker.core.models.Asset`
-    
-       * :class:`~stalker.core.models.Shot`
+      * :class:`~stalker.core.models.Project`
+      * :class:`~stalker.core.models.Sequence`
+      * :class:`~stalker.core.models.Asset`
+      * :class:`~stalker.core.models.Shot`
     
     If you want to have your own class to be *taskable* use the
     :class:`~stalker.core.models.TaskMixin` to add the ability to connect a
@@ -4335,8 +4327,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""The total effort that needs to be spend to complete this Task.
         
         Can be used to create an initial bid of how long this task going to
-        take. The effort is equaly divided to the assigned resources. So if the
-        effort is 10 days and 2 resources is assigned then the
+        take. The effort is equally divided to the assigned resources. So if
+        the effort is 10 days and 2 resources is assigned then the
         :attr:`~stalker.core.models.Task.duration` of the task is going to be 5
         days (if both of the resources are free to work). The default value is
         stalker.conf.defaults.DEFAULT_TASK_DURATION.
@@ -4496,7 +4488,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             _duration_getter,
             _duration_setter
         ),
-        doc="""The overriden duration attribute.
+        doc="""The overridden duration attribute.
         
         It is a datetime.timedelta instance. Showing the difference of the
         :attr:`~stalker.core.models.ScheduleMixin.start_date` and the
@@ -4583,7 +4575,7 @@ def _check_circular_dependency(task, check_for_task):
 
 ########################################################################
 class TaskableEntity(Entity, ProjectMixin):
-    """Gives the abilitiy to connect to a list of :class:`~stalker.core.models.Task`\ s to the mixed in object.
+    """Gives the ability to connect to a list of :class:`~stalker.core.models.Task`\ s to the mixed in object.
     
     TaskMixin is a variant of :class:`~stalker.core.models.ProjectMixin` and
     lets the mixed object to have :class:`~stalker.core.model.Task` instances
@@ -5101,19 +5093,19 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     """Stores data about Sequences.
     
     Sequences are holders of the :class:`~stalker.core.models.Shot` objects.
-    They orginize the conceptual data with another level of complexity.
+    They organize the conceptual data with another level of complexity.
     
     The Sequence class updates the
     :attr:`~stalker.core.models.Project.sequence` attribute in the
     :class:`~stalker.core.models.Project` class when the Sequence is
     initialized.
     
-    :param lead: The lead of this Seuqence. The default value is None.
+    :param lead: The lead of this Sequence. The default value is None.
     
     :type lead: :class:`~stalker.core.models.User`
     """
     
-    __project_backref_attrname__ = "sequences_ossuruk"
+#    __project_backref_attrname__ = "sequences_ossuruk"
     __project_doc__ = """The :class:`~stalker.core.models.Project` instance that this Sequence belongs to.
     
     A :class:`~stalker.core.models.Sequence` can not be created without a
@@ -5125,30 +5117,6 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     __mapper_args__ = {"polymorphic_identity": "Sequence"}
     sequence_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                          primary_key=True)
-    
-
-    
-    
-    ##----------------------------------------------------------------------
-    #@declared_attr
-    #def project_id(cls):
-        #return Column("project_id", Integer, ForeignKey("Projects.id"),
-                      #nullable=False)
-    
-    ##----------------------------------------------------------------------
-    #@declared_attr
-    #def project(cls):
-        #return relationship(
-            #"Project",
-            #primaryjoin="Sequence.project_id==Project.project_id_local",
-            #back_populates="sequences",
-            #uselist=False,
-            #doc="""The :class:`~stalker.core.models.Project` instance that this Sequence belongs to.
-            
-            #A :class:`~stalker.core.models.Sequence` can not be created without a
-            #:class:`~stalker.core.models.Project` instance.
-            #"""
-        #)
     
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
@@ -5296,7 +5264,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     is not going to be used.
     
     :param sequence: The :class:`~stalker.core.models.Sequence` that this shot
-      blengs to. A shot can only be created with a
+      belongs to. A shot can only be created with a
       :class:`~stalker.core.models.Sequence` instance, so it can not be None.
       The shot itself will be added to the
       :attr:`~stalker.core.models.Sequence.shots` list of the given sequence.
@@ -5831,12 +5799,12 @@ class Version(Entity, StatusMixin):
       The default is "1". If skipped or given as zero or as a negative value a
       ValueError will be raised.
     
-    :param source_file: A :class:`~stalker.core.models.Link` instance, showing
+    :param source: A :class:`~stalker.core.models.Link` instance, showing
       the source file of this version. It can be a Maya scene file
       (*.ma, *.mb), a Nuke file (*.nk) or anything that is opened with the
       application you have created this version.
     
-    :type source_file: :class:`~stalker.core.models.Link`
+    :type source: :class:`~stalker.core.models.Link`
     
     :param outputs: A list of :class:`~stalker.core.models.Link` instances,
       holding the outputs of the current version. It could be the rendered

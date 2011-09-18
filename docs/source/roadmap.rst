@@ -11,7 +11,7 @@ Roadmap Based on Versions
 
 Below you can find the roadmap based on the version
 
-0.1.2:
+0.1.0:
 ------
 
  * A complete working set of models in SOM which are using
