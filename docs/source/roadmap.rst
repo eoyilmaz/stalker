@@ -11,11 +11,11 @@ Roadmap Based on Versions
 
 Below you can find the roadmap based on the version
 
-0.1.1:
+0.1.2:
 ------
- * A complete working set of models in SOM.
- * The SQLAlchemy integration to have the database part, tables and mappers.
- * Ability to extend SOM with new classes and database mappers and tables.
+
+ * A complete working set of models in SOM which are using
+   SQLAlchemy.ext.declarative.
 
 0.2.0:
 ------
@@ -25,5 +25,8 @@ Below you can find the roadmap based on the version
 0.3.0:
 ------
  * Web interface
- * Complete Project Management capabilities.
+ * Complete ProdAM capabilities.
  * And new features that I can't really see right now.
+ * Maybe mobile versions for Android and iPhone/iPad (though the Web interface
+   should work flawlessly for them)
+

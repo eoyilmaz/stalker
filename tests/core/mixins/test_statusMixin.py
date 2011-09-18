@@ -323,6 +323,138 @@ class StatusMixinTester(unittest.TestCase):
 
 
 
+from stalker import db
 
 
 
+
+
+
+########################################################################
+class StatusListAutoAddClass(SimpleEntity, StatusMixin):
+    """It is a class derived from stalker.core.models.SimpleEntity for testing
+    purposes.
+    """
+    
+    __mapper_args__ = {"polymorphic_identity": "StatusListAutoAddClass"}
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(SimpleEntity, self).__init__(**kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        
+        pass
+
+
+
+
+
+
+########################################################################
+class StatusListNoAutoAddClass(SimpleEntity, StatusMixin):
+    """It is a class derived from stalker.core.models.SimpleEntity for testing
+    purposes.
+    """
+    
+    __mapper_args__ = {"polymorphic_identity": "StatusListNoAutoAddClass"}
+    
+    #----------------------------------------------------------------------
+    def __init__(self, **kwargs):
+        super(SimpleEntity, self).__init__(**kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        
+        pass
+
+
+
+
+
+########################################################################
+class StatusMixinDBTester(unittest.TestCase) :
+    """tests the StatusMixin with a DB is already setup
+    """
+    
+    
+    
+    #----------------------------------------------------------------------
+    def setUp(self):
+        """setup the test
+        """
+        
+        # create a database
+        db.setup()
+        
+
+        
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_status_list_attribute_is_skipped_and_there_is_a_db_setup():
+        """testing if there will be no error and the status_list attribute is
+        filled with the correct StatusList instance coming from the database
+        if there is already a database setup and there is a StatusList instance
+        defined for the StatusListAutoAddClass.
+        """
+        
+        # create a StatusList for StatusListAutoAddClass
+        test_status_list = StatusList(
+            name="StatusListAutoAddClass Statuses",
+            statuses=[
+                Status(name="Status1", code="Sts1"),
+                Status(name="Status2", code="Sts2"),
+                Status(name="Status3", code="Sts3"),
+            ],
+            target_entity_type=StatusListAutoAddClass,
+        )
+        
+        # add it to the db
+        db.session.add(test_status_list)
+        db.session.commit()
+        
+        # now try to create a StatusListAutoAddClass without a status_list 
+        # argument
+        
+        test_StatusListAutoAddClass = StatusListAutoAddClass(
+            name="Test StatusListAutoAddClass",
+        )
+        
+        # now check if the status_list is equal to test_status_list
+        self.assertEqual(test_StatusListAutoAddClass.status_list,
+                         test_status_list)
+    
+    
+    
+    
+    
+    #----------------------------------------------------------------------
+    def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitable_StatusList():
+        """testing if a TypeError will be raised even a database is setup 
+        but there is no suitable StatusList for StatusListNoAutoAddClass in 
+        the database
+        """
+        
+        # create a StatusList for StatusListAutoAddClass
+        test_status_list = StatusList(
+            name="StatusListAutoAddClass Statuses",
+            statuses=[
+                Status(name="Status1", code="Sts1"),
+                Status(name="Status2", code="Sts2"),
+                Status(name="Status3", code="Sts3"),
+            ],
+            target_entity_type=StatusListAutoAddClass,
+        )
+        
+        # add it to the db
+        db.session.add(test_status_list)
+        db.session.commit()
+        
+        # now try to create a StatusListAutoAddClass without a status_list 
+        # argument
+        
+        self.assertRaises(TypeError,
+                          StatusListNoAutoAddClass,
+                          **{"name": "Test StatusListNoAutoAddClass"},
+        )
+        
+        

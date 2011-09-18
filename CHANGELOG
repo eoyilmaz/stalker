@@ -2,6 +2,27 @@
 Stalker Changes
 ===============
 
+v0.1.2.a4
+---------
+
+ * Added database tests for:
+    
+    * :class:`~stalker.core.models.Review`
+
+    * :class:`~stalker.core.models.Task`
+
+    * :class:`~stalker.core.models.Version`
+
+ * The ``published`` attribute in :class:`~stalker.core.models.Version` is
+   renamed to :attr:`~stalker.core.models.Version.is_published`.
+
+ * :class:`~stalker.core.models.Structure` is not ``strictly_typed`` anymore.
+
+v0.1.2.a3
+---------
+
+ * stalker.__version__ is fixed for PyPI
+
 v0.1.2.a2
 ---------
 

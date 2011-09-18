@@ -3,12 +3,10 @@
 import re
 import datetime
 import platform
-import uuid
 
 from sqlalchemy import orm
 from sqlalchemy.orm import relationship, synonym, validates
 from sqlalchemy import (
-    join,
     Table,
     Column,
     Boolean,
@@ -594,8 +592,8 @@ class SimpleEntity(Base):
         
         if raise_error:
             raise TypeError("%s.type must be an instance of "
-                             "stalker.core.models.Type" \
-                             % self.entity_type)
+                             "stalker.core.models.Type not %s" \
+                             % (self.entity_type, type_in))
         
         return type_in
     
@@ -1085,7 +1083,7 @@ class StatusList(Entity):
             raise TypeError("target_entity_type can not be None")
         
         if str(target_entity_type_in)=="":
-            raise ValueError("target_entity_type can not be empty string")
+            raise ValueError("StatusList.target_entity_type can not be empty")
         
         # check if it is a class
         if isinstance(target_entity_type_in, type):
@@ -1799,9 +1797,9 @@ class Repository(Entity):
     projects and one for commercial projects.
     
     A repository also defines the default paths for linux, windows and mac
-    fileshares.
+    foreshores.
     
-    The path seperator in the repository is always forward slashes ("/").
+    The path separator in the repository is always forward slashes ("/").
     Setting a path that contains backward slashes ("\\"), will be converted to
     a path with forward slashes.
     
@@ -3384,7 +3382,7 @@ class StatusMixin(object):
         return Column(
             "status_list_id",
             Integer,
-            ForeignKey("StatusLists.id"),
+            ForeignKey("StatusLists.id", use_alter=True, name="x"),
             nullable=False,
         )
     
@@ -3412,25 +3410,33 @@ class StatusMixin(object):
         #from stalker.core.models import StatusList
         
         if status_list is None:
-            raise TypeError("'%s' objects can not be initialized without a "
-                            "stalker.core.models.StatusList instance, please "
-                            "pass a suitable StatusList "
-                            "(StatusList.target_entity_type=%s) "
-                            "with the 'status_list' argument" 
-                            % (self.__class__.__name__,
-                               self.__class__.__name__))
-        
-        # it is not an instance of status_list
-        if not isinstance(status_list, StatusList):
-            raise TypeError("the status list should be an instance of "
-                             "stalker.core.models.StatusList")
-        
-        # check if the entity_type matches to the StatusList.target_entity_type
-        if self.__class__.__name__ != status_list.target_entity_type:
-            raise TypeError("the given StatusLists' target_entity_type is %s, "
-                            "whereas the entity_type of this object is %s" % \
-                            (status_list.target_entity_type,
-                             self.__class__.__name__))
+            
+            # check if there is a db setup and try to get the appropriate 
+            # StatusList from the database
+            if db.session is not None:
+                pass
+            else:
+                # there is no db so raise an error because there is no way 
+                # to get an appropriate StatusList
+                raise TypeError("'%s' objects can not be initialized without a "
+                                "stalker.core.models.StatusList instance, please "
+                                "pass a suitable StatusList "
+                                "(StatusList.target_entity_type=%s) "
+                                "with the 'status_list' argument" 
+                                % (self.__class__.__name__,
+                                   self.__class__.__name__))
+        else:
+            # it is not an instance of status_list
+            if not isinstance(status_list, StatusList):
+                raise TypeError("the status list should be an instance of "
+                                 "stalker.core.models.StatusList")
+            
+            # check if the entity_type matches to the StatusList.target_entity_type
+            if self.__class__.__name__ != status_list.target_entity_type:
+                raise TypeError("the given StatusLists' target_entity_type is %s, "
+                                "whereas the entity_type of this object is %s" % \
+                                (status_list.target_entity_type,
+                                 self.__class__.__name__))
         
         return status_list
     
@@ -4108,7 +4114,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
     )
     
-    effort = Column(Interval)
+    _effort = Column(Interval)
     priority = Column(Integer)
     
     task_of_id = Column(Integer, ForeignKey("TaskableEntities.id"))
@@ -4178,6 +4184,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             resources = []
         
         self.resources = resources
+        self._effort = None
         self.effort = effort
         
         self.priority = priority
@@ -5824,12 +5831,12 @@ class Version(Entity, StatusMixin):
     
     :type outputs: list of :class:`~stalker.core.models.Link` instances
     
-    :param task: A :class:`~stalker.core.models.Task` instance showing the
-      owner of this Version.
+    :param version_of: A :class:`~stalker.core.models.Task` instance showing
+      the owner of this Version.
     
-    :type task: :class:`~stalker.core.models.Task`
+    :type version_of: :class:`~stalker.core.models.Task`
     
-    .. todo::
+    .. TODO::
       Think about using Tickets instead of review notes for reporting desired
       changes.
     
@@ -5873,7 +5880,7 @@ class Version(Entity, StatusMixin):
         """
     )
     
-    published = Column(Boolean, default=False)
+    is_published = Column(Boolean, default=False)
     
     
     

@@ -167,7 +167,7 @@ class VersionTester(unittest.TestCase):
         self.test_version = Version(**self.kwargs)
         
         # set the published to False
-        self.test_version.published = False
+        self.test_version.is_published = False
     
     
     
@@ -360,45 +360,6 @@ class VersionTester(unittest.TestCase):
     
     
     
-    ##----------------------------------------------------------------------
-    #def test_published_attribute_is_set_to_non_bool_value(self):
-        #"""testing if the published attribute is set to a non bool value will
-        #be converted to a bool value
-        #"""
-        
-        #test_value = "no bool value"
-        #self.test_version.published = test_value
-        #self.assertEqual(self.test_version.published, bool(test_value))
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_published_attribute_defaults_to_false(self):
-        #"""testing if the default value of published for newly created Versions
-        #is False
-        #"""
-        
-        #new_version = Version(**self.kwargs)
-        #self.assertEqual(new_version.published, False)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def test_published_attribute_is_working_properly(self):
-        #"""testing if the published attribute is working properly
-        #"""
-        
-        #test_value = True
-        #new_version = Version(**self.kwargs)
-        #new_version.published = test_value
-        #self.assertEqual(new_version.published, test_value)
-        
-        #test_value = False
-        #new_version.published = test_value
-        #self.assertEqual(new_version.published, test_value)
-    
-    
-    
     #----------------------------------------------------------------------
     def test_version_of_argument_is_skipped(self):
         """testing if a TypeError will be raised when the version_of argument
@@ -547,7 +508,7 @@ class VersionTester(unittest.TestCase):
         
         self.kwargs.pop("outputs")
         new_version = Version(**self.kwargs)
-        self.assertEquals(new_version.outputs, [])
+        self.assertEqual(new_version.outputs, [])
     
     
     
@@ -559,7 +520,7 @@ class VersionTester(unittest.TestCase):
         
         self.kwargs["outputs"] = None
         new_version = Version(**self.kwargs)
-        self.assertEquals(new_version.outputs, [])
+        self.assertEqual(new_version.outputs, [])
     
     
     
@@ -614,24 +575,21 @@ class VersionTester(unittest.TestCase):
     
     
     #----------------------------------------------------------------------
-    def test_published_attribute_is_False_by_default(self):
-        """tetsing if the published attribute is False by default
+    def test_is_published_attribute_is_False_by_default(self):
+        """testing if the is_published attribute is False by default
         """
         
-        self.assertEquals(self.test_version.published, False)
+        self.assertEqual(self.test_version.is_published, False)
     
     
     
     #----------------------------------------------------------------------
-    def test_published_attribute_is_working_properly(self):
-        """testing if the published attribute is working properly
+    def test_is_published_attribute_is_working_properly(self):
+        """testing if the is_published attribute is working properly
         """
         
-        self.test_version.published = True
-        self.assertEquals(self.test_version.published, True)
+        self.test_version.is_published = True
+        self.assertEqual(self.test_version.is_published, True)
         
-        self.test_version.published = False
-        self.assertEquals(self.test_version.published, False)
-    
-    
-    
+        self.test_version.is_published = False
+        self.assertEqual(self.test_version.is_published, False)

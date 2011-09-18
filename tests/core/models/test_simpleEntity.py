@@ -262,7 +262,7 @@ class SimpleEntityTester(unittest.TestCase):
         new_simple_entity.name = new_name
         
         # first check if it is not different then the old_code
-        self.assertEquals(new_simple_entity.code, old_code)
+        self.assertEqual(new_simple_entity.code, old_code)
         
         # then check if it is set to the expected result
         self.assertEqual(new_simple_entity.code, expected_new_code)
@@ -345,7 +345,7 @@ class SimpleEntityTester(unittest.TestCase):
         self.assertIsNot(self.kwargs["code"], None)
         
         new_simpleEntity = SimpleEntity(**self.kwargs)
-        self.assertEquals(new_simpleEntity.name, new_simpleEntity.code)
+        self.assertEqual(new_simpleEntity.name, new_simpleEntity.code)
     
     
     

@@ -2,22 +2,17 @@
 
 
 
-import sys
 import os
 import datetime
 import unittest
 import tempfile
 
-import sqlalchemy
-from sqlalchemy.orm import clear_mappers
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.sql import select
 
 from stalker.conf import defaults
-from stalker import utils
 from stalker import db
 from stalker.ext import auth
-from stalker.core.errors import LoginError, DBError
+from stalker.core.errors import LoginError
 from stalker.core.models import (
     Asset,
     Booking,
@@ -58,6 +53,7 @@ class DatabaseTester(unittest.TestCase):
     def setUp(self):
         """setup the tests
         """
+        
         # just set the default admin creation to true
         # some tests are relying on that
         defaults.AUTO_CREATE_ADMIN = True
@@ -724,7 +720,54 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of Review
         """
         
-        self.fail("test is not implemented yet")
+        # create a new review and connect it to a SimpleEntity
+        new_entity = Entity(name="Review Test Simple Entity")
+        
+        new_review = Review(
+            name="Review",
+            to=new_entity,
+            body="testing the review",
+        )
+        
+        # store it to the database
+        db.session.add(new_review)
+        db.session.commit()
+        
+        body = new_review.body
+        code = new_review.code
+        created_by = new_review.created_by
+        date_created = new_review.date_created
+        date_updated = new_review.date_updated
+        description = new_review.description
+        name = new_review.name
+        nice_name = new_review.nice_name
+        notes = new_review.notes
+        reviews = new_review.reviews
+        tags = new_review.tags
+        to = new_review.to
+        type_ = new_review.type
+        updated_by = new_review.updated_by
+        
+        del(new_review)
+        
+        new_review_DB = db.query(Review).filter_by(name=name).first()
+        
+        assert(isinstance(new_review_DB, Review))
+        
+        self.assertEqual(body, new_review_DB.body)
+        self.assertEqual(code, new_review_DB.code)
+        self.assertEqual(created_by, new_review_DB.created_by)
+        self.assertEqual(date_created, new_review_DB.date_created)
+        self.assertEqual(date_updated, new_review_DB.date_updated)
+        self.assertEqual(description, new_review_DB.description)
+        self.assertEqual(name, new_review_DB.name)
+        self.assertEqual(nice_name, new_review_DB.nice_name)
+        self.assertEqual(notes, new_review_DB.notes)
+        self.assertEqual(reviews, new_review_DB.reviews)
+        self.assertEqual(tags, new_review_DB.tags)
+        self.assertEqual(to, new_review_DB.to)
+        self.assertEqual(type_, new_review_DB.type)
+        self.assertEqual(updated_by, new_review_DB.updated_by)
     
     
     
@@ -2092,8 +2135,140 @@ SEQUENCES/{% for sequence in project.sequences %}
         """testing the persistence of Task
         """
         
-        # lets create a task for an asset
-        self.fail("test is not implemented yet")
+        # create a task
+        
+        status1 = Status(name="stat1", code="STS1")
+        status2 = Status(name="stat2", code="STS2")
+        status3 = Status(name="stat3", code="STS3")
+        status4 = Status(name="stat4", code="STS4")
+        status5 = Status(name="stat5", code="STS5")
+        
+        task_status_list = StatusList(
+            name="Task Status List",
+            statuses=[status1, status2, status3, status4, status5],
+            target_entity_type=Task,
+        )
+        
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[status1, status2, status3, status4, status5],
+            target_entity_type=Project,
+        )
+        
+        asset_status_list = StatusList(
+            name="Asset Status List",
+            statuses=[status1, status2, status3, status4, status5],
+            target_entity_type=Asset,
+        )
+        
+        test_repo = Repository(
+            name="Test Repo",
+            linux_path="/mnt/M/JOBs",
+            windows_path="M:/JOBs",
+            osx_path="/Users/Shared/Servers/M",
+        )
+        
+        test_project1 = Project(
+            name="Tests Project",
+            status_list = project_status_list,
+            repository=test_repo,
+        )
+        
+        char_asset_type = Type(
+            name="Character Asset",
+            target_entity_type=Asset
+        )
+        
+        new_asset = Asset(
+            name="Char1",
+            status_list = asset_status_list,
+            type=char_asset_type,
+            project=test_project1,
+        )
+        
+        user1 = User(
+            login_name="user1",
+            first_name="User1",
+            last_name="User1",
+            email="user1@user.com",
+            password="1234",
+        )
+        
+        user2 = User(
+            login_name="user2",
+            first_name="User2",
+            last_name="User2",
+            email="user2@user.com",
+            password="1234",
+        )
+        
+        user3 = User(
+            login_name="user3",
+            first_name="User3",
+            last_name="User3",
+            email="user3@user.com",
+            password="1234",
+        )
+        
+        test_task = Task(
+            name="Test Task",
+            resources=[user1, user2, user3],
+            task_of=new_asset,
+            status_list=task_status_list,
+            effort=datetime.timedelta(5)
+        )
+        
+        bookings = test_task.bookings
+        code = test_task.code
+        created_by = test_task.created_by
+        date_created = test_task.date_created
+        date_updated = test_task.date_updated
+        effort = test_task.effort
+        is_complete = test_task.is_complete
+        is_milestone = test_task.is_milestone
+        name = test_task.name
+        priority = test_task.priority
+        resources = test_task.resources
+        reviews = test_task.reviews
+        start_date = test_task.start_date
+        status = test_task.status
+        status_list = test_task.status_list
+        tags = test_task.tags
+        task_of = test_task.task_of
+        type_ = test_task.type
+        updated_by = test_task.updated_by
+        versions = test_task.versions
+        
+        db.session.add(test_task)
+        db.session.commit()
+        
+        del(test_task)
+        
+        # now query it back
+        test_task_DB = db.session.query(Task).filter_by(name=name).first()
+        
+        assert(isinstance(test_task_DB, Task))
+        
+        self.assertEqual(bookings, test_task_DB.bookings)
+        self.assertEqual(code, test_task_DB.code)
+        self.assertEqual(created_by, test_task_DB.created_by)
+        self.assertEqual(date_created, test_task_DB.date_created)
+        self.assertEqual(date_updated, test_task_DB.date_updated)
+        self.assertEqual(effort, test_task_DB.effort)
+        self.assertEqual(is_complete, test_task_DB.is_complete)
+        self.assertEqual(is_milestone, test_task_DB.is_milestone)
+        self.assertEqual(name, test_task_DB.name)
+        self.assertEqual(priority, test_task_DB.priority)
+        self.assertEqual(resources, test_task_DB.resources)
+        self.assertEqual(reviews, test_task_DB.reviews)
+        self.assertEqual(start_date, test_task_DB.start_date)
+        self.assertEqual(status, test_task_DB.status)
+        self.assertEqual(status_list, test_task_DB.status_list)
+        self.assertEqual(tags, test_task_DB.tags)
+        self.assertEqual(task_of, test_task_DB.task_of)
+        self.assertEqual(type_, test_task_DB.type)
+        self.assertEqual(updated_by, test_task_DB.updated_by)
+        self.assertEqual(versions, test_task_DB.versions)
         
     
     
@@ -2205,7 +2380,136 @@ SEQUENCES/{% for sequence in project.sequences %}
         """testing the persistence of Version
         """
         
-        self.fail("test is not implemented yet")
+        # create a project
+        test_project =  Project(
+            name="Test Project",
+            status_list=StatusList(
+                name="Project Status List",
+                target_entity_type=Project,
+                statuses=[
+                    Status(
+                        name="Work In Progress",
+                        code="WIP"
+                    ),
+                    Status(
+                        name="Completed",
+                        code="Cmplt"
+                    )
+                ]
+            ),
+            repository=Repository(
+                name="Film Projects",
+                windows_path="M:/",
+                linux_path="/mnt/M/",
+                osx_path="/Users/Volumes/M/",
+            )
+        )
+        
+        # create a task
+        test_task = Task(
+            name="Modeling",
+            task_of=test_project,
+            status_list=StatusList(
+                name="Task Status List",
+                target_entity_type=Task,
+                statuses=[
+                    Status(
+                        name="Waiting to be Approved",
+                        code="WAPP",
+                    ),
+                    Status(
+                        name="Started",
+                        code="Strt",
+                    ),
+                ]
+            )
+        )
+        
+        # create a new version
+        test_version = Version(
+            name="version for task modeling",
+            version_of=test_task,
+            version=10,
+            take="MAIN",
+            source=Link(
+                name="Modeling",
+                path="M:/JOBs/Proj1/Seq1/Shots/SH001/Ligting\
+                /Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma"
+            ),
+            outputs=[
+                Link(
+                    name="Renders",
+                    path="M:/JOBs/Proj1/Seq1/Shots/SH001/Lighting/Output/test1\
+                    .###.jpg"
+                ),
+            ],
+            status_list=StatusList(
+                name="Version Statuses",
+                statuses=[
+                    Status(name="Status1", code="STS1"),
+                    Status(name="Status2", code="STS2"),
+                    Status(name="Status3", code="STS3"),
+                    Status(name="Published", code="PBL")
+                ],
+                target_entity_type=Version,
+            ),
+            status=3,
+        )
+        
+        # now save it to the database
+        db.session.add(test_version)
+        db.session.commit()
+        
+        
+        code = test_version.code
+        created_by = test_version.created_by
+        date_created = test_version.date_created
+        date_updated = test_version.date_updated
+        name = test_version.name
+        nice_name = test_version.nice_name
+        notes = test_version.notes
+        outputs = test_version.outputs
+        is_published = test_version.is_published
+        reviews = test_version.reviews
+        source = test_version.source
+        status = test_version.status
+        status_list = test_version.status_list
+        tags = test_version.tags
+        take = test_version.take
+        type = test_version.type
+        updated_by = test_version.updated_by
+        version = test_version.version
+        version_of = test_version.version_of
+        
+        
+        del(test_version)
+        
+        # get it back from the db
+        test_version_DB = db.query(Version).filter_by(name=name).first()
+        
+        assert(isinstance(test_version_DB, Version))
+        
+        self.assertEqual(code, test_version_DB.code)
+        self.assertEqual(created_by, test_version_DB.created_by)
+        self.assertEqual(date_created, test_version_DB.date_created)
+        self.assertEqual(date_updated, test_version_DB.date_updated)
+        self.assertEqual(name, test_version_DB.name)
+        self.assertEqual(nice_name, test_version_DB.nice_name)
+        self.assertEqual(notes, test_version_DB.notes)
+        self.assertEqual(outputs, test_version_DB.outputs)
+        self.assertEqual(is_published, test_version_DB.is_published)
+        self.assertEqual(reviews, test_version_DB.reviews)
+        self.assertEqual(source, test_version_DB.source)
+        self.assertEqual(status, test_version_DB.status)
+        self.assertEqual(status_list, test_version_DB.status_list)
+        self.assertEqual(tags, test_version_DB.tags)
+        self.assertEqual(take, test_version_DB.take)
+        self.assertEqual(type, test_version_DB.type)
+        self.assertEqual(updated_by, test_version_DB.updated_by)
+        self.assertEqual(version, test_version_DB.version)
+        self.assertEqual(version_of, test_version_DB.version_of)
+        
+
 
 
 
