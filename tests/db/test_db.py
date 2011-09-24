@@ -2482,7 +2482,7 @@ SEQUENCES/{% for sequence in project.sequences %}
         version_of = test_version.version_of
         
         
-        del(test_version)
+        del test_version
         
         # get it back from the db
         test_version_DB = db.query(Version).filter_by(name=name).first()
@@ -2508,8 +2508,6 @@ SEQUENCES/{% for sequence in project.sequences %}
         self.assertEqual(updated_by, test_version_DB.updated_by)
         self.assertEqual(version, test_version_DB.version)
         self.assertEqual(version_of, test_version_DB.version_of)
-        
-
 
 
 

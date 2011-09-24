@@ -1,162 +1,189 @@
 TODO
 ====
 
- * don't forget to add tests for:
-   
-   * Project.users
-   
-   * Project.assets
-   
-   * Project.sequences
-   
-   * Project.shots
+* OverBookingWarning:
+  
+  Create a new Warning for the :class:`~stalker.core.models.Booking` class 
+  which will be emitted when a resource is booked for the same time period 
+  more than once.
 
- * SimpleEntity.code attribute:
-   
-   code is a more important field than the name, so replace their roles in the
-   system.
+* ``end_date`` attribute in ScheduleMixin:
+  
+  there could be a synonym for the ``due_date`` attribute in the
+  :class:`~stalker.core.models.ScheduleMixin`\ . Which will be meaningful for
+  :class:`~stalker.core.models.Booking` class.
 
- * ``project`` or ``projects`` field:
-   
-   Most of the data is related with a Project. It is possible to add the
-   ``project`` field to a higher level in the hierarchy than the
-   TaskableEntity. A TaskableEntity needs to have a project but not all of them
-   needs a tasks field. So creating a project field in the super will be nice.
+* Logging:
 
- * StatusMixin and string indices:
-   
-   StatusMixin should be able to set the status with a string, because it is
-   possible to use strings in StatusList.
+  Use the Python logging module to output Debug messages.
 
- * Refactor target_entity_type attributes
-   
-   StatusList, FilenameTemplate and Type classes are using the same
-   target_entity_type attribute, create a mixin for that.
+* Per user settings file:
 
- * Implicit instance creation with back references:
-   
-   Instead of::
-   
-     object2 = AClass(name="A Data", related_to=object1)
-   
-   Allow object creation with the following idiom::
-   
-     object1.data_list.append( AClass(name="A Data") )
-   
-   This is much easier to understand, because it both shows where is the new
-   data connected to and the user doesn't need to come up with a name for the
-   new object, but the first usage needs less knowledge about the internals of
-   the system (ex: to know that ``object2`` should go to ``object1.data_list``)
+  To let Pipeline TDs easily setup a new workstation with a setup script,
+  a predefined file let say with a name of ".strc" can be placed in to the 
+  users home folder and Stalker can search for this file and parse it to get 
+  things like the database server path, user name and the password.
 
- * Scrum:
-   
-   Use scrum.
+  There could be also an $STRC environment variable which is showing a common
+  place lets say in the fileserver, which also may have a ".strc" file. In 
+  this way it will be easy to setup only one ".strc" file for the whole studio.
 
- * Commanline Module:
-   
-   Create a commandline module which resembles the mercurials "hg" command to
-   let the users to manage their assets and data. Examples: stalker create
-   project "Deneme". Also, to let the users easily use the commandline tool
-   all the models should be easy to create.
+* don't forget to add tests for:
 
- * SCM Integration:
-   
-   The repository can be a local path, and the project can be managed with an
-   SCM, preferably with Mercurial.
+  * Project.users
+  * Project.assets
+  * Project.sequences
+  * Project.shots
 
- * Unicode:
-   
-   All the string attributes should be unicode so for string attributes which
-   are checked against being a string should now be checked against being
-   unicode.
+* SimpleEntity.code attribute:
 
- * Start & End Date For Classes Mixed With TaskMixin:
-   
-   All the classes which are mixed with TaskMixin should have a start and end
-   date attribute which will be set to the start date of the first task to the
-   due_date of the last task.
+  ``code`` is a more important field than the name, so replace their roles in 
+  the system.
 
- * datetime instead of date
-   
-   In the Task class all the time calculation should be done over the
-   datetime.datetime class instead of datetime.date object. This will let us
-   to increase the granularity of the scheduling.
+* ``project`` or ``projects`` field:
+
+  Most of the data is related with a Project. It is possible to add the
+  ``project`` field to a higher level in the hierarchy than the TaskableEntity.
+  A TaskableEntity needs to have a project but not all of them needs a tasks 
+  field. So creating a project field in the super will be nice.
+
+* StatusMixin and string indices:
+
+  StatusMixin should be able to set the status with a string, because it is
+  possible to use strings in StatusList.
+
+* Refactor target_entity_type attributes
+
+  StatusList, FilenameTemplate and Type classes are using the same
+  target_entity_type attribute, create a mixin for that.
+
+* Implicit instance creation with back references:
+
+  Instead of::
+  
+    object2 = AClass(name="A Data", related_to=object1)
+  
+  Allow object creation with the following idiom::
+  
+    object1.data_list.append( AClass(name="A Data") )
+  
+  This is much easier to understand, because it both shows where is the new
+  data connected to and the user doesn't need to come up with a name for the
+  new object, but the first usage needs less knowledge about the internals of
+  the system (ex: to know that ``object2`` should go to ``object1.data_list``)
+
+* Scrum:
+
+  Use scrum.
+
+* Commandline Module:
+
+  Create a commandline module which resembles the mercurials "hg" command to
+  let the users to manage their assets and data. Examples::
+    
+    st create project "Deneme"
+  
+  Also, to let the users easily use the commandline tool all the models 
+  should be easy to create.
+
+* SCM Integration:
+
+  The repository can be a local path, and the project can be managed with an
+  SCM, preferably with Mercurial.
+
+* Unicode:
+
+  All the string attributes should be unicode so for string attributes which
+  are checked against being a string should now be checked against being
+  unicode.
+
+* Start & End Date For Classes Mixed With TaskMixin:
+
+  All the classes which are mixed with TaskMixin should have a start and end
+  date attribute which will be set to the start date of the first task to the
+  due_date of the last task.
+
+* datetime instead of date
+
+  In the Task class all the time calculation should be done over the
+  datetime.datetime class instead of datetime.date object. This will let us
+  to increase the granularity of the scheduling.
 
 DONE:
 =====
- * Auto StatusList connection:
-   
-   StatusLists can be automatically connected to the created instance if there
-   is already a database setup and a StatusList instance already defined for
-   the current class. This means mixing the model part with the control part
-   but it is acceptable.
+* Auto StatusList connection:
 
- * Stop the fight between SimpleEntity.name and SimpleEntity.code.
-   
-   Currently name superseeds code, but it is annoying to change the code over
-   and over again just because the name is changed. So change the behaviour to
-   something like that; the code is only updated to the same value with name if
-   it is set to None or empty string. In any other case the code should remain
-   in the same value.
+  StatusLists can be automatically connected to the created instance if there
+  is already a database setup and a StatusList instance already defined for
+  the current class. This means mixing the model part with the control part
+  but it is acceptable.
 
- * SQLAlchemy ORM Declarative:
-   
-   Use declarative for the whole system. It started to make no sense to use
-   classical approach with Python objects and it started to be very hard to try
-   to update all the relations which is handled automatically by SQLAlchemy.
-   Besides, the work done by all the attributes which are using ValidatedList
-   is replaced with a neat system whenever the mapping has occured. Which is
-   the usage case %90 of the time.
-   
-   Tests are going to be nearly the same. The only programming overhead is the
-   implementation itself.
-   
-   Mixin classes also needs some attention, but as far as I see it is
-   successfully handled withing declarative approach.
+* Stop the fight between SimpleEntity.name and SimpleEntity.code.
 
- * "__stalker_version__" in SimpleEntity:
-   
-   Create an attribute called __stalker_version__ in the SimpleEntity, and
-   automatically update it to the current version string of Stalker to be able
-   to see with which version of Stalker this data is created, mainly important
-   for the database part.
+  Currently name superseeds code, but it is annoying to change the code over
+  and over again just because the name is changed. So change the behaviour to
+  something like that; the code is only updated to the same value with name if
+  it is set to None or empty string. In any other case the code should remain
+  in the same value.
 
- * Replace all the Mocker based tests with Unittest's which are using real
-   objects. It was necessary to use the Mocker library while designing the rest
-   of the system, but it is now making things complex and started to hide the
-   changes of one object from the others in the system.
+* SQLAlchemy ORM Declarative:
 
- * Convert all the list comparison test to assertItemsEqual
+  Use declarative for the whole system. It started to make no sense to use
+  classical approach with Python objects and it started to be very hard to try
+  to update all the relations which is handled automatically by SQLAlchemy.
+  Besides, the work done by all the attributes which are using ValidatedList
+  is replaced with a neat system whenever the mapping has occured. Which is
+  the usage case %90 of the time.
 
- * Add a slot in the ValidatedList which will hold the callable for the
-   validation process when any of the objects are changed (set, remove, delete
-   etc.) to allow the callable to be called when something has changed. This
-   will allow more control on the list, e.g. this will help controling the
-   relation of the classes to each other.
+  Tests are going to be nearly the same. The only programming overhead is the
+  implementation itself.
 
- * Check FilenameTemplate class documentation.
+  Mixin classes also needs some attention, but as far as I see it is
+  successfully handled withing declarative approach.
 
- * Check database part of all the previous Type dependent classes (Link, Asset,
-   Project, Task)
+* "__stalker_version__" in SimpleEntity:
 
- * Update the exceptions. Check if a proper exception is raised instead of
-   raising ValueErrors all the time.
+  Create an attribute called __stalker_version__ in the SimpleEntity, and
+  automatically update it to the current version string of Stalker to be able
+  to see with which version of Stalker this data is created, mainly important
+  for the database part.
 
- * A Status in StatusList should be accessed by its name used as the index
- 
- * A status should be comparable with a string like project.status=="complete"
-   or project.status=="cmplt"
- 
- * for an object which stores a list of other objects, stalker is validating if
-   the list is gathered from the correct type of objects, for example,
-   StatusList objects only accepts a list of Status objects. Stalker is able to
-   check if the elements in a list are Status objects when a list is assigned
-   to the StatusList.statuses attribute, but it can not check anything if the
-   list element is changed individually afterwards. This behaviour should be
-   extended with a validating system which is able to track changes on list
-   elements.
-   
-   SOLUTION:
-     
-     Added the ValidatedList list variant which does all the necessary things
-     explained in the problem.
+* Replace all the Mocker based tests with Unittest's which are using real
+  objects. It was necessary to use the Mocker library while designing the rest
+  of the system, but it is now making things complex and started to hide the
+  changes of one object from the others in the system.
+
+* Convert all the list comparison test to assertItemsEqual
+
+* Add a slot in the ValidatedList which will hold the callable for the
+  validation process when any of the objects are changed (set, remove, delete
+  etc.) to allow the callable to be called when something has changed. This
+  will allow more control on the list, e.g. this will help controling the
+  relation of the classes to each other.
+
+* Check FilenameTemplate class documentation.
+
+* Check database part of all the previous Type dependent classes (Link, Asset,
+  Project, Task)
+
+* Update the exceptions. Check if a proper exception is raised instead of
+  raising ValueErrors all the time.
+
+* A Status in StatusList should be accessed by its name used as the index
+
+* A status should be comparable with a string like project.status=="complete"
+  or project.status=="cmplt"
+
+* for an object which stores a list of other objects, stalker is validating if
+  the list is gathered from the correct type of objects, for example,
+  StatusList objects only accepts a list of Status objects. Stalker is able to
+  check if the elements in a list are Status objects when a list is assigned
+  to the StatusList.statuses attribute, but it can not check anything if the
+  list element is changed individually afterwards. This behaviour should be
+  extended with a validating system which is able to track changes on list
+  elements.
+  
+  SOLUTION:
+  
+    Added the ValidatedList list variant which does all the necessary things
+    explained in the problem.

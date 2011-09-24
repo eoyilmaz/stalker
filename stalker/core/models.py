@@ -23,7 +23,7 @@ from sqlalchemy.ext.declarative import (declarative_base, synonym_for,
                                         declared_attr)
 
 import stalker
-from stalker.core.errors import CircularDependencyError
+from stalker.core.errors import CircularDependencyError, OverBookedWarning
 from stalker.conf import defaults
 
 
@@ -1470,51 +1470,6 @@ class Link(Entity):
 
 
 ########################################################################
-class Booking(Entity):
-    """Holds information about the time spend on a specific task by a specific user.
-    """
-    
-    __tablename__ = "Bookings"
-    __mapper_args__ = {"polymorphic_identity": "Booking"}
-    booking_id = Column("id", Integer, ForeignKey("Entities.id"),
-                        primary_key=True)
-    task_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
-    task = relationship(
-        "Task",
-        primaryjoin="Bookings.c.task_id==Tasks.c.id",
-        uselist=False,
-        back_populates="bookings",
-        doc="The :class:`~stalker.core.models.Task` instance that this booking is created for"
-    )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, task=None, **kwargs):
-        super(Booking, self).__init__(**kwargs)
-        
-        self.task = task
-    
-    
-    
-    #----------------------------------------------------------------------
-    @validates("task")
-    def _validate_task(self, key, task):
-        """validates the given task value
-        """
-        
-        if not isinstance(task, Task):
-            raise TypeError("Booking.task should be an instance of "
-                            "stalker.core.models.Task")
-        
-        return task
-
-
-
-
-
-
-########################################################################
 class Review(Entity):
     """User reviews and comments about other entities.
     
@@ -2768,6 +2723,16 @@ class User(Entity):
     )
     
     
+    bookings = relationship(
+        "Booking",
+        primaryjoin="Bookings.c.resource_id==Users.c.id",
+        back_populates="resource",
+        doc="""A list of :class:`~stalker.core.models.Booking` instances which
+        holds the bookings created for this :class:`~stalker.core.models.User`.
+        """
+    )
+    
+    
     #----------------------------------------------------------------------
     def __init__(
         self,
@@ -3247,7 +3212,7 @@ class ReferenceMixin(object):
     
     
     # add this lines for Sphinx
-    __tablename__ = "ReferenceMixins"
+#    __tablename__ = "ReferenceMixins"
     
     
     
@@ -3566,8 +3531,8 @@ class ScheduleMixin(object):
     
     
     
-    # add this lines for Sphinx
-    __tablename__ = "ScheduleMixins"
+#    # add this lines for Sphinx
+#    __tablename__ = "ScheduleMixins"
     
     
     
@@ -3785,8 +3750,8 @@ class ProjectMixin(object):
     
     
     
-    # add this lines for Sphinx
-    __tablename__ = "ProjectMixins"
+#    # add this lines for Sphinx
+#    __tablename__ = "ProjectMixins"
     
     
     
@@ -3811,22 +3776,9 @@ class ProjectMixin(object):
     def project(cls):
         
         backref = cls.__tablename__.lower()
-        doc = """The :class:`~stalker.core.models.Project` instance that this object belongs to.
+        doc = """The :class:`~stalker.core.models.Project` instance that this
+        object belongs to.
         """
-        
-        #print cls
-        #print cls.__name__
-        #print cls.__tablename__
-        #print cls.__mapper_args__
-        
-        #if hasattr(cls, "__project_backref_attrname__"):
-            #print "it has a __project_backref_attrname__ attribute"
-            #backref = cls.__project_backref_attrname__
-        #else:
-            #print "it has not a __project_backref_attrname__ attribute"
-        
-        if hasattr(cls, "__project_doc__"):
-            doc = cls.__project_doc__
         
         return relationship(
             "Project",
@@ -3880,6 +3832,123 @@ class ProjectMixin(object):
         #"""
         
         #return self._project
+
+
+
+
+
+
+########################################################################
+class Booking(Entity, ScheduleMixin):
+    """Holds information about the time spend on a specific
+    :class:`~stalker.core.models.Task` by a specific
+    :class:`~stalker.core.models.User`.
+    
+    Bookings are created per resource. It means, you need to record all the 
+    works separately for each resource. So there is only one resource in a 
+    Booking instance, thus :attr:`~stalker.core.models.Booking.duration`
+    attribute is equal to the meaning of ``effort``.
+    
+    A :class:`~stalker.core.models.Booking` instance needs to be initialized
+    with a :class:`~stalker.core.models.Task` and a
+    :class:`~stalker.core.models.User` instances.
+    
+    Adding overlapping booking for a :class:`~stalker.core.models.User` will
+    raise a :class:`~stalker.core.errors.OverBookedWarning`.
+    
+    :param task: The :class:`~stalker.core.models.Task` instance that this
+      booking belongs to.
+    
+    :param resource: The :class:`~stalker.core.models.User` instance that this
+      booking is created for.
+    """
+
+    __tablename__ = "Bookings"
+    __mapper_args__ = {"polymorphic_identity": "Booking"}
+    booking_id = Column("id", Integer, ForeignKey("Entities.id"),
+                        primary_key=True)
+    task_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
+    task = relationship(
+        "Task",
+        primaryjoin="Bookings.c.task_id==Tasks.c.id",
+        uselist=False,
+        back_populates="bookings",
+        doc="""The :class:`~stalker.core.models.Task` instance that this 
+        booking is created for"""
+    )
+    
+    resource_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
+    resource = relationship(
+        "User",
+        primaryjoin="Bookings.c.resource_id==Users.c.id",
+        uselist=False,
+        back_populates="bookings",
+        doc="""The :class:`~stalker.core.models.User` instance that this booking
+        is created for"""
+    )
+    
+    
+    
+    #----------------------------------------------------------------------
+    def __init__(self, task=None, resource=None, **kwargs):
+        super(Booking, self).__init__(**kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
+        
+        self.task = task
+        self.resource = resource
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("task")
+    def _validate_task(self, key, task):
+        """validates the given task value
+        """
+        
+        if not isinstance(task, Task):
+            raise TypeError("Booking.task should be an instance of "
+                            "stalker.core.models.Task")
+        
+        return task
+    
+    
+    
+    #----------------------------------------------------------------------
+    @validates("resource")
+    def _validate_resource(self, key, resource):
+        """validates the given resource value
+        """
+        
+        if resource is None:
+            raise TypeError("Booking.resource can not be None")
+        
+        if not isinstance(resource, User):
+            raise TypeError("Booking.resource should be a "
+                            "stalker.core.models.User instance")
+        
+        
+        # check for overbooking
+        for booking in resource.bookings:
+            print booking.start_date
+            print self.start_date
+                
+            if booking.start_date == self.start_date or \
+                booking.due_date == self.due_date or \
+                (self.due_date > booking.start_date and \
+                    self.due_date < booking.due_date) or \
+                (self.start_date > booking.start_date and \
+                    self.start_date < booking.due_date):
+                
+                raise OverBookedWarning(
+                    "The resource %s is overly booked with %s and %s" % 
+                    (resource, self, booking)
+                )
+        
+        
+        return resource
+        
+        
+        
 
 
 
@@ -3945,10 +4014,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
       * :class:`~stalker.core.models.Sequence`
       * :class:`~stalker.core.models.Asset`
       * :class:`~stalker.core.models.Shot`
+      * :class:`~stalker.core.models.TaskableEntity` itself and any class 
+        which derives from :class:`~stalker.core.models.TaskableEntity`.
     
-    If you want to have your own class to be *taskable* use the
-    :class:`~stalker.core.models.TaskMixin` to add the ability to connect a
-    :class:`~stalker.core.models.Task` to it.
+    If you want to have your own class to be *taskable* derive it from the
+    :class:`~stalker.core.models.TaskableEntity` to add the ability to 
+    connect a :class:`~stalker.core.models.Task` to it.
     
     The Task class itself is mixed with
     :class:`~stalker.core.models.StatusMixin` and
@@ -3968,7 +4039,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :param effort: The total effort that needs to be spend to complete this
       Task. Can be used to create an initial bid of how long this task going to
-      take. The effort is equaly divided to the assigned resources. So if the
+      take. The effort is equally divided to the assigned resources. So if the
       effort is 10 days and 2 :attr:`~stalker.core.models.Task.resources` is
       assigned then the :attr:`~stalker.core.models.Task.duration` of the task
       is going to be 5 days (if both of the resources are free to work). The
@@ -3996,7 +4067,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     :type effort: datetime.timedelta
     
     :param depends: A list of :class:`~stalker.core.models.Task`\ s those this
-      :class:`~stalker.core.models.Task` is dependening on.
+      :class:`~stalker.core.models.Task` is depending on.
     
     :type depends: list of :class:`~stalker.core.models.Task`
     
@@ -4232,9 +4303,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """validates the given bookings value
         """
         
-        if isinstance(booking, Booking):
+        if not isinstance(booking, Booking):
             raise TypeError("all the elements in the bookings should be "
-                            "an instances of stalker.core.models.Booking")
+                            "an instances of stalker.core.models.Booking not "
+                            "%s instance" % booking.__class__)
         
         
         return booking

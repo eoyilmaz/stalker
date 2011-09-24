@@ -11,7 +11,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 # create a new mixed in SimpleEntity
 class DeclProjMixA(SimpleEntity, ProjectMixin):
     
-    __tablename__ = "ProjMixAs"
+    __tablename__ = "DeclProjMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclProjMixA"}
     a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
@@ -25,7 +25,7 @@ class DeclProjMixA(SimpleEntity, ProjectMixin):
 
 class DeclProjMixB(SimpleEntity, ProjectMixin):
     
-    __tablename__ = "ProjMixBs"
+    __tablename__ = "DeclProjMixBs"
     __mapper_args__ = {"polymorphic_identity": "DeclProjMixB"}
     b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
