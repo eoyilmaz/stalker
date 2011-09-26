@@ -25,7 +25,6 @@ from stalker.db.mixins import ReferenceMixinDB
 from stalker.core.models import SimpleEntity, ReferenceMixin
 
 
-
 class GreatEntity(SimpleEntity, ReferenceMixin):
     """The new great entity class, which is a new simpleEntity with
     ReferenceMixin
@@ -33,11 +32,9 @@ class GreatEntity(SimpleEntity, ReferenceMixin):
     pass
 
 
-
 def setup():
-    
     metadata = db.metadata
-    
+
     # first create the table for our GreatEntity
     great_entities_table = Table(
         "greatEntities", metadata,
@@ -46,29 +43,29 @@ def setup():
             Integer,
             ForeignKey(tables.SimpleEntities.c.id),
             primary_key=True,
-        ),
-    )
-    
-    
+            ),
+        )
+
+
     # to let the mixin adds its own columns and properties we call the
     # ReferenceMixinDB.setup
-    
+
     # create the mapper_arguments dictionary
-    mapper_arguments= {
+    mapper_arguments = {
         "inherits": GreatEntity.__base__,
         "polymorphic_identity": GreatEntity.entity_type
     }
-    
+
     # do the mixin database setup
     ReferenceMixinDB.setup(GreatEntity, great_entities_table, mapper_arguments)
-    
+
     # setup the mapper with the updated mapper_arguments
     mapper(
         GreatEntity,
         great_entities_table,
         **mapper_arguments
     )
-    
+
     # voila now we have introduced a new type to the SOM and also mixed it
     # with a StatusMixin
 

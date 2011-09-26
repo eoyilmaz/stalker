@@ -48,8 +48,6 @@ not using any properties we are mapping the tables directly to our classes
 without setting up any synonyms for our attributes.
 """
 
-
-
 from sqlalchemy import Table, Column, Integer, Float, ForeignKey, String
 from sqlalchemy.orm import mapper, relationship
 
@@ -58,11 +56,6 @@ from stalker.db import tables
 from stalker.core.models import Entity
 
 
-
-
-
-
-########################################################################
 class Camera(Entity):
     """The Camera class holds basic information about the Camera used on the
     sets.
@@ -82,8 +75,8 @@ class Camera(Entity):
     :param web_page: the web page of the camera
     
     """
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  make="",
                  model="",
@@ -93,10 +86,9 @@ class Camera(Entity):
                  cropping_factor=1.0,
                  web_page="",
                  **kwargs):
-        
         # pass all the extra data to Entity
         super(Camera, self).__init__(**kwargs)
-        
+
         self.make = make
         self.model = model
         self.aperture_gate = aperture_gate
@@ -106,11 +98,6 @@ class Camera(Entity):
         self.web_page = web_page
 
 
-
-
-
-
-########################################################################
 class Lens(Entity):
     """The Lens class holds data about lenses used in shootings
     
@@ -124,8 +111,8 @@ class Lens(Entity):
     
     :param web_page: the product web page
     """
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  make="",
                  model="",
@@ -133,11 +120,10 @@ class Lens(Entity):
                  max_focal_length=0,
                  web_page="",
                  **kwargs
-                 ):
-        
+    ):
         # pass all the extra data to Entity
         super(Lens, self).__init__(**kwargs)
-        
+
         self.make = make
         self.model = model
         self.min_focal_length = min_focal_length
@@ -145,15 +131,13 @@ class Lens(Entity):
         self.web_page = web_page
 
 
-
-#----------------------------------------------------------------------
 def setup():
     """this is the setup method for Stalker to call to learn about how to
     persist our classes.
     """
-    
+
     metadata = db.metadata
-    
+
     # Camera
     cameras_table = Table(
         "cameras", metadata,
@@ -170,8 +154,8 @@ def setup():
         Column("vertical_film_back", Float(precision=4)),
         Column("cropping_factor", Float(precision=4)),
         Column("web_page", String),
-    )
-    
+        )
+
     # Lens
     lenses_table = Table(
         "lenses", metadata,
@@ -186,22 +170,22 @@ def setup():
         Column("min_focal_length", Float(precision=1)),
         Column("max_focal_length", Float(precision=1)),
         Column("web_page", String),
-    )
-    
+        )
+
     # map Camera
     mapper(
         Camera,
         cameras_table,
         inherits=Camera.__base__,
         polymorphic_identity=Camera.entity_type,
-    )
-    
+        )
+
     # map Lens
     mapper(
         Lens,
         lenses_table,
         inherits=Lens.__base__,
         polymorphic_identity=Lens.entity_type,
-    )
-    
+        )
+
     # now we have extended SOM with two new classes

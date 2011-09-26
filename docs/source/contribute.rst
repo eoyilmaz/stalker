@@ -83,7 +83,7 @@ tests results and the coverage table.
   done using real objects. It is done in this way cause the design of the
   objects were changing too quickly, and it started to be a guess work to see
   which of the tests are effected by this changes. So the Mocker is removed and
-  it will not be used in future tests.
+  it will not be used in future releases.
 
 Coding Style
 ============
@@ -94,61 +94,25 @@ rules, and there are some extra rules as listed below:
  * Class names should start with an upper-case letter, function and method
    names should start with lower-case letter::
    
-     ########################################################################
      class MyClass(object):
          """the doc string of the class
          """
          
-         
-         
-         #----------------------------------------------------------------------
          def __init__(self):
              pass
          
-         
-         
-         #----------------------------------------------------------------------
          def my_method(self):
              pass
-         
-         
-         
  
- * The class definitions should be preceded by 72 `#` characters, if you are
-   using `Wing IDE`_ it is trivial cause it has these kind of templates::
+ * There should be 1 spaces before and after functions and class methods::
    
-     ########################################################################
-     class StatusBase(object):
-         """The StatusBase class
-         """
-         pass
-  
- * The method or function definitions should be preceded by 70 `-` characters,
-   and the line should be commented out, again if you are using `Wing IDE`_ it
-   does that automatically::
-   
-     #----------------------------------------------------------------------
-     def __init__(self, name, abbreviation, thumbnail=None):
-     
-         self._name = self._checkName(name)
-     
-     
- * There should be 3 spaces before and after functions and class methods::
-   
-     ########################################################################
      class StatusBase(object):
          """The StatusBase class
          """
          
-         
-         
-         #----------------------------------------------------------------------
          def __init__(self, name, abbreviation, thumbnail=None):
              self._name = self._checkName(name)
          
-         
-         
-         #----------------------------------------------------------------------
          def _checkName(self, name):
              """checks the name attribute
              """
@@ -159,40 +123,22 @@ rules, and there are some extra rules as listed below:
                  
                  return name.title()
    
- * And also there should be 6 spaces before and after a class body::
+ * And also there should be 1 spaces before and after a class body::
    
      #-*- coding: utf-8 -*-
      
-     
-     
-     
-     
-     
-     ########################################################################
      class A(object):
          pass
      
-     
-     
-     
-     
-     
-     ########################################################################
      class B(object):
          pass
-         
-         
-         
-         
-         
-         
+     
      pass
  
  * Any lines that may contain a code or comment can not be longer than 79
    characters, all the longer lines should be cancelled with "\\" character and
    should continue properly from the line below::
    
-     #----------------------------------------------------------------------
      def _checkName(self, name):
          """checks the name attribute
          """
@@ -223,7 +169,6 @@ the first line::
   #-*- coding: utf-8 -*-
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
-.. _Wing IDE: http://www.wingware.com
 
 SCM - Mercurial (HG)
 ====================

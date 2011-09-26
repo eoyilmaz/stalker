@@ -28,7 +28,7 @@ new_project2 = Project(
     name="test project2",
     type=project_type,
     status_list=project_status_list,
-    repository=repo1,
+    repository=repo1
 )
 
 character_asset_type = Type(name="Character", target_entity_type=Asset)
@@ -43,14 +43,14 @@ new_asset1 = Asset(
     name="test asset",
     type=character_asset_type,
     project=new_project1,
-    status_list=asset_status_list,
+    status_list=asset_status_list
 )
 
 new_asset2 = Asset(
     name="test",
     type=character_asset_type,
     project=new_project2,
-    status_list=asset_status_list,
+    status_list=asset_status_list
 )
 
 new_user1 = User(
@@ -58,7 +58,7 @@ new_user1 = User(
     first_name="Test1",
     last_name="User1",
     email="testuser1@test.com",
-    password="1234",
+    password="1234"
 )
 
 new_user2 = User(
@@ -66,13 +66,13 @@ new_user2 = User(
     first_name="Test2",
     last_name="User2",
     email="testuser2@test.com",
-    password="1234",
+    password="1234"
 )
 
 task_status_list = StatusList(
     name="Task Statuses",
     statuses=[status1, status2],
-    target_entity_type=Task,
+    target_entity_type=Task
 )
 
 new_task = Task(

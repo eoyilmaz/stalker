@@ -1,96 +1,6 @@
 TODO
 ====
 
-* OverBookingWarning:
-  
-  Create a new Warning for the :class:`~stalker.core.models.Booking` class 
-  which will be emitted when a resource is booked for the same time period 
-  more than once.
-
-* ``end_date`` attribute in ScheduleMixin:
-  
-  there could be a synonym for the ``due_date`` attribute in the
-  :class:`~stalker.core.models.ScheduleMixin`\ . Which will be meaningful for
-  :class:`~stalker.core.models.Booking` class.
-
-* Logging:
-
-  Use the Python logging module to output Debug messages.
-
-* Per user settings file:
-
-  To let Pipeline TDs easily setup a new workstation with a setup script,
-  a predefined file let say with a name of ".strc" can be placed in to the 
-  users home folder and Stalker can search for this file and parse it to get 
-  things like the database server path, user name and the password.
-
-  There could be also an $STRC environment variable which is showing a common
-  place lets say in the fileserver, which also may have a ".strc" file. In 
-  this way it will be easy to setup only one ".strc" file for the whole studio.
-
-* don't forget to add tests for:
-
-  * Project.users
-  * Project.assets
-  * Project.sequences
-  * Project.shots
-
-* SimpleEntity.code attribute:
-
-  ``code`` is a more important field than the name, so replace their roles in 
-  the system.
-
-* ``project`` or ``projects`` field:
-
-  Most of the data is related with a Project. It is possible to add the
-  ``project`` field to a higher level in the hierarchy than the TaskableEntity.
-  A TaskableEntity needs to have a project but not all of them needs a tasks 
-  field. So creating a project field in the super will be nice.
-
-* StatusMixin and string indices:
-
-  StatusMixin should be able to set the status with a string, because it is
-  possible to use strings in StatusList.
-
-* Refactor target_entity_type attributes
-
-  StatusList, FilenameTemplate and Type classes are using the same
-  target_entity_type attribute, create a mixin for that.
-
-* Implicit instance creation with back references:
-
-  Instead of::
-  
-    object2 = AClass(name="A Data", related_to=object1)
-  
-  Allow object creation with the following idiom::
-  
-    object1.data_list.append( AClass(name="A Data") )
-  
-  This is much easier to understand, because it both shows where is the new
-  data connected to and the user doesn't need to come up with a name for the
-  new object, but the first usage needs less knowledge about the internals of
-  the system (ex: to know that ``object2`` should go to ``object1.data_list``)
-
-* Scrum:
-
-  Use scrum.
-
-* Commandline Module:
-
-  Create a commandline module which resembles the mercurials "hg" command to
-  let the users to manage their assets and data. Examples::
-    
-    st create project "Deneme"
-  
-  Also, to let the users easily use the commandline tool all the models 
-  should be easy to create.
-
-* SCM Integration:
-
-  The repository can be a local path, and the project can be managed with an
-  SCM, preferably with Mercurial.
-
 * Unicode:
 
   All the string attributes should be unicode so for string attributes which
@@ -109,8 +19,108 @@ TODO
   datetime.datetime class instead of datetime.date object. This will let us
   to increase the granularity of the scheduling.
 
+* SCM Integration:
+
+  The repository can be a local path, and the project can be managed with an
+  SCM, preferably with Mercurial.
+
+* Commandline Module:
+
+  Create a commandline module which resembles the mercurials "hg" command to
+  let the users to manage their assets and data. Examples::
+    
+    st create project "Deneme"
+  
+  Also, to let the users easily use the commandline tool all the models 
+  should be easy to create.
+
+* Scrum:
+
+  Use scrum.
+
+* Implicit instance creation with back references:
+
+  Instead of::
+  
+    object2 = AClass(name="A Data", related_to=object1)
+  
+  Allow object creation with the following idiom::
+  
+    object1.data_list.append( AClass(name="A Data") )
+  
+  This is much easier to understand, because it both shows where is the new
+  data connected to and the user doesn't need to come up with a name for the
+  new object, but the first usage needs less knowledge about the internals of
+  the system (ex: to know that ``object2`` should go to ``object1.data_list``)
+
+* StatusMixin and string indices:
+
+  StatusMixin should be able to set the status with a string, because it is
+  possible to use strings in StatusList.
+
+* ``project`` or ``projects`` field:
+
+  Most of the data is related with a Project. It is possible to add the
+  ``project`` field to a higher level in the hierarchy than the TaskableEntity.
+  A TaskableEntity needs to have a project but not all of them needs a tasks 
+  field. So creating a project field in the super will be nice.
+
+* SimpleEntity.code attribute:
+
+  ``code`` is a more important field than the name, so replace their roles in 
+  the system.
+
+* don't forget to add tests for:
+
+  * Project.users
+  * Project.assets
+  * Project.sequences
+  * Project.shots
+
+* Per user settings file:
+
+  To let Pipeline TDs easily setup a new workstation with a setup script,
+  a predefined file let say with a name of ".strc" can be placed in to the 
+  users home folder and Stalker can search for this file and parse it to get 
+  things like the database server path, user name and the password.
+
+  There could be also an $STRC environment variable which is showing a common
+  place lets say in the fileserver, which also may have a ".strc" file. In 
+  this way it will be easy to setup only one ".strc" file for the whole studio.
+
+* Logging:
+
+  Use the Python logging module to output Debug messages.
+
+* ``end_date`` attribute in ScheduleMixin:
+  
+  there could be a synonym for the ``due_date`` attribute in the
+  :class:`~stalker.core.models.ScheduleMixin`\ . Which will be meaningful for
+  :class:`~stalker.core.models.Booking` class.
+
+* ``__tablename__`` and ``__mapper_args__``:
+  
+  The duty of the ``__tablename__`` and ``__mapper_args__`` variables are 
+  very common to any class in the SOM. It can be gathered in a mixin and the
+  :class:`~stalker.core.models.SimpleEntity` can be mixed with this class and
+  the rest will have their table name and polymorphic identity by default. 
+  The plural name attribute also needs to be reintroduced.
+
+
 DONE:
 =====
+
+* Refactor target_entity_type attributes
+
+  StatusList, FilenameTemplate and Type classes are using the same
+  target_entity_type attribute, create a mixin for that.
+
+* OverBookingWarning:
+  
+  Create a new Warning for the :class:`~stalker.core.models.Booking` class 
+  which will be emitted when a resource is booked for the same time period 
+  more than once.
+
 * Auto StatusList connection:
 
   StatusLists can be automatically connected to the created instance if there

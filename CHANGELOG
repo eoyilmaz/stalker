@@ -29,6 +29,14 @@ Stalker Changes
   than one booking is creating with overlapping time interval and issue a
   :class:`~stalker.core.errors.OverBookedWarning`.
 
+* Cleaned up the code style.
+
+* Moved the ``target_entity_type`` functionality to a new mixin class called
+  :class:`~stalker.core.models.TargetEntityTypeMixin`\ .
+  :class:`~stalker.core.models.StatusList`,
+  :class:`~stalker.core.models.FilenameTemplate`, and
+  :class:`~stalker.core.models.Type` classes are mixin with this new class.
+
 0.1.2.a3
 ---------
 

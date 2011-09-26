@@ -21,6 +21,7 @@ Summary
    stalker.core.models.ReferenceMixin
    stalker.core.models.ScheduleMixin
    stalker.core.models.StatusMixin
+   stalker.core.models.TargetEntityTypeMixin
    stalker.core.models
    stalker.core.models.Asset
    stalker.core.models.Booking

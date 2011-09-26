@@ -30,6 +30,7 @@ Inheritance Diagram
      stalker.core.models.StatusList
      stalker.core.models.Structure
      stalker.core.models.Tag
+     stalker.core.models.TargetEntityTypeMixin
      stalker.core.models.Task
      stalker.core.models.TaskableEntity
      stalker.core.models.Type

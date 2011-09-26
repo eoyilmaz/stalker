@@ -51,8 +51,6 @@ There are also two utility functions two check and set encrypted passwords.
 :func:`stalker.ext.auth.set_password`.
 """
 
-
-
 import os
 import tempfile
 import datetime
@@ -65,14 +63,11 @@ from stalker.core.errors import LoginError, DBError
 from stalker.core.models import User
 
 
-
-SESSION={}
+SESSION = {}
 SESSION_ID = "stalker"
 SESSION_KEY = "_auth_user_id"
 
 
-
-#----------------------------------------------------------------------
 def create_session():
     """Creates the beaker.session object.
     
@@ -80,26 +75,24 @@ def create_session():
     function creates the session and stores it in the
     :const:`stalker.ext.auth.SESSION` dictionary.
     """
-    
+
     from stalker.ext import auth
-    
+
     tempdir = tempfile.gettempdir()
-    
+
     # loading session
     session_options = {
-        "id":auth.SESSION_ID,
-        "type":"file",
+        "id": auth.SESSION_ID,
+        "type": "file",
         "cookie_expires": False,
         "data_dir": os.path.sep.join([tempdir, "stalker_cache", "data"]),
         "lock_dir": os.path.sep.join([tempdir, "stalker_cache", "lock"]),
-    }
-    
+        }
+
     auth.SESSION = beakerSession.Session({}, **session_options)
     auth.SESSION.save()
 
 
-
-#----------------------------------------------------------------------
 def login(user=None):
     """Persists the user_id in a session.
     
@@ -120,9 +113,9 @@ def login(user=None):
     
     :type user: :class:`stalker.core.models.User`
     """
-    
+
     from stalker.ext import auth
-    
+
     # log the user if the current session id matches the given user id
     if user is None:
         try:
@@ -132,19 +125,19 @@ def login(user=None):
                              "user, for the first time.")
         else:
             user = db.query(User).\
-                   filter_by(id=SESSION[auth.SESSION_KEY]).\
-                   first()
-    
+            filter_by(id=SESSION[auth.SESSION_KEY]).\
+            first()
+
     if not isinstance(user, User):
         raise TypeError("user must be a stalker.core.models.User instance")
-    
+
     if db.session is None:
         raise DBError("No database connection is setup yet, please use "
                       "stalker.db.setup to setup a database")
-    
+
     user.last_login = datetime.datetime.now()
     db.session.commit()
-    
+
     # store the user-id in the SESSION
     if auth.SESSION_KEY in auth.SESSION:
         if auth.SESSION[SESSION_KEY] != user.id:
@@ -155,44 +148,39 @@ def login(user=None):
         auth.SESSION[SESSION_KEY] = user.id
 
 
-
-
-#----------------------------------------------------------------------
 def authenticate(username="", password=""):
     """Authenticates the given username and password, returns a
     stalker.core.models.User object
     
     There needs to be a already setup database for the authentication to hapen.
     """
-    
+
     user_obj = None
-    
+
     # check if the database is setup
     if db.session == None:
         raise DBError("stalker is not connected to any db right now, use "
                       "stalker.db.setup(), to setup the default database")
-    
+
     # try to get the given user
     user_obj = db.session.query(User).filter_by(name=username).first()
-    
+
     error_msg = "user name and login don't match, %s" % username
-    
+
     if user_obj is None:
         raise LoginError(error_msg)
-    
+
     if not check_password(password, user_obj.password):
         raise LoginError(error_msg)
-    
+
     return user_obj
 
 
-
-#----------------------------------------------------------------------
 def logout():
     """removes the current session
     """
     from stalker.ext import auth
-    
+
     try:
         auth.SESSION.delete()
         auth.SESSION.clear()
@@ -200,8 +188,6 @@ def logout():
         return
 
 
-
-#----------------------------------------------------------------------
 def login_required(view, error_message=None):
     """a decorator that implements login functionality to any function or
     method
@@ -214,7 +200,7 @@ def login_required(view, error_message=None):
     
     :returns: the decorated function
     """
-    
+
     def wrap(func):
         def wrapped_func(*args, **kwargs):
             if view():
@@ -225,12 +211,12 @@ def login_required(view, error_message=None):
                 else:
                     raise LoginError("You should be logged in before "
                                      "completing your action!")
+
         return wrapped_func
+
     return wrap
 
 
-
-#----------------------------------------------------------------------
 def permission_required(permission_group, error_message=None):
     """a decorator that implements permission checking to any function or
     method
@@ -246,7 +232,7 @@ def permission_required(permission_group, error_message=None):
     
     :returns: the decorated function
     """
-    
+
     def wrap(func):
         def wrapped_func(*args, **kwargs):
             if get_user() in permission_group:
@@ -257,12 +243,12 @@ def permission_required(permission_group, error_message=None):
                 else:
                     raise LoginError("You don't have permission to complete "
                                      "your action!")
+
         return wrapped_func
+
     return wrap
 
 
-
-#----------------------------------------------------------------------
 def check_password(raw_password, enc_password):
     """Checks the given raw password.
     
@@ -275,12 +261,10 @@ def check_password(raw_password, enc_password):
     
     :returns: bool
     """
-    
+
     return enc_password == base64.encodestring(str(raw_password))
 
 
-
-#----------------------------------------------------------------------
 def set_password(raw_password):
     """Returns an encrypted version of the given password.
     
@@ -289,13 +273,13 @@ def set_password(raw_password):
       
     :returns: string
     """
-    
+
     if raw_password is None:
         raise TypeError("raw_password can not be None")
-    
+
     if raw_password == "":
         raise ValueError("raw_password can not be empty string")
-    
+
     return base64.encodestring(raw_password)
 
 

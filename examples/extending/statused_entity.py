@@ -25,7 +25,6 @@ from stalker.db.mixins import StatusMixinDB
 from stalker.core.models import SimpleEntity, StatusMixin
 
 
-
 class NewStatusedEntity(SimpleEntity, StatusMixin):
     """The new statused entity class, which is a new simpleEntity with status
     abilities
@@ -33,13 +32,12 @@ class NewStatusedEntity(SimpleEntity, StatusMixin):
     pass
 
 
-
 def setup():
     """this is the setup function that stalker will call to setup our class
     """
-    
+
     metadata = db.metadata
-    
+
     # first create the table for our NewStatusedEntity, we don't need anything
     # other than an id column
     new_statused_entities_table = Table(
@@ -49,17 +47,17 @@ def setup():
             Integer,
             ForeignKey(tables.SimpleEntities.c.id),
             primary_key=True,
-        ),
-    )
-    
-    
+            ),
+        )
+
+
     # to let the mixin adds its own columns and properties we call the
     # StatusMixinDB.setup
-    
+
     # to mix the table
     mapper_arguments = StatusMixinDB.setup(NewStatusedEntity, new_statused_entities_table)
     #print "mapper_arguments", mapper_arguments
-    
+
     # StatusMixinDB.setup returns the:
     #  * secondary_tables that it created for us
     #  * new properties for the mapper
@@ -67,7 +65,7 @@ def setup():
     #
     # we don't need to use the secondary_tables but the properties and options
     # will be passed to the mapper of our class
-    
+
     # update the mapper arguments with our variables
     mapper_arguments.update(
         dict(
@@ -75,14 +73,14 @@ def setup():
             polymorphic_identity=NewStatusedEntity.entity_type
         )
     )
-    
+
     # do the mapping
     mapper(
         NewStatusedEntity,
         new_statused_entities_table,
         **mapper_arguments
     )
-    
+
     # voila now we have introduced a new type to the SOM and also mixed it
     # with a StatusMixin
 

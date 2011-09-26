@@ -16,10 +16,9 @@ DATABASE_ENGINE_SETTINGS = {
     "echo": False
 }
 
-
 DATABASE_SESSION_SETTINGS = {}
 
-STUDIO_DATABASE= "sqlite:///:memory:"
+STUDIO_DATABASE = "sqlite:///:memory:"
 PROJECT_DATABASE = "sqlite:///:memory:"
 
 #
@@ -47,8 +46,7 @@ KEY = "stalker_default_key"
 #
 MAPPERS = [
     "stalker.db.mapper",
-]
-
+    ]
 
 CORE_MODEL_CLASSES = [
     "stalker.core.models.Asset",
@@ -75,7 +73,7 @@ CORE_MODEL_CLASSES = [
     "stalker.core.models.Type",
     "stalker.core.models.User",
     "stalker.core.models.Version",
-]
+    ]
 
 DEFAULT_TASK_DURATION = datetime.timedelta(days=10)
 DEFAULT_TASK_PRIORITY = 500

@@ -18,7 +18,7 @@ from sqlalchemy import (
     DateTime,
     Interval,
     UniqueConstraint
-)
+    )
 from sqlalchemy.ext.declarative import (declarative_base, synonym_for,
                                         declared_attr)
 
@@ -26,18 +26,8 @@ import stalker
 from stalker.core.errors import CircularDependencyError, OverBookedWarning
 from stalker.conf import defaults
 
-
-
 Base = declarative_base()
 
-
-
-
-
-
-
-
-########################################################################
 class EntityMeta(type):
     """The metaclass for the very basic entity.
     
@@ -46,19 +36,16 @@ class EntityMeta(type):
     form of the class name. These two attributes can be overriden in the
     class itself.
     """
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __new__(mcs, classname, bases, dict_):
-        
         # create the entity_type
         dict_["entity_type"] = unicode(classname)
-        
+
         # try to find a plural name for the class if not given
         if not dict_.has_key("plural_name"):
-            
-            plural_name = unicode(classname+"s")
-            
+            plural_name = unicode(classname + "s")
+
             if classname[-1] == "y":
                 plural_name = unicode(classname[:-1] + "ies")
             elif classname[-2] == "ch":
@@ -67,20 +54,15 @@ class EntityMeta(type):
                 plural_name = unicode(classname[:-1] + "ves")
             elif classname[-1] == "s":
                 plural_name = unicode(classname + "es")
-            
+
             dict_["plural_name"] = plural_name
-        
+
         if not dict_.has_key("__strictly_typed__"):
             dict_["__strictly_typed__"] = False
-        
+
         return super(EntityMeta, mcs).__new__(mcs, classname, bases, dict_)
 
 
-
-
-
-
-########################################################################
 class SimpleEntity(Base):
     """The base class of all the others
     
@@ -190,21 +172,19 @@ class SimpleEntity(Base):
     
     :type type: :class:`~stalker.core.models.Type`
     """
-    
-    
-    
+
     __strictly_typed__ = False
-    
+
     __tablename__ = "SimpleEntities"
     id = Column("id", Integer, primary_key=True)
-    
+
     #entity_type = Column("db_entity_type", String(128), nullable=False)
     entity_type = Column(String(128), nullable=False)
     __mapper_args__ = {
         "polymorphic_on": entity_type,
         "polymorphic_identity": "SimpleEntity",
-    }
-    
+        }
+
     code = Column(
         String(256),
         nullable=False,
@@ -217,65 +197,69 @@ class SimpleEntity(Base):
         Setting the code attribute to None will reset it to the default value.
         The default value is the upper case form of the nice_name."""
     )
-    
+
     name = Column(
         String(256),
         nullable=False,
         doc="""Name of this object"""
     )
-    
+
     description = Column(
         "description",
         String,
         doc="""Description of this object."""
     )
-    
+
     created_by_id = Column(
         "created_by_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="x")
     )
-    
+
     created_by = relationship(
         "User",
         backref="entities_created",
         primaryjoin="SimpleEntity.created_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`~stalker.core.models.User` who has created this object.""",
-    )
-    
+        doc="""The :class:`~stalker.core.models.User` who has created this object."""
+        ,
+        )
+
     updated_by_id = Column(
         "updated_by_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="x")
     )
-    
+
     updated_by = relationship(
         "User",
         backref="entities_updated",
         primaryjoin="SimpleEntity.updated_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`~stalker.core.models.User` who has updated this object.""",
-    )
-    
+        doc="""The :class:`~stalker.core.models.User` who has updated this object."""
+        ,
+        )
+
     date_created = Column(
         DateTime,
         default=datetime.datetime.now(),
-        doc="""A :class:`datetime.datetime` instance showing the creation date and time of this object.""",
-    )
-    
+        doc="""A :class:`datetime.datetime` instance showing the creation date and time of this object."""
+        ,
+        )
+
     date_updated = Column(
         DateTime,
         default=datetime.datetime.now(),
-        doc="""A :class:`datetime.datetime` instance showing the update date and time of this object.""",
-    )
-    
+        doc="""A :class:`datetime.datetime` instance showing the update date and time of this object."""
+        ,
+        )
+
     type_id = Column(
         "type_id",
         Integer,
         ForeignKey("Types.id", use_alter=True, name="y")
     )
-    
+
     type = relationship(
         "Type",
         primaryjoin="SimpleEntity.type_id==Type.type_id_local",
@@ -285,13 +269,11 @@ class SimpleEntity(Base):
         :attr:`~stalker.core.models.Type.target_entity_type`.
         """
     )
-    
+
     #UniqueConstraint("name", "db_entity_type")
     __stalker_version__ = Column("stalker_version", String(256))
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  name=None,
                  description="",
@@ -302,19 +284,19 @@ class SimpleEntity(Base):
                  date_updated=datetime.datetime.now(),
                  code=None,
                  **kwargs
-                 ): # pylint: disable=W0613
-        
+    ): # pylint: disable=W0613
+
         # name and nice_name
         self._nice_name = ""
-        
+
         # check the name
         if name is None or name == "":
             if code is None:
                 code = ""
             name = code
-        
+
         self.name = name
-        
+
         # code
         # if the given code argument is not None
         # use it to set the code
@@ -323,7 +305,7 @@ class SimpleEntity(Base):
             self.code = code
         else:
             self.code = name
-        
+
         self.description = description
         self.created_by = created_by
         self.updated_by = updated_by
@@ -334,129 +316,112 @@ class SimpleEntity(Base):
         self.type = type
         self.__stalker_version__ = stalker.__version__
 
-    
-    
-    
-    #----------------------------------------------------------------------
+
     @orm.reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
         SQLAlchemy
         """
         self._nice_name = None
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __repr__(self):
         """the representation of the SimpleEntity
         """
-        
+
         return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("description")
     def _validate_description(self, key, description_in):
         """validates the given description_in value
         """
-        
+
         if description_in is None:
             description_in = ""
-        
+
         return str(description_in)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("name")
     def _validate_name(self, key, name):
         """validates the given name_in value
         """
-        
+
         # it is None
         if name is None:
             raise TypeError("the name couldn't be set to None")
-        
+
         name = self._format_name(str(name))
-        
+
         # it is empty
         if name == "":
             raise ValueError("the name couldn't be an empty string")
-        
+
         # also set the nice_name
         self._nice_name = self._format_nice_name(name)
-        
+
         ## set the code
         #self.code = name_in
-        
+
         return name
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _format_code(self, code_in):
         """formats the given code_in value
         """
-        
+
         # just set it to the uppercase of what nice_name gives
         # remove unnecesary characters from the string
         code_in = self._format_name(str(code_in))
-        
+
         # replace camel case letters
         #code_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", code_in)
-        
+
         # replace white spaces with under score
         code_in = re.sub("([\s\-])+", r"_", code_in)
-        
+
         # remove multiple underscores
         code_in = re.sub(r"([_]+)", r"_", code_in)
-        
+
         return code_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _format_name(self, name_in):
         """formats the name_in value
         """
-        
+
         # remove unnecesary characters from the string
         name_in = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", name_in).strip()
-        
+
         # remove all the characters which are not alpabetic
         name_in = re.sub("(^[^a-zA-Z]+)", r"", name_in)
-        
+
         return name_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _format_nice_name(self, nice_name_in):
         """formats the given nice name
         """
-        
+
         # remove unnecesary characters from the string
         nice_name_in = self._format_name(str(nice_name_in))
-        
+
         # replace camel case letters
         nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
-        
+
         # replace white spaces with under score
         nice_name_in = re.sub("([\s\-])+", r"_", nice_name_in)
-        
+
         # remove multiple underscores
         nice_name_in = re.sub(r"([_]+)", r"_", nice_name_in)
-        
+
         # turn it to lower case
         nice_name_in = nice_name_in.lower()
-        
+
         return nice_name_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @property
     def nice_name(self):
         """Nice name of this object.
@@ -469,115 +434,103 @@ class SimpleEntity(Base):
         There is also the ``code`` attribute which is simply the upper case
         form of ``nice_name`` if it is not defined differently (i.e set to
         another value)."""
-        
+
         # also set the nice_name
         if self._nice_name is None or self._nice_name == "":
             self._nice_name = self._format_nice_name(self.name)
-        
+
         return self._nice_name
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("code")
     def _validate_code(self, key, code_in):
         """validates the given code value
         """
-        
+
         # check if the code_in is None or empty string
         if code_in is None or code_in == "":
             # restore the value from nice_name and let it be reformatted
             #code_in = self.nice_name.upper()
             code_in = self.nice_name
-        
+
         return self._format_code(str(code_in))
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("created_by")
     def _validate_created_by(self, key, created_by_in):
         """validates the given created_by_in attribute
         """
-        
+
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
                 raise TypeError("the created_by attribute should be an "
-                                 "instance of stalker.core.models.User")
-        
+                                "instance of stalker.core.models.User")
+
         return created_by_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("updated_by")
     def _validate_updated_by(self, key, updated_by_in):
         """validates the given updated_by_in attribute
         """
-        
+
         if updated_by_in is None:
             # set it to what created_by attribute has
             updated_by_in = self.created_by
-        
+
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
                 raise TypeError("the updated_by attribute should be an "
-                                 "instance of stalker.core.models.User")
-        
+                                "instance of stalker.core.models.User")
+
         return updated_by_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("date_created")
     def _validate_date_created(self, key, date_created_in):
         """validates the given date_creaetd_in
         """
-        
+
         if date_created_in is None:
             raise TypeError("the date_created could not be None")
-        
+
         if not isinstance(date_created_in, datetime.datetime):
             raise TypeError("the date_created should be an instance of "
-                             "datetime.datetime")
-        
+                            "datetime.datetime")
+
         return date_created_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("date_updated")
     def _validate_date_updated(self, key, date_updated_in):
         """validates the given date_updated_in
         """
-        
+
         # it is None
         if date_updated_in is None:
             raise TypeError("the date_updated could not be None")
-        
+
         # it is not an instance of datetime.datetime
         if not isinstance(date_updated_in, datetime.datetime):
             raise TypeError("the date_updated should be an instance of "
-                             "datetime.datetime")
-        
+                            "datetime.datetime")
+
         # lower than date_created
         if date_updated_in < self.date_created:
             raise ValueError("the date_updated could not be set to a date "
                              "before date_created, try setting the "
                              "date_created before")
-        
+
         return date_updated_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("type")
     def _validate_type(self, key, type_in):
         """validates the given type value
         """
-        
+
         raise_error = False
-        
+
         if not self.__strictly_typed__:
             if type_in is not None:
                 if not isinstance(type_in, Type):
@@ -585,41 +538,31 @@ class SimpleEntity(Base):
         else:
             if not isinstance(type_in, Type):
                 raise_error = True
-        
+
         if raise_error:
             raise TypeError("%s.type must be an instance of "
-                             "stalker.core.models.Type not %s" \
-                             % (self.entity_type, type_in))
-        
+                            "stalker.core.models.Type not %s"\
+            % (self.entity_type, type_in))
+
         return type_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return isinstance(other, SimpleEntity) and \
-           self.name == other.name #and \
-           #self.description == other.description
-    
-    
-    
-    #----------------------------------------------------------------------
+
+        return isinstance(other, SimpleEntity) and\
+               self.name == other.name #and \
+        #self.description == other.description
+
+
     def __ne__(self, other):
         """the inequality operator
         """
-        
+
         return not self.__eq__(other)
 
 
-
-
-
-
-
-########################################################################
 class Entity(SimpleEntity):
     """Another base data class that adds tags and notes to the attributes list.
     
@@ -637,14 +580,12 @@ class Entity(SimpleEntity):
       Can be an empty list, or when omitted it will be set to an empty list,
       when set to None it will be converted to an empty list.
     """
-    
-    
-    
+
     __tablename__ = "Entities"
     __mapper_args__ = {"polymorphic_identity": "Entity"}
     entity_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                        primary_key=True)
-    
+
     tags = relationship(
         "Tag",
         secondary="Entity_Tags",
@@ -654,7 +595,7 @@ class Entity(SimpleEntity):
         It is a list of :class:`~stalker.core.models.Tag` instances which shows
         the tags of this object"""
     )
-    
+
     notes = relationship(
         "Note",
         primaryjoin="Entities.c.id==Notes.c.entity_id",
@@ -665,7 +606,7 @@ class Entity(SimpleEntity):
         empty list, setting it None will raise a TypeError.
         """
     )
-    
+
     reviews = relationship(
         "Review",
         primaryjoin="Entities.c.id==Reviews.c.to_id",
@@ -676,69 +617,58 @@ class Entity(SimpleEntity):
         empty list, setting it None will raise a TypeError.
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  tags=None,
                  notes=None,
                  **kwargs
-                 ):
-        
+    ):
         super(Entity, self).__init__(**kwargs)
-        
+
         if tags is None:
             tags = []
-        
+
         if notes is None:
             notes = []
-        
+
         self.tags = tags
         self.notes = notes
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @orm.reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
         SQLAlchemy
         """
-        
+
         super(Entity, self).__init_on_load__()
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("notes")
     def _validate_notes(self, key, note):
         """validates the given note value
         """
-        
+
         if not isinstance(note, Note):
             raise TypeError("note should be an instance of "
                             "stalker.core.models.Note")
-        
+
         return note
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("tags")
     def _validate_tags(self, key, tag):
         """validates the given tag
         """
-        
+
         if not isinstance(tag, Tag):
             raise TypeError("tag should be an instance of "
                             "stalker.core.models.Tag")
-        
+
         return tag
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("reviews")
     def _validate_reviews(self, key, review):
         """validates the given review value
@@ -746,27 +676,108 @@ class Entity(SimpleEntity):
         if not isinstance(review, Review):
             raise TypeError("The reviews should be a list of "
                             "stalker.core.models.Review instances")
-        
+
         return review
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Entity, self).__eq__(other) and \
+
+        return super(Entity, self).__eq__(other) and\
                isinstance(other, Entity)
 
 
+class TargetEntityTypeMixin(object):
+    """Adds target_entity_type attribute to mixed in class.
+    
+    :param target_entity_type: The target entity type which this class is 
+      designed for. Should be a class or a class name.
+      
+      For example::
+        
+        from stalker.core.models import (SimpleEntity, TargetEntityTypeMixin,
+                                         Project)
+        
+        class A(SimpleEntity, TargetEntityTypeMixin):
+            __tablename__ = "As"
+            __mapper_args__ = {"polymorphic_identity": "Type"}
+            
+            def __init__(self, **kwargs):
+                super(A, self).__init__(**kwargs)
+                TargetEntityTypeMixin.__init__(self, **kwargs)
+        
+        a_obj = A(target_entity_type=Project)
+      
+      The ``a_obj`` will only be accepted by
+      :class:`~stalker.core.models.Project` instances.
+    
+    To control the mixed-in class behaviour add these class variables to the 
+    mixed in class:
+      
+      __nullable_target__ : controls if the target_entity_type can be 
+                            nullable or not. Default is False.
+      
+      __unique_target__ : controls if the target_entity_type should be 
+                          unique, so there is only one object for one type.
+                          Default is False.
+    """
+    
+    __nullable_target__ = False
+    __unique_target__ = False
+    
+    
+    
+    @declared_attr
+    def _target_entity_type(cls):
+        
+        return Column(
+            "target_entity_type",
+            String(128),
+            nullable=cls.__nullable_target__,
+            unique=cls.__unique_target__
+        )
 
 
+    def __init__(self, target_entity_type=None, **kwargs):
+        self._target_entity_type =\
+            self._validate_target_entity_type(target_entity_type)
 
 
+    def _validate_target_entity_type(self, target_entity_type_in):
+        """validates the given target_entity_type value
+        """
+        # it can not be None
+        if target_entity_type_in is None:
+            raise TypeError("target_entity_type can not be None")
 
-########################################################################
-class Type(Entity):
+        if str(target_entity_type_in) == "":
+            raise ValueError("%s.target_entity_type can not be empty" % 
+                             self.__class__.__name__)
+
+        # check if it is a class
+        if isinstance(target_entity_type_in, type):
+            target_entity_type_in = target_entity_type_in.__name__
+        
+        return str(target_entity_type_in)
+    
+    def _target_entity_type_getter(self):
+        return self._target_entity_type
+    
+    @declared_attr
+    def target_entity_type(cls):
+        return synonym(
+            "_target_entity_type_",
+            descriptor=property(
+                fget=cls._target_entity_type_getter,
+                doc="""The entity type which this object is valid for.
+                
+                Usually it is set to the TargetClass directly.
+                """
+            )
+        )
+
+class Type(Entity, TargetEntityTypeMixin):
     """Everything can have a type.
     
     .. versionadded:: 0.1.1
@@ -807,7 +818,7 @@ class Type(Entity):
     :param string target_entity_type: The string defining the target type of
       this :class:`~stalker.core.models.Type`.
     """
-    
+
     __tablename__ = "Types"
     __mapper_args__ = {"polymorphic_identity": "Type"}
     type_id_local = Column("id", Integer, ForeignKey("Entities.id"),
@@ -816,77 +827,63 @@ class Type(Entity):
         "target_entity_type",
         String
     )
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self, target_entity_type=None, **kwargs):
+
+
+    def __init__(self, **kwargs):
         super(Type, self).__init__(**kwargs)
-        self._target_entity_type =\
-            self._validate_target_entity_type(target_entity_type)
+        TargetEntityTypeMixin.__init__(self, **kwargs)
+#        self._target_entity_type =\
+#        self._validate_target_entity_type(target_entity_type)
     
-    
-    
-    #----------------------------------------------------------------------
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Type, self).__eq__(other) and isinstance(other, Type) \
-               and self.target_entity_type == other.target_entity_type
-    
-    
-    
-    #----------------------------------------------------------------------
+
+        return super(Type, self).__eq__(other) and isinstance(other, Type)\
+        and self.target_entity_type == other.target_entity_type
+
+
     def __ne__(self, other):
         """the inequality operator
         """
-        
+
         return not self.__eq__(other)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_target_entity_type(self, target_entity_type_in):
-        """validates the given target_entity_type value
-        """
-        
-        # check if a class is given
-        if isinstance(target_entity_type_in, type):
-            target_entity_type_in = target_entity_type_in.__name__
-        
-        error_string = "target_entity_type must be a string showing the "\
-                     "target class name"
-        
-        if target_entity_type_in is None \
-           or not isinstance(target_entity_type_in, str):
-            raise TypeError(error_string)
-        
-        if target_entity_type_in == "":
-            raise ValueError(error_string)
-        
-        return target_entity_type_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    @synonym_for("_target_entity_type")
-    @property
-    def target_entity_type(self):
-        """The target type of this Type instance.
-        
-        It is a string, showing the name of the target type class. It is a
-        read-only attribute.
-        """
-        
-        return self._target_entity_type
 
 
+#    def _validate_target_entity_type(self, target_entity_type_in):
+#        """validates the given target_entity_type value
+#        """
+#
+#        # check if a class is given
+#        if isinstance(target_entity_type_in, type):
+#            target_entity_type_in = target_entity_type_in.__name__
+#
+#        error_string = "target_entity_type must be a string showing the "\
+#                       "target class name"
+#
+#        if target_entity_type_in is None\
+#        or not isinstance(target_entity_type_in, str):
+#            raise TypeError(error_string)
+#
+#        if target_entity_type_in == "":
+#            raise ValueError(error_string)
+#
+#        return target_entity_type_in
 
 
+#    @synonym_for("_target_entity_type")
+#    @property
+#    def target_entity_type(self):
+#        """The target type of this Type instance.
+#        
+#        It is a string, showing the name of the target type class. It is a
+#        read-only attribute.
+#        """
+#
+#        return self._target_entity_type
 
 
-########################################################################
 class Status(Entity):
     """Defines object statutes.
     
@@ -908,9 +905,7 @@ class Status(Entity):
     >>> a_status == "another status"
     False
     """
-    
-    
-    
+
     __tablename__ = "Statuses"
     __mapper_args__ = {"polymorphic_identity": "Status"}
     status_id = Column(
@@ -918,35 +913,26 @@ class Status(Entity):
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
-    )
-    
-    
-    
-    #----------------------------------------------------------------------
+        )
+
+
     def __init__(self, **kwargs):
         super(Status, self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
+
         if isinstance(other, (str, unicode)):
-            return self.name.lower() == other.lower() or \
+            return self.name.lower() == other.lower() or\
                    self.code.lower() == other.lower()
         else:
-            return super(Status, self).__eq__(other) and \
+            return super(Status, self).__eq__(other) and\
                    isinstance(other, Status)
 
 
-
-
-
-
-########################################################################
-class StatusList(Entity):
+class StatusList(Entity, TargetEntityTypeMixin):
     """Type specific list of :class:`~stalker.core.models.Status` instances.
     
     Holds multiple :class:`~stalker.core.models.Status`\ es to be used as a
@@ -1015,11 +1001,11 @@ class StatusList(Entity):
       its :attr:`~stalker.core.models.StatusList.statuses`. But it is useless.
       The validation for empty statuses list is left to the SOM user.
     """
-    
-    
-    
+
     __tablename__ = "StatusLists"
     __mapper_args__ = {"polymorphic_identity": "StatusList"}
+    
+    __unique_target__ = True
     
     statusList_id = Column(
         "id",
@@ -1027,106 +1013,90 @@ class StatusList(Entity):
         ForeignKey("Entities.id"),
         primary_key=True
     )
-    
+
     statuses = relationship(
         "Status",
         secondary="StatusList_Statuses",
         doc="""list of :class:`~stalker.core.models.Status` objects, showing the possible statuses"""
     )
-    
-    _target_entity_type = Column("target_entity_type", String(128),
-                                 nullable=False, unique=True)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def __init__(self,
-                 statuses=None,
-                 target_entity_type="",
-                 **kwargs
-                 ):
-        
+
+#    _target_entity_type = Column("target_entity_type", String(128),
+#                                 nullable=False, unique=True)
+
+
+    def __init__(self, statuses=None, **kwargs):
         super(StatusList, self).__init__(**kwargs)
+        TargetEntityTypeMixin.__init__(self, **kwargs)
         
         self.statuses = statuses
-        self._target_entity_type = \
-            self._validate_target_entity_type(target_entity_type)
-    
-    
-    
-    #----------------------------------------------------------------------
+#        self._target_entity_type =\
+#        self._validate_target_entity_type(target_entity_type)
+
+
     @validates("statuses")
     def _validate_statuses(self, key, status):
         """validates the given status
         """
-        
+
         if not isinstance(status, Status):
             raise TypeError("all elements must be an instance of "
                             "stalker.core.models.Status in the given statuses"
                             "list")
-        
+
         return status
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_target_entity_type(self, target_entity_type_in):
-        """validates the given target_entity_type value
-        """
-        
-        # it can not be None
-        if target_entity_type_in is None:
-            raise TypeError("target_entity_type can not be None")
-        
-        if str(target_entity_type_in)=="":
-            raise ValueError("StatusList.target_entity_type can not be empty")
-        
-        # check if it is a class
-        if isinstance(target_entity_type_in, type):
-            target_entity_type_in = target_entity_type_in.__name__
-        
-        return str(target_entity_type_in)
-    
-    
-    
-    #----------------------------------------------------------------------
-    @synonym_for("_target_entity_type") # we need it to make the property read
-    @property                           # only
-    def target_entity_type(self):
-        """The entity type which this StatusList is valid for.
-        
-        Usually it is set to the TargetClass directly::
-          
-          from stalker.core.models import Status, StatusList, Asset
-          
-          # create a StatusList valid only for Asset class
-          asset_status_list = StatusList(
-              name="Asset Statuses",
-              statuses = [
-                  Status(name="Waiting To Start", code="WTS"),
-                  Status(name="Work In Progress", code="WIP"),
-                  Status(name="Complete", code="CMPLT")
-              ],
-              target_entity_type=Asset # or "Asset" is also valid
-          )
-        """
-        return self._target_entity_type
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
+#    def _validate_target_entity_type(self, target_entity_type_in):
+#        """validates the given target_entity_type value
+#        """
+#
+#        # it can not be None
+#        if target_entity_type_in is None:
+#            raise TypeError("target_entity_type can not be None")
+#
+#        if str(target_entity_type_in) == "":
+#            raise ValueError("StatusList.target_entity_type can not be empty")
+#
+#        # check if it is a class
+#        if isinstance(target_entity_type_in, type):
+#            target_entity_type_in = target_entity_type_in.__name__
+#
+#        return str(target_entity_type_in)
+
+
+#    @synonym_for("_target_entity_type") # we need it to make the property read
+#    @property                           # only
+#    def target_entity_type(self):
+#        """The entity type which this StatusList is valid for.
+#        
+#        Usually it is set to the TargetClass directly::
+#          
+#          from stalker.core.models import Status, StatusList, Asset
+#          
+#          # create a StatusList valid only for Asset class
+#          asset_status_list = StatusList(
+#              name="Asset Statuses",
+#              statuses = [
+#                  Status(name="Waiting To Start", code="WTS"),
+#                  Status(name="Work In Progress", code="WIP"),
+#                  Status(name="Complete", code="CMPLT")
+#              ],
+#              target_entity_type=Asset # or "Asset" is also valid
+#          )
+#        """
+#        return self._target_entity_type
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(StatusList, self).__eq__(other) and \
-               isinstance(other, StatusList) and \
-               self.statuses == other.statuses and \
+
+        return super(StatusList, self).__eq__(other) and\
+               isinstance(other, StatusList) and\
+               self.statuses == other.statuses and\
                self.target_entity_type == other.target_entity_type
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __getitem__(self, key):
         """the indexing attributes for getting item
         """
@@ -1136,39 +1106,29 @@ class StatusList(Entity):
                     return item
         else:
             return self.statuses[key]
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __setitem__(self, key, value):
         """the indexing attributes for setting item
         """
-        
+
         self.statuses[key] = self._validate_status(value)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __delitem__(self, key):
         """the indexing attributes for deleting item
         """
-        
+
         del self.statuses[key]
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __len__(self):
         """the indexing attributes for getting the length
         """
-        
+
         return len(self.statuses)
 
 
-
-
-
-
-########################################################################
 class ImageFormat(Entity):
     """Common image formats for the :class:`~stalker.core.models.Project`\ s.
     
@@ -1185,19 +1145,17 @@ class ImageFormat(Entity):
     :param print_resolution: The print resolution of the ImageFormat given as
       DPI (dot-per-inch). It can not be zero or negative
     """
-    
-    
-    
+
     __tablename__ = "ImageFormats"
     __mapper_args__ = {"polymorphic_identity": "ImageFormat"}
-    
+
     imageFormat_id = Column(
         "id",
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
-    )
-    
+        )
+
     width = Column(
         Integer,
         doc="""The width of this format.
@@ -1207,7 +1165,7 @@ class ImageFormat(Entity):
         * for improper inputs the object will raise an exception.
         """
     )
-    
+
     height = Column(
         Integer,
         doc="""The height of this format
@@ -1217,7 +1175,7 @@ class ImageFormat(Entity):
         * for improper inputs the object will raise an exception.
         """
     )
-    
+
     pixel_aspect = Column(
         Float,
         default="1.0",
@@ -1228,7 +1186,7 @@ class ImageFormat(Entity):
         * for improper inputs the object will raise an exception
         """
     )
-    
+
     print_resolution = Column(
         Float,
         default="300.0",
@@ -1239,112 +1197,97 @@ class ImageFormat(Entity):
         * for improper inputs the object will raise an exception.
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  width=None,
                  height=None,
                  pixel_aspect=1.0,
                  print_resolution=300,
                  **kwargs
-                 ):
-        
+    ):
         super(ImageFormat, self).__init__(**kwargs)
-        
+
         self.width = width
         self.height = height
         self.pixel_aspect = pixel_aspect
         self.print_resolution = print_resolution
         self._device_aspect = 1.0
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @orm.reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
         SQLAlchemy
         """
-        
+
         self._device_aspect = None
         #self._update_device_aspect()
-        
+
         # call supers __init_on_load__
         super(ImageFormat, self).__init_on_load__()
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("width")
     def _validate_width(self, key, width):
         """validates the given width
         """
-        
+
         if not isinstance(width, (int, float)):
             raise TypeError("width should be an instance of int or float")
-        
+
         if width <= 0:
             raise ValueError("width shouldn't be zero or negative")
-        
+
         return int(width)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("height")
     def _validate_height(self, key, height):
         """validates the given height
         """
-        
+
         if not isinstance(height, (int, float)):
             raise TypeError("height should be an instance of int or float")
-        
+
         if height <= 0:
             raise ValueError("height shouldn't be zero or negative")
-        
+
         return int(height)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("pixel_aspect")
     def _validate_pixel_aspect(self, key, pixel_aspect):
         """validates the given pixel aspect
         """
-        
+
         if not isinstance(pixel_aspect, (int, float)):
             raise TypeError("pixel_aspect should be an instance of int or "
-                             "float")
-        
+                            "float")
+
         if pixel_aspect <= 0:
             raise ValueError("pixel_aspect can not be zero or a negative "
                              "value")
-        
+
         return float(pixel_aspect)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("print_resolution")
     def _validate_print_resolution(self, key, print_resolution):
         """validates the print resolution
         """
-        
+
         if not isinstance(print_resolution, (int, float)):
             raise TypeError("print resolution should be an instance of int "
-                             "or float")
-        
+                            "or float")
+
         if print_resolution <= 0:
             raise ValueError("print resolution should not be zero or "
                              "negative")
-        
+
         return float(print_resolution)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @property
     def device_aspect(self):
         """returns the device aspect
@@ -1352,28 +1295,21 @@ class ImageFormat(Entity):
         because the device_aspect is calculated from the width/height*pixel
         formula, this property is read-only.
         """
-        
+
         return float(self.width) / float(self.height) * self.pixel_aspect
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(ImageFormat, self).__eq__(other) and \
-               isinstance(other, ImageFormat) and \
-               self.width == other.width and \
-               self.height == other.height and \
+
+        return super(ImageFormat, self).__eq__(other) and\
+               isinstance(other, ImageFormat) and\
+               self.width == other.width and\
+               self.height == other.height and\
                self.pixel_aspect == other.pixel_aspect
 
 
-
-
-
-
-########################################################################
 class Link(Entity):
     """Holds data about external links.
     
@@ -1396,9 +1332,7 @@ class Link(Entity):
     
     .. _Nuke: http://www.thefoundry.co.uk
     """
-    
-    
-    
+
     __tablename__ = "Links"
     __mapper_args__ = {"polymorphic_identity": "Link"}
     link_id = Column(
@@ -1406,7 +1340,7 @@ class Link(Entity):
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
-    )
+        )
     path = Column(
         String,
         doc="""The path of the url to the link.
@@ -1415,61 +1349,48 @@ class Link(Entity):
         unicode.
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self, path="", **kwargs):
         super(Link, self).__init__(**kwargs)
         self.path = path
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("path")
     def _validate_path(self, key, path):
         """validates the given path
         """
-        
+
         if path is None:
             raise TypeError("path can not be None")
-        
+
         if not isinstance(path, (str, unicode)):
             raise TypeError("path should be an instance of string or unicode")
-        
+
         if path == "":
             raise ValueError("path can not be an empty string")
-        
+
         return self._format_path(path)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _format_path(self, path):
         """formats the path to internal format, which is Linux forward slashes
         for path separation
         """
-        
+
         return path.replace("\\", "/")
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Link, self).__eq__(other) and \
-               isinstance(other, Link) and \
-               self.path == other.path and \
+
+        return super(Link, self).__eq__(other) and\
+               isinstance(other, Link) and\
+               self.path == other.path and\
                self.type == other.type
 
 
-
-
-
-
-########################################################################
 class Review(Entity):
     """User reviews and comments about other entities.
     
@@ -1481,9 +1402,7 @@ class Review(Entity):
       review is related to. Any object which has a list-like attribute called
       "reviews" is accepted. Anything other will raise AttributeError.
     """
-    
-    
-    
+
     __tablename__ = "Reviews"
     __mapper_args__ = {"polymorphic_identity": "Review"}
     review_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
@@ -1493,7 +1412,7 @@ class Review(Entity):
         doc="""The body (content) of this Review.
         """
     )
-    
+
     to_id = Column(ForeignKey("Entities.id"))
     to = relationship(
         "Entity",
@@ -1503,41 +1422,35 @@ class Review(Entity):
         doc="""The owner object of this Review.
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self, body="", to=None, **kwargs):
         super(Review, self).__init__(**kwargs)
-        
+
         self.body = body
         self.to = to
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("body")
     def _validate_body(self, key, body):
         """validates the given body variable
         """
-        
+
         # the body could be empty
         # but it should be an instance of string or unicode
-        
+
         if not isinstance(body, (str, unicode)):
             raise TypeError("the body attribute should be an instance of "
-                              "string or unicode")
-        
+                            "string or unicode")
+
         return body
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("to")
     def _validate_to(self, key, to):
         """validates the given to variable
         """
-        
+
         if to is None:
             if self.to is not None:
                 raise RuntimeError(
@@ -1551,22 +1464,17 @@ class Review(Entity):
                     "the object which is given with the `to` should be "
                     "inherited from stalker.core.models.Entity class"
                 )
-        
+
         if not isinstance(to, Entity):
             raise TypeError(
                 "the object which is given with the `to` should be inherited "
                 "from stalker.core.models.Entity class"
             )
-        
+
         return to
 
 
-
-
-
-
-########################################################################
-class PermissionGroup(SimpleEntity):    
+class PermissionGroup(SimpleEntity):
     """Manages permission in the system.
     
     A PermissionGroup object maps permission for tasks like Create, Read,
@@ -1600,25 +1508,18 @@ class PermissionGroup(SimpleEntity):
     NOTE TO DEVELOPERS: a Dictionary-Based Collections should be used in
     SQLAlchemy.
     """
-    
+
     __tablename__ = "PermissionGroups"
     __mapper_args__ = {"polymorphic_identity": "PermissionGroup"}
-    
+
     permissionGroup_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                                 primary_key=True)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self, **kwargs):
         super(PermissionGroup, self).__init__(**kwargs)
 
 
-
-
-
-
-########################################################################
 class Note(SimpleEntity):
     """Notes for any of the SOM objects.
     
@@ -1628,24 +1529,23 @@ class Note(SimpleEntity):
     
     :param attached_to: The object that this note is attached to.
     """
-    
-    
+
     __tablename__ = "Notes"
     __mapper_args__ = {"polymorphic_identity": "Note"}
-    
+
     note_id = Column(
         "id",
         Integer,
         ForeignKey("SimpleEntities.id"),
         primary_key=True
     )
-    
+
     entity_id = Column(
         "entity_id",
         Integer,
         ForeignKey("Entities.id")
     )
-    
+
     content = Column(
         String,
         doc="""The content of this :class:`~stalker.core.models.Note` instance.
@@ -1655,90 +1555,66 @@ class Note(SimpleEntity):
         string or unicode will raise a TypeError.
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self, content="", **kwargs):
         super(Note, self).__init__(**kwargs)
         self.content = content
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("content")
     def _validate_content(self, key, content_in):
         """validates the given content
         """
-        
-        if content_in is not None and \
+
+        if content_in is not None and\
            not isinstance(content_in, (str, unicode)):
             raise TypeError("content should be an instance of string or "
-                             "unicode")
-        
+                            "unicode")
+
         return content_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Note, self).__eq__(other) and \
-               isinstance(other, Note) and \
+
+        return super(Note, self).__eq__(other) and\
+               isinstance(other, Note) and\
                self.content == other.content
 
 
-
-
-
-
-########################################################################
 class Tag(SimpleEntity):
     """Use it to create tags for any object available in SOM.
     
     Doesn't have any other attribute than what is inherited from
     :class:`~stalker.core.models.SimpleEntity`
     """
-    
-    
-    
+
     __tablename__ = "Tags"
     __mapper_args__ = {"polymorphic_identity": "Tag"}
     tag_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                     primary_key=True)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self, **kwargs):
         super(Tag, self).__init__(**kwargs)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
+
         return super(Tag, self).__eq__(other) and isinstance(other, Tag)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __ne__(self, other):
         """the inequality operator
         """
-        
+
         return not self.__eq__(other)
 
 
-
-
-
-
-########################################################################
 class Repository(Entity):
     """Manages fileserver/repository related data.
     
@@ -1763,7 +1639,7 @@ class Repository(Entity):
     :param windows_path: shows the windows path of the repository root, should
       be a string
     """
-    
+
     __tablename__ = "Repositories"
     __mapper_args__ = {"polymorphic_identity": "Repository"}
     repository_id = Column(
@@ -1771,104 +1647,87 @@ class Repository(Entity):
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
-    )
+        )
     linux_path = Column(String(256))
     windows_path = Column(String(256))
     osx_path = Column(String(256))
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  linux_path="",
                  windows_path="",
                  osx_path="",
                  **kwargs):
         super(Repository, self).__init__(**kwargs)
-        
+
         self.linux_path = linux_path
         self.windows_path = windows_path
         self.osx_path = osx_path
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("linux_path")
     def _validate_linux_path(self, key, linux_path_in):
         """validates the given linux path
         """
-        
+
         if not isinstance(linux_path_in, (str, unicode)):
             raise TypeError("linux_path should be an instance of string or "
-                             "unicode")
-        
+                            "unicode")
+
         return linux_path_in.replace("\\", "/")
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("osx_path")
     def _validate_osx_path(self, key, osx_path_in):
         """validates the given osx path
         """
-        
+
         if not isinstance(osx_path_in, (str, unicode)):
             raise TypeError("osx_path should be an instance of string or "
-                             "unicode")
-        
+                            "unicode")
+
         return osx_path_in.replace("\\", "/")
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("windows_path")
     def _validate_windows_path(self, key, windows_path_in):
         """validates the given windows path
         """
-        
+
         if not isinstance(windows_path_in, (str, unicode)):
             raise TypeError("windows_path should be an instance of string or "
-                             "unicode")
-        
+                            "unicode")
+
         return windows_path_in.replace("\\", "/")
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @property
     def path(self):
         """The path for the current os"""
-        
+
         # return the proper value according to the current os
         platform_system = platform.system()
-        
+
         if platform_system == "Linux":
             return self.linux_path
         elif platform_system == "Windows":
             return self.windows_path
         elif platform_system == "Darwin":
             return self.osx_path
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Repository, self).__eq__(other) and \
-               isinstance(other, Repository) and \
-               self.linux_path == other.linux_path and \
-               self.osx_path == other.osx_path and \
+
+        return super(Repository, self).__eq__(other) and\
+               isinstance(other, Repository) and\
+               self.linux_path == other.linux_path and\
+               self.osx_path == other.osx_path and\
                self.windows_path == other.windows_path
 
 
-
-
-
-
-########################################################################
-class FilenameTemplate(Entity):
+class FilenameTemplate(Entity, TargetEntityTypeMixin):
     """Holds templates for filename conventions.
     
     FilenameTemplate objects help to specify where to place a file related to
@@ -2010,24 +1869,23 @@ Character assets",
     
     .. _Jinja2: http://jinja.pocoo.org/docs/
     """
-    
-    
-    
-    __tablename__ =  "FilenameTemplates"
+
+    __tablename__ = "FilenameTemplates"
     __mapper_args__ = {"polymorphic_identity": "FilenameTemplate"}
-    filenameTemplate_id = Column( "id", Integer,ForeignKey("Entities.id"),
-                                  primary_key=True)
-    _target_entity_type = Column("target_entity_type", String)
+    filenameTemplate_id = Column("id", Integer, ForeignKey("Entities.id"),
+                                 primary_key=True)
+#    _target_entity_type = Column("target_entity_type", String)
+    
     path_code = Column(
         String,
         doc="""The templating code for the path of this FilenameTemplate."""
     )
-    
+
     file_code = Column(
         String,
         doc="""The templating code for the file part of the FilenameTemplate."""
     )
-    
+
     output_path_code = Column(
         String,
         doc="""The output_path_code of this FilenameTemplate object.
@@ -2041,7 +1899,7 @@ Character assets",
         True then it will left as an empty string.
         """
     )
-    
+
     output_file_code = Column(
         String,
         doc="""The output_file_code of this FilenameTemplate object.
@@ -2055,18 +1913,16 @@ Character assets",
         True then it will left as an empty string.
         """
     )
-    
+
     output_is_relative = Column(
         Boolean,
         doc="""Specifies if the output should be calculated relative to the path attribute.
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
-                 target_entity_type=None,
+#                 target_entity_type=None,
                  path_code=None,
                  file_code=None,
                  output_path_code=None,
@@ -2074,140 +1930,120 @@ Character assets",
                  output_is_relative=True,
                  **kwargs):
         super(FilenameTemplate, self).__init__(**kwargs)
-        
-        self._target_entity_type = \
-            self._validate_target_entity_type(target_entity_type)
+        TargetEntityTypeMixin.__init__(self, **kwargs)
+#        self._target_entity_type =\
+#        self._validate_target_entity_type(target_entity_type)
         self.path_code = path_code
         self.file_code = file_code
         self.output_is_relative = output_is_relative
         self.output_path_code = output_path_code
         self.output_file_code = output_file_code
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("path_code")
     def _validate_path_code(self, key, path_code_in):
         """validates the given path_code attribute for several conditions
         """
-        
+
         # check if it is None
         if path_code_in is None:
             path_code_in = u""
-        
+
         path_code_in = unicode(path_code_in)
-        
+
         return path_code_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("file_code")
     def _validate_file_code(self, key, file_code_in):
         """validates the given file_code attribute for several conditions
         """
-        
+
         # check if it is None
         if file_code_in is None:
             file_code_in = u""
-        
+
         # convert it to unicode
         file_code_in = unicode(file_code_in)
-        
+
         return file_code_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("output_path_code")
     def _validate_output_path_code(self, key, output_path_code_in):
         """validates the given output_path_code value
         """
-        
+
         if output_path_code_in == None or output_path_code_in == "":
             if self.output_is_relative:
                 output_path_code_in = ""
             else:
                 output_path_code_in = self.path_code
-        
+
         return output_path_code_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("output_file_code")
     def _validate_output_file_code(self, key, output_file_code_in):
         """validates the given output_file_code value
         """
-        
+
         if output_file_code_in == None or output_file_code_in == "":
             if self.output_is_relative:
                 output_file_code_in = ""
             else:
                 output_file_code_in = self.file_code
-        
+
         return output_file_code_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("output_is_relative")
     def _validate_output_is_relative(self, key, output_is_relative_in):
         """validates the given output_is_relative value
         """
-        
+
         return bool(output_is_relative_in)
-    
-    
-    
-    #----------------------------------------------------------------------
-    def _validate_target_entity_type(self, target_entity_type_in):
-        """validates the given target_entity_type attribute for several
-        conditions
-        """
-        
-        # check if it is None
-        if target_entity_type_in is None:
-            raise TypeError("target_entity_type can not be None")
-        
-        if isinstance(target_entity_type_in, type):
-            target_entity_type_in = target_entity_type_in.__name__
-        
-        return target_entity_type_in
-    
-    
-    
-    #----------------------------------------------------------------------
-    @synonym_for("_target_entity_type")
-    @property
-    def target_entity_type(self):
-        """The target entity type this FilenameTemplate object should work on.
-        
-        Should be a string value or the class itself
-        """
-        
-        return self._target_entity_type
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
+#    def _validate_target_entity_type(self, target_entity_type_in):
+#        """validates the given target_entity_type attribute for several
+#        conditions
+#        """
+#
+#        # check if it is None
+#        if target_entity_type_in is None:
+#            raise TypeError("target_entity_type can not be None")
+#
+#        if isinstance(target_entity_type_in, type):
+#            target_entity_type_in = target_entity_type_in.__name__
+#
+#        return target_entity_type_in
+
+
+#    @synonym_for("_target_entity_type")
+#    @property
+#    def target_entity_type(self):
+#        """The target entity type this FilenameTemplate object should work on.
+#        
+#        Should be a string value or the class itself
+#        """
+#
+#        return self._target_entity_type
+
+
     def __eq__(self, other):
         """checks the equality of the given object to this one
         """
-        
-        return super(FilenameTemplate, self).__eq__(other) and \
-               isinstance(other, FilenameTemplate) and \
-               self.target_entity_type == other.target_entity_type and \
-               self.path_code == other.path_code and \
-               self.file_code == other.file_code and \
-               self.output_path_code == other.output_path_code and \
+
+        return super(FilenameTemplate, self).__eq__(other) and\
+               isinstance(other, FilenameTemplate) and\
+               self.target_entity_type == other.target_entity_type and\
+               self.path_code == other.path_code and\
+               self.file_code == other.file_code and\
+               self.output_path_code == other.output_path_code and\
                self.output_file_code == other.output_file_code
 
 
-
-
-
-########################################################################
 class Structure(Entity):
     """Holds data about how the physical files are arranged in the :class:`~stalker.core.models.Repository`.
     
@@ -2301,83 +2137,70 @@ class Structure(Entity):
     one for **Print** projects etc. and can reuse them with new
     :class:`~stalker.core.models.Project`\ s.
     """
-    
-    
-    
+
+
+
     #__strictly_typed__ = True
-    
+
     __tablename__ = "Structures"
     __mapper_args__ = {"polymorphic_identity": "Structure"}
-    
+
     structure_id = Column(
         "id",
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
-    )
-    
+        )
+
     templates = relationship(
         "FilenameTemplate",
         secondary="Structure_FilenameTemplates"
     )
-    
+
     custom_template = Column("custom_template", String)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self, templates=None, custom_template=None, **kwargs):
         super(Structure, self).__init__(**kwargs)
-        
+
         if templates is None:
             templates = []
-        
+
         self.templates = templates
         self.custom_template = custom_template
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Structure, self).__eq__(other) and \
-               isinstance(other, Structure) and \
-               self.templates == other.templates and \
+
+        return super(Structure, self).__eq__(other) and\
+               isinstance(other, Structure) and\
+               self.templates == other.templates and\
                self.custom_template == other.custom_template
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("custom_template")
     def _validate_custom_template(self, key, custom_template_in):
         """validates the given custom_template value
         """
-        
+
         return custom_template_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("templates")
     def _validate_templates(self, key, template_in):
         """validates the given template value
         """
-        
+
         if not isinstance(template_in, FilenameTemplate):
             raise TypeError("all the elements in the templates should be a "
                             "list of stalker.core.models.FilenameTemplate "
                             "instances")
-        
+
         return template_in
 
 
-
-
-
-
-########################################################################
 class Department(Entity):
     """The departments that forms the studio itself.
     
@@ -2403,9 +2226,7 @@ class Department(Entity):
       the department. So another departments member can be a lead for another
       department. Lead attribute can not be empty or None.
     """
-    
-    
-    
+
     __tablename__ = "Departments"
     __mapper_args__ = {"polymorphic_identity": "Department"}
     department_id = Column(
@@ -2414,87 +2235,74 @@ class Department(Entity):
         ForeignKey("Entities.id"),
         primary_key=True
     )
-    
+
     lead_id = Column(
         "lead_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="x")
     )
-    
+
     lead = relationship(
         "User",
         uselist=False,
         primaryjoin="Department.lead_id==User.user_id",
         post_update=True,
         doc="""The lead of this department, it is a User object""",
-    )
-    
+        )
+
     members = relationship(
         "User",
         #backref="department",
-        primaryjoin= "Departments.c.id==Users.c.department_id",
+        primaryjoin="Departments.c.id==Users.c.department_id",
         back_populates="department",
         doc="""List of users representing the members of this department.""",
-    )
-    
-    
-    
-    #----------------------------------------------------------------------
+        )
+
+
     def __init__(self, members=None, lead=None, **kwargs):
         super(Department, self).__init__(**kwargs)
-        
+
         if members is None:
             members = []
-        
+
         self.members = members
         self.lead = lead
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("members")
     def _validate_members(self, key, member):
         """validates the given member attribute
         """
-        
+
         if not isinstance(member, User):
             raise TypeError("every element in the members list should be "
                             "an instance of stalker.core.models.User class")
-        
+
         return member
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("lead")
     def _validate_lead(self, key, lead):
         """validates the given lead attribute
         """
-        
+
         if lead is not None:
             # the lead should be an instance of User class
             if not isinstance(lead, User):
                 raise TypeError("lead should be an instance of "
-                                 "stalker.core.models.User")
-        
+                                "stalker.core.models.User")
+
         return lead
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Department, self).__eq__(other) and \
+
+        return super(Department, self).__eq__(other) and\
                isinstance(other, Department)
 
 
-
-
-
-
-########################################################################
 class User(Entity):
     """The user class is designed to hold data about a User in the system.
     
@@ -2602,19 +2410,18 @@ class User(Entity):
     
     :type initials: unicode
     """
-    
-    
+
     __tablename__ = "Users"
     __mapper_args__ = {"polymorphic_identity": "User"}
-    
+
     user_id = Column("id", Integer, ForeignKey("Entities.id"),
                      primary_key=True)
-    
+
     department_id = Column(
         Integer,
         ForeignKey("Departments.id", use_alter=True, name="department_x"),
-    )
-    
+        )
+
     department = relationship(
         "Department",
         primaryjoin="Users.c.department_id==Departments.c.id",
@@ -2623,21 +2430,21 @@ class User(Entity):
         back_populates="members",
         uselist=False,
         doc=""":class:`~stalker.core.models.Department` of the user""",
-    )
-    
+        )
+
     email = Column(
         String(256),
         unique=True,
         nullable=False,
         doc="""email of the user, accepts strings or unicodes"""
     )
-    
+
     first_name = Column(
         String(256),
         nullable=False,
         doc="""first name of the user, accepts string or unicode"""
     )
-    
+
     last_name = Column(
         String(256),
         nullable=True,
@@ -2645,7 +2452,7 @@ class User(Entity):
         
         It is a string and can be None or empty string"""
     )
-    
+
     password = Column(
         String(256),
         nullable=False,
@@ -2654,14 +2461,14 @@ class User(Entity):
         It is scrambled before it is stored.
         """
     )
-    
+
     last_login = Column(
         DateTime,
         doc="""The last login time of this user.
         
         It is an instance of datetime.datetime class."""
     )
-    
+
     login_name = synonym(
         "name",
         doc="""The login name of the user.
@@ -2670,7 +2477,7 @@ class User(Entity):
         attribute.
         """
     )
-    
+
     initials = Column(
         String(16),
         doc="""The initials of the user.
@@ -2679,8 +2486,7 @@ class User(Entity):
         :attr:`~stalker.core.models.User.first_name` and
         :attr:`~stalker.core.models.User.last_name`"""
     )
-    
-    
+
     permission_groups = relationship(
         "PermissionGroup",
         secondary="User_PermissionGroups",
@@ -2689,7 +2495,7 @@ class User(Entity):
         Accepts :class:`~stalker.core.models.PermissionGroup` object.
         """
     )
-    
+
     projects_lead = relationship(
         "Project",
         primaryjoin="Projects.c.lead_id==Users.c.id",
@@ -2700,7 +2506,7 @@ class User(Entity):
         It is a list of :class:`~stalker.core.models.Project` instances.
         """
     )
-    
+
     sequences_lead = relationship(
         "Sequence",
         primaryjoin="Sequences.c.lead_id==Users.c.id",
@@ -2711,7 +2517,7 @@ class User(Entity):
         It is a list of :class:`~stalker.core.models.Sequence` instances.
         """
     )
-    
+
     tasks = relationship(
         "Task",
         secondary="Task_Resources",
@@ -2721,8 +2527,7 @@ class User(Entity):
         It is a list of :class:`~stalker.core.models.Task` instances.
         """
     )
-    
-    
+
     bookings = relationship(
         "Booking",
         primaryjoin="Bookings.c.resource_id==Users.c.id",
@@ -2731,418 +2536,379 @@ class User(Entity):
         holds the bookings created for this :class:`~stalker.core.models.User`.
         """
     )
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(
-        self,
-        department=None,
-        email="",
-        first_name="",
-        last_name="",
-        login_name="",
-        password="",
-        permission_groups=None,
-        projects_lead=None,
-        sequences_lead=None,
-        tasks=None,
-        last_login=None,
-        initials="",
-        **kwargs
-        ):
-        
+    self,
+    department=None,
+    email="",
+    first_name="",
+    last_name="",
+    login_name="",
+    password="",
+    permission_groups=None,
+    projects_lead=None,
+    sequences_lead=None,
+    tasks=None,
+    last_login=None,
+    initials="",
+    **kwargs
+    ):
         # use the login_name for name if there are no name attribute present
         name = kwargs.get("name")
-        
+
         if name is None:
             name = login_name
-        
+
         if login_name == "":
             login_name = name
-        
+
         name = login_name
         kwargs["name"] = name
-        
+
         super(User, self).__init__(**kwargs)
-        
+
         self.department = department
-        
+
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
         self.name = name
         self.login_name = login_name
         self.initials = initials
-        
+
         # to be able to mangle the password do it like this
         self.password = password
-        
+
         if permission_groups is None:
             permission_groups = []
         self.permission_groups = permission_groups
-        
+
         self._projects = []
-        
+
         if projects_lead is None:
             projects_lead = []
         self.projects_lead = projects_lead
-        
+
         if sequences_lead is None:
             sequences_lead = []
         self.sequences_lead = sequences_lead
-        
+
         if tasks is None:
             tasks = []
-        
+
         self.tasks = tasks
-        
+
         self.last_login = last_login
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @orm.reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
         SQLAlchemy
         """
-        
+
         self._projects = []
         # call the Entity __init_on_load__
         super(User, self).__init_on_load__()
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __repr__(self):
         """return the representation of the current User
         """
-        
-        return "<User (%s %s ('%s'))>" % \
+
+        return "<User (%s %s ('%s'))>" %\
                (self.first_name, self.last_name, self.login_name)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(User, self).__eq__(other) and \
-               isinstance(other, User) and \
-               self.email == other.email and \
-               self.login_name == other.login_name and \
-               self.first_name == other.first_name and \
-               self.last_name == other.last_name and \
+
+        return super(User, self).__eq__(other) and\
+               isinstance(other, User) and\
+               self.email == other.email and\
+               self.login_name == other.login_name and\
+               self.first_name == other.first_name and\
+               self.last_name == other.last_name and\
                self.name == other.name
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __ne__(self, other):
         """the inequality operator
         """
-        
+
         return not self.__eq__(other)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("name")
     def _validate_name(self, key, name):
         """validates the given name value
         """
-        
+
         print "name in: ", name
-        
+
         name = self._format_login_name(name)
-        
+
         # also set the nice_name
         self._nice_name = self._format_nice_name(name)
-        
+
         # and also the code
         self.code = name
-        
+
         print "name out: ", name
-        
+
         return name
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("department")
     def _validate_department(self, key, department):
         """validates the given department value
         """
-        
+
         # check if it is intance of Department object
         if department is not None:
             if not isinstance(department, Department):
                 raise TypeError("department should be instance of "
-                                 "stalker.core.models.Department")
-        
+                                "stalker.core.models.Department")
+
         return department
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("email")
     def _validate_email(self, key, email_in):
         """validates the given email value
         """
-        
+
         # check if email_in is an instance of string or unicode
         if not isinstance(email_in, (str, unicode)):
             raise TypeError("email should be an instance of string or "
-                             "unicode")
-        
+                            "unicode")
+
         return self._validate_email_format(email_in)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _validate_email_format(self, email_in):
         """formats the email
         """
-        
+
         # split the mail from @ sign
         splits = email_in.split("@")
         len_splits = len(splits)
-        
+
         # there should be one and only one @ sign
         if len_splits > 2:
             raise ValueError("check the email formatting, there are more than "
                              "one @ sign")
-        
+
         if len_splits < 2:
             raise ValueError("check the email formatting, there are no @ sign")
-        
+
         if splits[0] == "":
             raise ValueError("check the email formatting, the name part is "
                              "missing")
-        
+
         if splits[1] == "":
             raise ValueError("check the email formatting, the domain part is "
                              "missing")
-        
+
         return email_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("first_name")
     def _validate_first_name(self, key, first_name_in):
         """validates the given first_name attribute
         """
-        
+
         if first_name_in is None:
             raise TypeError("first_name cannot be None")
-        
+
         if not isinstance(first_name_in, (str, unicode)):
             raise TypeError("first_name should be instance of string or "
-                             "unicode")
-        
+                            "unicode")
+
         if first_name_in == "":
             raise ValueError("first_name can not be an empty string")
-        
+
         return first_name_in.strip().title()
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("initials")
     def _validate_initials(self, key, initials_in):
         """validates the given initials
         """
-        
+
         initials_in = str(initials_in)
-        
+
         if initials_in == "":
             # derive the initials from the first and last name
-            
+
             initials_in = re.sub("[^A-Z]+", "",
-                                 self.first_name.title() + " " + \
+                                 self.first_name.title() + " " +\
                                  self.last_name.title()).lower()
-        
+
         return initials_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("last_login")
     def _validate_last_login(self, key, last_login_in):
         """validates the given last_login argument
         """
-        
-        if not isinstance(last_login_in, datetime.datetime) and \
+
+        if not isinstance(last_login_in, datetime.datetime) and\
            last_login_in is not None:
             raise TypeError("last_login should be an instance of "
                             "datetime.datetime or None")
-        
+
         return last_login_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("last_name")
     def _validate_last_name(self, key, last_name_in):
         """validates the given last_name attribute
         """
-        
+
         if last_name_in is not None:
             if not isinstance(last_name_in, (str, unicode)):
                 raise TypeError("last_name should be instance of string or "
                                 "unicode")
         else:
             last_name_in = ""
-        
+
         return last_name_in.strip().title()
-    
-    
-    
-    
-    #----------------------------------------------------------------------
-    #def _validate_login_name(self, key, login_name):
-    #@validates("name")
-    #def _validate_name(self, key, name):
+
+
+
+
+
+        #def _validate_login_name(self, key, login_name):
+        #@validates("name")
+        #def _validate_name(self, key, name):
         #"""validates the given login_name value
         #"""
-        
+
         #print "login_name_in: ", name
-        
+
         #if name is None:
-            #raise TypeError("login name could not be None")
-        
+        #raise TypeError("login name could not be None")
+
         #name = self._format_login_name(str(name))
-        
+
         #if name == "":
-            #raise ValueError("login name could not be empty string")
-        
+        #raise ValueError("login name could not be empty string")
+
         #print "login_name_out: ", name
-        
+
         #return name
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _format_name(self, name):
         """formats the given name
         """
-        
+
         # be sure it is a string
         name = str(name)
-        
+
         # strip white spaces from start and end
         name = name.strip()
-        
+
         # remove all the spaces
-        name = name.replace(" ","")
-        
+        name = name.replace(" ", "")
+
         # make it lowercase
         name = name.lower()
-        
+
         # remove any illegal characters
-        name = re.sub( "[^\\(a-zA-Z0-9)]+", "", name)
-        
+        name = re.sub("[^\\(a-zA-Z0-9)]+", "", name)
+
         # remove any number at the begining
-        name = re.sub( "^[0-9]+", "", name)
-        
+        name = re.sub("^[0-9]+", "", name)
+
         return name
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("password")
     def _validate_password(self, key, password_in):
         """validates the given password
         """
-        
+
         if password_in is None:
             raise TypeError("password cannot be None")
-        
+
         # mangle the password
         from stalker.ext import auth  # pylint: disable=W0404
+
         password_in = auth.set_password(password_in)
-        
+
         return password_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def check_password(self, raw_password):
         """Checks the given raw_password.
         
         Checks the given raw_password with the current Users objects encrypted
         password.
         """
-        
+
         from stalker.ext import auth # pylint: disable=W0404
+
         return auth.check_password(raw_password, self.password)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("permission_groups")
     def _validate_permission_groups(self, key, permission_group):
         """check the given permission_group
         """
-        
+
         if not isinstance(permission_group, PermissionGroup):
             raise TypeError(
                 "any group in permission_groups should be an instance of"
                 "stalker.core.models.PermissionGroup"
             )
-        
+
         return permission_group
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("projects_lead")
     def _validate_projects_lead(self, key, project):
         """validates the given projects_lead attribute
         """
-        
+
         if not isinstance(project, Project):
             raise TypeError(
                 "any element in projects_lead should be a"
                 "stalker.core.models.Project instance")
-        
+
         return project
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("sequences_lead")
     def _validate_sequences_lead(self, key, sequence):
         """validates the given sequences_lead attribute
         """
-        
+
         if not isinstance(sequence, Sequence):
             raise TypeError(
                 "any element in sequences_lead should be an instance of "
                 "stalker.core.models.Sequence class"
             )
-        
+
         return sequence
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("tasks")
     def _validate_tasks(self, key, task):
         """validates the given taks attribute
         """
-        
+
         if not isinstance(task, Task):
             raise TypeError(
                 "any element in tasks should be an instance of "
                 "stalker.core.models.Task class")
-        
+
         return task
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @property
     def projects(self):
         """The list of :class:`~stlalker.core.models.Project`\ s those the current user assigned to.
@@ -3160,42 +2926,37 @@ class User(Entity):
         :class:`~stalker.core.models.Task` to the
         :class:`~stalker.core.models.Project`.
         """
-        
+
         #return self._projects
         projects = []
         for task in self.tasks:
             projects.append(task.task_of.project)
-        
+
         return list(set(projects))
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _login_name_getter(self):
+
+
+
+        #
+        #def _login_name_getter(self):
         #"""The login name of the user.
-        
+
         #It is a string and also sets the :attr:`~stalker.core.models.User.name`
         #attribute.
         #"""
-        
+
         #return self._name
-    
-    ##----------------------------------------------------------------------
-    #def _login_name_setter(self, login_name_in):
+
+        #
+        #def _login_name_setter(self, login_name_in):
         #self.name = self._validate_login_name(login_name_in)
-        
+
         ## set the name attribute
         #self.login_name = self.name
-        
+
         ## also set the code
         #self.code = self._validate_code(self.name)
 
 
-
-
-
-
-########################################################################
 class ReferenceMixin(object):
     """Adds reference capabilities to the mixed in class.
     
@@ -3208,37 +2969,35 @@ class ReferenceMixin(object):
     
     :type references: list of :class:`~stalker.core.models.Entity` objects.
     """
-    
-    
-    
+
+
+
     # add this lines for Sphinx
-#    __tablename__ = "ReferenceMixins"
-    
-    
-    
-    #----------------------------------------------------------------------
+    #    __tablename__ = "ReferenceMixins"
+
+
+
+
     def __init__(self,
                  references=None,
                  **kwargs):
         if references is None:
             references = []
-        
+
         self.references = references
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @classmethod
     def create_secondary_tables_for_references(cls):
         """creates any secondary table
         """
-        
+
         class_name = cls.__name__
-        
+
         # use the given class_name and the class_table
         secondary_table_name = class_name + "_References"
         secondary_table = None
-        
+
         # check if the table is already defined
         if secondary_table_name not in Base.metadata:
             secondary_table = Table(
@@ -3246,59 +3005,49 @@ class ReferenceMixin(object):
                 Column(
                     class_name.lower() + "_id",
                     Integer,
-                    ForeignKey(cls.__tablename__ + ".id"), 
+                    ForeignKey(cls.__tablename__ + ".id"),
                     primary_key=True,
-                ),
-                
+                    ),
+
                 Column(
                     "reference_id",
                     Integer,
                     ForeignKey("Links.id"),
                     primary_key=True,
-                )
+                    )
             )
         else:
             secondary_table = Base.metadata.tables[secondary_table_name]
-        
+
         return secondary_table
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def references(cls):
-        
         class_name = cls.__name__
-        
+
         # get secondary table
         secondary_table = cls.create_secondary_tables_for_references()
-        
+
         # return the relationship
         return relationship("Link", secondary=secondary_table)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("references")
     def _validate_references(self, key, reference):
         """validates the given reference
         """
-        
+
         #from stalker.core.models import SimpleEntity
-        
+
         # all the elements should be instance of stalker.core.models.Entity
         if not isinstance(reference, SimpleEntity):
             raise TypeError("all the elements should be instances of "
-                             ":class:`stalker.core.models.Entity`")
-        
+                            ":class:`stalker.core.models.Entity`")
+
         return reference
 
 
-
-
-
-
-########################################################################
 class StatusMixin(object):
     """Adds statusabilities to the object.
     
@@ -3327,25 +3076,19 @@ class StatusMixin(object):
       than 0 and higher than the length-1 of the status_list object and nothing
       other than an integer
     """
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self, status=0, status_list=None, **kwargs):
         self.status_list = status_list
         self.status = status
         pass
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def status(cls):
         return Column("status", Integer, default=0)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def status_list_id(cls):
         return Column(
@@ -3353,107 +3096,98 @@ class StatusMixin(object):
             Integer,
             ForeignKey("StatusLists.id", use_alter=True, name="x"),
             nullable=False,
-        )
-    
-    
-    
-    #----------------------------------------------------------------------
+            )
+
+
     @declared_attr
     def status_list(cls):
         return relationship(
             "StatusList",
             primaryjoin=\
-                "%s.status_list_id==StatusList.statusList_id" % cls.__name__,
+            "%s.status_list_id==StatusList.statusList_id" % cls.__name__,
             #post_update=True,
         )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("status_list")
     def _validate_status_list(self, key, status_list):
         """validates the given status_list_in value
         """
-        
+
         # raise TypeError when:
         #from stalker.core.models import StatusList
-        
+
         if status_list is None:
             # check if there is a db setup and try to get the appropriate 
             # StatusList from the database
             from stalker import db
+
             if db.session is not None:
                 # try to get a StatusList with the target_entity_type is 
                 # matching the class name
                 status_list = db.query(StatusList).filter_by\
                     (target_entity_type=self
                 .__class__.__name__).first()
-        
-        
+
+
         # if it is still None
         if status_list is None:
-                # there is no db so raise an error because there is no way 
-                # to get an appropriate StatusList
-                raise TypeError("'%s' objects can not be initialized without a "
-                                "stalker.core.models.StatusList instance, please "
-                                "pass a suitable StatusList "
-                                "(StatusList.target_entity_type=%s) "
-                                "with the 'status_list' argument" 
-                                % (self.__class__.__name__,
-                                   self.__class__.__name__))
+            # there is no db so raise an error because there is no way 
+            # to get an appropriate StatusList
+            raise TypeError("'%s' objects can not be initialized without a "
+                            "stalker.core.models.StatusList instance, please "
+                            "pass a suitable StatusList "
+                            "(StatusList.target_entity_type=%s) "
+                            "with the 'status_list' argument"
+            % (self.__class__.__name__,
+               self.__class__.__name__))
         else:
             # it is not an instance of status_list
             if not isinstance(status_list, StatusList):
                 raise TypeError("the status list should be an instance of "
-                                 "stalker.core.models.StatusList")
-            
+                                "stalker.core.models.StatusList")
+
             # check if the entity_type matches to the StatusList.target_entity_type
             if self.__class__.__name__ != status_list.target_entity_type:
-                raise TypeError("the given StatusLists' target_entity_type is %s, "
-                                "whereas the entity_type of this object is %s" % \
-                                (status_list.target_entity_type,
-                                 self.__class__.__name__))
-        
+                raise TypeError(
+                    "the given StatusLists' target_entity_type is %s, "
+                    "whereas the entity_type of this object is %s" %\
+                    (status_list.target_entity_type,
+                     self.__class__.__name__))
+
         return status_list
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("status")
     def _validate_status(self, key, status):
         """validates the given status value
         """
-        
+
         #from stalker.core.models import StatusList
-        
+
         if not isinstance(self.status_list, StatusList):
             raise TypeError("please set the status_list attribute first")
-        
+
         # it is set to None
         if status is None:
             raise TypeError("the status couldn't be None, set it to a "
-                             "non-negative integer")
-        
+                            "non-negative integer")
+
         # it is not an instance of int
         if not isinstance(status, int):
             raise TypeError("the status must be an instance of integer")
-        
+
         # if it is not in the correct range:
         if status < 0:
             raise ValueError("the status must be a non-negative integer")
-        
+
         if status >= len(self.status_list.statuses):
             raise ValueError("the status can not be bigger than the length of "
                              "the status_list")
-        
+
         return status
 
 
-
-
-
-
-########################################################################
 class ScheduleMixin(object):
     """Adds schedule info to the mixed in class.
     
@@ -3528,34 +3262,29 @@ class ScheduleMixin(object):
     
     :type duration: :class:`datetime.timedelta`
     """
-    
-    
-    
-#    # add this lines for Sphinx
-#    __tablename__ = "ScheduleMixins"
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
+
+    #    # add this lines for Sphinx
+    #    __tablename__ = "ScheduleMixins"
+
+
+
+
     def __init__(self,
                  start_date=None,
                  due_date=None,
                  duration=None,
                  **kwargs
-                 ):
-        
+    ):
         self._validate_dates(start_date, due_date, duration)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def _due_date(cls):
         return Column("due_date", Date)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _due_date_getter(self):
         """The date that the entity should be delivered.
         
@@ -3565,15 +3294,14 @@ class ScheduleMixin(object):
         due_date will also set the due_date so the timedelta between them is
         preserved, default value is 10 days
         """
-        
+
         return self._due_date
-    
-    #----------------------------------------------------------------------
+
+
     def _due_date_setter(self, due_date_in):
         self._validate_dates(self.start_date, due_date_in, self.duration)
-    
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def due_date(cls):
         return synonym(
@@ -3583,17 +3311,13 @@ class ScheduleMixin(object):
                 cls._due_date_setter
             )
         )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def _start_date(cls):
         return Column("start_date", Date)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _start_date_getter(self):
         """The date that this entity should start.
         
@@ -3608,16 +3332,14 @@ class ScheduleMixin(object):
         an instance of class:`datetime.date` and the default value is
         :func:`datetime.date.today()`
         """
-        
+
         return self._start_date
-    
-    #----------------------------------------------------------------------
+
+
     def _start_date_setter(self, start_date_in):
         self._validate_dates(start_date_in, self.due_date, self.duration)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def start_date(cls):
         return synonym(
@@ -3625,19 +3347,15 @@ class ScheduleMixin(object):
             descriptor=property(
                 cls._start_date_getter,
                 cls._start_date_setter,
-            )
+                )
         )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def _duration(cls):
         return Column("duration", Interval)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _duration_getter(self):
         """Duration of the entity.
         
@@ -3648,21 +3366,21 @@ class ScheduleMixin(object):
         attribute value.
         """
         return self._duration
-    
-    #----------------------------------------------------------------------
+
+
     def _duration_setter(self, duration_in):
-        
         if duration_in is not None:
             if isinstance(duration_in, datetime.timedelta):
                 # set the due_date to None
                 # to make it recalculated
                 self._validate_dates(self.start_date, None, duration_in)
             else:
-                self._validate_dates(self.start_date, self.due_date, duration_in)
+                self._validate_dates(self.start_date, self.due_date,
+                                     duration_in)
         else:
             self._validate_dates(self.start_date, self.due_date, duration_in)
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def duration(cls):
         return synonym(
@@ -3672,72 +3390,59 @@ class ScheduleMixin(object):
                 cls._duration_setter
             )
         )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _validate_dates(self, start_date, due_date, duration):
         """updates the date values
         """
-        
-        
+
         if not isinstance(start_date, datetime.date):
             start_date = None
-        
+
         if not isinstance(due_date, datetime.date):
             due_date = None
-        
+
         if not isinstance(duration, datetime.timedelta):
             duration = None
-        
-        
+
+
         # check start_date
         if start_date is None:
             # try to calculate the start_date from due_date and duration
             if due_date is None:
-                
                 # set the defaults
                 start_date = datetime.date.today()
-                
+
                 if duration is None:
                     # set the defaults
                     duration = defaults.DEFAULT_TASK_DURATION
-                
+
                 due_date = start_date + duration
             else:
-                
                 if duration is None:
                     duration = defaults.DEFAULT_TASK_DURATION
-                
+
                 start_date = due_date - duration
-        
+
         # check due_date
         if due_date is None:
-            
             if duration is None:
                 duration = defaults.DEFAULT_TASK_DURATION
-            
+
             due_date = start_date + duration
-        
-        
+
         if due_date < start_date:
-            
             # check duration
             if duration < datetime.timedelta(1):
                 duration = datetime.timedelta(1)
-            
+
             due_date = start_date + duration
-        
+
         self._start_date = start_date
         self._due_date = due_date
         self._duration = self._due_date - self._start_date
 
 
-
-
-
-
-########################################################################
 class ProjectMixin(object):
     """Gives the ability to connect to a :class:`~stalker.core.models.Project` to the mixed in object.
     
@@ -3747,15 +3452,15 @@ class ProjectMixin(object):
     
     :type project: :class:`~stalker.core.models.Project`
     """
-    
-    
-    
-#    # add this lines for Sphinx
-#    __tablename__ = "ProjectMixins"
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
+
+    #    # add this lines for Sphinx
+    #    __tablename__ = "ProjectMixins"
+
+
+
+
     @declared_attr
     def project_id(cls):
         return Column(
@@ -3768,77 +3473,64 @@ class ProjectMixin(object):
             # thus nullable should be True
             #nullable=False,
         )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @declared_attr
     def project(cls):
-        
         backref = cls.__tablename__.lower()
         doc = """The :class:`~stalker.core.models.Project` instance that this
         object belongs to.
         """
-        
+
         return relationship(
             "Project",
             primaryjoin=\
-                cls.__tablename__+ ".c.project_id==Projects.c.id",
+            cls.__tablename__ + ".c.project_id==Projects.c.id",
             post_update=True, # for project itself
             uselist=False,
             backref=backref,
             doc=doc
         )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  project=None,
                  **kwargs):
-        
         self.project = project
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("project")
     def _validate_project(self, key, project):
         """validates the given project value
         """
-        
+
         if project is None:
             raise TypeError("project can not be None it must be an instance "
                             "of stalker.core.models.Project instance")
-        
+
         #from stalker.core.models import Project
-        
+
         if not isinstance(project, Project):
             raise TypeError("project must be an instance of "
                             "stalker.core.models.Project instance")
-        
+
         return project
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@synonym_for("_project")
-    #@property
-    #def project(self):
+
+
+
+        #
+        #@synonym_for("_project")
+        #@property
+        #def project(self):
         #"""A :class:`~stalker.core.models.Project` instance showing the
         #relation of this object to a Stalker
         #:class:`~stalker.core.models.Project`. It is a read only attribute, so
         #you can not change the Project of an already created object.
         #"""
-        
+
         #return self._project
 
 
-
-
-
-
-########################################################################
 class Booking(Entity, ScheduleMixin):
     """Holds information about the time spend on a specific
     :class:`~stalker.core.models.Task` by a specific
@@ -3876,7 +3568,7 @@ class Booking(Entity, ScheduleMixin):
         doc="""The :class:`~stalker.core.models.Task` instance that this 
         booking is created for"""
     )
-    
+
     resource_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     resource = relationship(
         "User",
@@ -3886,76 +3578,60 @@ class Booking(Entity, ScheduleMixin):
         doc="""The :class:`~stalker.core.models.User` instance that this booking
         is created for"""
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self, task=None, resource=None, **kwargs):
         super(Booking, self).__init__(**kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-        
+
         self.task = task
         self.resource = resource
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("task")
     def _validate_task(self, key, task):
         """validates the given task value
         """
-        
+
         if not isinstance(task, Task):
             raise TypeError("Booking.task should be an instance of "
                             "stalker.core.models.Task")
-        
+
         return task
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("resource")
     def _validate_resource(self, key, resource):
         """validates the given resource value
         """
-        
+
         if resource is None:
             raise TypeError("Booking.resource can not be None")
-        
+
         if not isinstance(resource, User):
             raise TypeError("Booking.resource should be a "
                             "stalker.core.models.User instance")
-        
-        
+
+
         # check for overbooking
         for booking in resource.bookings:
             print booking.start_date
             print self.start_date
-                
-            if booking.start_date == self.start_date or \
-                booking.due_date == self.due_date or \
-                (self.due_date > booking.start_date and \
-                    self.due_date < booking.due_date) or \
-                (self.start_date > booking.start_date and \
-                    self.start_date < booking.due_date):
-                
+
+            if booking.start_date == self.start_date or\
+               booking.due_date == self.due_date or\
+               (self.due_date > booking.start_date and\
+                self.due_date < booking.due_date) or\
+               (self.start_date > booking.start_date and\
+                self.start_date < booking.due_date):
                 raise OverBookedWarning(
-                    "The resource %s is overly booked with %s and %s" % 
+                    "The resource %s is overly booked with %s and %s" %
                     (resource, self, booking)
                 )
-        
-        
+
         return resource
-        
-        
-        
 
 
-
-
-
-
-########################################################################
 class Message(Entity, StatusMixin):
     """The base of the messaging system in Stalker
     
@@ -3984,24 +3660,17 @@ class Message(Entity, StatusMixin):
       this message (so anything can be attached to a message)
     
     """
-    
-    
+
     __tablename__ = "Messages"
     __mapper_args__ = {"polymorphic_identity": "Message"}
     message_id = Column("id", Integer, ForeignKey("Entities.id"),
                         primary_key=True)
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self, **kwargs):
         super(Message, self).__init__(**kwargs)
 
 
-
-
-
-
-########################################################################
 class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
@@ -4090,60 +3759,60 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     :type task_of: :class:`~stalker.core.models.SimpleEntity`.
     """
     #.. :param depends: A list of
-         #:class:`~stalker.core.models.TaskDependencyRelation` objects. Holds
-         #information about the list of other :class:`~stalker.core.models.Task`\ s
-         #which the current one is dependent on.
-         
-      #.. giving information about the dependent tasks. The given list is iterated
-         #and the :attr:`~stalker.core.models.Task.start_date` attribute is set to
-         #the latest found :attr:`~stalker.core.models.Task.due_date` attribute of
-         #the dependent :class:`~stalker.core.models.Task`\ s.
-    
+    #:class:`~stalker.core.models.TaskDependencyRelation` objects. Holds
+    #information about the list of other :class:`~stalker.core.models.Task`\ s
+    #which the current one is dependent on.
+
+    #.. giving information about the dependent tasks. The given list is iterated
+    #and the :attr:`~stalker.core.models.Task.start_date` attribute is set to
+    #the latest found :attr:`~stalker.core.models.Task.due_date` attribute of
+    #the dependent :class:`~stalker.core.models.Task`\ s.
+
     #.. :type depends: list of :class:`~stalker.core.models.TaskDependencyRelation`
-    
-       
-       #:param parent_task: Another :class:`~stalker.core.models.Task` which is the
-         #parent of the current :class:`~stalker.core.models.Task`.
-         
-         #:class:`~stalker.core.models.Task`\ s can be grouped by using parent and
-         #child relation.
-       
-       #:type parent_task: :class:`~stalker.core.models.Task`
-       
-       #:param sub_tasks: A list of other :class:`~stalker.core.models.Task`\ s
-         #which are the child of the current one. A
-         #:class:`~stalker.core.models.Task` with other child
-         #:class:`~stalker.core.models.Task`\ s:
-         
-           #* can not have any resources
-           #* can not have any effort set
-           #* can not have any versions
-         
-         #The only reason of a :class:`~stalker.core.models.Task` to have other
-         #:class:`~stalker.core.models.Task`\ s as child is to group them. So it
-         #is meaningles to let a parent :class:`~stalker.core.models.Task` to have
-         #any resource or any effort or any verions. The
-         #:attr:`~stalker.core.models.Task.start_date`,
-         #:attr:`~stalker.core.models.Task.due_date` and
-         #:attr:`~stalker.core.models.Task.duration` attributes of a
-         #:class:`~stalker.core.models.Task` with child classes will be based on
-         #it childrens date attributes.
-       
-       #:type child_tasks: :class:`~stalker.core.models.Task`.
-       
+
+
+    #:param parent_task: Another :class:`~stalker.core.models.Task` which is the
+    #parent of the current :class:`~stalker.core.models.Task`.
+
+    #:class:`~stalker.core.models.Task`\ s can be grouped by using parent and
+    #child relation.
+
+    #:type parent_task: :class:`~stalker.core.models.Task`
+
+    #:param sub_tasks: A list of other :class:`~stalker.core.models.Task`\ s
+    #which are the child of the current one. A
+    #:class:`~stalker.core.models.Task` with other child
+    #:class:`~stalker.core.models.Task`\ s:
+
+    #* can not have any resources
+    #* can not have any effort set
+    #* can not have any versions
+
+    #The only reason of a :class:`~stalker.core.models.Task` to have other
+    #:class:`~stalker.core.models.Task`\ s as child is to group them. So it
+    #is meaningles to let a parent :class:`~stalker.core.models.Task` to have
+    #any resource or any effort or any verions. The
+    #:attr:`~stalker.core.models.Task.start_date`,
+    #:attr:`~stalker.core.models.Task.due_date` and
+    #:attr:`~stalker.core.models.Task.duration` attributes of a
+    #:class:`~stalker.core.models.Task` with child classes will be based on
+    #it childrens date attributes.
+
+    #:type child_tasks: :class:`~stalker.core.models.Task`.
+
     #:param versions: A list of :class:`~stalker.core.models.Version` objects
-      #showing the produced work on the repository. This is the relation between
-      #database and the repository.
-    
+    #showing the produced work on the repository. This is the relation between
+    #database and the repository.
+
     #:type versions: list of :class:`~stalker.core.models.Version`
     #"""
-    
-    
+
+
     __tablename__ = "Tasks"
     __mapper_args__ = {"polymorphic_identity": "Task"}
     task_id = Column("id", Integer, ForeignKey("Entities.id"),
                      primary_key=True)
-    
+
     is_milestone = Column(
         Boolean,
         doc="""Specifies if this Task is a milestone.
@@ -4153,7 +3822,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         of the project.
         """
     )
-    
+
     # UPDATE THIS: is_complete should look to Task.status, but it is may be
     # faster to query in this way, judge later
     is_complete = Column(
@@ -4166,7 +3835,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
         """
     )
-    
+
     depends = relationship(
         "Task",
         secondary="Task_Tasks",
@@ -4181,7 +3850,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         some way depends to this one again.
         """
     )
-    
+
     resources = relationship(
         "User",
         secondary="Task_Resources",
@@ -4192,12 +3861,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""The list of :class:`stalker.core.models.User`\ s instances assigned to this Task.
         """
     )
-    
+
     _effort = Column(Interval)
     priority = Column(Integer)
-    
+
     task_of_id = Column(Integer, ForeignKey("TaskableEntities.id"))
-    
+
     task_of = relationship(
         "TaskableEntity",
         primaryjoin="Tasks.c.task_of_id==TaskableEntities.c.id",
@@ -4211,7 +3880,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         will raise an AttributeError.
         """
     )
-    
+
     bookings = relationship(
         "Booking",
         primaryjoin="Bookings.c.task_id==Tasks.c.id",
@@ -4219,7 +3888,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""A list of :class:`~stalker.core.models.Booking` instances showing who and when spent how much effort on this task.
         """
     )
-    
+
     versions = relationship(
         "Version",
         primaryjoin="Versions.c.version_of_id==Tasks.c.id",
@@ -4227,10 +3896,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""A list of :class:`~stalker.core.models.Version` instances showing the files created for this task.
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  depends=None,
                  effort=None,
@@ -4240,39 +3907,37 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  task_of=None,
                  **kwargs):
         super(Task, self).__init__(**kwargs)
-        
+
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-        
+
         self.bookings = []
         self.versions = []
-        
+
         self.is_milestone = is_milestone
         self.is_complete = False
-        
+
         if depends is None:
             depends = []
-        
+
         self.depends = depends
-        
+
         if self.is_milestone:
             resources = None
-        
+
         if resources is None:
             resources = []
-        
+
         self.resources = resources
         self._effort = None
         self.effort = effort
-        
+
         self.priority = priority
-        
+
         self.task_of = task_of
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @orm.reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
@@ -4281,115 +3946,98 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # UPDATE THIS
         self.bookings = []
         self.versions = []
-        
+
         # call supers __init_on_load__
         super(Task, self).__init_on_load__()
 
-    
-    
-    #----------------------------------------------------------------------
+
     def __eq__(self, other):
         """the equality operator
         """
-        
+
         return super(Task, self).__eq__(other) and isinstance(other, Task)
-    
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("bookings")
     def _validate_bookings(self, key, booking):
         """validates the given bookings value
         """
-        
+
         if not isinstance(booking, Booking):
             raise TypeError("all the elements in the bookings should be "
                             "an instances of stalker.core.models.Booking not "
                             "%s instance" % booking.__class__)
-        
-        
+
         return booking
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("is_complete")
     def _validate_is_complete(self, key, complete_in):
         """validates the given complete value
         """
         return bool(complete_in)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("depends")
     def _validate_depends(self, key, depends):
         """validates the given depends value
         """
-        
+
         #if depends_in is None:
-            #depends_in = []
-        
+        #depends_in = []
+
         #if not isinstance(depends_in, list):
-            #raise TypeError("the depends attribute should be an list of"
-                            #"stalker.core.models.Task instances")
-            
-        
+        #raise TypeError("the depends attribute should be an list of"
+        #"stalker.core.models.Task instances")
+
+
         if not isinstance(depends, Task):
             raise TypeError("all the elements in the depends should be an "
                             "instance of stalker.core.models.Task")
-        
+
         # check for the circular dependency
         _check_circular_dependency(depends, self)
-        
+
         return depends
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _validate_effort(self, effort):
         """validates the given effort
         """
-        
+
         if not isinstance(effort, datetime.timedelta):
             effort = None
-        
+
         if effort is None:
             # take it from the duration and resources
-            
+
             num_of_resources = len(self.resources)
             if num_of_resources == 0:
                 num_of_resources = 1
-            
+
             effort = self.duration * num_of_resources
-        
+
         return effort
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _effort_getter(self):
         """the getter for the effort property
         """
         return self._effort
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _effort_setter(self, effort_in):
         """the setter for the effort property
         """
         self._effort = self._validate_effort(effort_in)
-        
+
         # update the duration
         num_of_resources = len(self.resources)
         if num_of_resources == 0:
             num_of_resources = 1
-        
+
         self.duration = self._effort / num_of_resources
-    
-    
-    
+
     effort = synonym(
         "_effort",
         descriptor=property(
@@ -4424,27 +4072,24 @@ class Task(Entity, StatusMixin, ScheduleMixin):
            {effort} = {duration} \\times {n_{resources}}
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("is_milestone")
     def _validate_is_milestone(self, key, is_milestone):
         """validates the given milestone value
         """
-        
+
         if is_milestone:
             self.resources = []
-        
+
         return bool(is_milestone)
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("task_of")
     def _validate_task_of(self, key, task_of):
         """validates the given task_of value
         """
-        
+
         # the object given withe the task_of argument should have an attribute
         # called "tasks"
         if task_of is None:
@@ -4452,81 +4097,71 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                             "Tasks without a parent, to remove a task from "
                             "a TaskableEntity, assign the task to another "
                             "TaskableEntity or delete it.")
-        
+
         if not hasattr(task_of, "tasks"):
             raise AttributeError("the object given with 'task_of' should have "
                                  "an attribute called 'tasks'")
-        
+
         return task_of
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("priority")
     def _validate_priority(self, key, priority):
         """validates the given priority value
         """
-        
+
         try:
             priority = int(priority)
         except (ValueError, TypeError):
             pass
-        
+
         if not isinstance(priority, int):
             priority = defaults.DEFAULT_TASK_PRIORITY
-        
+
         if priority < 0:
             priority = 0
         elif priority > 1000:
             priority = 1000
-        
+
         return priority
-    
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("resources")
     def _validate_resources(self, key, resource):
         """validates the given resources value
         """
-        
+
         if not isinstance(resource, User):
             raise TypeError("resources should be a list of "
                             "stalker.core.models.User instances")
-        
-        ## milestones do not need resources
-        #if self.is_milestone:
+
+            ## milestones do not need resources
+            #if self.is_milestone:
             #resource = None
-        
+
         return resource
-    
-    
+
     # UPDATE THIS
-    #----------------------------------------------------------------------
+
     @validates("versions")
     def _validate_versions(self, key, version):
         """validates the given version value
         """
-        
+
         if not isinstance(version, Version):
             raise TypeError("all the elements in the versions list should be "
                             "stalker.core.models.Version instances")
-        
+
         return version
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _duration_getter(self):
         return self._duration
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _duration_setter(self, duration):
         # just call the fset method of the duration property in the super
-        
+
         #------------------------------------------------------------
         # code copied and pasted from ScheduleMixin - Fix it later
         if duration is not None:
@@ -4538,22 +4173,22 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                 self._validate_dates(self.start_date, self.due_date, duration)
         else:
             self._validate_dates(self.start_date, self.due_date, duration)
-        #------------------------------------------------------------
-        
-        
+            #------------------------------------------------------------
+
+
         # then update the effort
         num_of_resources = len(self.resources)
         if num_of_resources == 0:
             num_of_resources = 1
-        
+
         new_effort_value = self.duration * num_of_resources
-        
+
         # break recursion
         if self.effort != new_effort_value:
             self.effort = new_effort_value
-        
-        #return duration
-    
+
+            #return duration
+
     duration = synonym(
         "_duration",
         descriptor=property(
@@ -4569,27 +4204,19 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         attribute value.
         """
     )
-    
-    
-    
 
 
-
-
-
-
-#----------------------------------------------------------------------
 def _check_circular_dependency(task, check_for_task):
     """checks the circular dependency in task if it has check_for_task in its
     depends list
     
     !!!!WARNING THERE IS NO TEST FOR THIS FUNCTION!!!!
     """
-    
+
     for dependent_task in task.depends:
         if dependent_task is check_for_task:
             raise CircularDependencyError(
-                "task %s and %s creates a circular dependency" % \
+                "task %s and %s creates a circular dependency" %\
                 (task, check_for_task)
             )
         else:
@@ -4600,52 +4227,47 @@ def _check_circular_dependency(task, check_for_task):
 
 
 
-#########################################################################
-#class TaskDependencyRelation(object):
-    #"""Holds information about :class:`~stalker.core.models.Task` dependencies.
-    
-    #(DEVELOPERS: It could be an association proxy for the Task class)
-    
-    #A TaskDependencyRelation object basically defines which
-    #:class:`~stalker.core.models.Task` is dependedt
-    #to which other :class:`~stalker.core.models.Task` and what is the lag
-    #between the end of the dependent to the start of the dependee.
-    
-    #A :class:`~stalker.core.models.Task` can not be set dependent to it self.
-    #So the the :attr:`~stalker.core.models.TaskDependencyRelation.depends` list
-    #can not contain the same value with
-    #:attr:`~stalker.core.models.TaskDependencyRelation.task`.
-    
-    #:param task: The :class:`~stalker.core.models.Task` that is dependent to
-      #others.
-    
-    #:type task: :class:`~stalker.core.models.Task`
-    
-    #:param depends: A :class:`~stalker.core.models.Task`\ s that the
-      #:class:`~stalker.core.models.Task` which is held by the
-      #:attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
-      #dependening on. The :attr:`~stalker.core.models.Task.start_date` and the
-      #:attr:`~stalker.core.models.Task.due_date` attributes of the
-      #:class:`~stalker.core.models.Task` is updated if it is before the
-      #``due_date`` of the dependent :class:`~stalker.core.models.Task`.
-    
-    #:type depends: :class:`~stalker.core.models.Task`
-    
-    #:param lag: The lag between the end of the dependent task to the start of
-      #the dependee. It is an instance of timedelta and could be a negative
-      #value. The default is 0. So the end of the task is start of the other.
-    #"""
-    
-    ##----------------------------------------------------------------------
-    #def __init__(self):
-        #pass
+            #
+            #class TaskDependencyRelation(object):
+            #"""Holds information about :class:`~stalker.core.models.Task` dependencies.
+
+            #(DEVELOPERS: It could be an association proxy for the Task class)
+
+            #A TaskDependencyRelation object basically defines which
+            #:class:`~stalker.core.models.Task` is dependedt
+            #to which other :class:`~stalker.core.models.Task` and what is the lag
+            #between the end of the dependent to the start of the dependee.
+
+            #A :class:`~stalker.core.models.Task` can not be set dependent to it self.
+            #So the the :attr:`~stalker.core.models.TaskDependencyRelation.depends` list
+            #can not contain the same value with
+            #:attr:`~stalker.core.models.TaskDependencyRelation.task`.
+
+            #:param task: The :class:`~stalker.core.models.Task` that is dependent to
+            #others.
+
+            #:type task: :class:`~stalker.core.models.Task`
+
+            #:param depends: A :class:`~stalker.core.models.Task`\ s that the
+            #:class:`~stalker.core.models.Task` which is held by the
+            #:attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
+            #dependening on. The :attr:`~stalker.core.models.Task.start_date` and the
+            #:attr:`~stalker.core.models.Task.due_date` attributes of the
+            #:class:`~stalker.core.models.Task` is updated if it is before the
+            #``due_date`` of the dependent :class:`~stalker.core.models.Task`.
+
+            #:type depends: :class:`~stalker.core.models.Task`
+
+            #:param lag: The lag between the end of the dependent task to the start of
+            #the dependee. It is an instance of timedelta and could be a negative
+            #value. The default is 0. So the end of the task is start of the other.
+            #"""
+
+            #
+            #def __init__(self):
+            #pass
 
 
-
-
-
-
-########################################################################
 class TaskableEntity(Entity, ProjectMixin):
     """Gives the ability to connect to a list of :class:`~stalker.core.models.Task`\ s to the mixed in object.
     
@@ -4660,52 +4282,41 @@ class TaskableEntity(Entity, ProjectMixin):
     ``project`` argument needs to be initialized. See the
     :class:`~stalker.core.models.ProjectMixin` for more detail.
     """
-    
-    
+
     __tablename__ = "TaskableEntities"
     __mapper_args__ = {"polymorphic_identity": "TaskableEntity"}
     taskableEntity_id = Column("id", Integer, ForeignKey("Entities.id"),
                                primary_key=True)
-    
+
     tasks = relationship(
         "Task",
-        primaryjoin=taskableEntity_id==Task.task_of_id,
+        primaryjoin=taskableEntity_id == Task.task_of_id,
         #backref="task_of",
         back_populates="task_of",
         post_update=True,
-    )
-    
-    
-    
-    #----------------------------------------------------------------------
+        )
+
+
     def __init__(self, tasks=None, **kwargs):
         super(TaskableEntity, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
-        
+
         if tasks is None:
             tasks = []
         self.tasks = tasks
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("tasks")
     def _validate_tasks(self, key, task):
         """validates the given task value
         """
         if not isinstance(task, Task):
             raise TypeError("tasks should be a list of "
-            "stalker.core.models.Task instances")
-        
+                            "stalker.core.models.Task instances")
+
         return task
 
 
-
-
-
-
-
-########################################################################
 class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     """All the information about a Project in Stalker is hold in this class.
     
@@ -4767,7 +4378,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
       stereo 3D setup). Should be an int or float value, negative values
       converted to the positive values. Default value is 1.
     """
-    
+
     # ------------------------------------------------------------------------
     # NOTES:
     #
@@ -4786,54 +4397,54 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     # for the created instance, I consider doing this safe.
     # ------------------------------------------------------------------------
 
-    
-    
-    
+
+
+
     #__strictly_typed__ = True
     __tablename__ = "Projects"
     project_id_local = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                               primary_key=True)
-    
+
     __mapper_args__ = {"polymorphic_identity": "Project",
-                   "inherit_condition":
-                       project_id_local==TaskableEntity.taskableEntity_id}
-    
+                       "inherit_condition":
+                           project_id_local == TaskableEntity.taskableEntity_id}
+
     #assets = relationship(
-        #"Asset",
-        #primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
-        #back_populates="project",
-        ##backref="project",
-        #uselist=True,
-        #doc="""The list of :class:`~stalker.core.models.Asset`\ s created in this project.
-        
-        #It is a read-only list. To add an :class:`~stalker.core.models.Asset`
-        #to this project, the :class:`~stalker.core.models.Asset` need to be
-        #created with this project is given in the ``project`` argument in the
-        #:class:`~stalker.core.models.Asset`.
-        #"""
+    #"Asset",
+    #primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
+    #back_populates="project",
+    ##backref="project",
+    #uselist=True,
+    #doc="""The list of :class:`~stalker.core.models.Asset`\ s created in this project.
+
+    #It is a read-only list. To add an :class:`~stalker.core.models.Asset`
+    #to this project, the :class:`~stalker.core.models.Asset` need to be
+    #created with this project is given in the ``project`` argument in the
+    #:class:`~stalker.core.models.Asset`.
+    #"""
     #)
-    
+
     #sequences = relationship(
-        #"Sequence",
-        #primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
-        #back_populates="project",
-        ##backref="project",
-        #uselist=True,
-        #doc="""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
-        
-        #This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
-        #that this :class:`~stalker.core.models.Project` has. It is a list of
-        #:class:`~stalker.core.models.Sequence` instances. The attribute is
-        #read-only. The only way to attach a
-        #:class:`~stalker.core.models.Sequence` to this
-        #:class:`~stalker.core.models.Project` is to create the
-        #:class:`~stalker.core.models.Sequence` with this
-        #:class:`~stalker.core.models.Project` by passing this
-        #:class:`~stalker.core.models.Project` in the ``project`` argument of
-        #the :class:`~stalker.core.models.Sequence`.
-        #"""
+    #"Sequence",
+    #primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
+    #back_populates="project",
+    ##backref="project",
+    #uselist=True,
+    #doc="""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
+
+    #This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
+    #that this :class:`~stalker.core.models.Project` has. It is a list of
+    #:class:`~stalker.core.models.Sequence` instances. The attribute is
+    #read-only. The only way to attach a
+    #:class:`~stalker.core.models.Sequence` to this
+    #:class:`~stalker.core.models.Project` is to create the
+    #:class:`~stalker.core.models.Sequence` with this
+    #:class:`~stalker.core.models.Project` by passing this
+    #:class:`~stalker.core.models.Project` in the ``project`` argument of
+    #the :class:`~stalker.core.models.Sequence`.
+    #"""
     #)
-    
+
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
         "User",
@@ -4845,7 +4456,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         also can set to None.
         """
     )
-    
+
     repository_id = Column(Integer, ForeignKey("Repositories.id"))
     repository = relationship(
         "Repository",
@@ -4857,7 +4468,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         repository of one project.
         """
     )
-    
+
     structure_id = Column(Integer, ForeignKey("Structures.id"))
     structure = relationship(
         "Structure",
@@ -4865,7 +4476,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         doc="""The structure of the project. Should be an instance of
         :class:`~stalker.core.models.Structure` class"""
     )
-    
+
     image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
     image_format = relationship(
         "ImageFormat",
@@ -4876,8 +4487,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         instance of :class:`~stalker.core.models.ImageFormat`.
         """
     )
-    
-    
+
     fps = Column(
         Float(precision=3),
         doc="""The fps of the project.
@@ -4891,16 +4501,16 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         doc="""True if the project is a stereoscopic project"""
     )
     #display_width = Column(
-        #Float(precision=3),
-        #doc="""The target display width that this project is going to be displayed on.
-        
-        #Meaningfull if this project is a stereoscopic project.
-        #"""
+    #Float(precision=3),
+    #doc="""The target display width that this project is going to be displayed on.
+
+    #Meaningfull if this project is a stereoscopic project.
+    #"""
     #)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
+
+
     def __init__(self,
                  lead=None,
                  repository=None,
@@ -4910,124 +4520,111 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
                  is_stereoscopic=False,
                  #display_width=1.0,
                  **kwargs):
-        
         # a projects project should be self
         # initialize the project argument to self
         kwargs["project"] = self
-        
+
         super(Project, self).__init__(**kwargs)
         # call the mixin __init__ methods
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
         #TaskMixin.__init__(self, **kwargs)
-        
+
         self.lead = lead
         self._users = []
         self.repository = repository
         self.structure = structure
         self._sequences = []
         self._assets = []
-        
+
         self.image_format = image_format
         self.fps = fps
         self.is_stereoscopic = bool(is_stereoscopic)
         #self.display_width = display_width
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@validates("display_width")
-    #def _validate_display_width(self, key, display_width_in):
+
+
+
+        #
+        #@validates("display_width")
+        #def _validate_display_width(self, key, display_width_in):
         #"""validates the given display_width_in value
         #"""
         #return abs(float(display_width_in))
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("fps")
     def _validate_fps(self, key, fps):
         """validates the given fps_in value
         """
         return float(fps)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("image_format")
     def _validate_image_format(self, key, image_format):
         """validates the given image format
         """
-        
-        if image_format is not None and \
+
+        if image_format is not None and\
            not isinstance(image_format, ImageFormat):
             raise TypeError("the image_format should be an instance of "
                             "stalker.core.models.ImageFormat")
-        
+
         return image_format
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("lead")
     def _validate_lead(self, key, lead):
         """validates the given lead_in value
         """
-        
+
         if lead is not None:
             if not isinstance(lead, User):
                 raise TypeError("lead must be an instance of "
                                 "stalker.core.models.User")
-        
+
         return lead
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("repository")
     def _validate_repository(self, key, repository):
         """validates the given repository_in value
         """
-        
+
         if not isinstance(repository, Repository):
             raise TypeError("The stalker.core.models.Project instance should "
                             "be created with a stalker.core.models.Repository "
                             "instance passed through the 'repository' "
                             "argument, the current value is "
                             "'%s'" % repository)
-        
+
         return repository
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("structure")
     def _validate_structure(self, key, structure_in):
         """validates the given structure_in vlaue
         """
-        
+
         if structure_in is not None:
             if not isinstance(structure_in, Structure):
                 raise TypeError("structure should be an instance of "
-                                 "stalker.core.models.Structure")
-        
+                                "stalker.core.models.Structure")
+
         return structure_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("is_stereoscopic")
     def _validate_is_stereoscopic(self, key, is_stereoscopic_in):
         return bool(is_stereoscopic_in)
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def sequences(self):
+
+
+
+        #
+        #@property
+        #def sequences(self):
         #"""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
-        
+
         #This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
         #that this :class:`~stalker.core.models.Project` has. It is a list of
         #:class:`~stalker.core.models.Sequence` instances. The attribute is
@@ -5039,16 +4636,16 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         #:class:`~stalker.core.models.Project` in the ``project`` argument of
         #the :class:`~stalker.core.models.Sequence`.
         #"""
-        
+
         #return self._sequences
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #@property
-    #def users(self):
+
+
+
+        #
+        #@property
+        #def users(self):
         #"""The users assigned to this project.
-        
+
         #This is a list of :class:`~stalker.core.models.User` instances. All the
         #elements are gathered from all the
         #:class:`~stalker.core.models.Task`\ s of the project itself and from
@@ -5056,111 +4653,99 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         #:class:`~stalker.core.models.Shot`\ s,
         #:class:`~stalker.core.models.Asset`\ s.
         #"""
-        
+
         #self._users = []
         ## project tasks
         #for task in self.tasks:
-            #self._users.extend(task.resources)
-        
+        #self._users.extend(task.resources)
+
         ## sequence tasks
         #for seq in self.sequences:
-            #for task in seq.tasks:
-                #self._users.extend(task.resources)
-            
-            ## shot tasks
-            #for shot in seq.shots:
-                #for task in shot.tasks:
-                    #self._users.extend(task.resources)
-        
+        #for task in seq.tasks:
+        #self._users.extend(task.resources)
+
+        ## shot tasks
+        #for shot in seq.shots:
+        #for task in shot.tasks:
+        #self._users.extend(task.resources)
+
         ## asset tasks
         #for asset in self.assets:
-            #for task in asset.tasks:
-                #self._users.extend(task.resources)
-        
+        #for task in asset.tasks:
+        #self._users.extend(task.resources)
+
         #self._users = list(set(self._users))
-        
+
         #return self._users
-    
-    #----------------------------------------------------------------------
+
+
     @property
     def users(self):
         """returns the users related to this project
         """
-        
+
         # use joins over the session.query
         from stalker import db
+
         if db.session is not None:
             return db.query(User).\
-                   join(User.tasks).\
-                   join(Task.task_of).\
-                   join(TaskableEntity.project).\
-                   filter(Project.name==self.name).all()
+            join(User.tasks).\
+            join(Task.task_of).\
+            join(TaskableEntity.project).\
+            filter(Project.name == self.name).all()
         else:
             RuntimeWarning("There is no database setup, the users can not "
                            "be queried from this state, please use "
                            "stalker.db.setup() to setup a database")
             return []
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @property
     def assets(self):
         """returns the assets related to this project
         """
-        
+
         # use joins over the session.query
         from stalker import db
+
         if db.session is not None:
             return db.query(Asset).\
-                   join(Asset.project).\
-                   filter(Project.name==self.name).all()
+            join(Asset.project).\
+            filter(Project.name == self.name).all()
         else:
             RuntimeWarning("There is no database setup, the users can not "
                            "be queried from this state, please use "
                            "stalker.db.setup() to setup a database")
             return []
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @property
     def sequences(self):
         """returns the sequences related to this project
         """
-        
+
         # use joins over the session.query
         from stalker import db
+
         if db.session is not None:
             return db.query(Sequence).\
-                   join(Sequence.project).\
-                   filter(Project.name==self.name).all()
+            join(Sequence.project).\
+            filter(Project.name == self.name).all()
         else:
             RuntimeWarning("There is no database setup, the sequences can not "
                            "be queried from this state, please use "
                            "stalker.db.setup() to setup a database")
             return []
-    
-    
-    
-    
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Project, self).__eq__(other) and \
+
+        return super(Project, self).__eq__(other) and\
                isinstance(other, Project)
 
 
-
-
-
-
-########################################################################
 class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     """Stores data about Sequences.
     
@@ -5176,20 +4761,19 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     
     :type lead: :class:`~stalker.core.models.User`
     """
-    
-#    __project_backref_attrname__ = "sequences_ossuruk"
+
+    #    __project_backref_attrname__ = "sequences_ossuruk"
     __project_doc__ = """The :class:`~stalker.core.models.Project` instance that this Sequence belongs to.
     
     A :class:`~stalker.core.models.Sequence` can not be created without a
     :class:`~stalker.core.models.Project` instance.
     """
-    
-    
+
     __tablename__ = "Sequences"
     __mapper_args__ = {"polymorphic_identity": "Sequence"}
     sequence_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                          primary_key=True)
-    
+
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
         "User",
@@ -5202,7 +4786,7 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         lead of this :class:`~stalker.core.models.Sequence`.
         """
     )
-    
+
     shots = relationship(
         "Shot",
         primaryjoin="Shots.c.sequence_id==Sequences.c.id",
@@ -5212,76 +4796,62 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         It is a list of :class:`~stalker.core.models.Shot` instances.
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  lead=None,
                  **kwargs
-                 ):
-        
+    ):
         super(Sequence, self).__init__(**kwargs)
-        
+
         # call the mixin __init__ methods
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
         #TaskMixin.__init__(self, **kwargs)
-        
+
         #self._lead = self._validate_lead(lead)
         self.lead = lead
         self.shots = []
-        
+
         ## update the Project._sequences attribute
         #if not self in self.project.sequences:
-            #self._project._sequences.append(self)
-    
-    
-    
-    #----------------------------------------------------------------------
+        #self._project._sequences.append(self)
+
+
     @validates("lead")
     def _validate_lead(self, key, lead):
         """validates the given lead_in value
         """
-        
+
         if lead is not None:
             if not isinstance(lead, User):
                 raise TypeError("lead should be instance of "
                                 "stalker.core.models.User")
-        
+
         return lead
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("shots")
     def _validate_shots(self, key, shot):
         """validates the given shot value
         """
-        
+
         if not isinstance(shot, Shot):
             raise TypeError("every item in the shots list should be an "
                             "instance of stalker.core.models.Shot")
-        
+
         return shot
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Sequence, self).__eq__(other) and \
+
+        return super(Sequence, self).__eq__(other) and\
                isinstance(other, Sequence)
 
 
-
-
-
-
-########################################################################
 class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     """Manages Shot related data.
     
@@ -5361,11 +4931,10 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
       :attr:`~stalker.core.models.Shot.cut_duration` attribute will be set to
       1. Can be skipped. The default value is None.
     """
-    
-    
+
     __tablename__ = "Shots"
     __mapper_args__ = {"polymorphic_identity": "Shot"}
-    
+
     shot_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                      primary_key=True)
     sequence_id = Column(Integer, ForeignKey("Sequences.id"))
@@ -5374,12 +4943,12 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         primaryjoin="Shots.c.sequence_id==Sequences.c.id",
         back_populates="shots"
     )
-    
+
     # the cut_duration attribute is not going to be stored in the database,
     # only the cut_in and cut_out will be enough to calculate the cut_duration
     _cut_in = Column(Integer)
     _cut_out = Column(Integer)
-    
+
     assets = relationship(
         "Asset",
         secondary="Shot_Assets",
@@ -5393,10 +4962,8 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         :class:`~stalker.core.models.Shot`.
         """
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  #code=None,
                  sequence=None,
@@ -5405,33 +4972,29 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
                  cut_duration=None,
                  assets=None,
                  **kwargs):
-        
         sequence = self._validate_sequence(sequence)
-        
+
         # initialize TaskableMixin
         kwargs["project"] = sequence.project
-        
+
         super(Shot, self).__init__(**kwargs)
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
-        
+
         self.sequence = self._validate_sequence(sequence)
-        
+
         self._cut_in = cut_in
         self._cut_duration = cut_duration
         self._cut_out = cut_out
-        
+
         self._update_cut_info(cut_in, cut_duration, cut_out)
-        
+
         #self._assets = self._validate_assets(assets)
         if assets is None:
             assets = []
         self.assets = assets
-        
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @orm.reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
@@ -5439,220 +5002,197 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         """
         self._cut_duration = None
         self._update_cut_info(self._cut_in, self._cut_duration, self._cut_out)
-        
+
         # call supers __init_on_load__
         super(Shot, self).__init_on_load__()
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __repr__(self):
         """the representation of the Shot
         """
-        
+
         return "<%s (%s, %s)>" % (self.entity_type, self.code, self.code)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """equality operator
         """
-        
+
         # __eq__ always returns false but to be safe the code will be added
         # here
-        
-        return self.code == other.code and isinstance(other, Shot) and \
+
+        return self.code == other.code and isinstance(other, Shot) and\
                self.sequence == other.sequence
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _update_cut_info(self, cut_in, cut_duration, cut_out):
         """updates the cut_in, cut_duration and cut_out attributes
         """
-        
+
         # validate all the values
         self._cut_in = self._validate_cut_in(cut_in)
         self._cut_duration = self._validate_cut_duration(cut_duration)
         self._cut_out = self._validate_cut_out(cut_out)
-        
+
         if self._cut_in is None:
             self._cut_in = 1
-        
+
         if self._cut_out is not None:
             if self._cut_in > self._cut_out:
                 # just update cut_duration
                 self._cut_duration = 1
-        #else:
-            #self._cut_o
-        
+                #else:
+                #self._cut_o
+
         if self._cut_duration is None or self._cut_duration <= 0:
             self._cut_duration = 1
-        
+
         self._cut_out = self._cut_in + self._cut_duration - 1
-    
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("assets")
     def _validate_assets(self, key, asset):
         """validates the given asset value
         """
-        
+
         if not isinstance(asset, Asset):
             raise TypeError("all the items in the assets list should be"
-                             "an instance of stalker.core.models.Asset")
-        
+                            "an instance of stalker.core.models.Asset")
+
         return asset
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #def _validate_code(self, code_in):
+
+
+
+        #
+        #def _validate_code(self, code_in):
         #"""validates the given code value
         #"""
-        
+
         ## check if the code_in is None or empty string
         #if code_in is None:
-            #raise TypeError("the code can not be None")
-        
+        #raise TypeError("the code can not be None")
+
         #if code_in == "":
-            #raise ValueError("the code can not be empty string")
-        
+        #raise ValueError("the code can not be empty string")
+
         #return self._format_code(str(code_in))
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _validate_cut_duration(self, cut_duration_in):
         """validates the given cut_duration value
         """
-        
-        if cut_duration_in is not None and \
+
+        if cut_duration_in is not None and\
            not isinstance(cut_duration_in, int):
             raise TypeError("cut_duration should be an instance of int")
-        
+
         return cut_duration_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _validate_cut_in(self, cut_in_in):
         """validates the given cut_in_in value
         """
-        
+
         if cut_in_in is not None:
             if not isinstance(cut_in_in, int):
                 raise TypeError("cut_in should be an instance of int")
-        
+
         return cut_in_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _validate_cut_out(self, cut_out_in):
         """validates the given cut_out_in value
         """
-        
+
         if cut_out_in is not None:
             if not isinstance(cut_out_in, int):
                 raise TypeError("cut_out should be an instance of int")
-        
+
         return cut_out_in
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _validate_sequence(self, sequence):
         """validates the given sequence_in value
         """
-        
+
         if not isinstance(sequence, Sequence):
             raise TypeError("the sequence should be an instance of "
-                             "stalker.core.models.Sequence instance")
-        
+                            "stalker.core.models.Sequence instance")
+
         for shot in sequence.shots:
-            if self.code ==  shot.code:
+            if self.code == shot.code:
                 raise ValueError("the given sequence already has a shot with "
                                  "a code %s" % self.code)
-        
+
         return sequence
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _sequence_getter(self):
         """The getter for the sequence attribute.
         """
-        
+
         return self._sequence
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _sequence_setter(self, sequence):
         """the setter for the sequence attribute.
         """
-        
+
         self._sequence = self._validate_sequence(sequence)
-    
+
     sequence = synonym(
         "_sequence",
         descriptor=property(_sequence_getter, _sequence_setter),
         doc="""The :class:`~stalker.core.models.Sequence` instance that this :class:`~stalker.core.models.Shot` instance belongs to."""
     )
-    
-    
-    
-    ##----------------------------------------------------------------------
+
+
+
+    #
     #@property
     #def code(self): # pylint: disable=E0202
-        #"""The code of this :class:`~stalker.core.models.Shot`.
-        
-        #Contrary to the original attribute from the inherited parent
-        #(:attr:`~stalker.core.models.SimpleEntity.code`), the code attribute
-        #can not be set to None or empty string."""
-        
-        #return self._code
-    
-    ##----------------------------------------------------------------------
+    #"""The code of this :class:`~stalker.core.models.Shot`.
+
+    #Contrary to the original attribute from the inherited parent
+    #(:attr:`~stalker.core.models.SimpleEntity.code`), the code attribute
+    #can not be set to None or empty string."""
+
+    #return self._code
+
+    #
     #@code.setter # pylint: disable=E1101
     #def code(self, code_in):
-        ## pylint: disable=E0102, E0202, W0221
-        #self._code = self._validate_code(code_in)
-    
-    
-    
-    #----------------------------------------------------------------------
+    ## pylint: disable=E0102, E0202, W0221
+    #self._code = self._validate_code(code_in)
+
+
+
+
     def _cut_duration_getter(self):
         return self._cut_duration
-    
-    #----------------------------------------------------------------------
+
+
     def _cut_duration_setter(self, cut_duration_in):
         self._update_cut_info(self._cut_in, cut_duration_in, self._cut_out)
-    
+
     cut_duration = synonym(
         "_cut_duration",
         descriptor=property(_cut_duration_getter, _cut_duration_setter),
-        doc= """The duration of this shot in frames.
+        doc="""The duration of this shot in frames.
         
         It should be a positive integer value. If updated also updates the
         :attr:`~stalker.core.models.Shot.cut_duration` attribute. The default
         value is 100."""
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _cut_in_getter(self):
         return self._cut_in
-    
-    #----------------------------------------------------------------------
+
+
     def _cut_in_setter(self, cut_in_in):
         self._update_cut_info(cut_in_in, self._cut_duration, self._cut_out)
-    
+
     cut_in = synonym(
         "_cut_in",
         descriptor=property(_cut_in_getter, _cut_in_setter),
@@ -5663,19 +5203,17 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         :attr:`~stalker.core.models.Shot.cut_out` value is update to
         :attr:`~stalker.core.models.Shot.cut_in` + 1."""
     )
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _cut_out_getter(self):
         if self._cut_out is None:
             self._update_cut_info(self._cut_in, self._cut_duration, None)
         return self._cut_out
-    
-    #----------------------------------------------------------------------
+
+
     def _cut_out_setter(self, cut_out_in):
         self._update_cut_info(self._cut_in, self._cut_duration, cut_out_in)
-    
+
     cut_out = synonym(
         "_cut_out",
         descriptor=property(_cut_out_getter, _cut_out_setter),
@@ -5688,34 +5226,29 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         :attr:`~stalker.core.models.Shot.cut_in` +
         :attr:`~stalker.core.models.Shot.cut_duration`."""
     )
-    
-    
-    
-    ##----------------------------------------------------------------------
+
+
+
+    #
     #@property
     #def name(self): # pylint: disable=E0202
-        #"""Name of this Shot.
-        
-        #Different than other :class:`~stalker.core.models.SimpleEntity`
-        #derivatives, the :class:`~stalker.core.models.Shot` classes
-        #:attr:`~stalker.core.models.Shot.name` attribute is read-only. And the
-        #stored value is a uuid4 sequence.
-        #"""
-        
-        #return self._name
-    
-    ##----------------------------------------------------------------------
+    #"""Name of this Shot.
+
+    #Different than other :class:`~stalker.core.models.SimpleEntity`
+    #derivatives, the :class:`~stalker.core.models.Shot` classes
+    #:attr:`~stalker.core.models.Shot.name` attribute is read-only. And the
+    #stored value is a uuid4 sequence.
+    #"""
+
+    #return self._name
+
+    #
     #@name.setter # pylint: disable=E1101
     #def name(self, name_in):
-        ## pylint: disable=E0102, E0202, W0221
-        #pass
+    ## pylint: disable=E0102, E0202, W0221
+    #pass
 
 
-
-
-
-
-########################################################################
 class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
     """The Asset class is the whole idea behind Stalker.
     
@@ -5739,116 +5272,102 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
     a :class:`~stalker.core.models.Project` instance is given then the asset
     will append itself to the :attr:`~stalker.core.models.Project.assets` list.
     """
-    
-    
-    
+
     __strictly_typed__ = True
     __tablename__ = "Assets"
     __mapper_args__ = {"polymorphic_identity": "Asset"}
-    
+
     asset_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                       primary_key=True)
-    
+
     shots = relationship(
         "Shot",
         secondary="Shot_Assets",
         back_populates="assets"
     )
-    
-    #----------------------------------------------------------------------
+
+
     #@declared_attr
     #def project(self):
-        #return relationship(
-            #"Project",
-            #primaryjoin="Assets.c.project_id==Projects.c.id",
-            #back_populates="assets",
-            #uselist=False,
-            #doc="""The :class:`~stalker.core.models.Project` instance that this Asset belongs to.
-            
-            #A :class:`~stalker.core.models.Asset` can not be created without a
-            #:class:`~stalker.core.models.Project` instance.
-            #"""
-        #)
-    
-    
-    
+    #return relationship(
+    #"Project",
+    #primaryjoin="Assets.c.project_id==Projects.c.id",
+    #back_populates="assets",
+    #uselist=False,
+    #doc="""The :class:`~stalker.core.models.Project` instance that this Asset belongs to.
+
+    #A :class:`~stalker.core.models.Asset` can not be created without a
+    #:class:`~stalker.core.models.Project` instance.
+    #"""
+    #)
+
+
+
     #project_id = Column(Integer, ForeignKey("Projects.id"), nullable=False)
     #project = relationship(
-        #"Project",
-        #primaryjoin="Assets.c.project_id==Projects.c.id",
-        #back_populates="assets",
-        #uselist=False,
-        #doc="""The :class:`~stalker.core.models.Project` instance that this Asset belongs to.
-        
-        #A :class:`~stalker.core.models.Asset` can not be created without a
-        #:class:`~stalker.core.models.Project` instance.
-        #"""
+    #"Project",
+    #primaryjoin="Assets.c.project_id==Projects.c.id",
+    #back_populates="assets",
+    #uselist=False,
+    #doc="""The :class:`~stalker.core.models.Project` instance that this Asset belongs to.
+
+    #A :class:`~stalker.core.models.Asset` can not be created without a
+    #:class:`~stalker.core.models.Project` instance.
+    #"""
     #)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
+
+
     def __init__(self, shots=None, **kwargs):
-        
         super(Asset, self).__init__(**kwargs)
-        
+
         # call the mixin init methods
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         #TaskMixin.__init__(self, **kwargs)
-        
+
         #self._shots = []
         if shots is None:
             shots = []
         self.shots = shots
-        
+
         ## append it self to the given projects assets attribute
         #if not self in self.project._assets:
-            #self.project._assets.append(self)
-    
-    
-    
-    #----------------------------------------------------------------------
+        #self.project._assets.append(self)
+
+
     @orm.reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
         SQLAlchemy
         """
         #self._shots = None
-        
+
         # call supers __init_on_load__
         super(Asset, self).__init_on_load__()
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("shots")
     def _validate_shots(self, key, shot):
         """validates the given shots_in value
         """
-        
+
         if not isinstance(shot, Shot):
             raise TypeError("shots should be set to a list of "
                             "stalker.core.models.Shot objects")
-        
+
         return shot
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __eq__(self, other):
         """the equality operator
         """
-        
-        return super(Asset, self).__eq__(other) and \
+
+        return super(Asset, self).__eq__(other) and\
                isinstance(other, Asset) and self.type == other.type
 
 
-
-
-
-
-########################################################################
 class Version(Entity, StatusMixin):
     """The connection to the filesystem.
     
@@ -5897,12 +5416,10 @@ class Version(Entity, StatusMixin):
       changes.
     
     """
-    
-    
-    
+
     __tablename__ = "Versions"
     __mapper_args__ = {"polymorphic_identity": "Version"}
-    
+
     version_id = Column("id", Integer, ForeignKey("Entities.id"),
                         primary_key=True)
     version_of_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
@@ -5913,18 +5430,18 @@ class Version(Entity, StatusMixin):
         """,
         uselist=False,
         back_populates="versions",
-    )
-    
+        )
+
     take = Column(String(256), default="MAIN")
     version = Column(Integer)
-    
+
     source_id = Column(Integer, ForeignKey("Links.id"))
     source = relationship(
         "Link",
         primaryjoin="Versions.c.source_id==Links.c.id",
         uselist=False
     )
-    
+
     outputs = relationship(
         "Link",
         secondary="Version_Outputs",
@@ -5935,12 +5452,10 @@ class Version(Entity, StatusMixin):
         It is a list of :class:`~stalker.core.models.Link` instances.
         """
     )
-    
+
     is_published = Column(Boolean, default=False)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def __init__(self,
                  version_of=None,
                  take=defaults.DEFAULT_VERSION_TAKE_NAME,
@@ -5949,131 +5464,106 @@ class Version(Entity, StatusMixin):
                  outputs=None,
                  task=None,
                  **kwargs):
-        
         # call supers __init__
         super(Version, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
-        
+
         self.take = take
         self.source = source
         self.version = version
         self.version_of = version_of
-        
+
         if outputs is None:
             outputs = []
-        
+
         self.outputs = outputs
-        
+
         # set published to False by default
         self.published = False
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("source")
     def _validate_source(self, key, source):
         """validates the given source value
         """
-        
+
         if source is not None:
             if not isinstance(source, Link):
                 raise TypeError("Version.source attribute should be a "
-                                "stalker.core.models.Link instance, not %s" \
-                                % type(source))
-        
+                                "stalker.core.models.Link instance, not %s"\
+                % type(source))
+
         return source
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     def _format_take(self, take):
         """formats the given take value
         """
-        
+
         # remove unnecessary characters
-        take = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", take).strip().replace(" ","")
-        
+        take = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", take).strip().replace(" ",
+                                                                         "")
+
         return re.sub(r"(.+?[^a-zA-Z]+)([a-zA-Z0-9\s_\-]+)", r"\2", take)
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("take")
     def _validate_take(self, key, take):
         """validates the given take value
         """
-        
+
         if take is None:
             raise TypeError("Version.take can not be None, please give a "
                             "proper string")
-        
+
         take = self._format_take(str(take))
-        
-        if take=="":
+
+        if take == "":
             raise ValueError("Version.take can not be an empty string")
-        
+
         return take
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("version")
     def _validate_version(self, key, version):
         """validates the given version value
         """
-        
+
         if version is None:
             raise TypeError("Version.version should be an int")
-        
+
         if version <= 0:
             raise ValueError("Version.version can not be zero or a negative "
                              "number")
-        
+
         return version
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("version_of")
     def _validate_version_of(self, key, version_of):
         """validates the given version_of value
         """
-        
+
         if version_of is None:
             raise TypeError("Version.version_of can not be None")
-        
+
         if not isinstance(version_of, Task):
             raise TypeError("Version.version_of should be a "
                             "stalker.core.models.Task instance")
-        
+
         return version_of
-    
-    
-    
-    #----------------------------------------------------------------------
+
+
     @validates("outputs")
     def _validate_outputs(self, key, output):
         """validates the given output
         """
-        
+
         if not isinstance(output, Link):
             raise TypeError("Version.outputs should be all "
                             "stalker.core.models.Link instances")
-        
+
         return output
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-
-
-
 
 ######################################
 # SECONDARY TABLES
@@ -6089,14 +5579,14 @@ Entity_Tags = Table(
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
-    ),
-    
+        ),
+
     Column(
         "tag_id",
         Integer,
         ForeignKey("Tags.id"),
         primary_key=True,
-    )
+        )
 )
 
 
@@ -6146,7 +5636,7 @@ Task_Resources = Table(
     "Task_Resources", Base.metadata,
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("resource_id", Integer, ForeignKey("Users.id"), primary_key=True),
-)
+    )
 
 # TASK_TASKS
 Task_Tasks = Table(
@@ -6154,18 +5644,18 @@ Task_Tasks = Table(
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("depends_to_task_id", Integer, ForeignKey("Tasks.id"),
            primary_key=True),
-)
+    )
 
 # SHOT ASSETS
 Shot_Assets = Table(
     "Shot_Assets", Base.metadata,
     Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
     Column("asset_id", Integer, ForeignKey("Assets.id"), primary_key=True),
-)
+    )
 
 # VERSION_OUTPUTS
 Version_Outputs = Table(
     "Version_Outputs", Base.metadata,
     Column("version_id", Integer, ForeignKey("Versions.id"), primary_key=True),
     Column("link_id", Integer, ForeignKey("Links.id"), primary_key=True),
-)
+    )
