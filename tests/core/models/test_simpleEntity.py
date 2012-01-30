@@ -1,13 +1,13 @@
-#-*- coding: utf-8 -*-
-
-
+# -*- coding: utf-8 -*-
+# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# 
+# This module is part of Stalker and is released under the BSD 2
+# License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
 import datetime
 import stalker
 from stalker.core.models import (SimpleEntity, Type, User)
-
-
 
 
 # create a new class deriving from the SimpleEntity
@@ -21,7 +21,7 @@ class SimpleEntityTester(unittest.TestCase):
 
 
     def setUp(self):
-        """seting up some proper values
+        """setting up some proper values
         """
         # create a user
         self.test_user = User(
@@ -64,9 +64,7 @@ class SimpleEntityTester(unittest.TestCase):
             ("2423$+^^+^'%+%%&_testName", "testName"),
             ("2423$+^^+^'%+%%&_testName_35", "testName_35"),
             ("2423$ +^^+^ '%+%%&_ testName_ 35", "testName_ 35"),
-            ("SH001", "SH001"),
-            ([1, "name"], "name"),
-            ({"a": "name"}, "a name"),
+            ("SH001", "SH001")
         ]
 
         self.nice_name_test_values = [
@@ -171,12 +169,8 @@ class SimpleEntityTester(unittest.TestCase):
             ("2423$ +^^+^ '%+%%&_ testCode_ 35", "testCode_35"),
             ("SH001", "SH001"),
             ("My CODE is Ozgur", "My_CODE_is_Ozgur"),
-
             (" this is another code for an asset",
              "this_is_another_code_for_an_asset"),
-
-            ([1, 3, "a", "list", "for", "testing", 3],
-             "a_list_for_testing_3"),
         ]
 
         self.kwargs.pop("code")
@@ -342,43 +336,42 @@ class SimpleEntityTester(unittest.TestCase):
             None
         )
 
-
     def test_name_argument_not_init_as_string_or_unicode(self):
-        """testing if a the name attribute is going to be formatted correctly
-        when the given value for the name argument isn't a str or unicode
+        """testing if a TypeError will be raised when the name argument is not
+        a string or unicode
         """
 
         test_values = [
-            ([1, "name"], "name"),
-            ({"a": "name"}, "a name")
+            12132,
+            [1, "name"],
+                {"a": "name"}
         ]
 
         for test_value in test_values:
-            self.kwargs["name"] = test_value[0]
-            a_new_simple_entity = SimpleEntity(**self.kwargs)
-            self.assertEqual(a_new_simple_entity.name, test_value[1])
+            self.kwargs["name"] = test_value
+            self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
 
-
-    def test_name_argument_not_init_as_string_or_unicode_2(self):
-        """testing if a ValueError will be raised when the result of conversion
-        is an empty string for the name argument
+    def test_name_attribute_is_not_string_or_unicode(self):
+        """testing if a TypeError will be raised when the name attribute is
+        not a string or unicode
         """
 
-        test_values = [1, 1.2, [1, 2]]
+        test_values = [
+            12132, [1, "name"], {"a": "name"}
+        ]
 
         for test_value in test_values:
-            self.kwargs["name"] = test_value
-            self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
-
-
-    def test_name_attribute_is_formated_correctly(self):
-        """testing if name is formated correctly
+            self.assertRaises(TypeError, setattr, self.test_simple_entity,
+                              "name", test_value)
+    
+    def test_name_attribute_is_formatted_correctly(self):
+        """testing if name is formatted correctly
         """
-
+        
         for test_value in self.name_test_values:
             # set the new name
             self.test_simple_entity.name = test_value[0]
-
+            
             self.assertEqual(
                 self.test_simple_entity.name,
                 test_value[1],

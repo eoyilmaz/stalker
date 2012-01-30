@@ -1,4 +1,8 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# 
+# This module is part of Stalker and is released under the BSD 2
+# License: http://www.opensource.org/licenses/BSD-2-Clause
 """Database module of Stalker.
 
 Whenever stalker.db or something under it imported, the
@@ -8,8 +12,7 @@ Whenever stalker.db or something under it imported, the
 import sqlalchemy
 from stalker.conf import defaults
 from stalker import utils
-from stalker.core.models import User, Department
-from stalker.core.models import Base
+from stalker.db.declarative import Base
 
 # SQLAlchemy database engine
 engine = None
@@ -52,27 +55,31 @@ def setup(database=None, mappers=None):
     if mappers is None:
         mappers = []
 
-    from stalker import db
+    global engine
+    global metadata
+    global session
+    global query
 
     if database is None:
         database = defaults.DATABASE
 
     # create engine
-    db.engine = sqlalchemy.create_engine(
+    engine = sqlalchemy.create_engine(
         database, **defaults.DATABASE_ENGINE_SETTINGS
     )
 
     # create the database
-    db.metadata.create_all(db.engine)
+    metadata.create_all(engine)
 
     # create the Session class
-    Session = sqlalchemy.orm.sessionmaker(bind=db.engine,
-                                          **defaults.DATABASE_SESSION_SETTINGS)
+    Session = sqlalchemy.orm.sessionmaker(
+        bind=engine, **defaults.DATABASE_SESSION_SETTINGS
+    )
 
     # create and save session object to db.sessison
-    db.session = Session()
-    db.query = db.session.query
-
+    session = Session()
+    query = session.query
+    
     # init database
     __init_db__()
 
@@ -90,10 +97,12 @@ def __init_db__():
 def __create_admin__():
     """creates the admin
     """
-    from stalker import db
+    global session
 
+    from stalker.core.models import User, Department
+    
     # check if there is already an admin in the database
-    if len(db.session.query(User).\
+    if len(session.query(User).\
     filter_by(name=defaults.ADMIN_NAME).all()) > 0:
         #there should be an admin user do nothing
         #print "there is an admin already"
@@ -101,17 +110,17 @@ def __create_admin__():
 
     # create the admin department
     admin_department = Department(name=defaults.ADMIN_DEPARTMENT_NAME)
-    db.session.add(admin_department)
-
+    session.add(admin_department)
+    
     # create the admin user
     admin = User(
         name=defaults.ADMIN_NAME,
         first_name=defaults.ADMIN_NAME,
         login_name=defaults.ADMIN_NAME,
         password=defaults.ADMIN_PASSWORD,
-        email=defaults.ADMIN_EMAIL,
+        email=defaults.ADMIN_EMAIL,   
         department=admin_department,
-        )
+    )
 
     admin.created_by = admin
     admin.updated_by = admin
@@ -119,33 +128,34 @@ def __create_admin__():
     admin_department.created_by = admin
     admin_department.updated_by = admin
 
-    db.session.add(admin)
-    db.session.commit()
+    session.add(admin)
+    session.commit()
 
 
 def __create_mappers__(mappers):
     """imports the given mapper helper modules, refer to :ref:`mappers` for
     more information about how to create your own mapper modules.
     """
-
-    from stalker import db
-
+    
+    global session
+    global __mappers__
+    
     # 
     # just import the given list of mapper modules and run the setup function,
     # if they are in the correct format all the mapping should be done already
     # by just import ing the mapper helper modules
     #
-
-    if db.__mappers__ == mappers:
+    
+    if __mappers__ == mappers:
         return
-
+    
     for _mapper in mappers:
-        if _mapper not in db.__mappers__:
+        if _mapper not in __mappers__:
             exec("import " + _mapper)
             exec(_mapper + ".setup()")
-
-    db.__mappers__ = []
-    db.__mappers__.extend(mappers)
+    
+    __mappers__ = []
+    __mappers__.extend(mappers)
 
 
 def __fill_entity_types_table__():
@@ -153,13 +163,12 @@ def __fill_entity_types_table__():
     defaults.CORE_MODEL_CLASSES
     """
 
-    from stalker import db
-    from stalker.db import tables
-
+    global engine
+    
     # insert the values if there is not any
-
+    
     # get the current values in the table
-    conn = db.engine.connect()
+    conn = engine.connect()
     select = sqlalchemy.sql.select([tables.EntityTypes.c.entity_type])
     result = conn.execute(select)
 

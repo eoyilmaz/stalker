@@ -105,6 +105,35 @@ TODO
   :class:`~stalker.core.models.SimpleEntity` can be mixed with this class and
   the rest will have their table name and polymorphic identity by default. 
   The plural name attribute also needs to be reintroduced.
+  
+* use pyseq for file sequence handling:
+
+  PySeq is a great, simple library which handles all the file sequence actions.
+  It would be great to use it in the :class:`~stalker.core.models.Link` 
+  instances. So, the :class:`~stalker.core.models.Link` class can also hold a
+  string which can be uncompressed with the pyseq.uncompress function::
+    
+    from pyseq import uncompress
+    seq = uncompress("./tests/012_vb_110_v001.%04d.png 1-10",
+                     format="%h%p%t %r")
+
+* Update error messages:
+  
+  Not all error message are clear. Generally, because of the heavy
+  inheritance, it is not very obvious which class gave the error. Writing down
+  the class name should help the user to understand at least what class is 
+  giving the error message.
+
+* Hidden keyword arguments:
+  
+  Because of the heavy inheritance, it is not very clear what parameters are 
+  needed to initialize a class. A simple solution is to repeat all the 
+  parameters of the inherited class in the __init__ of the child class.
+
+* Test CRUD:
+  
+  The database tests should test if all the Create, Read, Update and Delete
+  operations are happening properly.
 
 
 DONE:

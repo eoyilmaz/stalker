@@ -1,4 +1,8 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# 
+# This module is part of Stalker and is released under the BSD 2
+# License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import os
 from setuptools import setup, find_packages
@@ -12,7 +16,7 @@ import stalker
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-required_packages = ["beaker", "jinja2", "sqlalchemy>=0.7.0",]
+required_packages = ["beaker", "jinja2", "sqlalchemy>=0.7.0", "pyseq"]
 
 setup(name="stalker",
       version=stalker.__version__,

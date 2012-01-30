@@ -2,6 +2,17 @@
 Stalker Changes
 ===============
 
+0.1.2.a5
+--------
+
+* :class:`~stalker.core.models.SimpleEntity`.\ 
+  :attr:`~stalker.core.models.SimpleEntity.name` attribute doesn't accept
+  anything other than a string or unicode anymore.
+
+* All the error messages are now showing both the class and attribute names,
+  and for TypeErrors it also shows the current given data type which raised
+  the error and the desired type.
+
 0.1.2.a4
 ---------
 
@@ -36,6 +47,8 @@ Stalker Changes
   :class:`~stalker.core.models.StatusList`,
   :class:`~stalker.core.models.FilenameTemplate`, and
   :class:`~stalker.core.models.Type` classes are mixin with this new class.
+
+* Included the ``pyseq`` library to the dependency list.
 
 0.1.2.a3
 ---------
