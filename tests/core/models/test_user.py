@@ -470,18 +470,16 @@ class UserTest(unittest.TestCase):
         self.test_user.email = test_email
         self.assertEqual(self.test_user.email, test_email)
 
-
     def test_login_name_argument_conversion_to_strings(self):
         """testing if a ValueError will be raised when the given objects
         conversion to string results an empty string
         """
 
-        test_values = [23411, ]
+        test_values = ["----++==#@#$", ]
 
         for test_value in test_values:
             self.kwargs["login_name"] = test_value
             self.assertRaises(ValueError, User, **self.kwargs)
-
 
     def test_login_name_argument_for_empty_string(self):
         """testing if a ValueError will be raised when trying to assign an
@@ -490,7 +488,6 @@ class UserTest(unittest.TestCase):
 
         self.kwargs["login_name"] = ""
         self.assertRaises(ValueError, User, **self.kwargs)
-
 
     def test_login_name_attribute_for_empty_string(self):
         """testing if a ValueError will be raised when trying to assign an
@@ -505,7 +502,6 @@ class UserTest(unittest.TestCase):
             ""
         )
 
-
     def test_login_name_argument_for_None(self):
         """testing if a TypeError will be raised when trying to assign None
         to login_name argument
@@ -513,7 +509,6 @@ class UserTest(unittest.TestCase):
 
         self.kwargs["login_name"] = None
         self.assertRaises(ValueError, User, **self.kwargs)
-
 
     def test_login_name_attribute_for_None(self):
         """testing if a TypeError will be raised when trying to assign None
@@ -527,7 +522,6 @@ class UserTest(unittest.TestCase):
             "login_name",
             None
         )
-
 
     def test_login_name_argument_formatted_correctly(self):
         """testing if login_name argument formatted correctly
@@ -557,7 +551,6 @@ class UserTest(unittest.TestCase):
                 valuePair[1]
             )
 
-
     def test_login_name_attribute_formatted_correctly(self):
         """testing if loing_name attribute formatted correctly
         """
@@ -582,7 +575,6 @@ class UserTest(unittest.TestCase):
                 valuePair[1]
             )
 
-
     def test_login_name_argument_skipped(self):
         """testing if skipping loing_name argument but supplying a name
         argument will set the login_name attribute correctly
@@ -591,7 +583,6 @@ class UserTest(unittest.TestCase):
         self.kwargs["name"] = self.kwargs.pop("login_name")
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.login_name, self.kwargs["name"])
-
 
     def test_login_name_argument_changing_name_attribute(self):
         """testing if the login_name argument is actually holding the same
@@ -602,7 +593,6 @@ class UserTest(unittest.TestCase):
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.login_name, new_user.name)
 
-
     def test_login_name_attribute_changing_name_attribute(self):
         """testing if setting the login_name attribute sets the name attribute
         """
@@ -610,7 +600,6 @@ class UserTest(unittest.TestCase):
         # give a new value to login_name and
         self.test_user.login_name = "newusername"
         self.assertEqual(self.test_user.login_name, self.test_user.name)
-
 
     def test_login_name_is_superior_to_name_argument(self):
         """testing if login_name argument is superior to the the name argument
@@ -622,7 +611,6 @@ class UserTest(unittest.TestCase):
         new_user = User(**self.kwargs)
 
         self.assertEqual(new_user.name, self.kwargs["login_name"])
-
 
     def test_name_argument_changing_login_name_attribute(self):
         """testing if setting the name argument sets the login_name attribute
@@ -636,7 +624,6 @@ class UserTest(unittest.TestCase):
         self.assertEqual(new_user_with_name.login_name,
                          new_user_with_name.name)
 
-
     def test_name_attribute_changing_login_name_attribute(self):
         """testing if setting the name attribute changes the login_name
         attribute
@@ -645,7 +632,6 @@ class UserTest(unittest.TestCase):
         self.test_user.name = "EoYilmaz"
 
         self.assertEqual(self.test_user.login_name, "eoyilmaz")
-
 
     def test_first_name_argument_None(self):
         """testing if a TypeError will be raised when trying to assign None to

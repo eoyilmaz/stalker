@@ -8,6 +8,7 @@ import datetime
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
+from stalker import db
 from stalker.conf import defaults
 from stalker.core.models import SimpleEntity, ScheduleMixin
 
@@ -53,7 +54,14 @@ class ScheduleMixinTester(unittest.TestCase):
             }
 
         self.mock_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+    
+    def tearDown(self):
+        """clean up the test
+        """
+        if db.session:
+            db.session.close()
 
+        db.session = None
 
     def test_start_date_argument_is_not_a_date_object(self):
         """testing if defaults will be used for the start_date attribute when

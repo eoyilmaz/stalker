@@ -8,6 +8,7 @@ import unittest
 import datetime
 
 from sqlalchemy import Column, Integer, ForeignKey
+from stalker import db
 from stalker.core.models import (SimpleEntity, Entity, Link, Type,
                                  ReferenceMixin)
 
@@ -86,6 +87,13 @@ class ReferenceMixinTester(unittest.TestCase):
 
         self.test_foo_obj = RefMixFooClass(name="Ref Mixin Test")
 
+    def tearDown(self):
+        """clean up the test
+        """
+        if db.session:
+            db.session.close()
+
+        db.session = None
 
     def test_references_attribute_accepting_empty_list(self):
         """testing if references attribute accepting empty lists

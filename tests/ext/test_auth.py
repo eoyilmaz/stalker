@@ -4,7 +4,7 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
-import mocker
+import unittest
 
 from stalker.conf import defaults
 from stalker import db
@@ -13,10 +13,9 @@ from stalker.core.errors import LoginError, DBError
 from stalker.ext import auth
 
 
-class AuthTester(mocker.MockerTestCase):
-    """Tests the stlaker.ext.auth module
+class AuthTester(unittest.TestCase):
+    """Tests the stalker.ext.auth module
     """
-
 
     def test_login_with_user_argument_is_None(self):
         """testing if a LoginError will be raised when the user is None and
@@ -26,7 +25,6 @@ class AuthTester(mocker.MockerTestCase):
         auth.SESSION = {}
 
         self.assertRaises(LoginError, auth.login, None)
-
 
     def test_login_with_user_argument_is_None_in_the_second_time(self):
         """testing if the user is logged in without any problem if it is logged
@@ -46,14 +44,12 @@ class AuthTester(mocker.MockerTestCase):
         # this should not raise any error
         auth.login(None)
 
-
     def test_login_with_user_argument_is_not_User_instance(self):
         """testing if a TypeError will be raised when the user is not a User
         instance
         """
 
         self.assertRaises(TypeError, auth.login, 123)
-
 
     def test_login_creates_a_session(self):
         """testing if a proper session with the session key is set to the user
@@ -76,7 +72,6 @@ class AuthTester(mocker.MockerTestCase):
 
         self.assertEqual(auth.SESSION[auth.SESSION_KEY], admin.id)
 
-
     def test_login_with_another_user(self):
         """testing if the session will be deleted before login with a different
         user
@@ -98,8 +93,8 @@ class AuthTester(mocker.MockerTestCase):
 
         # now create a different user
         new_user = User(first_name="Erkan Ozgur", last_name="Yilmaz",
-                        login_name="eoyilmaz", password="1234",
-                        email="ozgur@yilmaz.com")
+            login_name="eoyilmaz", password="1234",
+            email="ozgur@yilmaz.com")
 
         # get an id for the user
         db.session.add(new_user)
@@ -113,12 +108,11 @@ class AuthTester(mocker.MockerTestCase):
 
         # check if the session_id is changed
         self.assertNotEqual(auth.SESSION[auth.SESSION_KEY],
-                            admin_session[auth.SESSION_KEY])
+            admin_session[auth.SESSION_KEY])
 
         # check if the session id matches the user id
         self.assertEqual(auth.SESSION[auth.SESSION_KEY],
-                         new_user.id)
-
+            new_user.id)
 
     def test_login_with_no_sesssion_and_a_User(self):
         """testing if a DBError will be raised when there is no database set
@@ -130,12 +124,11 @@ class AuthTester(mocker.MockerTestCase):
 
         # create a new user
         new_user = User(login_name="testuser", first_name="test",
-                        last_name="test", email="test@test.com",
-                        password="2134")
+            last_name="test", email="test@test.com",
+            password="2134")
 
         # try to login with this user and expect a DBError
         self.assertRaises(DBError, auth.login, new_user)
-
 
     def test_authenticate_without_a_db(self):
         """testing if a DBError will be raised whne there are no db setup
@@ -147,8 +140,7 @@ class AuthTester(mocker.MockerTestCase):
         #db.__mappers__ = []
 
         self.assertRaises(DBError, auth.authenticate, defaults.ADMIN_NAME,
-                          defaults.ADMIN_PASSWORD)
-
+            defaults.ADMIN_PASSWORD)
 
     def test_authenticate_returns_a_User_instance(self):
         """testing if authenticate returns a stalker.core.models.User instance
@@ -157,10 +149,10 @@ class AuthTester(mocker.MockerTestCase):
         # use the default admin user to check
         db.setup()
 
-        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME,
+            defaults.ADMIN_PASSWORD)
 
         self.assertIsInstance(admin, User)
-
 
     def test_authenticate_non_existent_user(self):
         """testing if a LoginError will be raised when the given user
@@ -170,9 +162,8 @@ class AuthTester(mocker.MockerTestCase):
         db.setup()
 
         self.assertRaises(LoginError,
-                          auth.authenticate,
-                          "non_existent", "user")
-
+            auth.authenticate,
+            "non_existent", "user")
 
     def test_authenticate_correct_user_wrong_password(self):
         """testing if a LoginError will be raised when the user name is correct
@@ -183,10 +174,9 @@ class AuthTester(mocker.MockerTestCase):
         db.setup()
 
         self.assertRaises(LoginError,
-                          auth.authenticate,
-                          defaults.ADMIN_NAME,
-                          "wrong password")
-
+            auth.authenticate,
+            defaults.ADMIN_NAME,
+            "wrong password")
 
     def test_logout_deletes_the_content_of_SESSION(self):
         """testing if logout deletes the content of the auth.SESSION
@@ -195,7 +185,8 @@ class AuthTester(mocker.MockerTestCase):
         # first login with admin
         db.setup()
 
-        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        admin = auth.authenticate(defaults.ADMIN_NAME,
+            defaults.ADMIN_PASSWORD)
         auth.login(admin)
 
         # check if SESSION has SESSION_KEY
@@ -206,7 +197,6 @@ class AuthTester(mocker.MockerTestCase):
 
         # and check if the SESSION doesn't have SESSION_KEY
         self.assertTrue(auth.SESSION_KEY not in auth.SESSION)
-
 
     def test_logout_without_login(self):
         """testing if logout greacefully handles logging out wihtout first
@@ -219,10 +209,9 @@ class AuthTester(mocker.MockerTestCase):
         auth.logout()
 
 
-class PasswordTester(mocker.MockerTestCase):
+class PasswordTester(unittest.TestCase):
     """tests stalker.ext.auth.check_password and stalker.ext.auth.set_password
     """
-
 
     def setUp(self):
         """setUp the test
@@ -231,11 +220,9 @@ class PasswordTester(mocker.MockerTestCase):
         self.raw_pass = "1234"
         self.enc_pass = "MTIzNA==\n"
 
-
     def test_check_password_1(self):
         """testing if False will be returned for variety of situations.
         """
-
         test_values = [(None, None, False),
             (self.raw_pass, None, False),
             (None, self.enc_pass, False),
@@ -252,7 +239,6 @@ class PasswordTester(mocker.MockerTestCase):
             #print "r:%s e:%s res:%s" % (raw_pass, enc_pass, result)
             self.assertEqual(auth.check_password(raw_pass, enc_pass), result)
 
-
     def test_set_password_working_properly(self):
         """testing if the set_password function is working properly.
         """
@@ -260,13 +246,11 @@ class PasswordTester(mocker.MockerTestCase):
         enc_password = auth.set_password(self.raw_pass)
         self.assertEqual(enc_password, self.enc_pass)
 
-
     def test_set_password_raw_password_None(self):
         """testing if a TypeError will be raised when the raw_password is None
         """
 
         self.assertRaises(TypeError, auth.set_password, None)
-
 
     def test_set_password_raw_password_empty_string(self):
         """testing if a ValueError will be raised when the raw_password is
@@ -274,5 +258,4 @@ class PasswordTester(mocker.MockerTestCase):
         """
 
         self.assertRaises(ValueError, auth.set_password, "")
-    
     

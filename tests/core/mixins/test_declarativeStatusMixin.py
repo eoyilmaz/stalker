@@ -7,6 +7,7 @@
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
+from stalker import db
 from stalker.core.models import SimpleEntity, Status, StatusList, StatusMixin
 
 
@@ -65,7 +66,14 @@ class StatusMixinTester(unittest.TestCase):
             "name": "ozgur",
             "status_list": self.test_a_statusList
         }
-
+    
+    def tearDown(self):
+        """clean up the test
+        """
+        if db.session:
+            db.session.close()
+        
+        db.session = None
 
     def test_status_list_argument_not_set(self):
         """testing if a TypeError will be raised when the status_list argument

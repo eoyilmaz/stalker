@@ -7,6 +7,7 @@
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
+from stalker import db
 from stalker.core.models import (SimpleEntity, Status, StatusList, StatusMixin)
 
 
@@ -74,7 +75,14 @@ class StatusMixinTester(unittest.TestCase):
 
         # create another one without status_list set to something
         self.test_mixed_obj2 = StatMixClass(**self.kwargs)
+    
+    def tearDown(self):
+        """clean up the test
+        """
+        if db.session:
+            db.session.close()
 
+        db.session = None
 
     def test_status_list_init_with_something_else_then_StatusList_1(self):
         """testing if TypeError is going to be raised when trying to
@@ -350,15 +358,22 @@ class StatusMixinDBTester(unittest.TestCase):
 
         # create a database
         db.setup()
+    
+    def tearDown(self):
+        """clean up the test
+        """
+        if db.session:
+            db.session.close()
 
-
+        db.session = None
+    
     def test_status_list_attribute_is_skipped_and_there_is_a_db_setup(self):
         """testing if there will be no error and the status_list attribute is
         filled with the correct StatusList instance coming from the database
         if there is already a database setup and there is a StatusList instance
         defined for the StatusListAutoAddClass.
         """
-
+        
         # create a StatusList for StatusListAutoAddClass
         test_status_list = StatusList(
             name="StatusListAutoAddClass Statuses",
@@ -369,11 +384,11 @@ class StatusMixinDBTester(unittest.TestCase):
                 ],
             target_entity_type=StatusListAutoAddClass,
             )
-
+        
         # add it to the db
         db.session.add(test_status_list)
         db.session.commit()
-
+        
         # now try to create a StatusListAutoAddClass without a status_list 
         # argument
 

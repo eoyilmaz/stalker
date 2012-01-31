@@ -5,7 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-
+from stalker import db
 from stalker.core.models import (SimpleEntity, Project, Type, Status,
                                  StatusList, Repository, ProjectMixin)
 from sqlalchemy import Column, Integer, ForeignKey
@@ -91,6 +91,15 @@ class ProjectMixinTester(unittest.TestCase):
             }
 
         self.test_a_obj = DeclProjMixA(**self.kwargs)
+
+    def tearDown(self):
+        """clean up the test
+        """
+        if db.session:
+            db.session.close()
+
+        db.session = None
+
 
 
     def test_project_attribute_is_working_properly(self):

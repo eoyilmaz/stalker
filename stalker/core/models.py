@@ -761,7 +761,7 @@ class TargetEntityTypeMixin(object):
     @declared_attr
     def target_entity_type(cls):
         return synonym(
-            "_target_entity_type_",
+            "_target_entity_type",
             descriptor=property(
                 fget=cls._target_entity_type_getter,
                 doc="""The entity type which this object is valid for.
@@ -1424,7 +1424,7 @@ class Review(Entity):
         if not isinstance(to, Entity):
             raise TypeError(
                 "%s.to should be inherited from stalker.core.models.Entity "
-                "class not %s" % (self.__class__.__name,
+                "class not %s" % (self.__class__.__name__,
                                   to.__class__.__name__)
             )
 
@@ -1647,7 +1647,7 @@ class Repository(Entity):
             raise TypeError("%s.windows_path should be an instance of string "
                             "or unicode" %
                             (self.__class__.__name__,
-                             linux_path_in.__class__.__name__))
+                             windows_path_in.__class__.__name__))
 
         return windows_path_in.replace("\\", "/")
 
@@ -2995,6 +2995,8 @@ class StatusMixin(object):
 
     @declared_attr
     def status_list(cls):
+#    @declared_attr
+#    def _status_list(cls):
         return relationship(
             "StatusList",
             primaryjoin=\
@@ -3004,27 +3006,29 @@ class StatusMixin(object):
 
     @validates("status_list")
     def _validate_status_list(self, key, status_list):
+#    def _validate_status_list(self, status_list):
         """validates the given status_list_in value
         """
-        
+
+        # TODO: validating should not create a new variable, so please move
+        # this part to another function
         if status_list is None:
             # check if there is a db setup and try to get the appropriate 
             # StatusList from the database
             from stalker import db
-            
             if db.session is not None:
                 # try to get a StatusList with the target_entity_type is 
                 # matching the class name
-                status_list = db.query(StatusList).filter_by\
-                    (target_entity_type=self.__class__.__name__).first()
-                print "status_list : ", status_list
+                status_list = db.query(StatusList)\
+                    .filter_by(target_entity_type=self.__class__.__name__)\
+                    .first()
         
         # if it is still None
         if status_list is None:
             # there is no db so raise an error because there is no way 
             # to get an appropriate StatusList
             raise TypeError(
-                "'%s' objects can not be initialized without a "
+                "'%s' instances can not be initialized without a "
                 "stalker.core.models.StatusList instance, please pass a "
                 "suitable StatusList (StatusList.target_entity_type=%s) "
                 "with the 'status_list' argument" %
@@ -3049,6 +3053,41 @@ class StatusMixin(object):
                      self.__class__.__name__))
 
         return status_list
+    
+#    def _status_list_getter(self):
+#        """The getter for the :attr:`~stalker.core.models.StatusMixin.status_list` attribute.
+#        
+#        :return: :class:`~stalker.core.models.StatusList`
+#        """
+#        return self._status_list
+#    
+#    def _status_list_setter(self, status_list):
+#        """The setter for the :attr:`~stalker.core.models.StatusMixin.status_list` attribute.
+#        
+#        :param status_list: A :class:`~stalker.core.models.StatusList`
+#          instance which is suitable to hold
+#          :class:`~stalker.core.models.Status`\ es suitable to this mixed in
+#          object.
+#        
+#        :type status_list: :class:`~stalker.core.models.StatusList`
+#        """
+#        
+#        status_list = self._validate_status_list(status_list)
+#        self._status_list = status_list
+#    
+#    @declared_attr
+#    def status_list(cls):
+#        return synonym(
+#            '_status_list',
+#            descriptor=property(
+#                fget=cls._status_list_getter,
+#                fset=cls._status_list_setter,
+#                doc="""The :class:`~stalker.core.models.StatusList` instance
+#                suitable for this mixed in object.
+#                """
+#            )
+#        )
+    
 
     @validates("status")
     def _validate_status(self, key, status):

@@ -8,10 +8,13 @@ Stalker Changes
 * :class:`~stalker.core.models.SimpleEntity`.\ 
   :attr:`~stalker.core.models.SimpleEntity.name` attribute doesn't accept
   anything other than a string or unicode anymore.
-
+  
 * All the error messages are now showing both the class and attribute names,
   and for TypeErrors it also shows the current given data type which raised
   the error and the desired type.
+  
+* Fixed a bug that causes recursion in queries to StatusList instances.
+
 
 0.1.2.a4
 ---------
