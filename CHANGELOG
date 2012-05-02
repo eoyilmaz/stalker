@@ -13,7 +13,8 @@ Stalker Changes
   and for TypeErrors it also shows the current given data type which raised
   the error and the desired type.
   
-* Fixed a bug that causes recursion in queries to StatusList instances.
+* Fixed a bug that causes recursion in queries to
+  :class:`~stalker.core.models.StatusList` instances.
 
 
 0.1.2.a4
