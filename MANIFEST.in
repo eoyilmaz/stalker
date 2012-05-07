@@ -1,8 +1,11 @@
-include README
-include INSTALL
-include MANIFEST.in
-include LICENSE
-include doTests
-recursive-include docs *
-recursive-include tests *
+include *.txt *.ini *.cfg *.rst
+recursive-include stalker *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml
+
+include README                                                                  
+include INSTALL                                                                 
+include MANIFEST.in                                                             
+include LICENSE                                                                 
+include doTests                                                                 
+recursive-include docs *                                                        
+recursive-include tests *                                                       
 recursive-include examples *

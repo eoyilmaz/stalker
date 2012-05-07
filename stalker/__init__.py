@@ -9,6 +9,25 @@ and vfx studios. See docs for more information.
 """
 
 
+from pyramid.config import Configurator
+from sqlalchemy import engine_from_config
 
-__version__ = "0.1.2.a5"
+from stalker.models import DBSession
+
+__version__ = '0.2.0a1'
+
+def main(global_config, **settings):
+    """ This function returns a Pyramid WSGI application.
+    """
+    
+    # this part is also going to be used by the Qt UI tools
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    DBSession.configure(bind=engine)
+    
+    # this is the Pyramid part don't use it in your Qt UIs
+    config = Configurator(settings=settings)
+    config.add_static_view('static', 'static', cache_max_age=3600)
+    config.add_route('home', '/')
+    config.scan()
+    return config.make_wsgi_app()
 
