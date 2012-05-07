@@ -6,7 +6,7 @@
 
 import unittest
 import datetime
-from stalker.core.models import (Sequence, Project, User,
+from stalker.models import (Sequence, Project, User,
                                  Entity, Status, StatusList, Link,
                                  Task, Type, Repository)
 

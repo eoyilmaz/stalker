@@ -5,7 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.core.models import Entity, Status, StatusList#, Project
+from stalker.models import  Status, StatusList#, Project
 
 class StatusListTest(unittest.TestCase):
     """testing the StatusList class

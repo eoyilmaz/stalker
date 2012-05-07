@@ -2,6 +2,24 @@
 Stalker Changes
 ===============
 
+0.2.0.a1
+--------
+* Converted the whole system to a Pyramid Web application. If the previous
+  implementations investigated, it will be understood that it was only the
+  database model of a Web Application.
+
+* Changed the :meth:`~stalker.db.setup` arguments. It is now accepting a
+  dictionary instead of just a string to comply with the SQLAlchemy scaffold
+  and this dictionary should contain keys for the SQLAlchemy engine setup.
+  There is another utility that comes with Pyramid to setup the database under
+  the `scripts` folder, it is also working without any problem with
+  :mod:`~stalker.db`\ .
+
+* The ``session`` variable is renamed to ``DBSession`` and is now a scopped
+  session, so there is no need to use ``DBSession.commit`` it will be handled
+  by the system it self.
+
+
 0.1.2.a5
 --------
 

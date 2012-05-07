@@ -10,7 +10,7 @@ import unittest
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import db
 from stalker.conf import defaults
-from stalker.core.models import SimpleEntity, ScheduleMixin
+from stalker.models import SimpleEntity, ScheduleMixin
 
 
 class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):

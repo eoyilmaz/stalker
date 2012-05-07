@@ -49,11 +49,11 @@ without setting up any synonyms for our attributes.
 """
 
 from sqlalchemy import Table, Column, Integer, Float, ForeignKey, String
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm import mapper
 
 from stalker import db
 from stalker.db import tables
-from stalker.core.models import Entity
+from stalker.models import Entity
 
 
 class Camera(Entity):

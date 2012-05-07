@@ -7,7 +7,7 @@
 import unittest
 import datetime
 import stalker
-from stalker.core.models import (SimpleEntity, Type, User)
+from stalker.models import (SimpleEntity, Type, User)
 
 
 # create a new class deriving from the SimpleEntity

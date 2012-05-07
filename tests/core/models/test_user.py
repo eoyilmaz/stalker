@@ -6,11 +6,11 @@
 
 import unittest
 import datetime
-from stalker.core.models import (User, Department, PermissionGroup,
+from stalker.models import (User, Department, PermissionGroup,
                                  Type, StatusList, Status,
                                  Repository)
 
-from stalker.core.models import (Task, Project, Sequence)
+from stalker.models import (Task, Project, Sequence)
 
 
 class UserTest(unittest.TestCase):

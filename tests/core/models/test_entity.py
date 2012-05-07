@@ -3,7 +3,7 @@
 
 
 import unittest
-from stalker.core.models import (Entity, User, Tag, Note, Review)
+from stalker.models import (Entity, User, Tag, Note, Review)
 
 
 class EntityTester(unittest.TestCase):

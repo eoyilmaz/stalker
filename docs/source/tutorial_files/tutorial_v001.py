@@ -4,37 +4,38 @@ db.setup()
 
 db.setup("sqlite:////tmp/studio.db")
 
-from stalker.core.models import User
+from stalker.models import User
 
 
-myUser = User(first_name="Erkan Ozgur",
-              last_name="Yilmaz",
-              login_name="eoyilmaz",
-              email="eoyilmaz@gmail.com",
-              password="secret",
-              description="This is me")
+myUser = User(
+    first_name=u"Erkan Ozgur",
+    last_name=u"Yilmaz",
+    login_name=u"eoyilmaz",
+    email=u"eoyilmaz@gmail.com",
+    password=u"secret",
+    description="This is me"
+)
 
 
-from stalker.core.models import Department
+from stalker.models import Department
 tds_department = Department(name="TDs",
                             description="This is the TDs department")
 
 
 tds_department.members.append(myUser)
 
-all_departments = db.query(Department).all()
+all_departments = db.DBSession.query(Department).all()
 all_members_of_dep = all_departments[0].members
-print all_members[0].first_name
+print all_members_of_dep[0].first_name
 
-db.session.add(myUser)
-db.session.add(tds_department)
-db.session.commit()
+db.DBSession.add(myUser)
+db.DBSession.add(tds_department)
 
-from stalker.core.models import Project
+from stalker.models import Project
 new_project = Project(name="Fancy Commercial")
 
 from datetime import datetime
-from stalker.core.models import ImageFormat
+from stalker.models import ImageFormat
 
 new_project.description = """The commercial is about this fancy product. The
                              client want us to have a shinny look with their
@@ -44,22 +45,22 @@ new_project.fps = 25
 new_project.due = datetime(2011,2,15)
 new_project.lead = myUser
 
-from stalker.core.models import ProjectType
+from stalker.models import ProjectType
 
 commercial_project_type = ProjectType(name="Commercial")
 new_project.type = commercial_project_type
 
-db.session.add(new_project)
-db.session.commit()
+db.DBSession.add(new_project)
+db.DBSession.commit()
 
 
-from stalker.core.models import Sequence
+from stalker.models import Sequence
 seq1 = Sequence(name="Sequence 1", code="SEQ1")
 
 # add it to the project
 new_project.sequences.append(seq1)
 
-from stalker.core.models import Shot
+from stalker.models import Shot
 
 sh001 = Shot(name="Shot 1", code="SH001")
 sh002 = Shot(name="Shot 2", code="SH002")
@@ -69,7 +70,7 @@ sh003 = Shot(name="Shot 3", code="SH003")
 seq1.shots.extend([sh001, sh002, sh003])
 
 
-from stalker.core.models import PipelineStep
+from stalker.models import PipelineStep
 
 previs      = PipelineStep(name="Previs"     , code="PREVIS")
 matchmove   = PipelineStep(name="Match Move" , code="MM")
@@ -80,7 +81,7 @@ comp        = PipelineStep(name="Compositing", code="COMP")
 
 
 
-from stalker.core.models import AssetType
+from stalker.models import AssetType
 
 # the order of the PipelineSteps are not important
 shot_pSteps = [previs, match, anim, layout, light, comp]
@@ -99,7 +100,7 @@ for shot in seq1.shots:
 
 
 from datetime import timedelta
-from stalker.core.models import Task
+from stalker.models import Task
 
 previs_task = Task(
                   name="Previs",
@@ -163,7 +164,7 @@ light_task.depends = [layout_task]
 session.commit()
 
 
-from stalker.core.models import Repository
+from stalker.models import Repository
 repo1 = Repository(
     name="Commercial Repository",
     description="""This is where the commercial projects are going to be
@@ -187,7 +188,7 @@ print repo1.path
 # /Volumes/M
 #
 
-from stalker.core.models import Structure
+from stalker.models import Structure
 
 structure1 = Structure(
     name="Commercial Projects Structure",

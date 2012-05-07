@@ -5,7 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.core.models import (FilenameTemplate, Type, Entity)
+from stalker.models import (FilenameTemplate, Entity)
 
 
 # a test class

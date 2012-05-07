@@ -6,7 +6,7 @@
 
 import platform
 import unittest
-from stalker.core.models import Repository, Tag
+from stalker.models import Repository, Tag
 
 
 class RepositoryTester(unittest.TestCase):

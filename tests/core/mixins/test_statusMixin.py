@@ -8,7 +8,7 @@ import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import db
-from stalker.core.models import (SimpleEntity, Status, StatusList, StatusMixin)
+from stalker.models import (SimpleEntity, Status, StatusList, StatusMixin)
 
 
 class StatMixClass(SimpleEntity, StatusMixin):
@@ -296,7 +296,6 @@ class StatusMixinTester(unittest.TestCase):
 
 
 from sqlalchemy import orm
-from stalker import db
 
 
 class StatusListAutoAddClass(SimpleEntity, StatusMixin):

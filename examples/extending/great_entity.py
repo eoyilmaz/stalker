@@ -17,12 +17,12 @@ Now Stalker nows how to extend the :mod:`stalker.core.models` with your class
 """
 
 from sqlalchemy import Table, Column, Integer, ForeignKey
-from sqlalchemy.orm import mapper, relationship, synonym
+from sqlalchemy.orm import mapper
 
 from stalker import db
 from stalker.db import tables
 from stalker.db.mixins import ReferenceMixinDB
-from stalker.core.models import SimpleEntity, ReferenceMixin
+from stalker.models import SimpleEntity, ReferenceMixin
 
 
 class GreatEntity(SimpleEntity, ReferenceMixin):

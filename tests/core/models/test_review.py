@@ -5,8 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-import datetime
-from stalker.core.models import (Review, Entity, User, Tag)
+from stalker.models import (Review, Entity, User )
 
 
 class ReviewTest(unittest.TestCase):

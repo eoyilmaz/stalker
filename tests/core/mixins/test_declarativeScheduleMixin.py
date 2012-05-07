@@ -8,7 +8,7 @@ import unittest
 import datetime
 from stalker import db
 
-from stalker.core.models import SimpleEntity, ScheduleMixin
+from stalker.models import SimpleEntity, ScheduleMixin
 from sqlalchemy import Column, Integer, ForeignKey
 
 

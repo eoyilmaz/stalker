@@ -63,8 +63,8 @@ import base64
 from beaker import session as beakerSession
 
 from stalker import db
-from stalker.core.errors import LoginError, DBError
-from stalker.core.models import User
+from stalker.errors import LoginError, DBError
+from stalker.models import User
 
 
 SESSION = {}

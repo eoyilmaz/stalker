@@ -6,7 +6,7 @@
 
 import unittest
 import datetime
-from stalker.core.models import Department, User, Entity
+from stalker.models import Department, User, Entity
 
 
 class DepartmentTester(unittest.TestCase):

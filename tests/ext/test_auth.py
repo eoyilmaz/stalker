@@ -8,8 +8,8 @@ import unittest
 
 from stalker.conf import defaults
 from stalker import db
-from stalker.core.models import User
-from stalker.core.errors import LoginError, DBError
+from stalker.models import User
+from stalker.errors import LoginError, DBError
 from stalker.ext import auth
 
 

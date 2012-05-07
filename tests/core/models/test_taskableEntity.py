@@ -5,9 +5,8 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-import datetime
 
-from stalker.core.models import (Status, StatusList, Task, TaskableEntity,
+from stalker.models import (Status, StatusList, Task, TaskableEntity,
                                  Project, Repository, Type)
 
 

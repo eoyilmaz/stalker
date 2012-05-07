@@ -5,7 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.core.models import Link, Type
+from stalker.models import Link, Type
 
 
 class LinkTester(unittest.TestCase):

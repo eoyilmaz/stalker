@@ -6,7 +6,7 @@
 
 import unittest
 from stalker import db
-from stalker.core.models import (SimpleEntity, Project, Type, Status,
+from stalker.models import (SimpleEntity, Project, Type, Status,
                                  StatusList, Repository, ProjectMixin)
 from sqlalchemy import Column, Integer, ForeignKey
 

@@ -5,11 +5,10 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-import datetime
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import db
-from stalker.core.models import (SimpleEntity, Entity, Link, Type,
+from stalker.models import (SimpleEntity, Entity, Link, Type,
                                  ReferenceMixin)
 
 

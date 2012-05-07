@@ -5,7 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.core.models import (Asset, Task, Entity, Project, Link, Status,
+from stalker.models import (Asset, Task, Entity, Project, Link, Status,
                                  StatusList, Shot, Type, Sequence, Repository)
 
 

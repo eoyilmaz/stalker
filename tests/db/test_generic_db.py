@@ -4,7 +4,7 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
-from stalker.core.models import *
+from stalker.models import *
 from stalker import db
 
 #db.setup("sqlite:////tmp/projectMixin_test.db")

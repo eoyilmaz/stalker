@@ -8,7 +8,7 @@
 import unittest
 from stalker import db
 
-from stalker.core.models import SimpleEntity, Link, ReferenceMixin
+from stalker.models import SimpleEntity, Link, ReferenceMixin
 from sqlalchemy import Column, Integer, ForeignKey
 
 

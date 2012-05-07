@@ -14,17 +14,15 @@ from sqlalchemy.exc import IntegrityError
 from stalker.conf import defaults
 from stalker import db
 from stalker.ext import auth
-from stalker.core.errors import LoginError
-from stalker.core.models import (
+from stalker.errors import LoginError
+from stalker.models import (
     Asset,
-    Booking,
     Department,
     Entity,
     SimpleEntity,
     ImageFormat,
     Link,
     Note,
-    PermissionGroup,
     Project,
     Repository,
     Review,

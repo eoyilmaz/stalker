@@ -5,7 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.core.models import Tag, SimpleEntity
+from stalker.models import Tag, SimpleEntity
 
 
 class TagTest(unittest.TestCase):

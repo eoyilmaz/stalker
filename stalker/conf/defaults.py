@@ -7,17 +7,12 @@
 import datetime
 
 #
-# The default database addres
-# 
-DATABASE = "sqlite:///:memory:"
-
-
-#
 # The default settings for the database, see sqlalchemy.create_engine for
 # possible parameters
 # 
 DATABASE_ENGINE_SETTINGS = {
-    "echo": False
+    "sqlalchemy.url": "sqlite:///:memory:",
+    "sqlalchemy.echo": False,
 }
 
 DATABASE_SESSION_SETTINGS = {}

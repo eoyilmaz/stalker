@@ -7,7 +7,7 @@
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.core.models import (Project, SimpleEntity, TargetEntityTypeMixin)
+from stalker.models import (Project, SimpleEntity, TargetEntityTypeMixin)
 
 class TestClass(object):
     pass

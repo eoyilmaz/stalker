@@ -5,7 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.core.models import Entity, Type
+from stalker.models import Entity, Type
 
 
 class TypeTester(unittest.TestCase):
@@ -119,7 +119,7 @@ class TypeTester(unittest.TestCase):
         will be converted to a string
         """
 
-        from stalker.core.models import Asset
+        from stalker.models import Asset
 
         self.kwargs["target_entity_type"] = Asset
         new_type = Type(**self.kwargs)
