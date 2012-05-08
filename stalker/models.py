@@ -30,6 +30,21 @@ from stalker.errors import CircularDependencyError, OverBookedWarning
 from stalker.conf import defaults
 
 
+from sqlalchemy.orm import (
+    scoped_session,
+    sessionmaker,
+)
+
+from zope.sqlalchemy import ZopeTransactionExtension
+
+# SQLAlchemy session manager
+DBSession = scoped_session(
+    sessionmaker(
+        extension=ZopeTransactionExtension()
+    )
+)
+
+
 
 class EntityMeta(type):
     """The metaclass for the very basic entity.
@@ -5086,6 +5101,14 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
     which are mixed with the :class:`~stalekr.core.mixins.TaskMixin`). And when
     a :class:`~stalker.core.models.Project` instance is given then the asset
     will append itself to the :attr:`~stalker.core.models.Project.assets` list.
+    
+    ..versionadded: 0.2.0:
+        No more Asset to Shot connection:
+        
+        Assets now are not directly related to Shots. Instead a
+        :class:`~stalker.models.Version` will reference the Asset and then it
+        is easy to track which shots are referencing this Asset by querying
+        with a join of Shot Versions referencing this Asset.
     """
 
     __strictly_typed__ = True
@@ -5095,11 +5118,11 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
     asset_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                       primary_key=True)
 
-    shots = relationship(
-        "Shot",
-        secondary="Shot_Assets",
-        back_populates="assets"
-    )
+    #shots = relationship(
+    #    "Shot",
+    #    secondary="Shot_Assets",
+    #    back_populates="assets"
+    #)
 
     #@declared_attr
     #def project(self):

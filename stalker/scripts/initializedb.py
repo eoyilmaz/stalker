@@ -1,8 +1,5 @@
 import os
 import sys
-import transaction
-
-#from sqlalchemy import engine_from_config
 
 from pyramid.paster import (
     get_appsettings,
@@ -26,4 +23,3 @@ def main(argv=sys.argv):
     settings = get_appsettings(config_uri)
     
     db.setup(settings)
-    db.__init_db__()
