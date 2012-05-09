@@ -7,8 +7,10 @@
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
+import transaction
 from stalker import db
-from stalker.models import (SimpleEntity, Status, StatusList, StatusMixin)
+from stalker.models import (DBSession, SimpleEntity, Status, StatusList,
+                            StatusMixin)
 
 
 class StatMixClass(SimpleEntity, StatusMixin):
@@ -79,10 +81,10 @@ class StatusMixinTester(unittest.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
-
-        db.session = None
+        if DBSession:
+            DBSession.remove()
+        
+        #DBSession = None
 
     def test_status_list_init_with_something_else_then_StatusList_1(self):
         """testing if TypeError is going to be raised when trying to
@@ -361,10 +363,10 @@ class StatusMixinDBTester(unittest.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
+        if DBSession:
+            DBSession.remove()
 
-        db.session = None
+        #db.session = None
     
     def test_status_list_attribute_is_skipped_and_there_is_a_db_setup(self):
         """testing if there will be no error and the status_list attribute is
@@ -373,31 +375,32 @@ class StatusMixinDBTester(unittest.TestCase):
         defined for the StatusListAutoAddClass.
         """
         
-        # create a StatusList for StatusListAutoAddClass
-        test_status_list = StatusList(
-            name="StatusListAutoAddClass Statuses",
-            statuses=[
-                Status(name="Status1", code="Sts1"),
-                Status(name="Status2", code="Sts2"),
-                Status(name="Status3", code="Sts3"),
-                ],
-            target_entity_type=StatusListAutoAddClass,
-            )
-        
-        # add it to the db
-        db.session.add(test_status_list)
-        db.session.commit()
+        with transaction.manager:
+            # create a StatusList for StatusListAutoAddClass
+            test_status_list = StatusList(
+                name="StatusListAutoAddClass Statuses",
+                statuses=[
+                    Status(name="Status1", code="Sts1"),
+                    Status(name="Status2", code="Sts2"),
+                    Status(name="Status3", code="Sts3"),
+                    ],
+                target_entity_type=StatusListAutoAddClass,
+                )
+            
+            # add it to the db
+            DBSession.add(test_status_list)
         
         # now try to create a StatusListAutoAddClass without a status_list 
         # argument
-
         test_StatusListAutoAddClass = StatusListAutoAddClass(
             name="Test StatusListAutoAddClass",
         )
 
         # now check if the status_list is equal to test_status_list
-        self.assertEqual(test_StatusListAutoAddClass.status_list,
-                         test_status_list)
+        self.assertEqual(
+            test_StatusListAutoAddClass.status_list,
+            test_status_list
+        )
 
 
     def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitable_StatusList(self):
@@ -405,27 +408,27 @@ class StatusMixinDBTester(unittest.TestCase):
         but there is no suitable StatusList for StatusListNoAutoAddClass in 
         the database
         """
-
-        # create a StatusList for StatusListAutoAddClass
-        test_status_list = StatusList(
-            name="StatusListAutoAddClass Statuses",
-            statuses=[
-                Status(name="Status1", code="Sts1"),
-                Status(name="Status2", code="Sts2"),
-                Status(name="Status3", code="Sts3"),
-                ],
-            target_entity_type=StatusListAutoAddClass,
-            )
-
-        # add it to the db
-        db.session.add(test_status_list)
-        db.session.commit()
-
+        
+        with transaction.manager:
+            # create a StatusList for StatusListAutoAddClass
+            test_status_list = StatusList(
+                name="StatusListAutoAddClass Statuses",
+                statuses=[
+                    Status(name="Status1", code="Sts1"),
+                    Status(name="Status2", code="Sts2"),
+                    Status(name="Status3", code="Sts3"),
+                    ],
+                target_entity_type=StatusListAutoAddClass,
+                )
+    
+            # add it to the db
+            DBSession.add(test_status_list)
+        
         # now try to create a StatusListAutoAddClass without a status_list 
         # argument
-
-        self.assertRaises(TypeError,
-                          StatusListNoAutoAddClass,
-                          **{"name": "Test StatusListNoAutoAddClass"}
-        )
         
+        self.assertRaises(
+            TypeError,
+            StatusListNoAutoAddClass,
+            **{"name": "Test StatusListNoAutoAddClass"}
+        )

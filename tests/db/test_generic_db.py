@@ -3,11 +3,14 @@
 # 
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
+import transaction
 
 from stalker.models import *
 from stalker import db
 
 #db.setup("sqlite:////tmp/projectMixin_test.db")
+DBSession.remove()
+DBSession.configure(extension=None)
 db.setup()
 
 status1 = Status(name="Complete", code="CMPLT")
@@ -101,8 +104,7 @@ new_task = Task(
 #new_project.assets.append(new_asset)
 #new_project.assets
 
-db.session.add_all([new_project1, new_project2])
-db.session.commit()
+DBSession.add_all([new_project1, new_project2])
+DBSession.commit()
 
 assert new_project1.users == [new_user1]
-

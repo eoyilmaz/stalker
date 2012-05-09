@@ -6,9 +6,8 @@
 
 
 import unittest
-from stalker import db
 
-from stalker.models import SimpleEntity, Link, ReferenceMixin
+from stalker.models import SimpleEntity, Link, ReferenceMixin, DBSession
 from sqlalchemy import Column, Integer, ForeignKey
 
 
@@ -65,10 +64,9 @@ class ReferenceMixinTester(unittest.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
+        if DBSession:
+            DBSession.close()
 
-        db.session = None
 
 
 

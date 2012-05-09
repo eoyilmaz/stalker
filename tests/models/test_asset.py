@@ -21,54 +21,64 @@ class AssetTester(unittest.TestCase):
         self.test_data_status_complete = Status(
             name="Complete",
             code="CMPLT",
-            )
-
+        )
+        
         self.test_data_status_wip = Status(
             name="Work In Progress",
             code="WIP",
-            )
-
+        )
+        
         # status lists
         self.test_data_project_status_list = StatusList(
             name="Project Status List",
             target_entity_type=Project,
-            statuses=[self.test_data_status_complete,
-                      self.test_data_status_wip]
+            statuses=[
+                self.test_data_status_complete,
+                self.test_data_status_wip
+            ]
         )
 
         self.test_data_task_status_list = StatusList(
             name="Task Status List",
             target_entity_type=Task,
-            statuses=[self.test_data_status_complete,
-                      self.test_data_status_wip]
+            statuses=[
+                self.test_data_status_complete,
+                self.test_data_status_wip
+            ]
         )
 
         self.test_data_asset_status_list = StatusList(
             name="Asset Status List",
             target_entity_type=Asset,
-            statuses=[self.test_data_status_complete,
-                      self.test_data_status_wip]
+            statuses=[
+                self.test_data_status_complete,
+                self.test_data_status_wip
+            ]
         )
 
         self.test_data_shot_status_list = StatusList(
             name="Shot Status List",
             target_entity_type=Shot,
-            statuses=[self.test_data_status_complete,
-                      self.test_data_status_wip]
+            statuses=[
+                self.test_data_status_complete,
+                self.test_data_status_wip
+            ]
         )
 
         self.test_data_sequence_status_list = StatusList(
             name="Sequence Status List",
             target_entity_type=Sequence,
-            statuses=[self.test_data_status_complete,
-                      self.test_data_status_wip]
+            statuses=[
+                self.test_data_status_complete,
+                self.test_data_status_wip
+            ]
         )
 
         # types
         self.test_data_commmercial_project = Type(
             name="Commercial Project",
             target_entity_type=Project,
-            )
+        )
 
         self.test_data_asset_type1 = Type(
             name="Character",
@@ -89,7 +99,7 @@ class AssetTester(unittest.TestCase):
         self.test_data_repository = Repository(
             name="Test Repository",
             type=self.test_data_repository_type,
-            )
+        )
 
         # project
         self.test_data_project1 = Project(
@@ -97,54 +107,54 @@ class AssetTester(unittest.TestCase):
             type=self.test_data_commmercial_project,
             status_list=self.test_data_project_status_list,
             repository=self.test_data_repository,
-            )
+        )
 
         # sequence
         self.test_data_sequence = Sequence(
             name="Test Sequence",
             project=self.test_data_project1,
             status_list=self.test_data_sequence_status_list,
-            )
+        )
 
         # shots
         self.test_data_shot1 = Shot(
             code="TestSH001",
             status_list=self.test_data_shot_status_list,
             sequence=self.test_data_sequence,
-            )
-
+        )
+        
         self.test_data_shot2 = Shot(
             code="TestSH002",
             status_list=self.test_data_shot_status_list,
             sequence=self.test_data_sequence,
-            )
+        )
 
         self.test_data_shot3 = Shot(
             code="TestSH003",
             status_list=self.test_data_shot_status_list,
             sequence=self.test_data_sequence,
-            )
-
+        )
+        
         self.test_data_shot4 = Shot(
             code="TestSH004",
             status_list=self.test_data_shot_status_list,
             sequence=self.test_data_sequence,
-            )
-
+        )
+        
         self.kwargs = {
             "name": "Test Asset",
             "description": "This is a test Asset object",
             "project": self.test_data_project1,
             "type": self.test_data_asset_type1,
-            "shots": [self.test_data_shot1,
-                      self.test_data_shot2,
-                      self.test_data_shot3],
+#            "shots": [self.test_data_shot1,
+#                      self.test_data_shot2,
+#                      self.test_data_shot3],
             "status": 0,
             "status_list": self.test_data_asset_status_list,
-            }
-
+        }
+        
         self.test_data_test_asset = Asset(**self.kwargs)
-
+        
         # tasks
         self.test_data_task1 = Task(
             name="Task1",
@@ -324,7 +334,7 @@ class AssetTester(unittest.TestCase):
 
 
         # UPDATE THIS: this test should be in tests.db
-        # because the property it is testing is using db.query
+        # because the property it is testing is using DBSession.query
         #
         #def test_asset_appends_itself_to_the_assets_list_of_project_instance(self):
         #"""testing if the created Asset instance will append itself to the

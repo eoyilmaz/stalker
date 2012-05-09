@@ -5,10 +5,11 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
+import transaction
 
 from stalker.conf import defaults
 from stalker import db
-from stalker.models import User
+from stalker.models import DBSession, User
 from stalker.errors import LoginError, DBError
 from stalker.ext import auth
 
@@ -35,7 +36,7 @@ class AuthTester(unittest.TestCase):
 
         # use the admin user for this test
         db.setup()
-        admin = db.query(User).filter_by(name=defaults.ADMIN_NAME).first()
+        admin = DBSession.query(User).filter_by(name=defaults.ADMIN_NAME).first()
 
         # log the user in for the first time
         auth.login(admin)
@@ -62,7 +63,7 @@ class AuthTester(unittest.TestCase):
         db.setup()
 
         # login with admin
-        admin = db.query(User).filter_by(name=defaults.ADMIN_NAME).first()
+        admin = DBSession.query(User).filter_by(name=defaults.ADMIN_NAME).first()
 
         # log the user in
         auth.login(admin)
@@ -84,7 +85,7 @@ class AuthTester(unittest.TestCase):
         db.setup()
 
         # login with admin
-        admin = db.query(User).filter_by(name=defaults.ADMIN_NAME).first()
+        admin = DBSession.query(User).filter_by(name=defaults.ADMIN_NAME).first()
 
         # log the admin in
         auth.login(admin)
@@ -92,41 +93,54 @@ class AuthTester(unittest.TestCase):
         admin_session = auth.SESSION.copy()
 
         # now create a different user
-        new_user = User(first_name="Erkan Ozgur", last_name="Yilmaz",
-            login_name="eoyilmaz", password="1234",
-            email="ozgur@yilmaz.com")
-
-        # get an id for the user
-        db.session.add(new_user)
-        db.session.commit()
-
+        with transaction.manager:
+            new_user = User(
+                first_name="Erkan Ozgur",
+                last_name="Yilmaz",
+                login_name="eoyilmaz",
+                password="1234",
+                email="ozgur@yilmaz.com"
+            )
+            
+            # get an id for the user
+            DBSession.add(new_user)
+        
         # log in with new user
         auth.login(new_user)
 
         # check if the session is renewed
         self.assertNotEqual(auth.SESSION, admin_session)
-
+        
         # check if the session_id is changed
-        self.assertNotEqual(auth.SESSION[auth.SESSION_KEY],
-            admin_session[auth.SESSION_KEY])
+        self.assertNotEqual(
+            auth.SESSION[auth.SESSION_KEY],
+            admin_session[auth.SESSION_KEY]
+        )
 
         # check if the session id matches the user id
-        self.assertEqual(auth.SESSION[auth.SESSION_KEY],
-            new_user.id)
-
+        self.assertEqual(
+            auth.SESSION[auth.SESSION_KEY],
+            new_user.id
+        )
+    
     def test_login_with_no_sesssion_and_a_User(self):
         """testing if a DBError will be raised when there is no database set
         but a correct User object is supplied to the login function
         """
 
         # clear the db session
-        db.session = None
+        DBSession.remove()
 
         # create a new user
-        new_user = User(login_name="testuser", first_name="test",
-            last_name="test", email="test@test.com",
-            password="2134")
-
+        with transaction.manager:
+            new_user = User(
+                login_name="testuser",
+                first_name="test",
+                last_name="test",
+                email="test@test.com",
+                password="2134"
+            )
+        
         # try to login with this user and expect a DBError
         self.assertRaises(DBError, auth.login, new_user)
 
@@ -136,47 +150,57 @@ class AuthTester(unittest.TestCase):
         """
 
         # clear the mappers and the database
-        db.session = None
-        #db.__mappers__ = []
-
-        self.assertRaises(DBError, auth.authenticate, defaults.ADMIN_NAME,
-            defaults.ADMIN_PASSWORD)
-
+        DBSession.remove()
+        
+        self.assertRaises(
+            DBError,
+            auth.authenticate,
+            defaults.ADMIN_NAME,
+            defaults.ADMIN_PASSWORD
+        )
+    
     def test_authenticate_returns_a_User_instance(self):
         """testing if authenticate returns a stalker.core.models.User instance
         """
 
         # use the default admin user to check
         db.setup()
-
-        admin = auth.authenticate(defaults.ADMIN_NAME,
-            defaults.ADMIN_PASSWORD)
-
+        
+        admin = auth.authenticate(
+            defaults.ADMIN_NAME,
+            defaults.ADMIN_PASSWORD
+        )
+        
         self.assertIsInstance(admin, User)
 
     def test_authenticate_non_existent_user(self):
         """testing if a LoginError will be raised when the given user
         information is not correct
         """
-
+        
         db.setup()
-
-        self.assertRaises(LoginError,
+        
+        self.assertRaises(
+            LoginError,
             auth.authenticate,
-            "non_existent", "user")
-
+            "non_existent",
+            "user"
+        )
+    
     def test_authenticate_correct_user_wrong_password(self):
         """testing if a LoginError will be raised when the user name is correct
         but the password is wrong
         """
-
+        
         # use the admin with wrong password
         db.setup()
 
-        self.assertRaises(LoginError,
+        self.assertRaises(
+            LoginError,
             auth.authenticate,
             defaults.ADMIN_NAME,
-            "wrong password")
+            "wrong password"
+        )
 
     def test_logout_deletes_the_content_of_SESSION(self):
         """testing if logout deletes the content of the auth.SESSION
@@ -184,17 +208,18 @@ class AuthTester(unittest.TestCase):
 
         # first login with admin
         db.setup()
-
-        admin = auth.authenticate(defaults.ADMIN_NAME,
+        
+        admin = auth.authenticate(
+            defaults.ADMIN_NAME,
             defaults.ADMIN_PASSWORD)
         auth.login(admin)
-
+        
         # check if SESSION has SESSION_KEY
         self.assertTrue(auth.SESSION_KEY in auth.SESSION)
-
+        
         # then logout
         auth.logout()
-
+        
         # and check if the SESSION doesn't have SESSION_KEY
         self.assertTrue(auth.SESSION_KEY not in auth.SESSION)
 

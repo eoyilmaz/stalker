@@ -7,10 +7,8 @@
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker import db
-from stalker.models import SimpleEntity, Status, StatusList, StatusMixin
-
-
+from stalker.models import (SimpleEntity, Status, StatusList, StatusMixin,
+                            DBSession)
 
 # create a new mixed in SimpleEntity
 class DeclStatMixA(SimpleEntity, StatusMixin):
@@ -19,11 +17,9 @@ class DeclStatMixA(SimpleEntity, StatusMixin):
     declStatMixAs_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                               primary_key=True)
 
-
     def __init__(self, **kwargs):
         super(DeclStatMixA, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
-
 
 class DeclStatMixB(SimpleEntity, StatusMixin):
     __tablename__ = "DeclStatMixBs"
@@ -31,16 +27,13 @@ class DeclStatMixB(SimpleEntity, StatusMixin):
     b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
 
-
     def __init__(self, **kwargs):
         super(B, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
 
-
 class StatusMixinTester(unittest.TestCase):
     """tests StatusMixin
     """
-
 
     def setUp(self):
         """setup the test
@@ -70,10 +63,7 @@ class StatusMixinTester(unittest.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
-        
-        db.session = None
+        DBSession.remove()
 
     def test_status_list_argument_not_set(self):
         """testing if a TypeError will be raised when the status_list argument
@@ -82,14 +72,12 @@ class StatusMixinTester(unittest.TestCase):
         self.kwargs.pop("status_list")
         self.assertRaises(TypeError, DeclStatMixA, **self.kwargs)
 
-
     def test_status_list_argument_is_not_correct(self):
         """testing if a TypeError will be raised when the given StatusList
         instance with the status_list argument is not suitable for this class
         """
         self.kwargs["status_list"] = self.test_b_statusList
         self.assertRaises(TypeError, DeclStatMixA, **self.kwargs)
-
 
     def test_status_list_working_properly(self):
         """testing if the status_list attribute is working properly
@@ -103,5 +91,4 @@ class StatusMixinTester(unittest.TestCase):
         self.assertIn(self.test_stat1, new_a_ins.status_list)
         self.assertNotIn(self.test_stat2, new_a_ins.status_list)
         self.assertIn(self.test_stat3, new_a_ins.status_list)
-    
     

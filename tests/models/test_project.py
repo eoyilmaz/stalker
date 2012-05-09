@@ -642,7 +642,7 @@ class ProjectTester(unittest.TestCase):
 
 
         # UPDATE THIS: This test needs to be in the tests.db
-        # because the property it is testing is using db.query
+        # because the property it is testing is using DBSession.query
         #
         #def test_users_attribute_is_calculated_from_project_tasks(self):
         #"""testing if the users attribute is calculated from the tasks of the
@@ -712,7 +712,7 @@ class ProjectTester(unittest.TestCase):
 
 
         # UPDATE THIS: This test needs to be in the tests.db
-        # because the property it is testing is using db.query
+        # because the property it is testing is using DBSession.query
         #
         #def test_users_attribute_is_calculated_from_sequence_tasks(self):
         #"""testing if the users attribute is calculated from the tasks of the
@@ -796,7 +796,7 @@ class ProjectTester(unittest.TestCase):
 
 
         # UPDATE THIS: this test should be in tests.db
-        # because the property it is testing is using db.query
+        # because the property it is testing is using DBSession.query
         #
         #def test_users_attribute_is_calculated_from_asset_tasks(self):
         #"""testing if the users attribute is calculated from the tasks of the
@@ -879,7 +879,7 @@ class ProjectTester(unittest.TestCase):
 
 
         # UPDATE THIS: This test needs to be in tests.db
-        # because the property it is testing is using db.query
+        # because the property it is testing is using DBSession.query
         #
         #def test_users_attribute_is_calculated_from_sequence_shots(self):
         #"""testing if the users attribute is calculated from the tasks of the

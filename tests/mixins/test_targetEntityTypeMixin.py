@@ -12,27 +12,23 @@ from stalker.models import (Project, SimpleEntity, TargetEntityTypeMixin)
 class TestClass(object):
     pass
 
-
-
 class TargetEntityTypeMixedClass(SimpleEntity, TargetEntityTypeMixin):
     __tablename__ = "TarEntMixClasses"
     __mapper_args__ = {"polymorphic_identity": "TarEntMixClass"}
-    tarMixClass_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
-                            primary_key=True)
-
+    tarMixClass_id = Column(
+        "id",
+        Integer,
+        ForeignKey("SimpleEntities.id"),
+        primary_key=True
+    )
 
     def __init__(self, **kwargs):
-        print "start TargetEntityTypeMixedClass.__init__"
         super(TargetEntityTypeMixedClass, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, **kwargs)
-        print "end TargetEntityTypeMixedClass.__init__"
-
 
 class TargetEntityMixinTester(unittest.TestCase):
     """Tests the TargetEntityMixin
     """
-
-
     def setUp(self):
         """setup the test
         """
@@ -44,7 +40,6 @@ class TargetEntityMixinTester(unittest.TestCase):
 
         self.test_object = TargetEntityTypeMixedClass(**self.kwargs)
     
-    
     def test_target_entity_type_argument_is_skipped(self):
         """testing if a TypeError will be raised when the target_entity_type 
         argument is skipped
@@ -52,8 +47,6 @@ class TargetEntityMixinTester(unittest.TestCase):
         
         self.kwargs.pop("target_entity_type")
         self.assertRaises(TypeError, TargetEntityTypeMixedClass, **self.kwargs)
-        
-        
     
     def test_target_entity_type_argument_being_empty_string(self):
         """testing if a ValueError will be raised when the target_entity_type
@@ -84,7 +77,6 @@ class TargetEntityMixinTester(unittest.TestCase):
             "target_entity_type",
             "Project"
         )
-
 
     def test_target_entity_type_argument_accepts_classes(self):
         """testing if the target_entity_type argument accepts classes

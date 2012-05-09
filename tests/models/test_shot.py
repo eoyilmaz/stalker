@@ -146,8 +146,8 @@ class ShotTester(unittest.TestCase):
             "cut_duration": 123,
             "status": 0,
             "status_list": self.test_data.shot_status_list,
-            "assets": [self.test_data.asset1,
-                       self.test_data.asset2]
+            #"assets": [self.test_data.asset1,
+            #           self.test_data.asset2]
         }
 
         # create a mock shot object
@@ -797,137 +797,136 @@ class ShotTester(unittest.TestCase):
         """
         self.assertEqual(Shot.__strictly_typed__, False)
 
-
-    def test_assets_argument_is_skipped(self):
-        """testing if the assets attribute will be an empty list when the
-        assets argument is skipped
-        """
-        self.kwargs["code"] = "SHAnotherShot"
-        self.kwargs.pop("assets")
-        new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.assets, [])
-
-
-    def test_assets_argument_is_None(self):
-        """testing if the assets attribute will be an empty list when the
-        assets argument is None
-        """
-        self.kwargs["code"] = "SHAnotherShot"
-        self.kwargs["assets"] = None
-        new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.assets, [])
-
-
-    def test_assets_attribute_is_None(self):
-        """testing if a TypeError will be raised when the assets attribute is
-        set to None
-        """
-
-        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
-                          "assets", None)
-
-
-    def test_assets_argument_is_not_a_list(self):
-        """testing if a TypeError will be raised when the assets argument is
-        not a list
-        """
-        self.kwargs["code"] = "SHAnotherShot"
-        self.kwargs["assets"] = 1
-        self.assertRaises(TypeError, Shot, **self.kwargs)
-
-
-    def test_assets_attribute_is_not_a_list(self):
-        """testing if a TypeError will be raised when the assets attribute is
-        set to a non list value
-        """
-
-        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
-                          "assets", 1)
-
-
-    def test_assets_argument_is_not_a_list_of_Asset_instances(self):
-        """testing if a TypeError will be raised when the assets argument is
-        a list but not a list of Asset instances
-        """
-        self.kwargs["code"] = "SHAnotherShot"
-        self.kwargs["assets"] = [1, "a string", ["a", "list"]]
-        self.assertRaises(TypeError, Shot, **self.kwargs)
-
-
-    def test_assets_attribute_is_not_a_list_of_Asset_instances(self):
-        """testing if a TypeError will be raised when the assets attribute is
-        set to a list but not a list of Asset instances
-        """
-
-        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
-                          "assets", [1, "a string", ["a", "list"]])
-
-
-    def test_assets_argument_is_a_list_of_Asset_instances(self):
-        """testing if the assets shots attribute will contain the current shot
-        when the assets argument is a list of Asset instances
-        """
-
-        self.kwargs["code"] = "SHAnotherShot"
-        self.kwargs["assets"] = [self.test_data.asset1, self.test_data.asset2]
-        new_shot = Shot(**self.kwargs)
-
-        self.assertIn(new_shot, self.test_data.asset1.shots)
-        self.assertIn(new_shot, self.test_data.asset2.shots)
-
-
-    def test_assets_attribute_is_a_list_of_Asset_instances(self):
-        """testing if the assets shots attribute will contain the current shot
-        when the assets attribute is set to a list of Asset instances
-        """
-
-        self.kwargs["code"] = "SHAnotherShot"
-        self.kwargs.pop("assets")
-        new_shot = Shot(**self.kwargs)
-        new_shot.assets = [self.test_data.asset1, self.test_data.asset2]
-
-        self.assertIn(new_shot, self.test_data.asset1.shots)
-        self.assertIn(new_shot, self.test_data.asset2.shots)
-
-
-    def test_assets_attribute_will_update_the_Asset_shot_attribute(self):
-        """testing if the assets attribute will update the Asset.shots
-        attribute
-        """
-
-        self.kwargs["code"] = "SHAnotherShot"
-        self.kwargs.pop("assets")
-        new_shot = Shot(**self.kwargs)
-
-        new_shot.assets = [self.test_data.asset1, self.test_data.asset2]
-
-        self.assertIn(new_shot, self.test_data.asset1.shots)
-        self.assertIn(new_shot, self.test_data.asset2.shots)
-
-        new_shot.assets = [self.test_data.asset3]
-
-        self.assertIn(new_shot, self.test_data.asset3.shots)
-        self.assertNotIn(new_shot, self.test_data.asset1.shots)
-        self.assertNotIn(new_shot, self.test_data.asset2.shots)
-
-        # now append a new asset
-        new_shot.assets.append(self.test_data.asset1)
-        self.assertIn(new_shot, self.test_data.asset1.shots)
-
-        # remove one
-        new_shot.assets.remove(self.test_data.asset3)
-        self.assertNotIn(new_shot, self.test_data.asset3.shots)
-
-        # pop one
-        new_shot.assets.pop()
-        self.assertNotIn(new_shot, self.test_data.asset1.shots)
-
-        # extend
-        new_shot.assets.extend([self.test_data.asset1,
-                                self.test_data.asset2,
-                                self.test_data.asset3])
-
-        self.assertIn(new_shot, self.test_data.asset1.shots)
-        self.assertIn(new_shot, self.test_data.asset2.shots)
-        self.assertIn(new_shot, self.test_data.asset3.shots)
+#    def test_assets_argument_is_skipped(self):
+#        """testing if the assets attribute will be an empty list when the
+#        assets argument is skipped
+#        """
+#        self.kwargs["code"] = "SHAnotherShot"
+#        self.kwargs.pop("assets")
+#        new_shot = Shot(**self.kwargs)
+#        self.assertEqual(new_shot.assets, [])
+#
+#
+#    def test_assets_argument_is_None(self):
+#        """testing if the assets attribute will be an empty list when the
+#        assets argument is None
+#        """
+#        self.kwargs["code"] = "SHAnotherShot"
+#        self.kwargs["assets"] = None
+#        new_shot = Shot(**self.kwargs)
+#        self.assertEqual(new_shot.assets, [])
+#
+#
+#    def test_assets_attribute_is_None(self):
+#        """testing if a TypeError will be raised when the assets attribute is
+#        set to None
+#        """
+#
+#        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
+#                          "assets", None)
+#
+#
+#    def test_assets_argument_is_not_a_list(self):
+#        """testing if a TypeError will be raised when the assets argument is
+#        not a list
+#        """
+#        self.kwargs["code"] = "SHAnotherShot"
+#        self.kwargs["assets"] = 1
+#        self.assertRaises(TypeError, Shot, **self.kwargs)
+#
+#
+#    def test_assets_attribute_is_not_a_list(self):
+#        """testing if a TypeError will be raised when the assets attribute is
+#        set to a non list value
+#        """
+#
+#        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
+#                          "assets", 1)
+#
+#
+#    def test_assets_argument_is_not_a_list_of_Asset_instances(self):
+#        """testing if a TypeError will be raised when the assets argument is
+#        a list but not a list of Asset instances
+#        """
+#        self.kwargs["code"] = "SHAnotherShot"
+#        self.kwargs["assets"] = [1, "a string", ["a", "list"]]
+#        self.assertRaises(TypeError, Shot, **self.kwargs)
+#
+#
+#    def test_assets_attribute_is_not_a_list_of_Asset_instances(self):
+#        """testing if a TypeError will be raised when the assets attribute is
+#        set to a list but not a list of Asset instances
+#        """
+#
+#        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
+#                          "assets", [1, "a string", ["a", "list"]])
+#
+#
+#    def test_assets_argument_is_a_list_of_Asset_instances(self):
+#        """testing if the assets shots attribute will contain the current shot
+#        when the assets argument is a list of Asset instances
+#        """
+#
+#        self.kwargs["code"] = "SHAnotherShot"
+#        self.kwargs["assets"] = [self.test_data.asset1, self.test_data.asset2]
+#        new_shot = Shot(**self.kwargs)
+#
+#        self.assertIn(new_shot, self.test_data.asset1.shots)
+#        self.assertIn(new_shot, self.test_data.asset2.shots)
+#
+#
+#    def test_assets_attribute_is_a_list_of_Asset_instances(self):
+#        """testing if the assets shots attribute will contain the current shot
+#        when the assets attribute is set to a list of Asset instances
+#        """
+#
+#        self.kwargs["code"] = "SHAnotherShot"
+#        self.kwargs.pop("assets")
+#        new_shot = Shot(**self.kwargs)
+#        new_shot.assets = [self.test_data.asset1, self.test_data.asset2]
+#
+#        self.assertIn(new_shot, self.test_data.asset1.shots)
+#        self.assertIn(new_shot, self.test_data.asset2.shots)
+#
+#
+#    def test_assets_attribute_will_update_the_Asset_shot_attribute(self):
+#        """testing if the assets attribute will update the Asset.shots
+#        attribute
+#        """
+#
+#        self.kwargs["code"] = "SHAnotherShot"
+#        self.kwargs.pop("assets")
+#        new_shot = Shot(**self.kwargs)
+#
+#        new_shot.assets = [self.test_data.asset1, self.test_data.asset2]
+#
+#        self.assertIn(new_shot, self.test_data.asset1.shots)
+#        self.assertIn(new_shot, self.test_data.asset2.shots)
+#
+#        new_shot.assets = [self.test_data.asset3]
+#
+#        self.assertIn(new_shot, self.test_data.asset3.shots)
+#        self.assertNotIn(new_shot, self.test_data.asset1.shots)
+#        self.assertNotIn(new_shot, self.test_data.asset2.shots)
+#
+#        # now append a new asset
+#        new_shot.assets.append(self.test_data.asset1)
+#        self.assertIn(new_shot, self.test_data.asset1.shots)
+#
+#        # remove one
+#        new_shot.assets.remove(self.test_data.asset3)
+#        self.assertNotIn(new_shot, self.test_data.asset3.shots)
+#
+#        # pop one
+#        new_shot.assets.pop()
+#        self.assertNotIn(new_shot, self.test_data.asset1.shots)
+#
+#        # extend
+#        new_shot.assets.extend([self.test_data.asset1,
+#                                self.test_data.asset2,
+#                                self.test_data.asset3])
+#
+#        self.assertIn(new_shot, self.test_data.asset1.shots)
+#        self.assertIn(new_shot, self.test_data.asset2.shots)
+#        self.assertIn(new_shot, self.test_data.asset3.shots)
     

@@ -19,6 +19,10 @@ Stalker Changes
   session, so there is no need to use ``DBSession.commit`` it will be handled
   by the system it self.
 
+* Even though the ``DBSession`` is using the Zope Transaction Manager extension
+  normally, in the database tests no extension is used because the transaction
+  manager was swallowing all errors and it was a little weird to try to catch
+  this errors out of the ``with`` block.
 
 0.1.2.a5
 --------

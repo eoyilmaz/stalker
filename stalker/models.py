@@ -7,6 +7,10 @@
 import re
 import datetime
 import platform
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 from sqlalchemy import orm
 from sqlalchemy.orm import relationship, synonym, validates
@@ -2591,7 +2595,7 @@ class User(Entity):
         """validates the given name value
         """
 
-        print "name in: ", name
+        logger.debug("name in: %s" % name)
 
         name = self._format_login_name(name)
 
@@ -2601,7 +2605,7 @@ class User(Entity):
         # and also the code
         self.code = name
 
-        print "name out: ", name
+        logger.debug("name out: %s" % name)
 
         return name
 
@@ -2980,8 +2984,8 @@ class StatusMixin(object):
       .. versionadded:: 0.1.2.a4
         
         The status_list argument now can be skipped or can be None if there is
-        an active database connection (stalker.db.session is not None) and 
-        there is a suitable
+        an active database connection (stalker.models.DBSession is not None)
+        and there is a suitable
         :class:`~stalker.core.models.StatusList` instance in the database whom
         :attr:`~stalker.core.models.StatusList.target_entity_type` attribute
         is set to the current mixed-in class name.
@@ -3031,11 +3035,11 @@ class StatusMixin(object):
         if status_list is None:
             # check if there is a db setup and try to get the appropriate 
             # StatusList from the database
-            from stalker import db
-            if db.session is not None:
+            #from stalker import db
+            if DBSession is not None:
                 # try to get a StatusList with the target_entity_type is 
                 # matching the class name
-                status_list = db.query(StatusList)\
+                status_list = DBSession.query(StatusList)\
                     .filter_by(target_entity_type=self.__class__.__name__)\
                     .first()
         
@@ -3538,8 +3542,8 @@ class Booking(Entity, ScheduleMixin):
         
         # check for overbooking
         for booking in resource.bookings:
-            print booking.start_date
-            print self.start_date
+            logger.debug('booking.start_date: %s' % booking.start_date)
+            logger.debug('self.start_date: %s' % self.start_date)
 
             if booking.start_date == self.start_date or\
                booking.due_date == self.due_date or\
@@ -4556,10 +4560,10 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         """
 
         # use joins over the session.query
-        from stalker import db
+        #from stalker import db
 
-        if db.session is not None:
-            return db.query(User).\
+        if DBSession is not None:
+            return DBSession.query(User).\
             join(User.tasks).\
             join(Task.task_of).\
             join(TaskableEntity.project).\
@@ -4576,10 +4580,10 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         """
 
         # use joins over the session.query
-        from stalker import db
+        #from stalker import db
 
-        if db.session is not None:
-            return db.query(Asset).\
+        if DBSession is not None:
+            return DBSession.query(Asset).\
             join(Asset.project).\
             filter(Project.name == self.name).all()
         else:
@@ -4594,10 +4598,10 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         """
 
         # use joins over the session.query
-        from stalker import db
+        #from stalker import db
 
-        if db.session is not None:
-            return db.query(Sequence).\
+        if DBSession is not None:
+            return DBSession.query(Sequence).\
             join(Sequence.project).\
             filter(Project.name == self.name).all()
         else:
@@ -4811,19 +4815,19 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     _cut_in = Column(Integer)
     _cut_out = Column(Integer)
 
-    assets = relationship(
-        "Asset",
-        secondary="Shot_Assets",
-        #primaryjoin="Shots.c.id==Shot_Assets.c.shot_id",
-        #secondaryjoin="Shot_Assets.c.asset_id==Assets.c.id",
-        back_populates="shots",
-        doc="""The :class:`~stalker.core.models.Asset` instances used in this Shot.
-        
-        Holds the relation of a :class:`~stalker.core.models.Shot` with a list
-        of :class:`~stalker.core.models.Asset`\ s, which are used in this
-        :class:`~stalker.core.models.Shot`.
-        """
-    )
+#    assets = relationship(
+#        "Asset",
+#        secondary="Shot_Assets",
+#        #primaryjoin="Shots.c.id==Shot_Assets.c.shot_id",
+#        #secondaryjoin="Shot_Assets.c.asset_id==Assets.c.id",
+#        back_populates="shots",
+#        doc="""The :class:`~stalker.core.models.Asset` instances used in this Shot.
+#        
+#        Holds the relation of a :class:`~stalker.core.models.Shot` with a list
+#        of :class:`~stalker.core.models.Asset`\ s, which are used in this
+#        :class:`~stalker.core.models.Shot`.
+#        """
+#    )
 
     def __init__(self,
                  #code=None,
@@ -4831,7 +4835,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
                  cut_in=1,
                  cut_out=None,
                  cut_duration=None,
-                 assets=None,
+                 #assets=None,
                  **kwargs):
         sequence = self._validate_sequence(sequence)
 
@@ -4851,9 +4855,9 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         self._update_cut_info(cut_in, cut_duration, cut_out)
 
         #self._assets = self._validate_assets(assets)
-        if assets is None:
-            assets = []
-        self.assets = assets
+        #if assets is None:
+        #    assets = []
+        #self.assets = assets
 
     @orm.reconstructor
     def __init_on_load__(self):
@@ -4906,16 +4910,16 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
 
         self._cut_out = self._cut_in + self._cut_duration - 1
 
-    @validates("assets")
-    def _validate_assets(self, key, asset):
-        """validates the given asset value
-        """
-
-        if not isinstance(asset, Asset):
-            raise TypeError("all the items in the assets list should be"
-                            "an instance of stalker.core.models.Asset")
-
-        return asset
+#    @validates("assets")
+#    def _validate_assets(self, key, asset):
+#        """validates the given asset value
+#        """
+#
+#        if not isinstance(asset, Asset):
+#            raise TypeError("all the items in the assets list should be"
+#                            "an instance of stalker.core.models.Asset")
+#
+#        return asset
 
         #def _validate_code(self, code_in):
         #"""validates the given code value
@@ -5118,12 +5122,6 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
     asset_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                       primary_key=True)
 
-    #shots = relationship(
-    #    "Shot",
-    #    secondary="Shot_Assets",
-    #    back_populates="assets"
-    #)
-
     #@declared_attr
     #def project(self):
     #return relationship(
@@ -5153,7 +5151,7 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
     #"""
     #)
 
-    def __init__(self, shots=None, **kwargs):
+    def __init__(self, **kwargs):
         super(Asset, self).__init__(**kwargs)
 
         # call the mixin init methods
@@ -5162,9 +5160,9 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
         #TaskMixin.__init__(self, **kwargs)
 
         #self._shots = []
-        if shots is None:
-            shots = []
-        self.shots = shots
+        #if shots is None:
+        #    shots = []
+        #self.shots = shots
 
         ## append it self to the given projects assets attribute
         #if not self in self.project._assets:
@@ -5180,16 +5178,16 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
         # call supers __init_on_load__
         super(Asset, self).__init_on_load__()
 
-    @validates("shots")
-    def _validate_shots(self, key, shot):
-        """validates the given shots_in value
-        """
-
-        if not isinstance(shot, Shot):
-            raise TypeError("shots should be set to a list of "
-                            "stalker.core.models.Shot objects")
-
-        return shot
+#    @validates("shots")
+#    def _validate_shots(self, key, shot):
+#        """validates the given shots_in value
+#        """
+#
+#        if not isinstance(shot, Shot):
+#            raise TypeError("shots should be set to a list of "
+#                            "stalker.core.models.Shot objects")
+#
+#        return shot
 
     def __eq__(self, other):
         """the equality operator

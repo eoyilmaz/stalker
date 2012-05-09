@@ -8,9 +8,8 @@ import datetime
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker import db
 from stalker.conf import defaults
-from stalker.models import SimpleEntity, ScheduleMixin
+from stalker.models import SimpleEntity, ScheduleMixin, DBSession
 
 
 class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
@@ -23,16 +22,13 @@ class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
                                         ForeignKey("SimpleEntities.id"),
                                         primary_key=True)
 
-
     def __init__(self, **kwargs):
         super(SchedMixFooMixedInClass, self).__init__(**kwargs)
         ScheduleMixin.__init__(self, **kwargs)
 
-
 class ScheduleMixinTester(unittest.TestCase):
     """Tests the ScheduleMixin
     """
-
 
     def setUp(self):
         """setup the test
@@ -58,10 +54,7 @@ class ScheduleMixinTester(unittest.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
-
-        db.session = None
+        DBSession.remove()
 
     def test_start_date_argument_is_not_a_date_object(self):
         """testing if defaults will be used for the start_date attribute when
@@ -80,7 +73,6 @@ class ScheduleMixinTester(unittest.TestCase):
 
             self.assertEqual(new_foo_obj.due_date, self.kwargs["due_date"])
             self.assertEqual(new_foo_obj.duration, self.kwargs["duration"])
-
 
     def test_start_date_attribute_is_not_a_date_object(self):
         """testing if the defaults will be used when trying to set the
@@ -106,7 +98,6 @@ class ScheduleMixinTester(unittest.TestCase):
             # check if we still have the same duration
             self.assertEqual(self.mock_foo_obj.duration, duration)
 
-
     def test_start_date_attribute_is_set_to_None_use_the_default_value(self):
         """testing if setting the start_date attribute to None will update the
         start_date to today
@@ -115,7 +106,6 @@ class ScheduleMixinTester(unittest.TestCase):
         self.mock_foo_obj.start_date = None
         self.assertEqual(self.mock_foo_obj.start_date, datetime.date.today())
 
-
     def test_start_date_attribute_works_properly(self):
         """testing if the start propertly is working properly
         """
@@ -123,7 +113,6 @@ class ScheduleMixinTester(unittest.TestCase):
         test_value = datetime.date(year=2011, month=1, day=1)
         self.mock_foo_obj.start_date = test_value
         self.assertEqual(self.mock_foo_obj.start_date, test_value)
-
 
     def test_due_date_argument_is_not_a_date_object(self):
         """testing if default values will be for the due_date attribute used
@@ -141,7 +130,6 @@ class ScheduleMixinTester(unittest.TestCase):
             self.assertEqual(new_foo_obj.due_date,
                              new_foo_obj.start_date + new_foo_obj.duration)
 
-
     def test_due_date_attribute_is_not_a_date_object(self):
         """testing if default values will be used for the due_date attribute
         when trying to set the due_date attribute to something other than a
@@ -157,7 +145,6 @@ class ScheduleMixinTester(unittest.TestCase):
             self.assertEqual(self.mock_foo_obj.due_date,
                              self.mock_foo_obj.start_date +\
                              self.mock_foo_obj.duration)
-
 
     def test_due_date_argument_is_tried_to_set_to_a_time_before_start_date(
     self):
@@ -191,7 +178,6 @@ class ScheduleMixinTester(unittest.TestCase):
                          self.mock_foo_obj.start_date +\
                          self.mock_foo_obj.duration)
 
-
     def test_due_date_attribute_is_shifted_when_start_date_passes_it(self):
         """testing if due_date attribute will be shifted when the start_date
         attribute passes it
@@ -204,7 +190,6 @@ class ScheduleMixinTester(unittest.TestCase):
             self.mock_foo_obj.due_date - self.mock_foo_obj.start_date,
             time_delta
         )
-
 
     def test_duration_argument_is_not_an_instance_of_timedelta_no_problem_if_start_date_and_due_date_is_present(
     self):
@@ -224,7 +209,6 @@ class ScheduleMixinTester(unittest.TestCase):
             self.assertEqual(new_foo_obj.duration,
                              new_foo_obj.due_date - new_foo_obj.start_date)
 
-
     def test_duration_argument_is_not_an_instance_of_date_when_start_date_argument_is_missing(
     self):
         """testing if defaults for the duration attribute will be used  when
@@ -243,7 +227,6 @@ class ScheduleMixinTester(unittest.TestCase):
             self.assertEqual(new_foo_obj.duration,
                              defaults.DEFAULT_TASK_DURATION)
 
-
     def test_duration_argument_is_not_an_instance_of_date_when_due_date_argument_is_missing(
     self):
         """testing if the defaults for the duration attribute will be used when
@@ -261,7 +244,6 @@ class ScheduleMixinTester(unittest.TestCase):
             self.assertEqual(new_foo_obj.duration,
                              defaults.DEFAULT_TASK_DURATION)
 
-
     def test_duration_attribute_is_calculated_correctly(self):
         """testing if the duration attribute is calculated correctly
         """
@@ -272,7 +254,6 @@ class ScheduleMixinTester(unittest.TestCase):
                                   datetime.timedelta(201)
 
         self.assertEqual(new_foo_entity.duration, datetime.timedelta(201))
-
 
     def test_duration_attribute_is_set_to_not_an_instance_of_timedelta(self):
         """testing if duration attribute reset to a calculated value when it is
@@ -289,7 +270,6 @@ class ScheduleMixinTester(unittest.TestCase):
             self.assertEqual(self.mock_foo_obj.duration,
                              self.mock_foo_obj.due_date -\
                              self.mock_foo_obj.start_date)
-
 
     def test_duration_attribute_expands_then_due_date_shifts(self):
         """testing if duration attribute is expanded then the due_date
@@ -313,7 +293,6 @@ class ScheduleMixinTester(unittest.TestCase):
         # due_date is postponed
         self.assertEqual(self.mock_foo_obj.due_date, start_date + new_duration)
 
-
     def test_duration_attribute_contracts_then_due_date_shifts_back(self):
         """testing if duration attribute is contracted then the due_date
         attribute is shifted back
@@ -336,7 +315,6 @@ class ScheduleMixinTester(unittest.TestCase):
         # due_date is postponed
         self.assertEqual(self.mock_foo_obj.due_date, start_date + new_duration)
 
-
     def test_duration_is_a_negative_timedelta(self):
         """testing if the duration is a negative timedelta will set the
         duration to 1 days
@@ -348,7 +326,6 @@ class ScheduleMixinTester(unittest.TestCase):
 
         self.assertEqual(self.mock_foo_obj.duration, datetime.timedelta(1))
         self.assertEqual(self.mock_foo_obj.start_date, start_date)
-
 
     def test_init_all_parameters_skipped(self):
         """testing if the attributes are initialized to:
@@ -371,7 +348,6 @@ class ScheduleMixinTester(unittest.TestCase):
         self.assertEqual(new_foo_entity.due_date,
                          new_foo_entity.start_date + new_foo_entity.duration)
 
-
     def test_init_only_start_date_argument_is_given(self):
         """testing if the attributes are initialized to:
         
@@ -389,7 +365,6 @@ class ScheduleMixinTester(unittest.TestCase):
         self.assertEqual(new_foo_entity.due_date,
                          new_foo_entity.start_date + new_foo_entity.duration)
 
-
     def test_init_start_date_and_due_date_argument_is_given(self):
         """testing if the attributes are initialized to:
         
@@ -402,7 +377,6 @@ class ScheduleMixinTester(unittest.TestCase):
 
         self.assertEqual(new_foo_entity.duration,
                          new_foo_entity.due_date - new_foo_entity.start_date)
-
 
     def test_init_start_date_and_duration_argument_is_given(self):
         """testing if the attributes are initialized to:
@@ -417,7 +391,6 @@ class ScheduleMixinTester(unittest.TestCase):
         self.assertEqual(new_foo_entity.due_date,
                          new_foo_entity.start_date + new_foo_entity.duration)
 
-
     def test_init_all_arguments_are_given(self):
         """testing if the attributes are initialized to:
         
@@ -428,7 +401,6 @@ class ScheduleMixinTester(unittest.TestCase):
 
         self.assertEqual(new_foo_entity.duration,
                          new_foo_entity.due_date - new_foo_entity.start_date)
-
 
     def test_init_due_date_and_duration_argument_is_given(self):
         """testing if the attributes are initialized to:
@@ -442,7 +414,6 @@ class ScheduleMixinTester(unittest.TestCase):
 
         self.assertEqual(new_foo_entity.start_date,
                          new_foo_entity.due_date - new_foo_entity.duration)
-
 
     def test_init_only_due_date_argument_is_given(self):
         """testing if the attributes are initialized to:
@@ -460,7 +431,6 @@ class ScheduleMixinTester(unittest.TestCase):
                          defaults.DEFAULT_TASK_DURATION)
         self.assertEqual(new_foo_entity.start_date,
                          new_foo_entity.due_date - new_foo_entity.duration)
-
 
     def test_init_only_duration_argument_is_given(self):
         """testing if the attributes are initialized to:

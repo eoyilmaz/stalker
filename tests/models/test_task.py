@@ -13,39 +13,35 @@ from stalker.models import (SimpleEntity, Entity, Task, User,
                                  Status, StatusList, Project, Type,
                                  Repository, TaskableEntity)
 
-
 class SomeClass(TaskableEntity):
     pass
-
 
 class SomeOtherClass(object):
     pass
 
-
 class TaskTester(unittest.TestCase):
     """Tests the stalker.core.models.Task class
     """
-
-
+    
     def setUp(self):
         """setup the test
         """
-
+        
         self.test_data_status_wip = Status(
             name="Work In Progress",
             code="WIP"
         )
-
+        
         self.test_data_status_complete = Status(
             name="Complete",
             code="CMPLT"
         )
-
+        
         self.test_data_status_pending_review = Status(
             name="Pending Review",
             code="PNDR"
         )
-
+        
         self.test_data_task_status_list = StatusList(
             name="Task Statuses",
             statuses=[self.test_data_status_wip,
@@ -137,7 +133,7 @@ class TaskTester(unittest.TestCase):
             "status": 0,
             "status_list": self.test_data_task_status_list,
             "task_of": self.test_data_project1,
-            }
+        }
 
         # create a mock Task
         self.test_data_task = Task(**self.kwargs)
@@ -1578,8 +1574,7 @@ class TaskTester(unittest.TestCase):
 
         self.kwargs["task_of"] = someOtherClass_ins
         self.assertRaises(AttributeError, Task, **self.kwargs)
-
-
+    
     def test_task_of_attribute_accepts_anything_thats_been_inherited_from_Taskable(
     self):
         """testing if the task_of attribute accepts anything that has mixed
@@ -1618,7 +1613,6 @@ class TaskTester(unittest.TestCase):
 
         self.assertRaises(AttributeError, setattr, new_task, "task_of",
                           someOtherClass_ins)
-
 
     def test_task_of_attribute_updates_the_back_reference_attribute_tasks(self):
         """testing if the task_of updates the back reference attribute which
@@ -1694,7 +1688,7 @@ class TaskTester(unittest.TestCase):
         ##print new_task.task_of
         ##print new_project1.tasks
         ##print new_project2.tasks
-
+        
         #self.assertIn(new_task, new_project1.tasks)
         #self.assertNotIn(new_task, new_project2.tasks)
         ##print "555555555555555555555"
@@ -1705,5 +1699,16 @@ class TaskTester(unittest.TestCase):
         #new_task.task_of = new_project2
         #self.assertNotIn(new_task, new_project1.tasks)
         #self.assertIn(new_task, new_project2.tasks)
+    
+    def task_of_argument_only_accepts_TaskableEntity_instances(self):
+        """testing if task_of argument only accepts TaskableEntity instances
+        """
+        class TestClass(object):
+            def __init__(self):
+                self.tasks = []
         
+        test_obj = TestClass()
         
+        self.kwargs["task_of"] = test_obj
+        
+        self.assertRaises(TypeError, Task, **self.kwargs)

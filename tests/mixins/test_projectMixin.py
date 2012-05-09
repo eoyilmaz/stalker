@@ -7,9 +7,8 @@
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker import db
 from stalker.models import (Status, StatusList, Type, Project, Repository,
-                                 SimpleEntity, ProjectMixin)
+                                 SimpleEntity, ProjectMixin, DBSession)
 
 
 class ProjMixClass(SimpleEntity, ProjectMixin):
@@ -90,10 +89,7 @@ class ProjectMixinTester(unittest.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
-
-        db.session = None
+        DBSession.remove()
 
     def test_project_argument_is_skipped(self):
         """testing if a TypeError will be raised when the project argument is
