@@ -6,9 +6,8 @@
 
 import unittest
 from stalker.conf import defaults
-from stalker.models import (Version, Repository, Type, Project, Status,
-                                 StatusList, Sequence, Shot, Task, Link )
-
+from stalker import (Link, Project, Repository, Sequence, Shot, Status,
+                     StatusList, Task, Type, Version)
 
 class VersionTester(unittest.TestCase):
     """tests stalker.core.models.Version class

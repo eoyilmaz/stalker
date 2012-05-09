@@ -9,7 +9,8 @@ import transaction
 
 from stalker.conf import defaults
 from stalker import db
-from stalker.models import DBSession, User
+from stalker.db.session import DBSession
+from stalker.models.user import User
 from stalker.errors import LoginError, DBError
 from stalker.ext import auth
 

@@ -5,18 +5,14 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.models import Tag, SimpleEntity
-
+from stalker import Tag, SimpleEntity
 
 class TagTest(unittest.TestCase):
     """testing the Tag class
     """
-
-
     def setUp(self):
         """setup the test
         """
-
         self.kwargs = {
             "name": "a test tag",
             "description": "this is a test tag",
@@ -25,19 +21,15 @@ class TagTest(unittest.TestCase):
         # create another SimpleEntity with kwargs for __eq__ and __ne__ tests
         self.simple_entity = SimpleEntity(**self.kwargs)
 
-
     def test_tag_init(self):
         """testing if tag inits properly
         """
-
         # this should work without any error
         a_tag_object = Tag(**self.kwargs)
-
 
     def test_equality(self):
         """testing the equality of two Tags
         """
-
         a_tag_object1 = Tag(**self.kwargs)
         a_tag_object2 = Tag(**self.kwargs)
 
@@ -50,11 +42,9 @@ class TagTest(unittest.TestCase):
         self.assertFalse(a_tag_object1 == a_tag_object3)
         self.assertFalse(a_tag_object1 == self.simple_entity)
 
-
     def test_inequality(self):
         """testing the inequality of two Tags
         """
-
         a_tag_object1 = Tag(**self.kwargs)
         a_tag_object2 = Tag(**self.kwargs)
 
@@ -67,13 +57,7 @@ class TagTest(unittest.TestCase):
         self.assertTrue(a_tag_object1 != a_tag_object3)
         self.assertTrue(a_tag_object1 != self.simple_entity)
 
-
-
-        #
         #def test_plural_name(self):
         #"""testing the plural name of Tag class
         #"""
-
         #self.assertTrue(Tag.plural_name, "Tags")
-    
-    

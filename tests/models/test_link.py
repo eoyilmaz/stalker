@@ -5,18 +5,14 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.models import Link, Type
-
+from stalker import Type, Link
 
 class LinkTester(unittest.TestCase):
     """tests the :class:`stalker.core.models.Link` class
     """
-
-
     def setUp(self):
         """setup the test 
         """
-
         # create a mock LinkType object
         self.test_link_type1 = Type(
             name="Test Type 1",
@@ -36,24 +32,20 @@ class LinkTester(unittest.TestCase):
 
         self.test_link = Link(**self.kwargs)
 
-
     def test_path_argument_accepts_string_or_unicode_only(self):
         """testing if a TypeError will be raised when the path argument is not
         a string or unicode instance
         """
-
         test_values = [1, 1.1, ["a path"], {"a": "path"}]
 
         for test_value in test_values:
             self.kwargs["path"] = test_value
             self.assertRaises(TypeError, Link, **self.kwargs)
 
-
     def test_path_attribute_accpets_string_or_unicode_only(self):
         """testing if a TypeError will be raised when the path attribute
         is not a string or unicode instance
         """
-
         test_values = [1, 1.1, ["a path"], {"a": "path"}]
 
         for test_value in test_values:
@@ -65,21 +57,17 @@ class LinkTester(unittest.TestCase):
                 test_value
             )
 
-
     def test_path_argument_being_empty(self):
         """testing if setting the path argument to an empty string raises a
         ValueError
         """
-
         self.kwargs["path"] = ""
         self.assertRaises(ValueError, Link, **self.kwargs)
-
 
     def test_path_attribute_being_empty(self):
         """testing if setting the path attribute to an empty string raises a
         ValueError
         """
-
         self.assertRaises(
             ValueError,
             setattr,
@@ -88,14 +76,11 @@ class LinkTester(unittest.TestCase):
             ""
         )
 
-
     def test_path_argument_being_None(self):
         """testing if setting the path argument to None raises a TypeError
         """
-
         self.kwargs["path"] = None
         self.assertRaises(TypeError, Link, **self.kwargs)
-
 
     def test_path_attribute_being_None(self):
         """testing if setting the path attribute to None raises a TypeError
@@ -109,19 +94,14 @@ class LinkTester(unittest.TestCase):
             None
         )
 
-
     def test_path_windows_to_other_conversion(self):
         """testing if the path is stored in internal format
         """
-
         windows_path = "M:\\path\\to\\object"
         expected_result = "M:/path/to/object"
 
         self.test_link.path = windows_path
-
         self.assertEqual(self.test_link.path, expected_result)
-
-
 
         #
         #def test_filename_argument_accepts_string_or_unicode_only(self):
@@ -134,8 +114,6 @@ class LinkTester(unittest.TestCase):
         #for test_value in test_values:
         #self.kwargs["filename"] = test_value
         #self.assertRaises(TypeError, Link, **self.kwargs)
-
-
 
         #
         #def test_filename_attribute_accpets_string_or_unicode_only(self):
@@ -154,25 +132,17 @@ class LinkTester(unittest.TestCase):
         #test_value
         #)
 
-
-
-        #
         #def test_filename_argument_being_empty(self):
         #"""testing if setting the filename argument to an empty string raises a
         #ValueError
         #"""
-
         #self.kwargs["filename"] = ""
         #self.assertRaises(ValueError, Link, **self.kwargs)
 
-
-
-        #
         #def test_filename_attribute_being_empty(self):
         #"""testing if setting the filename attribute to an empty string raises
         #a ValueError
         #"""
-
         #self.assertRaises(
         #ValueError,
         #setattr,
@@ -180,25 +150,17 @@ class LinkTester(unittest.TestCase):
         #"filename",
         #""
         #)
-
-
-
-        #
+        
         #def test_filename_argument_being_None(self):
         #"""testing if setting the filename argument to None raises a TypeError
         #"""
-
         #self.kwargs["filename"] = None
         #self.assertRaises(TypeError, Link, **self.kwargs)
 
-
-
-        #
         #def test_filename_attribute_being_None(self):
         #"""testing if setting the filename attribute to None raises a
         #TypeError
         #"""
-
         #self.assertRaises(
         #TypeError,
         #setattr,
@@ -207,11 +169,9 @@ class LinkTester(unittest.TestCase):
         #None
         #)
 
-
     def test_equality_of_two_links(self):
         """testing the equality operator
         """
-
         # with same parameters
         mock_link1 = Link(**self.kwargs)
         self.assertTrue(self.test_link == mock_link1)
@@ -221,7 +181,6 @@ class LinkTester(unittest.TestCase):
         mock_link2 = Link(**self.kwargs)
 
         self.assertFalse(self.test_link == mock_link2)
-
 
     def test_inequality_of_two_links(self):
         """testing the inequality operator
@@ -237,22 +196,12 @@ class LinkTester(unittest.TestCase):
         self.assertFalse(self.test_link != mock_link1)
         self.assertTrue(self.test_link != mock_link2)
 
-
-
-        #
         #def test_plural_name(self):
         #"""testing the plural name of Link class
         #"""
-
         #self.assertTrue(Link.plural_name, "Links")
 
-
-
-        #
         #def test___strictly_typed___is_True(self):
         #"""testing if the __strictly_typed__ class attribute is True
         #"""
-
         #self.assertEqual(Link.__strictly_typed__, True)
-    
-    

@@ -3,12 +3,17 @@
 # 
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
-import transaction
 
-from stalker.models import *
 from stalker import db
+from stalker.models.asset import Asset
+from stalker.models.project import Project
+from stalker.models.repository import Repository
+from stalker.db.session import DBSession
+from stalker.models.status import Status, StatusList
+from stalker.models.task import Task
+from stalker.models.type import Type
+from stalker.models.user import User
 
-#db.setup("sqlite:////tmp/projectMixin_test.db")
 DBSession.remove()
 DBSession.configure(extension=None)
 db.setup()

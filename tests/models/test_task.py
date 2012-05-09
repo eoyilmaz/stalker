@@ -9,9 +9,8 @@ import unittest
 
 from stalker.conf import defaults
 from stalker.errors import CircularDependencyError
-from stalker.models import (SimpleEntity, Entity, Task, User,
-                                 Status, StatusList, Project, Type,
-                                 Repository, TaskableEntity)
+from stalker import (SimpleEntity, Entity, TaskableEntity, Project, Repository,
+                     StatusList, Status, Task, Type, User)
 
 class SomeClass(TaskableEntity):
     pass

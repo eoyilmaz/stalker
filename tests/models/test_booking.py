@@ -6,8 +6,8 @@
 
 import unittest
 import datetime
-from stalker.models import (Repository, Project, StatusList, Status,
-                                 Task, User, Booking)
+from stalker import (Project, Repository, Status, StatusList, Task, Booking,
+                     User)
 from stalker.errors import OverBookedWarning
 
 

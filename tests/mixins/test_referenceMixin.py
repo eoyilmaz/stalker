@@ -7,12 +7,13 @@
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.models import (SimpleEntity, Entity, Link, Type,
-                                 ReferenceMixin, DBSession)
+from stalker.models.entity import Entity
+from stalker.models.link import Link
+from stalker.models.mixins import ReferenceMixin
+from stalker.db.session import DBSession
+from stalker.models.type import Type
+from stalker.models.entity import SimpleEntity
 
-
-
-# create a SimpleEntitty and mix it with the ReferenceMixin
 class RefMixFooClass(SimpleEntity, ReferenceMixin):
     __tablename__ = "RefMixFooClasses"
     __mapper_args__ = {"polymorphic_identity": "RefMixFooClass"}

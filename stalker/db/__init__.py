@@ -16,7 +16,7 @@ from sqlalchemy import engine_from_config
 
 from stalker.conf import defaults
 from stalker.db.declarative import Base
-from stalker.models import DBSession
+from stalker.db.session import DBSession
 
 # create a logger
 logger = logging.getLogger(__name__)
@@ -64,7 +64,8 @@ def __create_admin__():
     """creates the admin
     """
     
-    from stalker.models import User, Department
+    from stalker.models.user import User
+    from stalker.models.department import Department
     
     # check if there is already an admin in the database
     if len(DBSession.query(User).\

@@ -24,6 +24,14 @@ Stalker Changes
   manager was swallowing all errors and it was a little weird to try to catch
   this errors out of the ``with`` block.
 
+* Refactored the code, all the models are now in separate python files, but can
+  be directly imported from the main stalker module as shown::
+  
+    from stalker import User, Department, Task
+  
+  By using this kind of organization, both development and usage will be eased
+  out.
+
 0.1.2.a5
 --------
 

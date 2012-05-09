@@ -5,8 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.models import (FilenameTemplate, Entity)
-
+from stalker import Entity, FilenameTemplate
 
 # a test class
 class Asset(object):

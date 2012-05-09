@@ -10,11 +10,35 @@ and vfx studios. See docs for more information.
 
 
 from pyramid.config import Configurator
-from sqlalchemy import engine_from_config
 
 from stalker import db
 
 __version__ = '0.2.0.a1'
+
+
+from stalker.models.asset import Asset
+from stalker.models.auth import PermissionGroup
+from stalker.models.department import Department
+from stalker.models.entity import SimpleEntity, Entity, TaskableEntity
+from stalker.models.formats import ImageFormat
+from stalker.models.link import Link
+from stalker.models.message import Message
+from stalker.models.mixins import (ProjectMixin, ReferenceMixin, ScheduleMixin,
+                                   StatusMixin, TargetEntityTypeMixin)
+from stalker.models.note import Note
+from stalker.models.project import Project
+from stalker.models.repository import Repository
+from stalker.models.review import Review
+from stalker.models.sequence import Sequence
+from stalker.models.shot import Shot
+from stalker.models.status import Status, StatusList
+from stalker.models.structure import Structure
+from stalker.models.tag import Tag
+from stalker.models.task import Task
+from stalker.models.templates import FilenameTemplate
+from stalker.models.type import Type
+from stalker.models.user import User
+from stalker.models.version import Version
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.

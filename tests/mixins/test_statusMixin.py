@@ -9,9 +9,10 @@ import unittest
 from sqlalchemy import Column, Integer, ForeignKey
 import transaction
 from stalker import db
-from stalker.models import (DBSession, SimpleEntity, Status, StatusList,
-                            StatusMixin)
-
+from stalker.models.mixins import StatusMixin
+from stalker.db.session import DBSession
+from stalker.models.status import Status, StatusList
+from stalker.models.entity import SimpleEntity
 
 class StatMixClass(SimpleEntity, StatusMixin):
     __tablename__ = "StatMixClasses"

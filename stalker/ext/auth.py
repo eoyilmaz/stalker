@@ -63,15 +63,14 @@ import base64
 from beaker import session as beakerSession
 import transaction
 
-from stalker import db
+#from stalker import db
 from stalker.errors import LoginError, DBError
-from stalker.models import DBSession, User
-
+from stalker.db.session import DBSession
+from stalker.models.user import User
 
 SESSION = {}
 SESSION_ID = "stalker"
 SESSION_KEY = "_auth_user_id"
-
 
 def create_session():
     """Creates the beaker.session object.

@@ -7,12 +7,11 @@
 import unittest
 import datetime
 
-from stalker.models import SimpleEntity, ScheduleMixin, DBSession
 from sqlalchemy import Column, Integer, ForeignKey
+from stalker.db.session import DBSession
+from stalker.models.mixins import ScheduleMixin
+from stalker.models.entity import SimpleEntity
 
-
-
-# create a new mixed in SimpleEntity
 class DeclSchedMixA(SimpleEntity, ScheduleMixin):
     __tablename__ = "DeclSchedMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclSchedMixA"}

@@ -9,39 +9,16 @@ import datetime
 import unittest
 import tempfile
 import logging
-#from sqlalchemy.orm import scoped_session
-#from sqlalchemy.orm.session import sessionmaker
-import transaction
-
 from sqlalchemy.exc import IntegrityError
 
 from stalker.conf import defaults
 from stalker import db
 from stalker.ext import auth
-from stalker.models import (
-    DBSession,
-    Asset,
-    Department,
-    Entity,
-    SimpleEntity,
-    ImageFormat,
-    Link,
-    Note,
-    Project,
-    Repository,
-    Review,
-    Sequence,
-    Shot,
-    Status,
-    StatusList,
-    Structure,
-    Tag,
-    Task,
-    Type,
-    FilenameTemplate,
-    User,
-    Version
-)
+from stalker.db.session import DBSession
+from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
+                     Link, Note, Project, Repository, Review, Sequence, Shot,
+                     Status, StatusList, Structure, Tag, Task, Type,
+                     FilenameTemplate, User, Version)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

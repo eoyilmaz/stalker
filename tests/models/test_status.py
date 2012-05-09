@@ -5,14 +5,12 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.models import Entity, Status
-
+from stalker import Entity, Status
 
 class StatusTest(unittest.TestCase):
     """tests the status class
     """
-
-
+    
     def setUp(self):
         """setup the test
         """
@@ -27,7 +25,6 @@ class StatusTest(unittest.TestCase):
         # (it should return False for __eq__ and True for __ne__ for same
         # kwargs)
         self.entity1 = Entity(**self.kwargs)
-
 
     def test_equality(self):
         """testing equality of two statuses
@@ -125,5 +122,3 @@ class StatusTest(unittest.TestCase):
         self.assertFalse(a_status != unicode(self.kwargs["code"]))
         self.assertFalse(a_status != unicode(self.kwargs["code"].lower()))
         self.assertFalse(a_status != unicode(self.kwargs["code"].upper()))
-
-

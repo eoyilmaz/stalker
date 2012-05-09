@@ -6,20 +6,17 @@
 
 import unittest
 import datetime
-from stalker.models import (Sequence, Project, User,
-                                 Entity, Status, StatusList, Link,
-                                 Task, Type, Repository)
 
+from stalker import (Entity, Link, Project, Repository, Sequence, Status,
+                     StatusList, Task, Type, User)
 
 class SequenceTester(unittest.TestCase):
     """Tests Sequence class
     """
-
-
+    
     def setUp(self):
         """setup the test
         """
-
         # create statuses
         self.test_status1 = Status(name="Status1", code="STS1")
         self.test_status2 = Status(name="Status2", code="STS2")
@@ -112,53 +109,42 @@ class SequenceTester(unittest.TestCase):
         # the test seuqence
         self.test_sequence = Sequence(**self.kwargs)
 
-
     def test_lead_attribute_defaults_to_None(self):
         """testing if the lead attribute defualts to None when no lead argument
         is given
         """
-
         self.kwargs.pop("lead")
         new_sequence = Sequence(**self.kwargs)
         self.assertEqual(new_sequence.lead, None)
-
 
     def test_lead_argument_is_None(self):
         """testing if nothing will happen when the lead argument is given as
         None
         """
-
         self.kwargs["lead"] = None
         new_sequence = Sequence(**self.kwargs)
-
 
     def test_lead_attribute_is_None(self):
         """testing if nothing will happen when the lead attribute is set to
         None
         """
-
         self.test_sequence.lead = None
-
 
     def test_lead_argument_is_not_User(self):
         """testing if a TypeError will be raised when the lead argument is not
         an instance of User
         """
-
         test_values = [1, 1.2, "a user", ["a", "list", "as", "user"]]
 
         for test_value in test_values:
             self.kwargs["lead"] = test_value
             self.assertRaises(TypeError, Sequence, **self.kwargs)
 
-
     def test_lead_attribute_is_not_User(self):
         """testing if a TypeError will be raised when the lead attribute is
         set to something other than a User
         """
-
         test_values = [1, 1.2, "a user", ["a", "list", "as", "user"]]
-
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
@@ -168,39 +154,30 @@ class SequenceTester(unittest.TestCase):
                 test_value
             )
 
-
     def test_lead_attribute_works_properly(self):
         """testing if the lead attribute is working properly
         """
-
         self.test_sequence.lead = self.test_lead2
         self.assertEqual(self.test_sequence.lead, self.test_lead2)
-
 
     def test_shots_attribute_defaults_to_empty_list(self):
         """testing if the shots attribute defaults to an empty list
         """
-
         #self.kwargs.pop("shots")
         new_sequence = Sequence(**self.kwargs)
         self.assertEqual(new_sequence.shots, [])
-
 
     def test_shots_attribute_is_set_None(self):
         """testing if a TypeError will be raised when the shots attribute will
         be set to None
         """
-
         self.assertRaises(TypeError, self.test_sequence, "shots", None)
-
 
     def test_shots_attribute_is_set_to_other_than_a_list(self):
         """testing if a TypeError will be raised when the shots attribute is
         tried to be set to something other than a list
         """
-
         test_values = [1, 1.2, "a string"]
-
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
@@ -210,12 +187,10 @@ class SequenceTester(unittest.TestCase):
                 test_value
             )
 
-
     def test_shots_attribute_is_a_list_of_other_objects(self):
         """testing if a TypeError will be raised when the shots argument is a
         list of other type of objects
         """
-
         test_value = [1, 1.2, "a string"]
         self.assertRaises(
             TypeError,
@@ -225,24 +200,19 @@ class SequenceTester(unittest.TestCase):
             test_value
         )
 
-
     def test_shots_attribute_elements_tried_to_be_set_to_non_Shot_object(self):
         """testing if a TypeError will be raised when the individual elements
         in the shots list tried to be set to something other than a Shot
         instance
         """
-
         test_values = [1, 1.2, "a string", ["a", "list"]]
-
         for test_value in test_values:
             self.assertRaises(TypeError,
                               self.test_sequence.shots.append, test_value)
 
-
     def test_equality(self):
         """testing the equality of sequences
         """
-
         new_seq1 = Sequence(**self.kwargs)
         new_seq2 = Sequence(**self.kwargs)
         new_entity = Entity(**self.kwargs)
@@ -254,11 +224,9 @@ class SequenceTester(unittest.TestCase):
         self.assertFalse(new_seq1 == new_seq3)
         self.assertFalse(new_seq1 == new_entity)
 
-
     def test_inequality(self):
         """testing the inequality of sequences
         """
-
         new_seq1 = Sequence(**self.kwargs)
         new_seq2 = Sequence(**self.kwargs)
         new_entity = Entity(**self.kwargs)
@@ -270,51 +238,47 @@ class SequenceTester(unittest.TestCase):
         self.assertTrue(new_seq1 != new_seq3)
         self.assertTrue(new_seq1 != new_entity)
 
-
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
         """
-
         link_type_1 = Type(name="Image", target_entity_type="Link")
 
-        link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
-                     filename="a.jpg", type=link_type_1)
-
-        link2 = Link(name="Artwork 2", path="/mnt/M/JOBs/TEST_PROJECT",
-                     filename="b.jbg", type=link_type_1)
-
+        link1 = Link(
+            name="Artwork 1",
+            path="/mnt/M/JOBs/TEST_PROJECT",
+            filename="a.jpg",
+            type=link_type_1
+        )
+        link2 = Link(
+            name="Artwork 2",
+            path="/mnt/M/JOBs/TEST_PROJECT",
+            filename="b.jbg",
+            type=link_type_1
+        )
         references = [link1, link2]
-
         self.kwargs["references"] = references
-
         new_sequence = Sequence(**self.kwargs)
-
         self.assertEqual(new_sequence.references, references)
-
 
     def test_StatusMixin_initialization(self):
         """testing if the StatusMixin part is initialized correctly
         """
-
         status1 = Status(name="On Hold", code="OH")
         status2 = Status(name="Complete", code="CMPLT")
 
-        status_list = StatusList(name="Project Statuses",
-                                 statuses=[status1, status2],
-                                 target_entity_type=Sequence)
-
+        status_list = StatusList(
+            name="Project Statuses",
+            statuses=[status1, status2],
+            target_entity_type=Sequence
+        )
         self.kwargs["status"] = 0
         self.kwargs["status_list"] = status_list
-
         new_sequence = Sequence(**self.kwargs)
-
         self.assertEqual(new_sequence.status_list, status_list)
-
 
     def test_ScheduleMixin_initialization(self):
         """testing if the ScheduleMixin part is initialized correctly
         """
-
         start_date = datetime.date.today() + datetime.timedelta(days=25)
         due_date = start_date + datetime.timedelta(days=12)
 
@@ -327,11 +291,9 @@ class SequenceTester(unittest.TestCase):
         self.assertEqual(new_sequence.due_date, due_date)
         self.assertEqual(new_sequence.duration, due_date - start_date)
 
-
     def test_TaskableEntity_initialization(self):
         """testing if the TaskableEntity part is initialized correctly
         """
-
         status1 = Status(name="On Hold", code="OH")
 
         task_status_list = StatusList(
@@ -380,7 +342,6 @@ class SequenceTester(unittest.TestCase):
         tasks = [task1, task2]
 
         self.assertItemsEqual(new_sequence.tasks, tasks)
-
 
         # UPDATE THIS: This test needs to be in the tests.db
         # because the property it is testing is using DBSession.query
@@ -439,11 +400,9 @@ class SequenceTester(unittest.TestCase):
 
         #self.assertIn(new_sequence, new_project.sequences)
 
-
     def test_ProjectMixin_initialization(self):
         """testing if the ProjectMixin part is initialized correctly
         """
-
         status1 = Status(name="On Hold", code="OH")
 
         project_status_list = StatusList(
@@ -459,26 +418,16 @@ class SequenceTester(unittest.TestCase):
                               repository=self.test_repository)
 
         self.kwargs["project"] = new_project
-
         new_sequence = Sequence(**self.kwargs)
-
         self.assertEqual(new_sequence.project, new_project)
 
-
-
-        #
         #def test_plural_name(self):
         #"""testing the plural name of Sequence class
         #"""
-
         #self.assertTrue(Sequence.plural_name, "Sequences")
-
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ class attribute is False for
         Sequence class.
         """
-
         self.assertEqual(Sequence.__strictly_typed__, False)
-    
-    

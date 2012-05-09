@@ -5,14 +5,12 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.models import (Asset, Task, Entity, Project, Link, Status,
-                            StatusList, Shot, Type, Sequence, Repository)
-
+from stalker import (Asset, Entity, Project, Repository, Sequence, Status,
+                     StatusList, Task, Type, Link, Shot)
 
 class AssetTester(unittest.TestCase):
-    """tests Asset class
-    """
-    
+    """tests Asset class    """    
+
     def setUp(self):
         """setup the test
         """

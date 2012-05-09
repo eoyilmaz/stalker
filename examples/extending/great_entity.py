@@ -22,7 +22,8 @@ from sqlalchemy.orm import mapper
 from stalker import db
 from stalker.db import tables
 from stalker.db.mixins import ReferenceMixinDB
-from stalker.models import SimpleEntity, ReferenceMixin
+from stalker.models import  ReferenceMixin
+from stalker.models.entity import SimpleEntity
 
 
 class GreatEntity(SimpleEntity, ReferenceMixin):

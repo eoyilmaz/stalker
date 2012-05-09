@@ -6,12 +6,8 @@
 
 import unittest
 import datetime
-from stalker.models import (User, Department, PermissionGroup,
-                                 Type, StatusList, Status,
-                                 Repository)
-
-from stalker.models import (Task, Project, Sequence)
-
+from stalker import (PermissionGroup, Department, Project, Repository,
+                     Sequence, Status, StatusList, Task, Type, User)
 
 class UserTest(unittest.TestCase):
     """Tests the user class

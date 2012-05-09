@@ -5,8 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.models import (Structure, FilenameTemplate, Type)
-
+from stalker import Structure, FilenameTemplate, Type
 
 # mock classes
 class Asset(object): pass

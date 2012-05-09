@@ -5,13 +5,17 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker.models import (SimpleEntity, Project, Type, Status, StatusList,
-                            Repository, ProjectMixin, DBSession)
 from sqlalchemy import Column, Integer, ForeignKey
-
-
+from stalker.db.session import DBSession
+from stalker.models.project import Project
+from stalker.models.type import Type
+from stalker.models.status import Status, StatusList
+from stalker.models.repository import Repository
+from stalker.models.mixins import ProjectMixin
 
 # create a new mixed in SimpleEntity
+from stalker.models.entity import SimpleEntity
+
 class DeclProjMixA(SimpleEntity, ProjectMixin):
     __tablename__ = "DeclProjMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclProjMixA"}

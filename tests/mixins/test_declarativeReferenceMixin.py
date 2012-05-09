@@ -4,12 +4,13 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
-
 import unittest
 
-from stalker.models import SimpleEntity, Link, ReferenceMixin, DBSession
 from sqlalchemy import Column, Integer, ForeignKey
-
+from stalker.db.session import DBSession
+from stalker.models.entity import SimpleEntity
+from stalker.models.mixins import ReferenceMixin
+from stalker.models.link import  Link
 
 class DeclRefMixA(SimpleEntity, ReferenceMixin):
     """A test class for ReferenceMixin

@@ -6,21 +6,18 @@
 
 import datetime
 import unittest
-from stalker.models import (User, ImageFormat, Type, Project,
-                                 Structure, Repository, Entity,
-                                 Status, StatusList, Link,
-                                 Task, Sequence, Asset, Shot)
 
+from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
+                     Sequence, Shot, Status, StatusList, Structure, Task, Type,
+                     User)
 
 class ProjectTester(unittest.TestCase):
     """tests the Project class
     """
-
-
+    
     def setUp(self):
         """setup the test
         """
-
         # create test objects
 
         self.start_date = datetime.date.today()
@@ -565,37 +562,29 @@ class ProjectTester(unittest.TestCase):
             status_list=self.task_status_list,
             )
 
-
     def test_setup_is_working_correctly(self):
         """testing if the setup is done correctly
         """
-
         self.assertIsInstance(self.test_project_type, Type)
         self.assertIsInstance(self.test_project_type2, Type)
-
 
     def test_lead_argument_is_given_as_None(self):
         """testing if no error will be raised when the lead arguments is given
         as None
         """
-
         self.kwargs["lead"] = None
         new_project = Project(**self.kwargs)
-
 
     def test_lead_attribute_is_set_to_None(self):
         """testing if no error will be raised when the lead attribute is set to
         None
         """
-
         self.test_project.lead = None
-
 
     def test_lead_argument_is_given_as_something_other_than_a_user(self):
         """testing if a TypeError will be raised when the lead argument is
         given as something other than a User object
         """
-
         test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
 
         for test_value in test_values:
@@ -606,14 +595,11 @@ class ProjectTester(unittest.TestCase):
                 **self.kwargs
             )
 
-
     def test_lead_attribute_is_set_to_something_other_than_a_user(self):
         """testing if a TypeError will be raised when the lead attribute is set
         to something other than a User object
         """
-
         test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
@@ -623,23 +609,17 @@ class ProjectTester(unittest.TestCase):
                 test_value
             )
 
-
     def test_lead_attribute_works_properly(self):
         """testing if the lead attribute works properly
         """
-
         self.test_project.lead = self.test_user1
         self.assertEqual(self.test_project.lead, self.test_user1)
-
 
     def test_users_attribute_is_read_only(self):
         """testing if the users attribute is read-only
         """
-
         self.assertRaises(AttributeError, setattr, self.test_project, "users",
             [self.test_user1, self.test_user2, self.test_user3])
-
-
 
         # UPDATE THIS: This test needs to be in the tests.db
         # because the property it is testing is using DBSession.query
@@ -905,8 +885,6 @@ class ProjectTester(unittest.TestCase):
         #status_list=self.sequence_status_list,
         #)
 
-
-
         ## shots
         #self.test_shot1 = Shot(
         #code="SH001",
@@ -1035,14 +1013,11 @@ class ProjectTester(unittest.TestCase):
         ## users
         #self.assertItemsEqual(new_project.users, expected_users)
 
-
     def test_sequences_attribute_is_read_only(self):
         """testing if the sequence attribute is read-only
         """
         self.assertRaises(AttributeError, setattr, self.test_project,
                           "sequences", ["some non sequence related data"])
-
-
 
         # UPDATE THIS: This test should be in the tests.db
         # because it useses an active database
@@ -1068,16 +1043,11 @@ class ProjectTester(unittest.TestCase):
         ## and verify that the sequence list is changed
         #self.assertNotEqual(prev_sequences, self.test_project.sequences)
 
-
     def test_assets_attribute_is_read_only(self):
         """testing if the assets attribute is read only
         """
-
         self.assertRaises(AttributeError, setattr, self.test_project, "assets",
             ["some list"])
-
-
-
         # UPDATE THIS: This test should be in the test.db
         # because it needs a db
         #
@@ -1103,31 +1073,24 @@ class ProjectTester(unittest.TestCase):
         ## and verify that the assets list is changed
         #self.assertNotEqual(prev_assets, self.test_project.assets)
 
-
     def test_image_format_argument_is_None(self):
         """testing if nothing is going to happen when the image_format is set
         to None
         """
-
         self.kwargs["image_format"] = None
         new_project = Project(**self.kwargs)
-
 
     def test_image_format_attribute_is_set_to_None(self):
         """testing if nothing will happen when the image_format attribute is
         set to None
         """
-
         self.test_project.image_format = None
-
 
     def test_image_format_argument_accepts_ImageFormat_only(self):
         """testing if a TypeError will be raised when the image_format
         argument is given as another type then ImageFormat
         """
-
         test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-
         for test_value in test_values:
             self.kwargs["image_format"] = test_value
             self.assertRaises(TypeError, Project, **self.kwargs)
@@ -1136,15 +1099,12 @@ class ProjectTester(unittest.TestCase):
         self.kwargs["image_format"] = self.test_imageFormat
         new_project = Project(**self.kwargs)
 
-
     def test_image_format_attribute_accepts_ImageFormat_only(self):
         """testing if a TypeError will be raised when the image_format
         attribute is tried to be set to something other than a ImageFormat
         instance
         """
-
         test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
@@ -1157,45 +1117,36 @@ class ProjectTester(unittest.TestCase):
         # and a proper image format
         self.test_project.image_format = self.test_imageFormat
 
-
     def test_image_format_attribute_works_properly(self):
         """testing if the image_format attribute is working properly
         """
-
         new_image_format = ImageFormat(
             name="Foo Image Format",
             width=10,
             height=10
         )
-
         self.test_project.image_format = new_image_format
         self.assertEqual(self.test_project.image_format, new_image_format)
-
 
     def test_fps_argument_is_skipped(self):
         """testing if the default value will be used when fps is skipped
         """
-
         self.kwargs.pop("fps")
         new_project = Project(**self.kwargs)
         self.assertEqual(new_project.fps, 25.0)
-
 
     def test_fps_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the fps attribute is set
         to None
         """
-
         self.kwargs["fps"] = None
         self.assertRaises(TypeError, Project, **self.kwargs)
-
 
     def test_fps_argument_is_given_as_non_float_or_integer(self):
         """testing if a TypeError will be raised when the fps argument is
         given as a value other than a float or integer, or a string which is
         convertable to float.
         """
-
         test_values = ["a str"]
         for test_value in test_values:
             self.kwargs["fps"] = test_value
@@ -1213,15 +1164,12 @@ class ProjectTester(unittest.TestCase):
                 Project,
                 **self.kwargs
             )
-
 
     def test_fps_attribute_is_given_as_non_float_or_integer(self):
         """testing if a TypeError will be raised when the fps attribute is
         set to a value other than a float, integer or valid string literals
         """
-
         test_values = ["a str"]
-
         for test_value in test_values:
             self.assertRaises(
                 ValueError,
@@ -1232,7 +1180,6 @@ class ProjectTester(unittest.TestCase):
             )
 
         test_values = [["a", "list"], {"a": "list"}]
-
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
@@ -1242,14 +1189,11 @@ class ProjectTester(unittest.TestCase):
                 test_value
             )
 
-
     def test_fps_argument_string_to_float_conversion(self):
         """testing if valid string literals of fps argument will be converted
         to float correctly
         """
-
         test_values = [("1", 1.0), ("2.3", 2.3)]
-
         for test_value in test_values:
             self.kwargs["fps"] = test_value[0]
             new_project = Project(**self.kwargs)
@@ -1260,81 +1204,59 @@ class ProjectTester(unittest.TestCase):
         """testing if valid string literals of fps attribute will be converted
         to float correctly
         """
-
         test_values = [("1", 1.0), ("2.3", 2.3)]
-
         for test_value in test_values:
             self.test_project.fps = test_value[0]
             self.assertAlmostEquals(self.test_project.fps, test_value[1])
-
 
     def test_fps_attribute_float_conversion(self):
         """testing if the fps attribute is converted to float when the float
         argument is given as an integer
         """
-
         test_value = 1
-
         self.kwargs["fps"] = test_value
         new_project = Project(**self.kwargs)
         self.assertIsInstance(new_project.fps, float)
         self.assertEqual(new_project.fps, float(test_value))
 
-
     def test_fps_attribute_float_conversion_2(self):
         """testing if the fps attribute is converted to float when it is set to
         an integer value
         """
-
         test_value = 1
-
         self.test_project.fps = test_value
         self.assertIsInstance(self.test_project.fps, float)
         self.assertEqual(self.test_project.fps, float(test_value))
-
 
     def test_repository_argument_is_skipped(self):
         """testing if a TypeError will be raised when the repository argument
         is skipped
         """
-
         self.kwargs.pop("repository")
         self.assertRaises(TypeError, Project, **self.kwargs)
-
 
     def test_repository_argument_is_None(self):
         """testing if a TypeError will be raised when the repository argument
         is given as None.
         """
-
         self.kwargs["repository"] = None
         self.assertRaises(TypeError, Project, **self.kwargs)
 
-
-
-        #
         #def test_repository_attribute_is_set_to_None(self):
         #"""testing if nothing happens when setting the repository attribute to
         #None
         #"""
-
         #self.test_project.repository = None
-
 
     def test_repository_argument_is_non_Repository_object(self):
         """testing if a TypeError will be raised when the repository argument
         is given as something other than a Repository object
         """
-
         test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-
         for test_value in test_values:
             self.kwargs["repository"] = test_value
             self.assertRaises(TypeError, Project, **self.kwargs)
 
-
-
-            #
             #def test_repository_attribute_is_set_to_non_Repository_object(self):
             #"""testing if a TypeErorr will be raised when the repository attribute
             #is tried to be set to something other than a Repository object
@@ -1350,45 +1272,35 @@ class ProjectTester(unittest.TestCase):
             #test_value
             #)
 
-
     def test_repository_attribute_is_working_properly(self):
-        """testin if the repository attribute is working properly
+        """testing if the repository attribute is working properly
         """
-
         new_project = Project(**self.kwargs)
         self.assertEqual(new_project.repository, self.kwargs["repository"])
-
 
     def test_is_stereoscopic_argument_skipped(self):
         """testing if is_stereoscopic will set the is_stereoscopic attribute to
         False
         """
-
         self.kwargs.pop("is_stereoscopic")
         new_project = Project(**self.kwargs)
         self.assertEqual(new_project.is_stereoscopic, False)
-
 
     def test_is_stereoscopic_argument_bool_conversion(self):
         """testing if all the given values for is_stereoscopic argument will be
         converted to a bool value correctly
         """
-
         test_values = [0, 1, 1.2, "", "str", ["a", "list"]]
-
         for test_value in test_values:
             self.kwargs["is_stereoscopic"] = test_value
             new_project = Project(**self.kwargs)
             self.assertEqual(new_project.is_stereoscopic, bool(test_value))
 
-
     def test_is_stereoscopic_attribute_bool_conversion(self):
         """testing if all the given values for is_stereoscopic attribute will
         be converted to a bool value correctly
         """
-
         test_values = [0, 1, 1.2, "", "str", ["a", "list"]]
-
         for test_value in test_values:
             self.test_project.is_stereoscopic = test_value
             self.assertEqual(
@@ -1396,26 +1308,18 @@ class ProjectTester(unittest.TestCase):
                 bool(test_value)
             )
 
-
-
-            #
             #def test_display_width_argument_is_skipped(self):
             #"""testing if the display_width attribute will be set to the default
             #value when the display_width argument is skipped
             #"""
-
             #self.kwargs.pop("display_width")
             #new_project = Project(**self.kwargs)
             #self.assertEqual(new_project.display_width, 1.0)
 
-
-
-            #
             #def test_display_width_argument_float_conversion(self):
             #"""testing if the display_width attribute is converted to float
             #correctly for various display_width arguments
             #"""
-
             #test_values = [1, 2, 3, 4]
             #for test_value in test_values:
             #self.kwargs["display_width"] = test_value
@@ -1423,14 +1327,10 @@ class ProjectTester(unittest.TestCase):
             #self.assertIsInstance(new_project.display_width, float)
             #self.assertEqual(new_project.display_width, float(test_value))
 
-
-
-            #
             #def test_display_width_attribute_float_conversion(self):
             #"""testing if the display_width attribute is converted to float
             #correctly
             #"""
-
             #test_values = [1, 2, 3, 4]
             #for test_value in test_values:
             #self.test_project.display_width = test_value
@@ -1438,67 +1338,49 @@ class ProjectTester(unittest.TestCase):
             #self.assertEqual(self.test_project.display_width,
             #float(test_value))
 
-
-
-            #
             #def test_display_width_argument_is_given_as_a_negative_value(self):
             #"""testing if the display_width attribute is set to the absolute value
             #of the given negative display_width argument
             #"""
-
             #test_value = -1.0
             #self.kwargs["display_width"] = test_value
             #new_project = Project(**self.kwargs)
             #self.assertEqual(new_project.display_width, abs(test_value))
 
-
-
-            #
             #def test_display_width_attribute_is_set_to_a_negative_value(self):
             #"""testing if the display_width attribute is set to default value when
             #it is set to a negative value
             #"""
-
             #test_value = -1.0
             #self.test_project.display_width = test_value
             #self.assertEqual(self.test_project.display_width, abs(test_value))
 
-
     def test_structure_argument_is_None(self):
         """testing if nothing happens when the structure argument is None
         """
-
         self.kwargs["structure"] = None
         new_project = Project(**self.kwargs)
 
-
-    def test_structure_attirbute_is_None(self):
-        """testing if nothing happends when the structure attribute is set to
+    def test_structure_attribute_is_None(self):
+        """testing if nothing happens when the structure attribute is set to
         None
         """
-
         self.test_project.structure = None
-
 
     def test_structure_argument_not_instance_of_Structure(self):
         """testing if a TypeError will be raised when the structure argument
         is not an instance of Structure
         """
-
         test_values = [1, 1.2, "a str", ["a", "list"]]
-
         for test_value in test_values:
             self.kwargs["structure"] = test_value
             self.assertRaises(TypeError, Project, **self.kwargs)
-
 
     def test_structure_attribute_not_instance_of_Structure(self):
         """testing if a TypeError will be raised when the structure attribute
         is not an instance of Structure
         """
-
         test_values = [1, 1.2, "a str", ["a", "list"]]
-
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
@@ -1508,20 +1390,16 @@ class ProjectTester(unittest.TestCase):
                 test_value
             )
 
-
     def test_structure_attribute_is_working_properly(self):
         """testing if the structure attribute is working properly
         """
-
         self.test_project.structure = self.test_project_structure2
         self.assertEqual(self.test_project.structure,
                          self.test_project_structure2)
 
-
     def test_equality(self):
         """testing the equality of two projects
         """
-
         # create a new project with the same arguments
         new_project1 = Project(**self.kwargs)
 
@@ -1536,11 +1414,9 @@ class ProjectTester(unittest.TestCase):
         self.assertFalse(self.test_project == new_project2)
         self.assertFalse(self.test_project == new_entity)
 
-
     def test_inequality(self):
         """testing the inequality of two projects
         """
-
         # create a new project with the same arguments
         new_project1 = Project(**self.kwargs)
 
@@ -1555,11 +1431,9 @@ class ProjectTester(unittest.TestCase):
         self.assertTrue(self.test_project != new_project2)
         self.assertTrue(self.test_project != new_entity)
 
-
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
         """
-
         link_type_1 = Type(name="Image", target_entity_type="Link")
 
         link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
@@ -1571,35 +1445,26 @@ class ProjectTester(unittest.TestCase):
         references = [link1, link2]
 
         self.kwargs["references"] = references
-
         new_project = Project(**self.kwargs)
-
         self.assertEqual(new_project.references, references)
-
 
     def test_StatusMixin_initialization(self):
         """testing if the StatusMixin part is initialized correctly
         """
-
         status1 = Status(name="On Hold", code="OH")
         status2 = Status(name="Complete", code="CMPLT")
 
         status_list = StatusList(name="Project Statuses",
                                  statuses=[status1, status2],
                                  target_entity_type=Project)
-
         self.kwargs["status"] = 0
         self.kwargs["status_list"] = status_list
-
         new_project = Project(**self.kwargs)
-
         self.assertEqual(new_project.status_list, status_list)
-
 
     def test_ScheduleMixin_initialization(self):
         """testing if the ScheduleMixin part is initialized correctly
         """
-
         start_date = datetime.date.today() + datetime.timedelta(days=25)
         due_date = start_date + datetime.timedelta(days=12)
 
@@ -1607,18 +1472,13 @@ class ProjectTester(unittest.TestCase):
         self.kwargs["due_date"] = due_date
 
         new_project = Project(**self.kwargs)
-
         self.assertEqual(new_project.start_date, start_date)
         self.assertEqual(new_project.due_date, due_date)
         self.assertEqual(new_project.duration, due_date - start_date)
 
-
-
-        #
         #def test_TaskMixin_initialization(self):
         #"""testing if the TaskMixin part is initialized correctly
         #"""
-
         #status1 = Status(name="On Hold", code="OH")
 
         #project_status_list = StatusList(
@@ -1652,22 +1512,17 @@ class ProjectTester(unittest.TestCase):
         #task_of=new_project,
         #)
 
-
         #self.assertItemsEqual(new_project.tasks, [new_task1])
         #self.assertEqual(new_project.project, new_project)
-
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ is True for Project class
         """
-
         self.assertEqual(Project.__strictly_typed__, False)
-
 
     def test___strictly_typed___not_forces_type_initialization(self):
         """testing if Project can not be created without defining a type for it
         """
-
         self.kwargs.pop("type")
         new_project = Project(**self.kwargs) # should be possible
 
@@ -1675,8 +1530,4 @@ class ProjectTester(unittest.TestCase):
     def test_project_attribute_equals_to_self(self):
         """testing if the Project.project equals to self
         """
-
         self.assertEqual(self.test_project.project, self.test_project)
-    
-    
-    

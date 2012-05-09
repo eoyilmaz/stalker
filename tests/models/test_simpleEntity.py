@@ -7,10 +7,11 @@
 import unittest
 import datetime
 import stalker
-from stalker.models import (SimpleEntity, Type, User)
-
+from stalker import Type, User
 
 # create a new class deriving from the SimpleEntity
+from stalker.models.entity import SimpleEntity
+
 class newClass(SimpleEntity):
     __strictly_typed__ = True
 
@@ -18,7 +19,6 @@ class newClass(SimpleEntity):
 class SimpleEntityTester(unittest.TestCase):
     """testing the SimpleEntity class
     """
-
 
     def setUp(self):
         """setting up some proper values
@@ -885,8 +885,3 @@ class SimpleEntityTester(unittest.TestCase):
 
         # restore the stalker.__version__
         stalker.__version__ = current_version
-        
-        
-    
-    
-    

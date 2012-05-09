@@ -22,7 +22,8 @@ from sqlalchemy.orm import mapper
 from stalker import db
 from stalker.db import tables
 from stalker.db.mixins import StatusMixinDB
-from stalker.models import SimpleEntity, StatusMixin
+from stalker.models import  StatusMixin
+from stalker.models.entity import SimpleEntity
 
 
 class NewStatusedEntity(SimpleEntity, StatusMixin):

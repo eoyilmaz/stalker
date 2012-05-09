@@ -5,10 +5,8 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-
-from stalker.models import (Status, StatusList, Task, TaskableEntity,
-                                 Project, Repository, Type)
-
+from stalker import (TaskableEntity, Project, Repository, Status, StatusList,
+                     Task, Type)
 
 class TaskableEntityTester(unittest.TestCase):
     """Tests the TaskableEntity
