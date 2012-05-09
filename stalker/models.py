@@ -48,8 +48,6 @@ DBSession = scoped_session(
     )
 )
 
-
-
 class EntityMeta(type):
     """The metaclass for the very basic entity.
     
@@ -861,7 +859,6 @@ class Type(Entity, TargetEntityTypeMixin):
 
         return not self.__eq__(other)
 
-
 class Status(Entity):
     """Defines object statutes.
     
@@ -908,7 +905,6 @@ class Status(Entity):
                    isinstance(other, Status)
 
 class StatusList(Entity, TargetEntityTypeMixin):
-#class StatusList(Entity):
     """Type specific list of :class:`~stalker.core.models.Status` instances.
     
     Holds multiple :class:`~stalker.core.models.Status`\ es to be used as a
@@ -996,14 +992,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
         doc="""list of :class:`~stalker.core.models.Status` objects, showing the possible statuses"""
     )
 
-# ------------
-# comment this
-#    _target_entity_type = Column("target_entity_type", String(128),
-#                                 nullable=False, unique=True)
-# ------------
-
     def __init__(self, statuses=None, **kwargs):
-#    def __init__(self, statuses=None, target_entity_type=None, **kwargs):
         super(StatusList, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, **kwargs)
         
@@ -1011,66 +1000,19 @@ class StatusList(Entity, TargetEntityTypeMixin):
             statuses = []
         
         self.statuses = statuses
-        # ------------
-        # comment this
-#        self._target_entity_type =\
-#            self._validate_target_entity_type(target_entity_type)
-        # ------------
 
     @validates("statuses")
     def _validate_statuses(self, key, status):
         """validates the given status
         """
-
+        
         if not isinstance(status, Status):
             raise TypeError("all the elements in %s.statuses must be an "
-                            "instance of stalker.core.models.Status not %s"
+                            "instance of stalker.core.models.Status not %s" %
                             (self.__class__.__name__,
                              status.__class__.__name__))
 
         return status
-
-    # ------------
-    # comment this
-#    def _validate_target_entity_type(self, target_entity_type_in):
-#        """validates the given target_entity_type value
-#        """
-#
-#        # it can not be None
-#        if target_entity_type_in is None:
-#            raise TypeError("target_entity_type can not be None")
-#
-#        if str(target_entity_type_in) == "":
-#            raise ValueError("StatusList.target_entity_type can not be empty")
-#
-#        # check if it is a class
-#        if isinstance(target_entity_type_in, type):
-#            target_entity_type_in = target_entity_type_in.__name__
-#
-#        return str(target_entity_type_in)
-#
-#    @synonym_for("_target_entity_type") # we need it to make the property read
-#    @property                           # only
-#    def target_entity_type(self):
-#        """The entity type which this StatusList is valid for.
-#        
-#        Usually it is set to the TargetClass directly::
-#          
-#          from stalker.core.models import Status, StatusList, Asset
-#          
-#          # create a StatusList valid only for Asset class
-#          asset_status_list = StatusList(
-#              name="Asset Statuses",
-#              statuses = [
-#                  Status(name="Waiting To Start", code="WTS"),
-#                  Status(name="Work In Progress", code="WIP"),
-#                  Status(name="Complete", code="CMPLT")
-#              ],
-#              target_entity_type=Asset # or "Asset" is also valid
-#          )
-#        """
-#        return self._target_entity_type
-# --------------
 
     def __eq__(self, other):
         """the equality operator
@@ -3073,41 +3015,6 @@ class StatusMixin(object):
                      self.__class__.__name__))
 
         return status_list
-    
-#    def _status_list_getter(self):
-#        """The getter for the :attr:`~stalker.core.models.StatusMixin.status_list` attribute.
-#        
-#        :return: :class:`~stalker.core.models.StatusList`
-#        """
-#        return self._status_list
-#    
-#    def _status_list_setter(self, status_list):
-#        """The setter for the :attr:`~stalker.core.models.StatusMixin.status_list` attribute.
-#        
-#        :param status_list: A :class:`~stalker.core.models.StatusList`
-#          instance which is suitable to hold
-#          :class:`~stalker.core.models.Status`\ es suitable to this mixed in
-#          object.
-#        
-#        :type status_list: :class:`~stalker.core.models.StatusList`
-#        """
-#        
-#        status_list = self._validate_status_list(status_list)
-#        self._status_list = status_list
-#    
-#    @declared_attr
-#    def status_list(cls):
-#        return synonym(
-#            '_status_list',
-#            descriptor=property(
-#                fget=cls._status_list_getter,
-#                fset=cls._status_list_setter,
-#                doc="""The :class:`~stalker.core.models.StatusList` instance
-#                suitable for this mixed in object.
-#                """
-#            )
-#        )
-    
 
     @validates("status")
     def _validate_status(self, key, status):
@@ -5397,7 +5304,7 @@ class Version(Entity, StatusMixin):
 # SECONDARY TABLES
 ######################################
 
-
+# TODO: secondary tables should be classes
 
 # ENTITY_TAGS
 Entity_Tags = Table(
@@ -5417,8 +5324,6 @@ Entity_Tags = Table(
         )
 )
 
-
-
 # STATUSLIST_STATUSES
 StatusList_Statuses = Table(
     "StatusList_Statuses", Base.metadata,
@@ -5436,8 +5341,6 @@ StatusList_Statuses = Table(
     )
 )
 
-
-
 # STRUCTURE_FILENAMETEMPLATES
 Structure_FilenameTemplates = Table(
     "Structure_FilenameTemplates", Base.metadata,
@@ -5447,8 +5350,6 @@ Structure_FilenameTemplates = Table(
            primary_key=True)
 )
 
-
-
 # USER_PERMISSIONGROUPS
 User_PermissionGroups = Table(
     "User_PermissionGroups", Base.metadata,
@@ -5457,7 +5358,6 @@ User_PermissionGroups = Table(
            primary_key=True
     )
 )
-
 
 # TASK_RESOURCES
 Task_Resources = Table(
