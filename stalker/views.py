@@ -26,7 +26,7 @@ try it again.
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
 def my_view(request):
     try:
-        one = DBSession.query(Project).all()
+        one = DBSession.query(Project).first()
     except DBAPIError:
         return Response(conn_err_msg, content_type='text/plain', status_int=500)
     return {'one':one, 'project':'stalker'}
