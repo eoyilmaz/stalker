@@ -21,8 +21,7 @@ class TargetEntityTypeMixin(object):
       
       For example::
         
-        from stalker.core.models import (SimpleEntity, TargetEntityTypeMixin,
-                                         Project)
+        from stalker import SimpleEntity, TargetEntityTypeMixin, Project
         
         class A(SimpleEntity, TargetEntityTypeMixin):
             __tablename__ = "As"
@@ -35,8 +34,8 @@ class TargetEntityTypeMixin(object):
         a_obj = A(target_entity_type=Project)
       
       The ``a_obj`` will only be accepted by
-      :class:`~stalker.core.models.Project` instances. You can not assign it
-      to any other class which accepts a :class:`~stalker.core.models.Type`
+      :class:`~stalker.models.project.Project` instances. You can not assign it
+      to any other class which accepts a :class:`~stalker.models.type.Type`
       instance.
     
     To control the mixed-in class behaviour add these class variables to the 
@@ -121,9 +120,9 @@ class StatusMixin(object):
         The status_list argument now can be skipped or can be None if there is
         an active database connection (stalker.models.DBSession is not None)
         and there is a suitable
-        :class:`~stalker.core.models.StatusList` instance in the database whom
-        :attr:`~stalker.core.models.StatusList.target_entity_type` attribute
-        is set to the current mixed-in class name.
+        :class:`~stalker.models.status.StatusList` instance in the database
+        whom :attr:`~stalker.models.status.StatusList.target_entity_type`
+        attribute is set to the current mixed-in class name.
     
     :param status: an integer value which is the index of the status in the
       status_list attribute. So the value of this attribute couldn't be lower
@@ -161,14 +160,12 @@ class StatusMixin(object):
 
     @validates("status_list")
     def _validate_status_list(self, key, status_list):
-#    def _validate_status_list(self, status_list):
         """validates the given status_list_in value
         """
         
         from stalker.models.status import StatusList
 
-        # TODO: validating should not create a new variable, so please move
-        # this part to another function
+        # TODO: validating should not create a new variable, so please move this part to another function
         if status_list is None:
             # check if there is a db setup and try to get the appropriate 
             # StatusList from the database
@@ -186,7 +183,7 @@ class StatusMixin(object):
             # to get an appropriate StatusList
             raise TypeError(
                 "'%s' instances can not be initialized without a "
-                "stalker.core.models.StatusList instance, please pass a "
+                "stalker.models.status.StatusList instance, please pass a "
                 "suitable StatusList (StatusList.target_entity_type=%s) "
                 "with the 'status_list' argument" %
                 (self.__class__.__name__, self.__class__.__name__)
@@ -196,7 +193,7 @@ class StatusMixin(object):
             if not isinstance(status_list, StatusList):
                 raise TypeError(
                     "%s.status_list should be an instance of "
-                    "stalker.core.models.StatusList not %s" %
+                    "stalker.models.status.StatusList not %s" %
                     (self.__class__.__name__,
                      status_list.__class__.__name__)
                 )
@@ -368,13 +365,14 @@ class ScheduleMixin(object):
         """The date that this entity should start.
         
         Also effects the
-        :attr:`~stalker.core.models.ScheduleMixin.due_date` attribute value in
-        certain conditions, if the
-        :attr:`~stalker.core.models.ScheduleMixin.start_date` is set to a time
-        passing the :attr:`~stalker.core.models.ScheduleMixin.due_date` it will
-        also offset the :attr:`~stalker.core.models.ScheduleMixin.due_date` to
-        keep the :attr:`~stalker.core.models.ScheduleMixin.duration` value
-        fixed. :attr:`~stalker.core.models.ScheduleMixin.start_date` should be
+        :attr:`~stalker.models.mixins.ScheduleMixin.due_date` attribute value
+        in certain conditions, if the
+        :attr:`~stalker.models.mixins.ScheduleMixin.start_date` is set to a
+        time passing the :attr:`~stalker.models.mixins.ScheduleMixin.due_date`
+        it will also offset the
+        :attr:`~stalker.models.mixins.ScheduleMixin.due_date` to keep the
+        :attr:`~stalker.models.mixins.ScheduleMixin.duration` value
+        fixed. :attr:`~stalker.models.mixins.ScheduleMixin.start_date` should be
         an instance of class:`datetime.date` and the default value is
         :func:`datetime.date.today()`
         """
@@ -402,9 +400,9 @@ class ScheduleMixin(object):
         """Duration of the entity.
         
         It is a datetime.timedelta instance. Showing the difference of the
-        :attr:`~stalker.core.models.ScheduleMixin.start_date` and the
-        :attr:`~stalker.core.models.ScheduleMixin.due_date`. If edited it
-        changes the :attr:`~stalker.core.models.ScheduleMixin.due_date`
+        :attr:`~stalker.models.mixins.ScheduleMixin.start_date` and the
+        :attr:`~stalker.models.mixins.ScheduleMixin.due_date`. If edited it
+        changes the :attr:`~stalker.models.mixins.ScheduleMixin.due_date`
         attribute value.
         """
         return self._duration
@@ -483,13 +481,13 @@ class ScheduleMixin(object):
 
 
 class ProjectMixin(object):
-    """Gives the ability to connect to a :class:`~stalker.core.models.Project` to the mixed in object.
+    """Gives the ability to connect to a :class:`~stalker.models.project.Project` to the mixed in object.
     
-    :param project: A :class:`~stalker.core.models.Project` instance holding
+    :param project: A :class:`~stalker.models.project.Project` instance holding
       the project which this object is related to. It can not be None, or
-      anything other than a :class:`~stalker.core.models.Project` instance.
+      anything other than a :class:`~stalker.models.project.Project` instance.
     
-    :type project: :class:`~stalker.core.models.Project`
+    :type project: :class:`~stalker.models.project.Project`
     """
 
     #    # add this lines for Sphinx
@@ -511,8 +509,8 @@ class ProjectMixin(object):
     @declared_attr
     def project(cls):
         backref = cls.__tablename__.lower()
-        doc = """The :class:`~stalker.core.models.Project` instance that this
-        object belongs to.
+        doc = """The :class:`~stalker.models.project.Project` instance that
+        this object belongs to.
         """
 
         return relationship(
@@ -539,42 +537,28 @@ class ProjectMixin(object):
 
         if project is None:
             raise TypeError("%s.project can not be None it must be an "
-                            "instance of stalker.core.models.Project" %
+                            "instance of stalker.models.project.Project" %
                             self.__class__.__name__)
-
-        #from stalker.core.models import Project
 
         if not isinstance(project, Project):
             raise TypeError("%s.project should be an instance of "
-                            "stalker.core.models.Project instance not %s" %
+                            "stalker.models.project.Project instance not %s" %
                             (self.__class__.__name__,
                              project.__class__.__name__))
-
         return project
-
-    #@synonym_for("_project")
-    #@property
-    #def project(self):
-        #"""A :class:`~stalker.core.models.Project` instance showing the
-        #relation of this object to a Stalker
-        #:class:`~stalker.core.models.Project`. It is a read only attribute, so
-        #you can not change the Project of an already created object.
-        #"""
-
-        #return self._project
-
 
 class ReferenceMixin(object):
     """Adds reference capabilities to the mixed in class.
     
-    References are :class:`stalker.core.models.Entity` instances or anything
+    References are :class:`stalker.models.entity.Entity` instances or anything
     derived from it, which adds information to the attached objects. The aim of
     the References are generally to give more info to direct the evolution of
     the object.
     
-    :param references: A list of :class:`~stalker.core.models.Entity` objects.
+    :param references: A list of :class:`~stalker.models.entity.Entity`
+      objects.
     
-    :type references: list of :class:`~stalker.core.models.Entity` objects.
+    :type references: list of :class:`~stalker.models.entity.Entity` objects.
     """
 
     # add this lines for Sphinx
@@ -639,12 +623,12 @@ class ReferenceMixin(object):
 
         from stalker.models.entity import SimpleEntity
 
-        # all the elements should be instance of stalker.core.models.Entity
+        # all the elements should be instance of stalker.models.entity.Entity
         if not isinstance(reference, SimpleEntity):
             raise TypeError("all the elements in %s.reference should be "
-                            "instances of stalker.core.models.Entity not %s" %
-                            (self.__class__.__name__,
-                             reference.__class__.__name__)
+                            "instances of stalker.models.entity.Entity not %s"
+                            % (self.__class__.__name__,
+                               reference.__class__.__name__)
             )
 
         return reference

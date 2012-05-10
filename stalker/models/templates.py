@@ -13,15 +13,15 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     """Holds templates for filename conventions.
     
     FilenameTemplate objects help to specify where to place a file related to
-    its :attr:`~stalker.core.models.FilenameTemplate.target_entity_type`.
+    its :attr:`~stalker.models.templates.FilenameTemplate.target_entity_type`.
     
     The first very important usage of FilenameTemplates is to place asset file
-    :class:`~stalker.core.models.Version`'s to proper places inside a
-    :class:`~stalker.core.models.Project`'s
-    :class:`~stalker.core.models.Structure`.
+    :class:`~stalker.models.version.Version`'s to proper places inside a
+    :class:`~stalker.models.project.Project`'s
+    :class:`~stalker.models.structure.Structure`.
     
     Secondly, it can be used in the process of injecting files in to the
-    repository. By creating templates for :class:`~stalker.core.models.Links`.
+    repository. By creating templates for :class:`~stalker.models.link.Link`.
     
     :param str target_entity_type: The class name that this FilenameTemplate
       is designed for. You can also pass the class itself. So both of the
@@ -41,7 +41,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     
     :param str file_code: A `Jinja2`_ template code which specifies the file
       name of the given item. It is relative to the
-      :attr:`~stalker.core.models.FilenameTemplate.path_code`. A typical
+      :attr:`~stalker.models.templates.FilenameTemplate.path_code`. A typical
       example could be::
         
         asset_file_code = "{{asset.code}}_{{version.take}}_{{task.code}}_"\\
@@ -51,39 +51,42 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     
     :param str output_path_code: A Jinja2 template code specifying where to
       place the outputs of the applied
-      :attr:`~stalker.core.models.FilenameTemplate.target_entity_type`. If it
-      is empty and the
-      :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is True,
-      then the outputs will naturally be in the same place with the
-      :attr:`~stalker.core.models.FilenameTemplate.path_code`. If the
-      :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is False
-      then :attr:`~stalker.core.models.FilenameTemplate.output_path_code` will
+      :attr:`~stalker.models.templates.FilenameTemplate.target_entity_type`. If
+      it is empty and the
+      :attr:`~stalker.models.templates.FilenameTemplate.output_is_relative` is
+      True, then the outputs will naturally be in the same place with the
+      :attr:`~stalker.models.templates.FilenameTemplate.path_code`. If the
+      :attr:`~stalker.models.templates.FilenameTemplate.output_is_relative` is
+      False then
+      :attr:`~stalker.models.templates.FilenameTemplate.output_path_code` will
       be the same code with
-      :attr:`~stalker.core.models.FilenameTemplate.path_code`.
+      :attr:`~stalker.models.templates.FilenameTemplate.path_code`.
       
       It can be None, or an empty string, or it can be skipped.
     
     :param str output_file_code: A Jinja2 template code specifying what will be
       the file name of the output. If it is skipped or given as None or as an
       empty string, it will be the same with the
-      :attr:`~stalker.core.models.FilenameTemplate.file_code`.
+      :attr:`~stalker.models.templates.FilenameTemplate.file_code`.
       
       It can be skipped, or can be set to None or an empty string. The default
       value is None, and this will set the
-      :attr:`~stalker.core.models.FilenameTemplate.output_file_code` to the
-      same value with :attr:`~stalker.core.models.FilenameTemplate.file_code`.
+      :attr:`~stalker.models.templates.FilenameTemplate.output_file_code` to
+      the same value with
+      :attr:`~stalker.models.templates.FilenameTemplate.file_code`.
     
     :param bool output_is_relative: A bool value specifying if the
-      :attr:`~stalker.core.models.FilenameTemplate.output_path_code` is
-      relative to the :attr:`~stalker.core.models.FilenameTemplate.path_code`.
-      The default value is True. Can be skipped, any other than a bool value
-      will be evaluated to a bool value.
+      :attr:`~stalker.models.templates.FilenameTemplate.output_path_code` is
+      relative to the
+      :attr:`~stalker.models.templates.FilenameTemplate.path_code`. The default
+      value is True. Can be skipped, any other than a bool value will be
+      evaluated to a bool value.
     
     Examples:
     
     A template for asset versions can be used like this::
       
-      from stalker.core.models import Type, FilenameTemplate, TaskTemplate
+      from stalker import Type, FilenameTemplate, TaskTemplate
       
       # create a couple of variables
       path_code = "ASSETS/{{asset_type.name}}/{{task_type.code}}"
@@ -132,7 +135,7 @@ Character assets",
       session.commit()
     
     Now with the code above, whenever a new
-    :class:`~stalker.core.models.Version` created for a **Character**
+    :class:`~stalker.models.version.Version` created for a **Character**
     asset, Stalker will automatically place the related file to a certain
     folder and with a certain file name defined by the template. For example
     the above template should render something like below for Windows::
@@ -167,18 +170,21 @@ Character assets",
         String,
         doc="""The templating code for the file part of the FilenameTemplate."""
     )
-
+    
+    # TODO: Remove the 'output is relative' attribute
+    
     output_path_code = Column(
         String,
         doc="""The output_path_code of this FilenameTemplate object.
         
         Should be a unicode string. None and empty string is also accepted, but
         in this case the value is copied from the
-        :attr:`~stalker.core.models.FilenameTemplate.path_code` if also the
-        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
-        False. If
-        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
-        True then it will left as an empty string.
+        :attr:`~stalker.models.templates.FilenameTemplate.path_code` if also
+        the
+        :attr:`~stalker.models.templates.FilenameTemplate.output_is_relative`
+        is False. If
+        :attr:`~stalker.models.templates.FilenameTemplate.output_is_relative`
+        is True then it will left as an empty string.
         """
     )
 
@@ -188,11 +194,12 @@ Character assets",
         
         Should be a unicode string. None and empty string is also accepted, but
         in this case the value is copied from the
-        :attr:`~stalker.core.models.FilenameTemplate.file_code` if also the
-        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
-        False. If
-        :attr:`~stalker.core.models.FilenameTemplate.output_is_relative` is
-        True then it will left as an empty string.
+        :attr:`~stalker.models.templates.FilenameTemplate.file_code` if also
+        the
+        :attr:`~stalker.models.templates.FilenameTemplate.output_is_relative`
+        is False. If
+        :attr:`~stalker.models.templates.FilenameTemplate.output_is_relative`
+        is True then it will left as an empty string.
         """
     )
 

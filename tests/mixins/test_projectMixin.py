@@ -8,12 +8,8 @@ import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.db.session import DBSession
-from stalker.models.entity import SimpleEntity
-from stalker.models.mixins import ProjectMixin
-from stalker.models.status import Status, StatusList
-from stalker.models.type import Type
-from stalker.models.project import Project
-from stalker.models.repository import Repository
+from stalker import (SimpleEntity, ProjectMixin, Status, StatusList, Type,
+                     Project, Repository)
 
 class ProjMixClass(SimpleEntity, ProjectMixin):
     __tablename__ = "ProjMixClasses"
@@ -120,7 +116,7 @@ class ProjectMixinTester(unittest.TestCase):
 
     def test_project_argument_is_not_a_Project_instance(self):
         """testing if a TypeError will be raised when the project argument is
-        not a stalker.core.models.Project instance
+        not a stalker.models.project.Project instance
         """
         self.kwargs["project"] = "a project"
         self.assertRaises(TypeError, ProjMixClass, **self.kwargs)
@@ -128,7 +124,7 @@ class ProjectMixinTester(unittest.TestCase):
 
     def test_project_attribute_is_not_a_Project_instance(self):
         """testing if a TypeError will be raised when the project attribute is
-        set to something other than a stalker.core.models.Project instance
+        set to something other than a stalker.models.project.Project instance
         """
         self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
                           "a project")

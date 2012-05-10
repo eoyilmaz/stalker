@@ -20,7 +20,7 @@ class Status(Entity):
     return if the lower case name or lower case code of the status matches the
     lower case form of the given string:
     
-    >>> from stalker.core.models import Status
+    >>> from stalker import Status
     >>> a_status = Status(name="On Hold", "OH")
     >>> a_status == "on hold"
     True
@@ -57,21 +57,21 @@ class Status(Entity):
 
 
 class StatusList(Entity, TargetEntityTypeMixin):
-    """Type specific list of :class:`~stalker.core.models.Status` instances.
+    """Type specific list of :class:`~stalker.models.status.Status` instances.
     
-    Holds multiple :class:`~stalker.core.models.Status`\ es to be used as a
+    Holds multiple :class:`~stalker.models.status.Status`\ es to be used as a
     choice list for several other classes.
     
     A StatusList can only be assigned to only one entity type. So a
-    :class:`~stalker.core.models.Project` can only have a suitable StatusList
-    object which is designed for :class:`~stalker.core.models.Project`
-    entities.
+    :class:`~stalker.models.project.Project` can only have a suitable
+    StatusList object which is designed for
+    :class:`~stalker.models.project.Project` entities.
     
     The list of statuses in StatusList can be accessed by using a list like
     indexing and it also supports string indexes only for getting the item,
     you can not set an item with string indices:
     
-    >>> from stalker.core.models import Status, StatusList
+    >>> from stalker import Status, StatusList
     >>> status1 = Status(name="Complete", code="CMPLT")
     >>> status2 = Status(name="Work in Progress", code="WIP")
     >>> status3 = Status(name="Pending Review", code="PRev")
@@ -94,7 +94,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
       
       For example::
         
-        from stalker.core.models import Status, StatusList, Project
+        from stalker import Status, StatusList, Project
         
         status_list = [
             Status(name="Waiting To Start", code="WTS"),
@@ -122,8 +122,8 @@ class StatusList(Entity, TargetEntityTypeMixin):
       object to any other class than a ``Project`` object.
       
       The StatusList instance can be empty, means it may not have anything in
-      its :attr:`~stalker.core.models.StatusList.statuses`. But it is useless.
-      The validation for empty statuses list is left to the SOM user.
+      its :attr:`~stalker.models.status.StatusList.statuses`. But it is
+      useless. The validation for empty statuses list is left to the SOM user.
     """
 
     __tablename__ = "StatusLists"
@@ -141,7 +141,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
     statuses = relationship(
         "Status",
         secondary="StatusList_Statuses",
-        doc="""list of :class:`~stalker.core.models.Status` objects, showing the possible statuses"""
+        doc="""list of :class:`~stalker.models.status.Status` objects, showing the possible statuses"""
     )
 
     def __init__(self, statuses=None, **kwargs):
@@ -160,7 +160,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
         
         if not isinstance(status, Status):
             raise TypeError("all the elements in %s.statuses must be an "
-                            "instance of stalker.core.models.Status not %s" %
+                            "instance of stalker.models.status.Status not %s" %
                             (self.__class__.__name__,
                              status.__class__.__name__))
 

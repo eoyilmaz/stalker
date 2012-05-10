@@ -82,8 +82,8 @@ class Department(Entity):
         from stalker.models.user import User
         
         if not isinstance(member, User):
-            raise TypeError("every element in the %s.members list should be "
-                            "an instance of stalker.core.models.User class "
+            raise TypeError("Every element in the %s.members list should be "
+                            "an instance of stalker.models.user.User class "
                             "not %s" %
                             (self.__class__.__name__,
                              member.__class__.__name__))
@@ -101,7 +101,7 @@ class Department(Entity):
             # the lead should be an instance of User class
             if not isinstance(lead, User):
                 raise TypeError("%s.lead should be an instance of "
-                                "stalker.core.models.User not %s" %
+                                "stalker.models.user.User not %s" %
                                 (self.__class__.__name__,
                                  lead.__class__.__name__))
 

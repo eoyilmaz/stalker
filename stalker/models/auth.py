@@ -17,11 +17,11 @@ class PermissionGroup(SimpleEntity):
     the list of available classes which can be created. It then stores a binary
     value for each of the class.
     
-    A :class:`~stalker.core.models.User` can be in several
-    :class:`~stalker.core.models.PermissionGroup`\ s. The combined permission
+    A :class:`~stalker.models.user.User` can be in several
+    :class:`~stalker.models.auth.PermissionGroup`\ s. The combined permission
     for an object is calculated with an ``OR`` (``^``) operation. So if one of
-    the :class:`~stalker.core.models.PermissionGroup`\ s of the
-    :class:`~stalker.core.models.User` is allowing the action then the user is
+    the :class:`~stalker.models.auth.PermissionGroup`\ s of the
+    :class:`~stalker.models.user.User` is allowing the action then the user is
     allowed to do the operation.
     
     The permissions are stored in a dictionary. The key is the class name and

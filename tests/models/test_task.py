@@ -6,8 +6,10 @@
 
 import datetime
 import unittest
+from sqlalchemy import Column, ForeignKey
 
 from stalker.conf import defaults
+from stalker.db.session import DBSession
 from stalker.errors import CircularDependencyError
 from stalker import (SimpleEntity, Entity, TaskableEntity, Project, Repository,
                      StatusList, Status, Task, Type, User)
@@ -18,9 +20,21 @@ class SomeClass(TaskableEntity):
 class SomeOtherClass(object):
     pass
 
+class TestClass(SimpleEntity):
+    __tablename__ = "TestClasses"
+    testClass_id = Column("id", ForeignKey("SimpleEntities.id"),
+                          primary_key=True)
+    #tasks = 
+        
 class TaskTester(unittest.TestCase):
-    """Tests the stalker.core.models.Task class
+    """Tests the stalker.models.task.Task class
     """
+    
+    @classmethod
+    def setUpClass(cls):
+        """set up tests in class level
+        """
+        DBSession.remove()
     
     def setUp(self):
         """setup the test
@@ -1538,8 +1552,7 @@ class TaskTester(unittest.TestCase):
                           None)
 
 
-    def test_task_of_argument_accepts_anything_thats_been_inherited_from_TaskableEntity(
-    self):
+    def test_task_of_argument_accepts_anything_thats_been_inherited_from_TaskableEntity(self):
         """testing if the task_of argument accepts anything that has been
         inherited from TaskableEntity
         """
@@ -1572,10 +1585,9 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**self.kwargs) # it should accept it
 
         self.kwargs["task_of"] = someOtherClass_ins
-        self.assertRaises(AttributeError, Task, **self.kwargs)
+        self.assertRaises(TypeError, Task, **self.kwargs)
     
-    def test_task_of_attribute_accepts_anything_thats_been_inherited_from_Taskable(
-    self):
+    def test_task_of_attribute_accepts_anything_thats_been_inherited_from_Taskable(self):
         """testing if the task_of attribute accepts anything that has mixed
         with TaskMixin
         """
@@ -1610,7 +1622,7 @@ class TaskTester(unittest.TestCase):
         # it should accept the SomeClass instance
         new_task.task_of = someClass_ins
 
-        self.assertRaises(AttributeError, setattr, new_task, "task_of",
+        self.assertRaises(TypeError, setattr, new_task, "task_of",
                           someOtherClass_ins)
 
     def test_task_of_attribute_updates_the_back_reference_attribute_tasks(self):
@@ -1699,15 +1711,9 @@ class TaskTester(unittest.TestCase):
         #self.assertNotIn(new_task, new_project1.tasks)
         #self.assertIn(new_task, new_project2.tasks)
     
-    def task_of_argument_only_accepts_TaskableEntity_instances(self):
+    def test_task_of_argument_only_accepts_TaskableEntity_instances(self):
         """testing if task_of argument only accepts TaskableEntity instances
         """
-        class TestClass(object):
-            def __init__(self):
-                self.tasks = []
-        
-        test_obj = TestClass()
-        
+        test_obj = TestClass(name="Test Class")
         self.kwargs["task_of"] = test_obj
-        
         self.assertRaises(TypeError, Task, **self.kwargs)

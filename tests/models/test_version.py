@@ -10,9 +10,8 @@ from stalker import (Link, Project, Repository, Sequence, Shot, Status,
                      StatusList, Task, Type, Version)
 
 class VersionTester(unittest.TestCase):
-    """tests stalker.core.models.Version class
+    """tests stalker.models.version.Version class
     """
-
 
     def setUp(self):
         """setup the test
@@ -403,7 +402,7 @@ class VersionTester(unittest.TestCase):
 
     def test_source_argument_is_not_a_Link_instance(self):
         """testing if a TypeError will be raised when the source argument is
-        not a stalker.core.models.Link instance
+        not a stalker.models.link.Link instance
         """
 
         self.kwargs["source"] = 123123

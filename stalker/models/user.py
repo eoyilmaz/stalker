@@ -22,29 +22,29 @@ class User(Entity):
     
     There are a couple of points to take your attention to:
     
-    * The :attr:`~stalker.core.models.User.code` attribute is derived from
-      the :attr:`~stalker.core.models.User.nice_name` as it is in a
-      :class:`~stalker.core.models.SimpleEntity`, but the
-      :attr:`~stalker.core.models.User.nice_name` is derived from the
-      :attr:`~stalker.core.models.User.login_name` instead of the
-      :attr:`~stalker.core.models.User.name` attribute, so the
-      :attr:`~stalker.core.models.User.code` of a
-      :class:`~stalker.core.models.User` and a
-      :class:`~stalker.core.models.SimpleEntity` will be different then each
-      other. The formatting of the :attr:`~stalker.core.models.User.code`
+    * The :attr:`~stalker.models.user.User.code` attribute is derived from
+      the :attr:`~stalker.models.user.User.nice_name` as it is in a
+      :class:`~stalker.models.entity.SimpleEntity`, but the
+      :attr:`~stalker.models.user.User.nice_name` is derived from the
+      :attr:`~stalker.models.user.User.login_name` instead of the
+      :attr:`~stalker.models.user.User.name` attribute, so the
+      :attr:`~stalker.models.user.User.code` of a
+      :class:`~stalker.models.user.User` and a
+      :class:`~stalker.models.entity.SimpleEntity` will be different then each
+      other. The formatting of the :attr:`~stalker.models.user.User.code`
       attribute is as follows:
       
       * no underscore character is allowed, so while in the
-        :class:`~stalker.core.models.SimpleEntity` class the code could have
-        underscores, in :class:`~stalker.core.models.User` class it is not
+        :class:`~stalker.models.entity.SimpleEntity` class the code could have
+        underscores, in :class:`~stalker.models.user.User` class it is not
         allowed.
       * all the letters in the code will be converted to lower case.
       
       Other than this two new rules all the previous formatting rules from the
-      :class:`~stalker.core.models.SimpleEntity` are still in charge.
+      :class:`~stalker.models.entity.SimpleEntity` are still in charge.
       
-    * The :attr:`~stalker.core.models.User.name` is a synonym of the
-      :attr:`~stalker.core.models.User.login_name`, so changing one of them
+    * The :attr:`~stalker.models.user.User.name` is a synonym of the
+      :attr:`~stalker.models.user.User.login_name`, so changing one of them
       will change the other.
     
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
@@ -83,13 +83,13 @@ class User(Entity):
       user is allowed to have no department to make it easy to create a new
       user and create the department and assign the user it later.
     
-    :type department: :class:`~stalker.core.models.Department`
+    :type department: :class:`~stalker.models.department.Department`
     
     :param password: it is the password of the user, can contain any character.
       Stalker doesn't store the raw passwords of the users. To check a stored
       password with a raw password use
-      :meth:`~stalker.core.models.User.check_password` and to set the password
-      you can use the :attr:`~stalker.core.models.User.password` property
+      :meth:`~stalker.models.user.User.check_password` and to set the password
+      you can use the :attr:`~stalker.models.user.User.password` property
       directly.
     
     :type password: unicode
@@ -97,22 +97,22 @@ class User(Entity):
     :param permission_groups: it is a list of permission groups that this user
       is belong to
     
-    :type permission_groups: :class:`~stalker.core.models.PermissionGroup`
+    :type permission_groups: :class:`~stalker.models.user.PermissionGroup`
     
     :param tasks: it is a list of Task objects which holds the tasks that this
       user has been assigned to
     
-    :type tasks: list of :class:`~stalker.core.models.Task`\ s
+    :type tasks: list of :class:`~stalker.models.task.Task`\ s
     
     :param projects_lead: it is a list of Project objects that this user
-      is the leader of, it is for back refefrencing purposes.
+      is the leader of, it is for back referencing purposes.
     
-    :type projects_lead: list of :class:`~stalker.core.models.Project`\ s
+    :type projects_lead: list of :class:`~stalker.models.project.Project`\ s
     
     :param sequences_lead: it is a list of Sequence objects that this
       user is the leader of, it is for back referencing purposes
     
-    :type sequences_lead: list of :class:`~stalker.core.models.Sequence`
+    :type sequences_lead: list of :class:`~stalker.models.sequence.Sequence`
     
     :param last_login: it is a datetime.datetime object holds the last login
       date of the user (not implemented yet)
@@ -141,7 +141,7 @@ class User(Entity):
         primaryjoin="Users.c.department_id==Departments.c.id",
         back_populates="members",
         uselist=False,
-        doc=""":class:`~stalker.core.models.Department` of the user""",
+        doc=""":class:`~stalker.models.department.Department` of the user""",
         )
 
     email = Column(
@@ -185,7 +185,7 @@ class User(Entity):
         "name",
         doc="""The login name of the user.
         
-        It is a synonym for the :attr:`~stalker.core.models.User.name`
+        It is a synonym for the :attr:`~stalker.models.user.User.name`
         attribute.
         """
     )
@@ -195,8 +195,8 @@ class User(Entity):
         doc="""The initials of the user.
         
         If not spesified, it is the upper case form of first letters of the
-        :attr:`~stalker.core.models.User.first_name` and
-        :attr:`~stalker.core.models.User.last_name`"""
+        :attr:`~stalker.models.user.User.first_name` and
+        :attr:`~stalker.models.user.User.last_name`"""
     )
 
     permission_groups = relationship(
@@ -204,7 +204,7 @@ class User(Entity):
         secondary="User_PermissionGroups",
         doc="""Permission groups that this users is a member of.
         
-        Accepts :class:`~stalker.core.models.PermissionGroup` object.
+        Accepts :class:`~stalker.models.auth.PermissionGroup` object.
         """
     )
 
@@ -213,9 +213,9 @@ class User(Entity):
         primaryjoin="Projects.c.lead_id==Users.c.id",
         #uselist=True,
         back_populates="lead",
-        doc=""":class:`~stalker.coer.models.Project`\ s lead by this user.
+        doc=""":class:`~stalker.models.project.Project`\ s lead by this user.
         
-        It is a list of :class:`~stalker.core.models.Project` instances.
+        It is a list of :class:`~stalker.models.project.Project` instances.
         """
     )
 
@@ -224,9 +224,9 @@ class User(Entity):
         primaryjoin="Sequences.c.lead_id==Users.c.id",
         uselist=True,
         back_populates="lead",
-        doc=""":class:`~stalker.core.models.Sequence`\ s lead by this user.
+        doc=""":class:`~stalker.models.sequence.Sequence`\ s lead by this user.
         
-        It is a list of :class:`~stalker.core.models.Sequence` instances.
+        It is a list of :class:`~stalker.models.sequence.Sequence` instances.
         """
     )
 
@@ -234,9 +234,9 @@ class User(Entity):
         "Task",
         secondary="Task_Resources",
         back_populates="resources",
-        doc=""":class:`~stalker.core..models.Task`\ s assigned to this user.
+        doc=""":class:`~stalker.models.task.Task`\ s assigned to this user.
         
-        It is a list of :class:`~stalker.core.models.Task` instances.
+        It is a list of :class:`~stalker.models.task.Task` instances.
         """
     )
 
@@ -244,8 +244,8 @@ class User(Entity):
         "Booking",
         primaryjoin="Bookings.c.resource_id==Users.c.id",
         back_populates="resource",
-        doc="""A list of :class:`~stalker.core.models.Booking` instances which
-        holds the bookings created for this :class:`~stalker.core.models.User`.
+        doc="""A list of :class:`~stalker.models.task.Booking` instances which
+        holds the bookings created for this :class:`~stalker.models.user.User`.
         """
     )
 
@@ -377,7 +377,7 @@ class User(Entity):
         if department is not None:
             if not isinstance(department, Department):
                 raise TypeError("%s.department should be instance of "
-                                "stalker.core.models.Department not %s" %
+                                "stalker.models.department.Department not %s" %
                                 (self.__class__.__name__,
                                  department.__class__.__name__))
 
@@ -552,7 +552,7 @@ class User(Entity):
         if not isinstance(permission_group, PermissionGroup):
             raise TypeError(
                 "any group in %s.permission_groups should be an instance of"
-                "stalker.core.models.PermissionGroup not %s" %
+                "stalker.models.auth.PermissionGroup not %s" %
                 (self.__class__.__name__, permission_group.__class__.__name__)
             )
 
@@ -568,7 +568,7 @@ class User(Entity):
         if not isinstance(project, Project):
             raise TypeError(
                 "any element in %s.projects_lead should be a"
-                "stalker.core.models.Project instance not %s" %
+                "stalker.models.project.Project instance not %s" %
                 (self.__class__.__name__, project.__class__.__name__)
             )
 
@@ -584,7 +584,7 @@ class User(Entity):
         if not isinstance(sequence, Sequence):
             raise TypeError(
                 "any element in %s.sequences_lead should be an instance of "
-                "stalker.core.models.Sequence not %s " %
+                "stalker.models.sequence.Sequence not %s " %
                 (self.__class__.__name__, sequence.__class__.__name__)
             )
 
@@ -600,7 +600,7 @@ class User(Entity):
         if not isinstance(task, Task):
             raise TypeError(
                 "any element in %s.tasks should be an instance of "
-                "stalker.core.models.Task not %s" %
+                "stalker.models.task.Task not %s" %
                 (self.__class__.__name__, task.__class__.__name__)
             )
 
@@ -608,20 +608,20 @@ class User(Entity):
 
     @property
     def projects(self):
-        """The list of :class:`~stalker.core.models.Project`\ s those the current user assigned to.
+        """The list of :class:`~stalker.models.project.Project`\ s those the current user assigned to.
         
-        returns a list of :class:`~stalker.core.models.Project` objects.
+        returns a list of :class:`~stalker.models.project.Project` objects.
         It is a read-only attribute. To assign a
-        :class:`~stalker.core.models.User` to a
-        :class:`~stalker.core.models.Project`, you need to create a new
-        :class:`~stalker.core.models.Task` with the
-        :attr:`~stalker.core.models.Task.resources` is set to this
-        :class:`~stalker.core.models.User` and assign the
-        :class:`~stalker.core.models.Task` to the
-        :class:`~stalker.core.models.Project` by setting the
-        :attr:`~stalker.core.models.Task.project` attribute of the
-        :class:`~stalker.core.models.Task` to the
-        :class:`~stalker.core.models.Project`.
+        :class:`~stalker.models.user.User` to a
+        :class:`~stalker.models.project.Project`, you need to create a new
+        :class:`~stalker.models.task.Task` with the
+        :attr:`~stalker.models.task.Task.resources` is set to this
+        :class:`~stalker.models.user.User` and assign the
+        :class:`~stalker.models.task.Task` to the
+        :class:`~stalker.models.project.Project` by setting the
+        :attr:`~stalker.models.task.Task.project` attribute of the
+        :class:`~stalker.models.task.Task` to the
+        :class:`~stalker.models.project.Project`.
         """
 
         #return self._projects
@@ -634,7 +634,7 @@ class User(Entity):
     #def _login_name_getter(self):
         #"""The login name of the user.
 
-        #It is a string and also sets the :attr:`~stalker.core.models.User.name`
+        #It is a string and also sets the :attr:`~stalker.models.user.User.name`
         #attribute.
         #"""
 

@@ -17,12 +17,13 @@ class Type(Entity, TargetEntityTypeMixin):
     Type is a generalized version of the previous design that defines types for
     specific classes.
     
-    The purpose of the :class:`~stalker.core.models.Type` class is just to
-    define a new type for a specific :class:`~stalker.core.models.Entity`. For
-    example, you can have a ``Character`` :class:`~stalker.core.models.Asset`
-    or you can have a ``Commercial`` :class:`~stalker.core.models.Project` or
-    you can define a :class:`~stalker.core.models.Link` as an ``Image`` etc.,
-    to create a new :class:`~stalker.core.models.Type` for various classes::
+    The purpose of the :class:`~stalker.models.type.Type` class is just to
+    define a new type for a specific :class:`~stalker.models.entity.Entity`.
+    For example, you can have a ``Character``
+    :class:`~stalker.models.asset.Asset` or you can have a ``Commercial``
+    :class:`~stalker.models.project.Project` or you can define a
+    :class:`~stalker.models.link.Link` as an ``Image`` etc.,
+    to create a new :class:`~stalker.models.type.Type` for various classes::
     
       Type(name="Character", target_entity_type="Asset")
       Type(name="Commercial", target_entity_type="Project")
@@ -40,14 +41,14 @@ class Type(Entity, TargetEntityTypeMixin):
       Type(name="Commercial", target_entity_type=Project)
       Type(name="Image", target_entity_type=Link)
     
-    By using :class:`~stalker.core.models.Type`\ s, one can able to sort and
+    By using :class:`~stalker.models.type.Type`\ s, one can able to sort and
     group same type of entities.
     
-    :class:`~stalker.core.models.Type`\ s are generally used in
-    :class:`~stalker.core.models.Structure`\ s.
+    :class:`~stalker.models.type.Type`\ s are generally used in
+    :class:`~stalker.models.type.Structure`\ s.
     
     :param string target_entity_type: The string defining the target type of
-      this :class:`~stalker.core.models.Type`.
+      this :class:`~stalker.models.type.Type`.
     """
 
     __tablename__ = "Types"

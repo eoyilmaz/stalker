@@ -2,15 +2,15 @@
 """
 In this example we are going to extend the Stalker Object Model (SOM) with two
 new type of classes which are derived from the
-:class:`stalker.core.models.Entity` class.
+:class:`stalker.models.entity.Entity` class.
 
 One of our new classes is going to hold information about Camera, or more
-spesifically it will hold the information of the Camera used on the set for a
+specifically it will hold the information of the Camera used on the set for a
 shooting. The Camera class should hold these information:
  
  * The make of the camera
  * The model of the camera
- * spesifications like:
+ * specifications like:
    * aperture gate 
    * horizontal film back size
    * vertical film back size
@@ -28,19 +28,19 @@ information:
  * The web page of the product if available
 
 To make this example simple and to not introduce the
-:class:`~stalker.core.models.mixin.ReferenceMixin` in this example, which is
+:class:`~stalker.models.mixins.ReferenceMixin` in this example, which is
 explained in other examples, we are going to use simple STRINGs for the web
-page links.
+page links of the manufacturer.
 
 And because we don't want to again make things complex we are not
-going to touch the :class:`stalker.core.models.Shot` class which probably
+going to touch the :class:`stalker.models.shot.Shot` class which probably
 will benefit these two classes. In normal circumstances we would like to
 introduce a new class which derives from the original
-:class:`stalker.core.models.Shot` and add these Camera and Lens
+:class:`stalker.models.shot.Shot` and add these Camera and Lens
 relations to it. But again to not to make things complex we are just going to
 settle with these two.
 
-Don't foreget that, for the sake of brevity we are skipping a lot of things
+Don't forget that, for the sake of brevity we are skipping a lot of things
 while creating these classes, first of all we are not doing any validation on
 the data given to us. Secondly we are not using any properties, but we are
 giving the bare class variables to the users of our classes. And because we are
@@ -49,11 +49,7 @@ without setting up any synonyms for our attributes.
 """
 
 from sqlalchemy import Table, Column, Integer, Float, ForeignKey, String
-from sqlalchemy.orm import mapper
-
-from stalker import db
-from stalker.db import tables
-from stalker.models import Entity
+from stalker import Entity
 
 
 class Camera(Entity):
@@ -72,11 +68,21 @@ class Camera(Entity):
     
     :param cropping_factor: the cropping factor of the camera
     
-    :param web_page: the web page of the camera
-    
+    :param web_page: the web page of the camera    
     """
-
-
+    
+    __tablename__ = 'Cameras'
+    __mapper_args__ = {'polymorphic_identity': 'Camera'}
+    
+    camera_id = Column('id', Integer, ForeignKey('Entities.id'),
+                       primary_key=True)
+    make = Column(String)
+    model = Column(String)
+    aperture_gate = Column(Float(precision=4), default=0)
+    horizontal_film_back = Column(Float(presicion=4), default=0)
+    vertical_film_back = Column(Float(precision=4), default=0)
+    web_page = Column(String)
+    
     def __init__(self,
                  make="",
                  model="",
@@ -86,15 +92,14 @@ class Camera(Entity):
                  cropping_factor=1.0,
                  web_page="",
                  **kwargs):
-        # pass all the extra data to Entity
+        # pass all the extra data to the super (which is Entity)
         super(Camera, self).__init__(**kwargs)
-
+        
         self.make = make
         self.model = model
         self.aperture_gate = aperture_gate
         self.horizontal_film_back = horizontal_film_back
         self.vertical_film_back = vertical_film_back
-        self.cropping_factor = cropping_factor
         self.web_page = web_page
 
 
@@ -111,17 +116,26 @@ class Lens(Entity):
     
     :param web_page: the product web page
     """
-
-
+    
+    __tablename__ = 'Lenses'
+    __mapper_args__ = {'polymorphic_identity': 'Lens'}
+    
+    lens_id = Column('id', Integer, ForeignKey('Entities.id'),
+                     primary_key=True)
+    make = Column(String)
+    model = Column(String)
+    min_focal_length = Column(Float(precision=1))
+    max_focal_length = Column(Float(precision=1))
+    web_page = Column(String)
+    
     def __init__(self,
                  make="",
                  model="",
                  min_focal_length=0,
                  max_focal_length=0,
                  web_page="",
-                 **kwargs
-    ):
-        # pass all the extra data to Entity
+                 **kwargs):
+        # pass all the extra data to the super (which is Entity)
         super(Lens, self).__init__(**kwargs)
 
         self.make = make
@@ -130,62 +144,4 @@ class Lens(Entity):
         self.max_focal_length = max_focal_length
         self.web_page = web_page
 
-
-def setup():
-    """this is the setup method for Stalker to call to learn about how to
-    persist our classes.
-    """
-
-    metadata = db.metadata
-
-    # Camera
-    cameras_table = Table(
-        "cameras", metadata,
-        Column(
-            "id",
-            Integer,
-            ForeignKey(tables.Entities.c.id),
-            primary_key=True
-        ),
-        Column("make", String),
-        Column("model", String),
-        Column("aperture_gate", Float(precision=4)),
-        Column("horizontal_film_back", Float(presicion=4)),
-        Column("vertical_film_back", Float(precision=4)),
-        Column("cropping_factor", Float(precision=4)),
-        Column("web_page", String),
-        )
-
-    # Lens
-    lenses_table = Table(
-        "lenses", metadata,
-        Column(
-            "id",
-            Integer,
-            ForeignKey(tables.Entities.c.id),
-            primary_key=True
-        ),
-        Column("make", String),
-        Column("model", String),
-        Column("min_focal_length", Float(precision=1)),
-        Column("max_focal_length", Float(precision=1)),
-        Column("web_page", String),
-        )
-
-    # map Camera
-    mapper(
-        Camera,
-        cameras_table,
-        inherits=Camera.__base__,
-        polymorphic_identity=Camera.entity_type,
-        )
-
-    # map Lens
-    mapper(
-        Lens,
-        lenses_table,
-        inherits=Lens.__base__,
-        polymorphic_identity=Lens.entity_type,
-        )
-
-    # now we have extended SOM with two new classes
+# now we have extended SOM with two new classes

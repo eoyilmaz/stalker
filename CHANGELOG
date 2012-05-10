@@ -32,6 +32,13 @@ Stalker Changes
   By using this kind of organization, both development and usage will be eased
   out.
 
+* :attr:`~stalker.models.task.Task.task_of` now only accepts
+  :attr:`~stalker.models.entity.TaskableEntity` instances.
+
+* Updated the examples. It is now showing how to extend SOM correctly. 
+
+* Updated the references to the SOM classes in docstrings and rst files.
+
 0.1.2.a5
 --------
 

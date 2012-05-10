@@ -18,7 +18,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
        same name, which is a kind of a code like SH001, SH012A etc., and in
        Stalker you can not have two entities with the same name if their types
        are also matching, to guarantee all the shots are going to have
-       different names the :attr:`~stalker.core.models.Shot.name` attribute of
+       different names the :attr:`~stalker.models.shot.Shot.name` attribute of
        the Shot instances are automatically set to a randomly generated
        **uuid4** sequence.
     
@@ -27,55 +27,56 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
        The name of the shot can be freely set without worrying about clashing
        names.
     
-    Two shots with the same :attr:`~stalker.core.models.Shot.code` can not be
-    assigned to the same :class:`~stalker.core.models.Sequence`.
+    Two shots with the same :attr:`~stalker.models.shot.Shot.code` can not be
+    assigned to the same :class:`~stalker.models.sequence.Sequence`.
     
-    The :attr:`~stalker.core.models.Shot.cut_out` and
-    :attr:`~stalker.core.models.Shot.cut_duration` attributes effects each
-    other. Setting the :attr:`~stalker.core.models.Shot.cut_out` will change
-    the :attr:`~stalker.core.models.Shot.cut_duration` and setting the
-    :attr:`~stalker.core.models.Shot.cut_duration` will change the
-    :attr:`~stalker.core.models.Shot.cut_out` value. The default value of the
-    :attr:`~stalker.core.models.Shot.cut_out` attribute is calculated from the
-    :attr:`~stalker.core.models.Shot.cut_in` and
-    :attr:`~stalker.core.models.Shot.cut_duration` attributes. If both
-    :attr:`~stalker.core.models.Shot.cut_out` and
-    :attr:`~stalker.core.models.Shot.cut_duration` arguments are set to None,
-    the :attr:`~stalker.core.models.Shot.cut_duration` defaults to 100 and
-    :attr:`~stalker.core.models.Shot.cut_out` will be set to
-    :attr:`~stalker.core.models.Shot.cut_in` +
-    :attr:`~stalker.core.models.Shot.cut_duration`. So the priority of the
+    The :attr:`~stalker.models.shot.Shot.cut_out` and
+    :attr:`~stalker.models.shot.Shot.cut_duration` attributes effects each
+    other. Setting the :attr:`~stalker.models.shot.Shot.cut_out` will change
+    the :attr:`~stalker.models.shot.Shot.cut_duration` and setting the
+    :attr:`~stalker.models.shot.Shot.cut_duration` will change the
+    :attr:`~stalker.models.shot.Shot.cut_out` value. The default value of the
+    :attr:`~stalker.models.shot.Shot.cut_out` attribute is calculated from the
+    :attr:`~stalker.models.shot.Shot.cut_in` and
+    :attr:`~stalker.models.shot.Shot.cut_duration` attributes. If both
+    :attr:`~stalker.models.shot.Shot.cut_out` and
+    :attr:`~stalker.models.shot.Shot.cut_duration` arguments are set to None,
+    the :attr:`~stalker.models.shot.Shot.cut_duration` defaults to 100 and
+    :attr:`~stalker.models.shot.Shot.cut_out` will be set to
+    :attr:`~stalker.models.shot.Shot.cut_in` +
+    :attr:`~stalker.models.shot.Shot.cut_duration`. So the priority of the
     attributes are as follows:
     
-      :attr:`~stalker.core.models.Shot.cut_in` >
-      :attr:`~stalker.core.models.Shot.cut_duration` >
-      :attr:`~stalker.core.models.Shot.cut_out`
+      :attr:`~stalker.models.shot.Shot.cut_in` >
+      :attr:`~stalker.models.shot.Shot.cut_duration` >
+      :attr:`~stalker.models.shot.Shot.cut_out`
     
     For still images (which can be also managed by shots) the
-    :attr:`~stalker.core.models.Shot.cut_in` and
-    :attr:`~stalker.core.models.Shot.cut_out` can be set to the same value
-    so the :attr:`~stalker.core.models.Shot.cut_duration` can be set to zero.
+    :attr:`~stalker.models.shot.Shot.cut_in` and
+    :attr:`~stalker.models.shot.Shot.cut_out` can be set to the same value
+    so the :attr:`~stalker.models.shot.Shot.cut_duration` can be set to zero.
     
     Because Shot is getting its relation to a
-    :class:`~stalker.core.models.Project` from the
-    passed :class:`~stalker.core.models.Sequence`, you can skip the
+    :class:`~stalker.models.project.Project` from the
+    passed :class:`~stalker.models.sequence.Sequence`, you can skip the
     ``project`` argument, and if you not the value of the ``project`` argument
     is not going to be used.
     
-    :param sequence: The :class:`~stalker.core.models.Sequence` that this shot
-      belongs to. A shot can only be created with a
-      :class:`~stalker.core.models.Sequence` instance, so it can not be None.
-      The shot itself will be added to the
-      :attr:`~stalker.core.models.Sequence.shots` list of the given sequence.
-      Also the ``project`` of the :class:`~stalker.core.models.Sequence` will
-      be used to set the ``project`` of the current Shot.
+    :param sequence: The :class:`~stalker.models.sequence.Sequence` that this
+      shot belongs to. A shot can only be created with a
+      :class:`~stalker.models.sequence.Sequence` instance, so it can not be
+      None. The shot itself will be added to the
+      :attr:`~stalker.models.sequence.Sequence.shots` list of the given
+      sequence. Also the ``project`` of the
+      :class:`~stalker.models.sequence.Sequence` will be used to set the
+      ``project`` of the current Shot.
     
-    :type sequence: :class:`~stalker.core.models.Sequence`
+    :type sequence: :class:`~stalker.models.sequence.Sequence`
     
     :param integer cut_in: The in frame number that this shot starts. The
       default value is 1. When the ``cut_in`` is bigger then
-      ``cut_out``, the :attr:`~stalker.core.models.Shot.cut_out` attribute is
-      set to :attr:`~stalker.core.models.Shot.cut_in` + 1.
+      ``cut_out``, the :attr:`~stalker.models.shot.Shot.cut_out` attribute is
+      set to :attr:`~stalker.models.shot.Shot.cut_in` + 1.
     
     :param integer cut_duration: The duration of this shot in frames. It should
       be zero or a positive integer value (natural number?) or . The default
@@ -83,9 +84,9 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     
     :param integer cut_out: The out frame number that this shot ends. If it is
       given as a value lower then the ``cut_in`` parameter, then the
-      :attr:`~stalker.core.models.Shot.cut_out` will be set to the same value
-      with :attr:`~stalker.core.models.Shot.cut_in` and the
-      :attr:`~stalker.core.models.Shot.cut_duration` attribute will be set to
+      :attr:`~stalker.models.shot.Shot.cut_out` will be set to the same value
+      with :attr:`~stalker.models.shot.Shot.cut_in` and the
+      :attr:`~stalker.models.shot.Shot.cut_duration` attribute will be set to
       1. Can be skipped. The default value is None.
     """
 
@@ -105,20 +106,6 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     # only the cut_in and cut_out will be enough to calculate the cut_duration
     _cut_in = Column(Integer)
     _cut_out = Column(Integer)
-
-#    assets = relationship(
-#        "Asset",
-#        secondary="Shot_Assets",
-#        #primaryjoin="Shots.c.id==Shot_Assets.c.shot_id",
-#        #secondaryjoin="Shot_Assets.c.asset_id==Assets.c.id",
-#        back_populates="shots",
-#        doc="""The :class:`~stalker.core.models.Asset` instances used in this Shot.
-#        
-#        Holds the relation of a :class:`~stalker.core.models.Shot` with a list
-#        of :class:`~stalker.core.models.Asset`\ s, which are used in this
-#        :class:`~stalker.core.models.Shot`.
-#        """
-#    )
 
     def __init__(self,
                  #code=None,
@@ -164,13 +151,11 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     def __repr__(self):
         """the representation of the Shot
         """
-
         return "<%s (%s, %s)>" % (self.entity_type, self.code, self.code)
 
     def __eq__(self, other):
         """equality operator
         """
-
         # __eq__ always returns false but to be safe the code will be added
         # here
 
@@ -180,7 +165,6 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     def _update_cut_info(self, cut_in, cut_duration, cut_out):
         """updates the cut_in, cut_duration and cut_out attributes
         """
-
         # validate all the values
         self._cut_in = self._validate_cut_in(cut_in)
         self._cut_duration = self._validate_cut_duration(cut_duration)
@@ -201,34 +185,9 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
 
         self._cut_out = self._cut_in + self._cut_duration - 1
 
-#    @validates("assets")
-#    def _validate_assets(self, key, asset):
-#        """validates the given asset value
-#        """
-#
-#        if not isinstance(asset, Asset):
-#            raise TypeError("all the items in the assets list should be"
-#                            "an instance of stalker.core.models.Asset")
-#
-#        return asset
-
-        #def _validate_code(self, code_in):
-        #"""validates the given code value
-        #"""
-
-        ## check if the code_in is None or empty string
-        #if code_in is None:
-        #raise TypeError("the code can not be None")
-
-        #if code_in == "":
-        #raise ValueError("the code can not be empty string")
-
-        #return self._format_code(str(code_in))
-
     def _validate_cut_duration(self, cut_duration_in):
         """validates the given cut_duration value
         """
-
         if cut_duration_in is not None and\
            not isinstance(cut_duration_in, int):
             raise TypeError("cut_duration should be an instance of int")
@@ -238,7 +197,6 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     def _validate_cut_in(self, cut_in_in):
         """validates the given cut_in_in value
         """
-
         if cut_in_in is not None:
             if not isinstance(cut_in_in, int):
                 raise TypeError("cut_in should be an instance of int")
@@ -248,7 +206,6 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     def _validate_cut_out(self, cut_out_in):
         """validates the given cut_out_in value
         """
-        
         if cut_out_in is not None:
             if not isinstance(cut_out_in, int):
                 raise TypeError("cut_out should be an instance of int")
@@ -258,12 +215,11 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     def _validate_sequence(self, sequence):
         """validates the given sequence_in value
         """
-        
         from stalker.models.sequence import Sequence
         
         if not isinstance(sequence, Sequence):
             raise TypeError("the sequence should be an instance of "
-                            "stalker.core.models.Sequence instance")
+                            "stalker.models.sequence.Sequence instance")
         
         for shot in sequence.shots:
             if self.code == shot.code:
@@ -275,35 +231,18 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     def _sequence_getter(self):
         """The getter for the sequence attribute.
         """
-
         return self._sequence
 
     def _sequence_setter(self, sequence):
         """the setter for the sequence attribute.
         """
-
         self._sequence = self._validate_sequence(sequence)
 
     sequence = synonym(
         "_sequence",
         descriptor=property(_sequence_getter, _sequence_setter),
-        doc="""The :class:`~stalker.core.models.Sequence` instance that this :class:`~stalker.core.models.Shot` instance belongs to."""
+        doc="""The :class:`~stalker.models.sequence.Sequence` instance that this :class:`~stalker.models.shot.Shot` instance belongs to."""
     )
-
-    #@property
-    #def code(self): # pylint: disable=E0202
-    #"""The code of this :class:`~stalker.core.models.Shot`.
-
-    #Contrary to the original attribute from the inherited parent
-    #(:attr:`~stalker.core.models.SimpleEntity.code`), the code attribute
-    #can not be set to None or empty string."""
-
-    #return self._code
-
-    #@code.setter # pylint: disable=E1101
-    #def code(self, code_in):
-    ## pylint: disable=E0102, E0202, W0221
-    #self._code = self._validate_code(code_in)
 
     def _cut_duration_getter(self):
         return self._cut_duration
@@ -317,7 +256,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         doc="""The duration of this shot in frames.
         
         It should be a positive integer value. If updated also updates the
-        :attr:`~stalker.core.models.Shot.cut_duration` attribute. The default
+        :attr:`~stalker.models.shot.Shot.cut_duration` attribute. The default
         value is 100."""
     )
 
@@ -333,9 +272,9 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         doc="""The in frame number taht this shot starts.
         
         The default value is 1. When the cut_in is bigger then
-        :attr:`~stalker.core.models.Shot.cut_out`, the
-        :attr:`~stalker.core.models.Shot.cut_out` value is update to
-        :attr:`~stalker.core.models.Shot.cut_in` + 1."""
+        :attr:`~stalker.models.shot.Shot.cut_out`, the
+        :attr:`~stalker.models.shot.Shot.cut_out` value is update to
+        :attr:`~stalker.models.shot.Shot.cut_in` + 1."""
     )
 
     def _cut_out_getter(self):
@@ -351,35 +290,10 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         descriptor=property(_cut_out_getter, _cut_out_setter),
         doc="""The out frame number that this shot ends.
         
-        When the :attr:`~stalker.core.models.Shot.cut_out` is set to a value
-        lower than :attr:`~stalker.core.models.Shot.cut_in`,
-        :attr:`~stalker.core.models.Shot.cut_out` will be updated to
-        :attr:`~stalker.core.models.Shot.cut_in` + 1. The default value is
-        :attr:`~stalker.core.models.Shot.cut_in` +
-        :attr:`~stalker.core.models.Shot.cut_duration`."""
+        When the :attr:`~stalker.models.shot.Shot.cut_out` is set to a value
+        lower than :attr:`~stalker.models.shot.Shot.cut_in`,
+        :attr:`~stalker.models.shot.Shot.cut_out` will be updated to
+        :attr:`~stalker.models.shot.Shot.cut_in` + 1. The default value is
+        :attr:`~stalker.models.shot.Shot.cut_in` +
+        :attr:`~stalker.models.shot.Shot.cut_duration`."""
     )
-
-    #@property
-    #def name(self): # pylint: disable=E0202
-    #"""Name of this Shot.
-
-    #Different than other :class:`~stalker.core.models.SimpleEntity`
-    #derivatives, the :class:`~stalker.core.models.Shot` classes
-    #:attr:`~stalker.core.models.Shot.name` attribute is read-only. And the
-    #stored value is a uuid4 sequence.
-    #"""
-
-    #return self._name
-
-    #@name.setter # pylint: disable=E1101
-    #def name(self, name_in):
-    ## pylint: disable=E0102, E0202, W0221
-    #pass
-
-## SHOT ASSETS
-#Shot_Assets = Table(
-#    "Shot_Assets", Base.metadata,
-#    Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
-#    Column("asset_id", Integer, ForeignKey("Assets.id"), primary_key=True)
-#)
-

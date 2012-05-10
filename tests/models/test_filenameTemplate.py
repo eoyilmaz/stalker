@@ -13,14 +13,12 @@ class Asset(object):
 
 
 class FilenameTemplateTester(unittest.TestCase):
-    """tests the stalker.core.models.FilenameTemplate class
+    """tests the stalker.models.templates.FilenameTemplate class
     """
-
 
     def setUp(self):
         """setup the test
         """
-
         self.kwargs = {
             "name": "Test FilenameTemplate",
             "path_code": "ASSETS/{{asset.code}}/{{task.code}}/",

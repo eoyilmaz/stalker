@@ -106,7 +106,7 @@ class BookingTester(unittest.TestCase):
 
     def test_task_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task argument is not
-        a stalker.core.models.Task instance
+        a stalker.models.task.Task instance
         """
 
         self.kwargs["task"] = "this is a task"
@@ -115,7 +115,7 @@ class BookingTester(unittest.TestCase):
 
     def test_task_attribute_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task attribute is not
-        a stalker.core.models.Task instance
+        a stalker.models.task.Task instance
         """
 
         self.assertRaises(TypeError, setattr, self.test_booking, "task",
@@ -211,7 +211,7 @@ class BookingTester(unittest.TestCase):
 
     def test_resource_argument_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the resource argument is
-        not a stalker.core.models.User instance
+        not a stalker.models.user.User instance
         """
 
         self.kwargs["resource"] = "This is a resource"
@@ -220,7 +220,7 @@ class BookingTester(unittest.TestCase):
 
     def test_resource_attribute_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the resource attribute is
-        set to a value other than a stalker.core.models.User instance
+        set to a value other than a stalker.models.user.User instance
         """
 
         self.assertRaises(TypeError, setattr, self.test_booking, "resource",

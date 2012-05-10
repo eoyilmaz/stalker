@@ -36,7 +36,7 @@ class Note(SimpleEntity):
 
     content = Column(
         String,
-        doc="""The content of this :class:`~stalker.core.models.Note` instance.
+        doc="""The content of this :class:`~stalker.models.note.Note` instance.
         
         Content is a string representing the content of this Note, can be given
         as an empty string or can be even None, but anything other than None or

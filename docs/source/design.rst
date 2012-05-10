@@ -57,20 +57,20 @@ Lets look at how a simple studio works and try to create our asset management
 concepts around it.
 
 An animation/vfx studios duty is to complete a
-:class:`~stalker.core.models.Project`. A project, generally is about to create
-a :class:`~stalker.core.models.Sequence` of :class:`~stalker.core.models.Shot`\
+:class:`~stalker.models.project.Project`. A project, generally is about to create
+a :class:`~stalker.models.sequence.Sequence` of :class:`~stalker.models.shot.Shot`\
 s which are a series of images those at the end converts to a movie. So a
 sequence in general contains Shots. Shots can contain
-:class:`~stalker.core.models.Asset`\ s. So basically to complete a project the
+:class:`~stalker.models.asset.Asset`\ s. So basically to complete a project the
 studio should complete the sequences thus the shots and assets.
 
 Furthermore all the Projects, Sequences, Shots or Assets are splitted in to
-different :class:`~stalker.core.models.Task`\ s those need to be done
+different :class:`~stalker.models.task.Task`\ s those need to be done
 sequentially or in parallel to complete that project.
 
 A Task relates to a work, a work is a quantity of time spend or going to be
 spend for that specific task. The time spend on the course of completion of a
-Task can be recorded with :class:`~stalker.core.models.Booking`\ s. Bookings
+Task can be recorded with :class:`~stalker.models.task.Booking`\ s. Bookings
 shows the time of an artist is booked for a certain Task. It can be showing a
 past work or a future work. So it holds information about how much time has
 been spent to complete a Task.

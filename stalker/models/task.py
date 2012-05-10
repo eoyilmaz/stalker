@@ -19,25 +19,25 @@ logger.setLevel(logging.WARNING)
 
 class Booking(Entity, ScheduleMixin):
     """Holds information about the time spend on a specific
-    :class:`~stalker.core.models.Task` by a specific
-    :class:`~stalker.core.models.User`.
+    :class:`~stalker.models.task.Task` by a specific
+    :class:`~stalker.models.user.User`.
     
     Bookings are created per resource. It means, you need to record all the 
     works separately for each resource. So there is only one resource in a 
-    Booking instance, thus :attr:`~stalker.core.models.Booking.duration`
+    Booking instance, thus :attr:`~stalker.models.task.Booking.duration`
     attribute is equal to the meaning of ``effort``.
     
-    A :class:`~stalker.core.models.Booking` instance needs to be initialized
-    with a :class:`~stalker.core.models.Task` and a
-    :class:`~stalker.core.models.User` instances.
+    A :class:`~stalker.models.task.Booking` instance needs to be initialized
+    with a :class:`~stalker.models.task.Task` and a
+    :class:`~stalker.models.user.User` instances.
     
-    Adding overlapping booking for a :class:`~stalker.core.models.User` will
-    raise a :class:`~stalker.core.errors.OverBookedWarning`.
+    Adding overlapping booking for a :class:`~stalker.models.user.User` will
+    raise a :class:`~stalker.errors.OverBookedWarning`.
     
-    :param task: The :class:`~stalker.core.models.Task` instance that this
+    :param task: The :class:`~stalker.models.task.Task` instance that this
       booking belongs to.
     
-    :param resource: The :class:`~stalker.core.models.User` instance that this
+    :param resource: The :class:`~stalker.models.user.User` instance that this
       booking is created for.
     """
 
@@ -51,7 +51,7 @@ class Booking(Entity, ScheduleMixin):
         primaryjoin="Bookings.c.task_id==Tasks.c.id",
         uselist=False,
         back_populates="bookings",
-        doc="""The :class:`~stalker.core.models.Task` instance that this 
+        doc="""The :class:`~stalker.models.task.Task` instance that this 
         booking is created for"""
     )
 
@@ -61,8 +61,8 @@ class Booking(Entity, ScheduleMixin):
         primaryjoin="Bookings.c.resource_id==Users.c.id",
         uselist=False,
         back_populates="bookings",
-        doc="""The :class:`~stalker.core.models.User` instance that this booking
-        is created for"""
+        doc="""The :class:`~stalker.models.user.User` instance that this 
+        booking is created for"""
     )
 
     def __init__(self, task=None, resource=None, **kwargs):
@@ -79,7 +79,7 @@ class Booking(Entity, ScheduleMixin):
 
         if not isinstance(task, Task):
             raise TypeError("%s.task should be an instance of "
-                            "stalker.core.models.Task not %s" %
+                            "stalker.models.task.Task not %s" %
                             (self.__class__.__name__,
                              task.__class__.__name__))
 
@@ -98,7 +98,7 @@ class Booking(Entity, ScheduleMixin):
 
         if not isinstance(resource, User):
             raise TypeError("%s.resource should be a "
-                            "stalker.core.models.User instance not %s" %
+                            "stalker.models.user.User instance not %s" %
                             (self.__class__.__name__,
                              resource.__class__.__name__))
         
@@ -109,9 +109,9 @@ class Booking(Entity, ScheduleMixin):
 
             if booking.start_date == self.start_date or\
                booking.due_date == self.due_date or\
-               (self.due_date > booking.start_date and\
+               (self.due_date > booking.start_date and
                 self.due_date < booking.due_date) or\
-               (self.start_date > booking.start_date and\
+               (self.start_date > booking.start_date and
                 self.start_date < booking.due_date):
                 raise OverBookedWarning(
                     "The resource %s is overly booked with %s and %s" %
@@ -125,59 +125,59 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
     Tasks are the smallest meaningful part that should be accomplished to
-    complete the a :class:`~stalker.core.models.Project`.
+    complete the a :class:`~stalker.models.project.Project`.
     
     In Stalker, currently these items supports Tasks:
     
-      * :class:`~stalker.core.models.Project`
-      * :class:`~stalker.core.models.Sequence`
-      * :class:`~stalker.core.models.Asset`
-      * :class:`~stalker.core.models.Shot`
-      * :class:`~stalker.core.models.TaskableEntity` itself and any class 
-        which derives from :class:`~stalker.core.models.TaskableEntity`.
+      * :class:`~stalker.models.project.Project`
+      * :class:`~stalker.models.sequence.Sequence`
+      * :class:`~stalker.models.asset.Asset`
+      * :class:`~stalker.models.shot.Shot`
+      * :class:`~stalker.models.entity.TaskableEntity` itself and any class 
+        which derives from :class:`~stalker.models.entity.TaskableEntity`.
     
     If you want to have your own class to be *taskable* derive it from the
-    :class:`~stalker.core.models.TaskableEntity` to add the ability to 
-    connect a :class:`~stalker.core.models.Task` to it.
+    :class:`~stalker.models.entity.TaskableEntity` to add the ability to 
+    connect a :class:`~stalker.models.task.Task` to it.
     
     The Task class itself is mixed with
-    :class:`~stalker.core.models.StatusMixin` and
-    :class:`~stalker.core.models.ScheduleMixin`. To be able to give the
-    :class:`~stalker.core.models.Task` a *Status* and a *start* and *end* time.
+    :class:`~stalker.models.mixins.StatusMixin` and
+    :class:`~stalker.models.mixins.ScheduleMixin`. To be able to give the
+    :class:`~stalker.models.task.Task` a *Status* and a *start* and *end* time.
     
     :param int priority: It is a number between 0 to 1000 which defines the
-      priority of the :class:`~stalker.core.models.Task`. The higher the value
+      priority of the :class:`~stalker.models.task.Task`. The higher the value
       the higher its priority. The default value is 500.
     
-    :param resources: The :class:`~stalker.core.models.User`\ s assigned to
-      this :class:`~stalker.core.models.Task`. A
-      :class:`~stalker.core.models.Task` without any resource can not be
+    :param resources: The :class:`~stalker.models.user.User`\ s assigned to
+      this :class:`~stalker.models.task.Task`. A
+      :class:`~stalker.models.task.Task` without any resource can not be
       scheduled.
     
-    :type resources: list of :class:`~stalker.core.models.User`
+    :type resources: list of :class:`~stalker.models.user.User`
     
     :param effort: The total effort that needs to be spend to complete this
-      :class:`~stalker.core.models.Task`. Can be used to create an initial bid
+      :class:`~stalker.models.task.Task`. Can be used to create an initial bid
       of how long this task will take. The effort is equally divided to the
       assigned resources. So if the effort is 10 days and 2
-      :attr:`~stalker.core.models.Task.resources` is assigned then the
-      :attr:`~stalker.core.models.Task.duration` of the task is going to be 5
+      :attr:`~stalker.models.task.Task.resources` is assigned then the
+      :attr:`~stalker.models.task.Task.duration` of the task is going to be 5
       days (if both of the resources are free to work). The default value is
       stalker.conf.defaults.DEFAULT_TASK_DURATION.
       
       The effort argument defines the
-      :attr:`~stalker.core.models.Task.duration` of the task. Every resource is
+      :attr:`~stalker.models.task.Task.duration` of the task. Every resource is
       counted equally effective and the
-      :attr:`~stalker.core.models.Task.duration` will be calculated by the
+      :attr:`~stalker.models.task.Task.duration` will be calculated by the
       simple formula:
       
       .. math::
          
          {duration} = \\frac{{effort}}{n_{resources}}
       
-      And changing the :attr:`~stalker.core.models.Task.duration` will also
-      effect the :attr:`~stalker.core.models.Task.effort` spend. The
-      :attr:`~stalker.core.models.Task.effort` will be calculated with the
+      And changing the :attr:`~stalker.models.task.Task.duration` will also
+      effect the :attr:`~stalker.models.task.Task.effort` spend. The
+      :attr:`~stalker.models.task.Task.effort` will be calculated with the
       formula:
       
       .. math::
@@ -186,68 +186,68 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :type effort: datetime.timedelta
     
-    :param depends: A list of :class:`~stalker.core.models.Task`\ s that this
-      :class:`~stalker.core.models.Task` is depending on. A Task can not depend
+    :param depends: A list of :class:`~stalker.models.task.Task`\ s that this
+      :class:`~stalker.models.task.Task` is depending on. A Task can not depend
       to itself or any other Task which are already depending to this one in
       anyway or a CircularDependency error will be raised.
     
-    :type depends: list of :class:`~stalker.core.models.Task`
+    :type depends: list of :class:`~stalker.models.task.Task`
     
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
     
-    :param task_of: A :class:`~stalker.core.models.TaskableEntity` instance
+    :param task_of: A :class:`~stalker.models.entity.TaskableEntity` instance
       which is the owner of this Task.
     
-    :type task_of: :class:`~stalker.core.models.TaskableEntity`
+    :type task_of: :class:`~stalker.models.entity.TaskableEntity`
     """
     #.. :param depends: A list of
-    #:class:`~stalker.core.models.TaskDependencyRelation` objects. Holds
-    #information about the list of other :class:`~stalker.core.models.Task`\ s
+    #:class:`~stalker.models.task.TaskDependencyRelation` objects. Holds
+    #information about the list of other :class:`~stalker.models.task.Task`\ s
     #which the current one is dependent on.
 
     #.. giving information about the dependent tasks. The given list is iterated
-    #and the :attr:`~stalker.core.models.Task.start_date` attribute is set to
-    #the latest found :attr:`~stalker.core.models.Task.due_date` attribute of
-    #the dependent :class:`~stalker.core.models.Task`\ s.
+    #and the :attr:`~stalker.models.task.Task.start_date` attribute is set to
+    #the latest found :attr:`~stalker.models.task.Task.due_date` attribute of
+    #the dependent :class:`~stalker.models.task.Task`\ s.
 
-    #.. :type depends: list of :class:`~stalker.core.models.TaskDependencyRelation`
+    #.. :type depends: list of :class:`~stalker.models.task.TaskDependencyRelation`
 
 
-    #:param parent_task: Another :class:`~stalker.core.models.Task` which is the
-    #parent of the current :class:`~stalker.core.models.Task`.
+    #:param parent_task: Another :class:`~stalker.models.task.Task` which is the
+    #parent of the current :class:`~stalker.models.task.Task`.
 
-    #:class:`~stalker.core.models.Task`\ s can be grouped by using parent and
+    #:class:`~stalker.models.task.Task`\ s can be grouped by using parent and
     #child relation.
 
-    #:type parent_task: :class:`~stalker.core.models.Task`
+    #:type parent_task: :class:`~stalker.models.task.Task`
 
-    #:param sub_tasks: A list of other :class:`~stalker.core.models.Task`\ s
+    #:param sub_tasks: A list of other :class:`~stalker.models.task.Task`\ s
     #which are the child of the current one. A
-    #:class:`~stalker.core.models.Task` with other child
-    #:class:`~stalker.core.models.Task`\ s:
+    #:class:`~stalker.models.task.Task` with other child
+    #:class:`~stalker.models.task.Task`\ s:
 
     #* can not have any resources
     #* can not have any effort set
     #* can not have any versions
 
-    #The only reason of a :class:`~stalker.core.models.Task` to have other
-    #:class:`~stalker.core.models.Task`\ s as child is to group them. So it
-    #is meaningles to let a parent :class:`~stalker.core.models.Task` to have
+    #The only reason of a :class:`~stalker.models.task.Task` to have other
+    #:class:`~stalker.models.task.Task`\ s as child is to group them. So it
+    #is meaningles to let a parent :class:`~stalker.models.task.Task` to have
     #any resource or any effort or any verions. The
-    #:attr:`~stalker.core.models.Task.start_date`,
-    #:attr:`~stalker.core.models.Task.due_date` and
-    #:attr:`~stalker.core.models.Task.duration` attributes of a
-    #:class:`~stalker.core.models.Task` with child classes will be based on
+    #:attr:`~stalker.models.task.Task.start_date`,
+    #:attr:`~stalker.models.task.Task.due_date` and
+    #:attr:`~stalker.models.task.Task.duration` attributes of a
+    #:class:`~stalker.models.task.Task` with child classes will be based on
     #it childrens date attributes.
 
-    #:type child_tasks: :class:`~stalker.core.models.Task`.
+    #:type child_tasks: :class:`~stalker.models.task.Task`.
 
-    #:param versions: A list of :class:`~stalker.core.models.Version` objects
+    #:param versions: A list of :class:`~stalker.models.version.Version` objects
     #showing the produced work on the repository. This is the relation between
     #database and the repository.
 
-    #:type versions: list of :class:`~stalker.core.models.Version`
+    #:type versions: list of :class:`~stalker.models.version.Version`
     #"""
 
 
@@ -285,7 +285,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         primaryjoin="Tasks.c.id==Task_Tasks.c.task_id",
         secondaryjoin="Task_Tasks.c.depends_to_task_id==Tasks.c.id",
         backref="dependent_of",
-        doc="""A list of :class:`~stalker.core.models.Task`\ s that this one is depending on.
+        doc="""A list of :class:`~stalker.models.task.Task`\ s that this one is depending on.
         
         A CircularDependencyError will be raised when the task dependency
         creates a circlar dependency which means it is not allowed to create
@@ -301,7 +301,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
         #backref="tasks",
         back_populates="tasks",
-        doc="""The list of :class:`stalker.core.models.User`\ s instances assigned to this Task.
+        doc="""The list of :class:`stalker.models.user.User`\ s instances assigned to this Task.
         """
     )
 
@@ -318,7 +318,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         The assigned object should have an attribute called ``tasks``. Any
         object which is not inherited from
-        :class:`~stalker.core.models.TaskableEntity` thus doesn't have a
+        :class:`~stalker.models.entity.TaskableEntity` thus doesn't have a
         ``tasks`` attribute which is mapped to the Tasks.task_of attribute
         will raise an AttributeError.
         """
@@ -328,7 +328,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         "Booking",
         primaryjoin="Bookings.c.task_id==Tasks.c.id",
         back_populates="task",
-        doc="""A list of :class:`~stalker.core.models.Booking` instances showing who and when spent how much effort on this task.
+        doc="""A list of :class:`~stalker.models.task.Booking` instances showing who and when spent how much effort on this task.
         """
     )
 
@@ -336,7 +336,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         "Version",
         primaryjoin="Versions.c.version_of_id==Tasks.c.id",
         back_populates="version_of",
-        doc="""A list of :class:`~stalker.core.models.Version` instances showing the files created for this task.
+        doc="""A list of :class:`~stalker.models.version.Version` instances showing the files created for this task.
         """
     )
 
@@ -405,7 +405,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         if not isinstance(booking, Booking):
             raise TypeError(
                 "all the elements in the %s.bookings should be an instances "
-                "of stalker.core.models.Booking not %s instance" %
+                "of stalker.models.task.Booking not %s instance" %
                 (self.__class__.__name__, booking.__class__.__name__))
 
         return booking
@@ -426,12 +426,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 
         #if not isinstance(depends_in, list):
         #raise TypeError("the depends attribute should be an list of"
-        #"stalker.core.models.Task instances")
+        #"stalker.models.task.Task instances")
 
 
         if not isinstance(depends, Task):
             raise TypeError("all the elements in the depends should be an "
-                            "instance of stalker.core.models.Task")
+                            "instance of stalker.models.task.Task")
 
         # check for the circular dependency
         _check_circular_dependency(depends, self)
@@ -484,22 +484,22 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         Can be used to create an initial bid of how long this task going to
         take. The effort is equally divided to the assigned resources. So if
         the effort is 10 days and 2 resources is assigned then the
-        :attr:`~stalker.core.models.Task.duration` of the task is going to be 5
+        :attr:`~stalker.models.task.Task.duration` of the task is going to be 5
         days (if both of the resources are free to work). The default value is
         stalker.conf.defaults.DEFAULT_TASK_DURATION.
       
-        The effort defines the :attr:`~stalker.core.models.Task.duration` of
+        The effort defines the :attr:`~stalker.models.task.Task.duration` of
         the task. Every resource is counted equally effective and the
-        :attr:`~stalker.core.models.Task.duration` will be calculated by the
+        :attr:`~stalker.models.task.Task.duration` will be calculated by the
         simple formula:
         
         .. math::
            
            {duration} = \\frac{{effort}}{n_{resources}}
         
-        And changing the :attr:`~stalker.core.models.Task.duration` will also
-        effect the :attr:`~stalker.core.models.Task.effort` spend. The
-        :attr:`~stalker.core.models.Task.effort` will be calculated with the
+        And changing the :attr:`~stalker.models.task.Task.duration` will also
+        effect the :attr:`~stalker.models.task.Task.effort` spend. The
+        :attr:`~stalker.models.task.Task.effort` will be calculated with the
         formula:
            
         .. math::
@@ -523,17 +523,23 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """validates the given task_of value
         """
 
-        # the object given withe the task_of argument should have an attribute
-        # called "tasks"
+        # the object given with the task_of argument should be an instance of
+        # TaskableEntity
+        
         if task_of is None:
-            raise TypeError("'task_of' can not be None, this will produce "
-                            "Tasks without a parent, to remove a task from "
-                            "a TaskableEntity, assign the task to another "
-                            "TaskableEntity or delete it.")
-
-        if not hasattr(task_of, "tasks"):
-            raise AttributeError("the object given with 'task_of' should have "
-                                 "an attribute called 'tasks'")
+            raise TypeError(
+                "'task_of' can not be None, this will produce Tasks without a "
+                "parent, to remove a task from a TaskableEntity, assign the "
+                "task to another TaskableEntity or delete it."
+            )
+        
+        from stalker.models.entity import TaskableEntity
+        
+        if not isinstance(task_of, TaskableEntity):
+            raise TypeError(
+                "'Task.task_of' should be an instance of "
+                "stalker.models.entity.TaskableEntity not %s" % type(task_of)
+            )
 
         return task_of
 
@@ -566,7 +572,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 
         if not isinstance(resource, User):
             raise TypeError("resources should be a list of "
-                            "stalker.core.models.User instances")
+                            "stalker.models.user.User instances")
 
             ## milestones do not need resources
             #if self.is_milestone:
@@ -585,7 +591,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         if not isinstance(version, Version):
             raise TypeError("all the elements in the versions list should be "
-                            "stalker.core.models.Version instances")
+                            "stalker.models.version.Version instances")
 
         return version
 
@@ -631,9 +637,9 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""The overridden duration attribute.
         
         It is a datetime.timedelta instance. Showing the difference of the
-        :attr:`~stalker.core.models.ScheduleMixin.start_date` and the
-        :attr:`~stalker.core.models.ScheduleMixin.due_date`. If edited it
-        changes the :attr:`~stalker.core.models.ScheduleMixin.due_date`
+        :attr:`~stalker.models.mixins.ScheduleMixin.start_date` and the
+        :attr:`~stalker.models.mixins.ScheduleMixin.due_date`. If edited it
+        changes the :attr:`~stalker.models.mixins.ScheduleMixin.due_date`
         attribute value.
         """
     )
@@ -657,34 +663,34 @@ def _check_circular_dependency(task, check_for_task):
 
 
 #class TaskDependencyRelation(object):
-#"""Holds information about :class:`~stalker.core.models.Task` dependencies.
+#"""Holds information about :class:`~stalker.models.task.Task` dependencies.
 
 #(DEVELOPERS: It could be an association proxy for the Task class)
 
 #A TaskDependencyRelation object basically defines which
-#:class:`~stalker.core.models.Task` is dependedt
-#to which other :class:`~stalker.core.models.Task` and what is the lag
+#:class:`~stalker.models.task.Task` is dependent
+#to which other :class:`~stalker.models.task.Task` and what is the lag
 #between the end of the dependent to the start of the dependee.
 
-#A :class:`~stalker.core.models.Task` can not be set dependent to it self.
-#So the the :attr:`~stalker.core.models.TaskDependencyRelation.depends` list
+#A :class:`~stalker.models.task.Task` can not be set dependent to it self.
+#So the the :attr:`~stalker.models.task.TaskDependencyRelation.depends` list
 #can not contain the same value with
-#:attr:`~stalker.core.models.TaskDependencyRelation.task`.
+#:attr:`~stalker.models.task.TaskDependencyRelation.task`.
 
-#:param task: The :class:`~stalker.core.models.Task` that is dependent to
+#:param task: The :class:`~stalker.models.task.Task` that is dependent to
 #others.
 
-#:type task: :class:`~stalker.core.models.Task`
+#:type task: :class:`~stalker.models.task.Task`
 
-#:param depends: A :class:`~stalker.core.models.Task`\ s that the
-#:class:`~stalker.core.models.Task` which is held by the
+#:param depends: A :class:`~stalker.models.task.Task`\ s that the
+#:class:`~stalker.models.task.Task` which is held by the
 #:attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
-#dependening on. The :attr:`~stalker.core.models.Task.start_date` and the
-#:attr:`~stalker.core.models.Task.due_date` attributes of the
-#:class:`~stalker.core.models.Task` is updated if it is before the
-#``due_date`` of the dependent :class:`~stalker.core.models.Task`.
+#dependening on. The :attr:`~stalker.models.task.Task.start_date` and the
+#:attr:`~stalker.models.task.Task.due_date` attributes of the
+#:class:`~stalker.models.task.Task` is updated if it is before the
+#``due_date`` of the dependent :class:`~stalker.models.task.Task`.
 
-#:type depends: :class:`~stalker.core.models.Task`
+#:type depends: :class:`~stalker.models.task.Task`
 
 #:param lag: The lag between the end of the dependent task to the start of
 #the dependee. It is an instance of timedelta and could be a negative

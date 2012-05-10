@@ -168,14 +168,14 @@ class ReviewTest(unittest.TestCase):
 
     def test_to_argument_is_not_Entity_instance(self):
         """testing if an TypeError will be raised when the object given
-        with the `to` argument is not a stalker.core.models.Entity instance
+        with the `to` argument is not a stalker.models.entity.Entity instance
         """
         self.kwargs["to"] = 123123
         self.assertRaises(TypeError, Review, **self.kwargs)
 
     def test_to_attribute_is_not_Entity_instance(self):
         """testing if an TypeError will be raised when the object given with
-        the `to` is not a stalker.core.models.Entity instance.
+        the `to` is not a stalker.models.entity.Entity instance.
         """
         self.assertRaises(TypeError, setattr, self.test_review, "to",
                           1243123)

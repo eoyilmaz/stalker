@@ -5,7 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 #from stalker import db
-#from stalker.core.models import User
+#from stalker import User
 
 ## create engine
 #db.setup("sqlite:////tmp/declerative_test.db")

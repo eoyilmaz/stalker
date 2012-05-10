@@ -18,9 +18,8 @@ class Link(object): pass
 
 
 class StructureTester(unittest.TestCase):
-    """tests the stalker.core.models.Structure class
+    """tests the stalker.models.structure.Structure class
     """
-
 
     def setUp(self):
         """seting up the tests

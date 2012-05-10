@@ -49,29 +49,29 @@ class EntityMeta(type):
 class SimpleEntity(Base):
     """The base class of all the others
     
-    The :class:`~stalker.core.models.SimpleEntity` is the starting point of the
-    Stalker Object Model, it starts by adding the basic information about an
-    entity which are :attr:`~stalker.core.models.SimpleEntity.name`,
-    :attr:`~stalker.core.models.SimpleEntity.description`, the audit
-    information like :attr:`~stalker.core.models.SimpleEntity.created_by`,
-    :attr:`~stalker.core.models.SimpleEntity.updated_by`,
-    :attr:`~stalker.core.models.SimpleEntity.date_created`,
-    :attr:`~stalker.core.models.SimpleEntity.date_updated` and a couple of
-    naming attributes like :attr:`~stalker.core.models.SimpleEntity.code` and
-    :attr:`~stalker.core.models.SimpleEntity.nice_name` and last but not least
-    the :attr:`~stalker.core.models.SimpleEntity.type` attribute which is very
-    important for entities that needs a type.
+    The :class:`~stalker.models.entity.SimpleEntity` is the starting point of
+    the Stalker Object Model, it starts by adding the basic information about
+    an entity which are :attr:`~stalker.models.entity.SimpleEntity.name`,
+    :attr:`~stalker.models.entity.SimpleEntity.description`, the audit
+    information like :attr:`~stalker.models.entity.SimpleEntity.created_by`,
+    :attr:`~stalker.models.entity.SimpleEntity.updated_by`,
+    :attr:`~stalker.models.entity.SimpleEntity.date_created`,
+    :attr:`~stalker.models.entity.SimpleEntity.date_updated` and a couple of
+    naming attributes like :attr:`~stalker.models.entity.SimpleEntity.code` and
+    :attr:`~stalker.models.entiy.SimpleEntity.nice_name` and last but not least
+    the :attr:`~stalker.models.entity.SimpleEntity.type` attribute which is
+    very important for entities that needs a type.
     
-    For derived classes if the :attr:`~stalker.core.models.SimpleEntity.type`
+    For derived classes if the :attr:`~stalker.models.entity.SimpleEntity.type`
     needed to be specifically specified, that is it can not be None or nothing
-    else then a :class:`~stalker.core.models.Type` instance, set the
+    else then a :class:`~stalker.models.type.Type` instance, set the
     ``strictly_typed`` class attribute to True::
       
       class NewClass(SimpleEntity):
           __strictly_typed__ = True
     
     This will ensure that the derived class always have a proper
-    :attr:`~stalker.core.models.SimpleEntity.type` attribute and can not
+    :attr:`~stalker.models.entity.SimpleEntity.type` attribute and can not
     initialize without one.
     
     Two SimpleEntities considered to be equal if they have the same name, the
@@ -122,12 +122,12 @@ class SimpleEntity(Base):
       could not again have white spaces at the beginning and at the end of the
       string, again any given objects will be converted to strings
     
-    :param created_by: The :class:`~stalker.core.models.User` who has created
+    :param created_by: The :class:`~stalker.models.user.User` who has created
       this object
     
-    :type created_by: :class:`~stalker.core.models.User`
+    :type created_by: :class:`~stalker.models.user.User`
     
-    :param updated_by: The :class:`~stalker.core.models.User` who has updated
+    :param updated_by: The :class:`~stalker.models.user.User` who has updated
       this object lastly. The created_by and updated_by attributes point the
       same object if this object is just created.
     
@@ -154,7 +154,7 @@ class SimpleEntity(Base):
     :param type: The type of the current SimpleEntity. Used across several
       places in Stalker. Can be None. The default value is None.
     
-    :type type: :class:`~stalker.core.models.Type`
+    :type type: :class:`~stalker.models.type.Type`
     """
 
     __strictly_typed__ = False
@@ -205,8 +205,7 @@ class SimpleEntity(Base):
         backref="entities_created",
         primaryjoin="SimpleEntity.created_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`~stalker.core.models.User` who has created this object."""
-        ,
+        doc="""The :class:`~stalker.models.user.User` who has created this object."""
         )
 
     updated_by_id = Column(
@@ -220,7 +219,7 @@ class SimpleEntity(Base):
         backref="entities_updated",
         primaryjoin="SimpleEntity.updated_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`~stalker.core.models.User` who has updated this object."""
+        doc="""The :class:`~stalker.models.user.User` who has updated this object."""
         ,
         )
 
@@ -249,8 +248,8 @@ class SimpleEntity(Base):
         primaryjoin="SimpleEntity.type_id==Type.type_id_local",
         doc="""The type of the object.
         
-        It is an instance of :class:`~stalker.core.models.Type` with a proper
-        :attr:`~stalker.core.models.Type.target_entity_type`.
+        It is an instance of :class:`~stalker.models.type.Type` with a proper
+        :attr:`~stalker.models.type.Type.target_entity_type`.
         """
     )
 
@@ -447,7 +446,7 @@ class SimpleEntity(Base):
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
                 raise TypeError("%s.created_by should be an instance of"
-                                "stalker.core.models.User" %
+                                "stalker.models.user.User" %
                                 self.__class__.__name__)
         
         return created_by_in
@@ -466,7 +465,7 @@ class SimpleEntity(Base):
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
                 raise TypeError("%s.updated_by should be an instance of"
-                                "stalker.core.models.User" %
+                                "stalker.models.user.User" %
                                 self.__class__.__name__)
 
         return updated_by_in
@@ -529,7 +528,7 @@ class SimpleEntity(Base):
 
         if raise_error:
             raise TypeError("%s.type must be an instance of "
-                            "stalker.core.models.Type not %s" %
+                            "stalker.models.type.Type not %s" %
                             (self.__class__.__name__, type_in))
 
         return type_in
@@ -558,11 +557,11 @@ class Entity(SimpleEntity):
     Two Entities considered equal if they have the same name. It doesn't matter
     if they have different tags or notes.
     
-    :param list tags: A list of :class:`~stalker.core.models.Tag` objects
+    :param list tags: A list of :class:`~stalker.models.tag.Tag` objects
       related to this entity. tags could be an empty list, or when omitted it
       will be set to an empty list.
     
-    :param list notes: A list of :class:`~stalker.core.models.Note` instances.
+    :param list notes: A list of :class:`~stalker.models.note.Note` instances.
       Can be an empty list, or when omitted it will be set to an empty list,
       when set to None it will be converted to an empty list.
     """
@@ -578,7 +577,7 @@ class Entity(SimpleEntity):
         backref="entities",
         doc="""A list of tags attached to this object.
         
-        It is a list of :class:`~stalker.core.models.Tag` instances which shows
+        It is a list of :class:`~stalker.models.tag.Tag` instances which shows
         the tags of this object"""
     )
 
@@ -586,9 +585,9 @@ class Entity(SimpleEntity):
         "Note",
         primaryjoin="Entities.c.id==Notes.c.entity_id",
         backref="entity",
-        doc="""All the :class:`~stalker.core.models.Notes`\ s attached to this entity.
+        doc="""All the :class:`~stalker.models.note.Notes`\ s attached to this entity.
         
-        It is a list of :class:`~stalker.core.models.Note` instances or an
+        It is a list of :class:`~stalker.models.note.Note` instances or an
         empty list, setting it None will raise a TypeError.
         """
     )
@@ -597,9 +596,9 @@ class Entity(SimpleEntity):
         "Review",
         primaryjoin="Entities.c.id==Reviews.c.to_id",
         back_populates="to",
-        doc="""All the :class:`~stalker.core.models.Review`\ s about this Entity.
+        doc="""All the :class:`~stalker.models.review.Review`\ s about this Entity.
         
-        It is a list of :class:`~stalker.core.models.Review` instances or an
+        It is a list of :class:`~stalker.models.review.Review` instances or an
         empty list, setting it None will raise a TypeError.
         """
     )
@@ -637,7 +636,7 @@ class Entity(SimpleEntity):
 
         if not isinstance(note, Note):
             raise TypeError("%s.note should be an instance of "
-                            "stalker.core.models.Note not %s" %
+                            "stalker.models.note.Note not %s" %
                             (self.__class__.__name__,
                              note.__class__.__name__))
 
@@ -652,7 +651,7 @@ class Entity(SimpleEntity):
 
         if not isinstance(tag, Tag):
             raise TypeError("%s.tag should be an instance of "
-                            "stalker.core.models.Tag not %s" %
+                            "stalker.models.tag.Tag not %s" %
                             (self.__class__.__name__,
                              tag.__class__.__name__))
 
@@ -667,7 +666,7 @@ class Entity(SimpleEntity):
         
         if not isinstance(review, Review):
             raise TypeError("%s.reviews should be a list of "
-                            "stalker.core.models.Review instances not %s" %
+                            "stalker.models.review.Review instances not %s" %
                             (self.__class__.__name__,
                              review.__class__.__name__))
 
@@ -682,18 +681,18 @@ class Entity(SimpleEntity):
 
 
 class TaskableEntity(Entity, ProjectMixin):
-    """Gives the ability to connect to a list of :class:`~stalker.core.models.Task`\ s to the mixed in object.
+    """Gives the ability to connect to a list of :class:`~stalker.models.task.Task`\ s to the mixed in object.
     
-    TaskMixin is a variant of :class:`~stalker.core.models.ProjectMixin` and
-    lets the mixed object to have :class:`~stalker.core.model.Task` instances
-    to be attached it self. And because :class:`~stalker.core.models.Task`\ s
-    are related to :class:`~stalker.core.models.Project`\ s, it also adds
-    ability to relate the object to a :class:`~stalker.core.models.Project`
+    TaskMixin is a variant of :class:`~stalker.models.mixins.ProjectMixin` and
+    lets the mixed object to have :class:`~stalker.model.task.Task` instances
+    to be attached it self. And because :class:`~stalker.models.task.Task`\ s
+    are related to :class:`~stalker.models.project.Project`\ s, it also adds
+    ability to relate the object to a :class:`~stalker.models.project.Project`
     instance. So every object which is mixed with TaskMixin will have a
-    :attr:`~stalker.core.models.TaskMixin.tasks` and a
-    :attr:`~stalker.core.models.TaskMixin.project` attribute. Only the
+    :attr:`~stalker.models.mixins.TaskMixin.tasks` and a
+    :attr:`~stalker.models.mixins.TaskMixin.project` attribute. Only the
     ``project`` argument needs to be initialized. See the
-    :class:`~stalker.core.models.ProjectMixin` for more detail.
+    :class:`~stalker.models.mixins.ProjectMixin` for more detail.
     """
 
     __tablename__ = "TaskableEntities"
@@ -701,10 +700,8 @@ class TaskableEntity(Entity, ProjectMixin):
     taskableEntity_id = Column("id", Integer, ForeignKey("Entities.id"),
                                primary_key=True)
     
-    # TODO: fix this one
     tasks = relationship(
         "Task",
-        #primaryjoin="taskableEntity_id==Task.task_of_id",
         primaryjoin="TaskableEntities.c.id==Tasks.c.task_of_id",
         #backref="task_of",
         back_populates="task_of",
@@ -728,7 +725,7 @@ class TaskableEntity(Entity, ProjectMixin):
         
         if not isinstance(task, Task):
             raise TypeError("tasks should be a list of "
-                            "stalker.core.models.Task instances")
+                            "stalker.models.task.Task instances")
 
         return task
 

@@ -12,24 +12,24 @@ from stalker.models.mixins import StatusMixin, ScheduleMixin, ReferenceMixin
 class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     """Stores data about Sequences.
     
-    Sequences are holders of the :class:`~stalker.core.models.Shot` objects.
+    Sequences are holders of the :class:`~stalker.models.shot.Shot` objects.
     They organize the conceptual data with another level of complexity.
     
     The Sequence class updates the
-    :attr:`~stalker.core.models.Project.sequence` attribute in the
-    :class:`~stalker.core.models.Project` class when the Sequence is
+    :attr:`~stalker.models.project.Project.sequence` attribute in the
+    :class:`~stalker.models.project.Project` class when the Sequence is
     initialized.
     
     :param lead: The lead of this Sequence. The default value is None.
     
-    :type lead: :class:`~stalker.core.models.User`
+    :type lead: :class:`~stalker.models.user.User`
     """
 
     #    __project_backref_attrname__ = "sequences_ossuruk"
-    __project_doc__ = """The :class:`~stalker.core.models.Project` instance that this Sequence belongs to.
+    __project_doc__ = """The :class:`~stalker.models.project.Project` instance that this Sequence belongs to.
     
-    A :class:`~stalker.core.models.Sequence` can not be created without a
-    :class:`~stalker.core.models.Project` instance.
+    A :class:`~stalker.models.sequence.Sequence` can not be created without a
+    :class:`~stalker.models.project.Project` instance.
     """
 
     __tablename__ = "Sequences"
@@ -45,8 +45,8 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         uselist=False,
         doc="""The lead of this sequence.
         
-        A :class:`~stalker.core.models.User` instance which is assigned as the
-        lead of this :class:`~stalker.core.models.Sequence`.
+        A :class:`~stalker.models.user.User` instance which is assigned as the
+        lead of this :class:`~stalker.models.sequence.Sequence`.
         """
     )
 
@@ -54,9 +54,9 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         "Shot",
         primaryjoin="Shots.c.sequence_id==Sequences.c.id",
         back_populates="_sequence",
-        doc="""The :class:`~stalker.core.models.Shot`\ s assigned to this Sequence.
+        doc="""The :class:`~stalker.models.shot.Shot`\ s assigned to this Sequence.
         
-        It is a list of :class:`~stalker.core.models.Shot` instances.
+        It is a list of :class:`~stalker.models.shot.Shot` instances.
         """
     )
 
@@ -90,7 +90,7 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         if lead is not None:
             if not isinstance(lead, User):
                 raise TypeError("lead should be instance of "
-                                "stalker.core.models.User")
+                                "stalker.models.user.User")
 
         return lead
 
@@ -103,7 +103,7 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         
         if not isinstance(shot, Shot):
             raise TypeError("every item in the shots list should be an "
-                            "instance of stalker.core.models.Shot")
+                            "instance of stalker.models.shot.Shot")
 
         return shot
 

@@ -13,11 +13,11 @@ class Link(Entity):
     
     Links are all about giving some external information to the current entity
     (external to the database, so it can be something on the
-    :class:`~stalker.core.models.Repository` or in the Web). The type of the
-    link (general, file, folder, web page, image, image sequence, video, 
+    :class:`~stalker.models.repository.Repository` or in the Web). The type of
+    the link (general, file, folder, web page, image, image sequence, video, 
     movie, sound, text etc.) can be defined by a
-    :class:`~stalker.core.models.Type` instance (you can also use multiple
-    :class:`~stalker.core.models.Tag` instances to add more information, and to
+    :class:`~stalker.models.type.Type` instance (you can also use multiple
+    :class:`~stalker.models.tag.Tag` instances to add more information, and to
     filter them back). Again it is defined by the needs of the studio.
     
     For sequences of files the file name may contain "#" or multiple of them

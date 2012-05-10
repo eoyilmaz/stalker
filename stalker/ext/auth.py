@@ -16,23 +16,23 @@ updated, read or delete the data.
 
 There are two main functions to be used in the process of login. The first one
 is :func:`stalker.ext.auth.authenticate`, which accepts username and password
-as strings and returns a :class:`stalker.core.models.User` object::
+as strings and returns a :class:`stalker.models.user.User` object::
 
     from stalker.ext import auth
     user_obj = auth.authenticate("username", "password")
 
 The second one is the :func:`stalker.ext.auth.login` which uses a given
-:class:`stalker.core.models.User` object and creates a Beaker Session and
+:class:`stalker.models.user.User` object and creates a Beaker Session and
 stores the logged in user id in that session.
 
 The :func:`stalker.ext.auth.get_user` can be used to get the authenticated and
-logged in :class:`stalker.core.models.User` object.
+logged in :class:`stalker.models.user.User` object.
 
 The basic usage of the system is as follows::
 
   from stalker import db
   from stalker.ext import auth
-  from stalker.core.models import User
+  from stalker import User
 
   if auth.SESSION_KEY in auth.SESSION:
       # user has login data 
@@ -115,7 +115,7 @@ def login(user=None):
       session and thus the user id in the session is None than a loggin error
       will be raised. So by this way the user is logged in only one time.
     
-    :type user: :class:`stalker.core.models.User`
+    :type user: :class:`stalker.models.user.User`
     """
     
     global SESSION
@@ -134,7 +134,7 @@ def login(user=None):
             first()
 
     if not isinstance(user, User):
-        raise TypeError("user must be a stalker.core.models.User instance")
+        raise TypeError("user must be a stalker.models.user.User instance")
 
     if DBSession is None:
         raise DBError(
@@ -155,7 +155,7 @@ def login(user=None):
 
 def authenticate(username="", password=""):
     """Authenticates the given username and password, returns a
-    stalker.core.models.User object
+    stalker.models.user.User object
     
     There needs to be a already setup database for the authentication to hapen.
     """
@@ -228,8 +228,8 @@ def permission_required(permission_group, error_message=None):
     Checks if the logged in user is in the given permission group and then
     calls the decorated function
     
-    :param permission_group: a :class:`~stalker.core.models.Group` object
-      showing the permision group
+    :param permission_group: a :class:`~stalker.models.auth.PermissionGroup`
+      object showing the permission group
     
     :param error_message: the message to be shown in case a LoginError is
       raised, a default message will be shown when skipped

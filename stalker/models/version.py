@@ -15,13 +15,14 @@ from stalker.models.mixins import StatusMixin
 class Version(Entity, StatusMixin):
     """The connection to the filesystem.
     
-    A :class:`~stalker.core.models.Version` holds information about the every
-    incarnation of the files in the :class:`~stalker.core.models.Repository`.
+    A :class:`~stalker.models.version.Version` holds information about the
+    every incarnation of the files in the
+    :class:`~stalker.models.repository.Repository`.
     So if one creates a new version for a file or a sequences of file for a
-    :class:`~stalker.core.models.Task` then the information is hold in the
-    :class:`~stalker.core.models.Version` instance.
+    :class:`~stalker.models.task.Task` then the information is hold in the
+    :class:`~stalker.models.version.Version` instance.
     
-    The :attr:`~stalker.core.models.Version.version` attribute is read-only.
+    The :attr:`~stalker.models.version.Version.version` attribute is read-only.
     Trying to change it will produce an AttributeError.
     
     :param str take: A short string holding the current take name. Can be
@@ -34,26 +35,26 @@ class Version(Entity, StatusMixin):
       The default is "1". If skipped or given as zero or as a negative value a
       ValueError will be raised.
     
-    :param source: A :class:`~stalker.core.models.Link` instance, showing
+    :param source: A :class:`~stalker.models.link.Link` instance, showing
       the source file of this version. It can be a Maya scene file
       (*.ma, *.mb), a Nuke file (*.nk) or anything that is opened with the
       application you have created this version.
     
-    :type source: :class:`~stalker.core.models.Link`
+    :type source: :class:`~stalker.models.link.Link`
     
-    :param outputs: A list of :class:`~stalker.core.models.Link` instances,
+    :param outputs: A list of :class:`~stalker.models.link.Link` instances,
       holding the outputs of the current version. It could be the rendered
       image sequences out of Maya or Nuke, or it can be a Targa file which is
       the output of a Photoshop file (*.psd), or anything that you can think as
       the output which is created using the
-      :attr:`~stalker.core.models.Version.source_file`\ .
+      :attr:`~stalker.models.version.Version.source_file`\ .
     
-    :type outputs: list of :class:`~stalker.core.models.Link` instances
+    :type outputs: list of :class:`~stalker.models.link.Link` instances
     
-    :param version_of: A :class:`~stalker.core.models.Task` instance showing
+    :param version_of: A :class:`~stalker.models.task.Task` instance showing
       the owner of this Version.
     
-    :type version_of: :class:`~stalker.core.models.Task`
+    :type version_of: :class:`~stalker.models.task.Task`
     
     .. TODO::
       Think about using Tickets instead of review notes for reporting desired
@@ -70,7 +71,7 @@ class Version(Entity, StatusMixin):
     version_of = relationship(
         "Task",
         primaryjoin="Versions.c.version_of_id==Tasks.c.id",
-        doc="""The :class:`~stalker.core.models.Task` instance that this Version is created for.
+        doc="""The :class:`~stalker.models.task.Task` instance that this Version is created for.
         """,
         uselist=False,
         back_populates="versions",
@@ -93,7 +94,7 @@ class Version(Entity, StatusMixin):
         secondaryjoin="Version_Outputs.c.link_id==Links.c.id",
         doc="""The outputs of the current version.
         
-        It is a list of :class:`~stalker.core.models.Link` instances.
+        It is a list of :class:`~stalker.models.link.Link` instances.
         """
     )
 
@@ -134,7 +135,7 @@ class Version(Entity, StatusMixin):
         if source is not None:
             if not isinstance(source, Link):
                 raise TypeError("Version.source attribute should be a "
-                                "stalker.core.models.Link instance, not %s"\
+                                "stalker.models.link.Link instance, not %s"\
                                 % source.__class__.__name__)
 
         return source
@@ -194,7 +195,7 @@ class Version(Entity, StatusMixin):
         
         if not isinstance(version_of, Task):
             raise TypeError("%s.version_of should be a "
-                            "stalker.core.models.Task instance not %s" %
+                            "stalker.models.task.Task instance not %s" %
                             (self.__class__.__name__,
                              version_of.__class__.__name__))
 
@@ -209,7 +210,7 @@ class Version(Entity, StatusMixin):
         
         if not isinstance(output, Link):
             raise TypeError("all elements in %s.outputs should be all "
-                            "stalker.core.models.Link instances not %s" %
+                            "stalker.models.link.Link instances not %s" %
                 self.__class__.__name__, output.__class__.__name__
             )
 

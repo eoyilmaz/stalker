@@ -187,7 +187,7 @@ class ShotTester(unittest.TestCase):
 
     def test_sequence_argument_is_not_Sequence_instance(self):
         """testing if a TypeError will be raised when the given sequence
-        argument is not an instance of stalker.core.models.Sequence
+        argument is not an instance of stalker.models.sequence.Sequence
         """
         test_values = [1, 1.2, "sequence", ["a", "sequence"]]
         for test_value in test_values:

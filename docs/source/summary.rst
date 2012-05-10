@@ -13,41 +13,41 @@ Summary
    stalker.db.query
    stalker.db.session
    stalker.db.setup
-   stalker.core.errors
-   stalker.core.errors.CircularDependencyError
-   stalker.core.errors.LoginError
-   stalker.core.errors.DBError
-   stalker.core.models.ProjectMixin
-   stalker.core.models.ReferenceMixin
-   stalker.core.models.ScheduleMixin
-   stalker.core.models.StatusMixin
-   stalker.core.models.TargetEntityTypeMixin
-   stalker.core.models
-   stalker.core.models.Asset
-   stalker.core.models.Booking
-   stalker.core.models.Department
-   stalker.core.models.FilenameTemplate
-   stalker.core.models.Entity
-   stalker.core.models.ImageFormat
-   stalker.core.models.Link
-   stalker.core.models.Message
-   stalker.core.models.Note
-   stalker.core.models.PermissionGroup
-   stalker.core.models.Project
-   stalker.core.models.Repository
-   stalker.core.models.Review
-   stalker.core.models.Sequence
-   stalker.core.models.Shot
-   stalker.core.models.SimpleEntity
-   stalker.core.models.Status
-   stalker.core.models.StatusList
-   stalker.core.models.Structure
-   stalker.core.models.Tag
-   stalker.core.models.Task
-   stalker.core.models.TaskableEntity
-   stalker.core.models.Type
-   stalker.core.models.User
-   stalker.core.models.Version
+   stalker.errors
+   stalker.errors.CircularDependencyError
+   stalker.errors.LoginError
+   stalker.errors.DBError
+   stalker.models.mixins.ProjectMixin
+   stalker.models.mixins.ReferenceMixin
+   stalker.models.mixins.ScheduleMixin
+   stalker.models.mixins.StatusMixin
+   stalker.models.mixins.TargetEntityTypeMixin
+   stalker.models
+   stalker.models.asset.Asset
+   stalker.models.auth.PermissionGroup
+   stalker.models.department.Department
+   stalker.models.entity.Entity
+   stalker.models.entity.SimpleEntity
+   stalker.models.entity.TaskableEntity
+   stalker.models.formats.ImageFormat
+   stalker.models.link.Link
+   stalker.models.message.Message
+   stalker.models.note.Note
+   stalker.models.project.Project
+   stalker.models.repository.Repository
+   stalker.models.review.Review
+   stalker.models.sequence.Sequence
+   stalker.models.shot.Shot
+   stalker.models.status.Status
+   stalker.models.status.StatusList
+   stalker.models.structure.Structure
+   stalker.models.tag.Tag
+   stalker.models.task.Booking
+   stalker.models.task.Task
+   stalker.models.templates.FilenameTemplate
+   stalker.models.type.Type
+   stalker.models.user.User
+   stalker.models.version.Version
    stalker.ext.auth
    stalker.ext.auth.authenticate
    stalker.ext.auth.check_password
@@ -57,4 +57,3 @@ Summary
    stalker.ext.auth.logout
    stalker.ext.auth.permission_required
    stalker.ext.auth.set_password
-   stalker.utils.path_to_exec

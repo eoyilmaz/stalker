@@ -491,7 +491,7 @@ class SimpleEntityTester(unittest.TestCase):
 
     def test_created_by_argument_instance_of_User(self):
         """testing if TypeError is raised when assigned anything other than a
-        stalker.core.models.User object to created_by argument
+        stalker.models.user.User object to created_by argument
         """
         # the created_by argument should be an instance of User class, in any
         # other case it should raise a TypeError
@@ -744,7 +744,7 @@ class SimpleEntityTester(unittest.TestCase):
 
 
     def test_type_attribute_is_set_to_None(self):
-        """testing if nothing will be happend when the type attribute is set to
+        """testing if nothing will be happened when the type attribute is set to
         None.
         """
 
@@ -753,7 +753,7 @@ class SimpleEntityTester(unittest.TestCase):
 
     def test_type_argument_accepts_only_Type_instances(self):
         """testing if a TypeError will be raised when the given type attribute
-        is not instance of stalker.core.models.Type class
+        is not instance of stalker.models.type.Type class
         """
 
         test_values = [1, 1.2, "a type"]
@@ -765,7 +765,7 @@ class SimpleEntityTester(unittest.TestCase):
 
     def test_type_argument_accepts_Type_instances(self):
         """testing if no error will be raised when the type argument is given
-        as a stalker.core.models.Type instance
+        as a stalker.models.type.Type instance
         """
 
         # test with a proper Type
@@ -776,7 +776,7 @@ class SimpleEntityTester(unittest.TestCase):
 
     def test_type_attribute_accepts_only_Type_instances(self):
         """testing if a TypeError will be raised when the given type attribute
-        is not instance of stalker.core.models.Type class
+        is not instance of stalker.models.type.Type class
         """
 
         test_values = [1, 1.2, "a type"]
@@ -788,7 +788,7 @@ class SimpleEntityTester(unittest.TestCase):
 
     def test_type_attribute_accepts_Type_instances(self):
         """testing if no error will be raised when the type attribute is given
-        as a stalker.core.models.Type instance
+        as a stalker.models.type.Type instance
         """
 
         # test with a proper Type

@@ -16,31 +16,32 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     Project is one of the main classes that will direct the others. A project
     in Stalker is a gathering point.
     
-    It is mixed with :class:`~stalker.core.models.ReferenceMixin`,
-    :class:`~stalker.core.models.StatusMixin`,
-    :class:`~stalker.core.models.ScheduleMixin` and
-    :class:`~stalker.core.models.TaskMixin` to give reference, status, schedule
-    and task abilities. Please read the individual documentation of each of the
-    mixins.
+    It is mixed with :class:`~stalker.models.mixins.ReferenceMixin`,
+    :class:`~stalker.models.mixins.StatusMixin`,
+    :class:`~stalker.models.mixins.ScheduleMixin` and
+    :class:`~stalker.models.mixins.TaskMixin` to give reference, status,
+    schedule and task abilities. Please read the individual documentation of
+    each of the mixins.
     
-    The :attr:`~stalker.core.models.Project.users` attributes content is
-    gathered from all the :class:`~stalker.core.models.Task`\ s of the project
-    itself and from the :class:`~stalker.core.models.Task`\ s of the
-    :class:`~stalker.core.models.Sequence`\ s stored in the
-    :attr:`~stalker.core.models.Project.sequences` attribute, the
-    :class:`~stalker.core.models.Shot`\ s stored in the
-    :attr:`~stalker.core.models.Sequence.shots` attribute, the
-    :class:`~stalker.core.models.Asset`\ s stored in the
-    :attr:`~stalker.core.models.Project.assets`. It is a read only attribute.
+    The :attr:`~stalker.models.project.Project.users` attributes content is
+    gathered from all the :class:`~stalker.models.task.Task`\ s of the project
+    itself and from the :class:`~stalker.models.task.Task`\ s of the
+    :class:`~stalker.models.sequence.Sequence`\ s stored in the
+    :attr:`~stalker.models.project.Project.sequences` attribute, the
+    :class:`~stalker.models.shot.Shot`\ s stored in the
+    :attr:`~stalker.models.sequence.Sequence.shots` attribute, the
+    :class:`~stalker.models.asset.Asset`\ s stored in the
+    :attr:`~stalker.models.project.Project.assets`. It is a read only
+    attribute.
     
     :param lead: The lead of the project. Default value is None.
     
-    :type lead: :class:`~stalker.core.models.User`
+    :type lead: :class:`~stalker.models.user.User`
     
     :param image_format: The output image format of the project. Default
       value is None.
     
-    :type image_format: :class:`~stalker.core.models.ImageFormat`
+    :type image_format: :class:`~stalker.models.formats.ImageFormat`
     
     :param float fps: The FPS of the project, it should be a integer or float
       number, or a string literal which can be correctly converted to a float.
@@ -48,19 +49,19 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     
     :param type: The type of the project. Default value is None.
     
-    :type type: :class:`~stalker.core.models.ProjectType`
+    :type type: :class:`~stalker.models.type.Type`
     
     :param structure: The structure of the project. Default value is None
     
-    :type structure: :class:`~stalker.core.models.Structure`
+    :type structure: :class:`~stalker.models.structure.Structure`
     
     :param repository: The repository that the project files are going to be
       stored in. You can not create a project without specifying the
       repository argument and passing a
-      :class:`~stalker.core.models.Repository` to it. Default value is None
-      which raises a TypeError.
+      :class:`~stalker.models.repository.Repository` to it. Default value is
+      None which raises a TypeError.
     
-    :type repository: :class:`~stalker.core.models.Repository`.
+    :type repository: :class:`~stalker.models.repository.Repository`.
     
     :param bool is_stereoscopic: a bool value, showing if the project is going
       to be a stereo 3D project, anything given as the argument will be
@@ -90,9 +91,6 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     # for the created instance, I consider doing this safe.
     # ------------------------------------------------------------------------
 
-
-
-
     #__strictly_typed__ = True
     __tablename__ = "Projects"
     project_id_local = Column("id", Integer, ForeignKey("TaskableEntities.id"),
@@ -102,41 +100,6 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
                        "inherit_condition":
                            project_id_local == TaskableEntity.taskableEntity_id}
 
-    #assets = relationship(
-    #"Asset",
-    #primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
-    #back_populates="project",
-    ##backref="project",
-    #uselist=True,
-    #doc="""The list of :class:`~stalker.core.models.Asset`\ s created in this project.
-
-    #It is a read-only list. To add an :class:`~stalker.core.models.Asset`
-    #to this project, the :class:`~stalker.core.models.Asset` need to be
-    #created with this project is given in the ``project`` argument in the
-    #:class:`~stalker.core.models.Asset`.
-    #"""
-    #)
-
-    #sequences = relationship(
-    #"Sequence",
-    #primaryjoin="TaskableEntities.c.project_id==Projects.c.id",
-    #back_populates="project",
-    ##backref="project",
-    #uselist=True,
-    #doc="""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
-
-    #This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
-    #that this :class:`~stalker.core.models.Project` has. It is a list of
-    #:class:`~stalker.core.models.Sequence` instances. The attribute is
-    #read-only. The only way to attach a
-    #:class:`~stalker.core.models.Sequence` to this
-    #:class:`~stalker.core.models.Project` is to create the
-    #:class:`~stalker.core.models.Sequence` with this
-    #:class:`~stalker.core.models.Project` by passing this
-    #:class:`~stalker.core.models.Project` in the ``project`` argument of
-    #the :class:`~stalker.core.models.Sequence`.
-    #"""
-    #)
 
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
@@ -145,7 +108,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         back_populates="projects_lead",
         doc="""The lead of the project.
         
-        Should be an instance of :class:`~stalker.core.models.User`,
+        Should be an instance of :class:`~stalker.models.user.User`,
         also can set to None.
         """
     )
@@ -154,9 +117,11 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     repository = relationship(
         "Repository",
         primaryjoin="Project.repository_id==Repository.repository_id",
-        doc="""The :class:`~stalker.core.models.Repository` that this project should reside.
+        doc="""The :class:`~stalker.models.repository.Repository` that this
+        project should reside.
         
-        Should be an instance of :class:`~stalker.core.models.Repository`. It
+        Should be an instance of
+        :class:`~stalker.models.repository.Repository`\ . It
         is a read-only attribute. So it is not possible to change the
         repository of one project.
         """
@@ -167,17 +132,18 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         "Structure",
         primaryjoin="Project.structure_id==Structure.structure_id",
         doc="""The structure of the project. Should be an instance of
-        :class:`~stalker.core.models.Structure` class"""
+        :class:`~stalker.models.structure.Structure` class"""
     )
 
     image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
     image_format = relationship(
         "ImageFormat",
         primaryjoin="Projects.c.image_format_id==ImageFormats.c.id",
-        doc="""The :class:`~stalker.core.models.ImageFormat` of this project.
+        doc="""The :class:`~stalker.models.formats.ImageFormat` of this
+        project.
         
         This value defines the output image format of the project, should be an
-        instance of :class:`~stalker.core.models.ImageFormat`.
+        instance of :class:`~stalker.models.formats.ImageFormat`.
         """
     )
 
@@ -193,13 +159,6 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         Boolean,
         doc="""True if the project is a stereoscopic project"""
     )
-    #display_width = Column(
-    #Float(precision=3),
-    #doc="""The target display width that this project is going to be displayed on.
-
-    #Meaningfull if this project is a stereoscopic project.
-    #"""
-    #)
 
     def __init__(self,
                  lead=None,
@@ -219,7 +178,6 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-        #TaskMixin.__init__(self, **kwargs)
 
         self.lead = lead
         self._users = []
@@ -231,13 +189,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         self.image_format = image_format
         self.fps = fps
         self.is_stereoscopic = bool(is_stereoscopic)
-        #self.display_width = display_width
 
-    #@validates("display_width")
-    #def _validate_display_width(self, key, display_width_in):
-        #"""validates the given display_width_in value
-        #"""
-        #return abs(float(display_width_in))
 
     @validates("fps")
     def _validate_fps(self, key, fps):
@@ -255,7 +207,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         if image_format is not None and\
            not isinstance(image_format, ImageFormat):
             raise TypeError("the image_format should be an instance of "
-                            "stalker.core.models.ImageFormat")
+                            "stalker.models.formats.ImageFormat")
 
         return image_format
 
@@ -269,7 +221,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         if lead is not None:
             if not isinstance(lead, User):
                 raise TypeError("lead must be an instance of "
-                                "stalker.core.models.User")
+                                "stalker.models.user.User")
 
         return lead
 
@@ -281,24 +233,24 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         from stalker.models.repository import Repository
 
         if not isinstance(repository, Repository):
-            raise TypeError("The stalker.core.models.Project instance should "
-                            "be created with a stalker.core.models.Repository "
-                            "instance passed through the 'repository' "
-                            "argument, the current value is "
-                            "'%s'" % repository)
+            raise TypeError("The stalker.models.project.Project instance "
+                            "should be created with a "
+                            "stalker.models.repository.Repository instance "
+                            "passed through the 'repository' argument, the "
+                            "current value is '%s'" % repository)
 
         return repository
 
     @validates("structure")
     def _validate_structure(self, key, structure_in):
-        """validates the given structure_in vlaue
+        """validates the given structure_in value
         """
         from stalker.models.structure import Structure
         
         if structure_in is not None:
             if not isinstance(structure_in, Structure):
                 raise TypeError("structure should be an instance of "
-                                "stalker.core.models.Structure")
+                                "stalker.models.structure.Structure")
 
         return structure_in
 
@@ -306,60 +258,6 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     def _validate_is_stereoscopic(self, key, is_stereoscopic_in):
         return bool(is_stereoscopic_in)
 
-        #
-        #@property
-        #def sequences(self):
-        #"""The :class:`~stalker.core.models.Sequence`\ s that attached to this project.
-
-        #This attribute holds all the :class:`~stalker.core.models.Sequence`\ s
-        #that this :class:`~stalker.core.models.Project` has. It is a list of
-        #:class:`~stalker.core.models.Sequence` instances. The attribute is
-        #read-only. The only way to attach a
-        #:class:`~stalker.core.models.Sequence` to this
-        #:class:`~stalker.core.models.Project` is to create the
-        #:class:`~stalker.core.models.Sequence` with this
-        #:class:`~stalker.core.models.Project` by passing this
-        #:class:`~stalker.core.models.Project` in the ``project`` argument of
-        #the :class:`~stalker.core.models.Sequence`.
-        #"""
-
-        #return self._sequences
-
-        #@property
-        #def users(self):
-        #"""The users assigned to this project.
-
-        #This is a list of :class:`~stalker.core.models.User` instances. All the
-        #elements are gathered from all the
-        #:class:`~stalker.core.models.Task`\ s of the project itself and from
-        #:class:`~stalker.core.models.Sequence`\ s,
-        #:class:`~stalker.core.models.Shot`\ s,
-        #:class:`~stalker.core.models.Asset`\ s.
-        #"""
-
-        #self._users = []
-        ## project tasks
-        #for task in self.tasks:
-        #self._users.extend(task.resources)
-
-        ## sequence tasks
-        #for seq in self.sequences:
-        #for task in seq.tasks:
-        #self._users.extend(task.resources)
-
-        ## shot tasks
-        #for shot in seq.shots:
-        #for task in shot.tasks:
-        #self._users.extend(task.resources)
-
-        ## asset tasks
-        #for asset in self.assets:
-        #for task in asset.tasks:
-        #self._users.extend(task.resources)
-
-        #self._users = list(set(self._users))
-
-        #return self._users
 
     @property
     def users(self):

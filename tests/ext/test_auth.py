@@ -161,7 +161,7 @@ class AuthTester(unittest.TestCase):
         )
     
     def test_authenticate_returns_a_User_instance(self):
-        """testing if authenticate returns a stalker.core.models.User instance
+        """testing if authenticate returns a stalker.models.user.User instance
         """
 
         # use the default admin user to check

@@ -8,7 +8,7 @@ import unittest
 from stalker import Type, Link
 
 class LinkTester(unittest.TestCase):
-    """tests the :class:`stalker.core.models.Link` class
+    """tests the :class:`stalker.models.link.Link` class
     """
     def setUp(self):
         """setup the test 

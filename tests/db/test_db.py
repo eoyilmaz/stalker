@@ -225,7 +225,7 @@ class DatabaseTester(unittest.TestCase):
         self.assertTrue(len(admins) == 1)
     
 #    def test_auth_authenticate_LogginError_raised(self):
-#        """testing if stalker.core.models.LoginError will be raised when
+#        """testing if stalker.errors.LoginError will be raised when
 #        authentication information is wrong
 #        """
 #        

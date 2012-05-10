@@ -79,7 +79,7 @@ class Review(Entity):
         
         if not isinstance(to, Entity):
             raise TypeError(
-                "%s.to should be inherited from stalker.core.models.Entity "
+                "%s.to should be inherited from stalker.models.entity.Entity "
                 "class not %s" % (self.__class__.__name__,
                                   to.__class__.__name__)
             )
