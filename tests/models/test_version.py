@@ -514,3 +514,83 @@ class VersionTester(unittest.TestCase):
 
         self.test_version.is_published = False
         self.assertEqual(self.test_version.is_published, False)
+    
+#    def test_tickets_attribute_is_not_set_to_a_list(self):
+#        """testing if a TypeError will be raised when the tickets attribute is
+#        not set to a list instance
+#        """
+#        self.assertRaises(TypeError, setattr, self.test_version, "reviews",
+#                          123)
+#
+#    def test_reviews_attribute_is_not_accepting_anything_other_than_list_of_Reviews(self):
+#        """testing if a TypeError will be raised when the elements of the
+#        reivews attribute is set to something other than a Review
+#        """
+#        self.assertRaises(TypeError, setattr, self.test_version, "reviews",
+#            [123])
+#
+#    def test_reviews_attribute_is_working_properly(self):
+#        """testing if the reviews attribute is working properly
+#        """
+#        # create a couple of Reviews
+#        rev1 = Review(name="Test Rev 1", to=self.test_version)
+#        rev2 = Review(name="Test Rev 2", to=self.test_version)
+#        rev3 = Review(name="Test Rev 3", to=self.test_version)
+#
+#        # create a new Version with no reviews
+#        new_version = Version(**self.kwargs)
+#
+#        # now try to assign all the reviews to the new object
+#        # this should work fine
+#        test_reviews = [rev1, rev2, rev3]
+#        new_version.reviews = test_reviews
+#
+#        self.assertEqual(new_version.reviews, test_reviews)
+#
+#    def test_reviews_attribute_updates_the_to_attribute_in_the_Review_instance(self):
+#        """testing if the "to" attribute is updated with the current object
+#        when it is set
+#        """
+#        # create a couple of Reviews
+#        rev1 = Review(name="Test Rev 1", to=self.test_version)
+#        rev2 = Review(name="Test Rev 2", to=self.test_version)
+#        rev3 = Review(name="Test Rev 3", to=self.test_version)
+#
+#        # create a new Version with no reviews
+#        new_version = Version(**self.kwargs)
+#        
+#        # now try to assign all the reviews to the new object
+#        new_version.reviews = [rev1, rev2, rev3]
+#
+#        # now check if the reviews "to" attribute is pointing to the correct
+#        # object
+#        self.assertEqual(rev1.to, new_version)
+#        self.assertEqual(rev2.to, new_version)
+#        self.assertEqual(rev3.to, new_version)
+#
+#        # check the reviews are in the reviews list
+#        self.assertIn(rev1, new_version.reviews)
+#        self.assertIn(rev2, new_version.reviews)
+#        self.assertIn(rev3, new_version.reviews)
+#
+#        # now try to remove the review from the reviews list and expect a
+#        # TypeError
+#        self.assertRaises(RuntimeError, new_version.reviews.remove, rev1)
+#
+#    def test_reviews_attribute_handles_assigning_the_same_review_twice(self):
+#        """testing if assigning the same review twice or more will not break
+#        anything or raise any exception
+#        """
+#        # create a couple of Reviews
+#        rev1 = Review(name="Test Rev 1", to=self.test_version)
+#        rev2 = Review(name="Test Rev 2", to=self.test_version)
+#        rev3 = Review(name="Test Rev 3", to=self.test_version)
+#
+#        # now try to assign the same review again to the same object
+#        self.test_version.reviews.append(rev1)
+#
+#        # now try the reverse
+#        rev1.to = self.test_version
+#
+#        # the review should be in the list
+#        self.assertIn(rev1, self.test_version.reviews)

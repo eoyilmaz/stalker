@@ -23,7 +23,6 @@ Inheritance Diagram
      stalker.models.note.Note
      stalker.models.project.Project
      stalker.models.repository.Repository
-     stalker.models.review.Review
      stalker.models.sequence.Sequence
      stalker.models.shot.Shot
      stalker.models.status.Status
@@ -33,6 +32,8 @@ Inheritance Diagram
      stalker.models.task.Booking
      stalker.models.task.Task
      stalker.models.templates.FilenameTemplate
+     stalker.models.ticket.Ticket
+     stalker.models.ticket.TicketLog
      stalker.models.type.Type
      stalker.models.user.User
      stalker.models.version.Version

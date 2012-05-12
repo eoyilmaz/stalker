@@ -27,12 +27,12 @@ from stalker.models.mixins import (ProjectMixin, ReferenceMixin, ScheduleMixin,
 from stalker.models.note import Note
 from stalker.models.project import Project
 from stalker.models.repository import Repository
-from stalker.models.review import Review
 from stalker.models.sequence import Sequence
 from stalker.models.shot import Shot
 from stalker.models.status import Status, StatusList
 from stalker.models.structure import Structure
 from stalker.models.tag import Tag
+from stalker.models.task import Booking
 from stalker.models.task import Task
 from stalker.models.templates import FilenameTemplate
 from stalker.models.type import Type

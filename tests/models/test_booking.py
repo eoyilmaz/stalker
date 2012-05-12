@@ -21,16 +21,16 @@ class BookingTester(unittest.TestCase):
 
         # create a resource
         self.test_resource = User(
-            login_name="ozgur",
-            first_name="Ozgur",
-            email="eoyilmaz@gmail.com",
+            login_name="user1",
+            first_name="user1",
+            email="user1@users.com",
             password="1234",
             )
 
         self.test_resource2 = User(
-            login_name="user1",
-            first_name="user1",
-            email="user1@users.com",
+            login_name="user2",
+            first_name="user2",
+            email="user2@users.com",
             password="1234"
         )
 

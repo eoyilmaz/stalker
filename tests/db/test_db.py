@@ -16,7 +16,7 @@ from stalker import db
 from stalker.ext import auth
 from stalker.db.session import DBSession
 from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
-                     Link, Note, Project, Repository, Review, Sequence, Shot,
+                     Link, Note, Project, Repository, Sequence, Shot,
                      Status, StatusList, Structure, Tag, Task, Type,
                      FilenameTemplate, User, Version)
 
@@ -497,58 +497,58 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         self.fail("test is not implemented yet")
     
-    def test_persistence_Review(self):
-        """testing the persistence of Review
-        """
-        
-        # create a new review and connect it to a SimpleEntity
-        new_entity = Entity(name="Review Test Simple Entity")
-        
-        new_review = Review(
-            name="Review",
-            to=new_entity,
-            body="testing the review",
-        )
-        
-        # store it to the database
-        DBSession.add(new_review)
-        DBSession.commit()
-        
-        body = new_review.body
-        code = new_review.code
-        created_by = new_review.created_by
-        date_created = new_review.date_created
-        date_updated = new_review.date_updated
-        description = new_review.description
-        name = new_review.name
-        nice_name = new_review.nice_name
-        notes = new_review.notes
-        reviews = new_review.reviews
-        tags = new_review.tags
-        to = new_review.to
-        type_ = new_review.type
-        updated_by = new_review.updated_by
-        
-        del new_review
-        
-        new_review_DB = DBSession.query(Review).filter_by(name=name).first()
-        
-        assert(isinstance(new_review_DB, Review))
-        
-        self.assertEqual(body, new_review_DB.body)
-        self.assertEqual(code, new_review_DB.code)
-        self.assertEqual(created_by, new_review_DB.created_by)
-        self.assertEqual(date_created, new_review_DB.date_created)
-        self.assertEqual(date_updated, new_review_DB.date_updated)
-        self.assertEqual(description, new_review_DB.description)
-        self.assertEqual(name, new_review_DB.name)
-        self.assertEqual(nice_name, new_review_DB.nice_name)
-        self.assertEqual(notes, new_review_DB.notes)
-        self.assertEqual(reviews, new_review_DB.reviews)
-        self.assertEqual(tags, new_review_DB.tags)
-        self.assertEqual(to, new_review_DB.to)
-        self.assertEqual(type_, new_review_DB.type)
-        self.assertEqual(updated_by, new_review_DB.updated_by)
+#    def test_persistence_Review(self):
+#        """testing the persistence of Review
+#        """
+#        
+#        # create a new review and connect it to a SimpleEntity
+#        new_entity = Entity(name="Review Test Simple Entity")
+#        
+#        new_review = Review(
+#            name="Review",
+#            to=new_entity,
+#            body="testing the review",
+#        )
+#        
+#        # store it to the database
+#        DBSession.add(new_review)
+#        DBSession.commit()
+#        
+#        body = new_review.body
+#        code = new_review.code
+#        created_by = new_review.created_by
+#        date_created = new_review.date_created
+#        date_updated = new_review.date_updated
+#        description = new_review.description
+#        name = new_review.name
+#        nice_name = new_review.nice_name
+#        notes = new_review.notes
+#        reviews = new_review.reviews
+#        tags = new_review.tags
+#        to = new_review.to
+#        type_ = new_review.type
+#        updated_by = new_review.updated_by
+#        
+#        del new_review
+#        
+#        new_review_DB = DBSession.query(Review).filter_by(name=name).first()
+#        
+#        assert(isinstance(new_review_DB, Review))
+#        
+#        self.assertEqual(body, new_review_DB.body)
+#        self.assertEqual(code, new_review_DB.code)
+#        self.assertEqual(created_by, new_review_DB.created_by)
+#        self.assertEqual(date_created, new_review_DB.date_created)
+#        self.assertEqual(date_updated, new_review_DB.date_updated)
+#        self.assertEqual(description, new_review_DB.description)
+#        self.assertEqual(name, new_review_DB.name)
+#        self.assertEqual(nice_name, new_review_DB.nice_name)
+#        self.assertEqual(notes, new_review_DB.notes)
+#        self.assertEqual(reviews, new_review_DB.reviews)
+#        self.assertEqual(tags, new_review_DB.tags)
+#        self.assertEqual(to, new_review_DB.to)
+#        self.assertEqual(type_, new_review_DB.type)
+#        self.assertEqual(updated_by, new_review_DB.updated_by)
     
     def test_persistence_Department(self):
         """testing the persistence of Department
@@ -2009,7 +2009,7 @@ class DatabaseModelsTester(unittest.TestCase):
         name = test_task.name
         priority = test_task.priority
         resources = test_task.resources
-        reviews = test_task.reviews
+#        reviews = test_task.reviews
         start_date = test_task.start_date
         status = test_task.status
         status_list = test_task.status_list
@@ -2037,7 +2037,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(name, test_task_DB.name)
         self.assertEqual(priority, test_task_DB.priority)
         self.assertEqual(resources, test_task_DB.resources)
-        self.assertEqual(reviews, test_task_DB.reviews)
+#        self.assertEqual(reviews, test_task_DB.reviews)
         self.assertEqual(start_date, test_task_DB.start_date)
         self.assertEqual(status, test_task_DB.status)
         self.assertEqual(status_list, test_task_DB.status_list)
@@ -2239,7 +2239,7 @@ class DatabaseModelsTester(unittest.TestCase):
         notes = test_version.notes
         outputs = test_version.outputs
         is_published = test_version.is_published
-        reviews = test_version.reviews
+        #reviews = test_version.reviews
         source = test_version.source
         status = test_version.status
         status_list = test_version.status_list
@@ -2266,7 +2266,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(notes, test_version_DB.notes)
         self.assertEqual(outputs, test_version_DB.outputs)
         self.assertEqual(is_published, test_version_DB.is_published)
-        self.assertEqual(reviews, test_version_DB.reviews)
+        #self.assertEqual(reviews, test_version_DB.reviews)
         self.assertEqual(source, test_version_DB.source)
         self.assertEqual(status, test_version_DB.status)
         self.assertEqual(status_list, test_version_DB.status_list)

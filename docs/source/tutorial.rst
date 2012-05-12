@@ -601,8 +601,8 @@ In Stalker you can communicate with others in the system, by:
     to a tag)
   * Sending a :class:`~stalker.models.message.Message` directly to them or
     to a group of users
-  * If you are a lead of a project or a sequence, then by placing a
-    :class:`~stalker.models.review.Review` to their works
+  * Anyone can create :class:`~stalker.models.ticket.Ticket`\ s to a
+    :class:`~stalker.models.version.Version`
 
 Part VII - Session Management (coming)
 ======================================

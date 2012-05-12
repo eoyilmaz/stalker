@@ -37,7 +37,7 @@ def setup(settings=None):
     if settings is None:
         settings = defaults.DATABASE_ENGINE_SETTINGS
         logger.debug('no settings given, using the default: %s' % settings)
- 
+    
     logger.debug("settings: %s" % settings)
     # create engine
     engine = engine_from_config(settings, 'sqlalchemy.')
@@ -104,3 +104,38 @@ def __create_admin__():
         admin_department.updated_by = admin
         
         DBSession.add(admin)
+    
+    # TODO: create tests for the Ticket Status initialization
+    # create statuses for Tickets
+    from stalker import Status, StatusList
+    with transaction.manager:
+        ticket_status1 = Status(name='New', code='NEW')
+        ticket_status2 = Status(name='Reopened', code='REOPENED')
+        ticket_status3 = Status(name='Closed', code='CLOSED')
+        
+        ticket_status_list = StatusList(
+            name='Ticket Statuses',
+            target_entity_type='Ticket',
+            statuses=[
+                ticket_status1,
+                ticket_status2,
+                ticket_status3,
+            ]
+        )
+        
+        DBSession.add(ticket_status_list)
+    
+    # create Ticket Types
+    from stalker import Type
+    with transaction.manager:
+        ticket_type_1 = Type(
+            name='Defect',
+            target_entity_type='Ticket'
+        )
+        ticket_type_2 = Type(
+            name='Enhancement',
+            target_entity_type='Ticket'
+        )
+        DBSession.add_all([ticket_type_1, ticket_type_2])
+    
+    

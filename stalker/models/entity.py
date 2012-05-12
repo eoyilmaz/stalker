@@ -161,8 +161,7 @@ class SimpleEntity(Base):
 
     __tablename__ = "SimpleEntities"
     id = Column("id", Integer, primary_key=True)
-
-    #entity_type = Column("db_entity_type", String(128), nullable=False)
+    
     entity_type = Column(String(128), nullable=False)
     __mapper_args__ = {
         "polymorphic_on": entity_type,
@@ -326,6 +325,7 @@ class SimpleEntity(Base):
         """validates the given name_in value
         """
         
+        
         # it is None
         if name is None:
             raise TypeError("%s.name can not be None" %
@@ -343,7 +343,7 @@ class SimpleEntity(Base):
         if name == "":
             raise ValueError("%s.name can not be an empty string" %
                              self.__class__.__name__)
-
+        
         # also set the nice_name
         self._nice_name = self._format_nice_name(name)
 
@@ -374,7 +374,7 @@ class SimpleEntity(Base):
     def _format_name(self, name_in):
         """formats the name_in value
         """
-
+        # TODO: relax the name attribute a little bit allow more
         # remove unnecessary characters from the string
         name_in = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", name_in).strip()
 
@@ -592,17 +592,6 @@ class Entity(SimpleEntity):
         """
     )
 
-    reviews = relationship(
-        "Review",
-        primaryjoin="Entities.c.id==Reviews.c.to_id",
-        back_populates="to",
-        doc="""All the :class:`~stalker.models.review.Review`\ s about this Entity.
-        
-        It is a list of :class:`~stalker.models.review.Review` instances or an
-        empty list, setting it None will raise a TypeError.
-        """
-    )
-
     def __init__(self,
                  tags=None,
                  notes=None,
@@ -656,22 +645,7 @@ class Entity(SimpleEntity):
                              tag.__class__.__name__))
 
         return tag
-
-    @validates("reviews")
-    def _validate_reviews(self, key, review):
-        """validates the given review value
-        """
-        
-        from stalker.models.review import Review
-        
-        if not isinstance(review, Review):
-            raise TypeError("%s.reviews should be a list of "
-                            "stalker.models.review.Review instances not %s" %
-                            (self.__class__.__name__,
-                             review.__class__.__name__))
-
-        return review
-
+    
     def __eq__(self, other):
         """the equality operator
         """

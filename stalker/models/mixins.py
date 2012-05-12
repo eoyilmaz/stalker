@@ -7,6 +7,7 @@
 import datetime
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Date,
                         Interval)
+from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
 from stalker.conf import defaults
@@ -102,42 +103,85 @@ class TargetEntityTypeMixin(object):
 
 
 class StatusMixin(object):
-    """Adds statusabilities to the object.
+    """Makes the mixed in object statusable.
     
-    This mixin adds status and statusList variables to the list. Any object
-    that needs a status and a corresponding status list can include this mixin.
+    This mixin adds status and status_list attributes to the mixed in class.
+    Any object that needs a status and a corresponding status list can include
+    this mixin.
     
     When mixed with a class which don't have an __init__ method, the mixin
     supplies one, and in this case the parameters below must be defined.
     
     :param status_list: this attribute holds a status list object, which shows
-      the possible statuses that this entity could be in. This attribute can
-      not be empty or None. Giving a StatusList object, the
-      StatusList.target_entity_type should match the current class.
+        the possible statuses that this entity could be in. This attribute can
+        not be empty or None. Giving a StatusList object, the
+        StatusList.target_entity_type should match the current class.
       
-      .. versionadded:: 0.1.2.a4
+        .. versionadded:: 0.1.2.a4
         
-        The status_list argument now can be skipped or can be None if there is
-        an active database connection (stalker.models.DBSession is not None)
-        and there is a suitable
-        :class:`~stalker.models.status.StatusList` instance in the database
-        whom :attr:`~stalker.models.status.StatusList.target_entity_type`
-        attribute is set to the current mixed-in class name.
+            The status_list argument now can be skipped or can be None if there
+            is an active database connection (stalker.models.DBSession is not
+            None) and there is a suitable
+            :class:`~stalker.models.status.StatusList` instance in the database
+            whom :attr:`~stalker.models.status.StatusList.target_entity_type`
+            attribute is set to the current mixed-in class name.
     
-    :param status: an integer value which is the index of the status in the
-      status_list attribute. So the value of this attribute couldn't be lower
-      than 0 and higher than the length-1 of the status_list object and nothing
-      other than an integer
+    :param status: It is a :class:`~stalker.models.status.Status` instance
+        which shows the current status of the statusable object. Integer values
+        are also accepted, which shows the index of the desired asset in the
+        ``status_list`` attribute of the current statusable object. If a
+        :class:`~stalker.models.status.Status` instance is supplied, it should
+        also be present in the ``status_list`` attribute. If set to None then
+        the first :class:`~stalker.models.status.Status` instance in the
+        ``status_list`` will be used.
+        
+        .. versionadded:: 0.2.0
+            
+            Status attribute as Status instance:
+          
+            It is now possible to set the status of the instance by a
+            :class:`~stalker.models.status.Status` instance directly. And the
+            :attr:`~stalker.models.mixins.StatusMixin.status` will return a
+            proper :class:`~stalker.models.status.Status` instance.
     """
-
+    
+    # TODO: (minor) update docstrings with 4 spaced tabs.
+    
     def __init__(self, status=0, status_list=None, **kwargs):
         self.status_list = status_list
         self.status = status
 
+    def _status_getter(self):
+        """The getter for the status property
+        """
+        # return the Status from the status_list with the _status index
+        return self.status_list[self._status]
+    
+    def _status_setter(self, status):
+        """The setter for the status property
+        """
+        self._status = self._validate_status(status)
+ 
+    @declared_attr
+    def _status(cls):
+        return Column("_status", Integer, default=0)
+    
     @declared_attr
     def status(cls):
-        return Column("status", Integer, default=0)
-
+        return synonym(
+            "_status",
+            descriptor=property(
+                cls._status_getter,
+                cls._status_setter,
+                doc="""The current status of the object.
+                
+                It is a :class:`~stalker.models.status.Status` instance which
+                is one of the Statuses stored in the ``status_list`` attribute
+                of this object.
+                """
+            )
+        )
+   
     @declared_attr
     def status_list_id(cls):
         return Column(
@@ -149,13 +193,10 @@ class StatusMixin(object):
 
     @declared_attr
     def status_list(cls):
-#    @declared_attr
-#    def _status_list(cls):
         return relationship(
             "StatusList",
             primaryjoin=\
             "%s.status_list_id==StatusList.statusList_id" % cls.__name__,
-            #post_update=True,
         )
 
     @validates("status_list")
@@ -169,13 +210,16 @@ class StatusMixin(object):
         if status_list is None:
             # check if there is a db setup and try to get the appropriate 
             # StatusList from the database
-            #from stalker import db
-            if DBSession is not None:
+
+            try:
                 # try to get a StatusList with the target_entity_type is 
                 # matching the class name
                 status_list = DBSession.query(StatusList)\
                     .filter_by(target_entity_type=self.__class__.__name__)\
                     .first()
+            except UnboundExecutionError:
+                # it is not mapped just skip it
+                pass
         
         # if it is still None
         if status_list is None:
@@ -208,36 +252,41 @@ class StatusMixin(object):
 
         return status_list
 
-    @validates("status")
-    def _validate_status(self, key, status):
+    def _validate_status(self, status):
         """validates the given status value
         """
-
-        from stalker.models.status import StatusList
-
+        
+        from stalker.models.status import Status, StatusList
+        
         if not isinstance(self.status_list, StatusList):
             raise TypeError("please set the %s.status_list attribute first" %
                 self.__class__.__name__)
 
         # it is set to None
         if status is None:
-            raise TypeError("%s.status couldn't be None, set it to a "
-                            "non-negative integer" % self.__class__.__name__)
-
+            status = 0
+        
         # it is not an instance of int
-        if not isinstance(status, int):
-            raise TypeError("%s.status must be an instance of integer not "
-                            "%s" % (self.__class__.__name__,
-                                    status.__class__.__name__))
-
-        # if it is not in the correct range:
-        if status < 0:
-            raise ValueError("%s.status must be a non-negative integer" %
-                self.__class__.__name__)
-
-        if status >= len(self.status_list.statuses):
-            raise ValueError("%s.status can not be bigger than the length of "
-                             "the status_list" % self.__class__.__name__)
+        if not isinstance(status, (int, Status)):
+            raise TypeError("%s.status must be an instance of integer or "
+                            "stalker.models.status.Status not %s" % 
+                            (self.__class__.__name__,
+                             status.__class__.__name__))
+        
+        if isinstance(status, int):
+            # if it is not in the correct range:
+            if status < 0:
+                raise ValueError("%s.status must be a non-negative integer" %
+                    self.__class__.__name__)
+    
+            if status >= len(self.status_list.statuses):
+                raise ValueError("%s.status can not be bigger than the length "
+                                 "of the status_list" % 
+                                 self.__class__.__name__)
+        
+        elif isinstance(status, Status):
+            # convert it to an integer
+            status = self.status_list.statuses.index(status)
 
         return status
 

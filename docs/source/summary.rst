@@ -8,10 +8,6 @@ Summary
    :nosignatures:
    
    stalker.db
-   stalker.db.engine
-   stalker.db.metadata
-   stalker.db.query
-   stalker.db.session
    stalker.db.setup
    stalker.errors
    stalker.errors.CircularDependencyError
@@ -35,7 +31,6 @@ Summary
    stalker.models.note.Note
    stalker.models.project.Project
    stalker.models.repository.Repository
-   stalker.models.review.Review
    stalker.models.sequence.Sequence
    stalker.models.shot.Shot
    stalker.models.status.Status
@@ -45,6 +40,8 @@ Summary
    stalker.models.task.Booking
    stalker.models.task.Task
    stalker.models.templates.FilenameTemplate
+   stalker.models.ticket.Ticket
+   stalker.models.ticket.TicketLog
    stalker.models.type.Type
    stalker.models.user.User
    stalker.models.version.Version

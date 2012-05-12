@@ -99,7 +99,21 @@ class Version(Entity, StatusMixin):
     )
 
     is_published = Column(Boolean, default=False)
-
+    
+#    tickets = relationship(
+#        "Ticket",
+#        primaryjoin="Versions.c.id==Tickets.c.ticket_for_id",
+#        back_populates="ticket_for",
+#        doc="""All the :class:`~stalker.models.ticket.Ticket`\ s about this
+#        :class:`~stalker.models.version.Version` instance.
+#        
+#        It is a list of :class:`~stalker.models.ticket.Ticket` instances or an
+#        empty list, setting it None will raise a TypeError.
+#        """
+#    )
+    
+    # TODO: Version.version should be automatically increasing starting from 1
+    
     def __init__(self,
                  version_of=None,
                  take=defaults.DEFAULT_VERSION_TAKE_NAME,
@@ -175,7 +189,9 @@ class Version(Entity, StatusMixin):
         if version is None:
             raise TypeError("%s.version should be an int" %
                             self.__class__.__name__)
-
+        
+        # TODO: auto generate Version.version by using the database
+        
         if version <= 0:
             raise ValueError("%s.version can not be zero or a negative "
                              "number" % self.__class__.__name__)
@@ -211,10 +227,26 @@ class Version(Entity, StatusMixin):
         if not isinstance(output, Link):
             raise TypeError("all elements in %s.outputs should be all "
                             "stalker.models.link.Link instances not %s" %
-                self.__class__.__name__, output.__class__.__name__
+                            (self.__class__.__name__,
+                             output.__class__.__name__)
             )
 
         return output
+    
+#    @validates("tickets")
+#    def _validate_tickets(self, key, ticket):
+#        """validates the given ticket value
+#        """
+#        
+#        from stalker.models.ticket import Ticket
+#        
+#        if not isinstance(ticket, Ticket):
+#            raise TypeError("%s.tickets should be a list of "
+#                            "stalker.models.ticket.Ticket instances not %s" %
+#                            (self.__class__.__name__,
+#                             ticket.__class__.__name__))
+#        
+#        return ticket
 
 # VERSION_OUTPUTS
 Version_Outputs = Table(

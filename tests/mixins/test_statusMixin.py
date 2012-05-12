@@ -5,9 +5,9 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-
-from sqlalchemy import Column, Integer, ForeignKey
 import transaction
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import orm
 from stalker import db
 from stalker.models.mixins import StatusMixin
 from stalker.db.session import DBSession
@@ -20,21 +20,17 @@ class StatMixClass(SimpleEntity, StatusMixin):
     StatMixClass_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                              primary_key=True)
 
-
     def __init__(self, **kwargs):
         super(StatMixClass, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
 
-
 class StatusMixinTester(unittest.TestCase):
     """tests the StatusMixin class
     """
-
-
+    
     def setUp(self):
         """setup the test
         """
-
         self.test_status1 = Status(name="Status1", code="STS1")
         self.test_status2 = Status(name="Status2", code="STS2")
         self.test_status3 = Status(name="Status3", code="STS3")
@@ -82,22 +78,16 @@ class StatusMixinTester(unittest.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if DBSession:
-            DBSession.remove()
-        
-        #DBSession = None
+        DBSession.remove()
 
     def test_status_list_init_with_something_else_then_StatusList_1(self):
         """testing if TypeError is going to be raised when trying to
         initialize status_list with something other than a StatusList
         """
-
         testValues = [100, "", 100.2]
-
         for testValue in testValues:
             self.kwargs["status_list"] = testValue
             self.assertRaises(TypeError, StatMixClass, **self.kwargs)
-
 
     def test_status_list_init_with_something_else_then_StatusList_2(self):
         """testing if TypeError is going to be raised when trying to
@@ -106,12 +96,10 @@ class StatusMixinTester(unittest.TestCase):
         self.kwargs["status_list"] = None
         self.assertRaises(TypeError, StatMixClass, **self.kwargs)
 
-
     def test_status_list_attribute_set_to_something_other_than_StatusList(self):
         """testing if TypeError is going to be raised when trying to set the
         status_list to something else than a StatusList object
         """
-
         test_values = ["a string", 1.0, 1, {"a": "statusList"}]
 
         for test_value in test_values:
@@ -123,7 +111,6 @@ class StatusMixinTester(unittest.TestCase):
                 "status_list",
                 test_value
             )
-
 
     def test_status_list_attribute_set_to_None(self):
         """testing if TypeError is going to be raised when trying to set the
@@ -138,7 +125,6 @@ class StatusMixinTester(unittest.TestCase):
             None
         )
 
-
     def test_status_list_argument_being_omited(self):
         """testing if a TypeError going to be raised when omiting the
         status_list argument
@@ -146,16 +132,13 @@ class StatusMixinTester(unittest.TestCase):
         self.kwargs.pop("status_list")
         self.assertRaises(TypeError, StatMixClass, **self.kwargs)
 
-
     def test_status_list_argument_suitable_for_the_current_class(self):
         """testing if a TypeError will be raised when the
         Status.target_entity_class is not compatible with the current
         class
         """
-
         # create a new status list suitable for another class with different
         # entity_type
-
 
         new_status_list = StatusList(
             name="Sequence Statuses",
@@ -186,33 +169,28 @@ class StatusMixinTester(unittest.TestCase):
         # this shouldn't raise any error
         self.test_mixed_obj.status_list = new_suitable_list
 
-
     def test_status_argument_set_to_None(self):
-        """testing if a TypeError will be raised when setting the status
-        argument to None
+        """testing if the first Status in the status_list attribute will be
+        used when the status argument is None
         """
         self.kwargs["status"] = None
-        self.assertRaises(TypeError, StatMixClass, **self.kwargs)
-
-
+        new_obj = StatMixClass(**self.kwargs)
+        self.assertEqual(new_obj.status, new_obj.status_list[0])
+    
     def test_status_attribute_set_to_None(self):
-        """testing if a TypeError will be raised when setting the status
-        attribute to None
+        """testing if the first Status in the status_list attribute will be
+        used when setting the status attribute to None
         """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_mixed_obj,
-            "status",
-            None
+        self.test_mixed_obj.status = None
+        self.assertEqual(
+            self.test_mixed_obj.status,
+            self.test_mixed_obj.status_list[0]
         )
 
-
-    def test_status_argument_different_than_an_int(self):
+    def test_status_argument_different_than_an_Status_or_int(self):
         """testing if a TypeError is going to be raised if trying to
         initialize status with something else than an integer
         """
-
         # with a string
         test_values = ["0", 1.2, [0]]
 
@@ -220,14 +198,11 @@ class StatusMixinTester(unittest.TestCase):
             self.kwargs["status"] = test_value
             self.assertRaises(TypeError, StatMixClass, **self.kwargs)
 
-
-    def test_status_attribute_set_to_other_than_int(self):
+    def test_status_attribute_set_to_other_than_Status_or_int(self):
         """testing if TypeError going to be raised when trying to set the
         current status to something other than an integer
         """
-
         test_values = ["a string", 1.2, [1], {"a": "status"}]
-
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
@@ -237,15 +212,12 @@ class StatusMixinTester(unittest.TestCase):
                 test_value
             )
 
-
     def test_status_attribute_set_to_too_high(self):
         """testing if a ValueError is going to be raised when trying to set the
-        current status to something higher than it is allowd to, that is it
+        current status to something higher than it is allowed to, that is it
         couldn't be set a value higher than len(statusList.statuses - 1)
         """
-
         test_value = len(self.test_status_list1.statuses)
-
         self.assertRaises(
             ValueError,
             setattr,
@@ -254,30 +226,11 @@ class StatusMixinTester(unittest.TestCase):
             test_value
         )
 
-
-
-        #
-        #def test_status_attribute_set_before_status_list(self):
-        #"""testing if a TypeError will be raised when trying to set the status
-        #attribute to some value before having a StatusList object in
-        #status_list attribute
-        #"""
-
-        #self.assertRaises(
-        #TypeError,
-        #setattr,
-        #self.test_mixed_obj2,
-        #"status",
-        #0,
-        #)
-
-
     def test_status_attribute_set_to_too_low(self):
         """testing if a ValueError is going to be raised when trying to set the
         current status to something lower than it is allowed to, that is it
         couldn't be set to value lower than 0
         """
-
         test_value = -1
         self.assertRaises(
             ValueError,
@@ -287,19 +240,36 @@ class StatusMixinTester(unittest.TestCase):
             test_value
         )
 
-
     def test_status_attribute_works_properly(self):
         """testing if the status attribute works properly
         """
-
         test_value = 1
 
         self.test_mixed_obj.status = test_value
-        self.assertEqual(self.test_mixed_obj.status, test_value)
+        self.assertEqual(
+            self.test_mixed_obj.status,
+            self.test_mixed_obj.status_list[test_value]
+        )
 
-
-from sqlalchemy import orm
-
+    def test_status_attribute_can_be_set_with_a_Status_object(self):
+        """testing if the status of the mixed in object can be set with a
+        Status instance
+        """
+        self.test_mixed_obj.status = self.test_status2
+        self.assertEqual(self.test_mixed_obj.status, self.test_status2)
+    
+    def test_status_attribute_is_set_with_a_Status_which_is_not_in_the_StatusList(self):
+        """testing if a ValueError will be raised when the status of an object
+        is set with a Status instance which is not in the status_list of the
+        mixed in object
+        """
+        self.assertRaises(ValueError, setattr, self.test_mixed_obj, 'status',
+                          Status(name='Temp', code='TEMP'))
+    
+    def test_status_attribute_holds_a_Status_instance(self):
+        """testing if the status attribute holds a Status instance
+        """
+        self.assertTrue(isinstance(self.test_mixed_obj.status, Status))
 
 class StatusListAutoAddClass(SimpleEntity, StatusMixin):
     """It is a class derived from stalker.core.models.SimpleEntity for testing
@@ -433,3 +403,4 @@ class StatusMixinDBTester(unittest.TestCase):
             StatusListNoAutoAddClass,
             **{"name": "Test StatusListNoAutoAddClass"}
         )
+    

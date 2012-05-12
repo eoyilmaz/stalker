@@ -144,9 +144,9 @@ class StatusList(Entity, TargetEntityTypeMixin):
         doc="""list of :class:`~stalker.models.status.Status` objects, showing the possible statuses"""
     )
 
-    def __init__(self, statuses=None, **kwargs):
+    def __init__(self, statuses=None, target_entity_type=None, **kwargs):
         super(StatusList, self).__init__(**kwargs)
-        TargetEntityTypeMixin.__init__(self, **kwargs)
+        TargetEntityTypeMixin.__init__(self, target_entity_type, **kwargs)
         
         if statuses is None:
             statuses = []

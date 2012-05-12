@@ -39,6 +39,28 @@ Stalker Changes
 
 * Updated the references to the SOM classes in docstrings and rst files.
 
+* Removed the ``Review`` class. And introduced the much handier
+  :class:`~stalker.models.ticket.Ticket` class. Now reviewing a data is the
+  process of creating Ticket's to that data.
+
+* The database is now initialized with a
+  :class:`~stalker.models.status.StatusList` and a couple of
+  :class:`~stalker.models.status.Status`\ es appropriate for
+  :class:`~stalker.models.ticket.Ticket` instances.
+
+* The database is now initialized with two :class:`~stalker.models.type.Type`
+  instances ('Enhancement' and 'Defect') suitable for
+  :class:`~stalker.models.ticket.Ticket` instances.
+
+* :class:`~stalker.models.mixins.StatusMixin` now stores the
+  :attr:`~stalker.models.mixins.StatusMixin.status` attribute as an Integer
+  showing the index of the :class:`~stalker.models.status.Status` in the
+  :attr:`~stalker.models.mixins.StatusMixin.status_list` attribute but when
+  asked for the value of :attr:`~stalker.models.mixins.StatusMixin.status`
+  attribute it will return a proper :class:`~stalker.models.status.Status`
+  instance and the attribute can be set with an integer or with a proper
+  :class:`~stalker.models.status.Status` instance.
+
 0.1.2.a5
 --------
 
