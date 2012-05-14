@@ -590,7 +590,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         from stalker.models.version import Version
         
         if not isinstance(version, Version):
-            raise TypeError("all the elements in the versions list should be "
+            raise TypeError("Task.versions should only have "
                             "stalker.models.version.Version instances")
 
         return version

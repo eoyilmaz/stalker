@@ -22,7 +22,7 @@ class StructureTester(unittest.TestCase):
     """
 
     def setUp(self):
-        """seting up the tests
+        """setting up the tests
         """
 
         # type templates

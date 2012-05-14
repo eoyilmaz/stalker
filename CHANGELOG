@@ -75,6 +75,15 @@ Stalker Changes
 * Fixed a bug that causes recursion in queries to
   :class:`~stalker.core.models.StatusList` instances.
 
+* Removed the ``FilenameTemplate.output_file_code`` attribute cause it is not
+  needed.
+
+* Removed the ``FilenameTemplate.output_is_relative`` attribute, now all the
+  path values are :class:`~stalker.models.repository.Repository` relative.
+
+* Renamed the ``path_code`` to ``path``, ``file_code`` to ``filename`` and
+  ``output_path_code`` to ``output_path`` in
+  :class:`~stalker.models.template.FilenameTemplate``\ .
 
 0.1.2.a4
 ---------

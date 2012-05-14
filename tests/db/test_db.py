@@ -771,9 +771,9 @@ class DatabaseModelsTester(unittest.TestCase):
             "description": "this is a template to be used for links to movie"
                            "files",
             #"created_by": admin,
-            "path_code": "REFS/{{link_type.name}}",
-            "file_code": "{{link.file_name}}",
-            "output_path_code": "OUTPUT",
+            "path": "REFS/{{link_type.name}}",
+            "filename": "{{link.file_name}}",
+            "output_path": "OUTPUT",
             "output_file_code": "{{link.file_name}}",
             }
         
@@ -789,14 +789,12 @@ class DatabaseModelsTester(unittest.TestCase):
         date_created = new_type_template.date_created
         date_updated = new_type_template.date_updated
         description = new_type_template.description
-        file_code = new_type_template.file_code
+        filename = new_type_template.filename
         name = new_type_template.name
         nice_name = new_type_template.nice_name
         notes = new_type_template.notes
-        output_path_code = new_type_template.output_path_code
-        output_file_code = new_type_template.output_file_code
-        output_is_relative = new_type_template.output_is_relative
-        path_code = new_type_template.path_code
+        output_path = new_type_template.output_path
+        path = new_type_template.path
         tags = new_type_template.tags
         target_entity_type = new_type_template.target_entity_type
         updated_by = new_type_template.updated_by
@@ -815,17 +813,13 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(date_created, new_type_template_DB.date_created)
         self.assertEqual(date_updated, new_type_template_DB.date_updated)
         self.assertEqual(description, new_type_template_DB.description)
-        self.assertEqual(file_code, new_type_template_DB.file_code)
+        self.assertEqual(filename, new_type_template_DB.filename)
         self.assertEqual(name, new_type_template_DB.name)
         self.assertEqual(nice_name, new_type_template_DB.nice_name)
         self.assertEqual(notes, new_type_template_DB.notes)
-        self.assertEqual(output_path_code,
+        self.assertEqual(output_path,
                          new_type_template_DB.output_path_code)
-        self.assertEqual(output_file_code,
-                         new_type_template_DB.output_file_code)
-        self.assertEqual(output_is_relative,
-                         new_type_template_DB.output_is_relative)
-        self.assertEqual(path_code, new_type_template_DB.path_code)
+        self.assertEqual(path, new_type_template_DB.path_code)
         self.assertEqual(tags, new_type_template_DB.tags)
         self.assertEqual(target_entity_type,
                          new_type_template_DB.target_entity_type)
@@ -1780,8 +1774,8 @@ class DatabaseModelsTester(unittest.TestCase):
         assetTemplate = FilenameTemplate(
             name="Character Asset Template",
             description="This is the template for character assets",
-            path_code="ASSETS/{{asset_type.name}}/{{pipeline_step.code}}",
-            file_code="{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
+            path="ASSETS/{{asset_type.name}}/{{pipeline_step.code}}",
+            filename="{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
             v{{version.version_number}}",
             target_entity_type=Asset,
         )
@@ -1800,8 +1794,8 @@ class DatabaseModelsTester(unittest.TestCase):
             description="this is the template for image references, it "
                         "shows where to place the image files",
             #created_by=admin,
-            path_code="REFS/{{reference.type.name}}",
-            file_code="{{reference.file_name}}",
+            path="REFS/{{reference.type.name}}",
+            filename="{{reference.file_name}}",
             target_entity_type=Link
         )
         

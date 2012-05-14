@@ -15,6 +15,7 @@ from stalker import db
 
 __version__ = '0.2.0.a1'
 
+from stalker.db.declarative import Base
 from stalker.models.asset import Asset
 from stalker.models.auth import PermissionGroup
 from stalker.models.department import Department

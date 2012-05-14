@@ -3,14 +3,14 @@ import transaction
 
 from pyramid import testing
 
-from stalker.models import DBSession
+from stalker.db.session import DBSession
 
 class TestMyView(unittest.TestCase):
     def setUp(self):
         self.config = testing.setUp()
         from sqlalchemy import create_engine
         engine = create_engine('sqlite://')
-        from .models import (
+        from stalker import (
             Base,
             MyModel,
             )
