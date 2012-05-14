@@ -55,13 +55,13 @@ or::
    .. _engine: http://www.sqlalchemy.org/docs/core/engines.html
    .. _mapping: http://www.sqlalchemy.org/docs/orm/mapper_config.html
 
-Lets continue by creating a :class:`~stalker.core.models.User` for ourself in
+Lets continue by creating a :class:`~stalker.models.user.User` for ourselves in
 the database. The first thing we need to do is to import the
-:class:`~stalker.core.models.User` class in to the current namespace::
+:class:`~stalker.models.user.User` class in to the current namespace::
 
-  from stalker.core.models import User
+  from stalker import User
 
-then create the :class:`~stalker.core.models.User` object::
+then create the :class:`~stalker.models.user.User` object::
 
   myUser = User(
       first_name="Erkan Ozgur",
@@ -73,10 +73,10 @@ then create the :class:`~stalker.core.models.User` object::
   )
 
 Our studio possibly has **Departments**. Lets add a new
-:class:`~stalker.core.models.Department` object to define your
+:class:`~stalker.models.department.Department` object to define your
 department::
 
-  from stalker.core.models import Department
+  from stalker import Department
   tds_department = Department(
       name="TDs",
       description="This is the TDs department"
@@ -90,8 +90,8 @@ or::
 
   myUser.department = tds_department
 
-We have created successfully a :class:`~stalker.core.models.User` and a
-:class:`~stalker.core.models.Department` and we assigned the user as one of the
+We have created successfully a :class:`~stalker.models.user.User` and a
+:class:`~stalker.models.department.Department` and we assigned the user as one of the
 member of the **TDs Department**.
 
 For now, because we didn't tell Stalker to commit the changes, no data has been
@@ -116,13 +116,13 @@ Part II/A - Creating Simple Data
 
 Lets say that we have this new commercial project coming and you want to start
 using Stalker with it. So we need to create a
-:class:`~stalker.core.models.Project` object to hold data about it.
+:class:`~stalker.models.project.Project` object to hold data about it.
 
 A project instance needs to have a suitable status list and it needs to be
-attached to a :class:`~stalker.core.models.Repository` instance::
+attached to a :class:`~stalker.models.repository.Repository` instance::
 
   # lets create a couple of generic Statuses
-  from stalker.core.models import Status
+  from stalker import Status
   
   status_waiting = Status(name="Waiting To Start", code="WTS")
   status_wip = Status(name="Work in Progress", code="WIP")
@@ -132,17 +132,17 @@ attached to a :class:`~stalker.core.models.Repository` instance::
   status_stopped = Status(name="Stopped", code="STOP")
 
 For now we have just created generic statuses. These
-:class:`~stalker.core.models.Status` instances can be used with any kind of
+:class:`~stalker.models.status.Status` instances can be used with any kind of
 objects. The idea behind is to define the statuses only once, and use them in
 mixtures suitable for different type of object. So you can define all the
 possible Statuses for your entities, then you can create a list of them for
 specific type of objects (Assets, Projects, Shots etc.).
 
-Lets create a :class:`~stalker.core.models.StatusList` suitable for
-:class:`~stalker.core.models.Project` instances::
+Lets create a :class:`~stalker.models.status.StatusList` suitable for
+:class:`~stalker.models.project.Project` instances::
 
   # a status list which is suitable for Project instances
-  from stalker.core.models import StatusList, Project
+  from stalker import StatusList, Project
   
   project_statuses = StatusList(
       name="Project Status List",
@@ -161,30 +161,31 @@ for a Project object we thought that these statuses are enough.
   We also need to specify the type of the project, which is *commercial* in our
   case::
   
-    from stalker.core.models import Type
+    from stalker import Type
     commercial_project_type = Type(
         name="Commercial Project",
         target_entity_type=Project
     )
   
-  class:`~stalker.core.models.Type`\ s are generic entities that is accepted by
-  any kind of entity created in Stalker. So in Stalker you can define a type for
-  anything. But a couple of them, like the :class:`~stalker.core.models.Project`
-  class, needs the type to be defined in the creation of the instance.
+  class:`~stalker.models.type.Type`\ s are generic entities that is accepted by
+  any kind of entity created in Stalker. So in Stalker you can define a type
+  for anything. But a couple of them, like the
+  :class:`~stalker.models.project.Project` class, needs the type to be defined
+  in the creation of the instance.
 
-And finally, the :class:`~stalker.core.models.Repository`. The Repository (or
-Repo if you like) is a path in our file server, where we place files and which
-is visible to all the workstations/render farmers::
+And finally, the :class:`~stalker.models.repository.Repository`. The Repository
+(or Repo if you like) is a path in our file server, where we place files and
+which is visible to all the workstations/render farmers::
 
-  from stalker.core.models import Repository
+  from stalker import Repository
   
   # and the repository itself
   commercial_repo = Repository(
     name="Commercial Repository",
   )
 
-:class:`~stalker.core.models.Repository` class will be explained in deatil in
-upcomming sections.
+:class:`~stalker.models.repository.Repository` class will be explained in
+detail in upcomming sections.
 
 So::
 
@@ -204,7 +205,7 @@ So we have created our project now.
 Lets enter more information about this new project::
 
   import datetime
-  from stalker.core.models import ImageFormat
+  from stalker import ImageFormat
   
   new_project.description = """The commercial is about this fancy product. The
                                client want us to have a shiny look with their
@@ -223,11 +224,11 @@ As you see, even though we have created multiple objects (new_project, satuses,
 status lists etc.) we've just added the ``new_project`` object to the database,
 but don't worry all the related objects will be added to the database.
 
-A Project generally contains :class:`~stalker.core.models.Sequence`\ s, so lets
-create one, again we need to create a status list suitable for sequences and a
-sequence should be initialized with a project instance::
+A Project generally contains :class:`~stalker.models.sequence.Sequence`\ s, so
+lets create one, again we need to create a status list suitable for sequences
+and a sequence should be initialized with a project instance::
 
-  from stalker.core.models import Sequence
+  from stalker import Sequence
   
   seq_statuses = StatusList(
       name="Sequence Status List",
@@ -245,9 +246,9 @@ sequence should be initialized with a project instance::
       project=new_project,
   )
 
-And a Sequence generally has :class:`~stalker.core.models.Shot`\ s::
+And a Sequence generally has :class:`~stalker.models.shot.Shot`\ s::
 
-  from stalker.core.models import Shot
+  from stalker import Shot
   
   shot_statuses = StatusList(
       name="Shot Status List",
@@ -314,12 +315,12 @@ Stalker still doesn't know much about our studio. For example, it doesn't have
 any information about the **pipeline** that we are following and what steps we
 do to complete those shots, thus to complete the project.
 
-In Stalker, pipeline is managed by :class:`~stalker.core.models.Task`\ s. So
+In Stalker, pipeline is managed by :class:`~stalker.models.task.Task`\ s. So
 you create Tasks for Shots and then you can create dependencies between tasks.
 
 So lets create a couple of tasks for one of the shots we have created before::
 
-  from stalker.core.models import Task
+  from stalker import Task
   
   task_statuses = StatusList(
       name="Task Status List",
@@ -415,7 +416,7 @@ Part V - Asset Management
 Now we have created a lot of things but other then storing all the data in the
 database, we didn't do much. Stalker still doesn't have information about a lot
 of things. For example, it doesn't know how to handle your asset versions
-(:class:`~stalker.core.models.Version`) namely it doesn't know how to store
+(:class:`~stalker.models.version.Version`) namely it doesn't know how to store
 your data that you are going to create while completing this tasks.
 
 So what we need to define is a place in our file structure. It doesn't need to
@@ -425,7 +426,7 @@ place your files in a network share or a SAN storage, there are other
 alternatives like storing your files locally and sharing your revisions with a
 Software Configuration Management (SCM) system. We are going to see the first
 alternative, which uses a network share in our fileserver, and this network
-share is called a :class:`~stalker.core.models.Reposiory` in Stalker.
+share is called a :class:`~stalker.models.repository.Reposiory` in Stalker.
 
 A repository is a file path, preferably a path which is mapped or mounted to
 the same path on every computer in our studio. You can have several
@@ -459,12 +460,12 @@ correct answer according to your operating system::
   using.
 
 Assigning this repository to our project is not enough, Stalker still doesn't
-know about the project :class:`~stalker.core.models.Structure`\ , or in other
-words it doesn't have information about the folder structure about your
+know about the project :class:`~stalker.models.structure.Structure`\ , or in
+other words it doesn't have information about the folder structure about your
 project. To explain the project structure we can use the
-:class:`~stalker.core.models.Structure` object::
+:class:`~stalker.models.structure.Structure` object::
 
-  from stalker.core.models import Structure
+  from stalker import Structure
   
   commercial_project_structure = Structure(
       name="Commercial Projects Structure",
@@ -513,8 +514,8 @@ Now we have entered a couple of `Jinja2`_ directives as a string. This template
 will be used when creating the project structure.
 
 .. :: by calling
-  :func:`~stalker.core.models.Project.create`. It is safe to call the
-  :func:`~stalker.core.models.Project.create` over and over or whenever you've
+  :func:`~stalker.models.project.Project.create`. It is safe to call the
+  :func:`~stalker.models.project.Project.create` over and over or whenever you've
   added new data that will add some extra folders to the project structure.
 
 .. _Jinja2: http://jinja.pocoo.org/
@@ -539,19 +540,20 @@ The above template will produce the following folders for our project::
 
 We are still not done with defining the templates. Even though Stalker now
 knows what is the project structure like, it is not aware of the placements of
-individual :class:`~stalker.core.models.Version` files specific for a Task. A
-:class:`~stalker.core.models.Version` is an object holding information about
-every single iteration of one Task and has a connection to files in the
+individual :class:`~stalker.models.version.Version` files specific for a Task.
+A :class:`~stalker.models.version.Version` is an object holding information
+about every single iteration of one Task and has a connection to files in the
 repository.
 
 So before creating a new version for any kind of task, we need to tell Stalker
 where to place the related files. This can be done by using a
-:class:`~stalker.core.models.FilenameTemplate` object.
+:class:`~stalker.models.templates.FilenameTemplate` object.
 
-A :class:`~stalker.core.models.FilenameTemplate` object has information about
-the path, the filename, and the target entity type to apply this template to::
+A :class:`~stalker.models.template.FilenameTemplate` object has information
+about the path, the filename, and the target entity type to apply this template
+to::
 
-  from stalker.core.models import FilenameTemplate
+  from stalker import FilenameTemplate
   
   shot_version_template = FilenameTemplate(
       name="Shot Template",
@@ -594,13 +596,13 @@ Management System if we can not communicate with our colleagues.
 
 In Stalker you can communicate with others in the system, by:
   
-  * Leaving a :class:`~stalker.core.models.Note` to anything created in
+  * Leaving a :class:`~stalker.models.note.Note` to anything created in
     Stalker (except to notes and tags, you can not create a note to a note and
     to a tag)
-  * Sending a :class:`~stalker.core.models.Message` directly to them or
+  * Sending a :class:`~stalker.models.message.Message` directly to them or
     to a group of users
-  * If you are a lead of a project or a sequence, then by placing a
-    :class:`~stalker.core.models.Review` to their works
+  * Anyone can create :class:`~stalker.models.ticket.Ticket`\ s to a
+    :class:`~stalker.models.version.Version`
 
 Part VII - Session Management (coming)
 ======================================

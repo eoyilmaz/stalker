@@ -14,3 +14,10 @@ dist/*
 build/*
 stalker.egg-info/*
 upload_to_pypi
+lib/*
+bin/*
+include/*
+local
+*.swp
+stalker/static/*
+stalker.db

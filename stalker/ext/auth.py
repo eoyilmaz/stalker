@@ -16,23 +16,23 @@ updated, read or delete the data.
 
 There are two main functions to be used in the process of login. The first one
 is :func:`stalker.ext.auth.authenticate`, which accepts username and password
-as strings and returns a :class:`stalker.core.models.User` object::
+as strings and returns a :class:`stalker.models.user.User` object::
 
     from stalker.ext import auth
     user_obj = auth.authenticate("username", "password")
 
 The second one is the :func:`stalker.ext.auth.login` which uses a given
-:class:`stalker.core.models.User` object and creates a Beaker Session and
+:class:`stalker.models.user.User` object and creates a Beaker Session and
 stores the logged in user id in that session.
 
 The :func:`stalker.ext.auth.get_user` can be used to get the authenticated and
-logged in :class:`stalker.core.models.User` object.
+logged in :class:`stalker.models.user.User` object.
 
 The basic usage of the system is as follows::
 
   from stalker import db
   from stalker.ext import auth
-  from stalker.core.models import User
+  from stalker import User
 
   if auth.SESSION_KEY in auth.SESSION:
       # user has login data 
@@ -47,7 +47,7 @@ The module also introduces a decorator called
 functionality to any function or method.
 
 There is also another decorator called
-:func:`stalker.ext.auth.premission_required` to check if the logged in user is
+:func:`stalker.ext.auth.permission_required` to check if the logged in user is
 in the given permission group.
 
 There are also two utility functions two check and set encrypted passwords.
@@ -61,16 +61,16 @@ import datetime
 import base64
 
 from beaker import session as beakerSession
+import transaction
 
-from stalker import db
-from stalker.core.errors import LoginError, DBError
-from stalker.core.models import User
-
+#from stalker import db
+from stalker.errors import LoginError, DBError
+from stalker.db.session import DBSession
+from stalker.models.user import User
 
 SESSION = {}
 SESSION_ID = "stalker"
 SESSION_KEY = "_auth_user_id"
-
 
 def create_session():
     """Creates the beaker.session object.
@@ -79,23 +79,23 @@ def create_session():
     function creates the session and stores it in the
     :const:`stalker.ext.auth.SESSION` dictionary.
     """
-
-    from stalker.ext import auth
-
+    
+    global SESSION
+    global SESSION_ID
+    
     tempdir = tempfile.gettempdir()
 
     # loading session
     session_options = {
-        "id": auth.SESSION_ID,
+        "id": SESSION_ID,
         "type": "file",
         "cookie_expires": False,
         "data_dir": os.path.sep.join([tempdir, "stalker_cache", "data"]),
         "lock_dir": os.path.sep.join([tempdir, "stalker_cache", "lock"]),
         }
 
-    auth.SESSION = beakerSession.Session({}, **session_options)
-    auth.SESSION.save()
-
+    SESSION = beakerSession.Session({}, **session_options)
+    SESSION.save()
 
 def login(user=None):
     """Persists the user_id in a session.
@@ -115,46 +115,47 @@ def login(user=None):
       session and thus the user id in the session is None than a loggin error
       will be raised. So by this way the user is logged in only one time.
     
-    :type user: :class:`stalker.core.models.User`
+    :type user: :class:`stalker.models.user.User`
     """
-
-    from stalker.ext import auth
-
+    
+    global SESSION
+    global SESSION_KEY
+    
     # log the user if the current session id matches the given user id
     if user is None:
         try:
-            logged_user_id = auth.SESSION[auth.SESSION_KEY]
+            logged_user_id = SESSION[SESSION_KEY]
         except KeyError:
             raise LoginError("There is no previous session, please supply a "
                              "user, for the first time.")
         else:
-            user = db.query(User).\
-            filter_by(id=SESSION[auth.SESSION_KEY]).\
+            user = DBSession.query(User).\
+            filter_by(id=SESSION[SESSION_KEY]).\
             first()
 
     if not isinstance(user, User):
-        raise TypeError("user must be a stalker.core.models.User instance")
+        raise TypeError("user must be a stalker.models.user.User instance")
 
-    if db.session is None:
-        raise DBError("No database connection is setup yet, please use "
-                      "stalker.db.setup to setup a database")
-
-    user.last_login = datetime.datetime.now()
-    db.session.commit()
-
+    if DBSession is None:
+        raise DBError(
+            "No database connection is setup yet, please use stalker.db.setup "
+            "to setup a database")
+    
+    with transaction.manager:
+        user.last_login = datetime.datetime.now()
+    
     # store the user-id in the SESSION
-    if auth.SESSION_KEY in auth.SESSION:
-        if auth.SESSION[SESSION_KEY] != user.id:
-            auth.SESSION[SESSION_KEY] = user.id
+    if SESSION_KEY in SESSION:
+        if SESSION[SESSION_KEY] != user.id:
+            SESSION[SESSION_KEY] = user.id
     else:
         # create the session with given session id
         create_session()
-        auth.SESSION[SESSION_KEY] = user.id
-
+        SESSION[SESSION_KEY] = user.id
 
 def authenticate(username="", password=""):
     """Authenticates the given username and password, returns a
-    stalker.core.models.User object
+    stalker.models.user.User object
     
     There needs to be a already setup database for the authentication to hapen.
     """
@@ -162,12 +163,12 @@ def authenticate(username="", password=""):
     user_obj = None
 
     # check if the database is setup
-    if db.session == None:
+    if DBSession == None:
         raise DBError("stalker is not connected to any db right now, use "
                       "stalker.db.setup(), to setup the default database")
 
     # try to get the given user
-    user_obj = db.session.query(User).filter_by(name=username).first()
+    user_obj = DBSession.query(User).filter_by(name=username).first()
 
     error_msg = "user name and login don't match, %s" % username
 
@@ -183,11 +184,10 @@ def authenticate(username="", password=""):
 def logout():
     """removes the current session
     """
-    from stalker.ext import auth
-
+    global SESSION
     try:
-        auth.SESSION.delete()
-        auth.SESSION.clear()
+        SESSION.delete()
+        SESSION.clear()
     except AttributeError:
         return
 
@@ -228,8 +228,8 @@ def permission_required(permission_group, error_message=None):
     Checks if the logged in user is in the given permission group and then
     calls the decorated function
     
-    :param permission_group: a :class:`~stalker.core.models.Group` object
-      showing the permision group
+    :param permission_group: a :class:`~stalker.models.auth.PermissionGroup`
+      object showing the permission group
     
     :param error_message: the message to be shown in case a LoginError is
       raised, a default message will be shown when skipped

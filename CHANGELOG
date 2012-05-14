@@ -2,6 +2,65 @@
 Stalker Changes
 ===============
 
+0.2.0.a1
+--------
+* Converted the whole system to a Pyramid Web application. If the previous
+  implementations investigated, it will be understood that it was only the
+  database model of a Web Application.
+
+* Changed the :meth:`~stalker.db.setup` arguments. It is now accepting a
+  dictionary instead of just a string to comply with the SQLAlchemy scaffold
+  and this dictionary should contain keys for the SQLAlchemy engine setup.
+  There is another utility that comes with Pyramid to setup the database under
+  the `scripts` folder, it is also working without any problem with
+  :mod:`~stalker.db`\ .
+
+* The ``session`` variable is renamed to ``DBSession`` and is now a scopped
+  session, so there is no need to use ``DBSession.commit`` it will be handled
+  by the system it self.
+
+* Even though the ``DBSession`` is using the Zope Transaction Manager extension
+  normally, in the database tests no extension is used because the transaction
+  manager was swallowing all errors and it was a little weird to try to catch
+  this errors out of the ``with`` block.
+
+* Refactored the code, all the models are now in separate python files, but can
+  be directly imported from the main stalker module as shown::
+  
+    from stalker import User, Department, Task
+  
+  By using this kind of organization, both development and usage will be eased
+  out.
+
+* :attr:`~stalker.models.task.Task.task_of` now only accepts
+  :attr:`~stalker.models.entity.TaskableEntity` instances.
+
+* Updated the examples. It is now showing how to extend SOM correctly. 
+
+* Updated the references to the SOM classes in docstrings and rst files.
+
+* Removed the ``Review`` class. And introduced the much handier
+  :class:`~stalker.models.ticket.Ticket` class. Now reviewing a data is the
+  process of creating Ticket's to that data.
+
+* The database is now initialized with a
+  :class:`~stalker.models.status.StatusList` and a couple of
+  :class:`~stalker.models.status.Status`\ es appropriate for
+  :class:`~stalker.models.ticket.Ticket` instances.
+
+* The database is now initialized with two :class:`~stalker.models.type.Type`
+  instances ('Enhancement' and 'Defect') suitable for
+  :class:`~stalker.models.ticket.Ticket` instances.
+
+* :class:`~stalker.models.mixins.StatusMixin` now stores the
+  :attr:`~stalker.models.mixins.StatusMixin.status` attribute as an Integer
+  showing the index of the :class:`~stalker.models.status.Status` in the
+  :attr:`~stalker.models.mixins.StatusMixin.status_list` attribute but when
+  asked for the value of :attr:`~stalker.models.mixins.StatusMixin.status`
+  attribute it will return a proper :class:`~stalker.models.status.Status`
+  instance and the attribute can be set with an integer or with a proper
+  :class:`~stalker.models.status.Status` instance.
+
 0.1.2.a5
 --------
 
@@ -16,6 +75,15 @@ Stalker Changes
 * Fixed a bug that causes recursion in queries to
   :class:`~stalker.core.models.StatusList` instances.
 
+* Removed the ``FilenameTemplate.output_file_code`` attribute cause it is not
+  needed.
+
+* Removed the ``FilenameTemplate.output_is_relative`` attribute, now all the
+  path values are :class:`~stalker.models.repository.Repository` relative.
+
+* Renamed the ``path_code`` to ``path``, ``file_code`` to ``filename`` and
+  ``output_path_code`` to ``output_path`` in
+  :class:`~stalker.models.template.FilenameTemplate``\ .
 
 0.1.2.a4
 ---------
