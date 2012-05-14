@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.0.a2
+--------
+
+* :class:`~stalker.models.entity.SimpleEntity` now has an attribute called
+  :attr:`~stalker.models.entity.SimpleEntity.generic_data` which can hold any
+  kind of ``SOM`` object inside and it is a list.
+
 0.2.0.a1
 --------
 * Converted the whole system to a Pyramid Web application. If the previous

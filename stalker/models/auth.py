@@ -4,8 +4,17 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
+from pyramid.security import Allow, Everyone
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.entity import SimpleEntity
+
+class RootFactory(object):
+    __acl__ = [
+        (Allow, Everyone, 'view'),
+        (Allow, 'group:editors', 'edit')
+    ]
+    def __init__(self, request):
+        pass
 
 class PermissionGroup(SimpleEntity):
     """Manages permission in the system.

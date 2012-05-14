@@ -58,17 +58,17 @@ class SimpleEntity(Base):
     :attr:`~stalker.models.entity.SimpleEntity.date_created`,
     :attr:`~stalker.models.entity.SimpleEntity.date_updated` and a couple of
     naming attributes like :attr:`~stalker.models.entity.SimpleEntity.code` and
-    :attr:`~stalker.models.entiy.SimpleEntity.nice_name` and last but not least
-    the :attr:`~stalker.models.entity.SimpleEntity.type` attribute which is
-    very important for entities that needs a type.
+    :attr:`~stalker.models.entity.SimpleEntity.nice_name` and last but not
+    least the :attr:`~stalker.models.entity.SimpleEntity.type` attribute which
+    is very important for entities that needs a type.
     
     For derived classes if the :attr:`~stalker.models.entity.SimpleEntity.type`
     needed to be specifically specified, that is it can not be None or nothing
     else then a :class:`~stalker.models.type.Type` instance, set the
     ``strictly_typed`` class attribute to True::
       
-      class NewClass(SimpleEntity):
-          __strictly_typed__ = True
+        class NewClass(SimpleEntity):
+            __strictly_typed__ = True
     
     This will ensure that the derived class always have a proper
     :attr:`~stalker.models.entity.SimpleEntity.type` attribute and can not
@@ -79,36 +79,36 @@ class SimpleEntity(Base):
     
     The formatting rules for the code attribute is as follows:
       
-      * only alphanumerics and underscore is allowed \[a-zA-Z0-9\_\]
-      * no number is allowed at the beginning
-      * no white spaces are allowed
-      * all the white spaces will be converted to underscore characters
-      * all the underscores are converted to only one underscore character if
-        more than one follows each other
+        * only alphanumerics and underscore is allowed \[a-zA-Z0-9\_\]
+        * no number is allowed at the beginning
+        * no white spaces are allowed
+        * all the white spaces will be converted to underscore characters
+        * all the underscores are converted to only one underscore character if
+          more than one follows each other
     
     Examples:
     
-      +-----------------------------------+-----------------------------------+
-      | Input Value                       | Formatted Output                  |
-      +===================================+===================================+
-      | testCode                          | testCode                          |
-      +-----------------------------------+-----------------------------------+
-      | 1testCode                         | testCode                          |
-      +-----------------------------------+-----------------------------------+
-      | _testCode                         | testCode                          |
-      +-----------------------------------+-----------------------------------+
-      | 2423$+^^+^'%+%%&_testCode         | testCode                          |
-      +-----------------------------------+-----------------------------------+
-      | 2423$+^^+^'%+%%&_testCode_35      | testCode_35                       |
-      +-----------------------------------+-----------------------------------+
-      | 2423$ +^^+^ '%+%%&_ testCode\_ 35 | testCode_35                       |
-      +-----------------------------------+-----------------------------------+
-      | SH001                             | SH001                             |
-      +-----------------------------------+-----------------------------------+
-      | My CODE is Code                   | My_CODE_is_Code                   |
-      +-----------------------------------+-----------------------------------+
-      | this is another code for an asset | this_is_another_code_for_an_asset |
-      +-----------------------------------+-----------------------------------+
+        +-----------------------------------+-----------------------------------+
+        | Input Value                       | Formatted Output                  |
+        +===================================+===================================+
+        | testCode                          | testCode                          |
+        +-----------------------------------+-----------------------------------+
+        | 1testCode                         | testCode                          |
+        +-----------------------------------+-----------------------------------+
+        | _testCode                         | testCode                          |
+        +-----------------------------------+-----------------------------------+
+        | 2423$+^^+^'%+%%&_testCode         | testCode                          |
+        +-----------------------------------+-----------------------------------+
+        | 2423$+^^+^'%+%%&_testCode_35      | testCode_35                       |
+        +-----------------------------------+-----------------------------------+
+        | 2423$ +^^+^ '%+%%&_ testCode\_ 35 | testCode_35                       |
+        +-----------------------------------+-----------------------------------+
+        | SH001                             | SH001                             |
+        +-----------------------------------+-----------------------------------+
+        | My CODE is Code                   | My_CODE_is_Code                   |
+        +-----------------------------------+-----------------------------------+
+        | this is another code for an asset | this_is_another_code_for_an_asset |
+        +-----------------------------------+-----------------------------------+
       
     :param string name: A string or unicode value that holds the name of this
       entity. It can not be empty, the first letter should be an alphabetic
@@ -250,6 +250,15 @@ class SimpleEntity(Base):
         It is an instance of :class:`~stalker.models.type.Type` with a proper
         :attr:`~stalker.models.type.Type.target_entity_type`.
         """
+    )
+    
+    generic_data = relationship(
+        'SimpleEntity',
+        secondary='SimpleEntity_GenericData',
+        primaryjoin='SimpleEntities.c.id==SimpleEntity_GenericData.c.simple_entity_id',
+        secondaryjoin='SimpleEntity_GenericData.c.other_simple_entity_id==SimpleEntities.c.id',
+        doc='''This attribute can hold any kind of data which exists in SOM.
+        '''
     )
 
     #UniqueConstraint("name", "db_entity_type")
@@ -712,13 +721,29 @@ Entity_Tags = Table(
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
-        ),
+    ),
 
     Column(
         "tag_id",
         Integer,
         ForeignKey("Tags.id"),
         primary_key=True,
-        )
+    )
 )
 
+# SIMPLEENTITY_GENERICDATA
+SimpleEntity_GenericData = Table(
+   'SimpleEntity_GenericData', Base.metadata,
+   Column(
+        'simple_entity_id',
+       Integer,
+       ForeignKey('SimpleEntities.id'),
+       primary_key=True
+   ),
+   Column(
+       'other_simple_entity_id',
+       Integer,
+       ForeignKey('SimpleEntities.id'),
+       primary_key=True
+   )
+)

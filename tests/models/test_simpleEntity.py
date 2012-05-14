@@ -76,13 +76,9 @@ class SimpleEntityTester(unittest.TestCase):
             ("2423$ +^^+^ '%+%%&_ testName_ 35", "test_name_35"),
             ("SH001", "sh001"),
             ("My name is Ozgur", "my_name_is_ozgur"),
-
             (" this is another name for an asset",
              "this_is_another_name_for_an_asset"),
-
-
         ]
-
 
         #self.code_test_values = [
         #("testCode","TEST_CODE"),
@@ -101,11 +97,9 @@ class SimpleEntityTester(unittest.TestCase):
         #"A_LIST_FOR_TESTING_3"),
         #]
 
-
     def test_code_argument_skipped(self):
         """testing if a value will be set if code argument is skipped
         """
-
         #code = None
         #name = "something"
         # code value ?
@@ -122,39 +116,29 @@ class SimpleEntityTester(unittest.TestCase):
         self.assertTrue(new_simple_entity.code != "")
         self.assertIsInstance(new_simple_entity.code, (str, unicode))
 
-
     def test_code_argument_None(self):
         """testing if a value will be set if code argument is set to None
         """
-
         self.kwargs["code"] = None
-
         new_simple_entity = SimpleEntity(**self.kwargs)
-
         self.assertTrue(new_simple_entity.code is not None)
         self.assertTrue(new_simple_entity.code != "")
         self.assertIsInstance(new_simple_entity.code, (str, unicode))
-
 
     def test_code_argument_empty_string(self):
         """testing if a value will be set if code argument is set to an empty
         string
         """
-
         self.kwargs["code"] = ""
-
         new_simple_entity = SimpleEntity(**self.kwargs)
-
         self.assertTrue(new_simple_entity.code is not None)
         self.assertTrue(new_simple_entity.code != "")
         self.assertIsInstance(new_simple_entity.code, (str, unicode))
-
 
     def test_code_attribute_format_when_code_argument_skipped(self):
         """testing if code attribute is formatted correctly when skipped as an
         argument
         """
-
         #code = None or ""
         #name = "something"
         # code format ?
@@ -181,12 +165,10 @@ class SimpleEntityTester(unittest.TestCase):
 
             self.assertEqual(new_entity.code, test_value[1])
 
-
     def test_code_attribute_is_set_when_both_code_and_name_is_given(self):
         """testing if both code argument and name argument is given then it is
         just set to the formatted version of code
         """
-
         code_test_values = [
             ("testCode", "testCode"),
             ("1testCode", "testCode"),
@@ -213,12 +195,10 @@ class SimpleEntityTester(unittest.TestCase):
 
             self.assertEqual(new_entity.code, test_value[1])
 
-
     def test_code_attribute_is_not_changed_after_setting_name(self):
         """testing if code attribute is not changed and reformatted after the
         name attribute has changed
         """
-
         # create a SimpleEntity with code and name has values in it
         code = "something"
         name = "some name"
@@ -242,79 +222,62 @@ class SimpleEntityTester(unittest.TestCase):
         # then check if it is set to the expected result
         self.assertEqual(new_simple_entity.code, expected_new_code)
 
-
     def test_code_attribute_set_to_empty_string(self):
         """testing if the code attribute will be restored from the nice_name
         attribute when it is set to an empty string
         """
-
         self.test_simple_entity.code = ""
         self.assertEqual(self.test_simple_entity.code, "test_entity")
-
 
     def test_code_attribute_set_to_None(self):
         """testing if the code is evauluated from the nice_name attribute when
         set to None.
         """
-
         self.test_simple_entity.code = None
         self.assertEqual(self.test_simple_entity.code, "test_entity")
-
 
     def test_name_argument_init_as_None_and_also_the_code_is_None(self):
         """testing if ValueError is raised for None name argument
         """
-
         self.kwargs["name"] = None
         self.kwargs["code"] = None
         self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
-
 
     def test_name_argument_init_as_None_and_also_the_code_is_empty_string(self):
         """testing if TypeError is raised for None name argument
         """
-
         self.kwargs["name"] = None
         self.kwargs["code"] = ""
         self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
 
-
     def test_name_argument_init_as_empty_string_and_also_the_code_is_None(self):
         """testing if ValueError is raised for None name argument
         """
-
         self.kwargs["name"] = ""
         self.kwargs["code"] = None
         self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
 
-
-    def test_name_argument_init_as_empty_string_and_also_the_code_is_empty_string(
-    self):
+    def test_name_argument_init_as_empty_string_and_also_the_code_is_empty_string(self):
         """testing if TypeError is raised for None name argument
         """
-
         self.kwargs["name"] = ""
         self.kwargs["code"] = ""
         self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
 
-
     def test_name_argument_is_None_but_there_is_code_argument(self):
         """testing if the name attribute will be calculated from the code
-        arugment if the name argument is given as none
+        argument if the name argument is given as none
         """
-
         self.kwargs["name"] = None
         self.assertIsNot(self.kwargs["code"], None)
 
         new_simpleEntity = SimpleEntity(**self.kwargs)
         self.assertEqual(new_simpleEntity.name, new_simpleEntity.code)
 
-
     def test_name_attribute_for_being_empty(self):
         """testing if ValueError is raised when trying to set the name to an
         empty string
         """
-
         self.assertRaises(
             ValueError,
             setattr,
@@ -323,11 +286,9 @@ class SimpleEntityTester(unittest.TestCase):
             ""
         )
 
-
     def test_name_attribute_for_being_None(self):
         """testing if TypeError is raised when trying to set the name to None
         """
-
         self.assertRaises(
             TypeError,
             setattr,
@@ -340,7 +301,6 @@ class SimpleEntityTester(unittest.TestCase):
         """testing if a TypeError will be raised when the name argument is not
         a string or unicode
         """
-
         test_values = [
             12132,
             [1, "name"],
@@ -355,7 +315,6 @@ class SimpleEntityTester(unittest.TestCase):
         """testing if a TypeError will be raised when the name attribute is
         not a string or unicode
         """
-
         test_values = [
             12132, [1, "name"], {"a": "name"}
         ]
@@ -367,7 +326,6 @@ class SimpleEntityTester(unittest.TestCase):
     def test_name_attribute_is_formatted_correctly(self):
         """testing if name is formatted correctly
         """
-        
         for test_value in self.name_test_values:
             # set the new name
             self.test_simple_entity.name = test_value[0]
@@ -379,11 +337,9 @@ class SimpleEntityTester(unittest.TestCase):
                 (str(test_value[0]), test_value[1])
             )
 
-
     def test_nice_name_attribute_is_formatted_correctly(self):
         """testing if nice name attribute is formatted correctly
         """
-
         for test_value in self.nice_name_test_values:
             self.test_simple_entity.name = test_value[0]
 
@@ -394,11 +350,9 @@ class SimpleEntityTester(unittest.TestCase):
                 test_value[0] + ", " + test_value[1]
             )
 
-
     def test_nice_name_attribute_is_read_only(self):
         """testing if nice name attribute is read-only
         """
-
         self.assertRaises(
             AttributeError,
             setattr,
@@ -407,17 +361,14 @@ class SimpleEntityTester(unittest.TestCase):
             "a text"
         )
 
-
     def test_description_argument_None(self):
         """testing if description proeprty will be convertod to an empty string
         if None is given as the description argument
         """
-
         self.kwargs["description"] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
 
         self.assertEqual(new_simple_entity.description, "")
-
 
     def test_description_attribute_None(self):
         """testing if description attribute will be converted to an empty
@@ -427,12 +378,10 @@ class SimpleEntityTester(unittest.TestCase):
         self.test_simple_entity.description = None
         self.assertEqual(self.test_simple_entity.description, "")
 
-
     def test_description_argument_string_conversion(self):
         """testing if description argument will be converted to string
         correctly
         """
-
         test_values = [["a description"], {"a": "description"}]
 
         for test_value in test_values:
@@ -442,12 +391,10 @@ class SimpleEntityTester(unittest.TestCase):
             self.assertIsInstance(new_simple_entity.description,
                 (str, unicode))
 
-
     def test_description_attribute_string_conversion(self):
         """testing if description attribute will be converted to string
         correctly
         """
-
         test_values = [["a description"], {"a": "description"}]
 
         for test_value in test_values:
@@ -455,11 +402,9 @@ class SimpleEntityTester(unittest.TestCase):
             self.assertIsInstance(self.test_simple_entity.description,
                 (str, unicode))
 
-
     def test_equality(self):
         """testing the equality of two simple entities
         """
-
         # create two simple entities with same parameters and check for
         # equality
         simpleEntity1 = SimpleEntity(**self.kwargs)
@@ -471,11 +416,9 @@ class SimpleEntityTester(unittest.TestCase):
         self.assertTrue(simpleEntity1 == simpleEntity2)
         self.assertFalse(simpleEntity1 == simpleEntity3)
 
-
     def test_inequality(self):
         """testing the inequality of two simple entites
         """
-
         # create two simple entities with same parameters and check for
         # equality
         simpleEntity1 = SimpleEntity(**self.kwargs)
@@ -487,7 +430,6 @@ class SimpleEntityTester(unittest.TestCase):
 
         self.assertFalse(simpleEntity1 != simpleEntity2)
         self.assertTrue(simpleEntity1 != simpleEntity3)
-
 
     def test_created_by_argument_instance_of_User(self):
         """testing if TypeError is raised when assigned anything other than a
@@ -509,10 +451,9 @@ class SimpleEntityTester(unittest.TestCase):
             test_value
         )
 
-
     def test_created_by_attribute_instance_of_User(self):
         """testing if TypeError is raised when assigned anything other than a
-        stalker.modles.User object to created_by attribute
+        stalker.models.User object to created_by attribute
         """
         # the created_by attribute should be an instance of User class, in any
         # other case it should raise a TypeError
@@ -530,10 +471,9 @@ class SimpleEntityTester(unittest.TestCase):
             test_value
         )
 
-
     def test_updated_by_argument_instance_of_User(self):
         """testing if TypeError is raised when assigned anything other than a
-        stalker.modles.User object to updated_by argument
+        stalker.models.User object to updated_by argument
         """
         # the updated_by argument should be an instance of User class, in any
         # other case it should raise a TypeError
@@ -551,10 +491,9 @@ class SimpleEntityTester(unittest.TestCase):
             test_value
         )
 
-
     def test_updated_by_attribute_instance_of_User(self):
         """testing if TypeError is raised when assigned anything other than a
-        stalker.modles.User object to update_by attribute
+        stalker.models.User object to update_by attribute
         """
         # the updated_by attribute should be an instance of User class, in any
         # other case it should raise a TypeError
@@ -572,12 +511,10 @@ class SimpleEntityTester(unittest.TestCase):
             test_value
         )
 
-
     def test_updated_by_argument_empty(self):
         """testing if initializing updated_by with None causes it to be set to
         the same value with created_by argument
         """
-
         self.kwargs["updated_by"] = None
 
         aNewSimpleEntity = SimpleEntity(**self.kwargs)
@@ -586,16 +523,12 @@ class SimpleEntityTester(unittest.TestCase):
         self.assertEqual(aNewSimpleEntity.created_by,
                          aNewSimpleEntity.updated_by)
 
-
     def test_date_created_argument_accepts_datetime_only(self):
         """testing if TypeError raises when the date_created argument is set
         to something else than a datetime.datetime object
         """
-
         # the date_created argument should be an instance of datetime.datetime
-
         # try to set something else and expect a TypeError
-
         test_value = "a string date time 2010-10-26 etc."
 
         # be sure that the test_value is not an instance of datetime.datetime
@@ -608,22 +541,16 @@ class SimpleEntityTester(unittest.TestCase):
             "date_created",
             test_value
         )
-
 
     def test_date_created_attribute_accepts_datetime_only(self):
         """testing if TypeError raises when the date_created attribute is set
         to something else than a datetime.datetime object
         """
-
         # the date_created attribute should be an instance of datetime.datetime
-
         # try to set something else and expect a TypeError
-
         test_value = "a string date time 2010-10-26 etc."
-
         # be sure that the test_value is not an instance of datetime.datetime
         self.assertFalse(isinstance(test_value, datetime.datetime))
-
         self.assertRaises(
             TypeError,
             setattr,
@@ -632,12 +559,10 @@ class SimpleEntityTester(unittest.TestCase):
             test_value
         )
 
-
     def test_date_created_attribute_being_empty(self):
         """testing if TypeError is raised when the date_created attribute is
         set to None
         """
-
         self.assertRaises(
             TypeError,
             setattr,
@@ -646,12 +571,10 @@ class SimpleEntityTester(unittest.TestCase):
             None
         )
 
-
     def test_date_updated_argument_accepts_datetime_only(self):
         """testing if TypeError raises when the date_updated argument is set
         to something else than a datetime.datetime object
         """
-
         # try to set it to something else and expect a TypeError
         test_value = "a string date time 2010-10-26 etc."
 
@@ -666,12 +589,10 @@ class SimpleEntityTester(unittest.TestCase):
             test_value
         )
 
-
     def test_date_updated_attribute_being_datetime(self):
         """testing if TypeError raises when the date_updated attribute is set
         to something else than a datetime.datetime object
         """
-
         # try to set something else and expect a TypeError
         test_value = "a string date time 2010-10-26 etc."
 
@@ -686,12 +607,10 @@ class SimpleEntityTester(unittest.TestCase):
             test_value
         )
 
-
     def test_date_updated_attribute_is_set_to_None(self):
         """testing if TypeError is raised when the date_updated attribute is
         set to None
         """
-
         self.assertRaises(
             TypeError,
             setattr,
@@ -700,21 +619,17 @@ class SimpleEntityTester(unittest.TestCase):
             None
         )
 
-
     def test_date_updated_attribute_is_working_properly(self):
         """testing if the date_updated attribute is working properly
         """
-
         test_value = datetime.datetime.now()
         self.test_simple_entity.date_updated = test_value
         self.assertEqual(self.test_simple_entity.date_updated, test_value)
-
 
     def test_date_created_is_before_date_updated(self):
         """testing if a ValueError is going to be raised when trying to set the
         date_updated to a time before date_created
         """
-
         self.kwargs["date_created"] = datetime.datetime(2000, 1, 1, 1, 1, 1)
         self.kwargs["date_updated"] = datetime.datetime(1990, 1, 1, 1, 1, 1)
 
@@ -722,11 +637,9 @@ class SimpleEntityTester(unittest.TestCase):
         # and expect a ValueError
         self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
 
-
     def test___repr__(self):
         """testing the __repr__ works properly
         """
-
         self.assertEqual(
             self.test_simple_entity.__repr__(),
             "<%s (%s, %s)>" % (
@@ -735,85 +648,66 @@ class SimpleEntityTester(unittest.TestCase):
                 self.test_simple_entity.code)
         )
 
-
     def test_type_argument_is_None(self):
         """testing if nothing will happen the type argument is None
         """
         self.kwargs["type"] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
 
-
     def test_type_attribute_is_set_to_None(self):
         """testing if nothing will be happened when the type attribute is set to
         None.
         """
-
         self.test_simple_entity.type = None
-
 
     def test_type_argument_accepts_only_Type_instances(self):
         """testing if a TypeError will be raised when the given type attribute
         is not instance of stalker.models.type.Type class
         """
-
         test_values = [1, 1.2, "a type"]
-
         for test_value in test_values:
             self.kwargs["type"] = test_value
             self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
-
 
     def test_type_argument_accepts_Type_instances(self):
         """testing if no error will be raised when the type argument is given
         as a stalker.models.type.Type instance
         """
-
         # test with a proper Type
         self.kwargs["type"] = self.test_type
         # no error is expected
         new_simple_entity = SimpleEntity(**self.kwargs)
 
-
     def test_type_attribute_accepts_only_Type_instances(self):
         """testing if a TypeError will be raised when the given type attribute
         is not instance of stalker.models.type.Type class
         """
-
         test_values = [1, 1.2, "a type"]
-
         for test_value in test_values:
             self.assertRaises(TypeError, setattr, self.test_simple_entity,
                               "type", test_value)
-
 
     def test_type_attribute_accepts_Type_instances(self):
         """testing if no error will be raised when the type attribute is given
         as a stalker.models.type.Type instance
         """
-
         # test with a proper Type
         self.test_simple_entity.type = self.test_type
-
 
     def test___strictly_typed___class_attribute_is_init_as_False(self):
         """testing if the __strictly_typed__ class attribute is initialized as
         False
         """
-
         self.assertEqual(self.test_simple_entity.__strictly_typed__, False)
 
-
-    def test___strictly_typed___attribute_set_to_True_and_no_type_argument(
-    self):
+    def test___strictly_typed___attribute_set_to_True_and_no_type_argument(self):
         """testing if a TypeError will be raised the __strictly_typed__
         attribute is set to true in a derived class but there is no type
         argument defined
         """
-
         ## create a new class deriving from the SimpleEntity
         #class newClass(SimpleEntity):
         #__strictly_typed__ = True
-
         self.assertEqual(newClass.__strictly_typed__, True)
 
         # create a new instance and skip the Type attribute and expect a
@@ -823,14 +717,11 @@ class SimpleEntityTester(unittest.TestCase):
 
         self.assertRaises(TypeError, newClass, **self.kwargs)
 
-
-    def test___strictly_typed___attribute_set_to_True_and_type_argument_is_None(
-    self):
+    def test___strictly_typed___attribute_set_to_True_and_type_argument_is_None(self):
         """testing if a TypeError will be raised the __strictly_typed__
         attribute is set to true in a derived class but the given type argument
         is None
         """
-
         ## create a new class deriving from the SimpleEntity
         #class newClass(SimpleEntity):
         #__strictly_typed__ = True
@@ -839,14 +730,11 @@ class SimpleEntityTester(unittest.TestCase):
         self.kwargs["type"] = None
         self.assertRaises(TypeError, newClass, **self.kwargs)
 
-
-    def test___strictly_typed___attribute_set_to_True_and_type_argument_is_not_Type(
-    self):
+    def test___strictly_typed___attribute_set_to_True_and_type_argument_is_not_Type(self):
         """testing if a TypeError will be raised the __strictly_typed__
         attribute is set to true in a derived class but the given type argument
         is not a string
         """
-
         ## create a new class deriving from the SimpleEntity
         #class newClass(SimpleEntity):
         #__strictly_typed__ = True
@@ -858,15 +746,11 @@ class SimpleEntityTester(unittest.TestCase):
             self.kwargs["type"] = test_value
             self.assertRaises(TypeError, newClass, **self.kwargs)
 
-
-    def test___stalker_version__attribute_is_automatically_set_to_the_current_version_of_Stalker(
-    self):
+    def test___stalker_version__attribute_is_automatically_set_to_the_current_version_of_Stalker(self):
         """testing if the __stalker_version__ is automatically set to the
         current version for the newly created SimpleEntities
         """
-
         new_simpleEntity = SimpleEntity(**self.kwargs)
-
         self.assertEqual(new_simpleEntity.__stalker_version__,
                          stalker.__version__)
 
@@ -885,3 +769,84 @@ class SimpleEntityTester(unittest.TestCase):
 
         # restore the stalker.__version__
         stalker.__version__ = current_version
+    
+    def test_generic_data_attribute_can_hold_a_wide_variety_of_object_types(self):
+        """testing if the generic_data attribute can hold any kind of object as
+        a list
+        """
+        
+        from stalker.db.session import DBSession
+        DBSession.remove()
+        DBSession.configure(extension=None)
+        from stalker import db
+        db.setup()
+        
+        new_simpleEntity = SimpleEntity(**self.kwargs)
+        test_user = User(
+            email='email@email.com',
+            first_name='email',
+            last_name='email',
+            login_name='email',
+            password='email',
+        )
+        
+        from stalker import Department
+        
+        test_department = Department(
+            name='department1'
+        )
+        
+        from stalker import Repository
+        
+        test_repo = Repository(
+            name='Test Repository'
+        )
+        
+        from stalker import Structure
+        test_struct = Structure(
+            name='Test Project Structure'
+        )
+        
+        from stalker import Status, StatusList
+        test_project_status_list = StatusList(
+            name='Project Status List',
+            target_entity_type='Project',
+            statuses=[
+                Status(name='Active', code='ACT')
+            ]
+        )
+        
+        from stalker import Project
+        
+        test_proj = Project(
+            name='Test Project',
+            repository=test_repo,
+            structure=test_struct,
+            status_list=test_project_status_list
+        )
+        
+        new_simpleEntity.generic_data.extend(
+            [test_proj, test_project_status_list, test_struct, test_repo,
+             test_department, test_user]
+        )
+        
+        DBSession.add(new_simpleEntity)
+        DBSession.commit()
+        
+        # now check if it is added to the database correctly
+        del new_simpleEntity
+        
+        new_simpleEntity_DB = DBSession.query(SimpleEntity)\
+            .filter(SimpleEntity.name==self.kwargs['name'])\
+            .first()
+        
+        self.assertTrue(test_proj in new_simpleEntity_DB.generic_data)
+        self.assertTrue(test_project_status_list in new_simpleEntity_DB.generic_data)
+        self.assertTrue(test_struct in new_simpleEntity_DB.generic_data)
+        self.assertTrue(test_repo in new_simpleEntity_DB.generic_data)
+        self.assertTrue(test_department in new_simpleEntity_DB.generic_data)
+        self.assertTrue(test_user in new_simpleEntity_DB.generic_data)
+        
+        DBSession.remove()
+        from stalker.db.session import ZopeTransactionExtension
+        DBSession.configure(extension=ZopeTransactionExtension)
