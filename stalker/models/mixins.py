@@ -113,39 +113,38 @@ class StatusMixin(object):
     supplies one, and in this case the parameters below must be defined.
     
     :param status_list: this attribute holds a status list object, which shows
-        the possible statuses that this entity could be in. This attribute can
-        not be empty or None. Giving a StatusList object, the
-        StatusList.target_entity_type should match the current class.
+      the possible statuses that this entity could be in. This attribute can
+      not be empty or None. Giving a StatusList object, the
+      StatusList.target_entity_type should match the current class.
       
-        .. versionadded:: 0.1.2.a4
-        
-            The status_list argument now can be skipped or can be None if there
-            is an active database connection (stalker.models.DBSession is not
-            None) and there is a suitable
-            :class:`~stalker.models.status.StatusList` instance in the database
-            whom :attr:`~stalker.models.status.StatusList.target_entity_type`
-            attribute is set to the current mixed-in class name.
+      .. versionadded:: 0.1.2.a4
+      
+        The status_list argument now can be skipped or can be None if there
+        is an active database connection (stalker.models.DBSession is not
+        None) and there is a suitable
+        :class:`~stalker.models.status.StatusList` instance in the database
+        whom :attr:`~stalker.models.status.StatusList.target_entity_type`
+        attribute is set to the current mixed-in class name.
     
     :param status: It is a :class:`~stalker.models.status.Status` instance
-        which shows the current status of the statusable object. Integer values
-        are also accepted, which shows the index of the desired asset in the
-        ``status_list`` attribute of the current statusable object. If a
-        :class:`~stalker.models.status.Status` instance is supplied, it should
-        also be present in the ``status_list`` attribute. If set to None then
-        the first :class:`~stalker.models.status.Status` instance in the
-        ``status_list`` will be used.
+      which shows the current status of the statusable object. Integer values
+      are also accepted, which shows the index of the desired asset in the
+      ``status_list`` attribute of the current statusable object. If a
+      :class:`~stalker.models.status.Status` instance is supplied, it should
+      also be present in the ``status_list`` attribute. If set to None then the
+      first :class:`~stalker.models.status.Status` instance in the
+      ``status_list`` will be used.
+      
+      .. versionadded:: 0.2.0
         
-        .. versionadded:: 0.2.0
-            
-            Status attribute as Status instance:
-          
-            It is now possible to set the status of the instance by a
-            :class:`~stalker.models.status.Status` instance directly. And the
-            :attr:`~stalker.models.mixins.StatusMixin.status` will return a
-            proper :class:`~stalker.models.status.Status` instance.
+        Status attribute as Status instance:
+        
+        It is now possible to set the status of the instance by a
+        :class:`~stalker.models.status.Status` instance directly. And the
+        :attr:`~stalker.models.mixins.StatusMixin.status` will return a proper
+        :class:`~stalker.models.status.Status` instance.
     """
     
-    # TODO: (minor) update docstrings with 4 spaced tabs.
     
     def __init__(self, status=0, status_list=None, **kwargs):
         self.status_list = status_list
@@ -667,9 +666,9 @@ class ReferenceMixin(object):
     def _validate_references(self, key, reference):
         """validates the given reference
         """
-
+        
         from stalker.models.entity import SimpleEntity
-
+        
         # all the elements should be instance of stalker.models.entity.Entity
         if not isinstance(reference, SimpleEntity):
             raise TypeError("all the elements in %s.reference should be "
@@ -677,5 +676,5 @@ class ReferenceMixin(object):
                             % (self.__class__.__name__,
                                reference.__class__.__name__)
             )
-
+        
         return reference

@@ -105,8 +105,6 @@ class Version(Entity, StatusMixin):
 
     is_published = Column(Boolean, default=False)
     
-    # TODO: Version.version_number should be automatically increasing starting from 1
-    
     def __init__(self,
                  version_of=None,
                  take_name=defaults.DEFAULT_VERSION_TAKE_NAME,
