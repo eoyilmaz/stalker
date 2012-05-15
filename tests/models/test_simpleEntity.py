@@ -59,25 +59,28 @@ class SimpleEntityTester(unittest.TestCase):
         self.name_test_values = [
             ("testName", "testName"),
             ("test-Name", "test-Name"),
-            ("1testName", "testName"),
+            ("1testName", "1testName"),
             ("_testName", "testName"),
-            ("2423$+^^+^'%+%%&_testName", "testName"),
-            ("2423$+^^+^'%+%%&_testName_35", "testName_35"),
-            ("2423$ +^^+^ '%+%%&_ testName_ 35", "testName_ 35"),
-            ("SH001", "SH001")
+            ("2423$+^^+^'%+%%&_testName", "2423_testName"),
+            ("2423$+^^+^'%+%%&_testName_35", "2423_testName_35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35", "2423 _ testName_ 35"),
+            ("SH001", "SH001"),
+            ("46-BJ-3A", "46-BJ-3A"),
+            ("Ozgur    Yilmaz\n\n\n", "Ozgur Yilmaz"),
         ]
-
+        
         self.nice_name_test_values = [
             ("testName", "test_name"),
-            ("1testName", "test_name"),
+            ("1testName", "1test_name"),
             ("_testName", "test_name"),
-            ("2423$+^^+^'%+%%&_testName", "test_name"),
-            ("2423$+^^+^'%+%%&_testName_35", "test_name_35"),
-            ("2423$ +^^+^ '%+%%&_ testName_ 35", "test_name_35"),
+            ("2423$+^^+^'%+%%&_testName", "2423_test_name"),
+            ("2423$+^^+^'%+%%&_testName_35", "2423_test_name_35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35", "2423_test_name_35"),
             ("SH001", "sh001"),
             ("My name is Ozgur", "my_name_is_ozgur"),
             (" this is another name for an asset",
              "this_is_another_name_for_an_asset"),
+            ("Ozgur    Yilmaz\n\n\n", "ozgur_yilmaz"),
         ]
 
         #self.code_test_values = [
@@ -146,15 +149,16 @@ class SimpleEntityTester(unittest.TestCase):
         # set the name and check the code
         code_test_values = [
             ("testCode", "testCode"),
-            ("1testCode", "testCode"),
+            ("1testCode", "1testCode"),
             ("_testCode", "testCode"),
-            ("2423$+^^+^'%+%%&_testCode", "testCode"),
-            ("2423$+^^+^'%+%%&_testCode_35", "testCode_35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "testCode_35"),
+            ("2423$+^^+^'%+%%&_testCode", "2423_testCode"),
+            ("2423$+^^+^'%+%%&_testCode_35", "2423_testCode_35"),
+            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "2423_testCode_35"),
             ("SH001", "SH001"),
             ("My CODE is Ozgur", "My_CODE_is_Ozgur"),
             (" this is another code for an asset",
              "this_is_another_code_for_an_asset"),
+            ('Ozgur    Yilmaz \n\n\n', 'Ozgur_Yilmaz')
         ]
 
         self.kwargs.pop("code")
@@ -171,11 +175,11 @@ class SimpleEntityTester(unittest.TestCase):
         """
         code_test_values = [
             ("testCode", "testCode"),
-            ("1testCode", "testCode"),
+            ("1testCode", "1testCode"),
             ("_testCode", "testCode"),
-            ("2423$+^^+^'%+%%&_testCode", "testCode"),
-            ("2423$+^^+^'%+%%&_testCode_35", "testCode_35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "testCode_35"),
+            ("2423$+^^+^'%+%%&_testCode", "2423_testCode"),
+            ("2423$+^^+^'%+%%&_testCode_35", "2423_testCode_35"),
+            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "2423_testCode_35"),
             ("SH001", "SH001"),
             ("My CODE is Ozgur", "My_CODE_is_Ozgur"),
 
@@ -183,7 +187,7 @@ class SimpleEntityTester(unittest.TestCase):
              "this_is_another_code_for_an_asset"),
 
             ([1, 3, "a", "list", "for", "testing", 3],
-             "a_list_for_testing_3"),
+             "1_3_a_list_for_testing_3"),
         ]
 
         # set the name and code and test the code
@@ -333,8 +337,8 @@ class SimpleEntityTester(unittest.TestCase):
             self.assertEqual(
                 self.test_simple_entity.name,
                 test_value[1],
-                "the name attribute is not correctly formatted for, %s, %s" %\
-                (str(test_value[0]), test_value[1])
+                "\nfor     : %s\nexpected: %s\ngot     : %s" %\
+                (str(test_value[0]), test_value[1], self.test_simple_entity.name)
             )
 
     def test_nice_name_attribute_is_formatted_correctly(self):

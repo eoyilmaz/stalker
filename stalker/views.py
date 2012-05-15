@@ -26,13 +26,9 @@ After you fix the problem, please restart the Pyramid application to
 try it again.
 """
 
-@view_config(route_name='home', renderer='templates/mytemplate.jinja2')
-def my_view(request):
-    try:
-        one = DBSession.query(Project).first()
-    except DBAPIError:
-        return Response(conn_err_msg, content_type='text/plain', status_int=500)
-    return {'one':one, 'project':'stalker'}
+@view_config(route_name='home', renderer='templates/home.jinja2')
+def home(request):
+    return {'project': 'stalker'}
 
 
 @view_config(route_name='login', renderer='templates/login.jinja2')
@@ -56,7 +52,7 @@ def login(request):
                 headers=headers
             )
         message = 'Failed Login'
-    
+
     return dict(
         message=message,
         url=request.application_url + '/login',

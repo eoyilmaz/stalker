@@ -394,20 +394,18 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def __eq__(self, other):
         """the equality operator
         """
-
         return super(Task, self).__eq__(other) and isinstance(other, Task)
 
     @validates("bookings")
     def _validate_bookings(self, key, booking):
         """validates the given bookings value
         """
-
         if not isinstance(booking, Booking):
             raise TypeError(
                 "all the elements in the %s.bookings should be an instances "
                 "of stalker.models.task.Booking not %s instance" %
                 (self.__class__.__name__, booking.__class__.__name__))
-
+        
         return booking
 
     @validates("is_complete")
@@ -420,19 +418,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def _validate_depends(self, key, depends):
         """validates the given depends value
         """
-
-        #if depends_in is None:
-        #depends_in = []
-
-        #if not isinstance(depends_in, list):
-        #raise TypeError("the depends attribute should be an list of"
-        #"stalker.models.task.Task instances")
-
-
         if not isinstance(depends, Task):
             raise TypeError("all the elements in the depends should be an "
                             "instance of stalker.models.task.Task")
-
+        
         # check for the circular dependency
         _check_circular_dependency(depends, self)
 
@@ -512,17 +501,15 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def _validate_is_milestone(self, key, is_milestone):
         """validates the given milestone value
         """
-
         if is_milestone:
             self.resources = []
-
+        
         return bool(is_milestone)
 
     @validates("task_of")
     def _validate_task_of(self, key, task_of):
         """validates the given task_of value
         """
-
         # the object given with the task_of argument should be an instance of
         # TaskableEntity
         
@@ -547,46 +534,42 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def _validate_priority(self, key, priority):
         """validates the given priority value
         """
-
         try:
             priority = int(priority)
         except (ValueError, TypeError):
             pass
-
+        
         if not isinstance(priority, int):
             priority = defaults.DEFAULT_TASK_PRIORITY
-
+        
         if priority < 0:
             priority = 0
         elif priority > 1000:
             priority = 1000
-
+        
         return priority
-
+    
     @validates("resources")
     def _validate_resources(self, key, resource):
         """validates the given resources value
         """
-        
         from stalker.models.user import User
-
+        
         if not isinstance(resource, User):
-            raise TypeError("resources should be a list of "
-                            "stalker.models.user.User instances")
-
+            raise TypeError("Task.resources should be a list of "
+                            "stalker.models.user.User instances not %s" %
+                            resource.__class__.__name__)
+        
             ## milestones do not need resources
             #if self.is_milestone:
             #resource = None
-
+        
         return resource
-
-    # TODO: UPDATE THIS
-
+    
     @validates("versions")
     def _validate_versions(self, key, version):
         """validates the given version value
         """
-        
         from stalker.models.version import Version
         
         if not isinstance(version, Version):

@@ -156,9 +156,9 @@ class SimpleEntity(Base):
     
     :type type: :class:`~stalker.models.type.Type`
     """
-
+    
     __strictly_typed__ = False
-
+    
     __tablename__ = "SimpleEntities"
     id = Column("id", Integer, primary_key=True)
     
@@ -167,7 +167,7 @@ class SimpleEntity(Base):
         "polymorphic_on": entity_type,
         "polymorphic_identity": "SimpleEntity"
     }
-
+    
     code = Column(
         String(256),
         nullable=False,
@@ -180,68 +180,66 @@ class SimpleEntity(Base):
         Setting the code attribute to None will reset it to the default value.
         The default value is the upper case form of the nice_name."""
     )
-
+    
     name = Column(
         String(256),
         nullable=False,
         doc="""Name of this object"""
     )
-
+    
     description = Column(
         "description",
         String,
         doc="""Description of this object."""
     )
-
+    
     created_by_id = Column(
         "created_by_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="x")
     )
-
+    
     created_by = relationship(
         "User",
         backref="entities_created",
         primaryjoin="SimpleEntity.created_by_id==User.user_id",
         post_update=True,
         doc="""The :class:`~stalker.models.user.User` who has created this object."""
-        )
-
+    )
+    
     updated_by_id = Column(
         "updated_by_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="x")
     )
-
+    
     updated_by = relationship(
         "User",
         backref="entities_updated",
         primaryjoin="SimpleEntity.updated_by_id==User.user_id",
         post_update=True,
         doc="""The :class:`~stalker.models.user.User` who has updated this object."""
-        ,
-        )
-
+    )
+    
     date_created = Column(
         DateTime,
         default=datetime.datetime.now(),
         doc="""A :class:`datetime.datetime` instance showing the creation date and time of this object."""
-        ,
-        )
-
+    )
+    
     date_updated = Column(
         DateTime,
         default=datetime.datetime.now(),
         doc="""A :class:`datetime.datetime` instance showing the update date and time of this object."""
         ,
         )
-
+    
     type_id = Column(
         "type_id",
         Integer,
         ForeignKey("Types.id", use_alter=True, name="y")
     )
-
+    
     type = relationship(
         "Type",
         primaryjoin="SimpleEntity.type_id==Type.type_id_local",
@@ -260,8 +258,7 @@ class SimpleEntity(Base):
         doc='''This attribute can hold any kind of data which exists in SOM.
         '''
     )
-
-    #UniqueConstraint("name", "db_entity_type")
+    
     __stalker_version__ = Column("stalker_version", String(256))
     
     def __init__(self,
@@ -333,8 +330,6 @@ class SimpleEntity(Base):
     def _validate_name(self, key, name):
         """validates the given name_in value
         """
-        
-        
         # it is None
         if name is None:
             raise TypeError("%s.name can not be None" %
@@ -347,7 +342,7 @@ class SimpleEntity(Base):
                              name.__class__.__name__))
         
         name = self._format_name(str(name))
-
+        
         # it is empty
         if name == "":
             raise ValueError("%s.name can not be an empty string" %
@@ -355,10 +350,7 @@ class SimpleEntity(Base):
         
         # also set the nice_name
         self._nice_name = self._format_nice_name(name)
-
-        ## set the code
-        #self.code = name_in
-
+        
         return name
     
     def _format_code(self, code_in):
@@ -383,12 +375,14 @@ class SimpleEntity(Base):
     def _format_name(self, name_in):
         """formats the name_in value
         """
-        # TODO: relax the name attribute a little bit allow more
         # remove unnecessary characters from the string
-        name_in = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", name_in).strip()
+        name_in = re.sub(r'([^a-zA-Z0-9\s_\-]+)', '', name_in).strip()
 
         # remove all the characters which are not alphabetic
-        name_in = re.sub("(^[^a-zA-Z]+)", r"", name_in)
+        name_in = re.sub(r"(^[^a-zA-Z0-9]+)", '', name_in)
+        
+        # remove multiple spaces
+        name_in = re.sub(r'[\s]+', ' ', name_in)
 
         return name_in
 

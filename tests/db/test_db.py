@@ -37,7 +37,6 @@ class DatabaseTester(unittest.TestCase):
     def setUp(self):
         """setup the tests
         """
-
         # just set the default admin creation to true
         # some tests are relying on that
         defaults.AUTO_CREATE_ADMIN = True
@@ -47,7 +46,6 @@ class DatabaseTester(unittest.TestCase):
         self.TEST_DATABASE_URI = "sqlite:///:memory:"
         
         self._createdDB = False
-
 
     def tearDown(self):
         """tearDown the tests
@@ -62,7 +60,6 @@ class DatabaseTester(unittest.TestCase):
         #clear_mappers()
         #db.__mappers__ = []
         DBSession.remove()
-
 
     def test_creating_a_custom_in_memory_db(self):
         """testing if a custom in-memory sqlite database will be created
@@ -101,12 +98,10 @@ class DatabaseTester(unittest.TestCase):
         
         self.assertTrue(newUser_DB is not None)
 
-
     def test_creating_a_custom_sqlite_db(self):
         """testing if a custom sqlite database will be created in the given
         location
         """
-
         self.TEST_DATABASE_FILE = tempfile.mktemp() + ".db"
         self.TEST_DATABASE_DIALECT = "sqlite:///"
         self.TEST_DATABASE_URI = self.TEST_DATABASE_DIALECT +\
@@ -160,7 +155,6 @@ class DatabaseTester(unittest.TestCase):
         os.remove(self.TEST_DATABASE_FILE)
         DBSession.remove()
 
-
 #    def test_creating_the_default_db(self):
 #        """testing if default.DATABASE is going to be used for the database
 #        address when nothging is given for database in setup
@@ -175,11 +169,9 @@ class DatabaseTester(unittest.TestCase):
 #
 #        self.assertEqual(full_db_url, defaults.DATABASE)
 
-
     def test_default_admin_creation(self):
         """testing if a default admin is created
         """
-
         # set default admin creation to True
         defaults.AUTO_CREATE_ADMIN = True
         
@@ -193,12 +185,10 @@ class DatabaseTester(unittest.TestCase):
         
         self.assertEqual(admin_DB.name, defaults.ADMIN_NAME)
 
-
     def test_default_admin_for_already_created_databases(self):
         """testing if no extra admin is going to be created for already setup
         databases
         """
-        
         # set default admin creation to True
         defaults.AUTO_CREATE_ADMIN = True
         
@@ -249,7 +239,6 @@ class DatabaseTester(unittest.TestCase):
     def test_no_default_admin_creation(self):
         """testing if there is no user if default.AUTO_CREATE_ADMIN is False
         """
-        
         # turn down auto admin creation
         defaults.AUTO_CREATE_ADMIN = False
         
@@ -272,14 +261,11 @@ class DatabaseTester(unittest.TestCase):
     def test_non_unique_names_on_different_entity_type(self):
         """testing if there can be non-unique names for different entity types
         """
-        
         db.setup()
-        
         admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
 
         # try to create a user and an entity with same name
         # expect Nothing
-
         kwargs = {
             "name": "user1",
             "created_by": admin
@@ -311,7 +297,22 @@ class DatabaseTester(unittest.TestCase):
 #        
 #        # check if db.metadata.tables has a table with name entity_types
 #        self.assertTrue("entity_types", db.metadata.tables)
-
+    
+    def test_ticket_status_initialization(self):
+        """testing if the ticket statuses are created correctly
+        """
+        db.setup()
+        
+        #ticket_statuses = DBSession.query(Status).all()
+        ticket_status_list = DBSession.query(StatusList)\
+            .filter(StatusList.name=='Ticket Statuses')\
+            .first()
+        
+        self.assertIsInstance(ticket_status_list, StatusList)
+        
+        expected_status_names = ['New', 'Reopened', 'Closed']
+        for status in ticket_status_list.statuses:
+            self.assertTrue(status.name in expected_status_names)
 
 class DatabaseModelsTester(unittest.TestCase):
     """tests the database model
@@ -818,8 +819,8 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(nice_name, new_type_template_DB.nice_name)
         self.assertEqual(notes, new_type_template_DB.notes)
         self.assertEqual(output_path,
-                         new_type_template_DB.output_path_code)
-        self.assertEqual(path, new_type_template_DB.path_code)
+                         new_type_template_DB.output_path)
+        self.assertEqual(path, new_type_template_DB.path)
         self.assertEqual(tags, new_type_template_DB.tags)
         self.assertEqual(target_entity_type,
                          new_type_template_DB.target_entity_type)
@@ -2234,14 +2235,14 @@ class DatabaseModelsTester(unittest.TestCase):
         outputs = test_version.outputs
         is_published = test_version.is_published
         #reviews = test_version.reviews
-        source = test_version.source
+        source_file = test_version.source_file
         status = test_version.status
         status_list = test_version.status_list
         tags = test_version.tags
-        take = test_version.take
+        take_name = test_version.take_name
         type = test_version.type
         updated_by = test_version.updated_by
-        version = test_version.version
+        version_number = test_version.version_number
         version_of = test_version.version_of
         
         del test_version
@@ -2260,15 +2261,14 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(notes, test_version_DB.notes)
         self.assertEqual(outputs, test_version_DB.outputs)
         self.assertEqual(is_published, test_version_DB.is_published)
-        #self.assertEqual(reviews, test_version_DB.reviews)
-        self.assertEqual(source, test_version_DB.source)
+        self.assertEqual(source_file, test_version_DB.source_file)
         self.assertEqual(status, test_version_DB.status)
         self.assertEqual(status_list, test_version_DB.status_list)
         self.assertEqual(tags, test_version_DB.tags)
-        self.assertEqual(take, test_version_DB.take)
+        self.assertEqual(take_name, test_version_DB.take_name)
         self.assertEqual(type, test_version_DB.type)
         self.assertEqual(updated_by, test_version_DB.updated_by)
-        self.assertEqual(version, test_version_DB.version)
+        self.assertEqual(version_number, test_version_DB.version_number)
         self.assertEqual(version_of, test_version_DB.version_of)
 
     #

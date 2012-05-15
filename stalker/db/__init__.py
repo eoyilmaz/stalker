@@ -105,7 +105,6 @@ def __create_admin__():
         
         DBSession.add(admin)
     
-    # TODO: create tests for the Ticket Status initialization
     # create statuses for Tickets
     from stalker import Status, StatusList
     with transaction.manager:

@@ -140,7 +140,6 @@ class Ticket(Entity, StatusMixin):
     
     reported_by = synonym('created_by', doc="Shows who created this Ticket")
     
-    # TODO: Remove the hardcoded Enum types of Ticket.priority
     priority = Column(
         Enum('TRIVIAL', 'MINOR', 'MAJOR', 'CRITICAL', 'BLOCKER',
              name='PriorityType'),

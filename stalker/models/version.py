@@ -6,11 +6,15 @@
 
 import re
 from sqlalchemy import Table, Column, Integer, ForeignKey, String, Boolean
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import relationship, validates, synonym
 from stalker.conf import defaults
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import StatusMixin
+
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class Version(Entity, StatusMixin):
     """The connection to the filesystem.
@@ -22,49 +26,44 @@ class Version(Entity, StatusMixin):
     :class:`~stalker.models.task.Task` then the information is hold in the
     :class:`~stalker.models.version.Version` instance.
     
-    The :attr:`~stalker.models.version.Version.version` attribute is read-only.
-    Trying to change it will produce an AttributeError.
+    The :attr:`~stalker.models.version.Version.version_number` attribute is
+    read-only. Trying to change it will produce an AttributeError.
     
-    :param str take: A short string holding the current take name. Can be
-      any alphanumeric value (a-zA-Z0-9\_). The default is the string "Main".
-      When skipped or given as None or an empty string then it will use the
-      default value. It can not start with a number. It can not have white
-      spaces.
+    :param str take_name: A short string holding the current take name. Can be
+        any alphanumeric value (a-zA-Z0-9\_). The default is the string "Main".
+        When skipped or given as None or an empty string then it will use the
+        default value. It can not start with a number. It can not have white
+        spaces.
     
-    :param int version: An integer value showing the current version number.
-      The default is "1". If skipped or given as zero or as a negative value a
-      ValueError will be raised.
+    :param source_file: A :class:`~stalker.models.link.Link` instance, showing
+        the source file of this version. It can be a Maya scene file
+        (*.ma, *.mb), a Nuke file (*.nk) or anything that is opened with the
+        application you have created this version.
     
-    :param source: A :class:`~stalker.models.link.Link` instance, showing
-      the source file of this version. It can be a Maya scene file
-      (*.ma, *.mb), a Nuke file (*.nk) or anything that is opened with the
-      application you have created this version.
-    
-    :type source: :class:`~stalker.models.link.Link`
+    :type source_file: :class:`~stalker.models.link.Link`
     
     :param outputs: A list of :class:`~stalker.models.link.Link` instances,
-      holding the outputs of the current version. It could be the rendered
-      image sequences out of Maya or Nuke, or it can be a Targa file which is
-      the output of a Photoshop file (*.psd), or anything that you can think as
-      the output which is created using the
-      :attr:`~stalker.models.version.Version.source_file`\ .
+        holding the outputs of the current version. It could be the rendered
+        image sequences out of Maya or Nuke, or it can be a Targa file which is
+        the output of a Photoshop file (*.psd), or anything that you can think
+        as the output which is created using the
+        :attr:`~stalker.models.version.Version.source_file`\ .
     
     :type outputs: list of :class:`~stalker.models.link.Link` instances
     
     :param version_of: A :class:`~stalker.models.task.Task` instance showing
-      the owner of this Version.
+        the owner of this Version.
     
     :type version_of: :class:`~stalker.models.task.Task`
     
     .. TODO::
-      Think about using Tickets instead of review notes for reporting desired
-      changes.
-    
+        Think about using Tickets instead of review notes for reporting desired
+        changes.
     """
-
+    
     __tablename__ = "Versions"
     __mapper_args__ = {"polymorphic_identity": "Version"}
-
+    
     version_id = Column("id", Integer, ForeignKey("Entities.id"),
                         primary_key=True)
     version_of_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
@@ -76,17 +75,23 @@ class Version(Entity, StatusMixin):
         uselist=False,
         back_populates="versions",
         )
-
-    take = Column(String(256), default="MAIN")
-    version = Column(Integer)
-
-    source_id = Column(Integer, ForeignKey("Links.id"))
-    source = relationship(
+    
+    take_name = Column(String(256), default="MAIN")
+    version_number = Column(Integer, default=1, nullable=False)
+    
+    source_file_id = Column(Integer, ForeignKey("Links.id"))
+    source_file = relationship(
         "Link",
-        primaryjoin="Versions.c.source_id==Links.c.id",
-        uselist=False
+        primaryjoin="Versions.c.source_file_id==Links.c.id",
+        uselist=False,
+        doc="""This is the source file of this Version instance.
+        
+        It holds a :class:`~stalker.models.link.Link` instance which is showing
+        a source file for this version. It is let say the scene file for Maya
+        or a psd file for Photoshop etc.
+        """
     )
-
+    
     outputs = relationship(
         "Link",
         secondary="Version_Outputs",
@@ -100,104 +105,117 @@ class Version(Entity, StatusMixin):
 
     is_published = Column(Boolean, default=False)
     
-#    tickets = relationship(
-#        "Ticket",
-#        primaryjoin="Versions.c.id==Tickets.c.ticket_for_id",
-#        back_populates="ticket_for",
-#        doc="""All the :class:`~stalker.models.ticket.Ticket`\ s about this
-#        :class:`~stalker.models.version.Version` instance.
-#        
-#        It is a list of :class:`~stalker.models.ticket.Ticket` instances or an
-#        empty list, setting it None will raise a TypeError.
-#        """
-#    )
-    
-    # TODO: Version.version should be automatically increasing starting from 1
+    # TODO: Version.version_number should be automatically increasing starting from 1
     
     def __init__(self,
                  version_of=None,
-                 take=defaults.DEFAULT_VERSION_TAKE_NAME,
-                 version=None,
-                 source=None,
+                 take_name=defaults.DEFAULT_VERSION_TAKE_NAME,
+                 #version_number=None,
+                 source_file=None,
                  outputs=None,
                  task=None,
                  **kwargs):
         # call supers __init__
         super(Version, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
-
-        self.take = take
-        self.source = source
-        self.version = version
+        
+        self.take_name = take_name
+        self.source_file = source_file
         self.version_of = version_of
-
+        self.version_number = None
+       
         if outputs is None:
             outputs = []
-
+        
         self.outputs = outputs
-
+        
         # set published to False by default
         self.published = False
-
-    @validates("source")
-    def _validate_source(self, key, source):
-        """validates the given source value
+    
+    @validates("source_file")
+    def _validate_source_file(self, key, source_file):
+        """validates the given source_file value
         """
-        
         from stalker.models.link import Link
-
-        if source is not None:
-            if not isinstance(source, Link):
-                raise TypeError("Version.source attribute should be a "
+        
+        if source_file is not None:
+            if not isinstance(source_file, Link):
+                raise TypeError("Version.source_file attribute should be a "
                                 "stalker.models.link.Link instance, not %s"\
-                                % source.__class__.__name__)
+                                % source_file.__class__.__name__)
+        
+        return source_file
 
-        return source
-
-    def _format_take(self, take):
-        """formats the given take value
+    def _format_take_name(self, take_name):
+        """formats the given take_name value
         """
 
         # remove unnecessary characters
-        take = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", take).strip().replace(" ",
+        take_name = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", take_name).strip().replace(" ",
                                                                          "")
 
-        return re.sub(r"(.+?[^a-zA-Z]+)([a-zA-Z0-9\s_\-]+)", r"\2", take)
+        return re.sub(r"(.+?[^a-zA-Z]+)([a-zA-Z0-9\s_\-]+)", r"\2", take_name)
 
-    @validates("take")
-    def _validate_take(self, key, take):
-        """validates the given take value
+    @validates("take_name")
+    def _validate_take_name(self, key, take_name):
+        """validates the given take_name value
         """
 
-        if take is None:
-            raise TypeError("%s.take can not be None, please give a "
+        if take_name is None:
+            raise TypeError("%s.take_name can not be None, please give a "
                             "proper string" % self.__class__.__name__)
 
-        take = self._format_take(str(take))
+        take_name = self._format_take_name(str(take_name))
 
-        if take == "":
-            raise ValueError("%s.take can not be an empty string" %
+        if take_name == "":
+            raise ValueError("%s.take_name can not be an empty string" %
                              self.__class__.__name__)
 
-        return take
-
-    @validates("version")
-    def _validate_version(self, key, version):
-        """validates the given version value
+        return take_name
+    
+    @property
+    def max_version_number(self):
+        """returns the maximum version number for this Version
+        :return: int
         """
-
-        if version is None:
-            raise TypeError("%s.version should be an int" %
-                            self.__class__.__name__)
+        from stalker import DBSession
         
-        # TODO: auto generate Version.version by using the database
+        all_versions = DBSession.query(Version)\
+            .filter(Version.version_of==self.version_of)\
+            .filter(Version.take_name==self.take_name)\
+            .order_by(Version.version_number.desc())\
+            .all()
         
-        if version <= 0:
-            raise ValueError("%s.version can not be zero or a negative "
-                             "number" % self.__class__.__name__)
+        if len(all_versions):
+            version_with_max_version_number = all_versions[-1]
+            
+            # skip the current version if it is itself to prevent increasing
+            # the version number unnecessarliy
+            if version_with_max_version_number is not self:
+                return version_with_max_version_number.version_number
+            elif len(all_versions) > 1:
+                return all_versions[-2].version_number
+        
+        return 0
+    
+    @validates("version_number")
+    def _validate_version_number(self, key, version_number):
+        """validates the given version_number value
+        """
+        max_version = self.max_version_number
+        logger.debug('max_version_number: %s' % max_version)
+        logger.debug('given version_number: %s' % version_number)
+        if version_number is None or version_number <= max_version:
 
-        return version
-
+            version_number = max_version + 1
+            logger.debug(
+                'given Version.version_number is too low, max version_number '
+                'in the database is %s, setting the current version_number to '
+                '%s' % (max_version, version_number)
+            )
+        
+        return version_number
+    
     @validates("version_of")
     def _validate_version_of(self, key, version_of):
         """validates the given version_of value
@@ -247,6 +265,9 @@ class Version(Entity, StatusMixin):
 #                             ticket.__class__.__name__))
 #        
 #        return ticket
+
+# VERSION INPUTS
+
 
 # VERSION_OUTPUTS
 Version_Outputs = Table(

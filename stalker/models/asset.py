@@ -9,8 +9,6 @@ from sqlalchemy.orm import reconstructor
 from stalker.models.entity import TaskableEntity
 from stalker.models.mixins import StatusMixin, ReferenceMixin
 
-__author__ = 'eoyilmaz'
-
 class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
     """The Asset class is the whole idea behind Stalker.
     

@@ -203,14 +203,12 @@ class StatusMixin(object):
     def _validate_status_list(self, key, status_list):
         """validates the given status_list_in value
         """
-        
         from stalker.models.status import StatusList
-
-        # TODO: validating should not create a new variable, so please move this part to another function
+        
         if status_list is None:
             # check if there is a db setup and try to get the appropriate 
             # StatusList from the database
-
+            
             try:
                 # try to get a StatusList with the target_entity_type is 
                 # matching the class name
@@ -241,7 +239,7 @@ class StatusMixin(object):
                     (self.__class__.__name__,
                      status_list.__class__.__name__)
                 )
-
+            
             # check if the entity_type matches to the StatusList.target_entity_type
             if self.__class__.__name__ != status_list.target_entity_type:
                 raise TypeError(
@@ -249,7 +247,7 @@ class StatusMixin(object):
                     "whereas the entity_type of this object is %s" %\
                     (status_list.target_entity_type,
                      self.__class__.__name__))
-
+        
         return status_list
 
     def _validate_status(self, status):

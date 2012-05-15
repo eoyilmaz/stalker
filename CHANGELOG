@@ -9,6 +9,28 @@ Stalker Changes
   :attr:`~stalker.models.entity.SimpleEntity.generic_data` which can hold any
   kind of ``SOM`` object inside and it is a list.
 
+* Changed the formatting rules for the
+  :attr:`~stalker.models.entity.SimpleEntity.name` in
+  :class:`~stalker.models.entity.SimpleEntity`, now it can start with a number,
+  and it is not allowed to have multiple whitespace characters following each
+  other.
+
+* The ``source`` attribute in :class:`~stalker.models.version.Version` is
+  renamed to :attr:`~stalker.models.version.Version.source_file`\ .
+
+* The ``version`` attribute in :class:`~stalker.models.version.Version` is
+  renamed to :attr:`~stalker.models.version.Version.version_number`\ .
+
+* The ``take`` attribute in :class:`~stalker.models.version.Version` is renamed
+  to :attr:`~stalker.models.version.Version.take_name`\ .
+
+* The :attr:`~stalker.models.version.Version.version_number` in
+  :class:`~stalker.models.version.Version` is now generated automatically if it
+  is skipped or given as None or it is too low where there is already a version
+  number for the same Version series (means attached to the same
+  :class:`~stalker.models.task.Task` and has the same
+  :attr:`~stalker.models.version.Version.take_name`).
+
 0.2.0.a1
 --------
 * Converted the whole system to a Pyramid Web application. If the previous
