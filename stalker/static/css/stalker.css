@@ -1,0 +1,147 @@
+@font-face {
+    font-family: 'Ubuntu';
+    src: url('../fonts/ubuntu-r-webfont.eot');
+    src: url('../fonts/ubuntu-r-webfont.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/ubuntu-r-webfont.woff') format('woff'),
+    url('../fonts/ubuntu-r-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'UbuntuBold';
+    src: url('../fonts/ubuntu-b-webfont.eot');
+    src: url('../fonts/ubuntu-b-webfont.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/ubuntu-b-webfont.woff') format('woff'),
+    url('../fonts/ubuntu-b-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'UbuntuBoldItalic';
+    src: url('../fonts/ubuntu-bi-webfont.eot');
+    src: url('../fonts/ubuntu-bi-webfont.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/ubuntu-bi-webfont.woff') format('woff'),
+    url('../fonts/ubuntu-bi-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'UbuntuCondensedRegular';
+    src: url('../fonts/ubuntu-c-webfont.eot');
+    src: url('../fonts/ubuntu-c-webfont.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/ubuntu-c-webfont.woff') format('woff'),
+    url('../fonts/ubuntu-c-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+body {
+    font-family: 'Ubuntu', "Bitstream Vera Sans", 'DejaVu Sans', 'Tahoma', 'sans-serif';
+    background-color: #c0c0c0;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+h1 {
+    font-size: 36px;
+    line-height: 40px;
+}
+
+h2 {
+    font-size: 24px;
+    line-height: 28px;
+}
+
+h3 {
+    font-size: 16px;
+    line-height: 20px;
+}
+
+p {
+    font-size: 12px;
+    line-height: 16px;
+}
+
+ul li ol {
+    font-size: 12px;
+    line-height: 16px;
+}
+
+#small_text {
+    font-size: 10px;
+    line-height: 14px;
+}
+
+#wrap{
+    width: 100%;
+    height: 100%;
+}
+
+#login_window {
+    background-color: #808080;
+    border-radius: 11px 11px 11px 11px;
+    color: #ffffff;
+    height: 160px;
+    left: 50%;
+    margin-left: -146px;
+    margin-top: -80px;
+    position: absolute;
+    top: 50%;
+    width: 292px;
+}
+
+#login_window #title {
+    position: relative;
+    text-align: center;
+    width: 100%;
+}
+
+#column1{
+    line-height: 38px;
+    margin-left: 13px;
+    margin-right: 8px;
+    margin-top: -7px;
+    text-align: right;
+    width: 76px;
+}
+
+.indented_input {
+    text-indent: 11px;
+}
+
+#column2 {
+    left: 97px;
+    margin-top: 45px;
+    position: absolute;
+    top: 6px;
+}
+
+#login_window input {
+    border: medium none transparent;
+    border-radius: 12px 12px 12px 12px;
+    float: left;
+    font-size: 12px;
+    height: 24px;
+    margin-bottom: 11px;
+    width: 182px;
+}
+
+#login_window #login_button input {
+    border: medium none transparent;
+    border-radius: 12px 12px 12px 12px;
+    float: right;
+    font-size: 12px;
+    height: 24px;
+    margin-bottom: 11px;
+    width: 75px;
+    color: #ffffff;
+    background: -moz-linear-gradient(top, #0072bc, #0054a6);
+    background: -webkit-gradient(linear, left top, left bottom, from(#0072bc), to(#0054a6));
+}

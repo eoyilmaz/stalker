@@ -17,7 +17,7 @@ Stalker Changes
 
 * The ``source`` attribute in :class:`~stalker.models.version.Version` is
   renamed to :attr:`~stalker.models.version.Version.source_file`\ .
-
+  
 * The ``version`` attribute in :class:`~stalker.models.version.Version` is
   renamed to :attr:`~stalker.models.version.Version.version_number`\ .
 
@@ -30,6 +30,8 @@ Stalker Changes
   number for the same Version series (means attached to the same
   :class:`~stalker.models.task.Task` and has the same
   :attr:`~stalker.models.version.Version.take_name`).
+
+* Finished the design of 'Login' page.
 
 0.2.0.a1
 --------

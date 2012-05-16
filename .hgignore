@@ -8,6 +8,7 @@ docs/latex/*
 docs/doctrees/*
 docs/source/generated/*
 docs/source/static/stalker_design*.vue
+docs/source/static/design
 .coverage
 .DS_Store
 dist/*
