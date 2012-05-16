@@ -24,83 +24,83 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     repository. By creating templates for :class:`~stalker.models.link.Link`.
     
     :param str target_entity_type: The class name that this FilenameTemplate
-        is designed for. You can also pass the class itself. So both of the
-        examples below can work::
+      is designed for. You can also pass the class itself. So both of the
+      examples below can work::
         
-            new_filename_template1 = FilenameTemplate(target_entity_type="Asset")
-            new_filename_template2 = FilenameTemplate(target_entity_type=Asset)
+        new_filename_template1 = FilenameTemplate(target_entity_type="Asset")
+        new_filename_template2 = FilenameTemplate(target_entity_type=Asset)
     
-        A TypeError will be raised when it is skipped or it is None and a
-        ValueError will be raised when it is given as and empty string.
+      A TypeError will be raised when it is skipped or it is None and a
+      ValueError will be raised when it is given as and empty string.
     
     :param str path: A `Jinja2`_ template code which specifies the path of the
-        given item. It is relative to the repository root. A typical example
-        could be::
-        
+      given item. It is relative to the repository root. A typical example
+      could be::
+      
         asset_path = "{{project.code}}/ASSETS/{{asset.code}}/{{task.code}}/"
     
     :param str filename: A `Jinja2`_ template code which specifies the file
-        name of the given item. It is relative to the
-        :attr:`~stalker.models.templates.FilenameTemplate.path`. A typical
-        example could be::
+      name of the given item. It is relative to the
+      :attr:`~stalker.models.templates.FilenameTemplate.path`. A typical
+      example could be::
         
-            asset_filename = "{{asset.code}}_{{version.take}}_{{task.code}}_"\\
-                             "{{version.version}}_{{user.initials}}"
+        asset_filename = "{{asset.code}}_{{version.take}}_{{task.code}}_"\\
+                         "{{version.version}}_{{user.initials}}"
       
-        Could be set to an empty string or None, the default value is None.
+      Could be set to an empty string or None, the default value is None.
     
-    :param str output_path: A Jinja2 template code specifying where to
-        place the outputs of the applied
-        :attr:`~stalker.models.templates.FilenameTemplate.target_entity_type`.
-     
-        It can be None, or an empty string, or it can be skipped.
+    :param str output_path: A Jinja2 template code specifying where to place
+      the outputs of the applied
+      :attr:`~stalker.models.templates.FilenameTemplate.target_entity_type`.
+      
+      It can be None, or an empty string, or it can be skipped.
     
     Examples:
     
     A template for asset versions can be used like this::
-        
-        from stalker import Type, FilenameTemplate, TaskTemplate
-         
-        # create a couple of variables
-        path = "{{project.code}}/Assets/{{asset_type.name}}/{{task_type.code}}"
-        
-        filename = "{{asset.name}}_{{take.name}}_{{asset_type.name}}_v{{version.version_number}}"
-        
-        output_path = "{{version.path}}/Outputs"
-        
-        # create a type for modeling task
-        modeling = Type(
-            name="Modeling",
-            code="MODEL",
-            description="The modeling step of the asset",
-            target_entity_type=Task
-        )
-        
-        # create a "Character" Type for Asset classes
-        character = Type(
-            name="Character",
-            description="this is the character asset type",
-            target_entity_type=Asset
-        )
-        
-        # now create our FilenameTemplate
-        char_template = FilenameTemplate(
-            name="Character",
-            description="this is the template which explains how to place Character assets",
-            target_entity_type="Asset",
-            path=path,
-            filename=filename,
-            output_path=output_path,
-        )
-        
-        # assign this type template to the structure of the project with id=101
-        myProject = query(Project).filter_by(id=101).first()
       
-        # append the type template to the structures' templates
-        myProject.structure.templates.append(char_template)
+      from stalker import Type, FilenameTemplate, TaskTemplate
+       
+      # create a couple of variables
+      path = "{{project.code}}/Assets/{{asset_type.name}}/{{task_type.code}}"
       
-        # commit everything to the database
-        session.commit()
+      filename = "{{asset.name}}_{{take.name}}_{{asset_type.name}}_v{{version.version_number}}"
+      
+      output_path = "{{version.path}}/Outputs"
+      
+      # create a type for modeling task
+      modeling = Type(
+          name="Modeling",
+          code="MODEL",
+          description="The modeling step of the asset",
+          target_entity_type=Task
+      )
+      
+      # create a "Character" Type for Asset classes
+      character = Type(
+          name="Character",
+          description="this is the character asset type",
+          target_entity_type=Asset
+      )
+      
+      # now create our FilenameTemplate
+      char_template = FilenameTemplate(
+          name="Character",
+          description="this is the template which explains how to place Character assets",
+          target_entity_type="Asset",
+          path=path,
+          filename=filename,
+          output_path=output_path,
+      )
+      
+      # assign this type template to the structure of the project with id=101
+      myProject = query(Project).filter_by(id=101).first()
+    
+      # append the type template to the structures' templates
+      myProject.structure.templates.append(char_template)
+    
+      # commit everything to the database
+      session.commit()
     
     Now with the code above, whenever a new
     :class:`~stalker.models.version.Version` created for a **Character**
@@ -114,8 +114,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
          |- Character  --> {{asset_type.name}}
           |- Olum  --> {{asset.name}}
            |- MODEL  --> {{task_type.code}}
-            |- Olum_MAIN_MODEL_v001.ma --> {{asset.name}}_/
-{{take.name}}_{{asset_type.name}}_v{{version.version_number}}
+            |- Olum_MAIN_MODEL_v001.ma --> {{asset.name}}_{{take.name}}_{{asset_type.name}}_v{{version.version_number}}
     
     And one of the best side is you can create a version from Linux, Windows or
     OSX all the paths will be correctly handled by Stalker.

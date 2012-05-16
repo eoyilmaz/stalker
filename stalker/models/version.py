@@ -30,35 +30,31 @@ class Version(Entity, StatusMixin):
     read-only. Trying to change it will produce an AttributeError.
     
     :param str take_name: A short string holding the current take name. Can be
-        any alphanumeric value (a-zA-Z0-9\_). The default is the string "Main".
-        When skipped or given as None or an empty string then it will use the
-        default value. It can not start with a number. It can not have white
-        spaces.
+      any alphanumeric value (a-zA-Z0-9\_). The default is the string "Main".
+      When skipped or given as None or an empty string then it will use the
+      default value. It can not start with a number. It can not have white
+      spaces.
     
     :param source_file: A :class:`~stalker.models.link.Link` instance, showing
-        the source file of this version. It can be a Maya scene file
-        (*.ma, *.mb), a Nuke file (*.nk) or anything that is opened with the
-        application you have created this version.
+      the source file of this version. It can be a Maya scene file
+      (*.ma, *.mb), a Nuke file (*.nk) or anything that is opened with the
+      application you have created this version.
     
     :type source_file: :class:`~stalker.models.link.Link`
     
     :param outputs: A list of :class:`~stalker.models.link.Link` instances,
-        holding the outputs of the current version. It could be the rendered
-        image sequences out of Maya or Nuke, or it can be a Targa file which is
-        the output of a Photoshop file (*.psd), or anything that you can think
-        as the output which is created using the
-        :attr:`~stalker.models.version.Version.source_file`\ .
+      holding the outputs of the current version. It could be the rendered
+      image sequences out of Maya or Nuke, or it can be a Targa file which is
+      the output of a Photoshop file (*.psd), or anything that you can think
+      as the output which is created using the
+      :attr:`~stalker.models.version.Version.source_file`\ .
     
     :type outputs: list of :class:`~stalker.models.link.Link` instances
     
     :param version_of: A :class:`~stalker.models.task.Task` instance showing
-        the owner of this Version.
+      the owner of this Version.
     
     :type version_of: :class:`~stalker.models.task.Task`
-    
-    .. TODO::
-        Think about using Tickets instead of review notes for reporting desired
-        changes.
     """
     
     __tablename__ = "Versions"

@@ -11,7 +11,7 @@ Inheritance Diagram
      stalker.models.mixins.ScheduleMixin
      stalker.models.mixins.StatusMixin
      stalker.models.mixins.TargetEntityTypeMixin
-     stalker.models.asset.Asst
+     stalker.models.asset.Asset
      stalker.models.auth.Group
      stalker.models.auth.User
      stalker.models.department.Department
