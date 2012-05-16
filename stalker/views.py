@@ -7,7 +7,8 @@ from sqlalchemy.exc import DBAPIError
 
 from stalker.db import DBSession
 
-from stalker import Project
+from stalker import User
+
 from stalker.security import USERS
 
 conn_err_msg = """\
@@ -26,7 +27,8 @@ After you fix the problem, please restart the Pyramid application to
 try it again.
 """
 
-@view_config(route_name='home', renderer='templates/home.jinja2')
+@view_config(route_name='home', renderer='templates/home.jinja2',
+             permission='view')
 def home(request):
     return {'project': 'stalker'}
 
@@ -45,14 +47,25 @@ def login(request):
     if 'form.submitted' in request.params:
         login = request.params['login']
         password = request.params['password']
-        if USERS.get(login) == password:
+        
+        # need to find the user
+        # first check with the login_name attribute
+        user_obj = DBsession.query(User).filter_by(login_name=login).first()
+        
+        if not user_obj:
+            # then by the email
+            user_obj = DBSession.query(User).filter_by(email=login).first()
+            login = user_obj.login_name
+        
+        #if USERS.get(login) == password:
+        if user_obj and user_obj.check_password(password):
             headers = remember(request, login)
             return HTTPFound(
                 location=came_from,
                 headers=headers
             )
         message = 'Failed Login'
-
+    
     return dict(
         message=message,
         url=request.application_url + '/login',

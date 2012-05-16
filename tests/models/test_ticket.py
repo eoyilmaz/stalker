@@ -10,6 +10,7 @@ from stalker import db
 from stalker.db.session import DBSession
 from zope.sqlalchemy import ZopeTransactionExtension
 from stalker.models.asset import Asset
+from stalker.models.auth import User
 from stalker.models.note import Note
 from stalker.models.project import Project
 from stalker.models.repository import Repository
@@ -17,7 +18,6 @@ from stalker.models.status import Status, StatusList
 from stalker.models.task import Task
 from stalker.models.ticket import Ticket
 from stalker.models.type import Type
-from stalker.models.user import User
 from stalker.models.version import Version
 
 import logging

@@ -3,11 +3,14 @@
 # 
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
-
-USERS = {'editor':'editor',
-         'viewer':'viewer'}
-GROUPS = {'editor':['group:editors']}
+from stalker.db.session import DBSession
+from stalker.models.auth import User
 
 def groupfinder(userid, request):
-    if userid in USERS:
-        return GROUPS.get(userid, [])
+    # return the group of the given User object
+    user_obj = DBSession.query(User).filter(User.login_name==userid).first()
+    
+    if user_obj:
+        return user_obj.permission_groups
+    
+    return []

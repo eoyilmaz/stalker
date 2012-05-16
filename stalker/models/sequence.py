@@ -6,6 +6,7 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
+from stalker import User
 from stalker.models.entity import TaskableEntity
 from stalker.models.mixins import StatusMixin, ScheduleMixin, ReferenceMixin
 
@@ -22,7 +23,7 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     
     :param lead: The lead of this Sequence. The default value is None.
     
-    :type lead: :class:`~stalker.models.user.User`
+    :type lead: :class:`~stalker.User`
     """
 
     #    __project_backref_attrname__ = "sequences_ossuruk"
@@ -84,9 +85,7 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     def _validate_lead(self, key, lead):
         """validates the given lead_in value
         """
-        
-        from stalker.models.user import User
-        
+
         if lead is not None:
             if not isinstance(lead, User):
                 raise TypeError("lead should be instance of "

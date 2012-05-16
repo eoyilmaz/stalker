@@ -31,7 +31,12 @@ Stalker Changes
   :class:`~stalker.models.task.Task` and has the same
   :attr:`~stalker.models.version.Version.take_name`).
 
-* Finished the design of 'Login' page.
+* Moved the :class:`~stalker.models.auth.User` class to
+  :mod:`~stalker.models.auth` module.
+
+* Removed the ``stalker.ext.auth`` module because it is not necessary anymore.
+  Thus the :class:`~stalker.models.auth.User` now handles all the
+  :attr:`~stalker.models.auth.User.password` conversions by itself.
 
 0.2.0.a1
 --------

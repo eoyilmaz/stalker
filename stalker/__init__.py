@@ -18,7 +18,7 @@ __version__ = '0.2.0.a1'
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.models.asset import Asset
-from stalker.models.auth import PermissionGroup
+from stalker.models.auth import PermissionGroup, User
 from stalker.models.department import Department
 from stalker.models.entity import SimpleEntity, Entity, TaskableEntity
 from stalker.models.formats import ImageFormat
@@ -38,7 +38,6 @@ from stalker.models.task import Booking
 from stalker.models.task import Task
 from stalker.models.templates import FilenameTemplate
 from stalker.models.type import Type
-from stalker.models.user import User
 from stalker.models.version import Version
 
 

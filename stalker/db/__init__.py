@@ -64,7 +64,7 @@ def __create_admin__():
     """creates the admin
     """
     
-    from stalker.models.user import User
+    from stalker.models.auth import User
     from stalker.models.department import Department
     
     # check if there is already an admin in the database

@@ -8,6 +8,7 @@ import datetime
 import logging
 from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, Interval
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
+from stalker import User
 from stalker.conf import defaults
 from stalker.db.declarative import Base
 from stalker.errors import OverBookedWarning, CircularDependencyError
@@ -20,7 +21,7 @@ logger.setLevel(logging.WARNING)
 class Booking(Entity, ScheduleMixin):
     """Holds information about the time spend on a specific
     :class:`~stalker.models.task.Task` by a specific
-    :class:`~stalker.models.user.User`.
+    :class:`~stalker.models.auth.User`.
     
     Bookings are created per resource. It means, you need to record all the 
     works separately for each resource. So there is only one resource in a 
@@ -29,15 +30,15 @@ class Booking(Entity, ScheduleMixin):
     
     A :class:`~stalker.models.task.Booking` instance needs to be initialized
     with a :class:`~stalker.models.task.Task` and a
-    :class:`~stalker.models.user.User` instances.
+    :class:`~stalker.models.auth.User` instances.
     
-    Adding overlapping booking for a :class:`~stalker.models.user.User` will
+    Adding overlapping booking for a :class:`~stalker.models.auth.User` will
     raise a :class:`~stalker.errors.OverBookedWarning`.
     
     :param task: The :class:`~stalker.models.task.Task` instance that this
       booking belongs to.
     
-    :param resource: The :class:`~stalker.models.user.User` instance that this
+    :param resource: The :class:`~stalker.models.auth.User` instance that this
       booking is created for.
     """
 
@@ -61,7 +62,7 @@ class Booking(Entity, ScheduleMixin):
         primaryjoin="Bookings.c.resource_id==Users.c.id",
         uselist=False,
         back_populates="bookings",
-        doc="""The :class:`~stalker.models.user.User` instance that this 
+        doc="""The :class:`~stalker.models.auth.User` instance that this 
         booking is created for"""
     )
 
@@ -89,8 +90,6 @@ class Booking(Entity, ScheduleMixin):
     def _validate_resource(self, key, resource):
         """validates the given resource value
         """
-        
-        from stalker.models.user import User
 
         if resource is None:
             raise TypeError("%s.resource can not be None" %
@@ -98,7 +97,7 @@ class Booking(Entity, ScheduleMixin):
 
         if not isinstance(resource, User):
             raise TypeError("%s.resource should be a "
-                            "stalker.models.user.User instance not %s" %
+                            "stalker.models.auth.User instance not %s" %
                             (self.__class__.__name__,
                              resource.__class__.__name__))
         
@@ -149,12 +148,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
       priority of the :class:`~stalker.models.task.Task`. The higher the value
       the higher its priority. The default value is 500.
     
-    :param resources: The :class:`~stalker.models.user.User`\ s assigned to
+    :param resources: The :class:`~stalker.models.auth.User`\ s assigned to
       this :class:`~stalker.models.task.Task`. A
       :class:`~stalker.models.task.Task` without any resource can not be
       scheduled.
     
-    :type resources: list of :class:`~stalker.models.user.User`
+    :type resources: list of :class:`~stalker.User`
     
     :param effort: The total effort that needs to be spend to complete this
       :class:`~stalker.models.task.Task`. Can be used to create an initial bid
@@ -301,7 +300,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
         #backref="tasks",
         back_populates="tasks",
-        doc="""The list of :class:`stalker.models.user.User`\ s instances assigned to this Task.
+        doc="""The list of :class:`stalker.models.auth.User`\ s instances assigned to this Task.
         """
     )
 
@@ -553,11 +552,11 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def _validate_resources(self, key, resource):
         """validates the given resources value
         """
-        from stalker.models.user import User
+        from stalker.models.auth import User
         
         if not isinstance(resource, User):
             raise TypeError("Task.resources should be a list of "
-                            "stalker.models.user.User instances not %s" %
+                            "stalker.models.auth.User instances not %s" %
                             resource.__class__.__name__)
         
             ## milestones do not need resources

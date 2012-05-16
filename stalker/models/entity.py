@@ -122,12 +122,12 @@ class SimpleEntity(Base):
       could not again have white spaces at the beginning and at the end of the
       string, again any given objects will be converted to strings
     
-    :param created_by: The :class:`~stalker.models.user.User` who has created
+    :param created_by: The :class:`~stalker.models.auth.User` who has created
       this object
     
-    :type created_by: :class:`~stalker.models.user.User`
+    :type created_by: :class:`~stalker.models.auth.User`
     
-    :param updated_by: The :class:`~stalker.models.user.User` who has updated
+    :param updated_by: The :class:`~stalker.models.auth.User` who has updated
       this object lastly. The created_by and updated_by attributes point the
       same object if this object is just created.
     
@@ -204,7 +204,7 @@ class SimpleEntity(Base):
         backref="entities_created",
         primaryjoin="SimpleEntity.created_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`~stalker.models.user.User` who has created this object."""
+        doc="""The :class:`~stalker.models.auth.User` who has created this object."""
     )
     
     updated_by_id = Column(
@@ -218,7 +218,7 @@ class SimpleEntity(Base):
         backref="entities_updated",
         primaryjoin="SimpleEntity.updated_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`~stalker.models.user.User` who has updated this object."""
+        doc="""The :class:`~stalker.models.auth.User` who has updated this object."""
     )
     
     date_created = Column(
@@ -444,12 +444,12 @@ class SimpleEntity(Base):
         """validates the given created_by_in attribute
         """
         
-        from stalker.models.user import User
-        
+        from stalker.models.auth import User
+
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
                 raise TypeError("%s.created_by should be an instance of"
-                                "stalker.models.user.User" %
+                                "stalker.models.auth.User" %
                                 self.__class__.__name__)
         
         return created_by_in
@@ -459,7 +459,7 @@ class SimpleEntity(Base):
         """validates the given updated_by_in attribute
         """
         
-        from stalker.models.user import User
+        from stalker.models.auth import User
 
         if updated_by_in is None:
             # set it to what created_by attribute has
@@ -468,7 +468,7 @@ class SimpleEntity(Base):
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
                 raise TypeError("%s.updated_by should be an instance of"
-                                "stalker.models.user.User" %
+                                "stalker.models.auth.User" %
                                 self.__class__.__name__)
 
         return updated_by_in

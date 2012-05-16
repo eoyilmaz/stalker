@@ -13,7 +13,6 @@ from sqlalchemy.exc import IntegrityError
 
 from stalker.conf import defaults
 from stalker import db
-from stalker.ext import auth
 from stalker.db.session import DBSession
 from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
                      Link, Note, Project, Repository, Sequence, Shot,
@@ -262,13 +261,13 @@ class DatabaseTester(unittest.TestCase):
         """testing if there can be non-unique names for different entity types
         """
         db.setup()
-        admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
 
         # try to create a user and an entity with same name
         # expect Nothing
         kwargs = {
             "name": "user1",
-            "created_by": admin
+            #"created_by": admin
         }
 
         entity1 = Entity(**kwargs)

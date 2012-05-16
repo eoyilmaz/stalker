@@ -6,6 +6,7 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
+from stalker.models.auth import User
 from stalker.models.entity import Entity
 
 class Department(Entity):
@@ -78,12 +79,10 @@ class Department(Entity):
     def _validate_members(self, key, member):
         """validates the given member attribute
         """
-        
-        from stalker.models.user import User
-        
+
         if not isinstance(member, User):
             raise TypeError("Every element in the %s.members list should be "
-                            "an instance of stalker.models.user.User class "
+                            "an instance of stalker.models.auth.User class "
                             "not %s" %
                             (self.__class__.__name__,
                              member.__class__.__name__))
@@ -95,13 +94,13 @@ class Department(Entity):
         """validates the given lead attribute
         """
         
-        from stalker.models.user import User
+        from stalker.models.auth import User
         
         if lead is not None:
             # the lead should be an instance of User class
             if not isinstance(lead, User):
                 raise TypeError("%s.lead should be an instance of "
-                                "stalker.models.user.User not %s" %
+                                "stalker.models.auth.User not %s" %
                                 (self.__class__.__name__,
                                  lead.__class__.__name__))
 

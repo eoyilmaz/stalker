@@ -6,6 +6,7 @@
 
 from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean
 from sqlalchemy.orm import relationship, validates
+from stalker import User
 from stalker.db.session import DBSession
 from stalker.models.entity import TaskableEntity
 from stalker.models.mixins import StatusMixin, ScheduleMixin, ReferenceMixin
@@ -36,7 +37,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     
     :param lead: The lead of the project. Default value is None.
     
-    :type lead: :class:`~stalker.models.user.User`
+    :type lead: :class:`~stalker.User`
     
     :param image_format: The output image format of the project. Default
       value is None.
@@ -108,7 +109,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         back_populates="projects_lead",
         doc="""The lead of the project.
         
-        Should be an instance of :class:`~stalker.models.user.User`,
+        Should be an instance of :class:`~stalker.models.auth.User`,
         also can set to None.
         """
     )
@@ -215,13 +216,11 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     def _validate_lead(self, key, lead):
         """validates the given lead_in value
         """
-        
-        from stalker.models.user import User
-        
+
         if lead is not None:
             if not isinstance(lead, User):
                 raise TypeError("lead must be an instance of "
-                                "stalker.models.user.User")
+                                "stalker.models.auth.User")
 
         return lead
 
@@ -264,7 +263,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         """returns the users related to this project
         """
         
-        from stalker.models.user import User
+        from stalker.models.auth import User
         from stalker.models.task import Task
         
         if DBSession is not None:
