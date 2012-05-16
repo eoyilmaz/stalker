@@ -6,7 +6,7 @@
 
 import unittest
 import datetime
-from stalker import (PermissionGroup, Department, Project, Repository,
+from stalker import (Group, Department, Project, Repository,
                      Sequence, Status, StatusList, Task, Type, User)
 
 class UserTest(unittest.TestCase):
@@ -31,15 +31,15 @@ class UserTest(unittest.TestCase):
             name="Test Department 3"
         )
 
-        # a couple of permission groups
-        self.test_permission_group1 = PermissionGroup(
-            name="Test PermissionGroup 1"
+        # a couple of groups
+        self.test_group1 = Group(
+            name="Test Group 1"
         )
-        self.test_permission_group2 = PermissionGroup(
-            name="Test PermissionGroup 2"
+        self.test_group2 = Group(
+            name="Test Group 2"
         )
-        self.test_permission_group3 = PermissionGroup(
-            name="Test PermissionGroup 3"
+        self.test_group3 = Group(
+            name="Test Group 3"
         )
 
         # a couple of statuses
@@ -197,8 +197,8 @@ class UserTest(unittest.TestCase):
             "password": "hidden",
             "email": "eoyilmaz@fake.com",
             "department": self.test_department1,
-            "permission_groups": [self.test_permission_group1,
-                                  self.test_permission_group2],
+            "groups": [self.test_group1,
+                       self.test_group2],
             "projects_lead": [self.test_project1,
                               self.test_project2],
             "sequences_lead": [self.test_sequence1,
@@ -1027,94 +1027,77 @@ class UserTest(unittest.TestCase):
         # check if check_password returns False
         self.assertFalse(self.test_user.check_password("wrong pass"))
 
-
-    def test_permission_groups_argument_for_None(self):
-        """testing if the permission_groups attribute will be an empty list
-        when the permission_groups argument is None
+    def test_groups_argument_for_None(self):
+        """testing if the groups attribute will be an empty list
+        when the groups argument is None
         """
-
-        self.kwargs["permission_groups"] = None
+        self.kwargs["groups"] = None
         new_user = User(**self.kwargs)
-        self.assertEqual(new_user.permission_groups, [])
+        self.assertEqual(new_user.groups, [])
 
-
-    def test_permission_groups_attribute_for_None(self):
-        """testing if a TypeError will be raised when permission_groups
-        attribute is set to None
+    def test_groups_attribute_for_None(self):
+        """testing if a TypeError will be raised when groups attribute is set
+        to None
         """
+        self.assertRaises(TypeError, setattr, self.test_user, "groups", None)
 
-        self.assertRaises(TypeError, setattr, self.test_user,
-                          "permission_groups", None)
-
-
-    def test_perimssion_groups_argument_accepts_only_PermissionGroup_instances(
-    self):
-        """testing if a TypeError will be raised when trying to assign
-        anything other then a PermissionGroup instances to the permission_group
-        argument
+    def test_groups_argument_accepts_only_Group_instances(self):
+        """testing if a TypeError will be raised when trying to assign anything
+        other then a Group instances to the group argument
         """
-
-        test_values = [23123,
-                       1231.43122,
-                       "a_group",
+        test_values = [
+            23123,
+            1231.43122,
+            "a_group",
             ["group1", "group2", 234],
-                       ]
+        ]
 
         for test_value in test_values:
-            self.kwargs["permission_groups"] = test_value
+            self.kwargs["groups"] = test_value
             self.assertRaises(TypeError, User, **self.kwargs)
 
-
-    def test_perimssion_groups_attribute_accepts_only_PermissionGroup_instances(
-    self):
-        """testing if a TypeError will be raised when trying to assign
-        anything other then a PermissionGroup instances to the permission_group
-        attribute
+    def test_groups_attribute_accepts_only_Group_instances(self):
+        """testing if a TypeError will be raised when trying to assign anything
+        other then a Group instances to the group attribute
         """
-
-        test_values = [23123,
-                       1231.43122,
-                       "a_group",
+        test_values = [
+            23123,
+            1231.43122,
+            "a_group",
             ["group1", "group2", 234],
-                       ]
+        ]
 
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
                 setattr,
                 self.test_user,
-                "permission_groups",
+                "groups",
                 test_value
             )
 
-
-    def test_permission_groups_attribute_works_properly(self):
-        """testing if permission_groups attribute works properly
+    def test_groups_attribute_works_properly(self):
+        """testing if groups attribute works properly
         """
+        test_pg = [self.test_group3]
+        self.test_user.groups = test_pg
+        self.assertEqual(self.test_user.groups, test_pg)
 
-        test_pg = [self.test_permission_group3]
-        self.test_user.permission_groups = test_pg
-        self.assertEqual(self.test_user.permission_groups, test_pg)
-
-
-    def test_permission_groups_attribute_elements_accepts_PermissionGroup_only(
-    self):
+    def test_groups_attribute_elements_accepts_Group_only(self):
         """testing if a TypeError will be raised when trying to assign
-        something other than a PermissionGroup instances to the permission_groups
-        list
+        something other than a Group instances to the groups list
         """
-
         # append
         self.assertRaises(
             TypeError,
-            self.test_user.permission_groups.append,
+            self.test_user.groups.append,
             0
         )
 
         # __setitem__
         self.assertRaises(
             TypeError,
-            self.test_user.permission_groups.__setitem__,
+            self.test_user.groups.__setitem__,
             0,
             0
         )

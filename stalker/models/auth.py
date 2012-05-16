@@ -28,10 +28,10 @@ class RootFactory(object):
     def __init__(self, request):
         pass
 
-class PermissionGroup(SimpleEntity):
+class Group(SimpleEntity):
     """Manages permission in the system.
     
-    A PermissionGroup object maps permission for tasks like Create, Read,
+    A Group object maps permission for tasks like Create, Read,
     Update, Delete operations in the system to available classes in the system.
     
     It reads the :attr:`~stalker.conf.defaults.CORE_MODEL_CLASSES` list to get
@@ -39,9 +39,9 @@ class PermissionGroup(SimpleEntity):
     value for each of the class.
     
     A :class:`~stalker.models.auth.User` can be in several
-    :class:`~stalker.models.auth.PermissionGroup`\ s. The combined permission
+    :class:`~stalker.models.auth.Group`\ s. The combined permission
     for an object is calculated with an ``OR`` (``^``) operation. So if one of
-    the :class:`~stalker.models.auth.PermissionGroup`\ s of the
+    the :class:`~stalker.models.auth.Group`\ s of the
     :class:`~stalker.models.auth.User` is allowing the action then the user is
     allowed to do the operation.
     
@@ -62,15 +62,17 @@ class PermissionGroup(SimpleEntity):
     NOTE TO DEVELOPERS: a Dictionary-Based Collections should be used in
     SQLAlchemy.
     """
+    
+    # TODO: Update Group class documentation
 
-    __tablename__ = "PermissionGroups"
-    __mapper_args__ = {"polymorphic_identity": "PermissionGroup"}
+    __tablename__ = "Groups"
+    __mapper_args__ = {"polymorphic_identity": "Group"}
 
-    permissionGroup_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+    gid = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                                 primary_key=True)
     
     def __init__(self, **kwargs):
-        super(PermissionGroup, self).__init__(**kwargs)
+        super(Group, self).__init__(**kwargs)
 
 class User(Entity):
     """The user class is designed to hold data about a User in the system.
@@ -149,10 +151,9 @@ class User(Entity):
     
     :type password: unicode
     
-    :param permission_groups: it is a list of permission groups that this user
-      is belong to
+    :param groups: it is a list of groups that this user belongs to
     
-    :type permission_groups: :class:`~stalker.models.auth.PermissionGroup`
+    :type groups: :class:`~stalker.models.auth.Group`
     
     :param tasks: it is a list of Task objects which holds the tasks that this
       user has been assigned to
@@ -254,12 +255,12 @@ class User(Entity):
         :attr:`~stalker.models.auth.User.last_name`"""
     )
 
-    permission_groups = relationship(
-        "PermissionGroup",
-        secondary="User_PermissionGroups",
+    groups = relationship(
+        "Group",
+        secondary="User_Groups",
         doc="""Permission groups that this users is a member of.
         
-        Accepts :class:`~stalker.models.auth.PermissionGroup` object.
+        Accepts :class:`~stalker.models.auth.Group` object.
         """
     )
 
@@ -312,7 +313,7 @@ class User(Entity):
         last_name="",
         login_name="",
         password="",
-        permission_groups=None,
+        groups=None,
         projects_lead=None,
         sequences_lead=None,
         tasks=None,
@@ -346,9 +347,9 @@ class User(Entity):
         # to be able to mangle the password do it like this
         self.password = password
 
-        if permission_groups is None:
-            permission_groups = []
-        self.permission_groups = permission_groups
+        if groups is None:
+            groups = []
+        self.groups = groups
 
         self._projects = []
 
@@ -596,19 +597,19 @@ class User(Entity):
         """
         return self.password == base64.encodestring(str(raw_password))
     
-    @validates("permission_groups")
-    def _validate_permission_groups(self, key, permission_group):
-        """check the given permission_group
+    @validates("groups")
+    def _validate_groups(self, key, group):
+        """check the given group
         """
         
-        if not isinstance(permission_group, PermissionGroup):
+        if not isinstance(group, Group):
             raise TypeError(
-                "any group in %s.permission_groups should be an instance of"
-                "stalker.models.auth.PermissionGroup not %s" %
-                (self.__class__.__name__, permission_group.__class__.__name__)
+                "any group in %s.groups should be an instance of"
+                "stalker.models.auth.Group not %s" %
+                (self.__class__.__name__, group.__class__.__name__)
             )
 
-        return permission_group
+        return group
 
     @validates("projects_lead")
     def _validate_projects_lead(self, key, project):
@@ -684,10 +685,10 @@ class User(Entity):
         return list(set(projects))
 
 # USER_PERMISSIONGROUPS
-User_PermissionGroups = Table(
-    "User_PermissionGroups", Base.metadata,
-    Column("user_id", Integer, ForeignKey("Users.id"), primary_key=True),
-    Column("permissionGroup_id", Integer, ForeignKey("PermissionGroups.id"),
+User_Groups = Table(
+    "User_Groups", Base.metadata,
+    Column("uid", Integer, ForeignKey("Users.id"), primary_key=True),
+    Column("gid", Integer, ForeignKey("Groups.id"),
            primary_key=True
     )
 )

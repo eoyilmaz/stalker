@@ -20,7 +20,8 @@ Summary
    stalker.models.mixins.TargetEntityTypeMixin
    stalker.models
    stalker.models.asset.Asset
-   stalker.models.auth.PermissionGroup
+   stalker.models.auth.Group
+   stalker.models.auth.User
    stalker.models.department.Department
    stalker.models.entity.Entity
    stalker.models.entity.SimpleEntity
@@ -43,14 +44,5 @@ Summary
    stalker.models.ticket.Ticket
    stalker.models.ticket.TicketLog
    stalker.models.type.Type
-   stalker.models.user.User
    stalker.models.version.Version
-   stalker.ext.auth
-   stalker.ext.auth.authenticate
-   stalker.ext.auth.check_password
-   stalker.ext.auth.create_session
-   stalker.ext.auth.login
-   stalker.ext.auth.login_required
-   stalker.ext.auth.logout
-   stalker.ext.auth.permission_required
-   stalker.ext.auth.set_password
+

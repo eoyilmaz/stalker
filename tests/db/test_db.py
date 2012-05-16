@@ -1025,11 +1025,11 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(nice_name, test_note_DB.nice_name)
         self.assertEqual(updated_by, test_note_DB.updated_by)
     
-    def test_persistence_PermissionGroup(self):
-        """testing the persistence of PermissionGroup
+    def test_persistence_Group(self):
+        """testing the persistence of Group
         """
         
-        self.fail("test is not implmented yet")
+        self.fail("test is not implemented yet")
     
     def test_persistence_Project(self):
         """testing the persistence of Project
@@ -2089,7 +2089,7 @@ class DatabaseModelsTester(unittest.TestCase):
         nice_name = new_user.nice_name
         notes = new_user.notes
         password = new_user.password
-        permission_groups = new_user.permission_groups
+        groups = new_user.groups
         projects = new_user.projects
         projects_lead = new_user.projects_lead
         sequences_lead = new_user.sequences_lead
@@ -2124,7 +2124,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(nice_name, new_user_DB.nice_name)
         self.assertEqual(notes, new_user_DB.notes)
         self.assertEqual(password, new_user_DB.password)
-        self.assertEqual(permission_groups, new_user_DB.permission_groups)
+        self.assertEqual(groups, new_user_DB.groups)
         self.assertEqual(projects, new_user_DB.projects)
         self.assertEqual(projects_lead, new_user_DB.projects_lead)
         self.assertEqual(sequences_lead, new_user_DB.sequences_lead)

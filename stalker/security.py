@@ -11,6 +11,6 @@ def groupfinder(userid, request):
     user_obj = DBSession.query(User).filter(User.login_name==userid).first()
     
     if user_obj:
-        return user_obj.permission_groups
+        return user_obj.groups
     
     return []

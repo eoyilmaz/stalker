@@ -12,7 +12,8 @@ Inheritance Diagram
      stalker.models.mixins.StatusMixin
      stalker.models.mixins.TargetEntityTypeMixin
      stalker.models.asset.Asst
-     stalker.models.auth.PermissionGroup
+     stalker.models.auth.Group
+     stalker.models.auth.User
      stalker.models.department.Department
      stalker.models.entity.Entity
      stalker.models.entity.SimpleEntity
@@ -35,6 +36,5 @@ Inheritance Diagram
      stalker.models.ticket.Ticket
      stalker.models.ticket.TicketLog
      stalker.models.type.Type
-     stalker.models.user.User
      stalker.models.version.Version
      :parts: 1

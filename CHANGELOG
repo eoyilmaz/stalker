@@ -38,6 +38,9 @@ Stalker Changes
   Thus the :class:`~stalker.models.auth.User` now handles all the
   :attr:`~stalker.models.auth.User.password` conversions by itself.
 
+* ``PermissionGroup`` is renamed back to :class:`~stalker.models.auth.Group`
+  again to match with the general naming of the authorization concept.
+
 0.2.0.a1
 --------
 * Converted the whole system to a Pyramid Web application. If the previous
@@ -457,8 +460,7 @@ Stalker Changes
   :class:`~stalker.core.models.Task`\ s assigned to the current
   :class:`~stalker.core.models.User`.
 
-* The ``Group`` class is renamed to
-  :class:`~stalker.core.models.PermissionGroup`.
+* The ``Group`` class is renamed to ``PermissionGroup``.
 
 * The default duration for the :class:`~stalker.core.mixins.ScheduleMixin`
   is now defined by the :attr:`stalker.conf.defaults.DEFAULT_TASK_DURATION`
