@@ -66,8 +66,6 @@ class Camera(Entity):
     
     :param vertical_film_back: the vertical length of the filmback
     
-    :param cropping_factor: the cropping factor of the camera
-    
     :param web_page: the web page of the camera    
     """
     
@@ -89,7 +87,6 @@ class Camera(Entity):
                  aperture_gate=0,
                  horizontal_film_back=0,
                  vertical_film_back=0,
-                 cropping_factor=1.0,
                  web_page="",
                  **kwargs):
         # pass all the extra data to the super (which is Entity)

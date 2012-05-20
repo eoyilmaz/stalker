@@ -62,7 +62,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
       from stalker import Type, FilenameTemplate, TaskTemplate
        
       # create a couple of variables
-      path = "{{project.code}}/Assets/{{asset_type.name}}/{{task_type.code}}"
+      path = "{{project.code}}/Assets/{{asset.code}}/{{task.type.name}}"
       
       filename = "{{asset.name}}_{{take.name}}_{{asset_type.name}}_v{{version.version_number}}"
       

@@ -41,6 +41,12 @@ Stalker Changes
 * ``PermissionGroup`` is renamed back to :class:`~stalker.models.auth.Group`
   again to match with the general naming of the authorization concept.
 
+* Created two new classes for the Authorization system, first one is called
+  :class:`~stalker.models.auth.Permission` and the second one is a Mixin which
+  is called :class;`~stalker.models.mixins.ACLMixin` which adds ACLs to the
+  mixed in class. But by default only the :class;`~stalker.models.auth.User`
+  and :class;`~stalker.models.auth.Group` is mixed with this mixin.
+
 0.2.0.a1
 --------
 * Converted the whole system to a Pyramid Web application. If the previous

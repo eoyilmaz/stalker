@@ -172,7 +172,7 @@ class Version(Entity, StatusMixin):
         """returns the maximum version number for this Version
         :return: int
         """
-        from stalker import DBSession
+        from stalker.db.session import DBSession
         
         all_versions = DBSession.query(Version)\
             .filter(Version.version_of==self.version_of)\

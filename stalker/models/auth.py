@@ -7,9 +7,11 @@ import re
 import base64
 import datetime
 
-from pyramid.security import Allow, Everyone
-from sqlalchemy import Table, Column, Integer, ForeignKey, String, DateTime
+from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
+                        Enum)
 from sqlalchemy.orm import relationship, synonym, reconstructor, validates
+from sqlalchemy.schema import UniqueConstraint
+from stalker.conf import defaults
 
 from stalker.db.declarative import Base
 from stalker.models.entity import SimpleEntity, Entity
@@ -18,61 +20,232 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+def group_finder(login_name, request):
+    # return the group of the given User object
+    from stalker.db.session import DBSession
+    user_obj = DBSession.query(User).filter(User.login_name==login_name).first()
+    
+    if user_obj:
+        # just return the groups names if there is any group
+        groups = user_obj.groups
+        if len(groups):
+            return map(lambda x:x.name, groups)
+    
+    return []
+
 class RootFactory(object):
-    __acl__ = [
-        #(Allow, Everyone, 'view'),
-        #(Allow, 'group:editors', 'edit')
-        (Allow, 'admin', 'view'),
-        (Allow, 'admins', 'view')
-    ]
+    #__acl__ = [
+    #    #(Allow, Everyone, 'view'),
+    #    #(Allow, u'admins', 'view')
+    #]
+    
+    @property
+    def __acl__(self):
+        """creates all the default ACLs
+        """
+        return []
+    
     def __init__(self, request):
         pass
 
-class Group(SimpleEntity):
-    """Manages permission in the system.
+class Permission(Base):
+    """A class to hold permissions.
     
-    A Group object maps permission for tasks like Create, Read,
-    Update, Delete operations in the system to available classes in the system.
+    Permissions in Stalker defines what one can do or do not. A Permission
+    instance is composed by three attributes; access, action and class_name.
     
-    It reads the :attr:`~stalker.conf.defaults.CORE_MODEL_CLASSES` list to get
-    the list of available classes which can be created. It then stores a binary
-    value for each of the class.
+    Permissions for all the classes in SOM are generally created by Stalker
+    when initializing the database.
     
-    A :class:`~stalker.models.auth.User` can be in several
-    :class:`~stalker.models.auth.Group`\ s. The combined permission
-    for an object is calculated with an ``OR`` (``^``) operation. So if one of
-    the :class:`~stalker.models.auth.Group`\ s of the
-    :class:`~stalker.models.auth.User` is allowing the action then the user is
-    allowed to do the operation.
+    If you created any custom classes to extend SOM you are also responsible to
+    create the Permissions for it by calling :meth:`stalker.db.register` and
+    passing your class to it. See the :mod:`stalker.db` documentation for
+    details.
     
-    The permissions are stored in a dictionary. The key is the class name and
-    the value is a 4-bit binary integer value like 0b0001.
+    :param str access: An Enum value which can have the one of the values of
+      ``Allow`` or ``Deny``.
     
-    +-------------------+--------+--------+--------+------+
-    |        0b         |   0    |   0    |   0    |  0   |
-    +-------------------+--------+--------+--------+------+
-    | binary identifier | Delete | Update | Create | Read |
-    |                   | Bit    | Bit    | Bit    | Bit  |
-    +-------------------+--------+--------+--------+------+
+    :param str action: An Enum value from the list: 'Add', 'View', 'Edit',
+      'Delete'. Can not be None. The list can be changed from
+      defaults.DEFAULT_ACTIONS.
     
-    :param dict permissions: A Python dictionary showing the permissions. The
-      key is the name of the Class and the value is the permission bit.
+    :param str class_name: The name of the class that this action is applied
+      to. Can not be None or an empty string.
+    
+    Example: Let say that you want to create a Permission specifying a Group of
+    Users are allowed to create Projects::
+      
+      import transaction
+      from stalker import db
+      from stalker.db.session import DBSession, transaction
+      from stalker.models.auth import User, Group, Permission
+      
+      # first setup the db with the default database
+      #
+      # stalker.db.__init_db__ will create all the Actions possible with the
+      # SOM classes automatically
+      # 
+      # What is left to you is to create the permissions
+      setup.db()
+      
+      user1 = User(login_name='test_user1', password='1234')
+      user2 = User(login_name='test_user2', password='1234')
+      
+      group1 = Group(name='users')
+      group1.users = [user1, user2]
+      
+      # get the permissions for the Project class
+      project_permissions = DBSession.query(Permission)\
+          .filter(Actions.access='Allow')\
+          .filter(Actions.class_name='Project')\
+          .filter(Actions.action='Add')\
+          .first()
+      
+      # now we have the permission specifying the allowance of creating a
+      # Project
+      
+      # to make group1 users able to create a Project we simple add this
+      # Permission to the groups permission attribute
+      group1.permissions.append(permission)
+      
+      # and persist this information in the database
+      DBSession.add(group)
+      transaction.commit()
     
     
-    NOTE TO DEVELOPERS: a Dictionary-Based Collections should be used in
-    SQLAlchemy.
+    """
+    __tablename__ = 'Permissions'
+    __table_args__  = (
+        UniqueConstraint('access', 'action', 'class_name'),
+        {"extend_existing":True}
+    )
+    
+    id = Column(Integer, primary_key=True)
+    _access = Column('access', Enum('Allow', 'Deny', name='AccessNames'))
+    _action = Column('action',
+                     Enum(*defaults.DEFAULT_ACTIONS,name='ActionNames'))
+    _class_name = Column('class_name', String)
+    
+    def __init__(self, access, action, class_name):
+        self._access = self._validate_access(access)
+        self._action = self._validate_action(action)
+        self._class_name = self._validate_class_name(class_name)
+    
+    def _validate_access(self, access):
+        """validates the given access value
+        """
+        if not isinstance(access, (str, unicode)):
+            raise TypeError('Permission.access should be an instance of str '
+                            'or unicode not %s' % access.__class__.__name__)
+        
+        if access not in ['Allow', 'Deny']:
+            raise ValueError('Permission.access should be "Allow" or "Deny"' 
+                             'not %s' % access)
+        
+        return access
+    
+    def _access_getter(self):
+        """returns the _access value
+        """
+        return self._access
+    
+    access = synonym('_access', descriptor=property(_access_getter))
+    
+    def _validate_class_name(self, class_name):
+        """validates the given class_name value
+        """
+        if not isinstance(class_name, (str, unicode)):
+            raise TypeError('Permission.class_name should be an instance of '
+                            'str or unicode not %s' % 
+                            class_name.__class__.__name__)
+        
+        return class_name
+    
+    def _class_name_getter(self):
+        """returns the _class_name attribute value
+        """
+        return self._class_name
+    
+    class_name = synonym('_class_name', descriptor=property(_class_name_getter))
+    
+    def _validate_action(self, action):
+        """validates the given action value
+        """
+        
+        if not isinstance(action, (str, unicode)):
+            raise TypeError('Permission.action should be an instance of str '
+                            'or unicode not %s' % action.__class__.__name__)
+        
+        if action not in defaults.DEFAULT_ACTIONS:
+            raise ValueError('Permission.action should be one of the values '
+                             'of %s not %s' % 
+                             (defaults.DEFAULT_ACTIONS, action))
+        
+        return action
+    
+    def _action_getter(self):
+        """returns the _action value
+        """
+        return self._action
+    
+    action = synonym('_action', descriptor=property(_action_getter))
+    
+    def __eq__(self, other):
+        """the equality of two Permissions
+        """
+        return isinstance(other, Permission) \
+            and other.access == self.access \
+            and other.action == self.action \
+            and other.class_name == self.class_name
+    
+    def __ne__(self, other):
+        """the inequality of two Permissions
+        """
+        return not self.__eq__(other)
+
+class Group(Entity):
+    """Creates groups for users to be used in authorization system.
+    
+    A Group instance is nothing more than a list of
+    :class:`~stalker.models.auth.User`\ s created to be able to assign
+    permissions in a group level.
     """
     
     # TODO: Update Group class documentation
-
+    
     __tablename__ = "Groups"
     __mapper_args__ = {"polymorphic_identity": "Group"}
 
-    gid = Column("id", Integer, ForeignKey("SimpleEntities.id"),
-                                primary_key=True)
+    gid = Column("id", Integer, ForeignKey("Entities.id"),
+                 primary_key=True)
     
-    def __init__(self, **kwargs):
+    users = relationship(
+        "User",
+        secondary="User_Groups",
+        back_populates="groups",
+        doc="""Users in this group.
+        
+        Accepts:class:`~stalker.models.auth.User` instance.
+        """
+    )
+    
+    def __init__(self, name='', users=[], **kwargs):
+        kwargs.update({'name': name})
         super(Group, self).__init__(**kwargs)
+        
+        self.users = users
+    
+    @validates('users')
+    def _validate_users(self, key, user):
+        """validates the given user instance
+        """
+        if not isinstance(user, User):
+            raise TypeError(
+                'Group.users attribute must all be stalker.models.auth.User '
+                'instances not %s' % user.__class__.__name__
+            )
+        
+        return user
 
 class User(Entity):
     """The user class is designed to hold data about a User in the system.
@@ -151,9 +324,10 @@ class User(Entity):
     
     :type password: unicode
     
-    :param groups: it is a list of groups that this user belongs to
+    :param groups: It is a list of :class:`~stalker.models.auth.Group`
+      instances that this user belongs to.
     
-    :type groups: :class:`~stalker.models.auth.Group`
+    :type groups: list of :class:`~stalker.models.auth.Group`
     
     :param tasks: it is a list of Task objects which holds the tasks that this
       user has been assigned to
@@ -180,18 +354,18 @@ class User(Entity):
     
     :type initials: unicode
     """
-
+    
     __tablename__ = "Users"
     __mapper_args__ = {"polymorphic_identity": "User"}
 
     user_id = Column("id", Integer, ForeignKey("Entities.id"),
                      primary_key=True)
-
+    
     department_id = Column(
         Integer,
         ForeignKey("Departments.id", use_alter=True, name="department_x"),
         )
-
+    
     department = relationship(
         "Department",
         primaryjoin="Users.c.department_id==Departments.c.id",
@@ -199,20 +373,20 @@ class User(Entity):
         uselist=False,
         doc=""":class:`~stalker.models.department.Department` of the user""",
         )
-
+    
     email = Column(
         String(256),
         unique=True,
         nullable=False,
         doc="""email of the user, accepts strings or unicodes"""
     )
-
+    
     first_name = Column(
         String(256),
         nullable=False,
         doc="""first name of the user, accepts string or unicode"""
     )
-
+    
     last_name = Column(
         String(256),
         nullable=True,
@@ -220,7 +394,7 @@ class User(Entity):
         
         It is a string and can be None or empty string"""
     )
-
+    
     password = Column(
         String(256),
         nullable=False,
@@ -229,14 +403,14 @@ class User(Entity):
         It is scrambled before it is stored.
         """
     )
-
+    
     last_login = Column(
         DateTime,
         doc="""The last login time of this user.
         
         It is an instance of datetime.datetime class."""
     )
-
+    
     login_name = synonym(
         "name",
         doc="""The login name of the user.
@@ -245,7 +419,7 @@ class User(Entity):
         attribute.
         """
     )
-
+    
     initials = Column(
         String(16),
         doc="""The initials of the user.
@@ -254,16 +428,17 @@ class User(Entity):
         :attr:`~stalker.models.auth.User.first_name` and
         :attr:`~stalker.models.auth.User.last_name`"""
     )
-
+    
     groups = relationship(
         "Group",
         secondary="User_Groups",
+        back_populates="users",
         doc="""Permission groups that this users is a member of.
         
         Accepts :class:`~stalker.models.auth.Group` object.
         """
     )
-
+    
     projects_lead = relationship(
         "Project",
         primaryjoin="Projects.c.lead_id==Users.c.id",
@@ -274,7 +449,7 @@ class User(Entity):
         It is a list of :class:`~stalker.models.project.Project` instances.
         """
     )
-
+    
     sequences_lead = relationship(
         "Sequence",
         primaryjoin="Sequences.c.lead_id==Users.c.id",
@@ -285,7 +460,7 @@ class User(Entity):
         It is a list of :class:`~stalker.models.sequence.Sequence` instances.
         """
     )
-
+    
     tasks = relationship(
         "Task",
         secondary="Task_Resources",

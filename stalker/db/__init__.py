@@ -10,9 +10,11 @@ Whenever stalker.db or something under it imported, the
 """
 
 import logging
+from sqlalchemy.exc import IntegrityError
 
 import transaction
 from sqlalchemy import engine_from_config
+from transaction.interfaces import TransactionFailedError
 
 from stalker.conf import defaults
 from stalker.db.declarative import Base
@@ -20,9 +22,9 @@ from stalker.db.session import DBSession
 
 # create a logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.DEBUG)
 
-def setup(settings=None):
+def setup(settings=None, callback=None):
     """Utility function that helps to connect the system to the given database.
     
     if the database is None then the it setups using the default database in
@@ -32,6 +34,9 @@ def setup(settings=None):
         "sqlalchemy" and shows the settings. The most important one is the
         engine. The default is None, and in this case it uses the settings from
         stalker.conf.defaults.DATABASE_ENGINE_SETTINGS
+    
+    :param callback: A callback function which is called after database is
+        initialized. It is a good place to register your own classes.
    """
 
     if settings is None:
@@ -41,24 +46,64 @@ def setup(settings=None):
     logger.debug("settings: %s" % settings)
     # create engine
     engine = engine_from_config(settings, 'sqlalchemy.')
-
+    
+    logger.debug('engine: %s' % engine)
+    
     # create the Session class
     DBSession.configure(bind=engine)
     
     # create the database
     logger.debug("creating the tables")
     Base.metadata.create_all(engine)
+    Base.metadata.bind = engine
     
-   # init database
+    
+    # init database
     __init_db__()
+    
+    # call callback function
+    if callback:
+        callback()
 
 def __init_db__():
     """fills the database with default values
     """
     logger.debug("initializing database")
 
+   # register all Actions available for all SOM classes
+    class_names = [
+        'Asset', 'Action', 'Group', 'Permission', 'User', 'Department',
+        'Entity', 'SimpleEntity', 'TaskableEntity', 'ImageFormat', 'Link',
+        'Message', 'Note', 'Project', 'Repository', 'Sequence', 'Shot',
+        'Status', 'StatusList', 'Structure', 'Tag', 'Booking', 'Task',
+        'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
+    ]
+    
+    from stalker.models.auth import Action
+    
+    actions_db = DBSession.query(Action).all()
+    
+    for class_name in class_names:
+        for action in defaults.DEFAULT_ACTIONS:
+            action_obj = Action(action, class_name)
+            if action not in actions_db:
+                logger.debug('adding new action %s, class_name: %s' % 
+                    (action_obj.action, action_obj.class_name)
+                )
+                DBSession.add(action_obj)
+            else:
+                logger.debug('actions already defined in db: %s, %s' %
+                    (action_obj.action, action_obj.class_name)
+                )
+    
+    transaction.commit()
+    
+    # create the admin if needed
     if defaults.AUTO_CREATE_ADMIN:
         __create_admin__()
+    
+    
+    logger.debug('finished initializing the database')
 
 def __create_admin__():
     """creates the admin
@@ -85,23 +130,43 @@ def __create_admin__():
         if not admin_department:
             admin_department = Department(name=defaults.ADMIN_DEPARTMENT_NAME)
             DBSession.add(admin_department)
-
-        # create the admin user
-        admin = User(
-            name=defaults.ADMIN_NAME,
-            first_name=defaults.ADMIN_NAME,
-            login_name=defaults.ADMIN_NAME,
-            password=defaults.ADMIN_PASSWORD,
-            email=defaults.ADMIN_EMAIL,   
-            department=admin_department,
-        )
+        # create the admins group
         
-        admin.created_by = admin
-        admin.updated_by = admin
+        from stalker.models.auth import Group
+        
+        admins_group = DBSession.query(Group)\
+            .filter_by(name=defaults.ADMIN_GROUP_NAME)\
+            .first()
+        
+        if not admins_group:
+            admins_group = Group(name=defaults.ADMIN_GROUP_NAME)
+            DBSession.add(admins_group)
+        
+        # create the admin user
+        admin = DBSession.query(User)\
+            .filter_by(name=defaults.ADMIN_NAME)\
+            .first()
+        
+        if not admin:
+            admin = User(
+                name=defaults.ADMIN_NAME,
+                first_name=defaults.ADMIN_NAME,
+                login_name=defaults.ADMIN_NAME,
+                password=defaults.ADMIN_PASSWORD,
+                email=defaults.ADMIN_EMAIL,   
+                department=admin_department,
+                groups=[admins_group]
+            )
+            
+            admin.created_by = admin
+            admin.updated_by = admin
         
         # update the department as created and updated by admin user
         admin_department.created_by = admin
         admin_department.updated_by = admin
+        
+        admins_group.created_by = admin
+        admins_group.updated_by = admin
         
         DBSession.add(admin)
     
@@ -136,5 +201,64 @@ def __create_admin__():
             target_entity_type='Ticket'
         )
         DBSession.add_all([ticket_type_1, ticket_type_2])
+
+def register(class_):
+    """Registers the given class to the database.
     
+    It is mainly used to create the :class:`~stalker.models.auth.Action`\ s
+    needed for the :class:`~stalker.models.auth.User`\ s and
+    :class:`~stalker.models.auth.Group`\ s to be able to interact with the
+    given class. Whatever class you have created needs to be registered.
     
+    Example, lets say that you have a data class which is specific to your
+    studio and it is not present in Stalker Object Model (SOM), so you need to
+    extend SOM with a new data type. Here is a simple Data class inherited from
+    the :class:`~stalker.models.entity.SimpleEntity` class (which is the
+    simplest class you should inherit your classes from or use more complex
+    classes down to the hierarchy)::
+    
+      from sqlalchemy import Column, Integer, ForeignKey
+      from stalker.models.entity import SimpleEntity
+      
+      class MyDataClass(SimpleEntity):
+        '''This is an example class holding a studio specific data which is not
+        present in SOM.
+        '''
+        
+        __tablename__ = 'MyData'
+        __mapper_arguments__ = {'polymorphic_identity': 'MyData'}
+        
+        my_data_id = Column('id', Integer, ForeignKey('SimpleEntities.c.id'),
+                            primary_key=True)
+    
+    Now because Stalker is using Pyramid authorization mechanism it needs to be
+    able to have an :class:`~stalker.models.auth.Permission` about your new
+    class, so you can assign this :class;`~stalker.models.auth.Permission` to
+    your :class:`~stalker.models.auth.User`\ s or
+    :class:`~satlker.models.auth.Group`\ s. So you ned to register your new
+    class with stalker.db.register like shown below::
+    
+      from stalker import db
+      db.register(MyDataClass)
+    
+    This will create the necessary Actions in the 'Actions' table on your
+    database, then you can create :class:`~stalker.models.auth.Permission`\ s
+    and assign these to your :class:`~stalker.models.auth.User`\ s and
+    :class:`~stalker.models.auth.Group`\ s so they are Allowed or Denied to do
+    the specified Action.
+    
+    :param class_: The class itself that needs to be registered.
+    """
+    
+    from stalker.models.auth import Action
+    
+    # create the Actions
+    
+    actions_instances = []
+    for action in defaults.DEFAULT_ACTIONS:
+        actions_instances.append(
+            Action(action=action, class_name=class_.__name__)
+        )
+    
+    DBSession.add_all(actions_instances)
+    transaction.commit()

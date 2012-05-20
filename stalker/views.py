@@ -9,8 +9,6 @@ from stalker.db import DBSession
 
 from stalker import User
 
-from stalker.security import USERS
-
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
 might be caused by one of the following things:
@@ -30,7 +28,8 @@ try it again.
 @view_config(route_name='home', renderer='templates/home.jinja2',
              permission='view')
 def home(request):
-    return {'project': 'stalker'}
+    login_name = authenticated_userid(request)
+    return {'current_user': login_name}
 
 
 @view_config(route_name='login', renderer='templates/login.jinja2')
@@ -50,21 +49,22 @@ def login(request):
         
         # need to find the user
         # first check with the login_name attribute
-        user_obj = DBsession.query(User).filter_by(login_name=login).first()
+        user_obj = DBSession.query(User).filter_by(login_name=login).first()
         
         if not user_obj:
             # then by the email
             user_obj = DBSession.query(User).filter_by(email=login).first()
-            login = user_obj.login_name
+            if user_obj:
+                login = user_obj.login_name
         
-        #if USERS.get(login) == password:
         if user_obj and user_obj.check_password(password):
             headers = remember(request, login)
             return HTTPFound(
                 location=came_from,
                 headers=headers
             )
-        message = 'Failed Login'
+        
+        message = 'Wrong username or password!!!'
     
     return dict(
         message=message,
@@ -78,6 +78,6 @@ def login(request):
 def logout(request):
     headers = forget(request)
     return HTTPFound(
-        location=request.route_url('view_wiki'),
+        location=request.route_url('login'),
         headers=headers
     )

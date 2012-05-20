@@ -17,4 +17,3 @@ DBSession = scoped_session(
         extension=ZopeTransactionExtension()
     )
 )
-

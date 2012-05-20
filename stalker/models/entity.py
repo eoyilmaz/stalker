@@ -6,12 +6,16 @@
 
 import datetime
 import re
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import (Table, Column, Integer, String, ForeignKey, DateTime,
+                        Enum)
 from sqlalchemy.orm import relationship, validates, reconstructor
 
 import stalker
 from stalker.db import Base
 from stalker.models.mixins import ProjectMixin
+
+
+
 
 class EntityMeta(type):
     """The metaclass for the very basic entity.
@@ -22,29 +26,35 @@ class EntityMeta(type):
     class itself.
     """
     
-    def __new__(mcs, classname, bases, dict_):
+    def __new__(mcs, class_name, bases, dict_):
         # create the entity_type
-        dict_["entity_type"] = unicode(classname)
-
+        #dict_["entity_type"] = unicode(class_name)
+        
         # try to find a plural name for the class if not given
         if not dict_.has_key("plural_name"):
-            plural_name = unicode(classname + "s")
+            plural_name = unicode(class_name + "s")
             
-            if classname[-1] == "y":
-                plural_name = unicode(classname[:-1] + "ies")
-            elif classname[-2] == "ch":
-                plural_name = unicode(classname + "es")
-            elif classname[-1] == "f":
-                plural_name = unicode(classname[:-1] + "ves")
-            elif classname[-1] == "s":
-                plural_name = unicode(classname + "es")
+            if class_name[-1] == "y":
+                plural_name = unicode(class_name[:-1] + "ies")
+            elif class_name[-2] == "ch":
+                plural_name = unicode(class_name + "es")
+            elif class_name[-1] == "f":
+                plural_name = unicode(class_name[:-1] + "ves")
+            elif class_name[-1] == "s":
+                plural_name = unicode(class_name + "es")
 
             dict_["plural_name"] = plural_name
 
-        if not dict_.has_key("__strictly_typed__"):
-            dict_["__strictly_typed__"] = False
-
-        return super(EntityMeta, mcs).__new__(mcs, classname, bases, dict_)
+        #if not dict_.has_key("__strictly_typed__"):
+        #    dict_["__strictly_typed__"] = False
+        
+        # add the class to the ACLs
+        ACLs.insert().values(action='add', class_name=class_name)
+        from stalker.db.session import DBSession
+        if DBSession.engine:
+            pass
+        
+        return super(EntityMeta, mcs).__new__(mcs, class_name, bases, dict_)
 
 class SimpleEntity(Base):
     """The base class of all the others

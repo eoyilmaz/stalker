@@ -26,12 +26,13 @@
       password
     </div>
     <div id='column2'>
-      <form>
-        <div><input class='indented_input' type='text' name='login'><br/></div>
-        <div><input class='indented_input' type='password' name='password'><br/></div>
-        <div id='login_button'><b><input type="submit" value="Login" /></b></div>
+      <form name='login_form' method="POST" action="{{request.route_url('login')}}">
+        <div><input class='indented_input' type='text' name='login' value='{{login}}'><br/></div>
+        <div><input class='indented_input' type='password' name='password' value='{{password}}'><br/></div>
+        <div id='login_button'><b><input type="submit" name='form.submitted' value="Login" /></b></div>
       </form>
     </div>
+    <div id='message'><b>{{message}}</b></div>
   </div>
 </div>
 </body>

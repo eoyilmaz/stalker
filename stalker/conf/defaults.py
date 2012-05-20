@@ -30,6 +30,7 @@ ADMIN_NAME = "admin"
 ADMIN_PASSWORD = "admin"
 ADMIN_EMAIL = "admin@admin.com"
 ADMIN_DEPARTMENT_NAME = "admins"
+ADMIN_GROUP_NAME = 'admins'
 
 
 # the default keyword which is going to be used in password scrambling
@@ -41,3 +42,6 @@ DEFAULT_TASK_PRIORITY = 500
 DEFAULT_VERSION_TAKE_NAME = "MAIN"
 
 DEFAULT_TICKET_LABEL = "Ticket"
+
+DEFAULT_ACTIONS = ['Add', 'View', 'Edit', 'Delete']
+

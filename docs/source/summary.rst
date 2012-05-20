@@ -13,6 +13,7 @@ Summary
    stalker.errors.CircularDependencyError
    stalker.errors.LoginError
    stalker.errors.DBError
+   stalker.models.mixins.ACLMixin
    stalker.models.mixins.ProjectMixin
    stalker.models.mixins.ReferenceMixin
    stalker.models.mixins.ScheduleMixin
@@ -20,7 +21,9 @@ Summary
    stalker.models.mixins.TargetEntityTypeMixin
    stalker.models
    stalker.models.asset.Asset
+   stalker.models.auth.Action
    stalker.models.auth.Group
+   stalker.models.auth.Permission
    stalker.models.auth.User
    stalker.models.department.Department
    stalker.models.entity.Entity
