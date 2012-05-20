@@ -8,7 +8,7 @@
 import unittest
 #import transaction
 #from stalker import db
-from stalker.db.session import DBSession
+#from stalker.db.session import DBSession
 
 from stalker.models.auth import Permission
 

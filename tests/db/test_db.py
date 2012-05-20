@@ -3,6 +3,7 @@
 # 
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
+import shutil
 
 import os
 import datetime
@@ -13,8 +14,6 @@ import transaction
 from sqlalchemy.exc import IntegrityError
 
 from stalker.models.auth import Permission
-from sqlalchemy.sql import select
-from stalker.db.declarative import Base
 
 from stalker.conf import defaults
 from stalker import db
@@ -351,10 +350,13 @@ class DatabaseTester(unittest.TestCase):
         
         self.assertEqual(
             len(permission_DB),
-            len(class_names) * len(defaults.DEFAULT_ACTIONS)
+            len(class_names) * len(defaults.DEFAULT_ACTIONS) * 2
         )
         
+        from pyramid.security import Allow, Deny
+        
         for permission in permission_DB:
+            self.assertIn(permission.access, [Allow, Deny])
             self.assertIn(permission.action,  defaults.DEFAULT_ACTIONS)
             self.assertIn(permission.class_name, class_names)
             logger.debug('permission.access: %s' % permission.access)
@@ -379,12 +381,12 @@ class DatabaseTester(unittest.TestCase):
         DBSession.remove()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
         
-        # and we still have correct amount of Actions
-        permissions = DBSession.query(Action).all()
-        self.assertEqual(len(permissions), 112)
+        # and we still have correct amount of Permissions
+        permissions = DBSession.query(Permission).all()
+        self.assertEqual(len(permissions), 224)
         
         # clean the test
-        
+        shutil.rmtree(temp_db_path)
     
 class DatabaseModelsTester(unittest.TestCase):
     """tests the database model

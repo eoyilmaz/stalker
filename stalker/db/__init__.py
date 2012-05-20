@@ -70,7 +70,7 @@ def __init_db__():
     """
     logger.debug("initializing database")
 
-   # register all Actions available for all SOM classes
+    # register all Actions available for all SOM classes
     class_names = [
         'Asset', 'Action', 'Group', 'Permission', 'User', 'Department',
         'Entity', 'SimpleEntity', 'TaskableEntity', 'ImageFormat', 'Link',
@@ -79,24 +79,9 @@ def __init_db__():
         'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
     ]
     
-    from stalker.models.auth import Action
-    
-    actions_db = DBSession.query(Action).all()
-    
     for class_name in class_names:
-        for action in defaults.DEFAULT_ACTIONS:
-            action_obj = Action(action, class_name)
-            if action not in actions_db:
-                logger.debug('adding new action %s, class_name: %s' % 
-                    (action_obj.action, action_obj.class_name)
-                )
-                DBSession.add(action_obj)
-            else:
-                logger.debug('actions already defined in db: %s, %s' %
-                    (action_obj.action, action_obj.class_name)
-                )
-    
-    transaction.commit()
+        register(class_name)
+   
     
     # create the admin if needed
     if defaults.AUTO_CREATE_ADMIN:
@@ -249,16 +234,36 @@ def register(class_):
     
     :param class_: The class itself that needs to be registered.
     """
+    from pyramid.security import Allow, Deny
+    from stalker.models.auth import Permission
     
-    from stalker.models.auth import Action
+    # create the Permissions
+    permissions_db = DBSession.query(Permission).all()
     
-    # create the Actions
+    if isinstance(class_, type):
+        class_name = class_.__class__.__name__
+    elif isinstance(class_, (str, unicode)):
+        class_name = class_
+    else:
+        raise TypeError('To register a class please either supply the class '
+                        'itself or the name of it')
     
-    actions_instances = []
     for action in defaults.DEFAULT_ACTIONS:
-        actions_instances.append(
-            Action(action=action, class_name=class_.__name__)
-        )
+        for access in  [Allow, Deny]:
+            permission_obj = Permission(access, action, class_name)
+            if permission_obj not in permissions_db:
+                logger.debug('adding new permission %s, %s, %s' % 
+                    (permission_obj.access,
+                     permission_obj.action,
+                     permission_obj.class_name)
+                )
+                DBSession.add(permission_obj)
+            else:
+                logger.debug('permission already defined in db:'
+                             ' %s, %s, %s' %
+                    (permission_obj.access,
+                     permission_obj.action,
+                     permission_obj.class_name)
+                )
     
-    DBSession.add_all(actions_instances)
     transaction.commit()
