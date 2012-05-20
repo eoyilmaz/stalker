@@ -840,8 +840,8 @@ class SimpleEntityTester(unittest.TestCase):
         # now check if it is added to the database correctly
         del new_simpleEntity
         
-        new_simpleEntity_DB = DBSession.query(SimpleEntity)\
-            .filter(SimpleEntity.name==self.kwargs['name'])\
+        new_simpleEntity_DB = SimpleEntity.query()\
+            .filter_by(name=self.kwargs['name'])\
             .first()
         
         self.assertTrue(test_proj in new_simpleEntity_DB.generic_data)
@@ -854,3 +854,4 @@ class SimpleEntityTester(unittest.TestCase):
         DBSession.remove()
         from stalker.db.session import ZopeTransactionExtension
         DBSession.configure(extension=ZopeTransactionExtension)
+    

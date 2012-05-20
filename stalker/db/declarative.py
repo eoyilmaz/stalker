@@ -7,5 +7,11 @@
 """
 
 from sqlalchemy.ext.declarative import declarative_base
-Base = declarative_base()
 
+class ORMClass(object):
+    @classmethod
+    def query(class_):
+        from stalker.db.session import DBSession
+        return DBSession.query(class_)
+
+Base = declarative_base(cls=ORMClass)

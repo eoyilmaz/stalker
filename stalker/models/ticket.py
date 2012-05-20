@@ -176,10 +176,8 @@ class Ticket(Entity, StatusMixin):
     def __init__(self, ticket_for=None, priority='TRIVIAL', **kwargs):
         # generate a name
         kwargs['name'] = "Ticket_" + uuid.uuid4().hex
-        logger.debug('name of the newly created Ticket is: %s' % 
-                     kwargs['name'])
-        
-        # 
+        #logger.debug('name of the newly created Ticket is: %s' % 
+        #             kwargs['name'])
         
         super(Ticket, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)

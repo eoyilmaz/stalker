@@ -6,9 +6,6 @@
 
 
 import unittest
-#import transaction
-#from stalker import db
-#from stalker.db.session import DBSession
 
 from stalker.models.auth import Permission
 
@@ -19,8 +16,6 @@ class PermissionTester(unittest.TestCase):
     def setUp(self):
         """setup the test
         """
-        #db.setup()
-        
         self.kwargs = {
             'access': 'Allow',
             'action': 'Add',

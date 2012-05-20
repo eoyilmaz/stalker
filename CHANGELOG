@@ -44,8 +44,19 @@ Stalker Changes
 * Created two new classes for the Authorization system, first one is called
   :class:`~stalker.models.auth.Permission` and the second one is a Mixin which
   is called :class;`~stalker.models.mixins.ACLMixin` which adds ACLs to the
-  mixed in class. But by default only the :class;`~stalker.models.auth.User`
-  and :class;`~stalker.models.auth.Group` is mixed with this mixin.
+  mixed in class. For now, only the :class;`~stalker.models.auth.User` and
+  :class;`~stalker.models.auth.Group` classes are mixed with this mixin by
+  default.
+
+* The declarative Base class of SQLAlchemy is now created by binding it to a
+  ORMClass (a random name) which lets all the derived class to have a method
+  called ``query`` which will bypass the need of calling
+  ``DBSession.query(class_)`` but instead just call ``class_.query()``::
+    
+    from stalker.models.auth import User
+    
+    user_1 = User.query().filter_by(name='a user name').first()
+
 
 0.2.0.a1
 --------

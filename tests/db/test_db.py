@@ -3,25 +3,22 @@
 # 
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
-import shutil
 
 import os
+import shutil
 import datetime
 import unittest
 import tempfile
 import logging
-import transaction
 from sqlalchemy.exc import IntegrityError
-
-from stalker.models.auth import Permission
 
 from stalker.conf import defaults
 from stalker import db
-from stalker.db.session import DBSession
+from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
                      Link, Note, Project, Repository, Sequence, Shot,
                      Status, StatusList, Structure, Tag, Task, Type,
-                     FilenameTemplate, User, Version)
+                     FilenameTemplate, User, Version, Permission, Group)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -30,12 +27,18 @@ class DatabaseTester(unittest.TestCase):
     """tests the database and connection to the database
     """
     
-    #@classmethod
-    #def setUpClass(cls):
-    #    """set up the test for class
-    #    """
-    #    #DBSession.remove()
-    #    #DBSession.configure(extension=None)
+    @classmethod
+    def setUpClass(cls):
+        """set up the test for class
+        """
+        DBSession.remove()
+        DBSession.configure(extension=None)
+    
+    @classmethod
+    def tearDownClass(cls):
+        """clean up the test
+        """
+        DBSession.configure(extension=ZopeTransactionExtension())
     
     def setUp(self):
         """setup the tests
@@ -80,8 +83,8 @@ class DatabaseTester(unittest.TestCase):
 
         newUser = User(**kwargs)
         DBSession.add(newUser)
-        transaction.commit()
-
+        DBSession.commit()
+        
         # now check if the newUser is there
         newUser_DB = DBSession.query(User)\
             .filter_by(name=kwargs["name"])\
@@ -127,8 +130,7 @@ class DatabaseTester(unittest.TestCase):
         
         newUser = User(**kwargs)
         DBSession.add(newUser)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # now reconnect and check if the newUser is there
         DBSession.remove()
@@ -253,8 +255,7 @@ class DatabaseTester(unittest.TestCase):
 
         entity1 = Entity(**kwargs)
         DBSession.add(entity1)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
 
         # lets create the second user
         kwargs.update({
@@ -268,8 +269,7 @@ class DatabaseTester(unittest.TestCase):
         DBSession.add(user1)
         
         # expect nothing, this should work without any error
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
     
 #    def test_entity_types_table_is_created_properly(self):
 #        """testing if the entity_types table is created properly
@@ -320,6 +320,13 @@ class DatabaseTester(unittest.TestCase):
         
         for action in permissions_DB:
             self.assertIn(action.action, actions)
+    
+    def test_register_raise_TypeError_for_wrong_class_name_argument(self):
+        """testing if a TypeError will be raised if the class_name argument is
+        not an instance of type or str or unicode
+        """
+        db.setup()
+        self.assertRaises(TypeError, db.register, 23425)
     
     def test_setup_calls_the_callback_function(self):
         """testing if setup will call the given callback function
@@ -407,19 +414,17 @@ class DatabaseModelsTester(unittest.TestCase):
     def setUpClass(cls):
         """setup the test
         """
-        
-        #global DBSession
         # use a normal session instead of a managed one
-        #DBSession = scoped_session(sessionmaker())
         DBSession.remove()
         DBSession.configure(extension=None)
     
-    #@classmethod
-    #def tearDownClass(cls):
-    #"""tear-off the test
-    #"""
-    ## delete the default test database file
-    #os.remove(cls.TEST_DATABASE_FILE)
+    @classmethod
+    def tearDownClass(cls):
+        """clean up the test
+        """
+        # delete the default test database file
+        #os.remove(cls.TEST_DATABASE_FILE)
+        DBSession.configure(extension=ZopeTransactionExtension())
 
     def setUp(self):
         """setup the test
@@ -429,9 +434,8 @@ class DatabaseModelsTester(unittest.TestCase):
         self.TEST_DATABASE_URI = "sqlite:///" + self.TEST_DATABASE_FILE
         
         # setup using this db
-        #DBSession = scoped_session(sessionmaker())
-        #DBSession.remove()
-        db.setup({"sqlalchemy.url": self.TEST_DATABASE_URI})
+        #db.setup({"sqlalchemy.url": self.TEST_DATABASE_URI})
+        db.setup()
     
     def tearDown(self):
         """tearing down the test
@@ -477,8 +481,7 @@ class DatabaseModelsTester(unittest.TestCase):
             )
         
         DBSession.add(test_project)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         task_status_list = StatusList(
             name="Task Status List",
@@ -503,8 +506,7 @@ class DatabaseModelsTester(unittest.TestCase):
         test_asset = Asset(**kwargs)
         
         DBSession.add(test_asset)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         mock_task1 = Task(
             name="test task 1", status=0,
@@ -525,8 +527,7 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         DBSession.add_all([mock_task1, mock_task2, mock_task3])
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         code = test_asset.code
         created_by = test_asset.created_by
@@ -590,8 +591,7 @@ class DatabaseModelsTester(unittest.TestCase):
 #        
 #        # store it to the database
 #        DBSession.add(new_review)
-#        #DBSession.commit()
-#        transaction.commit()
+#        DBSession.commit()
 #        
 #        body = new_review.body
 #        code = new_review.code
@@ -650,8 +650,7 @@ class DatabaseModelsTester(unittest.TestCase):
             date_updated=date_updated
         )
         DBSession.add(test_dep)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # create three users, one for lead and two for members
         
@@ -703,8 +702,7 @@ class DatabaseModelsTester(unittest.TestCase):
         test_dep.members = [user1, user2, user3]
         
         DBSession.add(test_dep)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         self.assertIn(test_dep, DBSession)
         
@@ -804,8 +802,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # persist it to the database
         DBSession.add(test_entity)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store attributes
         code = test_entity.code
@@ -864,8 +861,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # persist it
         DBSession.add(new_type_template)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         code = new_type_template.code
         created_by = new_type_template.created_by
@@ -932,8 +928,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # persist it
         DBSession.add(im_format)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store attributes
         code = im_format.code
@@ -1004,8 +999,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # persist it
         DBSession.add_all([sound_link_type, new_link])
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store attributes
         code = new_link.code
@@ -1071,8 +1065,7 @@ class DatabaseModelsTester(unittest.TestCase):
         test_entity = Entity(**entity_kwargs)
         
         DBSession.add_all([test_entity, test_note])
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store the attributes
         code = test_note.code
@@ -1098,9 +1091,6 @@ class DatabaseModelsTester(unittest.TestCase):
         test_entity_DB = DBSession.query(Entity).\
         filter(Entity.name == entity_kwargs["name"]).first()
 
-        #self.assertEqual(test_note, test_entity_DB.notes[0])
-
-        #self.assertEqual(test_note, test_note_DB)
         self.assertEqual(code, test_note_DB.code)
         self.assertEqual(content, test_note_DB.content)
         self.assertEqual(created_by, test_note_DB.created_by)
@@ -1115,7 +1105,36 @@ class DatabaseModelsTester(unittest.TestCase):
         """testing the persistence of Group
         """
         
-        self.fail("test is not implemented yet")
+        group1 = Group(
+            name='Test Group'
+        )
+        
+        user1 = User(
+            login_name='user1',
+            first_name='user1',
+            email='user1@test.com',
+            password='12'
+        )
+        user2 = User(
+            login_name='user2',
+            first_name='user2',
+            email='user2@test.com',
+            password='34'
+        )
+        
+        group1.users = [user1, user2]
+        
+        DBSession.add(group1)
+        DBSession.commit()
+        
+        name = group1.name
+        users = group1.users
+        
+        del group1
+        group_DB = Group.query().filter_by(name=name).first()
+        
+        self.assertEqual(name, group_DB.name)
+        self.assertEqual(users, group_DB.users)
     
     def test_persistence_Project(self):
         """testing the persistence of Project
@@ -1204,8 +1223,7 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         DBSession.add(project_status_list)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # create data for mixins
         # Reference Mixin
@@ -1237,8 +1255,7 @@ class DatabaseModelsTester(unittest.TestCase):
 
         DBSession.add(task_status_list)
         DBSession.add_all([ref1, ref2])
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # create a project object
         kwargs = {
@@ -1263,8 +1280,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # persist it in the database
         DBSession.add(new_project)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         task1 = Task(
             name="task1",
@@ -1281,8 +1297,7 @@ class DatabaseModelsTester(unittest.TestCase):
             )
         
         DBSession.add_all([task1, task2])
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store the attributes
         assets = new_project.assets
@@ -1375,8 +1390,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # save it to database
         DBSession.add(repo)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store attributes
         created_by = repo.created_by
@@ -1487,8 +1501,7 @@ class DatabaseModelsTester(unittest.TestCase):
                      status_list=shot_status_list)
         
         DBSession.add(test_sequence)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store the attributes
         code = test_sequence.code
@@ -1612,8 +1625,7 @@ class DatabaseModelsTester(unittest.TestCase):
 
         DBSession.add(test_shot)
         DBSession.add(test_sequence)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store the attributes
         code = test_shot.code
@@ -1672,8 +1684,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # persist it to the database
         DBSession.add(test_simple_entity)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         code = test_simple_entity.code
         created_by = test_simple_entity.created_by
@@ -1721,8 +1732,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # persist it to the database
         DBSession.add(test_status)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store the attributes
         code = test_status.code
@@ -1763,7 +1773,6 @@ class DatabaseModelsTester(unittest.TestCase):
         """
         
         # create a couple of statuses
-        
         statuses = [
             Status(name="Waiting To Start", code="WTS"),
             Status(name="On Hold", code="OH"),
@@ -1779,10 +1788,8 @@ class DatabaseModelsTester(unittest.TestCase):
         
         sequence_status_list = StatusList(**kwargs)
         
-        # send it to db
         DBSession.add(sequence_status_list)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store the attributes
         code = sequence_status_list.code
@@ -1802,8 +1809,9 @@ class DatabaseModelsTester(unittest.TestCase):
         del sequence_status_list
         
         # now get it back
-        sequence_status_list_DB = DBSession.query(StatusList).\
-        filter_by(name=kwargs["name"]).first()
+        sequence_status_list_DB = StatusList.query()\
+            .filter_by(name=kwargs["name"])\
+            .first()
         
         assert(isinstance(sequence_status_list_DB, StatusList))
         
@@ -1829,9 +1837,8 @@ class DatabaseModelsTester(unittest.TestCase):
         new_sequence_list = StatusList(**kwargs)
         
         DBSession.add(new_sequence_list)
-        
-        #self.assertRaises(IntegrityError, DBSession.commit)
-        self.assertRaises(IntegrityError, transaction.commit)
+        self.assertIn(new_sequence_list, DBSession)
+        self.assertRaises(IntegrityError, DBSession.commit)
     
     def test_persistence_Structure(self):
         """testing the persistence of Structure
@@ -1918,8 +1925,7 @@ class DatabaseModelsTester(unittest.TestCase):
         new_structure = Structure(**kwargs)
         
         DBSession.add(new_structure)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store the attributes
         templates = new_structure.templates
@@ -1977,8 +1983,7 @@ class DatabaseModelsTester(unittest.TestCase):
 
         # persist it to the database
         DBSession.add(aTag)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store the attributes
         description = aTag.description
@@ -2089,8 +2094,7 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         DBSession.add(test_task)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         bookings = test_task.bookings
         code = test_task.code
@@ -2170,8 +2174,7 @@ class DatabaseModelsTester(unittest.TestCase):
         new_user = User(**user_kwargs)
         
         DBSession.add_all([new_user, new_department])
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         # store attributes
         code = new_user.code
@@ -2323,8 +2326,7 @@ class DatabaseModelsTester(unittest.TestCase):
 
         # now save it to the database
         DBSession.add(test_version)
-        #DBSession.commit()
-        transaction.commit()
+        DBSession.commit()
         
         code = test_version.code
         created_by = test_version.created_by
@@ -2417,8 +2419,7 @@ class DatabaseModelsTester(unittest.TestCase):
 
     #newGreatEntity = great_entity.GreatEntity(name="test")
     #DBSession.add(newGreatEntity)
-    ##DBSession.commit()
-    #transaction.commit()
+    #DBSession.commit()
 
     #newLinkType = Type(name="Image", target_entity_type=Link)
 
@@ -2428,8 +2429,7 @@ class DatabaseModelsTester(unittest.TestCase):
     #newGreatEntity.references = [newLink]
 
     #DBSession.add_all([newLink, newLinkType])
-    ##DBSession.commit()
-    #transaction.commit()
+    #DBSession.commit()
 
     ## query and check the equality
     #newGreatEntity_DB = DBSession.query(great_entity.GreatEntity).\
@@ -2468,8 +2468,7 @@ class DatabaseModelsTester(unittest.TestCase):
     #target_entity_type = statused_entity.NewStatusedEntity
     #)
     #DBSession.add(newStatusList)
-    ##DBSession.commit()
-    #transaction.commit()
+    #DBSession.commit()
 
     #aStatusedEntity = statused_entity.NewStatusedEntity(
     #name="test")
@@ -2478,8 +2477,7 @@ class DatabaseModelsTester(unittest.TestCase):
     #aStatusedEntity.status_list = newStatusList
 
     #DBSession.add(aStatusedEntity)
-    ##DBSession.commit()
-    #transaction.commit()
+    #DBSession.commit()
 
     ## query and check the equality
     #aStatusedEntity_DB = DBSession.query(statused_entity.NewStatusedEntity).\
@@ -2529,8 +2527,7 @@ class DatabaseModelsTester(unittest.TestCase):
     #)
 
     #DBSession.add_all([new_camera, new_lens])
-    ##DBSession.commit()
-    #transaction.commit()
+    #DBSession.commit()
 
     ## retrieve them from the db
     #new_camera_DB = DBSession.query(camera_lens.Camera).first()

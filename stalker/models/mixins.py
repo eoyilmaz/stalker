@@ -14,6 +14,59 @@ from stalker.conf import defaults
 from stalker.db import Base
 from stalker.db.session import DBSession
 
+def make_plural(name):
+    """Returns the plural version of the given name argument.
+    """
+    plural_name = name + "s"
+    
+    if name[-1] == "y":
+        plural_name = name[:-1] + "ies"
+    elif name[-2:] == "ch":
+        plural_name = name + "es"
+    elif name[-1] == "f":
+        plural_name = name[:-1] + "ves"
+    elif name[-1] == "s":
+        plural_name = name + "es"
+
+    return plural_name
+
+def create_secondary_table(
+        primary_cls_name,
+        secondary_cls_name,
+        primary_cls_table_name,
+        secondary_cls_table_name,
+        ):
+        """creates any secondary table
+        """
+        
+        plural_secondary_cls_name = make_plural(secondary_cls_name)
+        
+        # use the given class_name and the class_table
+        secondary_table_name = primary_cls_name + "_" + plural_secondary_cls_name
+        
+        # check if the table is already defined
+        if secondary_table_name not in Base.metadata:
+            secondary_table = Table(
+                secondary_table_name, Base.metadata,
+                Column(
+                    primary_cls_name.lower() + "_id",
+                    Integer,
+                    ForeignKey(primary_cls_table_name + ".id"),
+                    primary_key=True,
+                ),
+                
+                Column(
+                    secondary_cls_name.lower() + "_id",
+                    Integer,
+                    ForeignKey(secondary_cls_table_name + ".id"),
+                    primary_key=True,
+                )
+            )
+        else:
+            secondary_table = Base.metadata.tables[secondary_table_name]
+        
+        return secondary_table
+
 class TargetEntityTypeMixin(object):
     """Adds target_entity_type attribute to mixed in class.
     
@@ -362,22 +415,21 @@ class ScheduleMixin(object):
     
     :type duration: :class:`datetime.timedelta`
     """
-
+    
     #    # add this lines for Sphinx
     #    __tablename__ = "ScheduleMixins"
-
+    
     def __init__(self,
                  start_date=None,
                  due_date=None,
                  duration=None,
-                 **kwargs
-    ):
+                 **kwargs):
         self._validate_dates(start_date, due_date, duration)
 
     @declared_attr
     def _due_date(cls):
         return Column("due_date", Date)
-
+    
     def _due_date_getter(self):
         """The date that the entity should be delivered.
         
@@ -387,12 +439,11 @@ class ScheduleMixin(object):
         due_date will also set the due_date so the timedelta between them is
         preserved, default value is 10 days
         """
-
         return self._due_date
 
     def _due_date_setter(self, due_date_in):
         self._validate_dates(self.start_date, due_date_in, self.duration)
-
+    
     @declared_attr
     def due_date(cls):
         return synonym(
@@ -402,11 +453,11 @@ class ScheduleMixin(object):
                 cls._due_date_setter
             )
         )
-
+    
     @declared_attr
     def _start_date(cls):
         return Column("start_date", Date)
-
+    
     def _start_date_getter(self):
         """The date that this entity should start.
         
@@ -422,12 +473,11 @@ class ScheduleMixin(object):
         an instance of class:`datetime.date` and the default value is
         :func:`datetime.date.today()`
         """
-
         return self._start_date
-
+    
     def _start_date_setter(self, start_date_in):
         self._validate_dates(start_date_in, self.due_date, self.duration)
-
+    
     @declared_attr
     def start_date(cls):
         return synonym(
@@ -437,11 +487,11 @@ class ScheduleMixin(object):
                 cls._start_date_setter,
                 )
         )
-
+    
     @declared_attr
     def _duration(cls):
         return Column("duration", Interval)
-
+    
     def _duration_getter(self):
         """Duration of the entity.
         
@@ -452,7 +502,7 @@ class ScheduleMixin(object):
         attribute value.
         """
         return self._duration
-
+    
     def _duration_setter(self, duration_in):
         if duration_in is not None:
             if isinstance(duration_in, datetime.timedelta):
@@ -464,7 +514,7 @@ class ScheduleMixin(object):
                                      duration_in)
         else:
             self._validate_dates(self.start_date, self.due_date, duration_in)
-
+    
     @declared_attr
     def duration(cls):
         return synonym(
@@ -474,21 +524,19 @@ class ScheduleMixin(object):
                 cls._duration_setter
             )
         )
-
+    
     def _validate_dates(self, start_date, due_date, duration):
         """updates the date values
         """
-
         if not isinstance(start_date, datetime.date):
             start_date = None
-
+        
         if not isinstance(due_date, datetime.date):
             due_date = None
-
+        
         if not isinstance(duration, datetime.timedelta):
             duration = None
-
-
+        
         # check start_date
         if start_date is None:
             # try to calculate the start_date from due_date and duration
@@ -524,7 +572,6 @@ class ScheduleMixin(object):
         self._start_date = start_date
         self._due_date = due_date
         self._duration = self._due_date - self._start_date
-
 
 class ProjectMixin(object):
     """Gives the ability to connect to a :class:`~stalker.models.project.Project` to the mixed in object.
@@ -615,50 +662,16 @@ class ReferenceMixin(object):
                  **kwargs):
         if references is None:
             references = []
-
+        
         self.references = references
-
-    @classmethod
-    def create_secondary_tables_for_references(cls):
-        """creates any secondary table
-        """
-
-        class_name = cls.__name__
-
-        # use the given class_name and the class_table
-        secondary_table_name = class_name + "_References"
-        secondary_table = None
-
-        # check if the table is already defined
-        if secondary_table_name not in Base.metadata:
-            secondary_table = Table(
-                secondary_table_name, Base.metadata,
-                Column(
-                    class_name.lower() + "_id",
-                    Integer,
-                    ForeignKey(cls.__tablename__ + ".id"),
-                    primary_key=True,
-                    ),
-
-                Column(
-                    "reference_id",
-                    Integer,
-                    ForeignKey("Links.id"),
-                    primary_key=True,
-                    )
-            )
-        else:
-            secondary_table = Base.metadata.tables[secondary_table_name]
-
-        return secondary_table
-
+    
     @declared_attr
     def references(cls):
-        class_name = cls.__name__
-
         # get secondary table
-        secondary_table = cls.create_secondary_tables_for_references()
-
+        secondary_table = create_secondary_table(
+            cls.__name__, 'Link', cls.__tablename__, 'Links'
+        )
+        
         # return the relationship
         return relationship("Link", secondary=secondary_table)
 
@@ -671,10 +684,65 @@ class ReferenceMixin(object):
         
         # all the elements should be instance of stalker.models.entity.Entity
         if not isinstance(reference, SimpleEntity):
-            raise TypeError("all the elements in %s.reference should be "
-                            "instances of stalker.models.entity.Entity not %s"
+            raise TypeError("%s.references should be all instances of "
+                            "stalker.models.entity.Entity not %s"
                             % (self.__class__.__name__,
-                               reference.__class__.__name__)
-            )
-        
+                               reference.__class__.__name__))
         return reference
+
+class ACLMixin(object):
+    """A Mixin for adding ACLs to mixed in class.
+    
+    Access control lists or ACLs are used to determine if the given resource
+    has the permission to access the given data. It is based on Pyramids
+    Authorization system but organized to fit in Stalker style.
+    
+    The ACLMixin adds an attribute called ``permissions`` and a
+    property called ``__acl__`` to be able to pass the permission data to
+    Pyramid framework.
+    """
+    
+    @declared_attr
+    def permissions(cls):
+        # get the secondary table
+        secondary_table = create_secondary_table(
+            cls.__name__, 'Permission', cls.__tablename__, 'Permissions'
+        )
+        #return the relationship
+        return relationship('Permission', secondary=secondary_table)
+    
+    @validates('permissions')
+    def _validate_permissions(self, key, permission):
+        """validates the given permission value
+        """
+        
+        from stalker.models.auth import Permission
+        
+        if not isinstance(permission, Permission):
+            raise TypeError("%s.permissions should be all instances of "
+                            "stalker.models.auth.Permission not %s" %
+                (self.__class__.__name__, permission.__class__.__name__))
+        
+        return permission
+    
+    @property
+    def __acl__(self):
+        """Returns Pyramid friendly ACL list composed by the:
+        
+          * Permission.access (Ex: 'Allow' or 'Deny')
+          * The Mixed in class name and the object name (Ex: 'User:eoyilmaz')
+          * The Action and the target class name (Ex: 'Add_Project')
+          
+        Thus a list of tuple is returned as follows::
+            
+          __acl__ = [
+              ('Allow', 'User:eoyilmaz', 'Add_Project'),
+          ]
+            
+        For the last example user eoyilmaz can grant access to views requiring
+        'Add_Project' permission.
+        """
+        return [(perm.access,
+                 self.__class__.__name__ + ':' + self.name,
+                 perm.action + '_' + perm.class_name)
+                 for perm in self.permissions]

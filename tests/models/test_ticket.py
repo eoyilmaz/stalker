@@ -32,6 +32,7 @@ class TicketTester(unittest.TestCase):
         """set up the test
         """
         # create the db
+        DBSession.remove()
         DBSession.configure(extension=None)
         db.setup()
         
@@ -40,7 +41,7 @@ class TicketTester(unittest.TestCase):
         self.test_status2 = Status(name='R', code='R')
        
         # get the ticket types
-        ticket_types = DBSession.query(Type)\
+        ticket_types = Type.query()\
             .filter(Type.target_entity_type=='Ticket').all()
         self.ticket_type_1 = ticket_types[0]
         self.ticket_type_2 = ticket_types[1]
@@ -142,7 +143,6 @@ class TicketTester(unittest.TestCase):
             'description': 'This is the long description',
             'priority': 'TRIVIAL',
             'reported_by': self.test_user,
-            #'status_list': self.test_ticket_status_list
         }
         
         self.test_ticket = Ticket(**self.kwargs)
@@ -169,6 +169,7 @@ class TicketTester(unittest.TestCase):
         """clean up the test
         """
         # revert the session back to the normal state
+        DBSession.remove()
         DBSession.configure(extension=ZopeTransactionExtension())
     
     def test_name_argument_is_not_used(self):
@@ -340,7 +341,6 @@ class TicketTester(unittest.TestCase):
         """testing if the status of newly created tickets will be New
         """
         # get the status NEW from the DBSession
-        #stat = DBSession.query(Status).filter(Status.code=='NEW').first()
         new_ticket = Ticket(**self.kwargs)
         self.assertEqual(new_ticket.status, self.status_NEW)
     
@@ -476,4 +476,9 @@ class TicketTester(unittest.TestCase):
     def test___eq___operator(self):
         """testing the equality of two tickets
         """
-        self.fail('test is not implemented yet')
+        
+        ticket1 = Ticket(**self.kwargs)
+        ticket2 = Ticket(**self.kwargs)
+        
+        # no two tickets are equal
+        self.assertNotEqual(ticket1, ticket2)

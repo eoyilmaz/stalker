@@ -124,7 +124,7 @@ class Version(Entity, StatusMixin):
         self.outputs = outputs
         
         # set published to False by default
-        self.published = False
+        self.is_published = False
     
     @validates("source_file")
     def _validate_source_file(self, key, source_file):
@@ -143,28 +143,27 @@ class Version(Entity, StatusMixin):
     def _format_take_name(self, take_name):
         """formats the given take_name value
         """
-
         # remove unnecessary characters
-        take_name = re.sub("([^a-zA-Z0-9\s_\-]+)", r"", take_name).strip().replace(" ",
-                                                                         "")
-
+        take_name = re.sub(
+            r"([^a-zA-Z0-9\s_\-]+)", r"", take_name
+        ).strip().replace(" ", "")
+        
         return re.sub(r"(.+?[^a-zA-Z]+)([a-zA-Z0-9\s_\-]+)", r"\2", take_name)
 
     @validates("take_name")
     def _validate_take_name(self, key, take_name):
         """validates the given take_name value
         """
-
         if take_name is None:
             raise TypeError("%s.take_name can not be None, please give a "
                             "proper string" % self.__class__.__name__)
-
+        
         take_name = self._format_take_name(str(take_name))
-
+        
         if take_name == "":
             raise ValueError("%s.take_name can not be an empty string" %
                              self.__class__.__name__)
-
+        
         return take_name
     
     @property

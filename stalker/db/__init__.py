@@ -10,11 +10,9 @@ Whenever stalker.db or something under it imported, the
 """
 
 import logging
-from sqlalchemy.exc import IntegrityError
 
 import transaction
 from sqlalchemy import engine_from_config
-from transaction.interfaces import TransactionFailedError
 
 from stalker.conf import defaults
 from stalker.db.declarative import Base
@@ -50,13 +48,13 @@ def setup(settings=None, callback=None):
     logger.debug('engine: %s' % engine)
     
     # create the Session class
+    DBSession.remove()
     DBSession.configure(bind=engine)
     
     # create the database
     logger.debug("creating the tables")
     Base.metadata.create_all(engine)
-    Base.metadata.bind = engine
-    
+    #Base.metadata.bind = engine
     
     # init database
     __init_db__()
@@ -69,7 +67,7 @@ def __init_db__():
     """fills the database with default values
     """
     logger.debug("initializing database")
-
+    
     # register all Actions available for all SOM classes
     class_names = [
         'Asset', 'Action', 'Group', 'Permission', 'User', 'Department',
@@ -81,12 +79,10 @@ def __init_db__():
     
     for class_name in class_names:
         register(class_name)
-   
     
     # create the admin if needed
     if defaults.AUTO_CREATE_ADMIN:
         __create_admin__()
-    
     
     logger.debug('finished initializing the database')
 
@@ -98,8 +94,9 @@ def __create_admin__():
     from stalker.models.department import Department
     
     # check if there is already an admin in the database
-    if len(DBSession.query(User).\
-        filter_by(name=defaults.ADMIN_NAME).all()) > 0:
+    if len(User.query()
+        .filter_by(name=defaults.ADMIN_NAME)
+        .all()) > 0:
         #there should be an admin user do nothing
         logger.debug("there is an admin already")
         return
@@ -107,85 +104,88 @@ def __create_admin__():
     logger.debug("creating the default administrator user")
     
     # create the admin department
-    with transaction.manager:
-        admin_department = DBSession.query(Department).filter_by(
-            name=defaults.ADMIN_DEPARTMENT_NAME
-        ).first()
+    #with transaction.manager:
+    admin_department = Department.query().filter_by(
+        name=defaults.ADMIN_DEPARTMENT_NAME
+    ).first()
+    
+    if not admin_department:
+        admin_department = Department(name=defaults.ADMIN_DEPARTMENT_NAME)
+        DBSession.add(admin_department)
+    # create the admins group
+    
+    from stalker.models.auth import Group
+    
+    admins_group = Group.query()\
+        .filter_by(name=defaults.ADMIN_GROUP_NAME)\
+        .first()
+    
+    if not admins_group:
+        admins_group = Group(name=defaults.ADMIN_GROUP_NAME)
+        DBSession.add(admins_group)
+    
+    # create the admin user
+    admin = User.query()\
+        .filter_by(name=defaults.ADMIN_NAME)\
+        .first()
+    
+    if not admin:
+        admin = User(
+            name=defaults.ADMIN_NAME,
+            first_name=defaults.ADMIN_NAME,
+            login_name=defaults.ADMIN_NAME,
+            password=defaults.ADMIN_PASSWORD,
+            email=defaults.ADMIN_EMAIL,   
+            department=admin_department,
+            groups=[admins_group]
+        )
         
-        if not admin_department:
-            admin_department = Department(name=defaults.ADMIN_DEPARTMENT_NAME)
-            DBSession.add(admin_department)
-        # create the admins group
-        
-        from stalker.models.auth import Group
-        
-        admins_group = DBSession.query(Group)\
-            .filter_by(name=defaults.ADMIN_GROUP_NAME)\
-            .first()
-        
-        if not admins_group:
-            admins_group = Group(name=defaults.ADMIN_GROUP_NAME)
-            DBSession.add(admins_group)
-        
-        # create the admin user
-        admin = DBSession.query(User)\
-            .filter_by(name=defaults.ADMIN_NAME)\
-            .first()
-        
-        if not admin:
-            admin = User(
-                name=defaults.ADMIN_NAME,
-                first_name=defaults.ADMIN_NAME,
-                login_name=defaults.ADMIN_NAME,
-                password=defaults.ADMIN_PASSWORD,
-                email=defaults.ADMIN_EMAIL,   
-                department=admin_department,
-                groups=[admins_group]
-            )
-            
-            admin.created_by = admin
-            admin.updated_by = admin
-        
-        # update the department as created and updated by admin user
-        admin_department.created_by = admin
-        admin_department.updated_by = admin
-        
-        admins_group.created_by = admin
-        admins_group.updated_by = admin
-        
-        DBSession.add(admin)
+        admin.created_by = admin
+        admin.updated_by = admin
+    
+    # update the department as created and updated by admin user
+    admin_department.created_by = admin
+    admin_department.updated_by = admin
+    
+    admins_group.created_by = admin
+    admins_group.updated_by = admin
+    
+    DBSession.add(admin)
+    transaction.commit()
     
     # create statuses for Tickets
     from stalker import Status, StatusList
-    with transaction.manager:
-        ticket_status1 = Status(name='New', code='NEW')
-        ticket_status2 = Status(name='Reopened', code='REOPENED')
-        ticket_status3 = Status(name='Closed', code='CLOSED')
-        
-        ticket_status_list = StatusList(
-            name='Ticket Statuses',
-            target_entity_type='Ticket',
-            statuses=[
-                ticket_status1,
-                ticket_status2,
-                ticket_status3,
-            ]
-        )
-        
-        DBSession.add(ticket_status_list)
+    #with transaction.manager:
+    ticket_status1 = Status(name='New', code='NEW')
+    ticket_status2 = Status(name='Reopened', code='REOPENED')
+    ticket_status3 = Status(name='Closed', code='CLOSED')
+    
+    ticket_status_list = StatusList(
+        name='Ticket Statuses',
+        target_entity_type='Ticket',
+        statuses=[
+            ticket_status1,
+            ticket_status2,
+            ticket_status3,
+        ]
+    )
+    
+    DBSession.add(ticket_status_list)
+    transaction.commit()
     
     # create Ticket Types
     from stalker import Type
-    with transaction.manager:
-        ticket_type_1 = Type(
-            name='Defect',
-            target_entity_type='Ticket'
-        )
-        ticket_type_2 = Type(
-            name='Enhancement',
-            target_entity_type='Ticket'
-        )
-        DBSession.add_all([ticket_type_1, ticket_type_2])
+    #with transaction.manager:
+    ticket_type_1 = Type(
+        name='Defect',
+        target_entity_type='Ticket'
+    )
+    ticket_type_2 = Type(
+        name='Enhancement',
+        target_entity_type='Ticket'
+    )
+    DBSession.add_all([ticket_type_1, ticket_type_2])
+    transaction.commit()
 
 def register(class_):
     """Registers the given class to the database.
@@ -238,7 +238,7 @@ def register(class_):
     from stalker.models.auth import Permission
     
     # create the Permissions
-    permissions_db = DBSession.query(Permission).all()
+    permissions_db = Permission.query().all()
     
     if isinstance(class_, type):
         class_name = class_.__class__.__name__
@@ -252,18 +252,18 @@ def register(class_):
         for access in  [Allow, Deny]:
             permission_obj = Permission(access, action, class_name)
             if permission_obj not in permissions_db:
-                logger.debug('adding new permission %s, %s, %s' % 
-                    (permission_obj.access,
-                     permission_obj.action,
-                     permission_obj.class_name)
-                )
+                #logger.debug('adding new permission %s, %s, %s' % 
+                #    (permission_obj.access,
+                #     permission_obj.action,
+                #     permission_obj.class_name)
+                #)
                 DBSession.add(permission_obj)
-            else:
-                logger.debug('permission already defined in db:'
-                             ' %s, %s, %s' %
-                    (permission_obj.access,
-                     permission_obj.action,
-                     permission_obj.class_name)
-                )
+            #else:
+            #    logger.debug('permission already defined in db:'
+            #                 ' %s, %s, %s' %
+            #        (permission_obj.access,
+            #         permission_obj.action,
+            #         permission_obj.class_name)
+            #    )
     
     transaction.commit()

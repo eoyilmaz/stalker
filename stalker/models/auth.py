@@ -17,6 +17,8 @@ from stalker.db.declarative import Base
 from stalker.models.entity import SimpleEntity, Entity
 
 import logging
+from stalker.models.mixins import ACLMixin
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -247,7 +249,7 @@ class Group(Entity):
         
         return user
 
-class User(Entity):
+class User(Entity, ACLMixin):
     """The user class is designed to hold data about a User in the system.
     
     There are a couple of points to take your attention to:
