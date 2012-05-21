@@ -68,12 +68,18 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
       to be a stereo 3D project, anything given as the argument will be
       converted to True or False. Default value is False.
     
-    :param float display_width: the width of the display that the output of the
-      project is going to be displayed (very unnecessary if you are not using
-      stereo 3D setup). Should be an int or float value, negative values
-      converted to the positive values. Default value is 1.
-    """
 
+    """
+    
+    
+    # DELETED ARGUMENTS:
+    #
+    #:param float display_width: the width of the display that the output of the
+    #  project is going to be displayed (very unnecessary if you are not using
+    #  stereo 3D setup). Should be an int or float value, negative values
+    #  converted to the positive values. Default value is 1.
+    
+    
     # ------------------------------------------------------------------------
     # NOTES:
     #
