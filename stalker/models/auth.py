@@ -11,41 +11,67 @@ from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
                         Enum)
 from sqlalchemy.orm import relationship, synonym, reconstructor, validates
 from sqlalchemy.schema import UniqueConstraint
-from stalker.conf import defaults
 
+from pyramid.security import Allow
+
+from stalker.conf import defaults
 from stalker.db.declarative import Base
-from stalker.models.entity import SimpleEntity, Entity
+from stalker.models.mixins import ACLMixin
+from stalker.models.entity import Entity
 
 import logging
-from stalker.models.mixins import ACLMixin
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 def group_finder(login_name, request):
+    """Returns the group of the given login_name. The login name will be in
+    'User:{login_name}' format.
+    
+    :param login_name: The login_name of the user, both '{login_name}' and
+      'User:{login_name}' format is accepted.
+    
+    :param request: The Request object
+    
+    :return: Will return the groups of the user in ['Group:{group_name}']
+      format.
+    """
+    if ':' in login_name:
+        login_name = login_name.split(':')[1]
+    
     # return the group of the given User object
-    from stalker.db.session import DBSession
-    user_obj = DBSession.query(User).filter(User.login_name==login_name).first()
+    user_obj = User.query().filter_by(login_name=login_name).first()
     
     if user_obj:
         # just return the groups names if there is any group
         groups = user_obj.groups
         if len(groups):
-            return map(lambda x:x.name, groups)
+            return map(lambda x:'Group:' + x.name, groups)
     
     return []
 
 class RootFactory(object):
-    #__acl__ = [
-    #    #(Allow, Everyone, 'view'),
-    #    #(Allow, u'admins', 'view')
-    #]
-    
+    """The main purpose of having a root factory is to generate the objects
+    used as the context by the request. But in our case it just used to
+    determine the deafult ACLs.
+    """
+   
     @property
     def __acl__(self):
-        """creates all the default ACLs
-        """
-        return []
+        # create the default acl and give admins all the permissions
+        from stalker.models.auth import Permission
+        
+        all_permissions = map(
+            lambda x: x.action + '_' + x.class_name,
+            Permission.query().all()
+        )
+        
+        d = defaults
+        
+        return [
+            (Allow, 'Group:' + d.ADMIN_DEPARTMENT_NAME, all_permissions),
+            (Allow, 'User:' + d.ADMIN_NAME, all_permissions)
+        ]
     
     def __init__(self, request):
         pass
@@ -205,12 +231,17 @@ class Permission(Base):
         """
         return not self.__eq__(other)
 
-class Group(Entity):
+class Group(Entity, ACLMixin):
     """Creates groups for users to be used in authorization system.
     
     A Group instance is nothing more than a list of
     :class:`~stalker.models.auth.User`\ s created to be able to assign
     permissions in a group level.
+    
+    The Group class, as with the :class:`~stalker.models.auth.User` class, is
+    mixed with the :class:`~stalker.models.mixins.ACLMixin` which adds ability
+    to hold :class:`~stalker.models.mixin.Permission` instances and serve ACLs
+    to Pyramid.
     """
     
     # TODO: Update Group class documentation

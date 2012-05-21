@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# 
+# This module is part of Stalker and is released under the BSD 2
+# License: http://www.opensource.org/licenses/BSD-2-Clause
+from sqlalchemy import or_
 from pyramid.httpexceptions import HTTPFound
-from pyramid.response import Response
 from pyramid.security import remember, forget, authenticated_userid
 from pyramid.view import view_config, forbidden_view_config
-
-from sqlalchemy.exc import DBAPIError
 
 from stalker.db import DBSession
 
@@ -26,7 +29,7 @@ try it again.
 """
 
 @view_config(route_name='home', renderer='templates/home.jinja2',
-             permission='view')
+             permission='View_Project')
 def home(request):
     login_name = authenticated_userid(request)
     return {'current_user': login_name}
@@ -48,14 +51,12 @@ def login(request):
         password = request.params['password']
         
         # need to find the user
-        # first check with the login_name attribute
-        user_obj = DBSession.query(User).filter_by(login_name=login).first()
+        # check with the login_name or email attribute
+        user_obj = User.query()\
+            .filter(or_(User.login_name==login, User.email==login)).first()
         
-        if not user_obj:
-            # then by the email
-            user_obj = DBSession.query(User).filter_by(email=login).first()
-            if user_obj:
-                login = user_obj.login_name
+        if user_obj:
+            login = 'User:' + user_obj.login_name
         
         if user_obj and user_obj.check_password(password):
             headers = remember(request, login)
