@@ -14,7 +14,6 @@ class StatusListTest(unittest.TestCase):
     def setUp(self):
         """let's create proper values for the tests
         """
-
         self.kwargs = {
             "name": "a status list",
             "description": "this is a status list for testing purposes",
@@ -24,7 +23,7 @@ class StatusListTest(unittest.TestCase):
                 Status(name="Started", code="STRT"),
                 Status(name="Waiting For Approve", code="WAPPR"),
                 Status(name="Approved", code="APPR"),
-                Status(name="Finished", code="FNSH"),
+                Status(name="Completed", code="COMP"),
                 Status(name="On Hold", code="OH"),
                 ],
             "target_entity_type": "Project",

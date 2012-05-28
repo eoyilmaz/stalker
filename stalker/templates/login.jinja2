@@ -1,24 +1,5 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-  <title>Login - Stalker</title>
-  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
-  <meta name="keywords" content="python web application"/>
-  <meta name="description" content="pyramid web application"/>
-  <link rel="shortcut icon"
-        href="{{request.static_url('stalker:static/favicon.ico')}}"/>
-  <link rel="stylesheet"
-        href="{{request.static_url('stalker:static/css/stalker.css')}}"
-        type="text/css" media="screen" charset="utf-8"/>
-  <!--[if lte IE 6]>
-  <link rel="stylesheet"
-        href="{{request.static_url('stalker:static/css/ie6.css')}}"
-        type="text/css" media="screen" charset="utf-8"/>
-  <![endif]-->
-</head>
-<body>
-<div id="wrap">
+{% extends 'base.jinja2' %}
+{% block body %}
   <div id='login_window'>
     <div id='title'><h3><b>Login To Stalker</b></h3></div>
     <div id='column1'>
@@ -34,6 +15,4 @@
     </div>
     <div id='message'><b>{{message}}</b></div>
   </div>
-</div>
-</body>
-</html>
+{% endblock body%}

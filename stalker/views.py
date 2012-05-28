@@ -7,10 +7,15 @@ from sqlalchemy import or_
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget, authenticated_userid
 from pyramid.view import view_config, forbidden_view_config
+import stalker
 
 from stalker.db import DBSession
 
-from stalker import User
+from stalker.models.auth import User
+from stalker.models.formats import ImageFormat
+from stalker.models.project import Project
+from stalker.models.repository import Repository
+from stalker.models.structure import Structure
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
@@ -31,9 +36,15 @@ try it again.
 @view_config(route_name='home', renderer='templates/home.jinja2',
              permission='View_Project')
 def home(request):
-    login_name = authenticated_userid(request)
-    return {'current_user': login_name}
-
+    login_name = authenticated_userid(request).split(':')[1]
+    user = User.query().filter_by(login_name=login_name).first()
+    projects = Project.query().all()
+    
+    return {
+        'stalker': stalker,
+        'user': user,
+        'projects': projects,
+    }
 
 @view_config(route_name='login', renderer='templates/login.jinja2')
 @forbidden_view_config(renderer='templates/login.jinja2')
@@ -62,7 +73,7 @@ def login(request):
             headers = remember(request, login)
             return HTTPFound(
                 location=came_from,
-                headers=headers
+                headers=headers,
             )
         
         message = 'Wrong username or password!!!'
@@ -72,7 +83,8 @@ def login(request):
         url=request.application_url + '/login',
         came_from=came_from,
         login=login,
-        password=password
+        password=password,
+        stalker=stalker
     )
 
 @view_config(route_name='logout')
@@ -82,3 +94,22 @@ def logout(request):
         location=request.route_url('login'),
         headers=headers
     )
+
+@view_config(route_name='create_project',
+             renderer='templates/create_project.jinja2',
+             permission='Add_Project')
+def create_project(request):
+    """called when creating a project
+    """
+    
+    login_name = authenticated_userid(request).split(':')[1]
+    user = User.query().filter_by(login_name=login_name).first()
+    
+    return  {
+        'user': user,
+        'users': User.query().all(),
+        'image_formats': ImageFormat.query().all(),
+        'repositories': Repository.query().all(),
+        'structures': Structure.query().all(),
+        'stalker': stalker,
+    }

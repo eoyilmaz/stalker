@@ -18,7 +18,7 @@ from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
                      Link, Note, Project, Repository, Sequence, Shot,
                      Status, StatusList, Structure, Tag, Task, Type,
-                     FilenameTemplate, User, Version, Permission, Group)
+                     FilenameTemplate, User, Version, Permission, Group, Color)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -105,19 +105,19 @@ class DatabaseTester(unittest.TestCase):
         
         # check if there is no file with the same name
         self.assertFalse(os.path.exists(self.TEST_DATABASE_FILE))
-
+        
         # setup the database
         db.setup({
             "sqlalchemy.url": self.TEST_DATABASE_URI,
             "sqlalchemy.echo": False,
         })
-
+        
         # check if the file is created
         self.assertTrue(os.path.exists(self.TEST_DATABASE_FILE))
-
+        
         # create a new user
         #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
-
+        
         kwargs = {
             "name": "eoyilmaz",
             "first_name": "Erkan Ozgur",
@@ -1726,6 +1726,8 @@ class DatabaseModelsTester(unittest.TestCase):
             "name": "TestStatus_test_creating_Status",
             "description": "this is for testing purposes",
             "code": "TSTST",
+            'bg_color': Color(15, 25, 35),
+            'fg_color': Color(105, 115, 125)
         }
         
         test_status = Status(**kwargs)
@@ -1745,6 +1747,8 @@ class DatabaseModelsTester(unittest.TestCase):
         notes = test_status.notes
         tags = test_status.tags
         updated_by = test_status.updated_by
+        bg_color = test_status.bg_color
+        fg_color = test_status.fg_color
         
         # delete the test_status
         del test_status
@@ -1767,6 +1771,8 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(notes, test_status_DB.notes)
         self.assertEqual(tags, test_status_DB.tags)
         self.assertEqual(updated_by, test_status_DB.updated_by)
+        self.assertEqual(bg_color, test_status_DB.bg_color)
+        self.assertEqual(fg_color, test_status_DB.fg_color)
     
     def test_persistence_StatusList(self):
         """testing the persistence of StatusList

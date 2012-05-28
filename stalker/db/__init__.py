@@ -10,6 +10,7 @@ Whenever stalker.db or something under it imported, the
 """
 
 import logging
+from sqlalchemy.exc import IntegrityError
 
 import transaction
 from sqlalchemy import engine_from_config
@@ -84,6 +85,9 @@ def __init_db__():
     if defaults.AUTO_CREATE_ADMIN:
         __create_admin__()
     
+    # create ticket statuses
+    __create_ticket_statuses()
+    
     logger.debug('finished initializing the database')
 
 def __create_admin__():
@@ -152,40 +156,80 @@ def __create_admin__():
     
     DBSession.add(admin)
     transaction.commit()
+
+def __create_ticket_statuses():
+    """creates the default ticket statuses
+    """
+    
+    from stalker import User
+    
+    admin = User.query().filter(User.login_name==defaults.ADMIN_NAME).first()
     
     # create statuses for Tickets
     from stalker import Status, StatusList
-    #with transaction.manager:
-    ticket_status1 = Status(name='New', code='NEW')
-    ticket_status2 = Status(name='Reopened', code='REOPENED')
-    ticket_status3 = Status(name='Closed', code='CLOSED')
     
-    ticket_status_list = StatusList(
-        name='Ticket Statuses',
-        target_entity_type='Ticket',
-        statuses=[
-            ticket_status1,
-            ticket_status2,
-            ticket_status3,
-        ]
-    )
-    
-    DBSession.add(ticket_status_list)
-    transaction.commit()
+    try:
+        with transaction.manager:
+            ticket_status1 = Status(
+                name='New',
+                code='NEW',
+                created_by=admin,
+                updated_by=admin
+            )
+            
+            ticket_status2 = Status(
+                name='Reopened',
+                code='REOPENED',
+                created_by=admin,
+                updated_by=admin
+            )
+            
+            ticket_status3 = Status(
+                name='Closed',
+                code='CLOSED',
+                created_by=admin,
+                updated_by=admin
+            )
+            
+            ticket_status_list = StatusList(
+                name='Ticket Statuses',
+                target_entity_type='Ticket',
+                statuses=[
+                    ticket_status1,
+                    ticket_status2,
+                    ticket_status3,
+                ],
+                created_by=admin,
+                updated_by=admin
+            )
+            
+            DBSession.add(ticket_status_list)
+    except IntegrityError:
+        pass
+    #transaction.commit()
     
     # create Ticket Types
     from stalker import Type
-    #with transaction.manager:
-    ticket_type_1 = Type(
-        name='Defect',
-        target_entity_type='Ticket'
-    )
-    ticket_type_2 = Type(
-        name='Enhancement',
-        target_entity_type='Ticket'
-    )
-    DBSession.add_all([ticket_type_1, ticket_type_2])
-    transaction.commit()
+    
+    try:
+        with transaction.manager:
+            ticket_type_1 = Type(
+                name='Defect',
+                target_entity_type='Ticket',
+                created_by=admin,
+                updated_by=admin
+            )
+            ticket_type_2 = Type(
+                name='Enhancement',
+                target_entity_type='Ticket',
+                created_by=admin,
+                updated_by=admin
+            )
+            DBSession.add_all([ticket_type_1, ticket_type_2])
+    except IntegrityError:
+        pass
+    
+    #transaction.commit()
 
 def register(class_):
     """Registers the given class to the database.

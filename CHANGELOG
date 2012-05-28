@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.0.a3
+--------
+
+* :class:`~stalker.models.status.Status` class now has two new attributes
+  :attr:`~stalker.models.status.Status.bg_color` and
+  :attr:`~stalker.models.status.Status.fg_color` to hold the UI colors of the
+  :class:`~stalker.models.status.Status` instance. The colors are
+  :class:`~stalker.models.status.Color` instances.
+
 0.2.0.a2
 --------
 

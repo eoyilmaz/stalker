@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal">
+<head>
+  <title>Stalker v{{stalker.__version__}}</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+  <meta name="keywords" content="python web application"/>
+  <meta name="description" content="pyramid web application"/>
+  <link rel="shortcut icon"
+        href="{{request.static_url('stalker:static/images/favicon.ico')}}"/>
+  <link rel="stylesheet"
+        href="{{request.static_url('stalker:static/css/stalker.css')}}"
+        type="text/css" media="screen" charset="utf-8"/>
+ <!--[if lte IE 6]>
+  <link rel="stylesheet" href="{{request.static_url('stalker:static/css/ie6.css')}}"
+        type="text/css" media="screen" charset="utf-8"/>
+  <![endif]-->
+  <script type="text/javascript"
+          src="{{request.static_url('stalker:static/js/mootools-core-1.4.2.js')}}">
+  </script>
+  <script type="text/javascript"
+          src="{{request.static_url('stalker:static/js/mootools-more-1.4.0.1.js')}}">
+  </script>
+</head>
+<body>
+{% block body %}
+  <div id="header">
+    {% block header %}
+      <div id="stalker_logo">
+        <div id="stalker_name">Stalker</div>
+        <div id="stalker_version">v{{stalker.__version__}}</div>
+      </div>
+
+      <div id="user_menu">
+        Welcome {{user.first_name}} {{user.last_name}} | Settings | <a href='/logout'>Logout</a>
+      </div>
+      <div id="search">
+        <div id="search_label">Search</div>
+        <div id="search_form">
+          <form>
+            <input class="indented_input"></input>
+          </form>
+        </div>
+      </div>
+    {% endblock %}
+  </div>
+  <div id="content">
+    {% block content %}
+      <div id="main_menu">
+        {% block main_menu %}{% endblock %}
+      </div>
+      <div id="main_view">
+        <div id="top_menu">
+          <a id='create_project' href='#'>Create Project</a>
+        </div>
+        {% block main_view %}{% endblock %}
+      </div>
+    {% endblock %}
+  </div>
+  <div id="footer">
+    {% block footer %}
+      <div class="footer">&copy; Copyright 2008-2012, Erkan Ozgur Yilmaz.</div>
+    {% endblock %}
+  </div>
+{% endblock %}
+<div id="popup_area">
+  <div id="popup_area_bg"></div>
+  <div id="popup_window">
+    <div class='window_close_button'>x</div>
+    <div class="window_header">{% block popup_window_title %}This is a popup window{% endblock %}</div>
+    {% block popup_window_content %}
+    {% endblock %}
+  </div>
+</div>
+  <script type="text/javascript">
+    $('create_project').addEvent('click', function(e) {
+      // prevent page from changing
+      e = new Event(e).stop()
+      
+      var req = new Request.HTML({
+        method: 'get',
+        url: '/create/project',
+        update: $('popup_window'),
+        onComplete: function(response) {
+          $('popup_area').setStyles({'visibility': 'visible'})
+        }
+      }).send();
+    });
+  </script>
+</body>
+</html>

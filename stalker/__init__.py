@@ -8,7 +8,7 @@ Stalker is a Production Asset Management System (ProdAM) designed for animation
 and vfx studios. See docs for more information.
 """
 
-__version__ = '0.2.0.a1'
+__version__ = '0.2.0.a3'
 
 from pyramid.config import Configurator
 
@@ -28,7 +28,7 @@ from stalker.models.project import Project
 from stalker.models.repository import Repository
 from stalker.models.sequence import Sequence
 from stalker.models.shot import Shot
-from stalker.models.status import Status, StatusList
+from stalker.models.status import Status, StatusList, Color
 from stalker.models.structure import Structure
 from stalker.models.tag import Tag
 from stalker.models.task import Booking
@@ -68,6 +68,7 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    config.add_route('create_project', 'create/project')
     config.scan()
     return config.make_wsgi_app()
 

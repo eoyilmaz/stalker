@@ -45,6 +45,8 @@ DEFAULT_TICKET_LABEL = "Ticket"
 
 DEFAULT_ACTIONS = ['Add', 'View', 'Edit', 'Delete']
 
+DEFAULT_BG_COLOR = [255, 255, 255]
+DEFAULT_FG_COLOR = [0, 0, 0]
 
 #PC Video (640, 480, 1.0)
 #NTSC (720, 486, 0.91)
