@@ -9,13 +9,17 @@ from pyramid.security import remember, forget, authenticated_userid
 from pyramid.view import view_config, forbidden_view_config
 import stalker
 
-from stalker.db import DBSession
 
 from stalker.models.auth import User
 from stalker.models.formats import ImageFormat
 from stalker.models.project import Project
 from stalker.models.repository import Repository
 from stalker.models.structure import Structure
+
+
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
@@ -49,14 +53,18 @@ def home(request):
 @view_config(route_name='login', renderer='templates/login.jinja2')
 @forbidden_view_config(renderer='templates/login.jinja2')
 def login(request):
+    """the login view
+    """
     login_url = request.route_url('login')
     referrer = request.url
     if referrer == login_url:
         referrer = '/'
+    
     came_from = request.params.get('came_from', referrer)
     message = ''
     login = ''
     password = ''
+    
     if 'form.submitted' in request.params:
         login = request.params['login']
         password = request.params['password']
@@ -102,14 +110,59 @@ def create_project(request):
     """called when creating a project
     """
     
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
     login_name = authenticated_userid(request).split(':')[1]
     user = User.query().filter_by(login_name=login_name).first()
     
-    return  {
+#    logger.debug('*******************************************')
+#    logger.debug(request.params)
+    
+    if 'form.submitted' in request.params:
+        if request.params['form.submitted'] == 'create':
+            #login = request.params['login']
+            # so create the project
+            logger.debug('create clicked with this request: ' % request)
+            
+            return HTTPFound(location=came_from)
+        else:
+            return HTTPFound(location=came_from)
+    
+    return {
         'user': user,
         'users': User.query().all(),
         'image_formats': ImageFormat.query().all(),
         'repositories': Repository.query().all(),
         'structures': Structure.query().all(),
+        'stalker': stalker,
+    }
+
+@view_config(route_name='create_image_format',
+             renderer='templates/create_image_format.jinja2',
+             permission='Add_ImageFormat')
+def create_image_format(request):
+    """called when creating an image format
+    """
+    
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    login_name = authenticated_userid(request).split(':')[1]
+    user = User.query().filter_by(login_name=login_name).first()
+    
+    if 'form.submitted' in request.params:
+        if request.params['form.submitted'] == 'create':
+            #login = request.params['login']
+            # so create the project
+            logger.debug('create clicked with this request: ' % request)
+            
+            return HTTPFound(location=came_from)
+        else:
+            return HTTPFound(location=came_from)
+    
+    return {
+        'user': user,
+        'users': User.query().all(),
         'stalker': stalker,
     }

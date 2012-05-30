@@ -1,0 +1,105 @@
+{% extends 'create_data_form.jinja2' %}
+{% block script_block %}
+<script type="text/javascript">
+  
+  window.addEvent('domready', function(){
+    
+    var my_form_div = $('form_div');
+    if (my_form_div == null){
+      return;
+    }
+    
+    var create_image_format_form = new Jx.Form({
+      name: 'create_image_format_form',
+      formClass: 'jxFormInline',
+      fileUpload: false,
+      action: '{{request.route_url('create_image_format')}}',
+      method: 'post',
+      onFormSubmitComplete: function(){
+        $jx('create_image_format_dialog').close();
+      },
+      plugins: [
+        'inlineErrors',
+        {
+          name: 'validator',
+          options: {
+            fields: {
+              'name': {validators: ['minlength:3']},
+              'width': {validators: []},
+              'height': {validators: []},
+              'pixel_aspect': {validators: []}
+            }
+          }
+        }
+      ]
+    }).addTo(my_form_div);
+    
+    
+    var fieldSet1 = new Jx.Fieldset({
+      legend: 'Create Image Format Form',
+      fieldsetClass: 'jxFormInlineblock'
+    }).addTo(create_image_format_form);
+
+    var name_text_field = new Jx.Field.Text({
+      name: 'name',
+      label: 'Name',
+      value: '',
+      required: true
+    }).addTo(fieldSet1);
+    
+    var width_numberSpinner = new Jx.Field.NumberSpinner({
+      label: 'Width',
+      allowNegative: false,
+      name: 'width',
+      value: 1920
+    }).addTo(fieldSet1);
+  
+    var height_numberSpinner = new Jx.Field.NumberSpinner({
+      label: 'Height',
+      allowNegative: false,
+      name: 'height',
+      value: 1080
+    }).addTo(fieldSet1);
+    
+    var pixel_aspect_numberSpinner = new Jx.Field.NumberSpinner({
+      label: 'Pixel Aspect',
+      allowNegative: false,
+      name: 'pixel_aspect',
+      precision: 2,
+      value: 1
+    }).addTo(fieldSet1);
+    
+    // hidden field
+    var hidden = new Jx.Field.Hidden({
+//      id: 'form.submitted',
+      name: 'form.submitted',
+      label: 'Form Submitted',
+      value: 'create',
+      readonly: true
+    }).addTo(fieldSet1)
+    
+    new Jx.Field.Button({
+      buttonOptions:{
+        label: 'Create',
+        onClick: function(){
+          if (create_image_format_form.isValid()){
+           // submit the form
+           create_image_format_form.submit()
+          }
+        },
+        defaultAction: true
+      }
+    }).addTo(create_image_format_form);
+    
+    new Jx.Field.Button({
+      buttonOptions:{
+        label: 'Cancel',
+        onClick: function(){
+          // close the dialog
+          $jx('create_image_format_dialog').close()
+        }
+      }
+    }).addTo(create_image_format_form);
+  });
+</script>
+{% endblock %}

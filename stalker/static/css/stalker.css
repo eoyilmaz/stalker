@@ -109,18 +109,9 @@ ul li ol {
     width: 100%;
 }
 
-#column1{
-    line-height: 38px;
-    margin-left: 13px;
-    margin-right: 8px;
-    margin-top: -7px;
-    text-align: right;
-    width: 76px;
-}
-
 #column1 {
     float: left;
-    line-height: 30px;
+    line-height: 33px;
     margin-left: 13px;
     margin-right: 8px;
     margin-top: 25px;
@@ -137,7 +128,7 @@ ul li ol {
     line-height: 30px;
     margin-top: 25px;
     position: relative;
-    width: auto;
+    width: 150px;
 }
 
 #login_window input {

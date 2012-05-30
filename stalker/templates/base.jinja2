@@ -12,15 +12,21 @@
   <link rel="stylesheet"
         href="{{request.static_url('stalker:static/css/stalker.css')}}"
         type="text/css" media="screen" charset="utf-8"/>
- <!--[if lte IE 6]>
-  <link rel="stylesheet" href="{{request.static_url('stalker:static/css/ie6.css')}}"
+  <link rel="stylesheet"
+        href="{{ request.static_url('stalker:static/js/jxlib-3.1.1-full/themes/crispin/jxtheme.css') }}"/>
+  <!--[if lte IE 6]>
+  <link rel="stylesheet" href="{{request.static_url('stalker:static/js/jxlib-3.1.1-full/themes/crispin/ie6.css')}}"
+        type="text/css" media="screen" charset="utf-8"/>
+  <![endif]-->
+  <!--[if lte IE 7]>
+  <link rel="stylesheet" href="{{request.static_url('stalker:static/js/jxlib-3.1.1-full/themes/crispin/ie7.css')}}"
         type="text/css" media="screen" charset="utf-8"/>
   <![endif]-->
   <script type="text/javascript"
-          src="{{request.static_url('stalker:static/js/mootools-core-1.4.2.js')}}">
+          src="{{ request.static_url('stalker:static/js/jxlib-3.1.1-full/jxlib.uncompressed.js') }}">
   </script>
   <script type="text/javascript"
-          src="{{request.static_url('stalker:static/js/mootools-more-1.4.0.1.js')}}">
+          src="{{ request.static_url('stalker:static/js/stalker.js') }}">
   </script>
 </head>
 <body>
@@ -39,7 +45,7 @@
         <div id="search_label">Search</div>
         <div id="search_form">
           <form>
-            <input class="indented_input"></input>
+            <input class="indented_input">
           </form>
         </div>
       </div>
@@ -73,20 +79,33 @@
     {% endblock %}
   </div>
 </div>
-  <script type="text/javascript">
-    $('create_project').addEvent('click', function(e) {
-      // prevent page from changing
-      e = new Event(e).stop()
-      
-      var req = new Request.HTML({
-        method: 'get',
-        url: '/create/project',
-        update: $('popup_window'),
-        onComplete: function(response) {
-          $('popup_area').setStyles({'visibility': 'visible'})
-        }
-      }).send();
-    });
-  </script>
+<script type="text/javascript">
+  
+  window.addEvent('domready', function(){
+    
+    //var d1 = create_create_project_dialog();
+    //var d2 = create_create_image_format_dialog();
+    
+    new Jx.Button({
+      label: 'Create Project',
+      onClick: function(){
+        d1 = create_create_project_dialog();
+        d1.open();
+        d1.loadContent();
+      }
+    }).addTo($('top_menu'));
+    
+    new Jx.Button({
+      label: 'Create Image Format',
+      onClick: function(){
+        d2 = create_create_image_format_dialog();
+        d2.open();
+        d2.loadContent();
+      }
+    }).addTo($('top_menu'));
+ 
+  });
+</script>
+
 </body>
 </html>

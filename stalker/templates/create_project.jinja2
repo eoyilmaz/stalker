@@ -1,24 +1,166 @@
-<div class='window_close_button'>x</div>
-<div class="window_header">Create Project</div>
-<div id="column1">
-  Name<br/>
-  Code<br/>
-  Image Format<br/>
-  FPS<br/>
-  Repository<br/>
-  Structure<br/>
-  Lead<br/>
-</div>
-<div id='column2'>
-  <form>
-    <input class='indented_input'><br/>
-    <input class='indented_input'><br/>
-    <input class='indented_input'><br/>
-    <input class='indented_input'><br/>
-    <input class='indented_input'><br/>
-    <input class='indented_input'><br/>
-    <input class='indented_input'><br/>
-    <input type='submit' name='form.canceled' value='cancel'>
-    <input type='submit' name='form.submitted' value='create'>
-  </form>
-</div>
+{% extends 'create_data_form.jinja2' %}
+{% block script_block %}
+<script type="text/javascript">
+  
+  window.addEvent('domready', function(){
+    
+    var my_form_div = $('form_div');
+    if (my_form_div == null){
+      return;
+    }    
+    
+    var create_project_form = new Jx.Form({
+      name: 'create_project_form',
+      formClass: 'jxFormInline1',
+      fileUpload: false,
+      action: '{{request.route_url('create_project')}}',
+      method: 'post',
+      onFormSubmitComplete: function(){
+        // just close the dialog
+        $jx('create_project_dialog').close();
+      },
+      plugins: [
+        'inlineErrors',
+        {
+          name: 'validator',
+          options: {
+            fields: {
+              'name': {validators: ['minlength:3']},
+              'code': {validators: []},
+              'image_format': {validators: []},
+              'fps': {validators: []},
+              'repository': {validators: []},
+              'structure': {validators: []},
+              'lead': {validators: []}
+            }
+          }
+        }
+      ]
+    }).addTo($('form_div'));
+    
+    var fieldSet1 = new Jx.Fieldset({
+      legend: 'Create Project Form',
+//      id: 'fieldSet1',
+      fieldsetClass: 'jxFormInlineblock'
+    }).addTo(create_project_form);
+
+    var name_text_field = new Jx.Field.Text({
+//      id: 'name',
+      name: 'name',
+      label: 'Name',
+      value: '',
+      required: true
+    }).addTo(fieldSet1);
+    
+    var code_text_field = new Jx.Field.Text({
+//      id: 'code',
+      name: 'code',
+      label: 'Code',
+      value: '',
+      required: false
+    }).addTo(fieldSet1);
+    
+    var image_format_combo = new Jx.Field.Combo({
+//      id: 'image_format',
+      name: 'image_format',
+      label: 'Image Format',
+      readonly: true,
+      required: true,
+      items: [
+        {% for image_format in image_formats %}
+          {label: '{{image_format.name}} - {{image_format.width}}x{{image_format.height}}x{{image_format.pixel_aspect}}'},
+        {% endfor %},
+        {
+          label: 'Add New...',
+          onClick: function(){
+            // call the create_image_format_dialog
+            d2 = create_create_image_format_dialog();
+            d2.open();
+            d2.loadContent();
+          }
+        }
+      ]
+    }).addTo(fieldSet1);
+    
+    var fps_numberSpinner = new Jx.Field.NumberSpinner({
+      label: 'FPS',
+      allowNegative: false,
+      name: 'fps',
+      value: 25
+    }).addTo(fieldSet1);
+    
+    var repository_combo = new Jx.Field.Combo({
+//      id: 'repository',
+      name: 'repository',
+      label: 'Repository',
+      readonly: true,
+      required: true,
+      items: [
+        {% for repository in repositories %}
+          {label: '{{repository.name}}'},
+        {% endfor %}
+      ]
+    }).addTo(fieldSet1);
+    
+    var structure_combo = new Jx.Field.Combo({
+//      id: 'structure',
+      name: 'structure',
+      label: 'Structure',
+      readonly: true,
+      required: true,
+      items: [
+        {% for structure in structures %}
+          {label: '{{structure.name}}'},
+        {% endfor %}
+      ]
+    }).addTo(fieldSet1);
+    
+    var lead_combo = new Jx.Field.Combo({
+//      id: 'lead',
+      name: 'lead',
+      label: 'Lead',
+      readonly: true,
+      required: true,
+      items: [
+        {% for lead in users %}
+          {label: '{{user.first_name}} {{user.last_name}}'},
+        {% endfor %}
+      ]
+    }).addTo(fieldSet1);
+    
+    // hidden field
+    var hidden = new Jx.Field.Hidden({
+//      id: 'form.submitted',
+      name: 'form.submitted',
+      label: 'Form Submitted',
+      value: 'create',
+      readonly: true
+    }).addTo(fieldSet1)
+//    $('form.submitted').hide()
+    
+    
+    new Jx.Field.Button({
+      buttonOptions:{
+        label: 'Create',
+        onClick: function(){
+          if (create_project_form.isValid()){
+           // submit the form
+           create_project_form.submit()
+          }
+        },
+        defaultAction: true
+      }
+    }).addTo(create_project_form);
+    
+    new Jx.Field.Button({
+      buttonOptions:{
+        label: 'Cancel',
+        onClick: function(){
+          // close the dialog
+          $jx('create_project_dialog').close()
+        }
+      }
+    }).addTo(create_project_form);
+  })
+</script>
+{% endblock %}
