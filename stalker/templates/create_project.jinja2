@@ -1,166 +1,206 @@
 {% extends 'create_data_form.jinja2' %}
-{% block script_block %}
-<script type="text/javascript">
-  
-  window.addEvent('domready', function(){
+
+{% block form_block %}
+  <div id='form_div'>
+    <div id="column1">
+      <label for='name'>Name:</label><br/>
+      <label for='code'>Code:</label><br/>
+      <label for='image_format'>Image Format:</label><br/>
+    </div>
+    <div id="column2">
+      <input id='name'><br/>
+      <input id='code'><br/>
+      <input id='image_format' dojo-data-type="dijit.Form.ComboBox"><br/>
+    </div>
+
+  </div>
     
-    var my_form_div = $('form_div');
-    if (my_form_div == null){
-      return;
-    }    
-    
-    var create_project_form = new Jx.Form({
-      name: 'create_project_form',
-      formClass: 'jxFormInline1',
-      fileUpload: false,
-      action: '{{request.route_url('create_project')}}',
-      method: 'post',
-      onFormSubmitComplete: function(){
-        // just close the dialog
-        $jx('create_project_dialog').close();
-      },
-      plugins: [
-        'inlineErrors',
-        {
-          name: 'validator',
-          options: {
-            fields: {
-              'name': {validators: ['minlength:3']},
-              'code': {validators: []},
-              'image_format': {validators: []},
-              'fps': {validators: []},
-              'repository': {validators: []},
-              'structure': {validators: []},
-              'lead': {validators: []}
+    <script type="text/javascript" dojo->
+    require(["dijit/registry", "dojo/store/Memory",
+      "dijit/form/Form", "dijit/form/TextBox", "dijit/form/ComboBox",],
+      function(registry, Memory, Form, TextBox, ComboBox){
+        
+        alert('This is working 1');
+        
+        var create_project_form = new Form({
+          id: "create_project_form",
+          action: "{{ request.route_url('create_project') }}",
+          method: "POST"
+        }, 'form_div');
+        
+        // NAME
+        var name_textBox = new TextBox({
+          name: "name",
+          label: "Name",
+          value: "",
+          placeHolder: "Enter a name",
+          required: true,
+        }, "name_div");
+        name_textBox.startup();
+        
+        // CODE
+        var code_textBox = new TextBox({
+          name: "code",
+          label: "Code",
+          value: "",
+          placeHolder: "Enter a code"
+        }, "code_div");
+        name_textBox.startup();
+        
+        // IMAGE FORMAT
+        var image_format_store = new Memory({
+          data: [
+            {% for image_format in image_formats %}
+              {
+                name: '{{image_format.name}} - {{image_format.width}}x{{image_format.height}}x{{image_format.pixel_aspect}}',
+                id: '{{ image_format.name }}'
+              },
+            {% endfor %}
+            {
+              name: "Add New",
+              id: "addnew",
+              onClick: function(){
+                alert('Add new Image Format is selected!')
+              }
+            }
+          ]
+        });
+        
+        
+        var image_format_comboBox = new ComboBox({
+          id: "image_format_select",
+          name: "image_format",
+          store: image_format_store,
+          searchAttr: "name",
+          //readOnly: true,
+          required: true,
+          onChange: function(){
+            if (this.get('value') == "Add New"){
+              // create the create_image_format_dialog
+              var dialog = dijit.byId('create_image_format_dialog');
+              if (dialog == null){
+                dialog = create_create_image_format_dialog();
+              }
+              // show the dialog
+              dialog.show();
             }
           }
-        }
-      ]
-    }).addTo($('form_div'));
+        }, "image_format");
+        
+        
+        alert('This is working 2');
+        
+        
+        
+        create_project_form.startup();
+        
+        alert('This is working 3');
+    });
     
-    var fieldSet1 = new Jx.Fieldset({
-      legend: 'Create Project Form',
-//      id: 'fieldSet1',
-      fieldsetClass: 'jxFormInlineblock'
-    }).addTo(create_project_form);
-
-    var name_text_field = new Jx.Field.Text({
-//      id: 'name',
-      name: 'name',
-      label: 'Name',
-      value: '',
-      required: true
-    }).addTo(fieldSet1);
+    }
+     
     
-    var code_text_field = new Jx.Field.Text({
-//      id: 'code',
-      name: 'code',
-      label: 'Code',
-      value: '',
-      required: false
-    }).addTo(fieldSet1);
-    
-    var image_format_combo = new Jx.Field.Combo({
-//      id: 'image_format',
-      name: 'image_format',
-      label: 'Image Format',
-      readonly: true,
-      required: true,
-      items: [
-        {% for image_format in image_formats %}
-          {label: '{{image_format.name}} - {{image_format.width}}x{{image_format.height}}x{{image_format.pixel_aspect}}'},
-        {% endfor %},
-        {
-          label: 'Add New...',
+  /*    var image_format_combo = new Jx.Field.Combo({
+        name: 'image_format',
+        label: 'Image Format',
+        readonly: true,
+        required: true,
+        items: [
+          {% for image_format in image_formats %}
+            {label: '{{image_format.name}} - {{image_format.width}}x{{image_format.height}}x{{image_format.pixel_aspect}}'},
+          {% endfor %},
+          {
+            label: 'Add New...',
+            onClick: function(){
+              // call the create_image_format_dialog
+              d2 = create_create_image_format_dialog();
+              d2.open();
+              d2.loadContent();
+            }
+          }
+        ]
+      }).addTo(fieldSet1);
+      
+      var fps_numberSpinner = new Jx.Field.NumberSpinner({
+        label: 'FPS',
+        allowNegative: false,
+        name: 'fps',
+        value: 25
+      }).addTo(fieldSet1);
+      
+      var repository_combo = new Jx.Field.Combo({
+  //      id: 'repository',
+        name: 'repository',
+        label: 'Repository',
+        readonly: true,
+        required: true,
+        items: [
+          {% for repository in repositories %}
+            {label: '{{repository.name}}'},
+          {% endfor %}
+        ]
+      }).addTo(fieldSet1);
+      
+      var structure_combo = new Jx.Field.Combo({
+  //      id: 'structure',
+        name: 'structure',
+        label: 'Structure',
+        readonly: true,
+        required: true,
+        items: [
+          {% for structure in structures %}
+            {label: '{{structure.name}}'},
+          {% endfor %}
+        ]
+      }).addTo(fieldSet1);
+      
+      var lead_combo = new Jx.Field.Combo({
+  //      id: 'lead',
+        name: 'lead',
+        label: 'Lead',
+        readonly: true,
+        required: true,
+        items: [
+          {% for lead in users %}
+            {label: '{{user.first_name}} {{user.last_name}}'},
+          {% endfor %}
+        ]
+      }).addTo(fieldSet1);
+      
+      // hidden field
+      var hidden = new Jx.Field.Hidden({
+  //      id: 'form.submitted',
+        name: 'form.submitted',
+        label: 'Form Submitted',
+        value: 'create',
+        readonly: true
+      }).addTo(fieldSet1)
+  //    $('form.submitted').hide()
+      
+      
+      new Jx.Field.Button({
+        buttonOptions:{
+          label: 'Create',
           onClick: function(){
-            // call the create_image_format_dialog
-            d2 = create_create_image_format_dialog();
-            d2.open();
-            d2.loadContent();
+            if (create_project_form.isValid()){
+             // submit the form
+             create_project_form.submit()
+            }
+          },
+          defaultAction: true
+        }
+      }).addTo(create_project_form);
+      
+      new Jx.Field.Button({
+        buttonOptions:{
+          label: 'Cancel',
+          onClick: function(){
+            // close the dialog
+            $jx('create_project_dialog').close()
           }
         }
-      ]
-    }).addTo(fieldSet1);
-    
-    var fps_numberSpinner = new Jx.Field.NumberSpinner({
-      label: 'FPS',
-      allowNegative: false,
-      name: 'fps',
-      value: 25
-    }).addTo(fieldSet1);
-    
-    var repository_combo = new Jx.Field.Combo({
-//      id: 'repository',
-      name: 'repository',
-      label: 'Repository',
-      readonly: true,
-      required: true,
-      items: [
-        {% for repository in repositories %}
-          {label: '{{repository.name}}'},
-        {% endfor %}
-      ]
-    }).addTo(fieldSet1);
-    
-    var structure_combo = new Jx.Field.Combo({
-//      id: 'structure',
-      name: 'structure',
-      label: 'Structure',
-      readonly: true,
-      required: true,
-      items: [
-        {% for structure in structures %}
-          {label: '{{structure.name}}'},
-        {% endfor %}
-      ]
-    }).addTo(fieldSet1);
-    
-    var lead_combo = new Jx.Field.Combo({
-//      id: 'lead',
-      name: 'lead',
-      label: 'Lead',
-      readonly: true,
-      required: true,
-      items: [
-        {% for lead in users %}
-          {label: '{{user.first_name}} {{user.last_name}}'},
-        {% endfor %}
-      ]
-    }).addTo(fieldSet1);
-    
-    // hidden field
-    var hidden = new Jx.Field.Hidden({
-//      id: 'form.submitted',
-      name: 'form.submitted',
-      label: 'Form Submitted',
-      value: 'create',
-      readonly: true
-    }).addTo(fieldSet1)
-//    $('form.submitted').hide()
-    
-    
-    new Jx.Field.Button({
-      buttonOptions:{
-        label: 'Create',
-        onClick: function(){
-          if (create_project_form.isValid()){
-           // submit the form
-           create_project_form.submit()
-          }
-        },
-        defaultAction: true
-      }
-    }).addTo(create_project_form);
-    
-    new Jx.Field.Button({
-      buttonOptions:{
-        label: 'Cancel',
-        onClick: function(){
-          // close the dialog
-          $jx('create_project_dialog').close()
-        }
-      }
-    }).addTo(create_project_form);
-  })
-</script>
+      }).addTo(create_project_form);
+    })*/
+  </script>
 {% endblock %}
+

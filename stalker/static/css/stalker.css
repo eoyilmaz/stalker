@@ -41,14 +41,25 @@
 
 }
 
-body {
+html, body {
     font-family: 'Ubuntu', "Bitstream Vera Sans", 'DejaVu Sans', 'Tahoma', 'sans-serif';
-    background-color: #c0c0c0;
-    font-size: 12px;
-    line-height: 16px;
-    margin: 0px;
+    /*background-color: #c0c0c0;*/
+    /*font-size: 12px;*/
+    /*line-height: 16px;*/
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
     -moz-user-select: none;
     -webkit-user-select: none; 
+}
+
+#appLayout {
+    height: 100%;
+}
+
+#leftCol {
+    width: 14em;
 }
 
 h1 {
@@ -111,12 +122,12 @@ ul li ol {
 
 #column1 {
     float: left;
-    line-height: 33px;
+    line-height: 25px;
     margin-left: 13px;
     margin-right: 8px;
-    margin-top: 25px;
+    /*margin-top: 25px;*/
     text-align: right;
-    width: 90px;
+    /*width: 90px;*/
 }
 
 .indented_input {
@@ -125,8 +136,8 @@ ul li ol {
 
 #column2 {
     float: left;
-    line-height: 30px;
-    margin-top: 25px;
+    /*line-height: 30px;*/
+    /*margin-top: 25px;*/
     position: relative;
     width: 150px;
 }

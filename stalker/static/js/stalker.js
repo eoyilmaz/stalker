@@ -7,42 +7,28 @@
  */
 
 
-
-function create_create_project_dialog(){
-    
-//    parent_element == parent_element || document;
-    
-    // create the dialog
-    return new Jx.Dialog({
-        id: 'create_project_dialog',
-        label: 'Create Project',
-        modal: true,
-        contentURL: '/create/project',
-        resize: false,
-        width: 680,
-        height: 360,
-        maximize: false,
-        useKeyboard: true,
-        limit: document,
-        destroyOnClose: true
-    });
-}
-
-function create_create_image_format_dialog(){
-    
-    // create the dialog
-    return new Jx.Dialog({
-        id: 'create_image_format_dialog',
-        label: 'Create Image Format',
-        modal: true,
-        contentURL: '/create/image_format',
-        resize: false,
-        width: 680,
-        height: 360,
-        maximize: false,
-        useKeyboard: true,
-        limit: document,
-        destroyOnClose: true
-    });
-}
+require(["dijit/registry", "dijit/Dialog"],
+    function(registry, Dialog){
+        create_create_project_dialog = function (){
+            // create the dialog
+            return new Dialog({
+                id: 'create_project_dialog',
+                title: 'Create Project',
+                href: '/create/project',
+                resize: true,
+                style: "width: 380px; height 360px;"
+            });
+        };
+        
+        create_create_image_format_dialog = function(){
+            return new Dialog({
+                id: 'create_image_format_dialog',
+                title: 'Create Image Format',
+                href: '/create/image_format',
+                resize: true,
+                style: "width: 380; height 360px;"
+            })
+        };
+    }
+)
 
