@@ -4,7 +4,7 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
-from sqlalchemy import Column, Integer, ForeignKey, String, Boolean
+from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
 from stalker.models.entity import Entity
 from stalker.models.mixins import TargetEntityTypeMixin
@@ -13,15 +13,89 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     """Holds templates for filename conventions.
     
     FilenameTemplate objects help to specify where to place a file related to
-    its :attr:`~stalker.models.templates.FilenameTemplate.target_entity_type`.
+    its :attr:`~stalker.models.template.FilenameTemplate.target_entity_type`
+    and :attr:`~stalker.models.template.FilenameTemplate.type`.
+    
+    Because the ``type`` attribute is used to define the correct
+    FilenameTemplate in a :class:`~stalker.models.structure.Structure`, the
+    FilenameTemplate class is `strictly typed`. This means you can not define
+    a FilenameTEmplate instance without assigning a
+    :class:`~stalker.models.type.Type` instance.
+    
+    For now there are two possible values for the type attribute:
+      
+      * A :class:`~stalker.models.type.Type` with the ``name`` attribute is set
+        to "Version". This type of FilenameTemplates are used to specify where
+        to place :class:`~staler.models.version.Version` source files.
+        
+      * A :class:`~stalker.models.type.Type` with the ``name`` attribute is set
+        to "Reference". This type of FilenameTemplates are used to specify
+        where to place reference files in to the Project structure.
+    
+    Here is a nice example to how to create a FilenameTemplate for Asset
+    Versions and References::
+      
+      # first get the Types
+      vers_type = Type.query()\
+                  .filter_by(target_entity_type="FilenameTemplate")\
+                  .filter_by(type="Version")\
+                  .first()
+      
+      ref_type = Type.query()\
+                 .filter_by(target_entity_type="FilenameTemplate")\
+                 .filter_by(type="Reference")\
+                 .first()
+      
+      # lets create a FilenameTemplate for placing Asset Version files.
+      f_ver = FilenameTemplate(
+          target_entity_type="Asset",
+          type=vers_type,
+          path="Assets/{{asset.type.code}}/{{asset.code}}/{{task.type.code}}",
+          filename="{{asset.code}}_{{version.take_name}}_{{task.type.code}}_v{{'%03d'|version.version_number}}{{link.extension}}"
+          output_path="{{version.path}}/Outputs/{{version.take_name}}"
+      )
+      
+      # and now define a FilenameTemplate for placing Asset Reference files.
+      # no need to have an output_path here...
+      f_ref = FilenameTemplate(
+          target_entity_type="Asset",
+          type=ref_type,
+          path="Assets/{{asset.type.code}}/{{asset.code}}/References",
+          filename="{{link.type.code}}/{{link.id}}{{link.extension}}"
+      )
     
     The first very important usage of FilenameTemplates is to place asset file
     :class:`~stalker.models.version.Version`'s to proper places inside a
     :class:`~stalker.models.project.Project`'s
-    :class:`~stalker.models.structure.Structure`.
+    :attr:`~stalker.models.project.Project.structure`.
     
-    Secondly, it can be used in the process of injecting files in to the
-    repository. By creating templates for :class:`~stalker.models.link.Link`.
+    The :attr:`~stalker.models.template.FilenameTemplate.type` attribute of
+    the FilenameTemplate class (which is derived from
+    :class:`stalker.models.entity.SimpleEntity` is used to determine which
+    template is going to be used in a :class:`~stalker.models.project.Project`.
+    
+    Let say we have a :class:`~stalker.models.project.Project` and in its
+    :attr:`~stalker.models.project.Project.structure` attribute a
+    :class:`~stalker.models.structure.Structure` is attached where::
+        
+        p1 = Project(name="Test Project")
+        s1 = Structure(name="Commercial Project Structure")
+        
+        t1 = Type(
+            name="Version",
+            target_entity_type="FilenameTemplate"
+        )
+        
+        # this is going to be used by the Version instance to decide the
+        # Link filename and path
+        f1 = FilenameTemplate(
+            name="Asset Version",
+            target_entity_type="Asset",
+            type=t1,
+            path_code="{{project.code}}/Assets/{{asset.type.name}}/{{task.type.name}}",
+            filename_code="{{taskable.code}}_{{version.take}}_{{task.type.name}}_v{{'%03d'|version.version_number}}{{link.extension}}",
+            
+        
     
     :param str target_entity_type: The class name that this FilenameTemplate
       is designed for. You can also pass the class itself. So both of the
@@ -41,17 +115,16 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     
     :param str filename: A `Jinja2`_ template code which specifies the file
       name of the given item. It is relative to the
-      :attr:`~stalker.models.templates.FilenameTemplate.path`. A typical
+      :attr:`~stalker.models.template.FilenameTemplate.path`. A typical
       example could be::
         
-        asset_filename = "{{asset.code}}_{{version.take}}_{{task.code}}_"\\
-                         "{{version.version}}_{{user.initials}}"
+        asset_filename = "{{asset.code}}_{{version.take}}_{{task.code}}_v"{{'%03d'|format(version.version)}}{{version.extension}}"
       
       Could be set to an empty string or None, the default value is None.
     
     :param str output_path: A Jinja2 template code specifying where to place
       the outputs of the applied
-      :attr:`~stalker.models.templates.FilenameTemplate.target_entity_type`.
+      :attr:`~stalker.models.template.FilenameTemplate.target_entity_type`.
       
       It can be None, or an empty string, or it can be skipped.
     
@@ -121,7 +194,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     
     .. _Jinja2: http://jinja.pocoo.org/docs/
     """
-
+    __strictly_typed__ = True
     __tablename__ = "FilenameTemplates"
     __mapper_args__ = {"polymorphic_identity": "FilenameTemplate"}
     filenameTemplate_id = Column("id", Integer, ForeignKey("Entities.id"),
@@ -164,10 +237,13 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         """
         # check if it is None
         if path_in is None:
-            path_in = u""
-
-        path_in = unicode(path_in)
-
+            path_in = ""
+        
+        if not isinstance(path_in, (str, unicode)):
+            raise TypeError("%s.path attribute should be string or unicode "
+                            "not %s" % (self.__class__.__name__,
+                                        path_in.__class__.__name__))
+        
         return path_in
     
     @validates("filename")
@@ -176,10 +252,12 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         """
         # check if it is None
         if filename_in is None:
-            filename_in = u""
+            filename_in = ""
         
-        # convert it to unicode
-        filename_in = unicode(filename_in)
+        if not isinstance(filename_in, (str, unicode)):
+            raise TypeError("%s.filename attribute should be string or "
+                            "unicode not %s" % (self.__class__.__name__,
+                                                filename_in.__class__.__name__))
         
         return filename_in
     

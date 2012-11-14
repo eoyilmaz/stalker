@@ -33,7 +33,7 @@ class DBError(Exception):
 
 
 class CircularDependencyError(Exception):
-    """Raised when there is cirular dependencies within Tasks
+    """Raised when there is circular dependencies within Tasks
     """
 
     def __init__(self, value=""):

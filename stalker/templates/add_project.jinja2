@@ -1,0 +1,354 @@
+{% extends 'add_data_form.jinja2' %}
+{% block form_block %}
+  <div class="dijitDialogPaneContentArea"> 
+    <div id='add_project_form_div'>
+      
+      {# NAME #}
+      <div class="row">
+        <div class="column1">
+          <label for='project_name'>Name</label>
+        </div>
+        <div class="column2">
+          <input id='project_name'>
+        </div>
+        <div class='column3'>
+          &nbsp;
+        </div>
+      </div>
+      
+      {# CODE #}
+      <div class='row'>
+        <div class='column1'>
+          <label for='project_code'>Code</label>
+        </div>
+        <div class='column2'>
+          <input id='project_code'>
+        </div>
+      </div>
+      
+      {# IMAGE FORMAT #}
+      <div class='row'>
+        <div class='column1'>
+          <label for='project_image_format'>Image Format</label>
+        </div>
+        <div class='column2'>
+          <input id='project_image_format'>
+        </div>
+        <div class='column3'>
+          <button id="project_add_image_format_button">Add</button>
+          <button id="project_edit_image_format_button">Edit</button>
+        </div>
+      </div>
+      
+      {# FPS #}
+      <div class='row'>
+        <div class='column1'>
+          <label for='project_fps'>FPS</label>
+        </div>
+        <div class='column2'>
+          <input id='project_fps'>
+        </div>
+      </div>
+      
+      {# REPOSITORY #}
+      <div class='row'>
+        <div class="column1">
+          <label for='project_repository'>Repository</label>
+        </div>
+        <div class='column2'>
+          <input id='project_repository'>
+        </div>
+        <div class='column3'>
+          <button id="project_add_repository_button">Add</button>
+          <button id="project_edit_repository_button">Edit</button>
+        </div>
+      </div>
+      
+      {# STRUCTURE #}
+      <div class='row'>
+        <div class="column1">
+          <label for='project_structure'>Structure</label>
+        </div>
+        <div class='column2'>
+          <input id='project_structure'>
+        </div>
+        <div class='column3'>
+          <button id="project_add_structure_button">Add</button>
+          <button id="project_edit_structure_button">Edit</button>
+        </div>
+      </div>
+      
+      {# LEAD #}
+      <div class='row'>
+        <div class="column1">
+          <label for='project_lead'>Lead</label>
+        </div>
+        <div class='column2'>
+          <input id='project_lead'>
+        </div>
+        <div class='column3'>
+          <button id="project_add_lead_button">Add</button>
+          <button id="project_edit_lead_button">Edit</button>
+        </div>
+      </div>
+       
+    </div>
+  </div>
+  
+  <div class="dijitDialogPaneActionBar" style="clear: both;">
+    <button id='project_add_button'>Add</button>
+    <button id='project_cancel_button'>Cancel</button>
+  </div>
+  
+  <script type="text/javascript">
+    require(["dijit/registry", "dojo/_base/xhr", "dojo/on",
+      "dojo/store/Memory", "dijit/form/Form", "dijit/form/ValidationTextBox",
+      "dijit/form/TextBox", "dijit/form/NumberTextBox", "dijit/form/Select",
+      "dijit/form/Button"
+    ],
+      function(registry, xhr, on, Memory, Form, ValidationTextBox, TextBox,
+               NumberTextBox, Select, Button){
+      
+        // ********************************************************************
+        // FORM
+        var add_project_form = new Form({
+          id: "add_project_form",
+          method: "POST",
+          onSubmit: function(event){
+            if (this.validate()){
+              var deferred = xhr.post({
+                content: {
+                  submitted: 'add'
+                },
+                url: "{{ request.route_url('add_project') }}",
+                form: dojo.byId('add_project_form')
+              });
+              
+              var dialog = dijit.byId('add_project_dialog');
+              // destroy dialog
+              dialog.destroyRecursive();
+            }
+          }
+        }, 'add_project_form_div');
+        
+        // ********************************************************************
+        // NAME
+        var name_textBox = new ValidationTextBox({
+          name: "name",
+          label: "Name",
+          value: "",
+          placeHolder: "Enter a name",
+          required: true
+        }, "project_name");
+        name_textBox.startup();
+        
+        // ********************************************************************
+        // CODE
+        var code_textBox = new TextBox({
+          name: "code",
+          label: "Code",
+          value: "",
+          placeHolder: "Enter a code"
+        }, "project_code");
+        name_textBox.startup();
+        
+        
+        // ********************************************************************
+        // IMAGE FORMAT
+        var image_format_select = new Select({
+          name: "image_format",
+          required: true,
+          style: "width: auto; margin: 0px; padding: 0px;",
+          options: [
+            {% for image_format in image_formats %}
+              {
+                label: '{{image_format.name}} - {{image_format.width}}'+
+                      'x{{image_format.height}}x{{image_format.pixel_aspect}}',
+                value: '{{ image_format.id }}'
+              },
+            {% endfor %}
+          ]
+        }, "project_image_format");
+        image_format_select.startup();
+        
+        // ADD IMAGE FORMAT BUTTON
+        var add_image_format_button = create_add_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Add',
+                'add_image_format_dialog',
+                create_add_image_format_dialog,
+                'project_add_image_format_button'
+        );
+        add_image_format_button.startup();
+        
+        // EDIT IMAGE FORMAT BUTTON
+        var edit_image_format_button = create_edit_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Edit',
+                'edit_image_format_dialog',
+                create_edit_image_format_dialog,
+                'project_edit_image_format_button',
+                function(){
+                  return image_format_select.get('value');
+                }
+        );
+        edit_image_format_button.startup();
+        
+        // ********************************************************************
+        // FPS
+        var fps_numberTextBox = new NumberTextBox({
+          name: "fps",
+          label: "FPS",
+          value: 25,
+          placeHolder: "",
+          required: true
+        }, "project_fps");
+        fps_numberTextBox.startup();
+        
+        // ********************************************************************
+        // REPOSITORY
+        var repository_select = new Select({
+          name: "repository",
+          required: true,
+          style: "width: auto; margin: 0px; padding: 0px;",
+          options: [
+            {% for repository in repositories %}
+              {
+                label: '{{ repository.name }}',
+                value: '{{ repository.id }}'
+              },
+            {% endfor %}
+          ]
+        }, "project_repository");
+        repository_select.startup();
+        
+        // ADD REPOSITORY BUTTON
+        var add_repository_button = create_add_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Add',
+                'add_repository_dialog',
+                create_add_repository_dialog,
+                'project_add_repository_button'
+        );
+        add_repository_button.startup();
+        
+        // EDIT REPOSITORY BUTTON
+        var edit_repository_button = create_edit_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Edit',
+                'edit_repository_dialog',
+                create_add_repository_dialog,
+                'project_edit_repository_button',
+                repository_select.options
+        );
+        edit_repository_button.startup();
+        
+        // ********************************************************************
+        // STRUCTURE
+        var structure_select = new Select({
+          name: "structure",
+          required: true,
+          style: "width: auto; height: auto; margin: 0px; padding: 0px;",
+          options: [
+            {% for structure in structures %}
+              {
+                label: '{{ structure.name }}',
+                value: '{{ structure.id }}'
+              },
+            {% endfor %}
+          ]
+        }, "project_structure");
+        structure_select.startup();
+        
+        // ADD STRUCTURE BUTTON
+        var add_structure_button = create_add_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Add',
+                'add_structure_dialog',
+                create_add_structure_dialog,
+                'project_add_structure_button'
+        );
+        add_structure_button.startup();
+        
+        // EDIT STRUCTURE BUTTON
+        var edit_structure_button = create_edit_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Edit',
+                'edit_structure_dialog',
+                create_edit_structure_dialog,
+                'project_edit_structure_button',
+                function(){
+                  return structure_select.get('value')
+                }
+        );
+        edit_structure_button.startup();
+        
+        // ********************************************************************
+        // LEAD
+        var lead_select = new Select({
+          name: 'lead',
+          required: true,
+          style: 'width: auto; height: auto; margin: 0px; padding: 0px;',
+          options: [
+            {%  for user in users %}
+              {
+                label: '{{ user.first_name }} {{ user.last_name }}',
+                value: '{{ user.id }}'
+              }
+            {% endfor %}
+          ]
+        }, 'project_lead');
+        lead_select.startup();
+        
+        // ADD LEAD BUTTON
+        var add_lead_button = create_add_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Add',
+                'add_user_dialog',
+                create_add_user_dialog,
+                'project_add_lead_button'
+        );
+        add_lead_button.startup();
+        
+        // EDIT LEAD BUTTON
+        var edit_lead_button = create_edit_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Edit',
+                'edit_user_dialog',
+                create_edit_user_dialog,
+                'project_edit_lead_button',
+                function(){
+                  return lead_select.get('value')
+                }
+        );
+        edit_lead_button.startup();
+        
+        // ********************************************************************
+        // ADD BUTTON
+        var add_button = new Button({
+          label: "Add",
+          type: "button",
+          onClick: function(){
+            if (add_project_form.validate()){
+              add_project_form.submit();
+            }
+          }
+        }, 'project_add_button');
+        add_button.startup();
+        
+        // ********************************************************************
+        // CANCEL BUTTON
+        var cancel_button = new Button({
+          label: "Cancel",
+          type: "button",
+          onClick: function(){
+            dijit.byId('add_project_dialog').destroyRecursive();
+          }
+        }, 'project_cancel_button');
+        cancel_button.startup();
+        
+        add_project_form.startup();
+    });
+  </script>
+{% endblock %}
+

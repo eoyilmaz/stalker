@@ -397,8 +397,6 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.reopen()
         self.assertEqual(self.test_ticket.status, self.status_REOPENED)
     
-    
-    
     def test_resolve_method_will_create_a_new_log_telling_status_is_changed_from_New_to_Closed(self):
         """testing if invoking the resolve method will create a new log entry
         telling the status changed from New to Closed

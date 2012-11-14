@@ -13,9 +13,9 @@
   <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
         href="{{request.static_url('stalker:static/css/stalker.css')}}"/>
   <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
-        href="{{ request.static_url('stalker:static/js/dojo-release-1.7.2/dijit/themes/claro/claro.css') }}"/>
+        href="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dijit/themes/claro/claro.css') }}"/>
   <script type="text/javascript" data-dojo-config="async: true" 
-          src="{{ request.static_url('stalker:static/js/dojo-release-1.7.2/dojo/dojo.js') }}">
+          src="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dojo/dojo.js') }}">
   </script>
   <script type="text/javascript"
           src="{{ request.static_url('stalker:static/js/stalker.js') }}">
@@ -62,23 +62,19 @@
               
               // create the button
               var button = new Button({
-                label: "Create Project",
+                label: "Add Project",
                 type: "button",
                 onClick: function(){
                   
                   // check if the dialog is created before
-                  var dialog = dijit.byId("create_project_dialog");
+                  var dialog = dijit.byId("add_project_dialog");
                   if (dialog == null){
-                    dialog = create_create_project_dialog();
+                    dialog = create_add_project_dialog();
                   }
                   // show the dialog
                   dialog.show();
-                  dialog.startup();
-                  
-                  init();
-                  
                 }
-              }, "create_project_btn");
+              }, "add_project_btn");
               button.startup();
               
               appLayout.startup();
@@ -89,7 +85,7 @@
           src="{{ request.static_url('stalker:static/js/stalker.js') }}">
   </script>
 </head>
-<body class="claro">
+<body class="claro" style="border-radius: 10px">
 {% block body %}
   <div id="appLayout" class="demoLayout">
     <div id="header" class="edgePanel">
@@ -98,7 +94,6 @@
           <div id="stalker_name">Stalker</div>
           <div id="stalker_version">v{{stalker.__version__}}</div>
         </div>
-
         <div id="user_menu">
           Welcome {{user.first_name}} {{user.last_name}} | Settings | <a href='/logout'>Logout</a>
         </div>
@@ -116,7 +111,7 @@
       {% block content %}
         <div id="main_view">
           <div id="top_menu">
-            <div id='create_project_btn'>Create Project</div>
+            <div id='add_project_btn'>Add Project</div>
           </div>
           {% block main_view %}{% endblock %}
         </div>

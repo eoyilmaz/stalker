@@ -9,8 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-from sqlalchemy import (Table, Column, Integer, ForeignKey, SmallInteger,
-                        CheckConstraint)
+from sqlalchemy import Table, Column, Integer, ForeignKey, SmallInteger
 from sqlalchemy.orm import relationship, validates, composite
 from sqlalchemy.ext.mutable import MutableComposite
 

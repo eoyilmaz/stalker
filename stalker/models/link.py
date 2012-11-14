@@ -20,17 +20,17 @@ class Link(Entity):
     :class:`~stalker.models.tag.Tag` instances to add more information, and to
     filter them back). Again it is defined by the needs of the studio.
     
-    For sequences of files the file name may contain "#" or multiple of them
-    like "###" to define padding.
+    For sequences of files the file name should be in "%h%p%t %R" format in
+    `PySeq`_ formatting rules.
     
     :param path: The Path to the link, it can be a path to a folder or a file
-      in the file system, or a web page. For file sequences use "#" in place of
-      the numerator (`Nuke`_ style). Setting the path to None or an empty
-      string is not accepted.
+      in the file system, or a web page. For file sequences use "%h%p%t %R"
+      format, for more information see `PySeq Documentation`_. Setting the path
+      to None or an empty string is not accepted.
     
-    .. _Nuke: http://www.thefoundry.co.uk
+    .. _PySeq Documentation: http://packages.python.org/pyseq/
     """
-
+    
     __tablename__ = "Links"
     __mapper_args__ = {"polymorphic_identity": "Link"}
     link_id = Column(
@@ -38,7 +38,8 @@ class Link(Entity):
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
-        )
+    )
+    
     path = Column(
         String,
         doc="""The path of the url to the link.
@@ -60,30 +61,30 @@ class Link(Entity):
         if path is None:
             raise TypeError("%s.path can not be None" %
                             self.__class__.__name__)
-
+        
         if not isinstance(path, (str, unicode)):
             raise TypeError("%s.path should be an instance of string or "
                             "unicode not %s" %
                             (self.__class__.__name__,
                              path.__class__.__name__))
-
+        
         if path == "":
             raise ValueError("%s.path can not be an empty string" %
                              self.__class__.__name__)
-
+        
         return self._format_path(path)
-
+    
     def _format_path(self, path):
         """formats the path to internal format, which is Linux forward slashes
         for path separation
         """
-
+        
         return path.replace("\\", "/")
-
+    
     def __eq__(self, other):
         """the equality operator
         """
-
+        
         return super(Link, self).__eq__(other) and\
                isinstance(other, Link) and\
                self.path == other.path and\

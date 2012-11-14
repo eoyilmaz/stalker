@@ -1,0 +1,151 @@
+{% extends 'add_data_form.jinja2' %}
+{% block form_block %}
+  <div class="dijitDialogPaneContentArea">
+    <div id='image_format_form_div'>
+      
+      {# NAME #}
+      <div class="row">
+        <div class="column1">
+          <label for='image_format_name'>Name</label>
+        </div>
+        <div class="column2">
+          <input id='image_format_name'>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="column1">
+          <label for='image_format_width'>Width</label>
+        </div>
+        <div class="column2">
+          <input id='image_format_width'>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="column1">
+          <label for='image_format_height'>Height</label>
+        </div>
+        <div class="column2">
+          <input id='image_format_height'>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="column1">
+          <label for='image_format_pixel_aspect'>Pixel Aspect</label>
+        </div>
+        <div class="column2">
+          <input id='image_format_pixel_aspect'>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <div class="dijitDialogPaneActionBar" style="clear: both;">
+    <button id='image_format_add_button'></button>
+    <button id='image_format_cancel_button'></button>
+  </div>
+  <script type="text/javascript">
+    require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
+      "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
+      "dijit/form/NumberTextBox", "dijit/form/Button", "dojo/domReady!"
+    ],
+      function(registry, xhr, Memory, Form, ValidationTextBox, NumberTextBox,
+               TextBox, Button){
+        
+        var add_image_format_form = new Form({
+          id: "add_image_format_form",
+          method: "POST",
+          onSubmit: function(event){
+            if (this.validate()){
+              // just close the dialog and somehow change the related field
+              // on parent widget
+              var deferred = xhr.post({
+                url: "{{ request.route_url('add_image_format') }}",
+                form: dojo.byId('add_image_format_form')
+              });
+              
+              // update the caller dialog
+              var dialog = dijit.byId('add_image_format_dialog');
+              var parent = dialog.get('parent');
+              if (parent != null){
+                // TODO: just update the image format field of the parent dialog
+                parent.refresh()
+              }
+              
+              // destroy the dialog
+              dialog.destroyRecursive();
+              
+            }
+            return false;
+          }
+        }, 'image_format_form_div');
+        add_image_format_form.startup();
+        
+        // NAME
+        var name_textBox = new ValidationTextBox({
+          name: "name",
+          label: "Name",
+          placeHolder: "Enter a name",
+          required: true
+        }, "image_format_name");
+        name_textBox.startup();
+        
+        // WIDTH
+        var width_numberTextBox = new NumberTextBox({
+          name: "width",
+          label: "Width",
+          placeHolder: "",
+          required: true
+        }, "image_format_width");
+        width_numberTextBox.startup();
+        
+        // HEIGHT
+        var height_numberTextBox = new NumberTextBox({
+          name: "height",
+          label: "Height",
+          placeHolder: "",
+          required: true
+        }, "image_format_height");
+        height_numberTextBox.startup();
+        
+        // PIXEL_ASPECT
+        var pixel_aspect_numberTextBox = new NumberTextBox({
+          name: "pixel_aspect",
+          label: "Pixel Aspect",
+          value: 1.0,
+          required: true
+        }, "image_format_pixel_aspect");
+        pixel_aspect_numberTextBox.startup();
+        
+        // ADD BUTTON
+        var add_button = new Button({
+          label: "Add",
+          type: "button",
+          onClick: function(){
+            if (add_image_format_form.validate()){
+              add_image_format_form.submit();
+            } else {
+              return false;
+            }
+          }
+        }, 'image_format_add_button');
+        add_button.startup();
+        
+        // CANCEL BUTTON
+        var cancel_button = new Button({
+          label: "Cancel",
+          type: "button",
+          onClick: function(){
+            var dialog = dijit.byId('add_image_format_dialog');
+            dialog.destroyRecursive();
+          }
+        }, 'image_format_cancel_button');
+        cancel_button.startup();        
+        
+        
+    });
+  </script>
+{% endblock %}
+

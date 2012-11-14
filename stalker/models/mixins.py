@@ -35,37 +35,40 @@ def create_secondary_table(
         secondary_cls_name,
         primary_cls_table_name,
         secondary_cls_table_name,
-        ):
-        """creates any secondary table
-        """
-        
-        plural_secondary_cls_name = make_plural(secondary_cls_name)
-        
-        # use the given class_name and the class_table
-        secondary_table_name = primary_cls_name + "_" + plural_secondary_cls_name
-        
-        # check if the table is already defined
-        if secondary_table_name not in Base.metadata:
-            secondary_table = Table(
-                secondary_table_name, Base.metadata,
-                Column(
-                    primary_cls_name.lower() + "_id",
-                    Integer,
-                    ForeignKey(primary_cls_table_name + ".id"),
-                    primary_key=True,
-                ),
-                
-                Column(
-                    secondary_cls_name.lower() + "_id",
-                    Integer,
-                    ForeignKey(secondary_cls_table_name + ".id"),
-                    primary_key=True,
-                )
+        secondary_table_name=None
+    ):
+    """creates any secondary table
+    """
+    
+    plural_secondary_cls_name = make_plural(secondary_cls_name)
+    
+    # use the given class_name and the class_table
+    if not secondary_table_name:
+        secondary_table_name = \
+            primary_cls_name + "_" + plural_secondary_cls_name
+    
+    # check if the table is already defined
+    if secondary_table_name not in Base.metadata:
+        secondary_table = Table(
+            secondary_table_name, Base.metadata,
+            Column(
+                primary_cls_name.lower() + "_id",
+                Integer,
+                ForeignKey(primary_cls_table_name + ".id"),
+                primary_key=True,
+            ),
+            
+            Column(
+                secondary_cls_name.lower() + "_id",
+                Integer,
+                ForeignKey(secondary_cls_table_name + ".id"),
+                primary_key=True,
             )
-        else:
-            secondary_table = Base.metadata.tables[secondary_table_name]
-        
-        return secondary_table
+        )
+    else:
+        secondary_table = Base.metadata.tables[secondary_table_name]
+    
+    return secondary_table
 
 class TargetEntityTypeMixin(object):
     """Adds target_entity_type attribute to mixed in class.
@@ -106,16 +109,16 @@ class TargetEntityTypeMixin(object):
     __nullable_target__ = False
     __unique_target__ = False
     
+    
     @declared_attr
     def _target_entity_type(cls):
-        
         return Column(
             "target_entity_type",
             String(128),
             nullable=cls.__nullable_target__,
             unique=cls.__unique_target__
         )
-
+    
     def __init__(self, target_entity_type=None, **kwargs):
         self._target_entity_type =\
             self._validate_target_entity_type(target_entity_type)
@@ -653,7 +656,7 @@ class ReferenceMixin(object):
     
     :type references: list of :class:`~stalker.models.entity.Entity` objects.
     """
-
+    
     # add this lines for Sphinx
     #    __tablename__ = "ReferenceMixins"
 
@@ -667,11 +670,15 @@ class ReferenceMixin(object):
     
     @declared_attr
     def references(cls):
+        # TODO: there is something wrong here, the documentation and the implementation is not telling the same story
         # get secondary table
         secondary_table = create_secondary_table(
-            cls.__name__, 'Link', cls.__tablename__, 'Links'
+            cls.__name__,
+            'Link',
+            cls.__tablename__,
+            'Links',
+            cls.__name__ + "_References"
         )
-        
         # return the relationship
         return relationship("Link", secondary=secondary_table)
 
@@ -685,7 +692,7 @@ class ReferenceMixin(object):
         # all the elements should be instance of stalker.models.entity.Entity
         if not isinstance(reference, SimpleEntity):
             raise TypeError("%s.references should be all instances of "
-                            "stalker.models.entity.Entity not %s"
+                            "stalker.models.entity.SimpleEntity not %s"
                             % (self.__class__.__name__,
                                reference.__class__.__name__))
         return reference

@@ -42,7 +42,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     :param image_format: The output image format of the project. Default
       value is None.
     
-    :type image_format: :class:`~stalker.models.formats.ImageFormat`
+    :type image_format: :class:`~stalker.models.format.ImageFormat`
     
     :param float fps: The FPS of the project, it should be a integer or float
       number, or a string literal which can be correctly converted to a float.
@@ -146,11 +146,11 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     image_format = relationship(
         "ImageFormat",
         primaryjoin="Projects.c.image_format_id==ImageFormats.c.id",
-        doc="""The :class:`~stalker.models.formats.ImageFormat` of this
+        doc="""The :class:`~stalker.models.format.ImageFormat` of this
         project.
         
         This value defines the output image format of the project, should be an
-        instance of :class:`~stalker.models.formats.ImageFormat`.
+        instance of :class:`~stalker.models.format.ImageFormat`.
         """
     )
 
@@ -209,12 +209,12 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         """validates the given image format
         """
         
-        from stalker.models.formats import ImageFormat
+        from stalker.models.format import ImageFormat
 
         if image_format is not None and\
            not isinstance(image_format, ImageFormat):
             raise TypeError("the image_format should be an instance of "
-                            "stalker.models.formats.ImageFormat")
+                            "stalker.models.format.ImageFormat")
 
         return image_format
 

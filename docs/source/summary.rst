@@ -29,7 +29,7 @@ Summary
    stalker.models.entity.Entity
    stalker.models.entity.SimpleEntity
    stalker.models.entity.TaskableEntity
-   stalker.models.formats.ImageFormat
+   stalker.models.format.ImageFormat
    stalker.models.link.Link
    stalker.models.message.Message
    stalker.models.note.Note
@@ -43,7 +43,7 @@ Summary
    stalker.models.tag.Tag
    stalker.models.task.Booking
    stalker.models.task.Task
-   stalker.models.templates.FilenameTemplate
+   stalker.models.template.FilenameTemplate
    stalker.models.ticket.Ticket
    stalker.models.ticket.TicketLog
    stalker.models.type.Type

@@ -4,8 +4,14 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
-from sqlalchemy import Column, Integer, ForeignKey, String
-from stalker.models.entity import Entity
+
+
+#from sqlalchemy.orm.descriptor_props import SynonymProperty
+ 
+from sqlalchemy import Column, Integer, ForeignKey, String, UniqueConstraint
+from sqlalchemy.ext.declarative import declared_attr
+from stalker.db.declarative import Base
+from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import TargetEntityTypeMixin
 
 class Type(Entity, TargetEntityTypeMixin):
@@ -50,26 +56,18 @@ class Type(Entity, TargetEntityTypeMixin):
     :param string target_entity_type: The string defining the target type of
       this :class:`~stalker.models.type.Type`.
     """
-
     __tablename__ = "Types"
     __mapper_args__ = {"polymorphic_identity": "Type"}
     type_id_local = Column("id", Integer, ForeignKey("Entities.id"),
                            primary_key=True)
-    _target_entity_type = Column(
-        "target_entity_type",
-        String
-    )
-
+    
     def __init__(self, **kwargs):
         super(Type, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, **kwargs)
-#        self._target_entity_type =\
-#        self._validate_target_entity_type(target_entity_type)
     
     def __eq__(self, other):
         """the equality operator
         """
-
         return super(Type, self).__eq__(other) and isinstance(other, Type)\
         and self.target_entity_type == other.target_entity_type
 
@@ -78,3 +76,17 @@ class Type(Entity, TargetEntityTypeMixin):
         """
 
         return not self.__eq__(other)
+
+# TODO: add a comparator as you did in oyProjectManager VersionStatusComparator
+class EntityType(Base):
+    """A simple class just to hold the registered class names in Stalker
+    """
+    __tablename__ = 'EntityTypes'
+    id = Column("id", Integer, primary_key=True)
+    name = Column(String(128), nullable=False, unique=True)
+    
+    def __init__(self, name):
+        self.name = name
+    
+    # TODO: add tests for the name attribute
+

@@ -43,13 +43,17 @@
 
 html, body {
     font-family: 'Ubuntu', "Bitstream Vera Sans", 'DejaVu Sans', 'Tahoma', 'sans-serif';
-    /*background-color: #c0c0c0;*/
-    /*font-size: 12px;*/
+    /*font-family: Arial,Helvetica,sans-serif;*/
+    background-color: #c0c0c0;
+    font-size: 14px;
     /*line-height: 16px;*/
     height: 100%;
     margin: 0;
     overflow: hidden;
     padding: 0;
+    border-radius: 12px;
+    -moz-border-radius: 12px;
+    -webkit-border-radius: 12px;
     -moz-user-select: none;
     -webkit-user-select: none; 
 }
@@ -101,76 +105,83 @@ ul li ol {
     -webkit-user-select: none; 
 }
 
-#login_window {
-    background-color: #808080;
-    border-radius: 12px 12px 12px 12px;
-    color: #FFFFFF;
-    height: 192px;
-    left: 50%;
-    margin-left: -160px;
-    margin-top: -96px;
-    position: absolute;
-    top: 50%;
-    width: 320px;
-}
+/*#login_window {*/
+    /*background-color: #808080;*/
+    /*border-radius: 12px 12px 12px 12px;*/
+    /*color: #FFFFFF;*/
+    /*height: 192px;*/
+    /*left: 50%;*/
+    /*margin-left: -160px;*/
+    /*margin-top: -96px;*/
+    /*position: absolute;*/
+    /*top: 50%;*/
+    /*width: 320px;*/
+/*}*/
 
-#login_window #title {
-    position: relative;
-    text-align: center;
-    width: 100%;
-}
-
-#column1 {
-    float: left;
-    line-height: 25px;
-    margin-left: 13px;
-    margin-right: 8px;
-    /*margin-top: 25px;*/
-    text-align: right;
-    /*width: 90px;*/
-}
+/*#login_window #title {*/
+    /*position: relative;*/
+    /*text-align: center;*/
+    /*width: 100%;*/
+/*}*/
 
 .indented_input {
     text-indent: 11px;
 }
 
-#column2 {
+.row {
     float: left;
-    /*line-height: 30px;*/
-    /*margin-top: 25px;*/
-    position: relative;
+    height: 35px;
+}
+
+.column1 {
+    float: left;
+    line-height: 32px;
+    margin-right: 10px;
+    text-align: right;
     width: 150px;
 }
 
-#login_window input {
-    border: medium none transparent;
-    border-radius: 12px 12px 12px 12px;
+.column2 {
     float: left;
-    font-size: 12px;
-    height: 24px;
-    margin-bottom: 11px;
-    width: 182px;
+    line-height: inherit;
+    width: 212px;
+    margin-right: 10px;
+    padding-top: 6px;
 }
 
-#login_window #login_button input {
-    border: medium none transparent;
-    border-radius: 12px 12px 12px 12px;
-    float: right;
-    font-size: 12px;
-    height: 24px;
-    margin-bottom: 11px;
-    width: 75px;
-    color: #ffffff;
-    background: -moz-linear-gradient(top, #0072bc, #0054a6);
-    background: -webkit-gradient(linear, left top, left bottom, from(#0072bc), to(#0054a6));
+.column3 {
+    float: left;
 }
 
-#login_window #message {
-    background-color: #EE1C24;
-    border-radius: 10px 10px 10px 10px;
-    margin-top: 42px;
-    text-align: center;
-}
+/*#login_window input {*/
+    /*border: medium none transparent;*/
+    /*border-radius: 12px 12px 12px 12px;*/
+    /*float: left;*/
+    /*font-size: 12px;*/
+    /*height: 24px;*/
+    /*margin-bottom: 11px;*/
+    /*width: 182px;*/
+/*}*/
+
+/*#login_window #login_button input {*/
+    /*border: medium none transparent;*/
+    /*border-radius: 12px 12px 12px 12px;*/
+    /*float: right;*/
+    /*font-size: 12px;*/
+    /*height: 24px;*/
+    /*margin-bottom: 11px;*/
+    /*width: 75px;*/
+    /*color: #ffffff;*/
+    /*background: -moz-linear-gradient(top, #0072bc, #0054a6);*/
+    /*background: -webkit-gradient(linear, left top, left bottom, from(#0072bc), to(#0054a6));*/
+/*}*/
+
+/*#login_window #message {*/
+    /*background-color: #EE1C24;*/
+    /*border-radius: 10px 10px 10px 10px;*/
+    /*margin-top: 42px;*/
+    /*text-align: center;*/
+/*}*/
 
 #header{
     background-color: #448CCB;
@@ -180,7 +191,7 @@ ul li ol {
     height: 40px;
     margin: 0;
     width: 100%;
-    font-family: UbuntuBold;
+    /*font-family: UbuntuBold;*/
 }
 
 #header #stalker_logo{
@@ -274,7 +285,7 @@ ul li ol {
 #main_view {
     float: left;
     height: 100%;
-    width: 82%;
+    width: 100%;
 }
 
 #top_menu {
@@ -354,7 +365,7 @@ ul li ol {
 .window_header {
     background-color: #448CCB;
     color: white;
-    font-family: UbuntuBold;
+    /*font-family: UbuntuBold;*/
     font-size: 14px;
     height: 24px;
     line-height: 24px;
@@ -364,7 +375,7 @@ ul li ol {
 
 .window_close_button {
     color: white;
-    font-family: UbuntuBold;
+    /*font-family: UbuntuBold;*/
     left: 8px;
     position: absolute;
     top: 3px;

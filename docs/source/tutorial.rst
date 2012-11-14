@@ -547,7 +547,7 @@ repository.
 
 So before creating a new version for any kind of task, we need to tell Stalker
 where to place the related files. This can be done by using a
-:class:`~stalker.models.templates.FilenameTemplate` object.
+:class:`~stalker.models.template.FilenameTemplate` object.
 
 A :class:`~stalker.models.template.FilenameTemplate` object has information
 about the path, the filename, and the target entity type to apply this template

@@ -10,8 +10,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class ORMClass(object):
     @classmethod
-    def query(class_):
+    def query(cls):
         from stalker.db.session import DBSession
-        return DBSession.query(class_)
+        return DBSession.query(cls)
 
 Base = declarative_base(cls=ORMClass)

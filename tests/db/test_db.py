@@ -134,6 +134,7 @@ class DatabaseTester(unittest.TestCase):
         
         # now reconnect and check if the newUser is there
         DBSession.remove()
+        
         db.setup({
             "sqlalchemy.url": self.TEST_DATABASE_URI,
             "sqlalchemy.echo": False
@@ -395,6 +396,24 @@ class DatabaseTester(unittest.TestCase):
         # clean the test
         shutil.rmtree(temp_db_path)
     
+    def test_default_FilenameTemplate_Type_creation(self):
+        """testing if the default Types for the FilenameTemplates are created
+        successfully
+        """
+        DBSession.remove()
+        DBSession.configure(extension=None)
+        db.setup()
+        
+        # now get all the Types for FilenameTemplates
+        f_types = Type.query()\
+            .filter_by(target_entity_type="FilenameTemplate")\
+            .all()
+        
+        self.assertEqual(len(f_types), 2)
+        type_names = [t.name for t in f_types]
+        self.assertIn("Version", type_names)
+        self.assertIn("Reference", type_names)
+
 class DatabaseModelsTester(unittest.TestCase):
     """tests the database model
     
@@ -840,21 +859,22 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_FilenameTemplate(self):
         """testing the persistence of FilenameTemplate
         """
-        ## get the admin
-        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
+        
+        vers_type = Type.query().filter_by(name="Version").first()
+        ref_type = Type.query().filter_by(name="Reference").first()
         
         # create a FilenameTemplate object for movie links
         kwargs = {
             "name": "Movie Links Template",
             "target_entity_type": Link,
+            "type": ref_type,
             "description": "this is a template to be used for links to movie"
                            "files",
-            #"created_by": admin,
             "path": "REFS/{{link_type.name}}",
             "filename": "{{link.file_name}}",
             "output_path": "OUTPUT",
             "output_file_code": "{{link.file_name}}",
-            }
+        }
         
         new_type_template = FilenameTemplate(**kwargs)
         #new_type_template2 = FilenameTemplate(**kwargs)
@@ -877,6 +897,7 @@ class DatabaseModelsTester(unittest.TestCase):
         tags = new_type_template.tags
         target_entity_type = new_type_template.target_entity_type
         updated_by = new_type_template.updated_by
+        type_ = new_type_template.type
         
         del new_type_template
         
@@ -903,6 +924,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(target_entity_type,
                          new_type_template_DB.target_entity_type)
         self.assertEqual(updated_by, new_type_template_DB.updated_by)
+        self.assertEqual(type_, new_type_template_DB.type)
     
     def test_persistence_ImageFormat(self):
         """testing the persistence of ImageFormat
@@ -1873,12 +1895,18 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # create a new asset Type
         char_asset_type = Type(
-            name="Character Asset Type",
+            name="Character",
             description="This is the asset type which covers animated " +\
                         "charactes",
             #created_by=admin,
             target_entity_type=Asset,
         )
+        
+        # get the Version Type for FilenameTemplates
+        v_type = Type.query()\
+            .filter_by(target_entity_type="FilenameTemplate")\
+            .filter_by(name="Version")\
+            .first()
         
         # create a new type template for character assets
         assetTemplate = FilenameTemplate(
@@ -1887,7 +1915,8 @@ class DatabaseModelsTester(unittest.TestCase):
             path="ASSETS/{{asset_type.name}}/{{pipeline_step.code}}",
             filename="{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
             v{{version.version_number}}",
-            target_entity_type=Asset,
+            target_entity_type="Asset",
+            type=v_type
         )
         
         # create a new link type
@@ -1898,6 +1927,12 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type=Link
         )
         
+        # get reference Type of FilenameTemplates
+        r_type = Type.query()\
+            .filter_by(target_entity_type="FilenameTemplate")\
+            .filter_by(name="Reference")\
+            .first()
+        
         # create a new template for references
         imageReferenceTemplate = FilenameTemplate(
             name="Image Reference Template",
@@ -1906,7 +1941,8 @@ class DatabaseModelsTester(unittest.TestCase):
             #created_by=admin,
             path="REFS/{{reference.type.name}}",
             filename="{{reference.file_name}}",
-            target_entity_type=Link
+            target_entity_type=Link,
+            type=r_type
         )
         
         commercial_structure_type = Type(

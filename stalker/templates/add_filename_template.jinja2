@@ -1,0 +1,212 @@
+{% extends 'add_data_form.jinja2' %}
+{% block form_block %}
+  <div class="dijitDialogPaneContentArea">
+    <div id='filename_template_form_div'>
+      
+      {# NAME #}
+      <div class="row">
+        <div class="column1">
+          <label for='filename_template_name'>Name</label>
+        </div>
+        <div class="column2">
+          <input id='filename_template_name'>
+        </div>
+      </div>
+      
+      {# TARGET ENTITY TYPE #}
+      <div class="row">
+        <div class="column1">
+          <label for='filename_template_target_entity_type'>Target Entity Type</label>
+        </div>
+        <div class="column2">
+          <input id='filename_template_target_entity_type'>
+        </div>
+      </div>
+      
+      {# TYPE #}
+      <div class="row">
+        <div class="column1">
+          <label for='filename_template_type'>Type</label>
+        </div>
+        <div class="column2">
+          <input id='filename_template_type'>
+        </div>
+      </div>
+      
+      {# PATH #}
+      <div class="row">
+        <div class="column1">
+          <label for='filename_template_path'>Path Template</label>
+        </div>
+        <div class="column2">
+          <input id='filename_template_path'>
+        </div>
+      </div>
+      
+      {# FILENAME #}
+      <div class="row">
+        <div class="column1">
+          <label for='filename_template_filename'>Filename Template</label>
+        </div>
+        <div class="column2">
+          <input id='filename_template_filename'>
+        </div>
+      </div>
+      
+      {# OUTPUT #}
+      <div class="row">
+        <div class="column1">
+          <label for='filename_template_output'>Output Template</label>
+        </div>
+        <div class="column2">
+          <input id='filename_template_output'>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <div class="dijitDialogPaneActionBar" style="clear: both;">
+    <button id='filename_template_add_button'></button>
+    <button id='filename_template_cancel_button'></button>
+  </div>
+  <script type="text/javascript">
+    require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
+      "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
+      "dijit/form/Select", "dijit/form/Button", "dojo/domReady!"
+    ],
+      function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
+               Select, Button){
+        
+        var add_filename_template_form = new Form({
+          id: "add_filename_template_form",
+          method: "POST",
+          onSubmit: function(event){
+            if (this.validate()){
+              // just close the dialog and somehow change the related field
+              // on parent widget
+              var deferred = xhr.post({
+                content: {
+                  submitted: 'add'
+                },
+                url: "{{ request.route_url('add_filename_template') }}",
+                form: dojo.byId('add_filename_template_form')
+              });
+              
+              // update the caller dialog
+              var dialog = dijit.byId('add_filename_template_dialog');
+              var parent = dialog.get('parent');
+              if (parent != null){
+                // TODO: just update the image format field of the parent dialog
+                parent.refresh()
+              }
+              
+              // destroy the dialog
+              dialog.destroyRecursive();
+              
+            }
+            return false;
+          }
+        }, 'filename_template_form_div');
+        add_filename_template_form.startup();
+        
+        // NAME
+        var name_textBox = new ValidationTextBox({
+          name: "name",
+          label: "Name",
+          placeHolder: "Enter a name",
+          required: true
+        }, "filename_template_name");
+        name_textBox.startup();
+        
+        // TARGET ENTITY TYPE
+        var target_entity_type_select = new Select({
+          name: "target_entity_type",
+          label: "Target Entity Type",
+          required: true,
+          style: 'width: auto; margin: 0px; padding: 0px;',
+          options: [
+            {% for entity_type in entity_types %}
+              {
+                label: '{{ entity_type.name }}',
+                value: '{{ entity_type.name }}'
+              },
+            {% endfor %}
+          ]
+        }, "filename_template_target_entity_type");
+        target_entity_type_select.startup();
+        
+
+        // TYPE
+        var type_select = new Select({
+          name: "type",
+          label: "Type",
+          required: true,
+          style: 'width: auto; margin: 0px; padding: 0px;',
+          options: [
+            {% for type in filename_template_types %}
+              {
+                label: '{{ type.name }}',
+                value: '{{ type.name }}'
+              },
+            {% endfor %}
+          ]
+        }, "filename_template_type");
+        type_select.startup();
+         
+        // PATH
+        var path_textBox = new TextBox({
+          name: "path",
+          label: "Path Template",
+          placeHolder: "Enter Jinja2 code here",
+          required: true
+        }, "filename_template_path");
+        path_textBox.startup();
+        
+        // FILENAME
+        var filename_textBox = new TextBox({
+          name: "filename",
+          label: "Filename Template",
+          placeHolder: "Enter Jinja2 code here",
+          required: true
+        }, "filename_template_filename");
+        filename_textBox.startup();
+      
+        // OUTPUT
+        var output_textBox = new TextBox({
+          name: "output",
+          label: "Output Template",
+          placeHolder: "Enter Jinja2 code here",
+          required: true
+        }, "filename_template_output");
+        output_textBox.startup();
+        
+        // ADD BUTTON
+        var add_button = new Button({
+          label: "Add",
+          type: "button",
+          onClick: function(){
+            if (add_filename_template_form.validate()){
+              add_filename_template_form.submit();
+            } else {
+              return false;
+            }
+          }
+        }, 'filename_template_add_button');
+        add_button.startup();
+        
+        // CANCEL BUTTON
+        var cancel_button = new Button({
+          label: "Cancel",
+          type: "button",
+          onClick: function(){
+            var dialog = dijit.byId('add_filename_template_dialog');
+            dialog.destroyRecursive();
+          }
+        }, 'filename_template_cancel_button');
+        cancel_button.startup();        
+        
+        
+    });
+  </script>
+{% endblock %}
+

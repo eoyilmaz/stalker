@@ -6,55 +6,51 @@
 
 import datetime
 import re
-from sqlalchemy import (Table, Column, Integer, String, ForeignKey, DateTime,
-                        Enum)
+from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship, validates, reconstructor
 
 import stalker
 from stalker.db import Base
 from stalker.models.mixins import ProjectMixin
 
-
-
-
-class EntityMeta(type):
-    """The metaclass for the very basic entity.
-    
-    Just adds the name of the class as the entity_type class attribute and
-    creates an attribute called plural_name to hold the auto generated plural
-    form of the class name. These two attributes can be overridden in the
-    class itself.
-    """
-    
-    def __new__(mcs, class_name, bases, dict_):
-        # create the entity_type
-        #dict_["entity_type"] = unicode(class_name)
-        
-        # try to find a plural name for the class if not given
-        if not dict_.has_key("plural_name"):
-            plural_name = unicode(class_name + "s")
-            
-            if class_name[-1] == "y":
-                plural_name = unicode(class_name[:-1] + "ies")
-            elif class_name[-2] == "ch":
-                plural_name = unicode(class_name + "es")
-            elif class_name[-1] == "f":
-                plural_name = unicode(class_name[:-1] + "ves")
-            elif class_name[-1] == "s":
-                plural_name = unicode(class_name + "es")
-
-            dict_["plural_name"] = plural_name
-
-        #if not dict_.has_key("__strictly_typed__"):
-        #    dict_["__strictly_typed__"] = False
-        
-        # add the class to the ACLs
-        ACLs.insert().values(action='add', class_name=class_name)
-        from stalker.db.session import DBSession
-        if DBSession.engine:
-            pass
-        
-        return super(EntityMeta, mcs).__new__(mcs, class_name, bases, dict_)
+#class EntityMeta(type):
+#    """The metaclass for the very basic entity.
+#    
+#    Just adds the name of the class as the entity_type class attribute and
+#    creates an attribute called plural_name to hold the auto generated plural
+#    form of the class name. These two attributes can be overridden in the
+#    class itself.
+#    """
+#    
+#    def __new__(mcs, class_name, bases, dict_):
+#        # create the entity_type
+#        #dict_["entity_type"] = unicode(class_name)
+#        
+#        # try to find a plural name for the class if not given
+#        if not dict_.has_key("plural_name"):
+#            plural_name = unicode(class_name + "s")
+#            
+#            if class_name[-1] == "y":
+#                plural_name = unicode(class_name[:-1] + "ies")
+#            elif class_name[-2] == "ch":
+#                plural_name = unicode(class_name + "es")
+#            elif class_name[-1] == "f":
+#                plural_name = unicode(class_name[:-1] + "ves")
+#            elif class_name[-1] == "s":
+#                plural_name = unicode(class_name + "es")
+#
+#            dict_["plural_name"] = plural_name
+#
+#        #if not dict_.has_key("__strictly_typed__"):
+#        #    dict_["__strictly_typed__"] = False
+#        
+#        # add the class to the ACLs
+#        ACLs.insert().values(action='add', class_name=class_name)
+#        from stalker.db.session import DBSession
+#        if DBSession.engine:
+#            pass
+#        
+#        return super(EntityMeta, mcs).__new__(mcs, class_name, bases, dict_)
 
 class SimpleEntity(Base):
     """The base class of all the others
@@ -519,7 +515,7 @@ class SimpleEntity(Base):
                              "before 'date_created', try setting the "
                              "'date_created' before" %
                              self.__class__.__name__)
-
+        # TODO: all the attribute check errors should use self.__class__.__name__ as used here
         return date_updated_in
 
     @validates("type")

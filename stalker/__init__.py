@@ -8,7 +8,7 @@ Stalker is a Production Asset Management System (ProdAM) designed for animation
 and vfx studios. See docs for more information.
 """
 
-__version__ = '0.2.0.a3'
+__version__ = '0.2.0.a4'
 
 from pyramid.config import Configurator
 
@@ -18,7 +18,7 @@ from stalker.models.asset import Asset
 from stalker.models.auth import Group, User, Permission
 from stalker.models.department import Department
 from stalker.models.entity import SimpleEntity, Entity, TaskableEntity
-from stalker.models.formats import ImageFormat
+from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message
 from stalker.models.mixins import (ProjectMixin, ReferenceMixin, ScheduleMixin,
@@ -33,8 +33,8 @@ from stalker.models.structure import Structure
 from stalker.models.tag import Tag
 from stalker.models.task import Booking
 from stalker.models.task import Task
-from stalker.models.templates import FilenameTemplate
-from stalker.models.type import Type
+from stalker.models.template import FilenameTemplate
+from stalker.models.type import Type, EntityType
 from stalker.models.version import Version
 
 
@@ -68,8 +68,20 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
-    config.add_route('create_project', 'create/project')
-    config.add_route('create_image_format', 'create/image_format')
+    config.add_route('add_project', 'add/project')
+    config.add_route('edit_project', 'edit/project')
+    config.add_route('add_image_format', 'add/image_format')
+    config.add_route('edit_image_format', 'edit/image_format/{imf_id}')
+    config.add_route('add_repository', 'add/repository')
+    config.add_route('edit_repository', 'edit/repository')
+    config.add_route('add_structure', 'add/structure')
+    config.add_route('edit_structure', 'edit/structure/{structure_id}')
+    config.add_route('add_user', 'add/user')
+    config.add_route('edit_user', 'edit/user/{user_id}')
+    config.add_route('add_filename_template', 'add/filename_template')
+    config.add_route('edit_filename_template',
+                     'edit/filename_template/{filename_template_id}')
+    
     config.scan()
     return config.make_wsgi_app()
 

@@ -85,8 +85,11 @@ def __init_db__():
     if defaults.AUTO_CREATE_ADMIN:
         __create_admin__()
     
-    # create ticket statuses
+    # create Ticket statuses
     __create_ticket_statuses()
+    
+    # create FilenameTemplate Types
+    __create_filename_template_types()
     
     logger.debug('finished initializing the database')
 
@@ -108,7 +111,6 @@ def __create_admin__():
     logger.debug("creating the default administrator user")
     
     # create the admin department
-    #with transaction.manager:
     admin_department = Department.query().filter_by(
         name=defaults.ADMIN_DEPARTMENT_NAME
     ).first()
@@ -160,76 +162,132 @@ def __create_admin__():
 def __create_ticket_statuses():
     """creates the default ticket statuses
     """
-    
     from stalker import User
     
     admin = User.query().filter(User.login_name==defaults.ADMIN_NAME).first()
     
     # create statuses for Tickets
     from stalker import Status, StatusList
+    logger.debug("Creating Ticket Statuses")
+    ticket_status1 = Status(
+        name='New',
+        code='NEW',
+        created_by=admin,
+        updated_by=admin
+    )
     
+    ticket_status2 = Status(
+        name='Reopened',
+        code='REOPENED',
+        created_by=admin,
+        updated_by=admin
+    )
+    
+    ticket_status3 = Status(
+        name='Closed',
+        code='CLOSED',
+        created_by=admin,
+        updated_by=admin
+    )
+    
+    ticket_status_list = StatusList(
+        name='Ticket Statuses',
+        target_entity_type='Ticket',
+        statuses=[
+            ticket_status1,
+            ticket_status2,
+            ticket_status3,
+        ],
+        created_by=admin,
+        updated_by=admin
+    )
+    
+    DBSession.add(ticket_status_list)
     try:
-        with transaction.manager:
-            ticket_status1 = Status(
-                name='New',
-                code='NEW',
-                created_by=admin,
-                updated_by=admin
-            )
-            
-            ticket_status2 = Status(
-                name='Reopened',
-                code='REOPENED',
-                created_by=admin,
-                updated_by=admin
-            )
-            
-            ticket_status3 = Status(
-                name='Closed',
-                code='CLOSED',
-                created_by=admin,
-                updated_by=admin
-            )
-            
-            ticket_status_list = StatusList(
-                name='Ticket Statuses',
-                target_entity_type='Ticket',
-                statuses=[
-                    ticket_status1,
-                    ticket_status2,
-                    ticket_status3,
-                ],
-                created_by=admin,
-                updated_by=admin
-            )
-            
-            DBSession.add(ticket_status_list)
+        transaction.commit()
     except IntegrityError:
+        transaction.abort()
         pass
-    #transaction.commit()
+    else:
+        logger.debug("Created Ticket Statuses successfully")
+        DBSession.flush()
+    
+    # Again I hate doing this in this way
+    from stalker import Type
+    types = Type.query()\
+        .filter_by(target_entity_type="Ticket")\
+        .all()
+    t_names = [t.name for t in types]
     
     # create Ticket Types
-    from stalker import Type
+    logger.debug("Creating Ticket Types")
+    if 'Defect' not in t_names:
+        ticket_type_1 = Type(
+            name='Defect',
+            target_entity_type='Ticket',
+            created_by=admin,
+            updated_by=admin
+        )
+        DBSession.add(ticket_type_1)
+    
+    if 'Enhancement' not in t_names:
+        ticket_type_2 = Type(
+            name='Enhancement',
+            target_entity_type='Ticket',
+            created_by=admin,
+            updated_by=admin
+        )
+        DBSession.add(ticket_type_2)
+    try:
+        transaction.commit()
+    except IntegrityError:
+        transaction.abort()
+        logger.debug("Ticket Types are already in the database!")
+    else:
+        DBSession.flush()
+        logger.debug("Ticket Types are created successfully")
+
+def __create_filename_template_types():
+    """Creates two default :class:`~stalker.models.type.Type`\ s for
+    :class:`~stalker.models.template.FilenameTemplate` objects. The first
+    Type instance is for "Version"s and the other is for "References".
+    """
+    from stalker import User, Type
+    
+    # I hate doing it in this way but I cannot create UniqueConstraint
+    # between derived and mixed-in attributes ("name" and "target_entity_type")
+    # So I need to be sure that there are no "Version" and "Reference"
+    # FilenameTemplate Types before creating them, cause I literally can.
+    types = Type.query()\
+        .filter_by(target_entity_type="FilenameTemplate")\
+        .all()
+    type_names = [t.name for t in types]
+    
+    logger.debug("creating default Types for FilenameTemplates")
+    
+    admin = User.query().filter_by(login_name=defaults.ADMIN_NAME).first()
+    
+    if "Version" not in type_names:
+        # mark them as created by admin
+        vers_type = Type(name="Version",
+                         target_entity_type="FilenameTemplate",
+                         created_by=admin)
+        DBSession.add(vers_type)
+    
+    if "Reference" not in type_names:
+        ref_type = Type(name="Reference",
+                    target_entity_type="FilenameTemplate",
+                    created_by=admin)
+        DBSession.add(ref_type)
     
     try:
-        with transaction.manager:
-            ticket_type_1 = Type(
-                name='Defect',
-                target_entity_type='Ticket',
-                created_by=admin,
-                updated_by=admin
-            )
-            ticket_type_2 = Type(
-                name='Enhancement',
-                target_entity_type='Ticket',
-                created_by=admin,
-                updated_by=admin
-            )
-            DBSession.add_all([ticket_type_1, ticket_type_2])
+        transaction.commit()
     except IntegrityError:
-        pass
-    
-    #transaction.commit()
+        transaction.abort()
+        logger.debug('FilenameTemplate Types are already in database')
+    else:
+        DBSession.flush()
+        logger.debug('FilenameTemplate Types are created successfully')
 
 def register(class_):
     """Registers the given class to the database.
@@ -284,6 +342,7 @@ def register(class_):
     # create the Permissions
     permissions_db = Permission.query().all()
     
+    class_name = ''
     if isinstance(class_, type):
         class_name = class_.__class__.__name__
     elif isinstance(class_, (str, unicode)):
@@ -292,22 +351,22 @@ def register(class_):
         raise TypeError('To register a class please either supply the class '
                         'itself or the name of it')
     
+    # register the class name to entity_types table
+    from stalker.models.type import EntityType
+    
+    if not EntityType.query().filter_by(name=class_name).first():
+        new_entity_type = EntityType(class_name)
+        DBSession.add(new_entity_type)
+    
     for action in defaults.DEFAULT_ACTIONS:
         for access in  [Allow, Deny]:
             permission_obj = Permission(access, action, class_name)
             if permission_obj not in permissions_db:
-                #logger.debug('adding new permission %s, %s, %s' % 
-                #    (permission_obj.access,
-                #     permission_obj.action,
-                #     permission_obj.class_name)
-                #)
                 DBSession.add(permission_obj)
-            #else:
-            #    logger.debug('permission already defined in db:'
-            #                 ' %s, %s, %s' %
-            #        (permission_obj.access,
-            #         permission_obj.action,
-            #         permission_obj.class_name)
-            #    )
     
-    transaction.commit()
+    try:
+        transaction.commit()
+    except IntegrityError:
+        transaction.abort()
+    else:
+        DBSession.flush()

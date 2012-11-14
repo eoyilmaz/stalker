@@ -16,6 +16,9 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+# TODO: Add parent_version attribute to hold a parent child relation between
+# version to pin point the source of the given version.
+
 class Version(Entity, StatusMixin):
     """The connection to the filesystem.
     
@@ -88,6 +91,17 @@ class Version(Entity, StatusMixin):
         """
     )
     
+    inputs = relationship(
+        "Link",
+        secondary="Version_Inputs",
+        primaryjoin="Versions.c.id==Version_Inputs.c.version_id",
+        secondaryjoin="Version_Inputs.c.link_id==Links.c.id",
+        doc="""The inputs of the current version.
+        
+        It is a list of :class:`~stalker.models.link.Link` instances.
+        """
+    )
+    
     outputs = relationship(
         "Link",
         secondary="Version_Outputs",
@@ -106,6 +120,7 @@ class Version(Entity, StatusMixin):
                  take_name=defaults.DEFAULT_VERSION_TAKE_NAME,
                  #version_number=None,
                  source_file=None,
+                 inputs=None,
                  outputs=None,
                  task=None,
                  **kwargs):
@@ -117,10 +132,13 @@ class Version(Entity, StatusMixin):
         self.source_file = source_file
         self.version_of = version_of
         self.version_number = None
-       
+        if inputs is None:
+            inputs = []
+        
         if outputs is None:
             outputs = []
         
+        self.inputs = inputs
         self.outputs = outputs
         
         # set published to False by default
@@ -228,11 +246,25 @@ class Version(Entity, StatusMixin):
 
         return version_of
     
+    @validates("inputs")
+    def _validate_inputs(self, key, input):
+        """validates the given output
+        """
+        from stalker.models.link import Link
+        
+        if not isinstance(input, Link):
+            raise TypeError("all elements in %s.inputs should be all "
+                            "stalker.models.link.Link instances not %s" %
+                            (self.__class__.__name__,
+                             input.__class__.__name__)
+            )
+
+        return input
+    
     @validates("outputs")
     def _validate_outputs(self, key, output):
         """validates the given output
         """
-        
         from stalker.models.link import Link
         
         if not isinstance(output, Link):
@@ -260,7 +292,11 @@ class Version(Entity, StatusMixin):
 #        return ticket
 
 # VERSION INPUTS
-
+Version_Inputs = Table(
+    "Version_Inputs", Base.metadata,
+    Column("version_id", Integer, ForeignKey("Versions.id"), primary_key=True),
+    Column("link_id", Integer, ForeignKey("Links.id"), primary_key=True)
+)
 
 # VERSION_OUTPUTS
 Version_Outputs = Table(

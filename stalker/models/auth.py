@@ -59,8 +59,6 @@ class RootFactory(object):
     @property
     def __acl__(self):
         # create the default acl and give admins all the permissions
-        from stalker.models.auth import Permission
-        
         all_permissions = map(
             lambda x: x.action + '_' + x.class_name,
             Permission.query().all()
@@ -262,7 +260,9 @@ class Group(Entity, ACLMixin):
         """
     )
     
-    def __init__(self, name='', users=[], **kwargs):
+    def __init__(self, name='', users=None, **kwargs):
+        if users is None:
+            users = []
         kwargs.update({'name': name})
         super(Group, self).__init__(**kwargs)
         
@@ -313,7 +313,7 @@ class User(Entity, ACLMixin):
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
     
-    :type email: unicode
+    :type email: str, unicode
     
     :param login_name: it is the login name of the user, it should be all lower
       case. Giving a string or unicode that has uppercase letters, it will be
@@ -326,20 +326,20 @@ class User(Entity, ACLMixin):
       both of them, one is enough and if the two is given `login_name` will be
       used.
     
-    :type login_name: unicode
+    :type login_name: str, unicode
     
     :param first_name: it is the first name of the user, must be a string or
       unicode, middle name also can be added here, so it accepts white-spaces
       in the variable, but it will truncate the white spaces at the beginin and
       at the end of the variable and it can not be empty or None
     
-    :type first_name: unicode
+    :type first_name: str, unicode
     
     :param last_name: it is the last name of the user, must be a string or
       unicode, again it can not contain any white spaces at the beggining and
       at the end of the variable and it can be an empty string or None
     
-    :type last_name: unicode
+    :type last_name: str, unicode
     
     :param department: it is the department of the current user. It should be
       a Department object. One user can only be listed in one department. A
@@ -355,7 +355,7 @@ class User(Entity, ACLMixin):
       you can use the :attr:`~stalker.models.auth.User.password` property
       directly.
     
-    :type password: unicode
+    :type password: str, unicode
     
     :param groups: It is a list of :class:`~stalker.models.auth.Group`
       instances that this user belongs to.

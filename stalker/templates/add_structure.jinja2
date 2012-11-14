@@ -1,0 +1,177 @@
+{% extends 'add_data_form.jinja2' %}
+{% block form_block %}
+  <div class="dijitDialogPaneContentArea">
+    <div id='structure_form_div'>
+      
+      {# Name #}
+      <div class="row">
+        <div class="column1">
+          <label for='structure_name'>Name</label>
+        </div>
+        <div class="column2">
+          <input id='structure_name'>
+        </div>
+      </div>
+      
+      {# Custom Template #}
+      <div class='row' style="height: 260px">
+        <div class='column1'>
+          <label for='structure_custom_template'>Custom Template</label>
+        </div>
+        <div class='column2'>
+          <input id='structure_custom_template'>
+        </div>
+      </div>
+      
+      {# Filename Templates #}
+      <div class="row">
+        <div class="column1">
+          <label for='structure_filename_template'>Filename Templates</label>
+        </div>
+        <div class="column2">
+          <input id='structure_filename_template'>
+        </div>
+        <div class='column3'>
+          <button id="structure_add_filename_template_button">Add</button>
+          <button id="structure_edit_filename_template_button">Edit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dijitDialogPaneActionBar" style="clear: both;">
+    <button id='structure_add_button'></button>
+    <button id='structure_cancel_button'></button>
+  </div>
+  
+  <script type="text/javascript">
+    require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
+      "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
+      "dijit/form/SimpleTextarea", "dijit/form/Button", "dijit/form/Select",
+      "dojo/domReady!"
+    ],
+      function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
+               SimpleTextarea, Select, Button){
+        
+        // ********************************************************************
+        // FORM
+        var add_structure_form = new Form({
+          id: "add_structure_form",
+          method: "POST",
+          onSubmit: function(event){
+            if (this.validate()){
+              // just close the dialog and somehow change the related field
+              // on parent widget
+              var deferred = xhr.post({
+                url: "{{ request.route_url('add_structure') }}",
+                form: dojo.byId('add_structure_form')
+              });
+              
+              // update the caller dialog
+              var dialog = dijit.byId('add_structure_dialog');
+              var parent = dialog.get('parent');
+              if (parent != null){
+                // TODO: just update the structure field of the parent dialog
+                parent.refresh()
+              }
+              
+              // destroy the dialog
+              dialog.destroyRecursive();
+              
+            }
+            return false;
+          }
+        }, 'structure_form_div');
+        add_structure_form.startup();
+        
+        // ********************************************************************
+        // NAME
+        var name_textBox = new ValidationTextBox({
+          name: "name",
+          label: "Name",
+          placeHolder: "Enter a name",
+          required: true
+        }, "structure_name");
+        name_textBox.startup();
+        
+        // ********************************************************************
+        // CUSTOM TEMPLATE
+        var custom_template_textarea = new SimpleTextarea({
+          name: 'custom_template',
+          label: 'Custom Template',
+          placeHolder: "Enter any custom template here",
+          required: false,
+          style: 'height: 250px; overflow:auto'
+        }, 'structure_custom_template');
+        custom_template_textarea.startup();
+        
+        // ********************************************************************
+        // FILENAME TEMPLATE
+        var filename_template_select = new Select({
+          name: 'filename_templates',
+          required: false,
+          style: 'width: auto; margin: 0px; padding: 0px;',
+          options:[
+            {% for filename_template in filename_templates %}
+              {
+                label: '{{ filename_template.name }}',
+                value: '{{ filename_template.id }}'
+              },
+            {% endfor %}
+          ]
+        }, 'structure_filename_template');
+        filename_template_select.startup();
+        
+        // ADD FILENAME TEMPLATE BUTTON
+        var add_filename_template_button = create_add_data_button(
+                dijit.byId('add_structure_form').getParent(),
+                'Add',
+                'add_filename_dialog',
+                create_add_filename_template_dialog,
+                'structure_add_filename_template_button'
+        );
+        add_filename_template_button.startup();
+        
+        // EDIT FILENAME TEMPLATE BUTTON
+        var edit_filename_template_button = create_edit_data_button(
+                dijit.byId('add_structure_form').getParent(),
+                'Edit',
+                'edit_filename_template_dialog',
+                create_edit_filename_template_dialog,
+                'structure_edit_filename_template_button',
+                function(){
+                  return filename_template_select.get('value');
+                }
+        );
+        edit_filename_template_button.startup();
+        
+        // ********************************************************************
+        // ADD BUTTON
+        var add_button = new Button({
+          label: "Add",
+          type: "button",
+          onClick: function(){
+            if (add_structure_form.validate()){
+              add_structure_form.submit();
+            } else {
+              return false;
+            }
+          }
+        }, 'structure_add_button');
+        add_button.startup();
+        
+        // ********************************************************************
+        // CANCEL BUTTON
+        var cancel_button = new Button({
+          label: "Cancel",
+          type: "button",
+          onClick: function(){
+            var dialog = dijit.byId('add_structure_dialog');
+            dialog.destroyRecursive();
+          }
+        }, 'structure_cancel_button');
+        cancel_button.startup();
+    });
+  </script>
+{% endblock %}
+

@@ -5,14 +5,14 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import unittest
-from stalker import Entity, FilenameTemplate
+from stalker import Entity, FilenameTemplate, Type
 
 # a test class
 class Asset(object):
     pass
 
 class FilenameTemplateTester(unittest.TestCase):
-    """tests the stalker.models.templates.FilenameTemplate class
+    """tests the stalker.models.template.FilenameTemplate class
     """
     
     def setUp(self):
@@ -20,13 +20,21 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs = {
             "name": "Test FilenameTemplate",
+            "type": Type(name="Test Type",
+                         target_entity_type="FilenameTemplate"),
             "path": "ASSETS/{{asset.code}}/{{task.type.code}}/",
             "filename": "{{asset.code}}_{{version.take}}_{{task.type.code}}_"\
                          "{{version.version}}_{{user.initials}}",
             "output_path": "",
             "target_entity_type": Asset,
         }
-        self.mock_filenameTemplate = FilenameTemplate(**self.kwargs)
+        self.filename_template = FilenameTemplate(**self.kwargs)
+    
+    def test_filename_template_is_strictly_typed(self):
+        """testing if the FilenameTemplate class is strictly typed
+        """
+        self.kwargs.pop("type")
+        self.assertRaises(TypeError, FilenameTemplate, **self.kwargs)
     
     def test_target_entity_type_argument_is_skipped(self):
         """testing if a TypeError will be raised when the target_entity_type
@@ -46,7 +54,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """testing if a AttributeError will be raised when the
         target_entity_type attribute is tried to be changed
         """
-        self.assertRaises(AttributeError, setattr, self.mock_filenameTemplate,
+        self.assertRaises(AttributeError, setattr, self.filename_template,
                           "target_entity_type", "Asset")
 
     def test_target_entity_type_argument_accepts_Classes(self):
@@ -96,25 +104,23 @@ class FilenameTemplateTester(unittest.TestCase):
         """testing if nothing happens when the path attribute is set to
         empty string
         """
-        self.mock_filenameTemplate.path = ""
+        self.filename_template.path = ""
 
     def test_path_argument_is_not_string(self):
-        """testing if the given value converted to string for the path
-        argument
+        """testing if a TypeError will be raised when the path argument is not
+        a string
         """
         test_value = list("a list from a string")
         self.kwargs["path"] = test_value
-        new_filenameTemplate = FilenameTemplate(**self.kwargs)
-        self.assertEqual(new_filenameTemplate.path, str(test_value))
+        self.assertRaises(TypeError, FilenameTemplate, **self.kwargs)
 
     def test_path_attribute_is_not_string(self):
-        """testing if the given value converted to string for the path
-        attribute
+        """testing if a TypeError will be raised when the path attribute is not
+        set to a string
         """
         test_value = list("a list from a string")
-        self.mock_filenameTemplate.path = test_value
-        self.assertEqual(self.mock_filenameTemplate.path,
-                         str(test_value))
+        self.assertRaises(TypeError, setattr, self.filename_template, "path",
+                          test_value)
 
     def test_filename_argument_is_skipped(self):
         """testing if nothing happens when the filename argument is skipped
@@ -149,26 +155,23 @@ class FilenameTemplateTester(unittest.TestCase):
         """testing if nothing happens when the filename attribute is set to
         empty string
         """
-        self.mock_filenameTemplate.filename = ""
+        self.filename_template.filename = ""
     
     def test_filename_argument_is_not_string(self):
-        """testing if the given value converted to string for the filename
-        argument
+        """testing if a TypeError will be raised when filename argument is not
+        string
         """
         test_value = list("a list from a string")
         self.kwargs["filename"] = test_value
-        new_filenameTemplate = FilenameTemplate(**self.kwargs)
-        
-        self.assertEqual(new_filenameTemplate.filename, str(test_value))
+        self.assertRaises(TypeError, FilenameTemplate, **self.kwargs)
     
     def test_filename_attribute_is_not_string(self):
         """testing if the given value converted to string for the filename
         attribute
         """
         test_value = list("a list from a string")
-        self.mock_filenameTemplate.filename = test_value
-        self.assertEqual(self.mock_filenameTemplate.filename,
-                         str(test_value))
+        self.assertRaises(TypeError, self.filename_template, "filename",
+                          test_value)
     
     def test_output_path_argument_is_skipped_nothing_happens(self):
         """testing there will be no problem if the output_path argument is
@@ -206,8 +209,8 @@ class FilenameTemplateTester(unittest.TestCase):
         self.kwargs["output_path"] = "different output path"
         new_filenameTemplate5 = FilenameTemplate(**self.kwargs)
 
-        self.assertTrue(self.mock_filenameTemplate == new_filenameTemplate1)
-        self.assertFalse(self.mock_filenameTemplate == new_entity)
+        self.assertTrue(self.filename_template == new_filenameTemplate1)
+        self.assertFalse(self.filename_template == new_entity)
         self.assertFalse(new_filenameTemplate1 == new_filenameTemplate2)
         self.assertFalse(new_filenameTemplate2 == new_filenameTemplate3)
         self.assertFalse(new_filenameTemplate3 == new_filenameTemplate4)
@@ -233,8 +236,8 @@ class FilenameTemplateTester(unittest.TestCase):
         self.kwargs["output_path"] = "different output path"
         new_filenameTemplate5 = FilenameTemplate(**self.kwargs)
 
-        self.assertFalse(self.mock_filenameTemplate != new_filenameTemplate1)
-        self.assertTrue(self.mock_filenameTemplate != new_entity)
+        self.assertFalse(self.filename_template != new_filenameTemplate1)
+        self.assertTrue(self.filename_template != new_entity)
         self.assertTrue(new_filenameTemplate1 != new_filenameTemplate2)
         self.assertTrue(new_filenameTemplate2 != new_filenameTemplate3)
         self.assertTrue(new_filenameTemplate3 != new_filenameTemplate4)

@@ -154,6 +154,20 @@ class VersionTester(unittest.TestCase):
             path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/v001.ma",
             )
 
+        # a Link for the input file
+        self.test_input_link1 = Link(
+            name="Input Link 1",
+            path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/"\
+                 "SH001_beauty_v001.###.exr"
+        )
+
+        self.test_input_link2 = Link(
+            name="Input Link 2",
+            path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/"\
+                 "SH001_occ_v001.###.exr"
+        )
+        
+        
         # a Link for the ouput file
         self.test_output_link1 = Link(
             name="Output Link 1",
@@ -166,14 +180,17 @@ class VersionTester(unittest.TestCase):
             path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/"\
                  "SH001_occ_v001.###.exr"
         )
+        
 
         # now create a version for the Task
         self.kwargs = {
             "name": "Version1",
             "take_name": "TestTake",
             "source_file": self.test_source_link,
+            "inputs": [self.test_input_link1,
+                       self.test_input_link2],
             "outputs": [self.test_output_link1,
-                        self.test_output_link2, ],
+                        self.test_output_link2],
             "version_of": self.test_task1,
             "status_list": self.test_version_status_list,
             }
@@ -458,7 +475,60 @@ class VersionTester(unittest.TestCase):
         self.assertNotEqual(self.test_version.source_file, new_source_file)
         self.test_version.source_file = new_source_file
         self.assertEqual(self.test_version.source_file, new_source_file)
+    
+    def test_inputs_argument_is_skipped(self):
+        """testing if the inputs attribute will be an empty list when the
+        inputs argument is skipped
+        """
+        self.kwargs.pop("inputs")
+        new_version = Version(**self.kwargs)
+        self.assertEqual(new_version.inputs, [])
 
+    def test_inputs_argument_is_None(self):
+        """testing if the inputs attribute will be an empty list when the
+        inputs argument is None
+        """
+        self.kwargs["inputs"] = None
+        new_version = Version(**self.kwargs)
+        self.assertEqual(new_version.inputs, [])
+
+    def test_inputs_attribute_is_None(self):
+        """testing if a TypeError will be raised when the inputs argument is
+        set to None
+        """
+        self.assertRaises(TypeError, setattr, self.test_version, "inputs",
+                          None)
+    
+    def test_inputs_argument_is_not_a_list_of_Link_instances(self):
+        """testing if a TypeError will be raised when the inputs attribute is
+        set to something other than a Link instance
+        """
+        test_value = [132, "231123"]
+        self.kwargs["inputs"] = test_value
+        self.assertRaises(TypeError, Version, **self.kwargs)
+    
+    def test_inputs_attribute_is_not_a_list_of_Link_instances(self):
+        """testing if a TypeError will be raised when the inputs attribute is
+        set to something other than a Link instance
+        """
+        test_value = [132, "231123"]
+        self.assertRaises(TypeError, setattr, self.test_version, "inputs",
+                          test_value)
+    
+    def test_inputs_attribute_is_working_properly(self):
+        """testing if the inputs attribute is working properly
+        """
+        self.kwargs.pop("inputs")
+        new_version = Version(**self.kwargs)
+        
+        self.assertNotIn(self.test_input_link1, new_version.inputs)
+        self.assertNotIn(self.test_input_link2, new_version.inputs)
+        
+        new_version.inputs = [self.test_input_link1, self.test_input_link2]
+        
+        self.assertIn(self.test_input_link1, new_version.inputs)
+        self.assertIn(self.test_input_link2, new_version.inputs)
+    
     def test_outputs_argument_is_skipped(self):
         """testing if the outputs attribute will be an empty list when the
         outputs argument is skipped

@@ -2,6 +2,57 @@
 Stalker Changes
 ===============
 
+0.2.0.a4
+--------
+
+* Added a new class called EntityType to hold all the class names available in
+  the system. Usable in FilenameTemplate's.
+
+* Version class now has a new attribute called ``inputs`` to hold the inputs of
+  the current Version instance. It is a list of Link instances.
+
+* FilenameTemplate classes ``path`` and ``filename`` attributes are no more
+  converted to string, so given a non string value will raise TypeError.
+
+* Structure.custom_template now only accepts strings and None, setting it to
+  anything else will raise a TypeError.
+
+* Two Type's for FilenameTemplate's are created by default when initializing
+  the database, first is called "Version" and it is used to define
+  FilenameTemplates which are used for placing Version source files. The second
+  one is called "Reference" and it is used when injecting references to a given
+  class. Along with the FilenameTemplate.target_entity_type this will allow one
+  to create two different FilenameTemplates for one class::
+    
+    # first get the Types
+    vers_type = Type.query()\
+                .filter_by(target_entity_type="FilenameTemplate")\
+                .filter_by(type="Version")\
+                .first()
+    
+    ref_type = Type.query()\
+               .filter_by(target_entity_type="FilenameTemplate")\
+               .filter_by(type="Reference")\
+               .first()
+    
+    # lets create a FilenameTemplate for placing Asset Version files.
+    f_ver = FilenameTemplate(
+        target_entity_type="Asset",
+        type=vers_type,
+        path="Assets/{{asset.type.code}}/{{asset.code}}/{{task.type.code}}",
+        filename="{{asset.code}}_{{version.take_name}}_{{task.type.code}}_v{{'%03d'|version.version_number}}{{link.extension}}"
+        output_path="{{version.path}}/Outputs/{{version.take_name}}"
+    )
+    
+    # and now define a FilenameTemplate for placing Asset Reference files.
+    # no need to have an output_path here...
+    f_ref = FilenameTemplate(
+        target_entity_type="Asset",
+        type=ref_type,
+        path="Assets/{{asset.type.code}}/{{asset.code}}/References",
+        filename="{{link.type.code}}/{{link.id}}{{link.extension}}"
+    )
+
 0.2.0.a3
 --------
 

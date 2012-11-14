@@ -1,18 +1,91 @@
 {% extends 'base.jinja2' %}
 {% block body %}
-  <div id='login_window'>
-    <div id='title'><h3><b>Login To Stalker</b></h3></div>
-    <div id='column1'>
-      login or email<br/>
-      password
+  <div id="appLayout" class="demoLayout">
+    <div id="content" class="centralPanel"
+         style="left: 50%;
+                top: 50%;
+                width: 450px;
+                margin-left: -204px;
+                height: 136px;
+                margin-top: -68px;">
+      <div class="dijitDialogPaneContentArea" style="background-color: white; height:130px">
+        <div id='login_form_div' style="clear:both">
+          <div id='title' style="text-align: center;"><h3><b>Login To Stalker</b></h3></div>
+
+          <div class="row">
+            <div class="column1">
+              <label for="login_or_email">login or email</label>
+            </div>
+            <div class="column2">
+              <input id="login_or_email">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="column1">
+              <label for="password">password</label>
+            </div>
+            <div class="column2">
+              <input id="password" >
+            </div>
+            <input id='form.submitted' type='hidden'>
+          </div>
+        </div>
+      </div>
+      <div class="dijitDialogPaneActionBar" style="clear:both">
+        <button id="login_button"></button>
+      </div>
+      <div id='message' style="position: relative; top: -17px;"><b>{{message}}</b></div>
     </div>
-    <div id='column2'>
-      <form name='login_form' method="POST" action="{{request.route_url('login')}}">
-        <div><input class='indented_input' type='text' name='login' value='{{login}}'><br/></div>
-        <div><input class='indented_input' type='password' name='password' value='{{password}}'><br/></div>
-        <div id='login_button'><b><input type="submit" name='form.submitted' value="Login" /></b></div>
-      </form>
-    </div>
-    <div id='message'><b>{{message}}</b></div>
   </div>
+  <script type="text/javascript">
+    require(["dijit/registry", "dijit/Dialog", "dijit/form/Form",
+      "dijit/form/TextBox",
+      "dijit/form/ValidationTextBox", 'dijit/form/Button'],
+    function(registry, Dialog, Form, TextBox, ValidationTextBox, Button){
+      
+      var login_form = new Form({
+        id: "login_form",
+        action:"{{request.route_url('login')}}",
+        method:"POST"
+      }, "login_form_div");
+      login_form.startup();
+      
+      // Login or Email
+      var login_name_validationTextBox = new ValidationTextBox({
+        name: 'login',
+        required: true,
+        type: 'text',
+        value: '{{login}}'
+      }, 'login_or_email');
+      login_name_validationTextBox.startup();
+      
+      // Password
+      var password_validationTextBox = new ValidationTextBox({
+        name: 'password',
+        type: 'password',
+        value: '{{password}}'
+      }, 'password');
+      password_validationTextBox.startup();
+      
+      var form_submitted_textBox = new TextBox({
+        name:"form.submitted",
+        value:'login',
+        type:'hidden'
+      }, 'form.submitted');
+      form_submitted_textBox.startup();
+      
+      // Login Button
+      var login_button = new Button({
+        label: 'Login',
+        type: 'submit',
+        name: 'form.submitted',
+        onClick: function(){
+          login_form.submit()
+        }
+      }, 'login_button');
+      login_button.startup();
+      
+    })
+  </script>
 {% endblock body%}

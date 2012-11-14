@@ -24,18 +24,22 @@ class Structure(Entity):
       {% for seq in project.sequences %}
           {{do something here}}
     
-    :param templates: A list of
-      :class:`~stalker.models.templates.FilenameTemplate`\ s which
-      defines a specific template for the given
-      :attr:`~stalker.models.templates.FilenameTemplate.target_entity_type`\ s.
+    Every line of this rendered template will represent a folder and Stalker
+    will create these folders on the attached
+    :class:`~stalker.models.repository.Repository`.
     
-    :type templates: list of :class:`~stalker.models.templates.FilenameTemplate`\ s
+    :param templates: A list of
+      :class:`~stalker.models.template.FilenameTemplate`\ s which
+      defines a specific template for the given
+      :attr:`~stalker.models.template.FilenameTemplate.target_entity_type`\ s.
+    
+    :type templates: list of :class:`~stalker.models.template.FilenameTemplate`\ s
     
     :param str custom_template: A string containing several lines of folder
       names. The folders are relative to the
-      :class:`~stalker.models.project.Project` root. It can also contain a Jinja2
-      Template code. Which will be rendered to show the list of folders to be
-      created with the project. The Jinja2 Template is going to have the
+      :class:`~stalker.models.project.Project` root. It can also contain a
+      Jinja2 Template code. Which will be rendered to show the list of folders
+      to be created with the project. The Jinja2 Template is going to have the
       {{project}} variable. The important point to be careful about is to list
       all the custom folders of the project in a new line in this string. For
       example a :class:`~stalker.models.structure.Structure` for a
@@ -55,7 +59,6 @@ class Structure(Entity):
         {% for seq in project.sequences %}}
             {% set seq_root = 'SEQUENCES/' + {{seq.code}} %}
             {{seq_root}}/Edit
-            {{seq_root}}/Edit/AnimaticStoryboard
             {{seq_root}}/Edit/Export
             {{seq_root}}/Storyboard
             
@@ -76,15 +79,15 @@ class Structure(Entity):
       created yet (or in fact no :class:`~stalker.models.version.Version`\ s
       are created for the :class:`~stalker.models.task.Task`\ s). Anyway, it is
       much suitable and desired to create this details by using
-      :class:`~stalker.models.templates.FilenameTemplate` objects. Which are
+      :class:`~stalker.models.template.FilenameTemplate` objects. Which are
       specific to certain
-      :attr:`~stalker.models.templates.FilenameTemplate.target_entity_type`\ s.
+      :attr:`~stalker.models.template.FilenameTemplate.target_entity_type`\ s.
       And by using the
       :attr:`~stalker.models.structure.Structure.custom_template`
       attribute, Stalker can not place any source or output file of a
       :class:`~stalker.models.version.Version` in the
       :class:`~stalker.models.repository.Repository` where as it can by using
-      :class:`~stalker.models.templates.FilenameTemplate`\ s.
+      :class:`~stalker.models.template.FilenameTemplate`\ s.
       
       But for certain types of :class:`~stalker.models.task.Task`\ s it is may
       be good to previously create the folder structure just because in certain
@@ -92,9 +95,7 @@ class Structure(Entity):
       place the file in to the Repository like in Photoshop.
       
       The ``custom_template`` parameter can be None or an empty string if it is
-      not needed. Be careful not to pass a variable other than a string or
-      unicode because it will use the string representation of the given
-      variable.
+      not needed.
     
     A :class:`~stalker.models.structure.Structure` can not be created without a
     ``type`` (__strictly_typed__ = True). By giving a ``type`` to the
@@ -137,7 +138,6 @@ class Structure(Entity):
     def __eq__(self, other):
         """the equality operator
         """
-
         return super(Structure, self).__eq__(other) and\
                isinstance(other, Structure) and\
                self.templates == other.templates and\
@@ -147,7 +147,13 @@ class Structure(Entity):
     def _validate_custom_template(self, key, custom_template_in):
         """validates the given custom_template value
         """
-
+        if custom_template_in is None:
+            custom_template_in = ""
+        
+        if not isinstance(custom_template_in, str):
+            raise TypeError("%s.custom_template should be a string not %s" 
+                            % (self.__class__.__name__,
+                               custom_template_in.__class__.__name__))
         return custom_template_in
 
     @validates("templates")
@@ -155,12 +161,12 @@ class Structure(Entity):
         """validates the given template value
         """
         
-        from stalker.models.templates import FilenameTemplate
+        from stalker.models.template import FilenameTemplate
         
         if not isinstance(template_in, FilenameTemplate):
             raise TypeError("all the elements in the %s.templates should be a "
                             "list of "
-                            "stalker.models.templates.FilenameTemplate "
+                            "stalker.models.template.FilenameTemplate "
                             "instances not %s" %
                             (self.__class__.__name__,
                              template_in.__class__.__name__))
