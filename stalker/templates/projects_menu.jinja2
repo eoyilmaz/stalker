@@ -1,0 +1,147 @@
+{% extends 'add_data_form.jinja2' %}
+{% block form_block %}
+  <div id='projects_menu'>
+  <button id='add_project_button'>Add Project</button>
+  <div id='projects_tree'></div>
+{#    <ul><b>Projects</b>#}
+{#      {% if projects|length > 0 %}#}
+{#        {% for project in projects %}#}
+{#          <ul><b>{{ project.name }}</b>#}
+{#            <li>Assets</li>#}
+{#            <li>Sequences</li>#}
+{#            <li>Tasks</li>#}
+{#            <li>Bookings</li>#}
+{#            <li>Tickets</li>#}
+{#            <li>Versions</li>#}
+{#          </ul>#}
+{#        {% endfor %}#}
+{#      {% else %}#}
+{#        <li>(-- There is No Project --)</li>#}
+{#      {% endif %}#}
+{#    </ul>#}
+  </div>
+  <script type="text/javascript">
+    require([
+      "dojo/dom", "dijit/registry", "dijit/form/Button", 'dojo/store/Memory',
+      'dijit/tree/ObjectStoreModel', 'dijit/Tree', 'dojo/ready',
+      "dojo/domReady!"],
+        function(dom, registry, Button, Memory, ObjectStoreModel, Tree, ready){
+          // **************************************************************
+          // ADD PROJECT BUTTON
+          var add_project_button = create_add_data_button(
+                  dijit.byId('projects_menu_content_pane'),
+                  'Add Project',
+                  'add_project_dialog',
+                  create_add_project_dialog,
+                  'add_project_button'
+          );
+          add_project_button.startup();
+          
+          // **************************************************************
+          // PROJECTS TREE
+          
+          // Store - Memory
+          var myStore = new Memory({
+            data: [
+              {
+                id:'root',
+                name: 'Projects',
+                type: 'Root'
+              },
+              {% for project in projects %}
+                {
+                  id: '{{ project.id }}',
+                  name: '{{ project.name }}',
+                  type: '{{ project.entity_type }}',
+                  parent: 'root'
+                },
+
+                {# Assets #}
+                {
+                  id: '{{ project.id }}_assets',
+                  name: 'Assets',
+                  type: 'Container',
+                  parent: '{{ project.id }}'
+                },
+                
+                {# Sequences #}
+                {
+                  id: '{{ project.id }}_sequences',
+                  name: 'Sequences',
+                  type: 'Container',
+                  parent: '{{ project.id }}'
+                },
+                
+                {% for sequence in project.sequences %}
+                  {
+                    id: '{{ sequence.id }}'
+                    name: '{{ sequence.name }}',
+                    type: '{{ sequence.entity_type }}',
+                    parent: '{{ project.id }}'
+                  },
+                  {# Shots #}
+                  {
+                    id: '{{ sequence.id }}_shots',
+                    name: 'Shots',
+                    type: 'Container',
+                    parent: '{{ sequence.id }}'
+                  },
+                  {% for shot in sequence.shots %}
+                    {
+                      id: '{{ shot.id }}',
+                      name: '{{ shot.name }}',
+                      type: '{{ shot.entity_type }}',
+                      parent: '{{ sequence.id }}'
+                    },
+                  {% endfor %}
+                {% endfor %}
+                
+                {# Tasks #}
+                {
+                  id: '{{ project.id }}_tasks',
+                  name: 'Tasks',
+                  type: 'Container',
+                  parent: '{{ project.id }}'
+                },
+                
+                {# Bookings #}
+                {
+                  id: '{{ project.id }}_bookings',
+                  name: 'Bookings',
+                  type: 'Container',
+                  parent: '{{ project.id }}'
+                },
+                
+                {# Tickets #}
+                {
+                  id: '{{ project.id }}_tickets',
+                  name: 'Tickets',
+                  type: 'Container',
+                  parent: '{{ project.id }}'
+                },
+                
+              {% endfor %}
+            ],
+            getChildren: function(object){
+              return this.query({parent: object.id});
+            }
+          });
+          
+          // The Object Store Model
+          var myModel = new ObjectStoreModel({
+            store: myStore,
+            query: {id: 'root'}
+          });
+          
+          // The Tree
+          ready(function(){
+            var tree = new Tree({
+              model: myModel
+            });
+            tree.placeAt(dojo.byId('projects_tree'));
+            tree.startup();
+          });
+          
+        });
+   </script>
+{% endblock %}

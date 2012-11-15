@@ -67,10 +67,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     :param bool is_stereoscopic: a bool value, showing if the project is going
       to be a stereo 3D project, anything given as the argument will be
       converted to True or False. Default value is False.
-    
-
     """
-    
     
     # DELETED ARGUMENTS:
     #
@@ -78,7 +75,6 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     #  project is going to be displayed (very unnecessary if you are not using
     #  stereo 3D setup). Should be an int or float value, negative values
     #  converted to the positive values. Default value is 1.
-    
     
     # ------------------------------------------------------------------------
     # NOTES:
@@ -102,12 +98,13 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     __tablename__ = "Projects"
     project_id_local = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                               primary_key=True)
-
-    __mapper_args__ = {"polymorphic_identity": "Project",
-                       "inherit_condition":
-                           project_id_local == TaskableEntity.taskableEntity_id}
-
-
+    
+    __mapper_args__ = {
+        "polymorphic_identity": "Project",
+        "inherit_condition":
+            project_id_local==TaskableEntity.taskableEntity_id
+    }
+    
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
         "User",
@@ -119,7 +116,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         also can set to None.
         """
     )
-
+    
     repository_id = Column(Integer, ForeignKey("Repositories.id"))
     repository = relationship(
         "Repository",
@@ -133,7 +130,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         repository of one project.
         """
     )
-
+    
     structure_id = Column(Integer, ForeignKey("Structures.id"))
     structure = relationship(
         "Structure",
@@ -141,7 +138,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         doc="""The structure of the project. Should be an instance of
         :class:`~stalker.models.structure.Structure` class"""
     )
-
+    
     image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
     image_format = relationship(
         "ImageFormat",
@@ -153,7 +150,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         instance of :class:`~stalker.models.format.ImageFormat`.
         """
     )
-
+    
     fps = Column(
         Float(precision=3),
         doc="""The fps of the project.
@@ -166,7 +163,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         Boolean,
         doc="""True if the project is a stereoscopic project"""
     )
-
+    
     def __init__(self,
                  lead=None,
                  repository=None,
@@ -196,56 +193,49 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         self.image_format = image_format
         self.fps = fps
         self.is_stereoscopic = bool(is_stereoscopic)
-
-
+    
     @validates("fps")
     def _validate_fps(self, key, fps):
         """validates the given fps_in value
         """
         return float(fps)
-
+    
     @validates("image_format")
     def _validate_image_format(self, key, image_format):
         """validates the given image format
         """
-        
         from stalker.models.format import ImageFormat
 
         if image_format is not None and\
            not isinstance(image_format, ImageFormat):
             raise TypeError("the image_format should be an instance of "
                             "stalker.models.format.ImageFormat")
-
         return image_format
-
+    
     @validates("lead")
     def _validate_lead(self, key, lead):
         """validates the given lead_in value
         """
-
         if lead is not None:
             if not isinstance(lead, User):
                 raise TypeError("lead must be an instance of "
                                 "stalker.models.auth.User")
-
         return lead
-
+    
     @validates("repository")
     def _validate_repository(self, key, repository):
         """validates the given repository_in value
         """
-        
         from stalker.models.repository import Repository
-
+        
         if not isinstance(repository, Repository):
             raise TypeError("The stalker.models.project.Project instance "
                             "should be created with a "
                             "stalker.models.repository.Repository instance "
                             "passed through the 'repository' argument, the "
                             "current value is '%s'" % repository)
-
         return repository
-
+    
     @validates("structure")
     def _validate_structure(self, key, structure_in):
         """validates the given structure_in value
@@ -256,19 +246,16 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
             if not isinstance(structure_in, Structure):
                 raise TypeError("structure should be an instance of "
                                 "stalker.models.structure.Structure")
-
         return structure_in
-
+    
     @validates("is_stereoscopic")
     def _validate_is_stereoscopic(self, key, is_stereoscopic_in):
         return bool(is_stereoscopic_in)
-
-
+    
     @property
     def users(self):
         """returns the users related to this project
         """
-        
         from stalker.models.auth import User
         from stalker.models.task import Task
         
@@ -283,12 +270,11 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
                            "be queried from this state, please use "
                            "stalker.db.setup() to setup a database")
             return []
-
+    
     @property
     def assets(self):
         """returns the assets related to this project
         """
-
         # use joins over the session.query
         from stalker.models.asset import Asset
         
@@ -301,15 +287,14 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
                            "be queried from this state, please use "
                            "stalker.db.setup() to setup a database")
             return []
-
+    
     @property
     def sequences(self):
         """returns the sequences related to this project
         """
-
         # use joins over the session.query
         from stalker.models.sequence import Sequence
-
+        
         if DBSession is not None:
             return DBSession.query(Sequence).\
             join(Sequence.project).\
@@ -319,10 +304,9 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
                            "be queried from this state, please use "
                            "stalker.db.setup() to setup a database")
             return []
-
+    
     def __eq__(self, other):
         """the equality operator
         """
-
         return super(Project, self).__eq__(other) and\
                isinstance(other, Project)

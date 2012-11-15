@@ -71,15 +71,23 @@ def __init_db__():
     
     # register all Actions available for all SOM classes
     class_names = [
-        'Asset', 'Action', 'Group', 'Permission', 'User', 'Department',
-        'Entity', 'SimpleEntity', 'TaskableEntity', 'ImageFormat', 'Link',
+        'Asset', 'Group', 'Permission', 'User', 'Department',
+        'SimpleEntity', 'Entity', 'TaskableEntity', 'ImageFormat', 'Link',
         'Message', 'Note', 'Project', 'Repository', 'Sequence', 'Shot',
         'Status', 'StatusList', 'Structure', 'Tag', 'Booking', 'Task',
         'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
     ]
     
     for class_name in class_names:
-        register(class_name)
+        _temp = __import__(
+            'stalker',
+            globals(),
+            locals(),
+            [class_name],
+            -1
+        )
+        class_ = eval("_temp." + class_name)
+        register(class_)
     
     # create the admin if needed
     if defaults.AUTO_CREATE_ADMIN:
@@ -322,7 +330,7 @@ def register(class_):
     able to have an :class:`~stalker.models.auth.Permission` about your new
     class, so you can assign this :class;`~stalker.models.auth.Permission` to
     your :class:`~stalker.models.auth.User`\ s or
-    :class:`~satlker.models.auth.Group`\ s. So you ned to register your new
+    :class:`~stalker.models.auth.Group`\ s. So you ned to register your new
     class with stalker.db.register like shown below::
     
       from stalker import db
@@ -342,20 +350,25 @@ def register(class_):
     # create the Permissions
     permissions_db = Permission.query().all()
     
-    class_name = ''
-    if isinstance(class_, type):
-        class_name = class_.__class__.__name__
-    elif isinstance(class_, (str, unicode)):
-        class_name = class_
-    else:
-        raise TypeError('To register a class please either supply the class '
-                        'itself or the name of it')
+    if not isinstance(class_, type):
+        raise TypeError('To register a class please supply the class itself ')
     
     # register the class name to entity_types table
-    from stalker.models.type import EntityType
+    from stalker import EntityType, StatusMixin, TaskableEntity, ScheduleMixin
+    
+    class_name = class_.__name__
     
     if not EntityType.query().filter_by(name=class_name).first():
         new_entity_type = EntityType(class_name)
+        # update attributes
+        # TODO: make this work
+        if issubclass(class_, StatusMixin):
+            new_entity_type.statusable = True
+        if issubclass(class_, TaskableEntity):
+            new_entity_type.taskable = True
+        if issubclass(class_, ScheduleMixin):
+            new_entity_type.schedulable = True
+        
         DBSession.add(new_entity_type)
     
     for action in defaults.DEFAULT_ACTIONS:

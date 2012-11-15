@@ -1,0 +1,184 @@
+{% extends 'add_data_form.jinja2' %}
+{% block form_block %}
+  <div class="dijitDialogPaneContentArea" style="height: 380px">
+    <div id='status_list_form_div'>
+      
+      {# NAME #}
+      <div class="row">
+        <div class="column1">
+          <label for='status_list_name'>Name</label>
+        </div>
+        <div class="column2">
+          <input id='status_list_name'>
+        </div>
+      </div>
+      
+      {# TARGET ENTITY TYPE #}
+      <div class="row">
+        <div class="column1">
+          <label for='status_list_target_entity_type'>Target Entity Type</label>
+        </div>
+        <div class="column2">
+          <input id='status_list_target_entity_type'>
+        </div>
+      </div>
+      
+      {# STATUSES #}
+      <div class="row">
+        <div class="column1">
+          <label for='status_list_statuses'>Statuses</label>
+        </div>
+        <div class="column2">
+          <select id='status_list_statuses'>
+            {% for status in statuses %}
+              <option value="'{{ status.id }}'">
+                {{ status.name }} / {{ status.code }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class='column3'>
+          <button id="status_list_add_status_button">Add</button>
+{#          <button id="status_list_edit_status_button">Edit</button>#}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dijitDialogPaneActionBar" style="clear: both;">
+    <button id='status_list_add_button'></button>
+    <button id='status_list_cancel_button'></button>
+  </div>
+  
+  <script type="text/javascript">
+    require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
+      "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
+      "dijit/form/SimpleTextarea", "dijit/form/Button", "dijit/form/Select",
+      "dijit/form/MultiSelect", "dojo/domReady!"
+    ],
+      function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
+               SimpleTextarea, Button, Select, MultiSelect){
+        
+        // ********************************************************************
+        // FORM
+        var add_status_list_form = new Form({
+          id: "add_status_list_form",
+          method: "POST",
+          onSubmit: function(event){
+            if (this.validate()){
+              // just close the dialog and somehow change the related field
+              // on parent widget
+              var deferred = xhr.post({
+                content: {
+                  submitted: 'add'
+                },
+                url: "{{ request.route_url('add_status_list') }}",
+                form: dojo.byId('add_status_list_form')
+              });
+              
+              // update the caller dialog
+              var dialog = dijit.byId('add_status_list_dialog');
+              var parent = dialog.get('parent');
+              if (parent != null){
+                // TODO: just update the status_list field of the parent dialog
+                parent.refresh()
+              }
+              
+              // destroy the dialog
+              dialog.destroyRecursive();
+              
+            }
+            return false;
+          }
+        }, 'status_list_form_div');
+        add_status_list_form.startup();
+        
+        // ********************************************************************
+        // NAME
+        var name_textBox = new ValidationTextBox({
+          name: "name",
+          label: "Name",
+          placeHolder: "Enter a name",
+          required: true
+        }, "status_list_name");
+        name_textBox.startup();
+        
+        // ********************************************************************
+        // TARGET ENTITY TYPE
+        var target_entity_type_select = new Select({
+          name: "target_entity_type",
+          label: "Target Entity Type",
+          required: true,
+          style: 'width: auto; margin: 0px; padding: 0px;',
+          options: [
+            {% for entity_type in entity_types %}
+              {
+                label: '{{ entity_type.name }}',
+                value: '{{ entity_type.name }}'
+              },
+            {% endfor %}
+          ]
+        }, "status_list_target_entity_type");
+        target_entity_type_select.startup();
+        
+        // ********************************************************************
+        // STATUSES
+        var statuses_multi_select = new MultiSelect({
+          name: 'statuses',
+          required: false,
+          style: 'width: 218px; margin: 0px; padding: 0px; height: 300px'
+        }, 'status_list_statuses');
+        statuses_multi_select.startup();
+        
+        // ADD STATUS BUTTON
+        var add_status_button = create_add_data_button(
+                dijit.byId('add_status_list_form').getParent(),
+                'Add',
+                'add_status_dialog',
+                create_add_status_dialog,
+                'status_list_add_status_button'
+        );
+        
+        // EDIT STATUS BUTTON
+{#        var edit_status_button = create_edit_data_button(#}
+{#                dijit.byId('add_status_list_form').getParent(),#}
+{#                'Edit',#}
+{#                'edit_status_dialog',#}
+{#                create_edit_status_dialog,#}
+{#                'status_list_edit_status_button',#}
+{#                function(){#}
+{#                  return statuses_multi_select.get('value');#}
+{#                }#}
+{#        );#}
+{#        edit_status_button.startup();#}
+        
+        // ********************************************************************
+        // ADD BUTTON
+        var add_button = new Button({
+          label: "Add",
+          type: "button",
+          onClick: function(){
+            if (add_status_list_form.validate()){
+              add_status_list_form.submit();
+            } else {
+              return false;
+            }
+          }
+        }, 'status_list_add_button');
+        add_button.startup();
+        
+        // ********************************************************************
+        // CANCEL BUTTON
+        var cancel_button = new Button({
+          label: "Cancel",
+          type: "button",
+          onClick: function(){
+            var dialog = dijit.byId('add_status_list_dialog');
+            dialog.destroyRecursive();
+          }
+        }, 'status_list_cancel_button');
+        cancel_button.startup();
+    });
+  </script>
+{% endblock %}
+

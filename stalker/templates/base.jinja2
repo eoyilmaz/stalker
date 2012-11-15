@@ -13,79 +13,18 @@
   <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
         href="{{request.static_url('stalker:static/css/stalker.css')}}"/>
   <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
-        href="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dijit/themes/claro/claro.css') }}"/>
+        href="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dijit/themes/soria/soria.css') }}"/>
   <script type="text/javascript" data-dojo-config="async: true" 
           src="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dojo/dojo.js') }}">
   </script>
   <script type="text/javascript"
           src="{{ request.static_url('stalker:static/js/stalker.js') }}">
   </script>
-  <script type='text/javascript'>
-    require(["dojo/dom", "dijit/registry", "dijit/layout/BorderContainer",
-      "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/form/Button",
-      "dojo/domReady!"],
-            function(dom, registry, BorderContainer, TabContainer, ContentPane, Button){
-              
-              // create the BorderContainer and attach it to our appLayout div
-              var appLayout = new BorderContainer({
-                design: "headline"
-              }, "appLayout");
-              
-              // create the Header
-              appLayout.addChild(
-                new ContentPane({
-                  region: "top"
-                }, "header")
-              );
-              
-              // create the MainMenu
-              appLayout.addChild(
-                new ContentPane({
-                  region: 'left',
-                  splitter: true
-                }, "leftCol")
-              );
-              
-              // create Footer
-              appLayout.addChild(
-                new ContentPane({
-                  region: 'bottom'
-                }, "footer")
-              );
-              
-              // create main content
-              appLayout.addChild(
-                new ContentPane({
-                  region: 'center'
-                }, "content")
-              );
-              
-              // create the button
-              var button = new Button({
-                label: "Add Project",
-                type: "button",
-                onClick: function(){
-                  
-                  // check if the dialog is created before
-                  var dialog = dijit.byId("add_project_dialog");
-                  if (dialog == null){
-                    dialog = create_add_project_dialog();
-                  }
-                  // show the dialog
-                  dialog.show();
-                }
-              }, "add_project_btn");
-              button.startup();
-              
-              appLayout.startup();
-              
-            });
-  </script>
   <script type="text/javascript"
           src="{{ request.static_url('stalker:static/js/stalker.js') }}">
   </script>
 </head>
-<body class="claro" style="border-radius: 10px">
+<body class="soria" style="border-radius: 10px">
 {% block body %}
   <div id="appLayout" class="demoLayout">
     <div id="header" class="edgePanel">
@@ -94,7 +33,7 @@
           <div id="stalker_name">Stalker</div>
           <div id="stalker_version">v{{stalker.__version__}}</div>
         </div>
-        <div id="user_menu">
+        <div id="navbar">
           Welcome {{user.first_name}} {{user.last_name}} | Settings | <a href='/logout'>Logout</a>
         </div>
         <div id="search">
@@ -111,14 +50,20 @@
       {% block content %}
         <div id="main_view">
           <div id="top_menu">
-            <div id='add_project_btn'>Add Project</div>
           </div>
           {% block main_view %}{% endblock %}
         </div>
       {% endblock %}
     </div>
-    <div id="leftCol" class="edgePanel">
-      {% block main_menu %}{% endblock %}
+    <div id="left_column" class="edgePanel">
+      <div id='user_menu_content_pane'>
+        <p>This Is User Menu</p>
+        {% block user_menu %}{% endblock %}
+      </div>
+      <div id='projects_menu_content_pane'>
+        <p>This Is Project Menu</p>
+        {% block project_menu %}{% endblock %}
+      </div>
     </div>
     <div id="footer" class="edgePanel">
       {% block footer %}
@@ -127,5 +72,80 @@
     </div>
   </div>
 {% endblock %}
+  <script type='text/javascript'>
+    require(["dojo/dom", "dijit/registry", "dijit/layout/BorderContainer",
+      "dijit/layout/TabContainer", "dijit/layout/SplitContainer",
+       "dojox/layout/ContentPane", "dijit/form/Button",
+      "dojo/domReady!"],
+        function(dom, registry, BorderContainer, TabContainer,
+                 SplitContainer, ContentPane, Button){
+          
+          // create the BorderContainer and attach it to our appLayout div
+          var appLayout = new BorderContainer({
+            design: "headline"
+          }, "appLayout");
+          
+          // create the Header
+          appLayout.addChild(
+            new ContentPane({
+              region: "top",
+{#              style: 'height: 40px'#}
+            }, "header")
+          );
+          
+          // create left Menu
+          var left_content_pane = new SplitContainer({
+            region: 'leading',
+            orientation: 'vertical',
+            splitter: true,
+            style:"width: 200px"
+          }, 'left_column');
+ 
+          appLayout.addChild(left_content_pane);
+          
+          // create the UserMenu
+          left_content_pane.addChild(
+            new ContentPane({
+              region: 'top',
+              splitter: true,
+              style: 'height: 200px',
+              href: '/user_menu',
+              preload: true,
+              executeScripts: true
+            }, 'user_menu_content_pane') 
+          );
+          
+          // create the Projects Menu
+          var projects_menu_content_pane = new ContentPane({
+             region: 'bottom',
+             splitter: true,
+             href: '/projects_menu',
+             executeScripts: true,
+             parseOnLoad: true
+          }, 'projects_menu_content_pane')
+          projects_menu_content_pane.startup();
+          
+          left_content_pane.addChild(projects_menu_content_pane);
+          
+          left_content_pane.startup();
+          
+          // create Footer
+          appLayout.addChild(
+            new ContentPane({
+              region: 'bottom'
+            }, "footer")
+          );
+          
+          // create main content
+          appLayout.addChild(
+            new ContentPane({
+              region: 'center'
+            }, "content")
+          );
+          
+          appLayout.startup();
+          
+        });
+  </script>
 </body>
 </html>

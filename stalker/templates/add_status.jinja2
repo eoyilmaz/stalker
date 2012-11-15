@@ -1,0 +1,129 @@
+{% extends 'add_data_form.jinja2' %}
+{% block form_block %}
+  <div class="dijitDialogPaneContentArea">
+    <div id='status_form_div'>
+      
+      {# NAME #}
+      <div class="row">
+        <div class="column1">
+          <label for='status_name'>Name</label>
+        </div>
+        <div class="column2">
+          <input id='status_name'>
+        </div>
+      </div>
+      
+      {# CODE #}
+      <div class="row">
+        <div class="column1">
+          <label for='status_code'>Code</label>
+        </div>
+        <div class="column2">
+          <input id='status_code'>
+        </div>
+      </div>
+    
+      {# TODO: add color fields also #}
+
+    </div>
+  </div>
+  
+  <div class="dijitDialogPaneActionBar" style="clear: both;">
+    <button id='status_add_button'></button>
+    <button id='status_cancel_button'></button>
+  </div>
+  
+  <script type="text/javascript">
+    require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
+      "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
+      "dijit/form/SimpleTextarea", "dijit/form/Button",
+      "dijit/form/MultiSelect", "dojo/domReady!"
+    ],
+      function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
+               SimpleTextarea, Button, MultiSelect){
+        
+        // ********************************************************************
+        // FORM
+        var add_status_form = new Form({
+          id: "add_status_form",
+          method: "POST",
+          onSubmit: function(event){
+            if (this.validate()){
+              // just close the dialog and somehow change the related field
+              // on parent widget
+              var deferred = xhr.post({
+                content: {
+                  submitted: 'add'
+                },
+                url: "{{ request.route_url('add_status') }}",
+                form: dojo.byId('add_status_form')
+              });
+              
+              // update the caller dialog
+              var dialog = dijit.byId('add_status_dialog');
+              var parent = dialog.get('parent');
+              if (parent != null){
+                // TODO: just update the status field of the parent dialog
+                parent.refresh()
+              }
+              
+              // destroy the dialog
+              dialog.destroyRecursive();
+              
+            }
+            return false;
+          }
+        }, 'status_form_div');
+        add_status_form.startup();
+        
+        // ********************************************************************
+        // NAME
+        var name_textBox = new ValidationTextBox({
+          name: "name",
+          label: "Name",
+          placeHolder: "Enter a name",
+          required: true
+        }, "status_name");
+        name_textBox.startup();
+        
+        // ********************************************************************
+        // CODE
+        var code_textBox = new ValidationTextBox({
+          name: "code",
+          label: "Code",
+          placeHolder: "Enter a code",
+          required: true
+        }, "status_code");
+        code_textBox.startup();
+        
+        // ********************************************************************
+        // ADD BUTTON
+        var add_button = new Button({
+          label: "Add",
+          type: "button",
+          onClick: function(){
+            if (add_status_form.validate()){
+              add_status_form.submit();
+            } else {
+              return false;
+            }
+          }
+        }, 'status_add_button');
+        add_button.startup();
+        
+        // ********************************************************************
+        // CANCEL BUTTON
+        var cancel_button = new Button({
+          label: "Cancel",
+          type: "button",
+          onClick: function(){
+            // TODO: the form is not closed correctly by doing it in this way
+            var dialog = dijit.byId('add_status_dialog');
+            dialog.destroyRecursive();
+          }
+        }, 'status_cancel_button');
+        cancel_button.startup();
+    });
+  </script>
+{% endblock %}
+

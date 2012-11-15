@@ -8,8 +8,7 @@
 
 #from sqlalchemy.orm.descriptor_props import SynonymProperty
  
-from sqlalchemy import Column, Integer, ForeignKey, String, UniqueConstraint
-from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy import Column, Integer, ForeignKey, String, Boolean
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import TargetEntityTypeMixin
@@ -82,11 +81,24 @@ class EntityType(Base):
     """A simple class just to hold the registered class names in Stalker
     """
     __tablename__ = 'EntityTypes'
+    __table_args__ = ({"extend_existing": True})
+    
     id = Column("id", Integer, primary_key=True)
     name = Column(String(128), nullable=False, unique=True)
+    statusable = Column(Boolean, default=False)
+    taskable = Column(Boolean, default=False)
+    schedulable = Column(Boolean, default=False)
     
-    def __init__(self, name):
+    def __init__(
+            self,
+            name,
+            statusable=False,
+            taskable=False,
+            schedulable=False):
         self.name = name
+        self.statusable = statusable
+        self.taskable = taskable
+        self.schedulable = schedulable
     
     # TODO: add tests for the name attribute
 

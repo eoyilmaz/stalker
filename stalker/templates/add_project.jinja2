@@ -91,6 +91,20 @@
           <button id="project_edit_lead_button">Edit</button>
         </div>
       </div>
+      
+      {# STATUS LIST #}
+      <div class='row'>
+        <div class="column1">
+          <label for='project_status_list'>Status List</label>
+        </div>
+        <div class='column2'>
+          <input id='project_status_list'>
+        </div>
+        <div class='column3'>
+          <button id="project_add_status_list_button">Add</button>
+          <button id="project_edit_status_list_button">Edit</button>
+        </div>
+      </div>
        
     </div>
   </div>
@@ -104,11 +118,11 @@
     require(["dijit/registry", "dojo/_base/xhr", "dojo/on",
       "dojo/store/Memory", "dijit/form/Form", "dijit/form/ValidationTextBox",
       "dijit/form/TextBox", "dijit/form/NumberTextBox", "dijit/form/Select",
-      "dijit/form/Button"
+      "dijit/form/Button", 'dojo/ready'
     ],
       function(registry, xhr, on, Memory, Form, ValidationTextBox, TextBox,
                NumberTextBox, Select, Button){
-      
+        
         // ********************************************************************
         // FORM
         var add_project_form = new Form({
@@ -124,12 +138,20 @@
                 form: dojo.byId('add_project_form')
               });
               
+              // update the caller dialog
               var dialog = dijit.byId('add_project_dialog');
+              var parent = dialog.get('parent');
+              if (parent != null){
+                parent.refresh()
+              }
               // destroy dialog
               dialog.destroyRecursive();
             }
           }
         }, 'add_project_form_div');
+        
+      
+          
         
         // ********************************************************************
         // NAME
@@ -323,6 +345,48 @@
         );
         edit_lead_button.startup();
         
+        
+
+        // ********************************************************************
+        // STATUS LIST
+        var status_list_select = new Select({
+          name: "status_list",
+          required: true,
+          style: "width: auto; height: auto; margin: 0px; padding: 0px;",
+          options: [
+            {% for status_list in status_lists %}
+              {
+                label: '{{ status_list.name }}',
+                value: '{{ status_list.id }}'
+              },
+            {% endfor %}
+          ]
+        }, "project_status_list");
+        status_list_select.startup();
+        
+        // ADD STATUS LIST BUTTON
+        var add_status_list_button = create_add_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Add',
+                'add_status_list_dialog',
+                create_add_status_list_dialog,
+                'project_add_status_list_button'
+        );
+        add_status_list_button.startup();
+        
+        // EDIT STATUS LIST BUTTON
+        var edit_status_list_button = create_edit_data_button(
+                dijit.byId('add_project_form').getParent(),
+                'Edit',
+                'edit_status_list_dialog',
+                create_edit_status_list_dialog,
+                'project_edit_status_list_button',
+                function(){
+                  return status_list_select.get('value')
+                }
+        );
+        edit_status_list_button.startup();
+        
         // ********************************************************************
         // ADD BUTTON
         var add_button = new Button({
@@ -348,6 +412,7 @@
         cancel_button.startup();
         
         add_project_form.startup();
+        
     });
   </script>
 {% endblock %}

@@ -62,6 +62,9 @@
               // just close the dialog and somehow change the related field
               // on parent widget
               var deferred = xhr.post({
+                content: {
+                  submitted: 'add'
+                },
                 url: "{{ request.route_url('add_image_format') }}",
                 form: dojo.byId('add_image_format_form')
               });
@@ -71,7 +74,7 @@
               var parent = dialog.get('parent');
               if (parent != null){
                 // TODO: just update the image format field of the parent dialog
-                parent.refresh()
+                parent.refresh();
               }
               
               // destroy the dialog

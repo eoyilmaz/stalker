@@ -2,7 +2,6 @@
 require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
     function(registry, DialogSimple, Button){
         
-        
         // ********************************************************************
         // ADD DATA BUTTON
         // TODO: what is parent and what is dialog_id
@@ -56,8 +55,8 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                         dialog = content_creator(parent, edited_data_id_getter());
                     }
                     
-                    alert(dialog)
-                    alert(parent)
+                    alert(dialog);
+                    alert(parent);
                     
                     // show the dialog
                     dialog.show();
@@ -78,14 +77,14 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 style: "width: 550px; height auto;",
                 executeScripts: true
             });
-            myDialog.set('parent', parent)
+            myDialog.set('parent', parent);
             return myDialog;
         };
         
         
-         // ********************************************************************
-         // IMAGE FORMAT
-         create_add_image_format_dialog = function(parent){
+        // ********************************************************************
+        // IMAGE FORMAT
+        create_add_image_format_dialog = function(parent){
             var myDialog = new DialogSimple({
                 id: 'add_image_format_dialog',
                 title: 'Add Image Format',
@@ -94,7 +93,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 style: "width: 550px; height: auto;",
                 executeScripts: true
             });
-            myDialog.set('parent', parent)
+            myDialog.set('parent', parent);
             return myDialog;
         };
         
@@ -111,7 +110,6 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
             return myDialog;
         };
         
-        
         // ********************************************************************
         // STRUCTURE
         create_add_structure_dialog = function(parent){
@@ -123,7 +121,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 style: "width: 550px; height: auto;",
                 executeScripts: true
             });
-            myDialog.set('parent', parent)
+            myDialog.set('parent', parent);
             return myDialog;
         };
         
@@ -224,6 +222,62 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
             });
             myDialog.set('parent', parent);
             return myDialog;
-        }
-});
+        };
+        
+        // ********************************************************************
+        // STATUS LIST
+        create_add_status_list_dialog = function(parent){
+            var myDialog = new DialogSimple({
+                id: 'add_status_list_dialog',
+                title: 'Add Status List',
+                href: '/add/status_list',
+                resize: true,
+                style: "width: 550px; height: auto;",
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+        
+        create_edit_status_list_dialog = function(parent, status_list_id){
+            var myDialog = new DialogSimple({
+                id: 'edit_status_list_dialog',
+                title: 'Edit Status List',
+                href: '/edit/status_list/' + status_list_id,
+                resize: true,
+                style: "width: 550px; height: auto;",
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+        
+        // ********************************************************************
+        // STATUS
+        create_add_status_dialog = function(parent){
+            var myDialog = new DialogSimple({
+                id: 'add_status_dialog',
+                title: 'Add Status',
+                href: '/add/status',
+                resize: true,
+                style: "width: 550px; height: auto;",
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+        
+        create_edit_status_dialog = function(parent, status_id){
+            var myDialog = new DialogSimple({
+                id: 'edit_status_dialog',
+                title: 'Edit Status',
+                href: '/edit/status/' + status_id,
+                resize: true,
+                style: "width: 550px; height: auto;",
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+ });
 

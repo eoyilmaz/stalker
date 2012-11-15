@@ -1,6 +1,6 @@
 {% extends 'add_data_form.jinja2' %}
 {% block form_block %}
-  <div class="dijitDialogPaneContentArea">
+  <div class="dijitDialogPaneContentArea" style="height: 380px">
     <div id='structure_form_div'>
       
       {# Name #}
@@ -29,11 +29,17 @@
           <label for='structure_filename_template'>Filename Templates</label>
         </div>
         <div class="column2">
-          <input id='structure_filename_template'>
+          <select id='structure_filename_template'>
+            {% for filename_template in filename_templates %}
+              <option value="'{{ filename_template.id }}'">
+                {{ filename_template.name }}
+              </option>
+            {% endfor %}
+          </select>
         </div>
         <div class='column3'>
           <button id="structure_add_filename_template_button">Add</button>
-          <button id="structure_edit_filename_template_button">Edit</button>
+{#          <button id="structure_edit_filename_template_button">Edit</button>#}
         </div>
       </div>
     </div>
@@ -47,11 +53,11 @@
   <script type="text/javascript">
     require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
       "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
-      "dijit/form/SimpleTextarea", "dijit/form/Button", "dijit/form/Select",
-      "dojo/domReady!"
+      "dijit/form/SimpleTextarea", "dijit/form/Button",
+      "dijit/form/MultiSelect", "dojo/domReady!"
     ],
       function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
-               SimpleTextarea, Select, Button){
+               SimpleTextarea, Button, MultiSelect){
         
         // ********************************************************************
         // FORM
@@ -63,6 +69,9 @@
               // just close the dialog and somehow change the related field
               // on parent widget
               var deferred = xhr.post({
+                content: {
+                  submitted: 'add'
+                },
                 url: "{{ request.route_url('add_structure') }}",
                 form: dojo.byId('add_structure_form')
               });
@@ -107,43 +116,42 @@
         
         // ********************************************************************
         // FILENAME TEMPLATE
-        var filename_template_select = new Select({
+        var filename_template_multi_select = new MultiSelect({
           name: 'filename_templates',
           required: false,
-          style: 'width: auto; margin: 0px; padding: 0px;',
-          options:[
-            {% for filename_template in filename_templates %}
-              {
-                label: '{{ filename_template.name }}',
-                value: '{{ filename_template.id }}'
-              },
-            {% endfor %}
-          ]
+          style: 'width: 218px; margin: 0px; padding: 0px;',
         }, 'structure_filename_template');
-        filename_template_select.startup();
+        filename_template_multi_select.startup();
         
         // ADD FILENAME TEMPLATE BUTTON
         var add_filename_template_button = create_add_data_button(
                 dijit.byId('add_structure_form').getParent(),
                 'Add',
-                'add_filename_dialog',
+                'add_filename_template_dialog',
                 create_add_filename_template_dialog,
                 'structure_add_filename_template_button'
         );
-        add_filename_template_button.startup();
+        
+{#        var add_filename_template_button = new Button({#}
+{#          label: "check",#}
+{#          onClick: function(){#}
+{#            alert(filename_template_multi_select.getValue());#}
+{#          }#}
+{#        }, 'structure_add_filename_template_button');#}
+{#        add_filename_template_button.startup();#}
         
         // EDIT FILENAME TEMPLATE BUTTON
-        var edit_filename_template_button = create_edit_data_button(
-                dijit.byId('add_structure_form').getParent(),
-                'Edit',
-                'edit_filename_template_dialog',
-                create_edit_filename_template_dialog,
-                'structure_edit_filename_template_button',
-                function(){
-                  return filename_template_select.get('value');
-                }
-        );
-        edit_filename_template_button.startup();
+{#        var edit_filename_template_button = create_edit_data_button(#}
+{#                dijit.byId('add_structure_form').getParent(),#}
+{#                'Edit',#}
+{#                'edit_filename_template_dialog',#}
+{#                create_edit_filename_template_dialog,#}
+{#                'structure_edit_filename_template_button',#}
+{#                function(){#}
+{#                  return filename_template_multi_select.get('value');#}
+{#                }#}
+{#        );#}
+{#        edit_filename_template_button.startup();#}
         
         // ********************************************************************
         // ADD BUTTON

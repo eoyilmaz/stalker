@@ -15,7 +15,7 @@ from pyramid.config import Configurator
 #from stalker.db.declarative import Base
 #from stalker.db.session import DBSession
 from stalker.models.asset import Asset
-from stalker.models.auth import Group, User, Permission
+from stalker.models.auth import Group, Permission, User
 from stalker.models.department import Department
 from stalker.models.entity import SimpleEntity, Entity, TaskableEntity
 from stalker.models.format import ImageFormat
@@ -31,9 +31,9 @@ from stalker.models.shot import Shot
 from stalker.models.status import Status, StatusList, Color
 from stalker.models.structure import Structure
 from stalker.models.tag import Tag
-from stalker.models.task import Booking
-from stalker.models.task import Task
+from stalker.models.task import Booking, Task
 from stalker.models.template import FilenameTemplate
+from stalker.models.ticket import Ticket, TicketLog
 from stalker.models.type import Type, EntityType
 from stalker.models.version import Version
 
@@ -66,10 +66,12 @@ def main(global_config, **settings):
     config.include('pyramid_jinja2')
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home', '/')
+    config.add_route('user_menu', '/user_menu')
+    config.add_route('projects_menu', '/projects_menu')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.add_route('add_project', 'add/project')
-    config.add_route('edit_project', 'edit/project')
+    config.add_route('edit_project', 'edit/project/{project_id}')
     config.add_route('add_image_format', 'add/image_format')
     config.add_route('edit_image_format', 'edit/image_format/{imf_id}')
     config.add_route('add_repository', 'add/repository')
@@ -81,7 +83,10 @@ def main(global_config, **settings):
     config.add_route('add_filename_template', 'add/filename_template')
     config.add_route('edit_filename_template',
                      'edit/filename_template/{filename_template_id}')
-    
+    config.add_route('add_status_list', 'add/status_list')
+    config.add_route('edit_status_list', 'edit/status_list/{status_list_id}')
+    config.add_route('add_status', 'add/status')
+    config.add_route('edit_status', 'edit/status')
     config.scan()
     return config.make_wsgi_app()
 

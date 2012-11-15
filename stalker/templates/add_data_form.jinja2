@@ -3,7 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
       xmlns:tal="http://xml.zope.org/namespaces/tal">
 <head>
-  <title>Stalker v{{stalker.__version__}}</title>
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
   <meta name="keywords" content="python web application"/>
@@ -13,7 +12,7 @@
   <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
         href="{{request.static_url('stalker:static/css/stalker.css')}}"/>
   <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
-        href="{{ request.static_url('stalker:static/js/dojo-release-1.7.2/dijit/themes/claro/claro.css') }}"/>
+        href="{{ request.static_url('stalker:static/js/dojo-release-1.7.2/dijit/themes/soria/soria.css') }}"/>
   <script type="text/javascript" data-dojo-config="async: true"
           src="{{ request.static_url('stalker:static/js/dojo-release-1.7.2/dojo/dojo.js') }}">
   </script>
@@ -22,7 +21,7 @@
   </script>
   {% block script_block %}{% endblock %}
 </head>
-<body class='claro' style="border-radius: 10px">
+<body class='soria' style="border-radius: 10px">
   {% block form_block %}
     <div id='form_div'></div>
   {% endblock %}

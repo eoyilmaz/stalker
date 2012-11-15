@@ -5,8 +5,8 @@ Stalker Changes
 0.2.0.a4
 --------
 
-* Added a new class called EntityType to hold all the class names available in
-  the system. Usable in FilenameTemplate's.
+* Added a new class called EntityType to hold all the available class names and
+  capabilities.
 
 * Version class now has a new attribute called ``inputs`` to hold the inputs of
   the current Version instance. It is a list of Link instances.
@@ -52,6 +52,9 @@ Stalker Changes
         path="Assets/{{asset.type.code}}/{{asset.code}}/References",
         filename="{{link.type.code}}/{{link.id}}{{link.extension}}"
     )
+
+* stalker.db.register() now only accepts real classes instead of class names.
+  This way it can store more information about classes.
 
 0.2.0.a3
 --------
