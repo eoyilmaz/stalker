@@ -361,7 +361,6 @@ def register(class_):
     if not EntityType.query().filter_by(name=class_name).first():
         new_entity_type = EntityType(class_name)
         # update attributes
-        # TODO: make this work
         if issubclass(class_, StatusMixin):
             new_entity_type.statusable = True
         if issubclass(class_, TaskableEntity):

@@ -53,7 +53,7 @@ Stalker Changes
         filename="{{link.type.code}}/{{link.id}}{{link.extension}}"
     )
 
-* stalker.db.register() now only accepts real classes instead of class names.
+* stalker.db.register() now accepts only real classes instead of class names.
   This way it can store more information about classes.
 
 0.2.0.a3

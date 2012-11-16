@@ -46,7 +46,7 @@
         </div>
       {% endblock %}
     </div>
-    <div id="content" class="centralPanel">
+    <div id="central_content" class="centralPanel">
       {% block content %}
         <div id="main_view">
           <div id="top_menu">
@@ -75,10 +75,10 @@
   <script type='text/javascript'>
     require(["dojo/dom", "dijit/registry", "dijit/layout/BorderContainer",
       "dijit/layout/TabContainer", "dijit/layout/SplitContainer",
-       "dojox/layout/ContentPane", "dijit/form/Button",
+       "dojox/layout/ContentPane",
       "dojo/domReady!"],
         function(dom, registry, BorderContainer, TabContainer,
-                 SplitContainer, ContentPane, Button){
+                 SplitContainer, ContentPane){
           
           // create the BorderContainer and attach it to our appLayout div
           var appLayout = new BorderContainer({
@@ -132,7 +132,8 @@
           // create Footer
           appLayout.addChild(
             new ContentPane({
-              region: 'bottom'
+              region: 'bottom',
+              style: 'height: 24px'
             }, "footer")
           );
           
@@ -140,7 +141,7 @@
           appLayout.addChild(
             new ContentPane({
               region: 'center'
-            }, "content")
+            }, "central_content")
           );
           
           appLayout.startup();

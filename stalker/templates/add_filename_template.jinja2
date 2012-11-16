@@ -72,10 +72,10 @@
   <script type="text/javascript">
     require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
       "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
-      "dijit/form/Select", "dijit/form/Button", "dojo/domReady!"
+      "dijit/form/FilteringSelect", "dijit/form/Button", "dojo/domReady!"
     ],
       function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
-               Select, Button){
+               FilteringSelect, Button){
         
         var add_filename_template_form = new Form({
           id: "add_filename_template_form",
@@ -119,37 +119,47 @@
         name_textBox.startup();
         
         // TARGET ENTITY TYPE
-        var target_entity_type_select = new Select({
+        var target_entity_type_memory = new Memory({
+          data: [
+            {% for entity_type in entity_types %}
+              {
+                name: '{{ entity_type.name }}',
+                id: '{{ entity_type.name }}'
+              },
+            {% endfor %}
+          ]
+        });
+        
+        var target_entity_type_select = new FilteringSelect({
           name: "target_entity_type",
           label: "Target Entity Type",
           required: true,
           style: 'width: auto; margin: 0px; padding: 0px;',
-          options: [
-            {% for entity_type in entity_types %}
-              {
-                label: '{{ entity_type.name }}',
-                value: '{{ entity_type.name }}'
-              },
-            {% endfor %}
-          ]
+          store: target_entity_type_memory,
+          value: target_entity_type_memory.data[0].id
         }, "filename_template_target_entity_type");
         target_entity_type_select.startup();
         
 
         // TYPE
-        var type_select = new Select({
-          name: "type",
-          label: "Type",
-          required: true,
-          style: 'width: auto; margin: 0px; padding: 0px;',
-          options: [
+        var type_memory = new Memory({
+          data: [
             {% for type in filename_template_types %}
               {
-                label: '{{ type.name }}',
-                value: '{{ type.name }}'
+                name: '{{ type.name }}',
+                id: '{{ type.id }}'
               },
             {% endfor %}
           ]
+        });
+        
+        var type_select = new FilteringSelect({
+          name: "type_id",
+          label: "Type",
+          required: true,
+          style: 'width: auto; margin: 0px; padding: 0px;',
+          store: type_memory,
+          value: type_memory.data[0].id
         }, "filename_template_type");
         type_select.startup();
          

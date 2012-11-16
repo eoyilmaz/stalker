@@ -63,30 +63,69 @@ def main(global_config, **settings):
     )
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(authz_policy) 
+    
     config.include('pyramid_jinja2')
     config.add_static_view('static', 'static', cache_max_age=3600)
+    
+    # *************************************************************************
+    # Basics
     config.add_route('home', '/')
-    config.add_route('user_menu', '/user_menu')
-    config.add_route('projects_menu', '/projects_menu')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    
+    # *************************************************************************
+    # Menus
+    config.add_route('user_menu', '/user_menu')
+    config.add_route('projects_menu', '/projects_menu')
+    
+    # *************************************************************************
+    # DATA VIEWS
+    # *************************************************************************
+    
+    # *************************************************************************
+    # Project
     config.add_route('add_project', 'add/project')
     config.add_route('edit_project', 'edit/project/{project_id}')
+    config.add_route('view_project', 'view/project/{project_id}')
+    config.add_route('view_projects', 'view/projects')
+    
+    # *************************************************************************
+    # ImageFormat
     config.add_route('add_image_format', 'add/image_format')
     config.add_route('edit_image_format', 'edit/image_format/{imf_id}')
+    
+    # *************************************************************************
+    # Repository
     config.add_route('add_repository', 'add/repository')
     config.add_route('edit_repository', 'edit/repository')
+    
+    # ************************************************************************* 
+    # Structure
     config.add_route('add_structure', 'add/structure')
     config.add_route('edit_structure', 'edit/structure/{structure_id}')
+    
+    # ************************************************************************* 
+    # User
     config.add_route('add_user', 'add/user')
     config.add_route('edit_user', 'edit/user/{user_id}')
+    
+    # *************************************************************************
+    # FilenameTemplate
     config.add_route('add_filename_template', 'add/filename_template')
     config.add_route('edit_filename_template',
                      'edit/filename_template/{filename_template_id}')
+    
+    # ************************************************************************* 
+    # StatusList
     config.add_route('add_status_list', 'add/status_list')
     config.add_route('edit_status_list', 'edit/status_list/{status_list_id}')
+    
+    # *************************************************************************
+    # Status
     config.add_route('add_status', 'add/status')
     config.add_route('edit_status', 'edit/status')
+    
+    
     config.scan()
     return config.make_wsgi_app()
 

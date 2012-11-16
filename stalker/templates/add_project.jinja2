@@ -117,11 +117,11 @@
   <script type="text/javascript">
     require(["dijit/registry", "dojo/_base/xhr", "dojo/on",
       "dojo/store/Memory", "dijit/form/Form", "dijit/form/ValidationTextBox",
-      "dijit/form/TextBox", "dijit/form/NumberTextBox", "dijit/form/Select",
-      "dijit/form/Button", 'dojo/ready'
+      "dijit/form/TextBox", "dijit/form/NumberTextBox",
+      "dijit/form/FilteringSelect", "dijit/form/Button", 'dojo/ready'
     ],
       function(registry, xhr, on, Memory, Form, ValidationTextBox, TextBox,
-               NumberTextBox, Select, Button){
+               NumberTextBox, FilteringSelect, Button){
         
         // ********************************************************************
         // FORM
@@ -177,21 +177,26 @@
         
         // ********************************************************************
         // IMAGE FORMAT
-        var image_format_select = new Select({
-          name: "image_format",
-          required: true,
-          style: "width: auto; margin: 0px; padding: 0px;",
-          options: [
+        var image_format_memory = new Memory({
+          data: [
             {% for image_format in image_formats %}
               {
-                label: '{{image_format.name}} - {{image_format.width}}'+
+                name: '{{image_format.name}} - {{image_format.width}}'+
                       'x{{image_format.height}}x{{image_format.pixel_aspect}}',
-                value: '{{ image_format.id }}'
+                id: '{{ image_format.id }}'
               },
             {% endfor %}
           ]
+        });
+        
+        var image_format_filteringSelect = new FilteringSelect({
+          name: "image_format",
+          required: true,
+          style: "width: auto; margin: 0px; padding: 0px;",
+          store: image_format_memory,
+          value: image_format_memory.data[0].id
         }, "project_image_format");
-        image_format_select.startup();
+        image_format_filteringSelect.startup();
         
         // ADD IMAGE FORMAT BUTTON
         var add_image_format_button = create_add_data_button(
@@ -205,14 +210,14 @@
         
         // EDIT IMAGE FORMAT BUTTON
         var edit_image_format_button = create_edit_data_button(
-                dijit.byId('add_project_form').getParent(),
-                'Edit',
-                'edit_image_format_dialog',
-                create_edit_image_format_dialog,
-                'project_edit_image_format_button',
-                function(){
-                  return image_format_select.get('value');
-                }
+          dijit.byId('add_project_form').getParent(),
+          'Edit',
+          'edit_image_format_dialog',
+          create_edit_image_format_dialog,
+          'project_edit_image_format_button',
+          function(){
+            return image_format_filteringSelect.get('value');
+          }
         );
         edit_image_format_button.startup();
         
@@ -229,18 +234,23 @@
         
         // ********************************************************************
         // REPOSITORY
-        var repository_select = new Select({
-          name: "repository",
-          required: true,
-          style: "width: auto; margin: 0px; padding: 0px;",
-          options: [
+        var repository_memory = new Memory({
+          data: [
             {% for repository in repositories %}
               {
-                label: '{{ repository.name }}',
-                value: '{{ repository.id }}'
+                name: '{{ repository.name }}',
+                id: '{{ repository.id }}'
               },
             {% endfor %}
           ]
+        });
+        
+        var repository_select = new FilteringSelect({
+          name: "repository",
+          required: true,
+          style: "width: auto; margin: 0px; padding: 0px;",
+          store: repository_memory,
+          value: repository_memory.data[0].id
         }, "project_repository");
         repository_select.startup();
         
@@ -267,18 +277,22 @@
         
         // ********************************************************************
         // STRUCTURE
-        var structure_select = new Select({
-          name: "structure",
-          required: true,
-          style: "width: auto; height: auto; margin: 0px; padding: 0px;",
-          options: [
+        var structure_memory = new Memory({
+          data: [
             {% for structure in structures %}
               {
-                label: '{{ structure.name }}',
-                value: '{{ structure.id }}'
+                name: '{{ structure.name }}',
+                id: '{{ structure.id }}'
               },
             {% endfor %}
           ]
+        });
+        var structure_select = new FilteringSelect({
+          name: "structure",
+          required: true,
+          style: "width: auto; height: auto; margin: 0px; padding: 0px;",
+          store: structure_memory,
+          value: structure_memory.data[0].id
         }, "project_structure");
         structure_select.startup();
         
@@ -307,18 +321,23 @@
         
         // ********************************************************************
         // LEAD
-        var lead_select = new Select({
-          name: 'lead',
-          required: true,
-          style: 'width: auto; height: auto; margin: 0px; padding: 0px;',
-          options: [
+        var lead_memory = new Memory({
+          data: [
             {%  for user in users %}
               {
-                label: '{{ user.first_name }} {{ user.last_name }}',
-                value: '{{ user.id }}'
+                name: '{{ user.first_name }} {{ user.last_name }}',
+                id: '{{ user.id }}'
               }
             {% endfor %}
           ]
+        });
+        
+        var lead_select = new FilteringSelect({
+          name: 'lead',
+          required: true,
+          style: 'width: auto; height: auto; margin: 0px; padding: 0px;',
+          store: lead_memory,
+          value: lead_memory.data[0].id
         }, 'project_lead');
         lead_select.startup();
         
@@ -349,18 +368,23 @@
 
         // ********************************************************************
         // STATUS LIST
-        var status_list_select = new Select({
-          name: "status_list",
-          required: true,
-          style: "width: auto; height: auto; margin: 0px; padding: 0px;",
-          options: [
+        var status_list_memory = new Memory({
+          data: [
             {% for status_list in status_lists %}
               {
-                label: '{{ status_list.name }}',
-                value: '{{ status_list.id }}'
+                name: '{{ status_list.name }}',
+                id: '{{ status_list.id }}'
               },
             {% endfor %}
           ]
+        });
+        
+        var status_list_select = new FilteringSelect({
+          name: "status_list",
+          required: true,
+          style: "width: auto; height: auto; margin: 0px; padding: 0px;",
+          store: status_list_memory,
+          value: status_list_memory.data[0].id
         }, "project_status_list");
         status_list_select.startup();
         

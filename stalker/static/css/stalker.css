@@ -96,7 +96,7 @@ ul li ol {
     line-height: 14px;
 }
 
-#content{
+#central_content {
     bottom: 24px;
     position: absolute;
     top: 40px;
@@ -379,4 +379,21 @@ ul li ol {
     left: 8px;
     position: absolute;
     top: 3px;
+}
+
+.project_thumbnail {
+    width: 192px;
+    height: 192px;
+    border: 1px;
+    border-color: black;
+    background-color: #d3d3d3;
+    float: left;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.project_info {
+    position: absolute;
+    clear: both;
+    left: 204px;
 }

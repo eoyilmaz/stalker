@@ -341,7 +341,6 @@ class DatabaseTester(unittest.TestCase):
     def test_permissions_created_for_all_the_classes(self):
         """testing if Permission instances are created for classes in the SOM
         """
-        
         DBSession.remove()
         DBSession.configure(extension=None)
         db.setup()

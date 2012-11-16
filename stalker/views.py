@@ -132,13 +132,8 @@ def logout(request):
     renderer='templates/add_project.jinja2',
     permission='Add_Project'
 )
-@view_config(
-    route_name='edit_project',
-    renderer='templates/edit_project.jinja2',
-    permission='Edit_Project'
-)
-def add_edit_project(request):
-    """called when creating a project
+def add_project(request):
+    """called when adding a project
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
@@ -150,7 +145,6 @@ def add_edit_project(request):
         if request.params['submitted'] == 'add':
             #login = request.params['login']
             # so create the project
-            logger.debug('create clicked with this request: ' % request)
             
             with transaction.manager:
                 # get the image format
@@ -175,19 +169,89 @@ def add_edit_project(request):
                 )
                 
                 DBSession.add(new_project)
-            
-            return HTTPFound(location=came_from)
-        elif request.params['params']:
-            return HTTPFound(location=came_from)
-    
+        
+        # do not return anything
+        # or maybe we should return to where we came from
+        return HTTPFound(location=came_from)
+   
+    # just one wants to see the add project form
     return {
         'user': user,
         'users': User.query().all(),
         'image_formats': ImageFormat.query().all(),
         'repositories': Repository.query().all(),
         'structures': Structure.query().all(),
-        'status_lists':
-            StatusList.query().filter_by(target_entity_type='Project').all(),
+        'status_lists': StatusList.query()\
+                            .filter_by(target_entity_type='Project')\
+                            .all(),
+    }
+
+@view_config(
+    route_name='view_project',
+    renderer='templates/view_project.jinja2',
+    permission='View_Project'
+)
+def view_project(request):
+    """runs when viewing a project
+    """
+    # just return the project
+    proj_id = request.matchdict['project_id']
+    proj = Project.query().filter_by(id=proj_id).first()
+    return {
+        'project': proj
+    }
+
+@view_config(
+    route_name='view_projects',
+    renderer='templates/view_projects.jinja2',
+    permission='View_Project'
+)
+def view_projects(request):
+    """runs when viewing all projects
+    """
+    # just return all the projects
+    return {
+        'projects': Project.query().all()
+    }
+
+
+@view_config(
+    route_name='edit_project',
+    renderer='templates/edit_project.jinja2',
+    permission='Edit_Project'
+)
+def edit_project(request):
+    """runs when editing a project
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    proj_id = request.matchdict['project_id']
+    proj = Project.query().filter_by(id=proj_id).first()
+    
+    
+    
+    if request.params['submitted'] == 'edit':
+        #return HTTPFound(location=came_from)
+        login_name = authenticated_userid(request)
+        authenticated_user = User.query().filter_by(login_name=login_name).first()
+        
+        # get the project and update it
+        # TODO: add this part
+        
+        # return where we came from
+        return HTTPFound(location=came_from)
+    
+    # just give the info enough to fill the form
+    return {
+        'project': proj,
+        'users': User.query().all(),
+        'image_formats': ImageFormat.query().all(),
+        'repositories': Repository.query().all(),
+        'structures': Structure.query().all(),
+        'status_lists': StatusList.query()\
+                            .filter_by(target_entity_type='Project')\
+                            .all(),
     }
 
 @view_config(
@@ -470,7 +534,7 @@ def add_edit_filename_template(request):
                 
                 # get the typ
                 type_ = Type.query()\
-                    .filter_by(name=request.params['type'])\
+                    .filter_by(id=request.params['type_id'])\
                     .first()
                 
                 try:

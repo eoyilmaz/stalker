@@ -53,11 +53,11 @@
   <script type="text/javascript">
     require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
       "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
-      "dijit/form/SimpleTextarea", "dijit/form/Button", "dijit/form/Select",
-      "dijit/form/MultiSelect", "dojo/domReady!"
+      "dijit/form/SimpleTextarea", "dijit/form/Button",
+      "dijit/form/FilteringSelect", "dijit/form/MultiSelect", "dojo/domReady!"
     ],
       function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
-               SimpleTextarea, Button, Select, MultiSelect){
+               SimpleTextarea, Button, FilteringSelect, MultiSelect){
         
         // ********************************************************************
         // FORM
@@ -105,19 +105,24 @@
         
         // ********************************************************************
         // TARGET ENTITY TYPE
-        var target_entity_type_select = new Select({
+        var target_entity_type_store = new Memory({
+          data: [
+            {% for entity_type in entity_types %}
+              {
+                name: '{{ entity_type.name }}',
+                id: '{{ entity_type.name }}'
+              },
+            {% endfor %}
+          ]
+        });
+        
+        var target_entity_type_select = new FilteringSelect({
           name: "target_entity_type",
           label: "Target Entity Type",
           required: true,
           style: 'width: auto; margin: 0px; padding: 0px;',
-          options: [
-            {% for entity_type in entity_types %}
-              {
-                label: '{{ entity_type.name }}',
-                value: '{{ entity_type.name }}'
-              },
-            {% endfor %}
-          ]
+          store: target_entity_type_store,
+          value: target_entity_type_store.data[0].id
         }, "status_list_target_entity_type");
         target_entity_type_select.startup();
         
