@@ -253,16 +253,21 @@
             id: 'projects_tree',
             model: myModel,
             onClick: function(item, node, event){
-              if (item.type == "Project"){
-                project_id = item.id;
-                // update the central view
-                var central_container = dijit.byId('central_content');
+              var central_container = dijit.byId('central_content');
+              if (item.type == "ProjectsContainer"){
                 central_container.setAttribute(
                   'href',
-                  '/view/project/' + project_id
+                  'view/projects'
+                )
+              } else if (item.type == "Project"){
+                project_id = item.id;
+                // update the central view
+                central_container.setAttribute(
+                  'href',
+                  'view/project/' + project_id
                 );
-                central_container.refresh();
               }
+              central_container.refresh();
             },
             onOpen: function(item, node){
               // loop through menuItems and replace the correct menu

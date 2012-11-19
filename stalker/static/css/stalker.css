@@ -43,17 +43,12 @@
 
 html, body {
     font-family: 'Ubuntu', "Bitstream Vera Sans", 'DejaVu Sans', 'Tahoma', 'sans-serif';
-    /*font-family: Arial,Helvetica,sans-serif;*/
     background-color: #c0c0c0;
-    font-size: 14px;
-    /*line-height: 16px;*/
+    font-size: 12px;
     height: 100%;
     margin: 0;
     overflow: hidden;
     padding: 0;
-    border-radius: 12px;
-    -moz-border-radius: 12px;
-    -webkit-border-radius: 12px;
     -moz-user-select: none;
     -webkit-user-select: none; 
 }
@@ -96,155 +91,86 @@ ul li ol {
     line-height: 14px;
 }
 
+a:link {
+    text-decoration: none;
+}
+a:visited {
+    text-decoration: none;
+}
+a:active {
+    text-decoration: none
+}
+a:hover {
+    text-decoration: underline;
+}
+
 #central_content {
     bottom: 24px;
     position: absolute;
     top: 40px;
     width: 100%;
     -moz-user-select: none;
-    -webkit-user-select: none; 
+    -webkit-user-select: none;
 }
 
-/*#login_window {*/
-    /*background-color: #808080;*/
-    /*border-radius: 12px 12px 12px 12px;*/
-    /*color: #FFFFFF;*/
-    /*height: 192px;*/
-    /*left: 50%;*/
-    /*margin-left: -160px;*/
-    /*margin-top: -96px;*/
-    /*position: absolute;*/
-    /*top: 50%;*/
-    /*width: 320px;*/
-/*}*/
-
-/*#login_window #title {*/
-    /*position: relative;*/
-    /*text-align: center;*/
-    /*width: 100%;*/
-/*}*/
-
-.indented_input {
-    text-indent: 11px;
-}
-
-.row {
-    float: left;
-    height: 35px;
-}
-
-.column1 {
-    float: left;
-    line-height: 32px;
-    margin-right: 10px;
+.label_column {
     text-align: right;
-    width: 150px;
+    font-weight: bold;
 }
 
-.column2 {
-    float: left;
-    line-height: inherit;
-    width: 212px;
-    margin-right: 10px;
-    padding-top: 6px;
+.input_column {
+    width: auto;
 }
 
-.column3 {
+.button_column {
     float: left;
 }
-
-/*#login_window input {*/
-    /*border: medium none transparent;*/
-    /*border-radius: 12px 12px 12px 12px;*/
-    /*float: left;*/
-    /*font-size: 12px;*/
-    /*height: 24px;*/
-    /*margin-bottom: 11px;*/
-    /*width: 182px;*/
-/*}*/
-
-/*#login_window #login_button input {*/
-    /*border: medium none transparent;*/
-    /*border-radius: 12px 12px 12px 12px;*/
-    /*float: right;*/
-    /*font-size: 12px;*/
-    /*height: 24px;*/
-    /*margin-bottom: 11px;*/
-    /*width: 75px;*/
-    /*color: #ffffff;*/
-    /*background: -moz-linear-gradient(top, #0072bc, #0054a6);*/
-    /*background: -webkit-gradient(linear, left top, left bottom, from(#0072bc), to(#0054a6));*/
-/*}*/
-
-/*#login_window #message {*/
-    /*background-color: #EE1C24;*/
-    /*border-radius: 10px 10px 10px 10px;*/
-    /*margin-top: 42px;*/
-    /*text-align: center;*/
-/*}*/
 
 #header{
-    background-color: #448CCB;
+    background-color: #2A2C2E;
     clear: both;
     color: white;
     float: left;
-    height: 40px;
+    height: 24px;
     margin: 0;
     width: 100%;
-    /*font-family: UbuntuBold;*/
 }
 
 #header #stalker_logo{
     float: left;
-    width: 25%;
-}
-
-#header #stalker_name {
     clear: both;
-    float: left;
-    font-size: 24px;
+    font-size: 16px;
     margin-left: 10px;
-    margin-top: 11px;
+    margin-top: 3px;
 }
 
-#header #stalker_version {
-    float: left;
-    font-size: 12px;
-    left: 3px;
-    position: relative;
-    top: 15px;
+#mebar {
+    float: right;
+    margin-right: 20px;
+    margin-top: 6px;
+    color: lightgrey;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-#header #user_menu {
-    border: 0 none;
-    float: left;
-    height: 30px;
-    position: relative;
-    text-align: center;
-    top: 11px;
-    width: 50%;
+#mebar:hover {
+    color:white;
 }
 
-#header #user_menu a {
-    text-decoration: none;
+#avatar {
+    width: 96px;
+    height: 96px;
+    /*background-image: "{{ request.static_url('stalker:static/images/NoPicture.gif') }}";*/
 }
-
-#header #user_menu a:visited {
-    text-decoration: none;
-    color: inherit;
-}
-
-#header #user_menu a:link {
-    text-decoration: none;
-}
-
-#header #user_menu a:active {
-    text-decoration: none;
-}
-
-#header #user_menu a:hover {
-    text-decoration: underline;
-}
+/*#header #user_menu {*/
+    /*border: 0 none;*/
+    /*float: left;*/
+    /*height: 30px;*/
+    /*position: relative;*/
+    /*text-align: center;*/
+    /*top: 11px;*/
+    /*width: 50%;*/
+/*}*/
 
 #footer{
     position:absolute;
@@ -321,64 +247,6 @@ ul li ol {
     font-size: 12px;
     height: 20px;
     width: 182px;
-}
-
-#popup_area {
-    height: 100%;
-    opacity: 1;
-    position: absolute;
-    width: 100%;
-    z-index: 100;
-    visibility: hidden;
-}
-
-#popup_area_bg {
-    background-color: black;
-    height: 100%;
-    opacity: 0.5;
-    position: absolute;
-    width: 100%;
-    z-index: 101;   
-}
-
-#popup_window {
-    background-color: #c0c0c0;
-    height: 300px;
-    left: 50%;
-    margin-left: -200px;
-    margin-top: -150px;
-    position: absolute;
-    top: 50%;
-    width: 400px;
-    z-index: 102;
-    opacity: 1.0;
-    clear: both;
-    line-height: 24px;
-}
-
-#popup_window input {
-    border: medium none transparent;
-    border-radius: 12px 12px 12px 12px;
-}
-
-/*for popup windows*/
-.window_header {
-    background-color: #448CCB;
-    color: white;
-    /*font-family: UbuntuBold;*/
-    font-size: 14px;
-    height: 24px;
-    line-height: 24px;
-    text-align: center;
-    width: 100%;
-}
-
-.window_close_button {
-    color: white;
-    /*font-family: UbuntuBold;*/
-    left: 8px;
-    position: absolute;
-    top: 3px;
 }
 
 .project_thumbnail {

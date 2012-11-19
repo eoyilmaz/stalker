@@ -56,6 +56,9 @@ Stalker Changes
 * stalker.db.register() now accepts only real classes instead of class names.
   This way it can store more information about classes.
 
+* Status.bg_color and Status.fg_color attributes are now simple integers. And
+  the Color class is removed.
+
 0.2.0.a3
 --------
 

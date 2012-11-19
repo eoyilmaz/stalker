@@ -1,47 +1,60 @@
 {% extends 'add_data_form.jinja2' %}
 {% block form_block %}
   <div class="dijitDialogPaneContentArea">
-    <div id='image_format_form_div'>
+    <form id="edit_image_format_form">
+      <table style="width: 100%">
       
-      <div class="row">
-        <div class="column1">
-          <label for='image_format_name'>Name</label>
-        </div>
-        <div class="column2">
-          <input id='image_format_name'>
-        </div>
-      </div>
-      
-      <div class="row">
-        <div class="column1">
-          <label for='image_format_width'>Width</label>
-        </div>
-        <div class="column2">
-          <input id='image_format_width'>
-        </div>
-      </div>
-      
-      <div class="row">
-        <div class="column1">
-          <label for='image_format_height'>Height</label>
-        </div>
-        <div class="column2">
-          <input id='image_format_height'>
-        </div>
-      </div>
-      
-      <div class="row">
-        <div class="column1">
-          <label for='image_format_pixel_aspect'>Pixel Aspect</label>
-        </div>
-        <div class="column2">
-          <input id='image_format_pixel_aspect'>
-        </div>
-      </div>
-      
-    </div>
+        {# NAME #}
+        <tr>
+          <td class="label_column">
+            <label for='image_format_name'>
+              Name
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='image_format_name'>
+          </td>
+        </tr>
+        
+        {# WIDTH #}
+        <tr>
+          <td class="label_column">
+            <label for='image_format_width'>
+              Width
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='image_format_width'>
+          </td>
+        </tr>
+        
+        {# HEIGHT #}
+        <tr>
+          <td class="label_column">
+            <label for='image_format_height'>
+              Height
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='image_format_height'>
+          </td>
+        </tr>
+        
+        <tr>
+          <td class="label_column">
+            <label for='image_format_pixel_aspect'>
+              Pixel Aspect
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='image_format_pixel_aspect'>
+          </td>
+        </tr>
+        
+      </table>
+    </form>
   </div>
-  <div class="dijitDialogPaneActionBar" style="clear: both;">
+  <div class="dijitDialogPaneActionBar">
     <button id='image_format_edit_button'
             value='Submit'
             name="edited"
@@ -83,7 +96,7 @@
             }
             return false;
           }
-        }, 'image_format_form_div');
+        }, 'edit_image_format_form');
         edit_image_format_form.startup();
         
         // NAME

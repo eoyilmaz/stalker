@@ -1,34 +1,62 @@
 {% extends 'add_data_form.jinja2' %}
 {% block form_block %}
   <div class="dijitDialogPaneContentArea">
-    <div id='status_form_div'>
-      
-      {# NAME #}
-      <div class="row">
-        <div class="column1">
-          <label for='status_name'>Name</label>
-        </div>
-        <div class="column2">
-          <input id='status_name'>
-        </div>
-      </div>
-      
-      {# CODE #}
-      <div class="row">
-        <div class="column1">
-          <label for='status_code'>Code</label>
-        </div>
-        <div class="column2">
-          <input id='status_code'>
-        </div>
-      </div>
+    <form id="add_status_form">
+      <table style="width:100%;">
+        
+        {# NAME #}
+        <tr>
+          <td class="label_column">
+            <label for='status_name'>
+              Name
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='status_name'>
+          </td>
+        </tr>
+        
+        {# CODE #}
+        <tr>
+          <td class="label_column">
+            <label for='status_code'>
+              Code
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='status_code'>
+          </td>
+        </tr>
     
-      {# TODO: add color fields also #}
-
-    </div>
+        {# FG Color #}
+        <tr>
+          <td class='label_column'>
+            <label for='status_fg_color'>
+              FG Color
+            </label>
+          </td>
+          <td class='input_column'>
+            <input id='status_fg_color'>
+          </td>
+        </tr>
+        
+        {# BG Color #}
+        <tr>
+          <td class='label_column'>
+            <label for='status_bg_color'>
+              BG Color
+            </label>
+          </td>
+          <td class='input_column'>
+            <input id='status_bg_color'>
+          </td>
+        </tr>
+        
+      </table>
+    </form>
   </div>
   
-  <div class="dijitDialogPaneActionBar" style="clear: both;">
+  <div class="dijitDialogPaneActionBar">
     <button id='status_add_button'></button>
     <button id='status_cancel_button'></button>
   </div>
@@ -36,11 +64,11 @@
   <script type="text/javascript">
     require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
       "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
-      "dijit/form/SimpleTextarea", "dijit/form/Button",
+      "dijit/form/SimpleTextarea", "dijit/form/Button", "dijit/ColorPalette",
       "dojo/domReady!"
     ],
       function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
-               SimpleTextarea, Button){
+               SimpleTextarea, Button, ColorPalette){
         
         // ********************************************************************
         // FORM
@@ -53,7 +81,9 @@
               // on parent widget
               var deferred = xhr.post({
                 content: {
-                  submitted: 'add'
+                  submitted: 'add',
+                  bg_color: bg_color_colorPalette.value,
+                  fg_color: fg_color_colorPalette.value
                 },
                 url: "{{ request.route_url('add_status') }}",
                 form: dojo.byId('add_status_form')
@@ -69,11 +99,10 @@
               
               // destroy the dialog
               dialog.destroyRecursive();
-              
             }
             return false;
           }
-        }, 'status_form_div');
+        }, 'add_status_form');
         add_status_form.startup();
         
         // ********************************************************************
@@ -95,6 +124,28 @@
           required: true
         }, "status_code");
         code_textBox.startup();
+        
+        // ********************************************************************
+        // FG Color
+        // TODO: set default colors
+        var fg_color_colorPalette = new ColorPalette({
+          name: 'fg_color',
+          label: 'FG Color',
+          required: true
+        }, 'status_fg_color');
+        fg_color_colorPalette.startup();
+        
+        // ********************************************************************
+        // BG Color
+        var bg_color_colorPalette = new ColorPalette({
+          name: 'bg_color',
+          label: 'BG Color',
+          required: true,
+          onChange: function(value){
+            alert(this.value);
+          }
+        }, 'status_bg_color');
+        bg_color_colorPalette.startup();
         
         // ********************************************************************
         // ADD BUTTON

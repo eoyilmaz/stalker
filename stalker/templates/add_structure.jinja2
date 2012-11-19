@@ -1,34 +1,41 @@
 {% extends 'add_data_form.jinja2' %}
 {% block form_block %}
   <div class="dijitDialogPaneContentArea" style="height: 380px">
-    <div id='structure_form_div'>
+    <form id="add_structure_form">
+      <table style="width: 100%">
       
       {# Name #}
-      <div class="row">
-        <div class="column1">
-          <label for='structure_name'>Name</label>
-        </div>
-        <div class="column2">
+      <tr>
+        <td class="label_column">
+          <label for='structure_name'>
+            Name
+          </label>
+        </td>
+        <td class="input_column">
           <input id='structure_name'>
-        </div>
-      </div>
+        </td>
+      </tr>
       
       {# Custom Template #}
-      <div class='row' style="height: 260px">
-        <div class='column1'>
-          <label for='structure_custom_template'>Custom Template</label>
-        </div>
-        <div class='column2'>
+      <tr style="height: 260px">
+        <td class='label_column'>
+          <label for='structure_custom_template'>
+            Custom Template
+          </label>
+        </td>
+        <td class='input_column'>
           <input id='structure_custom_template'>
-        </div>
-      </div>
+        </td>
+      </tr>
       
       {# Filename Templates #}
-      <div class="row">
-        <div class="column1">
-          <label for='structure_filename_template'>Filename Templates</label>
-        </div>
-        <div class="column2">
+      <tr>
+        <td class="label_column">
+          <label for='structure_filename_template'>
+            Filename Templates
+          </label>
+        </td>
+        <td class="input_column">
           <select id='structure_filename_template'>
             {% for filename_template in filename_templates %}
               <option value="'{{ filename_template.id }}'">
@@ -36,16 +43,17 @@
               </option>
             {% endfor %}
           </select>
-        </div>
-        <div class='column3'>
+        </td>
+        <td class='button_column'>
           <button id="structure_add_filename_template_button">Add</button>
 {#          <button id="structure_edit_filename_template_button">Edit</button>#}
-        </div>
-      </div>
-    </div>
+        </td>
+      </tr>
+      </table>
+    </form>
   </div>
   
-  <div class="dijitDialogPaneActionBar" style="clear: both;">
+  <div class="dijitDialogPaneActionBar">
     <button id='structure_add_button'></button>
     <button id='structure_cancel_button'></button>
   </div>
@@ -90,7 +98,7 @@
             }
             return false;
           }
-        }, 'structure_form_div');
+        }, 'add_structure_form');
         add_structure_form.startup();
         
         // ********************************************************************
@@ -118,8 +126,7 @@
         // FILENAME TEMPLATE
         var filename_template_multi_select = new MultiSelect({
           name: 'filename_templates',
-          required: false,
-          style: 'width: 218px; margin: 0px; padding: 0px;'
+          required: false
         }, 'structure_filename_template');
         filename_template_multi_select.startup();
         

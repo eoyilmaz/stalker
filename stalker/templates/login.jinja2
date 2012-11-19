@@ -4,39 +4,43 @@
     <div id="central_content" class="centralPanel"
          style="left: 50%;
                 top: 50%;
-                width: 450px;
-                margin-left: -204px;
+                width: 250px;
+                margin-left: -125px;
                 height: 136px;
                 margin-top: -68px;">
       <div class="dijitDialogPaneContentArea" style="background-color: white; height:130px">
-        <div id='login_form_div' style="clear:both">
-          <div id='title' style="text-align: center;"><h3><b>Login To Stalker</b></h3></div>
+        <form id='login_form_div' style="clear:both">
+          <h3 style="text-align: center"><b>Login To Stalker</b></h3>
+          <table>
 
-          <div class="row">
-            <div class="column1">
-              <label for="login_or_email">login or email</label>
-            </div>
-            <div class="column2">
-              <input id="login_or_email">
-            </div>
-          </div>
+            <tr>
+              <td class="label_column">
+                <label for="e-mail">e-mail</label>
+              </td>
+              <td class="input_column">
+                <input id="e-mail">
+              </td>
+            </tr>
 
-          <div class="row">
-            <div class="column1">
-              <label for="password">password</label>
-            </div>
-            <div class="column2">
-              <input id="password" >
-            </div>
-            <input id='form.submitted' type='hidden'>
-          </div>
-        </div>
+            <tr>
+              <td class="label_column">
+                <label for="password">password</label>
+              </td>
+              <td class="input_column">
+                <input id="password" >
+              </td>
+              <input id='form.submitted' type='hidden'>
+            </tr>
+          </table>
+        </form>
+        
         <div id='message'
              style="position: relative; clear: both; text-align: center">
           <b>{{message}}</b>
         </div>
+        
       </div>
-      <div class="dijitDialogPaneActionBar" style="clear:both">
+      <div class="dijitDialogPaneActionBar">
         <button id="login_button"></button>
       </div>
     </div>
@@ -60,14 +64,20 @@
         required: true,
         type: 'text',
         value: '{{login}}'
-      }, 'login_or_email');
+      }, 'e-mail');
       login_name_validationTextBox.startup();
       
       // Password
       var password_validationTextBox = new ValidationTextBox({
         name: 'password',
         type: 'password',
-        value: '{{password}}'
+        value: '{{password}}',
+        onKeyPress: function(e){
+          // submit on Enter
+          if (e.keyCode==13){
+            login_form.submit();
+          }
+        }
       }, 'password');
       password_validationTextBox.startup();
       

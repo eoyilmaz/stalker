@@ -13,7 +13,7 @@
   <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
         href="{{request.static_url('stalker:static/css/stalker.css')}}"/>
   <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
-        href="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dijit/themes/soria/soria.css') }}"/>
+        href="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dijit/themes/claro/claro.css') }}"/>
   <script type="text/javascript" data-dojo-config="async: true" 
           src="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dojo/dojo.js') }}">
   </script>
@@ -24,25 +24,16 @@
           src="{{ request.static_url('stalker:static/js/stalker.js') }}">
   </script>
 </head>
-<body class="soria" style="border-radius: 10px">
+<body class="claro" style="border-radius: 10px">
 {% block body %}
   <div id="appLayout" class="demoLayout">
     <div id="header" class="edgePanel">
       {% block header %}
         <div id="stalker_logo">
-          <div id="stalker_name">Stalker</div>
-          <div id="stalker_version">v{{stalker.__version__}}</div>
+          Stalker <span style="font-size: 12px;">v{{stalker.__version__}}</span>
         </div>
-        <div id="navbar">
-          Welcome {{user.first_name}} {{user.last_name}} | Settings | <a href='/logout'>Logout</a>
-        </div>
-        <div id="search">
-          <div id="search_label">Search</div>
-          <div id="search_form">
-            <form>
-              <input class="indented_input">
-            </form>
-          </div>
+        <div id="mebar">
+          <span>{{user.first_name}} {{user.last_name}}</span>
         </div>
       {% endblock %}
     </div>
@@ -73,34 +64,39 @@
   </div>
 {% endblock %}
   <script type='text/javascript'>
-    require(["dojo/dom", "dijit/registry", "dijit/layout/BorderContainer",
-      "dijit/layout/TabContainer", "dijit/layout/SplitContainer",
-       "dojox/layout/ContentPane",
-      "dojo/domReady!"],
+    require(['dojo/dom', 'dijit/registry', 'dijit/layout/BorderContainer',
+      'dijit/layout/TabContainer', 'dijit/layout/SplitContainer',
+      'dojox/layout/ContentPane', 'dijit/TooltipDialog', 'dijit/popup',
+      'dojo/on', 'dojo/domReady!'],
         function(dom, registry, BorderContainer, TabContainer,
-                 SplitContainer, ContentPane){
+                 SplitContainer, ContentPane, TooltipDialog, popup, on){
           
           // create the BorderContainer and attach it to our appLayout div
           var appLayout = new BorderContainer({
-            design: "headline"
-          }, "appLayout");
+            design: 'headline',
+            style: 'padding: 0px',
+            splitter: true,
+            gutters: false
+          }, 'appLayout');
           
           // create the Header
           appLayout.addChild(
             new ContentPane({
-              region: "top",
-{#              style: 'height: 40px'#}
-            }, "header")
+              region: 'top',
+              style: 'height: 24px; padding: 0px;'
+            }, 'header')
           );
           
           // create left Menu
           var left_content_pane = new SplitContainer({
             region: 'leading',
             orientation: 'vertical',
-            splitter: true,
-            style:"width: 200px"
+            splitter: false,
+            activeSizing: true,
+            style:"width: 220px; padding: 0px",
+            gutters: false
           }, 'left_column');
- 
+
           appLayout.addChild(left_content_pane);
           
           // create the UserMenu
@@ -108,7 +104,7 @@
             new ContentPane({
               region: 'top',
               splitter: true,
-              style: 'height: 200px',
+              style: 'height: 200px; padding: 0px;',
               href: '/user_menu',
               preload: true,
               executeScripts: true
@@ -121,9 +117,11 @@
              splitter: true,
              href: '/projects_menu',
              executeScripts: true,
-             parseOnLoad: true
+             parseOnLoad: true,
+             style: 'padding: 0px'
           }, 'projects_menu_content_pane')
           projects_menu_content_pane.startup();
+          
           
           left_content_pane.addChild(projects_menu_content_pane);
           
@@ -133,14 +131,35 @@
           appLayout.addChild(
             new ContentPane({
               region: 'bottom',
-              style: 'height: 24px'
+              style: 'height: 14px; padding: 0px'
             }, "footer")
           );
+          
+          // mebar
+          var mebar_tooltipDialog = new TooltipDialog({
+            id: 'mebar_tooltipDialog',
+            style: 'width: 250px;',
+            href: '/me_menu',
+            onMouseLeave: function(){
+                popup.close(mebar_tooltipDialog);
+            }
+          });
+          mebar_tooltipDialog.startup();
+          
+          // attach the TooltipDialog to our mebar
+          on(dojo.byId('mebar'), 'click', function(){
+            popup.open({
+              popup: mebar_tooltipDialog,
+              around: dom.byId('mebar')
+            });
+          });
+{#          mebar.startup();#}
           
           // create main content
           appLayout.addChild(
             new ContentPane({
-              region: 'center'
+              region: 'center',
+              style: 'padding: 0px'
             }, "central_content")
           );
           

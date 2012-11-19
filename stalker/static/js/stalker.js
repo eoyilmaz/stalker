@@ -73,8 +73,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 id: 'add_project_dialog',
                 title: 'Add Project',
                 href: '/add/project',
-                resize: true,
-                style: "width: 550px; height auto;",
+                style: "width: 380px; height auto; padding: 0px",
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -90,7 +89,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Add Image Format',
                 href: '/add/image_format',
                 resize: true,
-                style: "width: 550px; height: auto;",
+                style: "width: 380px; height auto; padding: 0px",
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -103,7 +102,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Edit Image Format',
                 href: '/edit/image_format/' + image_format_id,
                 resize: true,
-                style: "width: 550px; height: auto;",
+                style: "width: 380px; height: auto; padding: 0px",
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -118,7 +117,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Add Structure',
                 href: '/add/structure',
                 resize: true,
-                style: "width: 550px; height: auto;",
+                style: "width: 380px; height: auto; padding: 0px",
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -131,7 +130,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Edit Structure',
                 href: '/edit/structure/' + structure_id,
                 resize: true,
-                style: "width: 550px; height: auto;",
+                style: "width: 380px; height: auto; padding: 0px",
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -146,7 +145,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Add User',
                 href: '/add/user',
                 resize: true,
-                style: 'width: 550px; height: auto;',
+                style: 'width: 380px; height: auto; padding: 0px',
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -159,7 +158,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Edit User',
                 href: 'edit/user/' + user_id,
                 resize: true,
-                style: 'width: 550px; height: auto;',
+                style: 'width: 380px; height: auto; padding: 0px',
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -175,7 +174,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Add Filename Template',
                 href: '/add/filename_template',
                 resize: true,
-                style: 'width: 550px; height: auto;',
+                style: 'width: 380px; height: auto; padding: 0px',
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -189,7 +188,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Edit Filename Template',
                 href: 'edit/filename_template/' + filename_template_id,
                 resize: true,
-                style: 'width: 550px; height: auto;',
+                style: 'width: 380px; height: auto; padding: 0px',
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -204,7 +203,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Add Repository',
                 href: '/add/repository',
                 resize: true,
-                style: "width: 550px; height auto;",
+                style: "width: 380px; height auto; padding: 0px",
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -217,7 +216,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Edit Repository',
                 href: '/edit/repository/' + repo_id,
                 resize: true,
-                style: 'width: 550px; height: auto;',
+                style: 'width: 380px; height: auto; padding: 0px',
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -232,7 +231,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Add Status List',
                 href: '/add/status_list',
                 resize: true,
-                style: "width: 550px; height: auto;",
+                style: 'width: 380px; height: auto; padding: 0px',
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -245,7 +244,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Edit Status List',
                 href: '/edit/status_list/' + status_list_id,
                 resize: true,
-                style: "width: 550px; height: auto;",
+                style: 'width: 380px; height: auto; padding: 0px',
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -260,7 +259,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Add Status',
                 href: '/add/status',
                 resize: true,
-                style: "width: 550px; height: auto;",
+                style: 'width: 380px; height: auto; padding: 0px',
                 executeScripts: true
             });
             myDialog.set('parent', parent);
@@ -273,7 +272,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 title: 'Edit Status',
                 href: '/edit/status/' + status_id,
                 resize: true,
-                style: "width: 550px; height: auto;",
+                style: 'width: 380px; height: auto; padding: 0px',
                 executeScripts: true
             });
             myDialog.set('parent', parent);

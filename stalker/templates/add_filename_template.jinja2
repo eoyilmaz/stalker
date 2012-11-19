@@ -1,71 +1,85 @@
 {% extends 'add_data_form.jinja2' %}
 {% block form_block %}
   <div class="dijitDialogPaneContentArea">
-    <div id='filename_template_form_div'>
-      
-      {# NAME #}
-      <div class="row">
-        <div class="column1">
-          <label for='filename_template_name'>Name</label>
-        </div>
-        <div class="column2">
-          <input id='filename_template_name'>
-        </div>
-      </div>
-      
-      {# TARGET ENTITY TYPE #}
-      <div class="row">
-        <div class="column1">
-          <label for='filename_template_target_entity_type'>Target Entity Type</label>
-        </div>
-        <div class="column2">
-          <input id='filename_template_target_entity_type'>
-        </div>
-      </div>
-      
-      {# TYPE #}
-      <div class="row">
-        <div class="column1">
-          <label for='filename_template_type'>Type</label>
-        </div>
-        <div class="column2">
-          <input id='filename_template_type'>
-        </div>
-      </div>
-      
-      {# PATH #}
-      <div class="row">
-        <div class="column1">
-          <label for='filename_template_path'>Path Template</label>
-        </div>
-        <div class="column2">
-          <input id='filename_template_path'>
-        </div>
-      </div>
-      
-      {# FILENAME #}
-      <div class="row">
-        <div class="column1">
-          <label for='filename_template_filename'>Filename Template</label>
-        </div>
-        <div class="column2">
-          <input id='filename_template_filename'>
-        </div>
-      </div>
-      
-      {# OUTPUT PATH #}
-      <div class="row">
-        <div class="column1">
-          <label for='filename_template_output_path'>Output Path Template</label>
-        </div>
-        <div class="column2">
-          <input id='filename_template_output_path'>
-        </div>
-      </div>
-      
-    </div>
+    <form id="add_filename_template_form">
+      <table style="width: 100%;">
+        
+        {# NAME #}
+        <tr>
+          <td class="label_column">
+            <label for='filename_template_name'>
+              Name
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='filename_template_name'>
+          </td>
+        </tr>
+        
+        {# TARGET ENTITY TYPE #}
+        <tr>
+          <td class="label_column">
+            <label for='filename_template_target_entity_type'>
+              Target Entity Type
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='filename_template_target_entity_type'>
+          </td>
+        </tr>
+        
+        {# TYPE #}
+        <tr>
+          <td class="label_column">
+            <label for='filename_template_type'>
+              Type
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='filename_template_type'>
+          </td>
+        </tr>
+        
+        {# PATH #}
+        <tr>
+          <td class="label_column">
+            <label for='filename_template_path'>
+              Path Template
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='filename_template_path'>
+          </td>
+        </tr>
+        
+        {# FILENAME #}
+        <tr>
+          <td class="label_column">
+            <label for='filename_template_filename'>
+                Filename Template
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='filename_template_filename'>
+          </td>
+        </tr>
+        
+        {# OUTPUT PATH #}
+        <tr>
+          <td class="label_column">
+            <label for='filename_template_output_path'>
+                Output Path Template
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='filename_template_output_path'>
+          </td>
+        </tr>
+        
+      </table>
+    </form>
   </div>
-  <div class="dijitDialogPaneActionBar" style="clear: both;">
+  <div class="dijitDialogPaneActionBar">
     <button id='filename_template_add_button'></button>
     <button id='filename_template_cancel_button'></button>
   </div>
@@ -106,7 +120,7 @@
             }
             return false;
           }
-        }, 'filename_template_form_div');
+        }, 'add_filename_template_form');
         add_filename_template_form.startup();
         
         // NAME
@@ -134,7 +148,6 @@
           name: "target_entity_type",
           label: "Target Entity Type",
           required: true,
-          style: 'width: auto; margin: 0px; padding: 0px;',
           store: target_entity_type_memory,
           value: target_entity_type_memory.data[0].id
         }, "filename_template_target_entity_type");
@@ -157,7 +170,6 @@
           name: "type_id",
           label: "Type",
           required: true,
-          style: 'width: auto; margin: 0px; padding: 0px;',
           store: type_memory,
           value: type_memory.data[0].id
         }, "filename_template_type");

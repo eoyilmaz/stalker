@@ -43,6 +43,8 @@ try it again.
 @view_config(route_name='home',
              renderer='templates/base.jinja2',
              permission='View_Project')
+@view_config(route_name='me_menu',
+             renderer='templates/me_menu.jinja2')
 def home(request):
     login_name = authenticated_userid(request)
     user = User.query().filter_by(login_name=login_name).first()
@@ -53,7 +55,6 @@ def home(request):
         'user': user,
         'projects': projects,
     }
-
 
 @view_config(route_name='user_menu',
              renderer='templates/user_menu.jinja2')
@@ -599,7 +600,6 @@ def add_edit_filename_template(request):
 def add_edit_status(request):
     """called when adding or editing a Status
     """
-    
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
@@ -612,14 +612,21 @@ def add_edit_status(request):
             # create and add a new Status
             
             if 'name' in request.params and \
-                'code' in request.params:
+                'code' in request.params and \
+                'bg_color' in request.params and \
+                'fg_color' in request.params:
                 
                 logger.debug('we got all the parameters')
                 
                 try:
+                    # get colors
+                    bg_color = int(request.params['bg_color'][1:], 16)
+                    fg_color = int(request.params['fg_color'][1:], 16)
                     new_status = Status(
                         name=request.params['name'],
                         code=request.params['code'],
+                        fg_color=fg_color,
+                        bg_color=bg_color,
                         created_by=user,
                     )
                 except (AttributeError, TypeError) as e:
@@ -637,6 +644,7 @@ def add_edit_status(request):
                         logger.debug('finished adding Status')
             else:
                 logger.debug('there are missing parameters')
+                logger.debug(request.params)
             
             # TODO: place a return statement here
         elif request.params['submitted'] == 'edit':

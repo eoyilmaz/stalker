@@ -1,115 +1,116 @@
 {% extends 'add_data_form.jinja2' %}
 {% block form_block %}
   <div class="dijitDialogPaneContentArea"> 
-    <div id='add_project_form_div'>
-      
-      {# NAME #}
-      <div class="row">
-        <div class="column1">
-          <label for='project_name'>Name</label>
-        </div>
-        <div class="column2">
-          <input id='project_name'>
-        </div>
-        <div class='column3'>
-          &nbsp;
-        </div>
-      </div>
-      
-      {# CODE #}
-      <div class='row'>
-        <div class='column1'>
-          <label for='project_code'>Code</label>
-        </div>
-        <div class='column2'>
-          <input id='project_code'>
-        </div>
-      </div>
-      
-      {# IMAGE FORMAT #}
-      <div class='row'>
-        <div class='column1'>
-          <label for='project_image_format'>Image Format</label>
-        </div>
-        <div class='column2'>
-          <input id='project_image_format'>
-        </div>
-        <div class='column3'>
-          <button id="project_add_image_format_button">Add</button>
-          <button id="project_edit_image_format_button">Edit</button>
-        </div>
-      </div>
-      
-      {# FPS #}
-      <div class='row'>
-        <div class='column1'>
-          <label for='project_fps'>FPS</label>
-        </div>
-        <div class='column2'>
-          <input id='project_fps'>
-        </div>
-      </div>
-      
-      {# REPOSITORY #}
-      <div class='row'>
-        <div class="column1">
-          <label for='project_repository'>Repository</label>
-        </div>
-        <div class='column2'>
-          <input id='project_repository'>
-        </div>
-        <div class='column3'>
-          <button id="project_add_repository_button">Add</button>
-          <button id="project_edit_repository_button">Edit</button>
-        </div>
-      </div>
-      
-      {# STRUCTURE #}
-      <div class='row'>
-        <div class="column1">
-          <label for='project_structure'>Structure</label>
-        </div>
-        <div class='column2'>
-          <input id='project_structure'>
-        </div>
-        <div class='column3'>
-          <button id="project_add_structure_button">Add</button>
-          <button id="project_edit_structure_button">Edit</button>
-        </div>
-      </div>
-      
-      {# LEAD #}
-      <div class='row'>
-        <div class="column1">
-          <label for='project_lead'>Lead</label>
-        </div>
-        <div class='column2'>
-          <input id='project_lead'>
-        </div>
-        <div class='column3'>
-          <button id="project_add_lead_button">Add</button>
-          <button id="project_edit_lead_button">Edit</button>
-        </div>
-      </div>
-      
-      {# STATUS LIST #}
-      <div class='row'>
-        <div class="column1">
-          <label for='project_status_list'>Status List</label>
-        </div>
-        <div class='column2'>
-          <input id='project_status_list'>
-        </div>
-        <div class='column3'>
-          <button id="project_add_status_list_button">Add</button>
-          <button id="project_edit_status_list_button">Edit</button>
-        </div>
-      </div>
-       
-    </div>
+    <form id="add_project_form">
+      <table style="width: 100%;">
+        
+        {# NAME #}
+        <tr>
+          <td class='label_column'>
+            <label for='project_name'><strong>Name</strong></label>
+          </td>
+          <td class='input_column'>
+            <input id='project_name'>
+          </td>
+        </tr>
+        
+        {# CODE #}
+        <tr>
+          <td class='label_column'>
+            <label for='project_code'><strong>Code</strong></label>
+          </td>
+          <td class='input_column'>
+            <input id='project_code'>
+          </td>
+        </tr>
+    
+        {# IMAGE FORMAT #}
+        <tr>
+          <td class='label_column'>
+            <label for='project_image_format'>
+              <strong>Image Format</strong>
+            </label>
+          </td>
+          <td class='input_column'>
+            <input id='project_image_format'>
+          </td>
+          <td class='button_column'>
+            <button id="project_add_image_format_button">Add</button>
+            <button id="project_edit_image_format_button">Edit</button>
+          </td>
+        </tr>
+        
+        {# FPS #}
+        <tr>
+          <td class='label_column'>
+            <label for='project_fps'><strong>FPS</strong></label>
+          </td>
+          <td class='input_column'>
+            <input id='project_fps'>
+          </td>
+        </tr>
+        
+        {# REPOSITORY #}
+        <tr>
+          <td class='label_column'>
+            <label for='project_repository'><strong>Repository</strong></label>
+          </td>
+          <td class='input_column'>
+            <input id='project_repository'>
+          </td>
+          <td class='button_column'>
+            <button id="project_add_repository_button">Add</button>
+            <button id="project_edit_repository_button">Edit</button>
+          </td>
+        </tr>
+        
+        {# STRUCTURE #}
+        <tr>
+          <td class='label_column'>
+            <label for='project_structure'><strong>Structure</strong></label>
+          </td>
+          <td class='input_column'>
+            <input id='project_structure'>
+          </td>
+          <td class='button_column'>
+            <button id="project_add_structure_button">Add</button>
+            <button id="project_edit_structure_button">Edit</button>
+          </td>
+        </tr>
+        
+        {# LEAD #}
+        <tr>
+          <td class='label_column'>
+            <label for='project_lead'><strong>Lead</strong></label>
+          </td>
+          <td class='input_column'>
+            <input id='project_lead'>
+          </td>
+          <td class='button_column'>
+            <button id="project_add_lead_button">Add</button>
+            <button id="project_edit_lead_button">Edit</button>
+          </td>
+        </tr>
+        
+        {# STATUS LIST #}
+        <tr>
+          <td class='label_column'>
+            <label for='project_status_list'><strong>Status List</strong></label>
+          </td>
+          <td class='input_column'>
+            <input id='project_status_list'>
+          </td>
+          <td class='button_column'>
+            <button id="project_add_status_list_button">Add</button>
+            <button id="project_edit_status_list_button">Edit</button>
+          </td>
+        </tr>
+
+      </table>      
+    </form>
   </div>
   
-  <div class="dijitDialogPaneActionBar" style="clear: both;">
+  <div class="dijitDialogPaneActionBar">
     <button id='project_add_button'>Add</button>
     <button id='project_cancel_button'>Cancel</button>
   </div>
@@ -148,7 +149,7 @@
               dialog.destroyRecursive();
             }
           }
-        }, 'add_project_form_div');
+        }, 'add_project_form');
         
       
           
@@ -192,7 +193,6 @@
         var image_format_filteringSelect = new FilteringSelect({
           name: "image_format",
           required: true,
-          style: "width: auto; margin: 0px; padding: 0px;",
           store: image_format_memory,
           value: image_format_memory.data[0].id
         }, "project_image_format");
@@ -248,7 +248,6 @@
         var repository_select = new FilteringSelect({
           name: "repository",
           required: true,
-          style: "width: auto; margin: 0px; padding: 0px;",
           store: repository_memory,
           value: repository_memory.data[0].id
         }, "project_repository");
@@ -290,7 +289,6 @@
         var structure_select = new FilteringSelect({
           name: "structure",
           required: true,
-          style: "width: auto; height: auto; margin: 0px; padding: 0px;",
           store: structure_memory,
           value: structure_memory.data[0].id
         }, "project_structure");
@@ -335,7 +333,6 @@
         var lead_select = new FilteringSelect({
           name: 'lead',
           required: true,
-          style: 'width: auto; height: auto; margin: 0px; padding: 0px;',
           store: lead_memory,
           value: lead_memory.data[0].id
         }, 'project_lead');
@@ -382,7 +379,6 @@
         var status_list_select = new FilteringSelect({
           name: "status_list",
           required: true,
-          style: "width: auto; height: auto; margin: 0px; padding: 0px;",
           store: status_list_memory,
           value: status_list_memory.data[0].id
         }, "project_status_list");

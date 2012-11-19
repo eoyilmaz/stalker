@@ -1,51 +1,60 @@
 {% extends 'add_data_form.jinja2' %}
 {% block form_block %}
   <div class="dijitDialogPaneContentArea">
-    <div id='repository_form_div'>
-      
-      {# NAME #}
-      <div class="row">
-        <div class="column1">
-          <label for='repository_name'>Name</label>
-        </div>
-        <div class="column2">
-          <input id='repository_name'>
-        </div>
-      </div>
-      
-      {# WINDOWS_PATH #}
-      <div class="row">
-        <div class="column1">
-          <label for='repository_windows_path'>Windows Path</label>
-        </div>
-        <div class="column2">
-          <input id='repository_windows_path'>
-        </div>
-      </div>
-      
-      {# LINUX_PATH #}
-      <div class="row">
-        <div class="column1">
-          <label for='repository_linux_path'>Linux Path</label>
-        </div>
-        <div class="column2">
-          <input id='repository_linux_path'>
-        </div>
-      </div>
+    <div id="add_repository_form">
+      <table style="width: 100%">
+        
+        {# NAME #}
+        <tr>
+          <td class="label_column">
+            <label for='repository_name'>
+              Name
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='repository_name'>
+          </td>
+        </tr>
+        
+        {# WINDOWS_PATH #}
+        <tr>
+          <td class="label_column">
+            <label for='repository_windows_path'>
+              Windows Path
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='repository_windows_path'>
+          </td>
+        </tr>
+        
+        {# LINUX_PATH #}
+        <tr>
+          <td class="label_column">
+            <label for='repository_linux_path'>
+              Linux Path
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='repository_linux_path'>
+          </td>
+        </tr>
  
-      {# OSX_PATH #}
-      <div class="row">
-        <div class="column1">
-          <label for='repository_osx_path'>OSX Path</label>
-        </div>
-        <div class="column2">
-          <input id='repository_osx_path'>
-        </div>
-      </div>
-      
+        {# OSX_PATH #}
+        <tr>
+          <td class="label_column">
+            <label for='repository_osx_path'>
+              OSX Path
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='repository_osx_path'>
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
-  <div class="dijitDialogPaneActionBar" style="clear: both;">
+  <div class="dijitDialogPaneActionBar">
     <button id='repository_add_button'></button>
     <button id='repository_cancel_button'></button>
   </div>
@@ -80,7 +89,7 @@
             }
             return false;
           }
-        }, 'repository_form_div');
+        }, 'add_repository_form');
         add_repository_form.startup();
         
         // NAME

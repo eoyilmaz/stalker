@@ -1,51 +1,60 @@
 {% extends 'add_data_form.jinja2' %}
 {% block form_block %}
   <div class="dijitDialogPaneContentArea" style="height: 380px">
-    <div id='status_list_form_div'>
+    <form id="add_status_list_form">
+      <table style="width: 100%">
       
-      {# NAME #}
-      <div class="row">
-        <div class="column1">
-          <label for='status_list_name'>Name</label>
-        </div>
-        <div class="column2">
-          <input id='status_list_name'>
-        </div>
-      </div>
+        {# NAME #}
+        <tr>
+          <td class="label_column">
+            <label for='status_list_name'>
+              Name
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='status_list_name'>
+          </td>
+        </tr>
+        
+        {# TARGET ENTITY TYPE #}
+        <tr>
+          <td class="label_column">
+            <label for='status_list_target_entity_type'>
+              Target Entity Type
+            </label>
+          </td>
+          <td class="input_column">
+            <input id='status_list_target_entity_type'>
+          </td>
+        </tr>
+        
+        {# STATUSES #}
+        <tr>
+          <td class="label_column">
+            <label for='status_list_statuses'>
+              Statuses
+            </label>
+          </td>
+          <td class="input_column">
+            <select id='status_list_statuses'>
+              {% for status in statuses %}
+                <option value="'{{ status.id }}'">
+                  {{ status.name }} / {{ status.code }}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td class='button_column'>
+            <button id="status_list_add_status_button">Add</button>
+{#            <button id="status_list_edit_status_button">Edit</button>#}
+          </td>
+        </tr>
       
-      {# TARGET ENTITY TYPE #}
-      <div class="row">
-        <div class="column1">
-          <label for='status_list_target_entity_type'>Target Entity Type</label>
-        </div>
-        <div class="column2">
-          <input id='status_list_target_entity_type'>
-        </div>
-      </div>
-      
-      {# STATUSES #}
-      <div class="row">
-        <div class="column1">
-          <label for='status_list_statuses'>Statuses</label>
-        </div>
-        <div class="column2">
-          <select id='status_list_statuses'>
-            {% for status in statuses %}
-              <option value="'{{ status.id }}'">
-                {{ status.name }} / {{ status.code }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class='column3'>
-          <button id="status_list_add_status_button">Add</button>
-{#          <button id="status_list_edit_status_button">Edit</button>#}
-        </div>
-      </div>
-    </div>
+      </table>
+    </form>
   </div>
   
-  <div class="dijitDialogPaneActionBar" style="clear: both;">
+  <div class="dijitDialogPaneActionBar">
     <button id='status_list_add_button'></button>
     <button id='status_list_cancel_button'></button>
   </div>
@@ -90,7 +99,7 @@
             }
             return false;
           }
-        }, 'status_list_form_div');
+        }, 'add_status_list_form');
         add_status_list_form.startup();
         
         // ********************************************************************
@@ -120,7 +129,6 @@
           name: "target_entity_type",
           label: "Target Entity Type",
           required: true,
-          style: 'width: auto; margin: 0px; padding: 0px;',
           store: target_entity_type_store,
           value: target_entity_type_store.data[0].id
         }, "status_list_target_entity_type");
@@ -131,7 +139,7 @@
         var statuses_multi_select = new MultiSelect({
           name: 'statuses',
           required: false,
-          style: 'width: 218px; margin: 0px; padding: 0px; height: 300px'
+          style: 'height: 300px'
         }, 'status_list_statuses');
         statuses_multi_select.startup();
         

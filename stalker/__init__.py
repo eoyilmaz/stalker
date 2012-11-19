@@ -28,7 +28,7 @@ from stalker.models.project import Project
 from stalker.models.repository import Repository
 from stalker.models.sequence import Sequence
 from stalker.models.shot import Shot
-from stalker.models.status import Status, StatusList, Color
+from stalker.models.status import Status, StatusList
 from stalker.models.structure import Structure
 from stalker.models.tag import Tag
 from stalker.models.task import Booking, Task
@@ -70,6 +70,7 @@ def main(global_config, **settings):
     # *************************************************************************
     # Basics
     config.add_route('home', '/')
+    config.add_route('me_menu', '/me_menu')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     
