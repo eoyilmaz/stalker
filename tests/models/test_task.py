@@ -94,18 +94,16 @@ class TaskTester(unittest.TestCase):
         )
 
         self.test_data_user1 = User(
-            login_name="user1",
+            name="User1",
+            login="user1",
             email="user1@user1.com",
-            first_name="user1",
-            last_name="user1",
             password="1234"
         )
 
         self.test_data_user2 = User(
-            login_name="user2",
+            name="User2",
+            login="user2",
             email="user2@user2.com",
-            first_name="user2",
-            last_name="user2",
             password="1234"
         )
 
@@ -113,13 +111,13 @@ class TaskTester(unittest.TestCase):
             name="Dependent Task1",
             task_of=self.test_data_project1,
             status_list=self.test_data_task_status_list,
-            )
+        )
 
         self.test_data_dependent_task2 = Task(
             name="Dependent Task2",
             task_of=self.test_data_project1,
             status_list=self.test_data_task_status_list,
-            )
+        )
 
         # for task_of attribute tests
         self.test_data_simpleEntity = SimpleEntity(
@@ -370,17 +368,15 @@ class TaskTester(unittest.TestCase):
 
         # create a couple of new users
         new_user1 = User(
-            first_name="test1",
-            last_name="test1",
-            login_name="test1",
+            name="test1",
+            login="test1",
             email="test1@test.com",
             password="test1"
         )
 
         new_user2 = User(
-            first_name="test2",
-            last_name="test2",
-            login_name="test2",
+            name="test2",
+            login="test2",
             email="test2@test.com",
             password="test2"
         )
@@ -408,11 +404,12 @@ class TaskTester(unittest.TestCase):
         """
 
         # create a new user
-        new_user = User(first_name="Test",
-                        last_name="User",
-                        login_name="testuser",
-                        email="testuser@test.com",
-                        password="testpass")
+        new_user = User(
+            name="Test User",
+            login="testuser",
+            email="testuser@test.com",
+            password="testpass"
+        )
 
         # assign it to a newly created task
         #self.kwargs["resources"] = [new_user]
@@ -430,29 +427,33 @@ class TaskTester(unittest.TestCase):
         """
 
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
 
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
 
-        new_user3 = User(first_name="Test3",
-                         last_name="User3",
-                         login_name="testuser3",
-                         email="testuser3@test.com",
-                         password="testpass")
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
 
-        new_user4 = User(first_name="Test4",
-                         last_name="User4",
-                         login_name="testuser4",
-                         email="testuser4@test.com",
-                         password="testpass")
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
 
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
@@ -480,29 +481,33 @@ class TaskTester(unittest.TestCase):
         """
 
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
-
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
-
-        new_user3 = User(first_name="Test3",
-                         last_name="User3",
-                         login_name="testuser3",
-                         email="testuser3@test.com",
-                         password="testpass")
-
-        new_user4 = User(first_name="Test4",
-                         last_name="User4",
-                         login_name="testuser4",
-                         email="testuser4@test.com",
-                         password="testpass")
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+        
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
 
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
@@ -527,30 +532,34 @@ class TaskTester(unittest.TestCase):
         """
 
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
-
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
-
-        new_user3 = User(first_name="Test3",
-                         last_name="User3",
-                         login_name="testuser3",
-                         email="testuser3@test.com",
-                         password="testpass")
-
-        new_user4 = User(first_name="Test4",
-                         last_name="User4",
-                         login_name="testuser4",
-                         email="testuser4@test.com",
-                         password="testpass")
-
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+        
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+        
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
         self.kwargs["resources"] = [new_user1, new_user2]
@@ -571,32 +580,35 @@ class TaskTester(unittest.TestCase):
     def test_resources_attribute_will_handle___setitem__(self):
         """testing if the resources attribute will handle __setitem__ing users
         """
-
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
-
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
-
-        new_user3 = User(first_name="Test3",
-                         last_name="User3",
-                         login_name="testuser3",
-                         email="testuser3@test.com",
-                         password="testpass")
-
-        new_user4 = User(first_name="Test4",
-                         last_name="User4",
-                         login_name="testuser4",
-                         email="testuser4@test.com",
-                         password="testpass")
-
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+        
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+        
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
         self.kwargs["resources"] = [new_user1, new_user2]
@@ -622,32 +634,35 @@ class TaskTester(unittest.TestCase):
     def test_resources_attribute_will_handle___setslice__(self):
         """testing if the resources attribute will handle __setslice__ing users
         """
-
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
 
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
-
-        new_user3 = User(first_name="Test3",
-                         last_name="User3",
-                         login_name="testuser3",
-                         email="testuser3@test.com",
-                         password="testpass")
-
-        new_user4 = User(first_name="Test4",
-                         last_name="User4",
-                         login_name="testuser4",
-                         email="testuser4@test.com",
-                         password="testpass")
-
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+       
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
         self.kwargs["resources"] = [new_user1, new_user2]
@@ -672,32 +687,35 @@ class TaskTester(unittest.TestCase):
     def test_resources_attribute_will_handle_insert(self):
         """testing if the resources attribute will handle inserting users
         """
-
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
 
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
-
-        new_user3 = User(first_name="Test3",
-                         last_name="User3",
-                         login_name="testuser3",
-                         email="testuser3@test.com",
-                         password="testpass")
-
-        new_user4 = User(first_name="Test4",
-                         last_name="User4",
-                         login_name="testuser4",
-                         email="testuser4@test.com",
-                         password="testpass")
-
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+        
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
         self.kwargs["resources"] = [new_user1, new_user2]
@@ -721,32 +739,35 @@ class TaskTester(unittest.TestCase):
     def test_resources_attribute_will_handle___add__(self):
         """testing if the resources attribute will handle __add__ing users
         """
-
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
 
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
-
-        new_user3 = User(first_name="Test3",
-                         last_name="User3",
-                         login_name="testuser3",
-                         email="testuser3@test.com",
-                         password="testpass")
-
-        new_user4 = User(first_name="Test4",
-                         last_name="User4",
-                         login_name="testuser4",
-                         email="testuser4@test.com",
-                         password="testpass")
-
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+        
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
         self.kwargs["resources"] = [new_user1, new_user2]
@@ -771,29 +792,31 @@ class TaskTester(unittest.TestCase):
         """
 
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
 
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass")
 
-        new_user3 = User(first_name="Test3",
-                         last_name="User3",
-                         login_name="testuser3",
-                         email="testuser3@test.com",
-                         password="testpass")
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass")
 
-        new_user4 = User(first_name="Test4",
-                         last_name="User4",
-                         login_name="testuser4",
-                         email="testuser4@test.com",
-                         password="testpass")
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
 
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
@@ -817,19 +840,20 @@ class TaskTester(unittest.TestCase):
     def test_resources_attribute_will_handle_pop(self):
         """testing if the resources attribute will handle popping users
         """
-
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
-
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
 
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
@@ -853,17 +877,19 @@ class TaskTester(unittest.TestCase):
         """
 
         # create a couple of new users
-        new_user1 = User(first_name="Test1",
-                         last_name="User1",
-                         login_name="testuser1",
-                         email="testuser1@test.com",
-                         password="testpass")
-
-        new_user2 = User(first_name="Test2",
-                         last_name="User2",
-                         login_name="testuser2",
-                         email="testuser2@test.com",
-                         password="testpass")
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
 
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task

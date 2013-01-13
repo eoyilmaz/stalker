@@ -1,7 +1,7 @@
 {#{% extends 'form_base.jinja2' %}#}
 {#{% block form_block %}#}
 <div class='dijitDialogPaneContentArea' style='height: 380px'>
-  <form id='add_status_list_form'>
+  <form id='edit_status_list_form'>
     <table style='width: 100%'>
     
       {# NAME #}
@@ -49,13 +49,17 @@
 {#            <button id='status_list_edit_status_button'>Edit</button>#}
         </td>
       </tr>
+      
+      
+      <input id='status_list_statuses_wrapper' type='hidden'>
+      
     
     </table>
   </form>
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='status_list_add_button'></button>
+  <button id='status_list_edit_button'></button>
   <button id='status_list_cancel_button'></button>
 </div>
 
@@ -70,8 +74,8 @@
       
       // ********************************************************************
       // FORM
-      var add_status_list_form = new Form({
-        id: 'add_status_list_form',
+      var edit_status_list_form = new Form({
+        id: 'edit_status_list_form',
         method: 'POST',
         onSubmit: function(event){
           if (this.validate()){
@@ -79,14 +83,15 @@
             // on parent widget
             var deferred = xhr.post({
               content: {
-                submitted: 'add'
+                submitted: 'edit',
+                statuses: statuses_multiSelect_wrapper.get('value')
               },
-              url: '{{ request.route_url("add_status_list") }}',
-              form: dojo.byId('add_status_list_form')
+              url: '{{ request.route_url("edit_status_list", status_list_id=status_list.id) }}',
+              form: dojo.byId('edit_status_list_form')
             });
             
             // update the caller dialog
-            var dialog = dijit.byId('add_status_list_dialog');
+            var dialog = dijit.byId('edit_status_list_dialog');
             var parent = dialog.get('parent');
             if (parent != null){
               // TODO: just update the status_list field of the parent dialog
@@ -95,12 +100,11 @@
             
             // destroy the dialog
             dialog.destroyRecursive();
-            
           }
           return false;
         }
-      }, 'add_status_list_form');
-      add_status_list_form.startup();
+      }, 'edit_status_list_form');
+      edit_status_list_form.startup();
       
       // ********************************************************************
       // NAME
@@ -108,73 +112,93 @@
         name: 'name',
         label: 'Name',
         placeHolder: 'Enter a name',
-        required: true
+        required: true,
+        value: '{{ status_list.name }}'
       }, 'status_list_name');
       name_textBox.startup();
       
       // ********************************************************************
       // TARGET ENTITY TYPE
-      var target_entity_type_store = new Memory({
-        data: [
-          {% for entity_type in entity_types %}
-            {
-              name: '{{ entity_type.name }}',
-              id: '{{ entity_type.name }}'
-            },
-          {% endfor %}
-        ]
-      });
-      
-      var target_entity_type_select = new FilteringSelect({
+      var target_entity_type_textBox = new TextBox({
         name: 'target_entity_type',
         label: 'Target Entity Type',
-        required: true,
-        store: target_entity_type_store,
-        value: target_entity_type_store.data[0].id
+        required: false,
+        disabled: true,
+        value: '{{ status_list.target_entity_type }}'
       }, 'status_list_target_entity_type');
-      target_entity_type_select.startup();
+      target_entity_type_textBox.startup();
+      
+      // There is a bug related with the multiSelect
+      // it is not giving its all selected values to the form on submit
+      // but getting the value with getValue() works. So the following hidden
+      // input will be filled with the value of the multiSelect and be send
+      // with the request
+      var statuses_multiSelect_wrapper = new TextBox({
+        name: 'statuses',
+        label: 'Statuses Wrapper',
+        type: 'hidden'
+      }, 'status_list_statuses_wrapper');
+      statuses_multiSelect_wrapper.startup();
       
       // ********************************************************************
       // STATUSES
       var statuses_multiSelect = new MultiSelect({
-        name: 'statuses',
+        name: 'statuses_multiSelect',
+        label: 'Statuses',
         required: false,
-        style: 'height: 300px'
+        style: 'height: 300px',
+        onChange: function(){
+          // update the wrapper field
+          statuses_multiSelect_wrapper.set(
+            'value',
+            this.get('value')
+          )
+        }
       }, 'status_list_statuses');
+      
+      // select StatusList.statuses
+      var status_ids = [
+        {% for status in status_list.statuses %}
+          '{{ status.id }}',
+        {% endfor %}
+      ];
+      
+      statuses_multiSelect.set('value', status_ids);
+      
       statuses_multiSelect.startup();
       
       // ADD STATUS BUTTON
       var add_status_button = create_add_data_button(
-              dijit.byId('add_status_list_form').getParent(),
-              'Add',
-              'add_status_dialog',
-              create_add_status_dialog,
-              'status_list_add_status_button'
+        dijit.byId('edit_status_list_form').getParent(),
+        'Add',
+        'add_status_dialog',
+        create_add_status_dialog,
+        'status_list_add_status_button'
       );
-      
-      // EDIT STATUS BUTTON
+     
+        // EDIT STATUS BUTTON
 {#        var edit_status_button = create_edit_data_button(#}
-{#                dijit.byId('add_status_list_form').getParent(),#}
-{#                'Edit',#}
-{#                'edit_status_dialog',#}
-{#                create_edit_status_dialog,#}
-{#                'status_list_edit_status_button',#}
-{#                function(){#}
-{#                  return statuses_multi_select.get('value');#}
-{#                }#}
+{#          dijit.byId('edit_status_list_form').getParent(),#}
+{#          'Edit',#}
+{#          'edit_status_dialog',#}
+{#          create_edit_status_dialog,#}
+{#          'status_list_edit_status_button',#}
+{#          function(){#}
+{#            return statuses_multi_select.get('value');#}
+{#          }#}
 {#        );#}
 {#        edit_status_button.startup();#}
       
       // ********************************************************************
-      // ADD BUTTON
-      var add_button = new Button({
-        label: 'Add',
+      // EDIT BUTTON
+      var edit_button = new Button({
+        label: 'Edit',
         type: 'button',
         onClick: function(){
-          return add_status_list_form.submit();
+          return edit_status_list_form.submit();
         }
-      }, 'status_list_add_button');
-      add_button.startup();
+      }, 'status_list_edit_button');
+      edit_button.startup();
       
       // ********************************************************************
       // CANCEL BUTTON
@@ -182,7 +206,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = dijit.byId('add_status_list_dialog');
+          var dialog = dijit.byId('edit_status_list_dialog');
           dialog.destroyRecursive();
         }
       }, 'status_list_cancel_button');

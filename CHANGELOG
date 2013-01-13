@@ -59,6 +59,21 @@ Stalker Changes
 * Status.bg_color and Status.fg_color attributes are now simple integers. And
   the Color class is removed.
 
+* StatusMixin.status is now a ForeignKey to a the Statuses table, thus it is a
+  real Status instance instead of an integer showing the index of the Status in
+  the related StatusList. This way the Status of the object will not change if
+  the content of the StatusList is changed.
+
+* Added new attribute Project.project_tasks which holds all the direct or
+  indirect Tasks created for that project.
+
+* User.login_name is renamed to User.login.
+
+* Removed the ``first_name``, ``last_name`` and ``initials`` attributes from
+  User class. Now the ``name`` and ``code`` attributes are going to be used,
+  thus the ``name`` attribute is no more the equivalent of ``login`` and the
+  ``code`` attribute is doing what was ``initials`` doing previously.
+
 0.2.0.a3
 --------
 

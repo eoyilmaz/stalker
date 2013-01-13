@@ -273,12 +273,12 @@ class SimpleEntity(Base):
                  type=None,
                  created_by=None,
                  updated_by=None,
-                 date_created=datetime.datetime.now(),
-                 date_updated=datetime.datetime.now(),
+                 date_created=None,
+                 date_updated=None,
                  code=None,
                  **kwargs
     ): # pylint: disable=W0613
-
+        
         # name and nice_name
         self._nice_name = ""
 
@@ -304,6 +304,11 @@ class SimpleEntity(Base):
         self.updated_by = updated_by
         date_created = date_created
         date_updated = date_updated
+        if date_created is None:
+            date_created = datetime.datetime.now()
+        if date_updated is None:
+            date_updated = datetime.datetime.now()
+        
         self.date_created = date_created
         self.date_updated = date_updated
         self.type = type
@@ -436,7 +441,6 @@ class SimpleEntity(Base):
     def _validate_code(self, key, code_in):
         """validates the given code value
         """
-
         # check if the code_in is None or empty string
         if code_in is None or code_in == "":
             # restore the value from nice_name and let it be reformatted
@@ -449,15 +453,13 @@ class SimpleEntity(Base):
     def _validate_created_by(self, key, created_by_in):
         """validates the given created_by_in attribute
         """
-        
         from stalker.models.auth import User
-
+        
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
                 raise TypeError("%s.created_by should be an instance of"
                                 "stalker.models.auth.User" %
                                 self.__class__.__name__)
-        
         return created_by_in
 
     @validates("updated_by")

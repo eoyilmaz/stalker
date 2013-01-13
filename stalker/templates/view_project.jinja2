@@ -1,118 +1,116 @@
-{% extends 'add_data_form.jinja2' %}
-{% block form_block %}
-  <div id='data_split_container'>
-    <div id="project_details_content_pane">
-      
-      {# Thumbnail #}
-      <div id='project_thumbnail' class='project_thumbnail'>No Thumbnail</div>
-      
-      {# Basic Info #}
-      <div id='project_info' class='project_info'>
-        <h2 style='margin: 0px; text-align: right'>{{ project.name }}</h2>
-        <h5 style="margin: 0px; text-align: right">({{ project.code }})</h5>
-        <table>
-          <tr>
-            <td style="text-align: right"><b>Lead</b></td>
-            <td>&nbsp</td>
-            <td>{{ project.lead.first_name }} {{ project.lead.last_name }} ({{ project.lead.login_name }})</td>
-          </tr>
-          <tr>
-            <td style="text-align: right"><b>Image Format</b></td>
-            <td>&nbsp</td>
-            <td>{{ project.image_format.name }} ({{ project.image_format.width }} x {{ project.image_format.height }} x {{ project.image_format.pixel_aspect }})</td>
-          </tr>
-          <tr>
-            <td style="text-align: right"><b>Status</b></td>
-            <td>&nbsp</td>
-            <td>{{ project.status.name }} / {{ project.status.code }}</td>
-          </tr>
-          <tr>
-            <td style="text-align: right"><b>Repository</b></td>
-            <td>&nbsp</td>
-            <td>{{ project.repository.name }}</td>
-          </tr>
-          <tr>
-            <td style="text-align: right"><b>Start Date</b></td>
-            <td>&nbsp</td>
-            <td>{{ project.start_date }}</td>
-          </tr>
-          <tr>
-            <td style="text-align: right"><b>Due Date</b></td>
-            <td>&nbsp</td>
-            <td>{{ project.due_date }}</td>
-          </tr>
-        </table>
-      </div>
-    </div>
+{#{% extends 'form_base.jinja2' %}#}
+{#{% block form_block %}#}
+<div id='data_split_container'>
+  <div id='project_details_content_pane'>
     
-    {# Complex Info #}
-    <div id='project_related_data_tab_container'>
-      {# Tab View #}
+    {# Thumbnail #}
+    <div id='project_thumbnail' class='project_thumbnail'>No Thumbnail</div>
+    
+    {# Basic Info #}
+    <div id='project_info' class='project_info'>
+      <h2 style='margin: 0px; text-align: right'>{{ project.name }}</h2>
+      <h5 style='margin: 0px; text-align: right'>({{ project.code }})</h5>
+      <table>
+        <tr>
+          <td style='text-align: right'><b>Lead</b></td>
+          <td>&nbsp</td>
+          <td>{{ project.lead.first_name }} {{ project.lead.last_name }} ({{ project.lead.login_name }})</td>
+        </tr>
+        <tr>
+          <td style='text-align: right'><b>Image Format</b></td>
+          <td>&nbsp</td>
+          <td>{{ project.image_format.name }} ({{ project.image_format.width }} x {{ project.image_format.height }} x {{ project.image_format.pixel_aspect }})</td>
+        </tr>
+        <tr>
+          <td style='text-align: right'><b>Status</b></td>
+          <td>&nbsp</td>
+          <td>{{ project.status.name }} / {{ project.status.code }}</td>
+        </tr>
+        <tr>
+          <td style='text-align: right'><b>Repository</b></td>
+          <td>&nbsp</td>
+          <td>{{ project.repository.name }}</td>
+        </tr>
+        <tr>
+          <td style='text-align: right'><b>Start Date</b></td>
+          <td>&nbsp</td>
+          <td>{{ project.start_date }}</td>
+        </tr>
+        <tr>
+          <td style='text-align: right'><b>Due Date</b></td>
+          <td>&nbsp</td>
+          <td>{{ project.due_date }}</td>
+        </tr>
+      </table>
     </div>
   </div>
-  <script type="text/javascript">
-    require(['dijit/registry', 'dojo/_base/xhr', 'dijit/layout/SplitContainer',
-             'dijit/layout/TabContainer', 'dijit/layout/ContentPane',
-             'dojo/domReady!'],
-      function(registry, xhr, SplitContainer, TabContainer, ContentPane){
-        
-        {# Split Container - The Main View#}
-        var data_split_container = new SplitContainer({
-          region: 'center',
-          orientation: 'vertical',
-          splitter: false
-        }, 'data_split_container');
-        
-        var project_details_content_pane = new ContentPane({
-          region: 'top',
-          style: 'height: 256px'
-        }, 'project_details_content_pane');
-        
-{#        var project_related_data_content_pane = new ContentPane({#}
-{#        }, 'project_related_data_content_pane');#}
-        
-        data_split_container.addChild(project_details_content_pane);
-{#        data_split_container.addChild(project_related_data_content_pane);#}
-        
-        project_details_content_pane.startup();
-{#        project_related_data_content_pane.startup();#}
-        
-        {# Bottom Part - Complex Data View #}
-        var project_related_data_tab_container = new TabContainer({
-          region: 'bottom'
-        }, 'project_related_data_tab_container');
-        
-        data_split_container.addChild(project_related_data_tab_container);
-        
-        var assets_content_pane = new ContentPane({
-          title: 'Assets',
-          content: 'No Assets Yet!'
-        });
-        
-        var shots_content_pane = new ContentPane({
-          title: 'Shots',
-          content: 'No Shots Yet!'
-        });
-        
-        var tasks_content_pane = new ContentPane({
-          title: 'Tasks',
-          content: 'No Tasks Yet!'
-        });
-        
-        var tickets_content_pane = new ContentPane({
-          title: 'Tickets',
-          content: 'No Tickets Yet!'
-        });
-        
-        project_related_data_tab_container.addChild(assets_content_pane);
-        project_related_data_tab_container.addChild(shots_content_pane);
-        project_related_data_tab_container.addChild(tasks_content_pane);
-        project_related_data_tab_container.addChild(tickets_content_pane);
+  
+  {# Complex Info #}
+  <div id='project_related_data_tab_container'>
+    {# Tab View #}
+  </div>
+</div>
+<script type='text/javascript'>
+  require(['dijit/registry', 'dojo/_base/xhr', 'dijit/layout/SplitContainer',
+           'dijit/layout/TabContainer', 'dojox/layout/ContentPane',
+           'dojo/domReady!'],
+    function(registry, xhr, SplitContainer, TabContainer, ContentPane){
+      
+      {# Split Container - The Main View#}
+      var data_split_container = new SplitContainer({
+        region: 'center',
+        orientation: 'vertical',
+        splitter: false
+      }, 'data_split_container');
+      
+      var project_details_content_pane = new ContentPane({
+        region: 'top',
+        style: 'height: 256px'
+      }, 'project_details_content_pane');
+      
+      data_split_container.addChild(project_details_content_pane);
+      
+      project_details_content_pane.startup();
+      
+      {# Bottom Part - Complex Data View #}
+      var project_related_data_tab_container = new TabContainer({
+        region: 'bottom'
+      }, 'project_related_data_tab_container');
+      
+      data_split_container.addChild(project_related_data_tab_container);
+      
+      var assets_content_pane = new ContentPane({
+        title: 'Assets',
+        href:'view/assets/{{ project.id }}'
+      });
+      
+      var shots_content_pane = new ContentPane({
+        title: 'Shots',
+        href: 'view/shots/{{ project.id }}'
+      });
+      
+      
+      
+      
+      var tasks_content_pane = new ContentPane({
+        title: 'Tasks',
+        href: 'view/tasks/{{ project.id }}'
+      });
+      
+      var tickets_content_pane = new ContentPane({
+        title: 'Tickets',
+        content: 'view/tickets/{{ project.id }}'
+      });
+      
+      project_related_data_tab_container.addChild(assets_content_pane);
+      project_related_data_tab_container.addChild(shots_content_pane);
+      project_related_data_tab_container.addChild(tasks_content_pane);
+      project_related_data_tab_container.addChild(tickets_content_pane);
 {#        project_related_data_tab_container.startup();#}
 
 
-        data_split_container.startup();
-    });
-  </script>
-{% endblock %}
+      data_split_container.startup();
+  });
+</script>
+{#{% endblock %}#}
 

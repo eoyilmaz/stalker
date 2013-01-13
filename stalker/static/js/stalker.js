@@ -10,7 +10,9 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
             label,
             dialog_id,
             content_creator,
-            dom_element
+            dom_element,
+            parent_form,
+            data_id
             ){
             // parent: The parent widget, null if there are no parents defined
             // label: The label of the add button
@@ -24,8 +26,11 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                     // create the dialog if it doesn't already exists
                     var dialog = dijit.byId(dialog_id);
                     if (dialog == null){
-                        dialog = content_creator(parent);
+                        dialog = content_creator(parent, data_id);
                     }
+                    
+                    dialog['parent_form'] = parent_form;
+                    
                     // show the dialog
                     dialog.show();
                 }
@@ -40,7 +45,8 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
             dialog_id,
             content_creator,
             dom_element,
-            edited_data_id_getter
+            edited_data_id_getter,
+            parent_form
             ){
             // parent: The parent widget, null if there are no parents defined
             // label: The label of the add button
@@ -55,8 +61,7 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                         dialog = content_creator(parent, edited_data_id_getter());
                     }
                     
-                    alert(dialog);
-                    alert(parent);
+                    dialog['parent_form'] = parent_form;
                     
                     // show the dialog
                     dialog.show();
@@ -165,7 +170,6 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
             return myDialog;
         };
         
-
         // ********************************************************************
         // FILENAME TEMPLATE
         create_add_filename_template_dialog = function(parent){
@@ -278,5 +282,105 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
             myDialog.set('parent', parent);
             return myDialog;
         };
- });
+        
+        // ********************************************************************
+        // ASSET
+        create_add_asset_dialog = function(parent){
+            var myDialog = new DialogSimple({
+                id: 'add_asset_dialog',
+                title: 'Add Asset',
+                href: '/add/asset',
+                resize: true,
+                style: 'width: 380px; height: auto; padding: 0px',
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+        
+        
+        // ********************************************************************
+        // SHOT
+        create_add_shot_dialog = function(parent){
+            var myDialog = new DialogSimple({
+                id: 'add_shot_dialog',
+                title: 'Add Shot',
+                href: '/add/shot',
+                resize: true,
+                style: 'width: 380px; height: auto; padding: 0px',
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+        
+        create_edit_shot_dialog = function(parent, shot_id){
+            var myDialog = new DialogSimple({
+                id: 'edit_shot_dialog',
+                title: 'Edit Shot',
+                href: '/edit/shot/' + shot_id,
+                resize: true,
+                style: 'width: 380px; height: auto; padding: 0px',
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+        
+        // ********************************************************************
+        // SEQUENCE
+        create_add_sequence_dialog = function(parent){
+            var myDialog = new DialogSimple({
+                id: 'add_sequence_dialog',
+                title: 'Add Sequence',
+                href: '/add/sequence',
+                resize: true,
+                style: 'width: 380px; height: auto; padding: 0px',
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+        
+        create_edit_sequence_dialog = function(parent, sequence_id){
+            var myDialog = new DialogSimple({
+                id: 'edit_sequence_dialog',
+                title: 'Edit Sequence',
+                href: '/edit/sequence/' + sequence_id,
+                resize: true,
+                style: 'width: 380px; height: auto; padding: 0px',
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+        
+        // ********************************************************************
+        // TASK
+        create_add_task_dialog = function(parent, taskable_entity_id){
+            var myDialog = new DialogSimple({
+                id: 'add_task_dialog',
+                title: 'Add Task',
+                href: '/add/task/' + taskable_entity_id,
+                resize: true,
+                style: 'width: 380px; height: auto; padding: 0px',
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+        
+        create_edit_task_dialog = function(parent, task_id){
+            var myDialog = new DialogSimple({
+                id: 'edit_task_dialog',
+                title: 'Edit Task',
+                href: '/edit/task/' + task_id,
+                resize: true,
+                style: 'width: 380px; height: auto; padding: 0px',
+                executeScripts: true
+            });
+            myDialog.set('parent', parent);
+            return myDialog;
+        };
+   });
 

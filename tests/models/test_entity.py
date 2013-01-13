@@ -13,9 +13,8 @@ class EntityTester(unittest.TestCase):
         
         # create a user
         self.test_user = User(
-            first_name="Test",
-            last_name="User",
-            login_name="testuser",
+            name="Test User",
+            login="testuser",
             email="test@user.com",
             password="test"
         )

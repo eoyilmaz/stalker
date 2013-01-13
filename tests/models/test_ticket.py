@@ -48,11 +48,10 @@ class TicketTester(unittest.TestCase):
         
         # create a User
         self.test_user = User(
+            name='Test User',
+            login='testuser1',
             email='test1@user.com',
-            first_name='Test',
-            last_name='User',
-            password='secret',
-            login_name='testuser1'
+            password='secret'
         )
         
         # create a Repository
@@ -328,10 +327,10 @@ class TicketTester(unittest.TestCase):
         attribute
         """
         user1 = User(
-            login_name='user1',
-            first_name='user1',
+            name='user1',
+            login='user1',
             password='secret',
-            email='uesr1@test.com'
+            email='user1@test.com'
         )
         
         self.test_ticket.reported_by = user1

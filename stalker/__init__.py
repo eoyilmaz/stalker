@@ -109,6 +109,7 @@ def main(global_config, **settings):
     # User
     config.add_route('add_user', 'add/user')
     config.add_route('edit_user', 'edit/user/{user_id}')
+    config.add_route('get_users', 'get/users')
     
     # *************************************************************************
     # FilenameTemplate
@@ -126,6 +127,37 @@ def main(global_config, **settings):
     config.add_route('add_status', 'add/status')
     config.add_route('edit_status', 'edit/status')
     
+    # *************************************************************************
+    # Assets
+    config.add_route('add_asset', 'add/asset')
+    config.add_route('view_asset', 'view/asset/{asset_id}')
+    config.add_route('edit_asset', 'edit/asset/{asset_id}')
+    config.add_route('view_assets', 'view/assets/{project_id}')
+    
+    # *************************************************************************
+    # Shots
+    config.add_route('add_shot', 'add/shot')
+    config.add_route('view_shot', 'view/shot/{shot_id}')
+    config.add_route('edit_shot', 'edit/shot/{shot_id}')
+    config.add_route('view_shots', 'view/shots/{project_id}')
+    
+    # *************************************************************************
+    # Sequence
+    config.add_route('add_sequence', 'add/sequence')
+    config.add_route('view_sequence', 'view/sequence/{sequence_id}')
+    config.add_route('edit_sequence', 'edit/sequence/{sequence_id}')
+    config.add_route('view_sequences', 'view/sequences/{project_id}')
+    config.add_route('get_project_sequences',
+                     'get/project_sequences/{project_id}')
+    
+    # *************************************************************************
+    # Task
+    config.add_route('add_task', 'add/task/{taskable_entity_id}')
+    config.add_route('view_task', 'view/task/{task_id}')
+    config.add_route('edit_task', 'edit/task/{task_id}')
+    config.add_route('view_tasks', 'view/tasks/{taskable_entity_id}')
+    config.add_route('get_project_tasks',
+                     'get_project_tasks/{project_id}')
     
     config.scan()
     return config.make_wsgi_app()

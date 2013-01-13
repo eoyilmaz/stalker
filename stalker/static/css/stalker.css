@@ -146,31 +146,54 @@ a:hover {
 
 #mebar {
     float: right;
-    margin-right: 20px;
-    margin-top: 6px;
-    color: lightgrey;
+    color: lightGrey;
     font-weight: bold;
     cursor: pointer;
+    position: relative;
+    right: 16px;
+    top: 6px;
+    height: 12px;
 }
 
 #mebar:hover {
     color:white;
 }
 
+#projects_menu {
+    clear: both;
+    float: left;
+    position: absolute;
+    left: 168px;
+    top: 5px;
+    font-weight: bold;
+    color: lightgrey;
+    cursor: pointer;
+}
+
+#projects_menu:hover {
+    color: white;
+}
+
+.project_name {
+    cursor: pointer;
+    clear: both;
+}
+.project_name:hover {
+    background-color: #add8e6;
+}
+
+.link_with_action {
+    cursor: pointer;
+}
+
+.link_with_action:hover {
+    text-decoration: underline;
+}
+
 #avatar {
     width: 96px;
     height: 96px;
-    /*background-image: "{{ request.static_url('stalker:static/images/NoPicture.gif') }}";*/
 }
-/*#header #user_menu {*/
-    /*border: 0 none;*/
-    /*float: left;*/
-    /*height: 30px;*/
-    /*position: relative;*/
-    /*text-align: center;*/
-    /*top: 11px;*/
-    /*width: 50%;*/
-/*}*/
 
 #footer{
     position:absolute;
@@ -194,10 +217,6 @@ a:hover {
 
 #main_menu li {
     list-style: none;
-}
-
-#main_menu #menu{
-    /*margin-left: 12px;*/
 }
 
 #main_menu ul{

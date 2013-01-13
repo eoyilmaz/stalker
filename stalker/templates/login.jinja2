@@ -1,33 +1,33 @@
 {% extends 'base.jinja2' %}
 {% block body %}
-  <div id="appLayout" class="demoLayout">
-    <div id="central_content" class="centralPanel"
-         style="left: 50%;
+  <div id='appLayout' class='demoLayout'>
+    <div id='central_content' class='centralPanel'
+         style='left: 50%;
                 top: 50%;
                 width: 250px;
                 margin-left: -125px;
                 height: 136px;
-                margin-top: -68px;">
-      <div class="dijitDialogPaneContentArea" style="background-color: white; height:130px">
-        <form id='login_form_div' style="clear:both">
-          <h3 style="text-align: center"><b>Login To Stalker</b></h3>
+                margin-top: -68px;'>
+      <div class='dijitDialogPaneContentArea' style='background-color: white; height:130px'>
+        <form id='login_form_div' style='clear:both'>
+          <h3 style='text-align: center'><b>Login To Stalker</b></h3>
           <table>
 
             <tr>
-              <td class="label_column">
-                <label for="e-mail">e-mail</label>
+              <td class='label_column'>
+                <label for='e-mail'>e-mail</label>
               </td>
-              <td class="input_column">
-                <input id="e-mail">
+              <td class='input_column'>
+                <input id='e-mail'>
               </td>
             </tr>
 
             <tr>
-              <td class="label_column">
-                <label for="password">password</label>
+              <td class='label_column'>
+                <label for='password'>password</label>
               </td>
-              <td class="input_column">
-                <input id="password" >
+              <td class='input_column'>
+                <input id='password' >
               </td>
               <input id='form.submitted' type='hidden'>
             </tr>
@@ -35,27 +35,27 @@
         </form>
         
         <div id='message'
-             style="position: relative; clear: both; text-align: center">
+             style='position: relative; clear: both; text-align: center'>
           <b>{{message}}</b>
         </div>
         
       </div>
-      <div class="dijitDialogPaneActionBar">
-        <button id="login_button"></button>
+      <div class='dijitDialogPaneActionBar'>
+        <button id='login_button'></button>
       </div>
     </div>
   </div>
-  <script type="text/javascript">
-    require(["dijit/registry", "dijit/Dialog", "dijit/form/Form",
-      "dijit/form/TextBox",
-      "dijit/form/ValidationTextBox", 'dijit/form/Button'],
+  <script type='text/javascript'>
+    require(['dijit/registry', 'dijit/Dialog', 'dijit/form/Form',
+      'dijit/form/TextBox',
+      'dijit/form/ValidationTextBox', 'dijit/form/Button'],
     function(registry, Dialog, Form, TextBox, ValidationTextBox, Button){
       
       var login_form = new Form({
-        id: "login_form",
-        action:"{{request.route_url('login')}}",
-        method:"POST"
-      }, "login_form_div");
+        id: 'login_form',
+        action:'{{request.route_url("login")}}',
+        method:'POST'
+      }, 'login_form_div');
       login_form.startup();
       
       // Login or Email
@@ -82,7 +82,7 @@
       password_validationTextBox.startup();
       
       var form_submitted_textBox = new TextBox({
-        name:"form.submitted",
+        name:'form.submitted',
         value:'login',
         type:'hidden'
       }, 'form.submitted');

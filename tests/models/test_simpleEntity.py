@@ -25,9 +25,8 @@ class SimpleEntityTester(unittest.TestCase):
         """
         # create a user
         self.test_user = User(
-            first_name="Test",
-            last_name="User",
-            login_name="testuser",
+            name="Test User",
+            login="testuser",
             email="test@user.com",
             password="test"
         )
@@ -787,10 +786,9 @@ class SimpleEntityTester(unittest.TestCase):
         
         new_simpleEntity = SimpleEntity(**self.kwargs)
         test_user = User(
+            name='email',
+            login='email',
             email='email@email.com',
-            first_name='email',
-            last_name='email',
-            login_name='email',
             password='email',
         )
         

@@ -85,10 +85,10 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     # But this creates a weird position in database table and mapper
     # configuration where for the Project class the mapper should configure the
     # `project` attribute with the post_update flag is set to True, and this
-    # implies the project_id coloumn to be Null for a while, at least
+    # implies the project_id column to be Null for a while, at least
     # SQLAlchemy does an UPDATE to assign the Project itself to the project
     # attribute, thus the project_id column shouldn't be nullable for Project
-    # class, but it is not neccessary for the others.
+    # class, but it is not necessary for the others.
     # 
     # And because SOM is also checking if the project attribute is None or Null
     # for the created instance, I consider doing this safe.
@@ -296,15 +296,33 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         from stalker.models.sequence import Sequence
         
         if DBSession is not None:
-            return DBSession.query(Sequence).\
-            join(Sequence.project).\
-            filter(Project.name == self.name).all()
+            return DBSession.query(Sequence)\
+                .join(Sequence.project)\
+                .filter(Project.name == self.name).all()
         else:
             RuntimeWarning("There is no database setup, the sequences can not "
                            "be queried from this state, please use "
                            "stalker.db.setup() to setup a database")
             return []
     
+    @property
+    def project_tasks(self):
+        """returns the Tasks which are direct or indirectly related to this
+        Project
+        """
+        if DBSession is not None:
+            from stalker import Task
+            return DBSession.query(Task)\
+                .join(Task.task_of)\
+                .join(TaskableEntity.project)\
+                .filter(Project.id == self.id)\
+                .all()
+        else:
+            RuntimeWarning("There is no database setup, the tasks can not "
+                           "be queried from this state, please use "
+                           "stalker.db.setup() to setup a database")
+            return []
+     
     def __eq__(self, other):
         """the equality operator
         """

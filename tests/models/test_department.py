@@ -16,33 +16,29 @@ class DepartmentTester(unittest.TestCase):
         """
         # create a couple of test users
         self.test_user1 = User(
-            login_name="user1",
-            first_name="user1",
-            last_name="user1",
+            name="User1",
+            login="user1",
             email="user1@test.com",
             password="123456",
         )
         
         self.test_user2 = User(
-            login_name="user2",
-            first_name="user2",
-            last_name="user2",
+            name="User2",
+            login="user2",
             email="user2@test.com",
             password="123456",
         )
         
         self.test_user3 = User(
-            login_name="user3",
-            first_name="user3",
-            last_name="user3",
+            name="User3",
+            login="user3",
             email="user3@test.com",
             password="123456",
         )
         
         self.test_user4 = User(
-            login_name="user4",
-            first_name="user4",
-            last_name="user4",
+            name="User4",
+            login="user4",
             email="user4@test.com",
             password="123456",
         )
@@ -55,9 +51,8 @@ class DepartmentTester(unittest.TestCase):
         ]
 
         self.test_admin = User(
-            login_name="admin",
-            first_name="admin",
-            last_name="admin",
+            name="admin",
+            login="admin",
             email="admin@test.com",
             password="admin",
         )

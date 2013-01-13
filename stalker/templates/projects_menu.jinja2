@@ -1,330 +1,48 @@
-{% extends 'add_data_form.jinja2' %}
+{% extends 'form_base.jinja2' %}
 {% block form_block %}
-  <div id='projects_menu'>
-    <div id="projects_tree_container"></div>
-    <div id='projects_context_menu'></div>
-  </div>
-  <script type="text/javascript">
-    require([
-      'dojo/dom', 'dijit/registry', 'dijit/form/Button',
-      'dojo/store/Memory', 'dijit/tree/ObjectStoreModel', 'dijit/Tree',
-      'dijit/Menu', 'dijit/MenuItem', 'dojo/domReady!'],
-        function(dom, registry, Button, Memory, ObjectStoreModel, Tree, Menu,
-                MenuItem){
-          
-          // *****************************************************************
-          //
-          // Explanation:
-          //
-          // There are two types of menus : Containers and Data it self
-          //
-          // A Project menu ('Test Project 1') is the Data it self.
-          //
-          // A Projects menu ('Projects') is the Container
-          //
-          // ******************************************************************
-          
-          // ******************************************************************
-          // The Projects Container Context Menu
-          
-          // Container Menus
-          var projects_container_ctx_menu = new Menu();
-          var sequences_container_ctx_menu = new Menu();
-          var assets_container_ctx_menu = new Menu();
-          var shots_container_ctx_menu = new Menu();
-          var tasks_container_ctx_menu = new Menu();
-          var tickets_container_ctx_menu = new Menu();
-          var container_ctx_menus = [
-            projects_container_ctx_menu,
-            sequences_container_ctx_menu,
-            assets_container_ctx_menu,
-            shots_container_ctx_menu,
-            tasks_container_ctx_menu,
-            tickets_container_ctx_menu
-          ];
-          
-          // There should be no data menu other than project
-          // all the actions should be done in container_ctx_menus
-          // Data Menus
-          var project_ctx_menu = new Menu(); // like rename, change status etc.
-          var asset_ctx_menu = new Menu();
-          var sequence_ctx_menu = new Menu();
-          var shot_ctx_menu = new Menu();
-          var task_ctx_menu = new Menu();
-          var ticket_ctx_menu = new Menu();
-          var data_ctx_menus = [
-            project_ctx_menu,
-            asset_ctx_menu,
-            sequence_ctx_menu,
-            shot_ctx_menu,
-            task_ctx_menu,
-            ticket_ctx_menu
-          ];
-          
-          // Menu Items
-          var create_new_project_menuItem = new MenuItem({
-            label: 'Create New Project...',
-            onClick: function(){
+  <div id='project_names'>
+    <div class='link_with_action' onclick="
+        require(['dojo/dom', 'dijit/registry', 'dijit/popup', 'dojo/domReady!'],
+          function(dom, registry, popup){
               // create the dialog if it doesn't already exists
-              var tree_id = 'projects_tree';
-              var parent = dijit.byId(tree_id).getParent();
               
               var dialog_id = 'add_project_dialog';
               var dialog = dijit.byId(dialog_id);
               if (dialog == null){
-                dialog = create_add_project_dialog(parent);
+                dialog = create_add_project_dialog();
               }
               // shot the dialog
               dialog.show();
-            }
-          });
-          var create_new_asset_menuItem = new MenuItem({
-            label: 'Create New Asset...'
-          });
-          var create_new_sequence_menuItem = new MenuItem({
-            label: 'Create New Sequence...'
-{#            ,#}
-{#            onClick: function(event){#}
-{#              var node = this.getParent().currentTarget;#}
-{#              var tn = dijit.byNode(node);#}
-{#              alert('clicked on: ' + tn.item.id);#}
-{#            }#}
-          });
-          var create_new_shot_menuItem = new MenuItem({
-            label: 'Create New Shot...'
-          });
-          var create_new_task_menuItem = new MenuItem({
-            label: 'Create New Task...'
-          });
-          var create_new_booking_menuItem = new MenuItem({
-            label: 'Create New Booking...'
-          });
-          var create_new_ticket_menuItem = new MenuItem({
-            label: 'Create New Ticket...'
-          });
-          var edit_menuItem = new MenuItem({
-            label: 'Edit...'
-          });
-          var menu_items = [
-            create_new_project_menuItem,
-            create_new_asset_menuItem,
-            create_new_sequence_menuItem,
-            create_new_shot_menuItem,
-            create_new_task_menuItem,
-            create_new_booking_menuItem,
-            create_new_ticket_menuItem
-          ];
-          
-          // Attach Menu Items to Menus
-          projects_container_ctx_menu.addChild(create_new_project_menuItem);
-          
-          project_ctx_menu.addChild(edit_menuItem);
-          project_ctx_menu.addChild(create_new_asset_menuItem);
-          project_ctx_menu.addChild(create_new_sequence_menuItem);
-          
-          assets_container_ctx_menu.addChild(create_new_asset_menuItem);
-          
-          asset_ctx_menu.addChild(edit_menuItem);
-          
-          sequences_container_ctx_menu.addChild(create_new_sequence_menuItem);
-          
-          sequence_ctx_menu.addChild(edit_menuItem);
-          sequence_ctx_menu.addChild(create_new_shot_menuItem);
-          
-          shots_container_ctx_menu.addChild(create_new_shot_menuItem);
-          
-          shot_ctx_menu.addChild(edit_menuItem);
-          
-          tasks_container_ctx_menu.addChild(create_new_task_menuItem);
-          
-          task_ctx_menu.addChild(edit_menuItem);
-          task_ctx_menu.addChild(create_new_booking_menuItem);
-          task_ctx_menu.addChild(create_new_ticket_menuItem);
-          
-          tickets_container_ctx_menu.addChild(create_new_ticket_menuItem);
-          
-          ticket_ctx_menu.addChild(edit_menuItem);
-          
-          // ******************************************************************
-          // Startups
-          function startup_menus(menu_list){
-            var menu_id, temp_menu;
-            for (menu_id in menu_list){
-              menu_list[menu_id].startup();
-            }
           }
-          
-          startup_menus(container_ctx_menus);
-          startup_menus(data_ctx_menus);
-          startup_menus(menu_items);
-          
-          // ******************************************************************
-          // PROJECTS TREE
-          
-          // Store - Memory
-          var myStore = new Memory({
-            data: [
-              {
-                id:'ProjectsContainer',
-                name: 'Projects',
-                type: 'ProjectsContainer'
-              },
-              
-              {# Projects #}
-              {% for project in projects %}
-                {
-                  id: '{{ project.id }}',
-                  name: '{{ project.name }}',
-                  type: 'Project',
-                  parent: 'ProjectsContainer'
-                },
-                
-                {# Assets #}
-                {
-                  id: '{{ project.id }}_assets',
-                  name: 'Assets',
-                  type: 'AssetsContainer',
-                  parent: '{{ project.id }}'
-                },
-                
-                {# Sequences #}
-                {
-                  id: '{{ project.id }}_sequences',
-                  name: 'Sequences',
-                  type: 'SequencesContainer',
-                  parent: '{{ project.id }}'
-                },
-                
-                {% for sequence in project.sequences %}
-                  {
-                    id: '{{ sequence.id }}',
-                    name: '{{ sequence.name }}',
-                    type: 'Sequence',
-                    parent: '{{ project.id }}_sequences'
-                  },
-                  {# Shots #}
-                  {
-                    id: '{{ sequence.id }}_shots',
-                    name: 'Shots',
-                    type: 'ShotsContainer',
-                    parent: '{{ sequence.id }}'
-                  },
-                  {% for shot in sequence.shots %}
-                    {
-                      id: '{{ shot.id }}',
-                      name: '{{ shot.name }}',
-                      type: 'Shot',
-                      parent: '{{ sequence.id }}_shots'
-                    },
-                  {% endfor %}
-                {% endfor %}
-                
-                {# Tasks #}
-                {
-                  id: '{{ project.id }}_tasks',
-                  name: 'Tasks',
-                  type: 'TasksContainer',
-                  parent: '{{ project.id }}'
-                },
-                
-                {# Tickets #}
-                {
-                  id: '{{ project.id }}_tickets',
-                  name: 'Tickets',
-                  type: 'TicketsContainer',
-                  parent: '{{ project.id }}'
-                },
-                
-              {% endfor %}
-            ],
-            getChildren: function(object){
-              return this.query({parent: object.id});
-            }
-          });
-
-          // The Object Store Model
-          var myModel = new ObjectStoreModel({
-            store: myStore,
-            query: {id: 'ProjectsContainer'}
-          });
-          
-          // The Projects Tree
-          var projects_tree = new Tree({
-            id: 'projects_tree',
-            model: myModel,
-            onClick: function(item, node, event){
-              var central_container = dijit.byId('central_content');
-              if (item.type == "ProjectsContainer"){
-                central_container.setAttribute(
+        );
+    ">
+      <div id='create_new_project'
+           style='
+             background-image: url({{ request.static_url("stalker:static/images/gmail_icons.png") }});
+             background-position: -62px -19px;
+             font-size: 0;
+             line-height: 0;
+             width: 8px;
+             height: 14px;
+             float: left'>
+      ></div><span><b>&nbspCreate New</b></span>
+    </div>
+    <br>
+    {% for project in projects %}
+      <div class='project_name'
+           onclick="
+            require(['dojo/dom', 'dijit/registry', 'dojo/domReady!'],
+              function(dom, registry){
+                var central_container = dijit.byId('central_content');
+                  // update the central view
+                  central_container.setAttribute(
                   'href',
-                  'view/projects'
-                )
-              } else if (item.type == "Project"){
-                project_id = item.id;
-                // update the central view
-                central_container.setAttribute(
-                  'href',
-                  'view/project/' + project_id
-                );
-              }
-              central_container.refresh();
-            },
-            onOpen: function(item, node){
-              // loop through menuItems and replace the correct menu
-              var menus = {
-                ProjectsContainer: projects_container_ctx_menu,
-                Project: project_ctx_menu,
-                SequencesContainer: sequences_container_ctx_menu,
-                Sequence: sequence_ctx_menu,
-                AssetsContainer: assets_container_ctx_menu,
-                Asset: asset_ctx_menu,
-                ShotsContainer: shots_container_ctx_menu,
-                Shot: shot_ctx_menu,
-                TasksContainer: tasks_container_ctx_menu,
-                Task: task_ctx_menu,
-                TicketsContainer: tickets_container_ctx_menu,
-                Ticket: ticket_ctx_menu,
-                undefined: null
-              };
-              
-              function bindProperMenu(item, node){
-                var m, menu_type;
-                
-                item = item || {};
-                
-                for (m in menus){
-                  if (menus[m]){
-                    menus[m].unBindDomNode(node);
-                  }
-                }
-                
-                menu_type = item.type;
-                
-                if(menu_type){
-                  menus[menu_type].bindDomNode(node);
-                }
-              }
-              
-              if (item.type != 'ProjectsContainer'){
-                var children = node.containerNode.childNodes;
-                var n = children.length;
-                var thisWidget;
-                
-                while(n--){
-                  thisWidget = dijit.getEnclosingWidget(children[n]);
-                  bindProperMenu(thisWidget.item, thisWidget.domNode);
-                }
-                
-                bindProperMenu(item, node.domNode);
-              } else {
-                menus['ProjectsContainer'].bindDomNode(this.domNode);
-              }
-             
-            }
-          });
-          projects_tree.placeAt(dojo.byId('projects_tree_container'));
-          projects_tree.startup();
-          
-        });
-   </script>
+                  'view/project/' + {{ project.id }}
+                  )
+                });
+           ">
+      <b>{{ project.name }}</b><br>
+      </div>
+    {% endfor %}
+  </div>
 {% endblock %}

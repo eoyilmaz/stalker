@@ -26,10 +26,12 @@ AUTO_CREATE_ADMIN = True
 # these are for new projects
 # after creating the project you can change them from the interface
 # 
-ADMIN_NAME = "admin"
-ADMIN_PASSWORD = "admin"
-ADMIN_EMAIL = "admin@admin.com"
-ADMIN_DEPARTMENT_NAME = "admins"
+ADMIN_NAME = 'Admin'
+ADMIN_LOGIN = 'admin'
+ADMIN_CODE = 'adm'
+ADMIN_PASSWORD = 'admin'
+ADMIN_EMAIL = 'admin@admin.com'
+ADMIN_DEPARTMENT_NAME = 'admins'
 ADMIN_GROUP_NAME = 'admins'
 
 

@@ -1,0 +1,66 @@
+<button id='view_tasks_add_task_button'>Add Task</button>
+<div id='tasks_data_grid'></div>
+<script type='text/javascript'>
+  require(['dijit/registry',
+           'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
+           'dojo/store/Memory',
+           'dojo/domReady!'],
+    function(registry, ObjectStore, DataGrid, Memory){
+      
+      /* set up data store */
+      var task_memory = new Memory({
+        data: [
+          {% for task in taskable_entity.tasks %}
+            {
+              id: {{ task.id }},
+              name: '{{ task.name }}',
+              task_of: '{{ task.task_of.name }}'
+              status: '{{ task.status.name }}',
+              resources: [
+                {% for resource in task.resources %}
+                  '{{ resource.first_name }} {{ resource.last_name }}',
+                {% endfor %}
+              ],
+              start_date: '{{ task.start_date }}',
+              due_date: '{{ task.due_date }}',
+              effort: '{{ task.effort }}'
+            },
+          {% endfor %}
+        ]
+      });
+      
+      var my_store = new ObjectStore({objectStore: task_memory});
+      
+      /* create a new grid */
+      var tasks_data_grid = new DataGrid({
+        store: my_store,
+        structure: [
+          {name: 'Thumbnail',                         width: '100px'},
+          {name: 'Name',        field: 'name',        width: '100px'},
+          {name: 'Task Of',     field: 'task_of',     width: '200px'},
+          {name: 'Status',      field: 'status',      width: '150px'},
+          {name: 'Resources',   field: 'user_name',   width: '150px'},
+          {name: 'Start Date',  field: 'start_date',  width: '100px'},
+          {name: 'Due Date',    field: 'due_date',    width: '100px'},
+          {name: 'Effort',      field: 'effort',      width: '100px'}
+        ],
+        width: '100%',
+        autoHeight: true,
+        rowSelector: '20px'
+      }, 'tasks_data_grid');
+      
+      tasks_data_grid.startup();
+      
+      var add_task_button = create_add_data_button(
+        null,
+        'Add',
+        'add_task_dialog',
+        create_add_task_dialog,
+        'view_tasks_add_task_button',
+        null,
+        '{{ taskable_entity.id }}'
+      );
+      add_task_button.startup();
+  });
+</script>
+

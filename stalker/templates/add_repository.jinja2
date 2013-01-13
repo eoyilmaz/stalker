@@ -1,158 +1,154 @@
-{% extends 'add_data_form.jinja2' %}
-{% block form_block %}
-  <div class="dijitDialogPaneContentArea">
-    <div id="add_repository_form">
-      <table style="width: 100%">
-        
-        {# NAME #}
-        <tr>
-          <td class="label_column">
-            <label for='repository_name'>
-              Name
-            </label>
-          </td>
-          <td class="input_column">
-            <input id='repository_name'>
-          </td>
-        </tr>
-        
-        {# WINDOWS_PATH #}
-        <tr>
-          <td class="label_column">
-            <label for='repository_windows_path'>
-              Windows Path
-            </label>
-          </td>
-          <td class="input_column">
-            <input id='repository_windows_path'>
-          </td>
-        </tr>
-        
-        {# LINUX_PATH #}
-        <tr>
-          <td class="label_column">
-            <label for='repository_linux_path'>
-              Linux Path
-            </label>
-          </td>
-          <td class="input_column">
-            <input id='repository_linux_path'>
-          </td>
-        </tr>
- 
-        {# OSX_PATH #}
-        <tr>
-          <td class="label_column">
-            <label for='repository_osx_path'>
-              OSX Path
-            </label>
-          </td>
-          <td class="input_column">
-            <input id='repository_osx_path'>
-          </td>
-        </tr>
-      </table>
-    </div>
+{#{% extends 'form_base.jinja2' %}#}
+{#{% block form_block %}#}
+<div class='dijitDialogPaneContentArea'>
+  <div id='add_repository_form'>
+    <table style='width: 100%'>
+      
+      {# NAME #}
+      <tr>
+        <td class='label_column'>
+          <label for='repository_name'>
+            Name
+          </label>
+        </td>
+        <td class='input_column'>
+          <input id='repository_name'>
+        </td>
+      </tr>
+      
+      {# WINDOWS_PATH #}
+      <tr>
+        <td class='label_column'>
+          <label for='repository_windows_path'>
+            Windows Path
+          </label>
+        </td>
+        <td class='input_column'>
+          <input id='repository_windows_path'>
+        </td>
+      </tr>
+      
+      {# LINUX_PATH #}
+      <tr>
+        <td class='label_column'>
+          <label for='repository_linux_path'>
+            Linux Path
+          </label>
+        </td>
+        <td class='input_column'>
+          <input id='repository_linux_path'>
+        </td>
+      </tr>
+
+      {# OSX_PATH #}
+      <tr>
+        <td class='label_column'>
+          <label for='repository_osx_path'>
+            OSX Path
+          </label>
+        </td>
+        <td class='input_column'>
+          <input id='repository_osx_path'>
+        </td>
+      </tr>
+    </table>
   </div>
-  <div class="dijitDialogPaneActionBar">
-    <button id='repository_add_button'></button>
-    <button id='repository_cancel_button'></button>
-  </div>
-  <script type="text/javascript">
-    require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
-      "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
-      "dijit/form/NumberTextBox", "dijit/form/Button", "dojo/domReady!"
-    ],
-      function(registry, xhr, Memory, Form, ValidationTextBox, NumberTextBox,
-               TextBox, Button){
-        
-        var add_repository_form = new Form({
-          id: "add_repository_form",
-          method: "POST",
-          onSubmit: function(event){
-            if (this.validate()){
-              // just close the dialog and somehow change the referrer
-              var deferred = xhr.post({
-                url: "{{ request.route_url('add_repository') }}",
-                form: dojo.byId('add_repository_form')
-              });
-              
-              var dialog = dijit.byId('add_repository_dialog');
-              
-              // update the caller form
-              if (dialog.caller_form != null){
-                dialog.caller_form.refresh
-              }
-              
-              // destroy the form
-              dialog.destroyRecursive();
-            }
-            return false;
-          }
-        }, 'add_repository_form');
-        add_repository_form.startup();
-        
-        // NAME
-        var name_textBox = new ValidationTextBox({
-          name: "name",
-          label: "Name",
-          placeHolder: "Enter a Name",
-          required: true
-        }, "repository_name");
-        name_textBox.startup();
-        
-        // WINDOWS PATH
-        var windows_path_textBox = new ValidationTextBox({
-          name: "windows_path",
-          label: "Windows Path",
-          placeHolder: "Enter the Windows Path",
-          required: true
-        }, "repository_windows_path");
-        windows_path_textBox.startup();
-        
-        // LINUX PATH
-        var linux_path_textBox = new ValidationTextBox({
-          name: "linux_path",
-          label: "Linux Path",
-          placeHolder: "Enter the Linux Path",
-          required: true
-        }, "repository_linux_path");
-        linux_path_textBox.startup();
-        
-        // OSX PATH
-        var osx_path_textBox = new ValidationTextBox({
-          name: "osx_path",
-          label: "OSX Path",
-          placeHolder: "Enter the OSX Path",
-          required: true
-        }, "repository_osx_path");
-        osx_path_textBox.startup();
-        
-         // ADD BUTTON
-        var add_button = new Button({
-          label: "Add",
-          type: "button",
-          onClick: function(){
-            if (add_repository_form.validate()){
-              add_repository_form.submit();
-            } else {
-              return false;
-            }
-          }
-        }, 'repository_add_button');
-        add_button.startup();
-        
-        // CANCEL BUTTON
-        var cancel_button = new Button({
-          label: "Cancel",
-          type: "button",
-          onClick: function(){
+</div>
+<div class='dijitDialogPaneActionBar'>
+  <button id='repository_add_button'></button>
+  <button id='repository_cancel_button'></button>
+</div>
+<script type='text/javascript'>
+  require(['dijit/registry', 'dojo/_base/xhr', 'dojo/store/Memory',
+    'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
+    'dijit/form/NumberTextBox', 'dijit/form/Button', 'dojo/domReady!'
+  ],
+    function(registry, xhr, Memory, Form, ValidationTextBox, NumberTextBox,
+             TextBox, Button){
+      
+      var add_repository_form = new Form({
+        id: 'add_repository_form',
+        method: 'POST',
+        onSubmit: function(event){
+          if (this.validate()){
+            // just close the dialog and somehow change the referrer
+            var deferred = xhr.post({
+              url: '{{ request.route_url("add_repository") }}',
+              form: dojo.byId('add_repository_form')
+            });
+            
             var dialog = dijit.byId('add_repository_dialog');
+            
+            // update the caller form
+            if (dialog.parent != null){
+              dialog.parent.refresh();
+            }
+            
+            // destroy the form
             dialog.destroyRecursive();
           }
-        }, 'repository_cancel_button');
-        cancel_button.startup();        
-    });
-  </script>
-{% endblock %}
+          return false;
+        }
+      }, 'add_repository_form');
+      add_repository_form.startup();
+      
+      // NAME
+      var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        placeHolder: 'Enter a Name',
+        required: true
+      }, 'repository_name');
+      name_textBox.startup();
+      
+      // WINDOWS PATH
+      var windows_path_textBox = new ValidationTextBox({
+        name: 'windows_path',
+        label: 'Windows Path',
+        placeHolder: 'Enter the Windows Path',
+        required: true
+      }, 'repository_windows_path');
+      windows_path_textBox.startup();
+      
+      // LINUX PATH
+      var linux_path_textBox = new ValidationTextBox({
+        name: 'linux_path',
+        label: 'Linux Path',
+        placeHolder: 'Enter the Linux Path',
+        required: true
+      }, 'repository_linux_path');
+      linux_path_textBox.startup();
+      
+      // OSX PATH
+      var osx_path_textBox = new ValidationTextBox({
+        name: 'osx_path',
+        label: 'OSX Path',
+        placeHolder: 'Enter the OSX Path',
+        required: true
+      }, 'repository_osx_path');
+      osx_path_textBox.startup();
+      
+       // ADD BUTTON
+      var add_button = new Button({
+        label: 'Add',
+        type: 'button',
+        onClick: function(){
+          return add_repository_form.submit();
+        }
+      }, 'repository_add_button');
+      add_button.startup();
+      
+      // CANCEL BUTTON
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          var dialog = dijit.byId('add_repository_dialog');
+          dialog.destroyRecursive();
+        }
+      }, 'repository_cancel_button');
+      cancel_button.startup();        
+  });
+</script>
+{#{% endblock %}#}
 

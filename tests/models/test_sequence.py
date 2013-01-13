@@ -28,7 +28,7 @@ class SequenceTester(unittest.TestCase):
         self.project_type = Type(
             name="Test Project Type",
             target_entity_type=Project,
-            )
+        )
 
         # create a status list for project
         self.project_status_list = StatusList(
@@ -41,7 +41,7 @@ class SequenceTester(unittest.TestCase):
                 self.test_status5,
                 ],
             target_entity_type=Project,
-            )
+        )
 
         # create a repository
         self.repository_type = Type(
@@ -52,7 +52,7 @@ class SequenceTester(unittest.TestCase):
         self.test_repository = Repository(
             name="Test Repository",
             type=self.repository_type,
-            )
+        )
 
         # create projects
         self.test_project = Project(
@@ -60,30 +60,28 @@ class SequenceTester(unittest.TestCase):
             type=self.project_type,
             status_list=self.project_status_list,
             repository=self.test_repository,
-            )
+        )
 
         self.test_project2 = Project(
             name="Test Project 2",
             type=self.project_type,
             status_list=self.project_status_list,
             repository=self.test_repository,
-            )
+        )
 
         self.test_lead = User(
-            login_name="testuser1",
-            first_name="user1",
-            last_name="user1",
+            name="User1",
+            login="testuser1",
             email="user1@users.com",
             password="user1",
-            )
+        )
 
         self.test_lead2 = User(
-            login_name="testuser2",
-            first_name="user2",
-            last_name="user2",
+            name="User2",
+            login="testuser2",
             email="user2@users.com",
             password="user2",
-            )
+        )
 
         self.sequence_status_list = StatusList(
             name="Sequence Statuses",
@@ -95,7 +93,7 @@ class SequenceTester(unittest.TestCase):
                 self.test_status5,
                 ],
             target_entity_type=Sequence,
-            )
+        ) 
 
         # the parameters
         self.kwargs = {

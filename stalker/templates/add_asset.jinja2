@@ -1,0 +1,307 @@
+{#{% extends 'form_base.jinja2' %}#}
+{#{% block form_block %}#}
+<div class='dijitDialogPaneContentArea'> 
+  <form id='add_asset_form'>
+    <table style='width: 100%;'>
+      
+      {# NAME #}
+      <tr>
+        <td class='label_column'>
+          <label for='asset_name'>Name</label>
+        </td>
+        <td class='input_column'>
+          <input id='asset_name'>
+        </td>
+      </tr>
+      
+      {# CODE #}
+      <tr>
+        <td class='label_column'>
+          <label for='asset_code'>Code</label>
+        </td>
+        <td class='input_column'>
+          <input id='asset_code'>
+        </td>
+      </tr>
+      
+      {# DESCRIPTION #}
+      <tr>
+        <td class='label_column'>
+          <label for='asset_description'>Description</label>
+        </td>
+        <td class='input_column'>
+          <input id='asset_description'>
+        </td>
+      </tr>
+      
+      {# TYPE #}
+      <tr>
+        <td class='label_column'>
+          <label for='asset_type'>Type</label>
+        </td>
+        <td class='input_column'>
+          <input id='asset_type'>
+        </td>
+      </tr>
+      
+      {# PROJECT #}
+      <tr>
+        <td class='label_column'>
+          <label for='asset_project'>Project</label>
+        </td>
+        <td class='input_column'>
+          <input id='asset_project'>
+        </td>
+      </tr>
+      
+      {# STATUS #}
+      <tr>
+        <td class='label_column'>
+         <label for='asset_status'>Status</label>
+        </td>
+        {%  if not status_list %}
+          {# There is no status List so add a button to call add StatusList #}
+          <td class='input_column'>
+            --NO STATUS LIST FOR ASSET--
+          </td>
+          <td class='button_column'>
+            <button id='asset_add_status_list_button'>Add New Status List</button>
+          </td>
+        {% else %}
+          {# There are a suitable StatusList just shot the statuses #}
+          <td class='input_column'>
+            <input id='asset_status'>
+          </td>
+          <td class='button_column'>
+            <button id='asset_edit_status_list_button'>Edit</button>
+          </td>
+        {% endif %}
+      </tr>
+
+    </table>      
+  </form>
+</div>
+
+<div class='dijitDialogPaneActionBar'>
+  <button id='asset_add_button'>Add</button>
+  <button id='asset_cancel_button'>Cancel</button>
+</div>
+
+<script type='text/javascript'>
+  require(['dijit/registry', 'dojo/request/xhr', 'dojo/on',
+    'dojo/store/Memory', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
+    'dijit/form/TextBox', 'dijit/form/FilteringSelect',
+    'dijit/form/ComboBox', 'dijit/form/Button', 'dojo/ready'
+  ],
+    function(registry, xhr, on, Memory, Form, ValidationTextBox, TextBox,
+             FilteringSelect, ComboBox, Button){
+      
+      // ********************************************************************
+      // FORM
+      var add_asset_form = new Form({
+        id: 'add_asset_form',
+        method: 'POST',
+        onSubmit: function(event){
+          if (this.validate()){
+            
+            // get the form data
+            var form_data = {};
+            var myFormData = dijit.byId('add_asset_form').get('value');
+            form_data.name = myFormData.name;
+            form_data.description = myFormData.description;
+            form_data.project_id = myFormData.project;
+            form_data.type = myFormData.type;
+            form_data.status_id = myFormData.status;
+            form_data.submitted = 'add';
+            
+            var deferred = xhr.post(
+              '{{ request.route_url("add_asset") }}',
+              {
+                method: 'POST',
+                data: form_data
+              }
+            );
+            
+            // update the caller dialog
+            var dialog = dijit.byId('add_asset_dialog');
+            var parent = dialog.get('parent');
+            if (parent != null){
+              parent.refresh();
+            }
+            
+            // destroy dialog
+            dialog.destroyRecursive();
+          }
+        }
+      }, 'add_asset_form');
+      
+      add_asset_form.get_form_data = function(){
+        {# returns the data currently entered in the form
+        
+        this can be used to fill the form and also for posting data
+        #}
+        // prepare data to be submitted
+      }
+      
+      // add the restore_form_data function
+      add_asset_form.restore_form_data = function(form_data){
+        this.set('value', form_data);
+      }
+      
+      // ********************************************************************
+      // NAME
+      var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        value: '',
+        placeHolder: 'Enter a name',
+        required: true
+      }, 'asset_name');
+      name_textBox.startup();
+      
+      // ********************************************************************
+      // CODE
+      var code_textBox = new TextBox({
+        name: 'code',
+        label: 'Code',
+        value: '',
+        placeHolder: 'Enter a code'
+      }, 'asset_code');
+      name_textBox.startup();
+      
+      // ********************************************************************
+      // DESCRIPTION
+      var description_textBox = new TextBox({
+        name: 'description',
+        label: 'Description',
+        placeHolder: 'Enter description'
+      }, 'asset_description');
+      description_textBox.startup();
+      
+      // ********************************************************************
+      // TYPE
+      var type_memory = new Memory({
+        data: [
+          {% for type_ in types %}
+            {
+              name: '{{type_.name}}',
+              id: '{{ type_.id }}'
+            },
+          {% endfor %}
+        ]
+      });
+      
+      var type_comboBox = new ComboBox({
+        name: 'type',
+        required: true,
+        store: type_memory
+      }, 'asset_type');
+      
+      // set value of Type
+      
+      if (type_memory.data[0] != undefined ){
+        try {
+          type_comboBox.attr('value', type_memory.data[0].name);
+        } catch(e) {
+          // don't do anything
+        }
+      }
+      
+      type_comboBox.startup();
+      
+      // ********************************************************************
+      // PROJECT
+      var project_memory = new Memory({
+        data: [
+          {% for project in projects %}
+            {
+              name: '{{ project.name }}',
+              id: '{{ project.id }}'
+            },
+          {% endfor %}
+        ]
+      });
+      
+      var project_select = new FilteringSelect({
+        name: 'project',
+        required: true,
+        store: project_memory
+      }, 'asset_project');
+      project_select.startup();
+      
+      // ********************************************************************
+      // STATUS OR STATUS_LIST
+      {% if not status_list %}
+        // ADD STATUS LIST BUTTON
+        var add_status_list_button = create_add_data_button(
+          dijit.byId('add_asset_form').getParent(),
+          'Add',
+          'add_status_list_dialog',
+          create_add_status_list_dialog,
+          'asset_add_status_list_button'
+        );
+        add_status_list_button.startup();
+      {% else %}
+        // ADD STATUS
+        var status_memory = new Memory({
+          data: [
+            {% for status in status_list.statuses %}
+              {
+                name: '{{ status.name }} / {{ status.code }}',
+                id: '{{ status.id }}'
+              },
+            {% endfor %}
+          ]
+        });
+        
+        var status_select = new FilteringSelect({
+          name: 'status',
+          required: true,
+          store: status_memory,
+          value: status_memory.data[0].id
+        }, 'asset_status');
+        status_select.startup();
+      {% endif %}
+      
+      // EDIT STATUS LIST BUTTON
+      var edit_status_list_button = create_edit_data_button(
+        dijit.byId('add_asset_form').getParent(),
+        'Edit',
+        'edit_status_list_dialog',
+        create_edit_status_list_dialog,
+        'asset_edit_status_list_button',
+        function(){
+          return {{ status_list.id }};
+        },
+        add_asset_form.get('value')
+      );
+      edit_status_list_button.startup();
+      
+      // ********************************************************************
+      // ADD BUTTON
+      var add_button = new Button({
+        label: 'Add',
+        type: 'button',
+        onClick: function(){
+          return add_asset_form.submit();
+        }
+      }, 'asset_add_button');
+      add_button.startup();
+      
+      // ********************************************************************
+      // CANCEL BUTTON
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          dijit.byId('add_asset_dialog').destroyRecursive();
+        }
+      }, 'asset_cancel_button');
+      cancel_button.startup();
+      
+      add_asset_form.startup();
+      
+  });
+</script>
+{#{% endblock %}#}
+

@@ -146,8 +146,8 @@ def __create_admin__():
     if not admin:
         admin = User(
             name=defaults.ADMIN_NAME,
-            first_name=defaults.ADMIN_NAME,
-            login_name=defaults.ADMIN_NAME,
+            code=defaults.ADMIN_CODE,
+            login=defaults.ADMIN_LOGIN,
             password=defaults.ADMIN_PASSWORD,
             email=defaults.ADMIN_EMAIL,   
             department=admin_department,
@@ -172,7 +172,7 @@ def __create_ticket_statuses():
     """
     from stalker import User
     
-    admin = User.query().filter(User.login_name==defaults.ADMIN_NAME).first()
+    admin = User.query().filter(User.login==defaults.ADMIN_NAME).first()
     
     # create statuses for Tickets
     from stalker import Status, StatusList
@@ -273,7 +273,7 @@ def __create_filename_template_types():
     
     logger.debug("creating default Types for FilenameTemplates")
     
-    admin = User.query().filter_by(login_name=defaults.ADMIN_NAME).first()
+    admin = User.query().filter_by(login=defaults.ADMIN_NAME).first()
     
     if "Version" not in type_names:
         # mark them as created by admin

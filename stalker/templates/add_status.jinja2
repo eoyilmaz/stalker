@@ -1,180 +1,179 @@
-{% extends 'add_data_form.jinja2' %}
-{% block form_block %}
-  <div class="dijitDialogPaneContentArea">
-    <form id="add_status_form">
-      <table style="width:100%;">
-        
-        {# NAME #}
-        <tr>
-          <td class="label_column">
-            <label for='status_name'>
-              Name
-            </label>
-          </td>
-          <td class="input_column">
-            <input id='status_name'>
-          </td>
-        </tr>
-        
-        {# CODE #}
-        <tr>
-          <td class="label_column">
-            <label for='status_code'>
-              Code
-            </label>
-          </td>
-          <td class="input_column">
-            <input id='status_code'>
-          </td>
-        </tr>
-    
-        {# FG Color #}
-        <tr>
-          <td class='label_column'>
-            <label for='status_fg_color'>
-              FG Color
-            </label>
-          </td>
-          <td class='input_column'>
-            <input id='status_fg_color'>
-          </td>
-        </tr>
-        
-        {# BG Color #}
-        <tr>
-          <td class='label_column'>
-            <label for='status_bg_color'>
-              BG Color
-            </label>
-          </td>
-          <td class='input_column'>
-            <input id='status_bg_color'>
-          </td>
-        </tr>
-        
-      </table>
-    </form>
-  </div>
+{#{% extends 'form_base.jinja2' %}#}
+{#{% block form_block %}#}
+<div class='dijitDialogPaneContentArea'>
+  <form id='add_status_form'>
+    <table style='width:100%;'>
+      
+      {# NAME #}
+      <tr>
+        <td class='label_column'>
+          <label for='status_name'>
+            Name
+          </label>
+        </td>
+        <td class='input_column'>
+          <input id='status_name'>
+        </td>
+      </tr>
+      
+      {# CODE #}
+      <tr>
+        <td class='label_column'>
+          <label for='status_code'>
+            Code
+          </label>
+        </td>
+        <td class='input_column'>
+          <input id='status_code'>
+        </td>
+      </tr>
   
-  <div class="dijitDialogPaneActionBar">
-    <button id='status_add_button'></button>
-    <button id='status_cancel_button'></button>
-  </div>
-  
-  <script type="text/javascript">
-    require(["dijit/registry", "dojo/_base/xhr", "dojo/store/Memory",
-      "dijit/form/Form", "dijit/form/ValidationTextBox", "dijit/form/TextBox",
-      "dijit/form/SimpleTextarea", "dijit/form/Button", "dijit/ColorPalette",
-      "dojo/domReady!"
-    ],
-      function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
-               SimpleTextarea, Button, ColorPalette){
-        
-        // ********************************************************************
-        // FORM
-        var add_status_form = new Form({
-          id: "add_status_form",
-          method: "POST",
-          onSubmit: function(event){
-            if (this.validate()){
-              // just close the dialog and somehow change the related field
-              // on parent widget
-              var deferred = xhr.post({
-                content: {
-                  submitted: 'add',
-                  bg_color: bg_color_colorPalette.value,
-                  fg_color: fg_color_colorPalette.value
-                },
-                url: "{{ request.route_url('add_status') }}",
-                form: dojo.byId('add_status_form')
-              });
-              
-              // update the caller dialog
-              var dialog = dijit.byId('add_status_dialog');
-              var parent = dialog.get('parent');
-              if (parent != null){
-                // TODO: just update the status field of the parent dialog
-                parent.refresh()
-              }
-              
-              // destroy the dialog
-              dialog.destroyRecursive();
-            }
-            return false;
-          }
-        }, 'add_status_form');
-        add_status_form.startup();
-        
-        // ********************************************************************
-        // NAME
-        var name_textBox = new ValidationTextBox({
-          name: "name",
-          label: "Name",
-          placeHolder: "Enter a name",
-          required: true
-        }, "status_name");
-        name_textBox.startup();
-        
-        // ********************************************************************
-        // CODE
-        var code_textBox = new ValidationTextBox({
-          name: "code",
-          label: "Code",
-          placeHolder: "Enter a code",
-          required: true
-        }, "status_code");
-        code_textBox.startup();
-        
-        // ********************************************************************
-        // FG Color
-        // TODO: set default colors
-        var fg_color_colorPalette = new ColorPalette({
-          name: 'fg_color',
-          label: 'FG Color',
-          required: true
-        }, 'status_fg_color');
-        fg_color_colorPalette.startup();
-        
-        // ********************************************************************
-        // BG Color
-        var bg_color_colorPalette = new ColorPalette({
-          name: 'bg_color',
-          label: 'BG Color',
-          required: true,
-          onChange: function(value){
-            alert(this.value);
-          }
-        }, 'status_bg_color');
-        bg_color_colorPalette.startup();
-        
-        // ********************************************************************
-        // ADD BUTTON
-        var add_button = new Button({
-          label: "Add",
-          type: "button",
-          onClick: function(){
-            if (add_status_form.validate()){
-              add_status_form.submit();
-            } else {
-              return false;
-            }
-          }
-        }, 'status_add_button');
-        add_button.startup();
-        
-        // ********************************************************************
-        // CANCEL BUTTON
-        var cancel_button = new Button({
-          label: "Cancel",
-          type: "button",
-          onClick: function(){
-            // TODO: the form is not closed correctly by doing it in this way
+      {# FG Color #}
+      <tr>
+        <td class='label_column'>
+          <label for='status_fg_color'>
+            FG Color
+          </label>
+        </td>
+        <td class='input_column'>
+          <input id='status_fg_color'>
+        </td>
+      </tr>
+      
+      {# BG Color #}
+      <tr>
+        <td class='label_column'>
+          <label for='status_bg_color'>
+            BG Color
+          </label>
+        </td>
+        <td class='input_column'>
+          <input id='status_bg_color'>
+        </td>
+      </tr>
+      
+    </table>
+  </form>
+</div>
+
+<div class='dijitDialogPaneActionBar'>
+  <button id='status_add_button'></button>
+  <button id='status_cancel_button'></button>
+</div>
+
+<script type='text/javascript'>
+  require(['dijit/registry', 'dojo/_base/xhr', 'dojo/store/Memory',
+    'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
+    'dijit/form/SimpleTextarea', 'dijit/form/Button', 'dijit/ColorPalette',
+    'dojo/domReady!'
+  ],
+    function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
+             SimpleTextarea, Button, ColorPalette){
+      
+      // ********************************************************************
+      // FORM
+      var add_status_form = new Form({
+        id: 'add_status_form',
+        method: 'POST',
+        onSubmit: function(event){
+          if (this.validate()){
+            // just close the dialog and somehow change the related field
+            // on parent widget
+            var deferred = xhr.post({
+              content: {
+                submitted: 'add',
+                bg_color: bg_color_colorPalette.value,
+                fg_color: fg_color_colorPalette.value
+              },
+              url: '{{ request.route_url("add_status") }}',
+              form: dojo.byId('add_status_form')
+            });
+            
+            // update the caller dialog
             var dialog = dijit.byId('add_status_dialog');
+            var parent = dialog.get('parent');
+            if (parent != null){
+              // TODO: just update the status field of the parent dialog
+{#                var parent_form = dialog.get('parent_form')#}
+{#                var parent_form_data = null;#}
+              parent.refresh();
+{#                if (parent_form != null){#}
+{#                  // fill parent form data#}
+{#                  parent_form.set('value', parent_form_data);#}
+{#                }#}
+            }
+            
+            // destroy the dialog
             dialog.destroyRecursive();
           }
-        }, 'status_cancel_button');
-        cancel_button.startup();
-    });
-  </script>
-{% endblock %}
+          return false;
+        }
+      }, 'add_status_form');
+      add_status_form.startup();
+      
+      // ********************************************************************
+      // NAME
+      var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        placeHolder: 'Enter a name',
+        required: true
+      }, 'status_name');
+      name_textBox.startup();
+      
+      // ********************************************************************
+      // CODE
+      var code_textBox = new ValidationTextBox({
+        name: 'code',
+        label: 'Code',
+        placeHolder: 'Enter a code',
+        required: true
+      }, 'status_code');
+      code_textBox.startup();
+      
+      // ********************************************************************
+      // FG Color
+      // TODO: set default colors
+      var fg_color_colorPalette = new ColorPalette({
+        name: 'fg_color',
+        label: 'FG Color',
+        required: true
+      }, 'status_fg_color');
+      fg_color_colorPalette.startup();
+      
+      // ********************************************************************
+      // BG Color
+      var bg_color_colorPalette = new ColorPalette({
+        name: 'bg_color',
+        label: 'BG Color',
+        required: true
+      }, 'status_bg_color');
+      bg_color_colorPalette.startup();
+      
+      // ********************************************************************
+      // ADD BUTTON
+      var add_button = new Button({
+        label: 'Add',
+        type: 'button',
+        onClick: function(){
+          return add_status_form.submit();
+        }
+      }, 'status_add_button');
+      add_button.startup();
+      
+      // ********************************************************************
+      // CANCEL BUTTON
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          // TODO: the form is not closed correctly by doing it in this way
+          var dialog = dijit.byId('add_status_dialog');
+          dialog.destroyRecursive();
+        }
+      }, 'status_cancel_button');
+      cancel_button.startup();
+  });
+</script>
+{#{% endblock %}#}
 

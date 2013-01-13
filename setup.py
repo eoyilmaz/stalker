@@ -17,7 +17,7 @@ requires = [
     'waitress',
     'pyseq',
     'jinja2',
-    ]
+]
 
 setup(name='stalker',
       version=stalker.__version__,

@@ -303,43 +303,20 @@ class User(Entity, ACLMixin):
         allowed.
       * all the letters in the code will be converted to lower case.
       
-      Other than this two new rules all the previous formatting rules from the
-      :class:`~stalker.models.entity.SimpleEntity` are still in charge.
-      
-    * The :attr:`~stalker.models.auth.User.name` is a synonym of the
-      :attr:`~stalker.models.auth.User.login_name`, so changing one of them
-      will change the other.
+      Other than these two new rules all the previous formatting rules from the
+      :class:`~stalker.models.entity.SimpleEntity` are valid.
     
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
     
     :type email: str, unicode
     
-    :param login_name: it is the login name of the user, it should be all lower
+    :param login: This is the login name of the user, it should be all lower
       case. Giving a string or unicode that has uppercase letters, it will be
       converted to lower case. It can not be an empty string or None and it can
-      not contain any white space inside. login_name parameter will be copied
-      over name if both of them is given, if one of them given they will have
-      the same value which is the formatted login_name value. Setting the name
-      value also sets the login_name and setting the login_name property also
-      sets the name, while creating a User object you don't need to specify
-      both of them, one is enough and if the two is given `login_name` will be
-      used.
+      not contain any white space inside.
     
-    :type login_name: str, unicode
-    
-    :param first_name: it is the first name of the user, must be a string or
-      unicode, middle name also can be added here, so it accepts white-spaces
-      in the variable, but it will truncate the white spaces at the beginin and
-      at the end of the variable and it can not be empty or None
-    
-    :type first_name: str, unicode
-    
-    :param last_name: it is the last name of the user, must be a string or
-      unicode, again it can not contain any white spaces at the beggining and
-      at the end of the variable and it can be an empty string or None
-    
-    :type last_name: str, unicode
+    :type login: str, unicode
     
     :param department: it is the department of the current user. It should be
       a Department object. One user can only be listed in one department. A
@@ -381,11 +358,6 @@ class User(Entity, ACLMixin):
       date of the user (not implemented yet)
     
     :type last_login: datetime.datetime
-    
-    :param initials: it is the initials of the users name, if nothing given it
-      will be calculated from the first and last names of the user
-    
-    :type initials: unicode
     """
     
     __tablename__ = "Users"
@@ -397,7 +369,7 @@ class User(Entity, ACLMixin):
     department_id = Column(
         Integer,
         ForeignKey("Departments.id", use_alter=True, name="department_x"),
-        )
+    )
     
     department = relationship(
         "Department",
@@ -405,27 +377,13 @@ class User(Entity, ACLMixin):
         back_populates="members",
         uselist=False,
         doc=""":class:`~stalker.models.department.Department` of the user""",
-        )
+    )
     
     email = Column(
         String(256),
         unique=True,
         nullable=False,
         doc="""email of the user, accepts strings or unicodes"""
-    )
-    
-    first_name = Column(
-        String(256),
-        nullable=False,
-        doc="""first name of the user, accepts string or unicode"""
-    )
-    
-    last_name = Column(
-        String(256),
-        nullable=True,
-        doc="""The last name of the user.
-        
-        It is a string and can be None or empty string"""
     )
     
     password = Column(
@@ -444,22 +402,13 @@ class User(Entity, ACLMixin):
         It is an instance of datetime.datetime class."""
     )
     
-    login_name = synonym(
-        "name",
+    login = Column(
+        String(256),
+        nullable=False,
         doc="""The login name of the user.
         
-        It is a synonym for the :attr:`~stalker.models.auth.User.name`
-        attribute.
+        Can not be empty.
         """
-    )
-    
-    initials = Column(
-        String(16),
-        doc="""The initials of the user.
-        
-        If not specified, it is the upper case form of first letters of the
-        :attr:`~stalker.models.auth.User.first_name` and
-        :attr:`~stalker.models.auth.User.last_name`"""
     )
     
     groups = relationship(
@@ -515,63 +464,55 @@ class User(Entity, ACLMixin):
 
     def __init__(
         self,
+        name=None,
+        login=None,
+        code=None,
+        email=None,
+        password=None,
         department=None,
-        email="",
-        first_name="",
-        last_name="",
-        login_name="",
-        password="",
         groups=None,
         projects_lead=None,
         sequences_lead=None,
         tasks=None,
         last_login=None,
-        initials="",
         **kwargs
     ):
-        # use the login_name for name if there are no name attribute present
-        name = kwargs.get("name")
-
-        if name is None:
-            name = login_name
-
-        if login_name == "":
-            login_name = name
-
-        name = login_name
-        kwargs["name"] = name
-
+        kwargs['name'] = name
+        
+        self.login = login
+        
+        if code is None or code=='':
+            code = self.login
+        
+        kwargs['code'] = code
+        
         super(User, self).__init__(**kwargs)
-
+        
         self.department = department
-
+        
         self.email = email
-        self.first_name = first_name
-        self.last_name = last_name
-        self.name = name
-        self.login_name = login_name
-        self.initials = initials
-
+        self.code = code
+        
         # to be able to mangle the password do it like this
         self.password = password
-
+        
         if groups is None:
             groups = []
         self.groups = groups
-
+        
         self._projects = []
-
+        
         if projects_lead is None:
             projects_lead = []
         self.projects_lead = projects_lead
-
+        
         if sequences_lead is None:
             sequences_lead = []
         self.sequences_lead = sequences_lead
-
+        
         if tasks is None:
             tasks = []
-
+        
         self.tasks = tasks
 
         self.last_login = last_login
@@ -589,47 +530,61 @@ class User(Entity, ACLMixin):
     def __repr__(self):
         """return the representation of the current User
         """
-
-        return "<User (%s %s ('%s'))>" %\
-               (self.first_name, self.last_name, self.login_name)
+        return "<User (%s ('%s'))>" % (self.name, self.login)
 
     def __eq__(self, other):
         """the equality operator
         """
-
         return super(User, self).__eq__(other) and\
                isinstance(other, User) and\
                self.email == other.email and\
-               self.login_name == other.login_name and\
-               self.first_name == other.first_name and\
-               self.last_name == other.last_name and\
+               self.login == other.login and\
                self.name == other.name
 
     def __ne__(self, other):
         """the inequality operator
         """
-
         return not self.__eq__(other)
 
-    @validates("name")
-    def _validate_name(self, key, name):
-        """validates the given name value
+    @validates("login")
+    def _validate_login(self, key, login):
+        """validates the given login value
         """
-
-        logger.debug("name in: %s" % name)
-
-        name = self._format_login_name(name)
-
+        if login is None:
+            raise TypeError('%s.login can not be None' %
+                            self.__class__.__name__)
+        
+        login = self._format_login(login)
+        
+        # raise a ValueError if the login is an empty string after formatting
+        if login == '':
+            raise ValueError('%s.login can not be an empty string' %
+                             self.__class__.__name__)
+        
         # also set the nice_name
-        self._nice_name = self._format_nice_name(name)
-
-        # and also the code
-        self.code = name
-
-        logger.debug("name out: %s" % name)
-
-        return name
-
+        #self._nice_name = self._format_nice_name(login)
+        
+        ## and also the code
+        #self.code = login
+        
+        logger.debug("name out: %s" % login)
+        
+        return login
+    
+    @validates('code')
+    def _validate_code(self, key, code):
+        """validates the given code attribute
+        """
+        print "THIS IS WORKING!!!!!!!"
+        logger.debug('code in: %s' % code)
+        if code is None or code == '' or not isinstance(code, str):
+            logger.debug('code is %s, setting it to: %s' % (code, self.login))
+            code = self.login
+        
+        code = self._format_code(code)
+        
+        return code
+    
     @validates("department")
     def _validate_department(self, key, department):
         """validates the given department value
@@ -688,42 +643,27 @@ class User(Entity, ACLMixin):
 
         return email_in
 
-    @validates("first_name")
-    def _validate_first_name(self, key, first_name_in):
-        """validates the given first_name attribute
-        """
-
-        if first_name_in is None:
-            raise TypeError("%s.first_name cannot be None" %
-                            self.__class__.__name__)
-
-        if not isinstance(first_name_in, (str, unicode)):
-            raise TypeError("%s.first_name should be instance of string or "
-                            "unicode not %s" %
-                            (self.__class__.__name__,
-                             first_name_in.__class__.__name__))
-
-        if first_name_in == "":
-            raise ValueError("%s.first_name can not be an empty string" %
-                             self.__class__.__name__)
-
-        return first_name_in.strip().title()
-
-    @validates("initials")
-    def _validate_initials(self, key, initials_in):
-        """validates the given initials
-        """
-
-        initials_in = str(initials_in)
-
-        if initials_in == "":
-            # derive the initials from the first and last name
-
-            initials_in = re.sub("[^A-Z]+", "",
-                                 self.first_name.title() + " " +\
-                                 self.last_name.title()).lower()
-
-        return initials_in
+#    @validates("initials")
+#    def _validate_initials(self, key, initials):
+#        """validates the given initials
+#        """
+#        
+#        if initials is None:
+#            raise TypeError('%s.initials can not be None' %
+#                             self.__class__.__name__)
+#        
+#        if not isinstance(initials, str):
+#            raise TypeError('%s.initials should be a string not %s' %
+#                            (self.__class__.__name__,
+#                             initials.__class__.__name__))
+#        
+#        if initials == '':
+#            raise ValueError('%s.initials can not be an empty string' %
+#                             self.__class__.__name__)
+#        
+#        initials = initials.lower()
+#        
+#        return initials
 
     @validates("last_login")
     def _validate_last_login(self, key, last_login_in):
@@ -739,45 +679,28 @@ class User(Entity, ACLMixin):
 
         return last_login_in
 
-    @validates("last_name")
-    def _validate_last_name(self, key, last_name_in):
-        """validates the given last_name attribute
+    def _format_login(self, login):
+        """formats the given login value
         """
-
-        if last_name_in is not None:
-            if not isinstance(last_name_in, (str, unicode)):
-                raise TypeError("%s.last_name should be instance of string "
-                                "or unicode not %s" %
-                                (self.__class__.__name__,
-                                 last_name_in.__class__.__name__))
-        else:
-            last_name_in = ""
-
-        return last_name_in.strip().title()
-
-    def _format_name(self, name):
-        """formats the given name
-        """
-
         # be sure it is a string
-        name = str(name)
-
+        login = str(login)
+        
         # strip white spaces from start and end
-        name = name.strip()
-
+        login = login.strip()
+        
         # remove all the spaces
-        name = name.replace(" ", "")
-
+        login = login.replace(" ", "")
+        
         # make it lowercase
-        name = name.lower()
-
+        login = login.lower()
+        
         # remove any illegal characters
-        name = re.sub("[^\\(a-zA-Z0-9)]+", "", name)
-
-        # remove any number at the begining
-        name = re.sub("^[0-9]+", "", name)
-
-        return name
+        login = re.sub("[^\\(a-zA-Z0-9)]+", "", login)
+        
+        # remove any number at the beginning
+        login = re.sub("^[0-9]+", "", login)
+        
+        return login
 
     @validates("password")
     def _validate_password(self, key, password_in):
@@ -884,8 +807,8 @@ class User(Entity, ACLMixin):
         :class:`~stalker.models.task.Task` to the
         :class:`~stalker.models.project.Project`.
         """
-
-        #return self._projects
+        
+        # TODO: do it with SQLAlchemy
         projects = []
         for task in self.tasks:
             projects.append(task.task_of.project)

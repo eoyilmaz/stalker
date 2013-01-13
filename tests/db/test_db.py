@@ -18,7 +18,7 @@ from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
                      Link, Note, Project, Repository, Sequence, Shot,
                      Status, StatusList, Structure, Tag, Task, Type,
-                     FilenameTemplate, User, Version, Permission, Group, Color)
+                     FilenameTemplate, User, Version, Permission, Group)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -72,10 +72,8 @@ class DatabaseTester(unittest.TestCase):
         #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         kwargs = {
-            "name": "eoyilmaz",
-            "first_name": "Erkan Ozgur",
-            "last_name": "Yilmaz",
-            "login_name": "eoyilmaz",
+            "name": "Erkan Ozgur Yilmaz",
+            "login": "eoyilmaz",
             "email": "eoyilmaz@gmail.com",
             #"created_by": admin,
             "password": "password",
@@ -88,8 +86,6 @@ class DatabaseTester(unittest.TestCase):
         # now check if the newUser is there
         newUser_DB = DBSession.query(User)\
             .filter_by(name=kwargs["name"])\
-            .filter_by(first_name=kwargs["first_name"])\
-            .filter_by(last_name=kwargs["last_name"])\
             .first()
         
         self.assertTrue(newUser_DB is not None)
@@ -119,10 +115,8 @@ class DatabaseTester(unittest.TestCase):
         #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
         
         kwargs = {
-            "name": "eoyilmaz",
-            "first_name": "Erkan Ozgur",
-            "last_name": "Yilmaz",
-            "login_name": "eoyilmaz",
+            "name": "Erkan Ozgur Yilmaz",
+            "login": "eoyilmaz",
             "email": "eoyilmaz@gmail.com",
             #"created_by": admin,
             "password": "password",
@@ -142,8 +136,6 @@ class DatabaseTester(unittest.TestCase):
         
         newUser_DB = DBSession.query(User)\
             .filter_by(name=kwargs["name"])\
-            .filter_by(first_name=kwargs["first_name"])\
-            .filter_by(last_name=kwargs["last_name"])\
             .first()
         
         self.assertTrue(newUser_DB is not None)
@@ -260,8 +252,8 @@ class DatabaseTester(unittest.TestCase):
 
         # lets create the second user
         kwargs.update({
-            "first_name": "user1name",
-            "login_name": "user1",
+            "name": "User1 Name",
+            "login": "user1",
             "email": "user1@gmail.com",
             "password": "user1",
         })
@@ -674,7 +666,9 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # user1
         user1 = User(
-            name="user1_test_persistence_department",
+            name="User1 Test Persistence Department",
+            login='u1tpd',
+            initials='u1tpd',
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -688,7 +682,9 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # user2
         user2 = User(
-            name="user2_test_persistence_department",
+            name="User2 Test Persistence Department",
+            login='u2tpd',
+            initials='u2tpd',
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -703,7 +699,9 @@ class DatabaseModelsTester(unittest.TestCase):
         # user3
         # create three users, one for lead and two for members
         user3 = User(
-            name="user3_test_persistence_department",
+            name="User3 Test Persistence Department",
+            login='u2tpd',
+            initials='u2tpd',
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -1131,14 +1129,14 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         user1 = User(
-            login_name='user1',
-            first_name='user1',
+            name='User1',
+            login='user1',
             email='user1@test.com',
             password='12'
         )
         user2 = User(
-            login_name='user2',
-            first_name='user2',
+            name='User2',
+            login='user2',
             email='user2@test.com',
             password='34'
         )
@@ -1165,33 +1163,29 @@ class DatabaseModelsTester(unittest.TestCase):
         due_date = start_date + datetime.timedelta(days=20)
         
         lead = User(
-            login_name="lead",
-            first_name="lead",
-            last_name="lead",
+            name="lead",
+            login="lead",
             email="lead@lead.com",
             password="password"
         )
         
         user1 = User(
-            login_name="user1",
-            first_name="user1",
-            last_name="user1",
+            name="user1",
+            login="user1",
             email="user1@user1.com",
             password="password"
         )
         
         user2 = User(
-            login_name="user2",
-            first_name="user2",
-            last_name="user2",
+            name="user2",
+            login="user2",
             email="user1@user2.com",
             password="password"
         )
         
         user3 = User(
-            login_name="user3",
-            first_name="user3",
-            last_name="user3",
+            name="user3",
+            login="user3",
             email="user3@user3.com",
             password="password"
         )
@@ -1496,10 +1490,9 @@ class DatabaseModelsTester(unittest.TestCase):
             )
 
         lead = User(
-            login_name="lead",
+            name="lead",
+            login="lead",
             email="lead@lead.com",
-            first_name="lead",
-            last_name="lead",
             password="password"
         )
 
@@ -1509,7 +1502,7 @@ class DatabaseModelsTester(unittest.TestCase):
             "project": project1,
             "lead": lead,
             "status_list": sequence_status_list,
-            }
+        }
 
         test_sequence = Sequence(**kwargs)
 
@@ -1617,10 +1610,9 @@ class DatabaseModelsTester(unittest.TestCase):
             )
         
         lead = User(
-            login_name="lead",
+            name="lead",
+            login="lead",
             email="lead@lead.com",
-            first_name="lead",
-            last_name="lead",
             password="password"
         )
         
@@ -1747,8 +1739,8 @@ class DatabaseModelsTester(unittest.TestCase):
             "name": "TestStatus_test_creating_Status",
             "description": "this is for testing purposes",
             "code": "TSTST",
-            'bg_color': Color(15, 25, 35),
-            'fg_color': Color(105, 115, 125)
+            'bg_color': 15,
+            'fg_color': 105
         }
         
         test_status = Status(**kwargs)
@@ -1858,7 +1850,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(updated_by, sequence_status_list_DB.updated_by)
         
         # try to create another StatusList for the same target_entity_type
-        # and expect and IntegrityError
+        # and do not expect an IntegrityError
         
         kwargs["name"] = "new Sequence Status List"
         new_sequence_list = StatusList(**kwargs)
@@ -2103,25 +2095,22 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         user1 = User(
-            login_name="user1",
-            first_name="User1",
-            last_name="User1",
+            name="User1",
+            login="user1",
             email="user1@user.com",
             password="1234",
         )
         
         user2 = User(
-            login_name="user2",
-            first_name="User2",
-            last_name="User2",
+            name="User2",
+            login="user2",
             email="user2@user.com",
             password="1234",
         )
         
         user3 = User(
-            login_name="user3",
-            first_name="User3",
-            last_name="User3",
+            name="User3",
+            login="user3",
             email="user3@user.com",
             password="1234",
         )
@@ -2203,9 +2192,8 @@ class DatabaseModelsTester(unittest.TestCase):
         
         # create the user
         user_kwargs = {
-            "login_name": "testuser",
-            "first_name": "Test",
-            "last_name": "User",
+            "name": "Test",
+            "login": "testuser",
             "email": "testuser@test.com",
             "password": "12345",
             "description": "This user has been created for testing purposes",
@@ -2225,11 +2213,8 @@ class DatabaseModelsTester(unittest.TestCase):
         department = new_user.department
         description = new_user.description
         email = new_user.email
-        first_name = new_user.first_name
-        initials = new_user.initials
         last_login = new_user.last_login
-        last_name = new_user.last_name
-        login_name = new_user.login_name
+        login = new_user.login
         name = new_user.name
         nice_name = new_user.nice_name
         notes = new_user.notes
@@ -2246,7 +2231,7 @@ class DatabaseModelsTester(unittest.TestCase):
         del new_user
         
         new_user_DB = DBSession.query(User)\
-            .filter(User.name == user_kwargs["login_name"])\
+            .filter(User.name == user_kwargs["name"])\
             .first()
         
         assert(isinstance(new_user_DB, User))
@@ -2260,11 +2245,8 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(department, new_user_DB.department)
         self.assertEqual(description, new_user_DB.description)
         self.assertEqual(email, new_user_DB.email)
-        self.assertEqual(first_name, new_user_DB.first_name)
-        self.assertEqual(initials, new_user_DB.initials)
         self.assertEqual(last_login, new_user_DB.last_login)
-        self.assertEqual(last_name, new_user_DB.last_name)
-        self.assertEqual(login_name, new_user_DB.login_name)
+        self.assertEqual(login, new_user_DB.login)
         self.assertEqual(name, new_user_DB.name)
         self.assertEqual(nice_name, new_user_DB.nice_name)
         self.assertEqual(notes, new_user_DB.notes)

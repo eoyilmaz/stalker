@@ -1,64 +1,86 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
-      xmlns:tal="http://xml.zope.org/namespaces/tal">
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+        'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'
+      xmlns:tal='http://xml.zope.org/namespaces/tal'>
 <head>
   <title>Stalker v{{stalker.__version__}}</title>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
-  <meta name="keywords" content="python web application"/>
-  <meta name="description" content="pyramid web application"/>
-  <link rel="shortcut icon"
-        href="{{request.static_url('stalker:static/images/favicon.ico')}}"/>
-  <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
-        href="{{request.static_url('stalker:static/css/stalker.css')}}"/>
-  <link rel="stylesheet" type="text/css" media="screen" charset="utf-8"
-        href="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dijit/themes/claro/claro.css') }}"/>
-  <script type="text/javascript" data-dojo-config="async: true" 
-          src="{{ request.static_url('stalker:static/js/dojo-release-1.8.1/dojo/dojo.js') }}">
+  <meta charset='utf-8'>
+  <meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
+  <meta name='keywords' content='python web application'/>
+  <meta name='description' content='pyramid web application'/>
+  <link rel='shortcut icon'
+        href='{{request.static_url("stalker:static/images/favicon.ico")}}'/>
+  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
+        href='{{request.static_url("stalker:static/css/stalker.css")}}'/>
+  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
+        href='{{ request.static_url("stalker:static/js/dojo-release-1.8.1/dijit/themes/claro/claro.css") }}'/>
+  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
+        href='{{ request.static_url("stalker:static/js/dojo-release-1.8.1/dojox/grid/resources/claroGrid.css") }}'/>
+  <script type='text/javascript' data-dojo-config='async: true' 
+          src='{{ request.static_url("stalker:static/js/dojo-release-1.8.1/dojo/dojo.js") }}'>
   </script>
-  <script type="text/javascript"
-          src="{{ request.static_url('stalker:static/js/stalker.js') }}">
+  <script type='text/javascript'
+          src='{{ request.static_url("stalker:static/js/stalker.js") }}'>
   </script>
-  <script type="text/javascript"
-          src="{{ request.static_url('stalker:static/js/stalker.js') }}">
+  <script type='text/javascript'
+          src='{{ request.static_url("stalker:static/js/stalker.js") }}'>
   </script>
 </head>
-<body class="claro" style="border-radius: 10px">
+<body class='claro' style='border-radius: 10px'>
 {% block body %}
-  <div id="appLayout" class="demoLayout">
-    <div id="header" class="edgePanel">
+  <div id='appLayout' class='demoLayout'>
+    <div id='header' class='edgePanel'>
       {% block header %}
-        <div id="stalker_logo">
-          Stalker <span style="font-size: 12px;">v{{stalker.__version__}}</span>
+        <div id='stalker_logo'>
+          Stalker <span style='font-size: 12px;'>v{{stalker.__version__}}</span>
         </div>
-        <div id="mebar">
+        
+        <div id='projects_menu'>
+          <span>Projects</span>
+          <div id='expand_project_icon'
+               style='
+                 background-image: url({{ request.static_url('stalker:static/images/gmail_icons.png') }});
+                 background-position: -240px 0;
+                 font-size: 0;
+                 line-height: 0;
+                 height: 8px;
+                 width: 8px;
+                 position: relative;
+                 left: 48px;
+                 top: -10px;'>
+          </div>
+        </div>
+        
+        <div id='mebar'>
           <span>{{user.first_name}} {{user.last_name}}</span>
+          <div id='expand_icon'
+               style='
+                 background-image: url({{ request.static_url('stalker:static/images/gmail_icons.png') }});
+                 background-position: -240px 0;
+                 font-size: 0;
+                 line-height: 0;
+                 height: 8px;
+                 width: 8px;
+                 position: relative;
+                 left: 39px;
+                 top: -10px;'>
+          </div>
         </div>
       {% endblock %}
     </div>
-    <div id="central_content" class="centralPanel">
+    <div id='central_content' class='centralPanel'>
       {% block content %}
-        <div id="main_view">
-          <div id="top_menu">
+        <div id='main_view'>
+          <div id='top_menu'>
           </div>
           {% block main_view %}{% endblock %}
         </div>
       {% endblock %}
     </div>
-    <div id="left_column" class="edgePanel">
-      <div id='user_menu_content_pane'>
-        <p>This Is User Menu</p>
-        {% block user_menu %}{% endblock %}
-      </div>
-      <div id='projects_menu_content_pane'>
-        <p>This Is Project Menu</p>
-        {% block project_menu %}{% endblock %}
-      </div>
-    </div>
-    <div id="footer" class="edgePanel">
+
+    <div id='footer' class='edgePanel'>
       {% block footer %}
-        <div class="footer">&copy; Copyright 2008-2012, Erkan Ozgur Yilmaz.</div>
+        <div class='footer'>&copy; Copyright 2008-2012, Erkan Ozgur Yilmaz.</div>
       {% endblock %}
     </div>
   </div>
@@ -87,80 +109,72 @@
             }, 'header')
           );
           
-          // create left Menu
-          var left_content_pane = new SplitContainer({
-            region: 'leading',
-            orientation: 'vertical',
-            splitter: false,
-            activeSizing: true,
-            style:"width: 220px; padding: 0px",
-            gutters: false
-          }, 'left_column');
-
-          appLayout.addChild(left_content_pane);
-          
-          // create the UserMenu
-          left_content_pane.addChild(
-            new ContentPane({
-              region: 'top',
-              splitter: true,
-              style: 'height: 200px; padding: 0px;',
-              href: '/user_menu',
-              preload: true,
-              executeScripts: true
-            }, 'user_menu_content_pane') 
-          );
-          
-          // create the Projects Menu
-          var projects_menu_content_pane = new ContentPane({
-             region: 'bottom',
-             splitter: true,
-             href: '/projects_menu',
-             executeScripts: true,
-             parseOnLoad: true,
-             style: 'padding: 0px'
-          }, 'projects_menu_content_pane')
-          projects_menu_content_pane.startup();
-          
-          
-          left_content_pane.addChild(projects_menu_content_pane);
-          
-          left_content_pane.startup();
-          
           // create Footer
           appLayout.addChild(
             new ContentPane({
               region: 'bottom',
               style: 'height: 14px; padding: 0px'
-            }, "footer")
+            }, 'footer')
           );
+          
+          // projects_bar
+          var projects_menu_tooltipDialog = new TooltipDialog({
+            id: 'projects_menu_tooltipDialog',
+            style: 'width: 250px;',
+            href: '/projects_menu',
+            executeScripts: true,
+            onMouseLeave: function(){
+              popup.close(projects_menu_tooltipDialog);
+            }
+          });
+          
+          // attach the TooltipDialog to our projects_bar
+          on(dojo.byId('projects_menu'), 'click', function(){
+            
+            // refresh the projects_menu_tooltipDialog content
+            projects_menu_tooltipDialog.refresh();
+            
+            popup.open({
+              popup: projects_menu_tooltipDialog,
+              around: dom.byId('projects_menu')
+            });
+          });
           
           // mebar
           var mebar_tooltipDialog = new TooltipDialog({
             id: 'mebar_tooltipDialog',
-            style: 'width: 250px;',
+            style: 'width: 250px; height: 100%',
             href: '/me_menu',
             onMouseLeave: function(){
-                popup.close(mebar_tooltipDialog);
+              mebar_tooltipDialog.set('visible', false);
+              popup.close(mebar_tooltipDialog);
             }
           });
           mebar_tooltipDialog.startup();
           
           // attach the TooltipDialog to our mebar
           on(dojo.byId('mebar'), 'click', function(){
-            popup.open({
-              popup: mebar_tooltipDialog,
-              around: dom.byId('mebar')
-            });
+            
+            if (mebar_tooltipDialog.get('visible')){
+              mebar_tooltipDialog.set('visible', false);
+              popup.close(mebar_tooltipDialog);
+            } else {
+              mebar_tooltipDialog.set('visible', true);
+              popup.open({
+                popup: mebar_tooltipDialog,
+                around: dom.byId('mebar')
+              }); 
+            }
           });
-{#          mebar.startup();#}
+          
+         
           
           // create main content
           appLayout.addChild(
             new ContentPane({
               region: 'center',
               style: 'padding: 0px'
-            }, "central_content")
+            }, 'central_content')
           );
           
           appLayout.startup();

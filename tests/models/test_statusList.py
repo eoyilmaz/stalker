@@ -65,35 +65,10 @@ class StatusListTest(unittest.TestCase):
                 test_value
             )
 
-
-
-            #
-            #def test_statuses_argument_being_empty(self):
-            #"""testing status_list against being empty
-            #"""
-
-            #
-            ## the list couldn't be empty
-            #self.kwargs["statuses"] = []
-
-            #self.assertRaises(ValueError, StatusList, **self.kwargs)
-
-
-
-            #
-            #def test_statuses_attribute_is_set_to_empty_list(self):
-            #"""testing status_list against being empty
-            #"""
-
-            #
-            ## the list couldn't be empty
-            #self.assertRasises(ValueError, self.test_status_list, "statuses", [])
-
     def test_statuses_argument_elements_being_status_objects(self):
         """testing status_list elements against not being derived from Status
         class
         """
-
         #------------------------------------------------------
         # every element should be an object derived from Status
         a_fake_status_list = [1, 2, "a string", u"a unicode", 4.5]
@@ -105,7 +80,6 @@ class StatusListTest(unittest.TestCase):
     def test_statuses_attribute_works_properly(self):
         """testing if status_list attribute is working properly
         """
-
         new_list_of_statutes = [
             Status(name="New Status", code="NSTS")
         ]
@@ -127,31 +101,9 @@ class StatusListTest(unittest.TestCase):
             0
         )
 
-
-
-        #def test_statuses_attribute_is_empty_list_when_statuses_argument_is_None(self):
-        #"""testing if the statuses attribute will be an empty list when the
-        #statuses argument is given as None
-        #"""
-
-        #self.kwargs["statuses"] = None
-        #new_statusList = StatusList(**self.kwargs)
-        #self.assertEqual(new_statusList.statuses, [])
-
-
-
-        #def test_statuses_attribute_is_empty_list_when_it_is_set_to_None(self):
-        #"""testing if the statuses attribute will be an empty list when it is
-        #set to None
-        #"""
-
-        #self.test_status_list.statuses = None
-        #self.assertEqual(self.test_status_list.statuses, [])
-
     def test_equality_operator(self):
         """testing equality of two status list object
         """
-
         status_list1 = StatusList(**self.kwargs)
         status_list2 = StatusList(**self.kwargs)
 
@@ -175,7 +127,6 @@ class StatusListTest(unittest.TestCase):
     def test_inequality_operator(self):
         """testing equality of two status list object
         """
-
         status_list1 = StatusList(**self.kwargs)
         status_list2 = StatusList(**self.kwargs)
 
@@ -238,8 +189,7 @@ class StatusListTest(unittest.TestCase):
     def test_indexing_del(self):
         """testing indexing of statuses in the statusList, del
         """
-
-        # first get the lenght
+        # first get the length
         len_statuses = len(self.test_status_list.statuses)
 
         del self.test_status_list[-1]
@@ -250,14 +200,7 @@ class StatusListTest(unittest.TestCase):
     def test_indexing_len(self):
         """testing indexing of statuses in the statusList, len
         """
-
         # get the len and compare it wiht len(statuses)
         self.assertEqual(len(self.test_status_list.statuses),
                          len(self.test_status_list))
 
-
-    #def test_plural_name(self):
-        #"""testing the plural name of Status class
-        #"""
-
-        #self.assertTrue(Status.plural_name, "Statuses")

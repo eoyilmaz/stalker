@@ -41,22 +41,21 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
         is easy to track which shots are referencing this Asset by querying
         with a join of Shot Versions referencing this Asset.
     """
-
+    
     __strictly_typed__ = True
     __tablename__ = "Assets"
     __mapper_args__ = {"polymorphic_identity": "Asset"}
 
     asset_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                       primary_key=True)
-
-
+    
     def __init__(self, **kwargs):
         super(Asset, self).__init__(**kwargs)
-
+        
         # call the mixin init methods
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
-
+    
     @reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
@@ -64,8 +63,7 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
         """
         # call supers __init_on_load__
         super(Asset, self).__init_on_load__()
-
-
+    
     def __eq__(self, other):
         """the equality operator
         """

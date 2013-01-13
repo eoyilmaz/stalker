@@ -67,17 +67,15 @@ new_asset2 = Asset(
 )
 
 new_user1 = User(
-    login_name="testuser1",
-    first_name="Test1",
-    last_name="User1",
+    name="Test1",
+    login="testuser1",
     email="testuser1@test.com",
     password="1234"
 )
 
 new_user2 = User(
-    login_name="testuser2",
-    first_name="Test2",
-    last_name="User2",
+    name="Test2",
+    login="testuser2",
     email="testuser2@test.com",
     password="1234"
 )

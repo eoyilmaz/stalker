@@ -1,0 +1,60 @@
+{#{% extends 'form_base.jinja2' %}#}
+{#{% block form_block %}#}
+<button id='view_assets_add_asset_button'>Add Asset</button>
+<div id='assets_data_grid'></div>
+<script type='text/javascript'>
+  require(['dijit/registry',
+           'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
+           'dojo/store/Memory',
+           'dojo/domReady!'],
+    function(registry, ObjectStore, DataGrid, Memory){
+      
+      /* set up data store */
+      var asset_memory = new Memory({
+        data: [
+            {% for asset in project.assets %}
+              {
+                id: {{ asset.id }},
+                name: '{{ asset.name }}',
+                type: '{{ asset.type.name }}',
+                status: '{{ asset.status.name }}',
+                user_name: '{{ asset.created_by.first_name }} {{ asset.created_by.last_name }}',
+                description: '{{ asset.description }}'
+              },
+            {% endfor %}
+        ]
+      });
+      
+      var my_store = new ObjectStore({objectStore: asset_memory});
+      
+      /* create a new grid */
+      var asset_data_grid = new DataGrid({
+        store: my_store,
+        structure: [
+          {name: 'Thumbnail',                       width: '100px'},
+          {name: 'Name',        field: 'name',      width: '100px'},
+          {name: 'Type',        field: 'type',      width: '200px'},
+          {name: 'Status',      field: 'status',    width: '150px'},
+          {name: 'Created By',  field: 'user_name', width: '150px'},
+          {name: 'Description', field: 'description', width: 'auto'}
+        ],
+        width: '100%',
+        autoHeight: true,
+        rowSelector: '20px'
+      }, 'assets_data_grid');
+      
+      asset_data_grid.startup();
+      
+      var add_asset_button = create_add_data_button(
+        null,
+        'Add',
+        'add_asset_dialog',
+        create_add_asset_dialog,
+        'view_assets_add_asset_button'
+      );
+      add_asset_button.startup();        
+      
+  });
+</script>
+{#{% endblock %}#}
+

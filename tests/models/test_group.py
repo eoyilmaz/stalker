@@ -32,27 +32,24 @@ class GroupTester(unittest.TestCase):
         
         # create a couple of Users
         self.test_user1 = User(
-            login_name='user1',
+            name='User1',
+            login='user1',
             password='1234',
             email='user1@test.com',
-            first_name='User1',
-            last_name='User1'
         )
         
         self.test_user2 = User(
-            login_name='user2',
+            name='User2',
+            login='user2',
             password='1234',
             email='user1@test.com',
-            first_name='User2',
-            last_name='User2'
         )
         
         self.test_user3 = User(
-            login_name='user3',
+            name='User3',
+            login='user3',
             password='1234',
             email='user3@test.com',
-            first_name='User3',
-            last_name='User3'
         )
         
         # create a test group

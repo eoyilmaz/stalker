@@ -8,7 +8,7 @@ import datetime
 import re
 
 from sqlalchemy import or_
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, HTTPServerError
 from pyramid.security import remember, forget, authenticated_userid
 from pyramid.view import view_config, forbidden_view_config
 from sqlalchemy.exc import IntegrityError
@@ -18,7 +18,8 @@ import transaction
 import stalker
 from stalker.db.session import DBSession
 from stalker import (User, ImageFormat, Project, Repository, Structure,
-                     FilenameTemplate, EntityType, Type, StatusList, Status)
+                     FilenameTemplate, EntityType, Type, StatusList, Status,
+                     Asset, Shot, Sequence, TaskableEntity)
 
 import logging
 logger = logging.getLogger(__name__)
@@ -174,6 +175,8 @@ def add_project(request):
         # do not return anything
         # or maybe we should return to where we came from
         return HTTPFound(location=came_from)
+    
+    # restore previous choices
    
     # just one wants to see the add project form
     return {
@@ -185,21 +188,6 @@ def add_project(request):
         'status_lists': StatusList.query()\
                             .filter_by(target_entity_type='Project')\
                             .all(),
-    }
-
-@view_config(
-    route_name='view_project',
-    renderer='templates/view_project.jinja2',
-    permission='View_Project'
-)
-def view_project(request):
-    """runs when viewing a project
-    """
-    # just return the project
-    proj_id = request.matchdict['project_id']
-    proj = Project.query().filter_by(id=proj_id).first()
-    return {
-        'project': proj
     }
 
 @view_config(
@@ -229,8 +217,6 @@ def edit_project(request):
     
     proj_id = request.matchdict['project_id']
     proj = Project.query().filter_by(id=proj_id).first()
-    
-    
     
     if request.params['submitted'] == 'edit':
         #return HTTPFound(location=came_from)
@@ -494,13 +480,8 @@ def add_edit_user(request):
     renderer='templates/add_filename_template.jinja2',
     permission='Add_FilenameTemplate'
 )
-@view_config(
-    route_name='edit_filename_template',
-    renderer='templates/edit_filename_template.jinja2',
-    permission='Edit_FilenameTemplate'
-)
-def add_edit_filename_template(request):
-    """called when adding or editing a FilenameTemplate instance
+def add_filename_template(request):
+    """called when adding a FilenameTemplate instance
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
@@ -513,11 +494,10 @@ def add_edit_filename_template(request):
             logger.debug('adding a new FilenameTemplate')
             # create and add a new FilenameTemplate
             
-            
             # TODO: remove this later
             for param in ['name',
                           'target_entity_type',
-                          'type',
+                          'type_id',
                           'path',
                           'filename',
                           'output_path']:
@@ -526,7 +506,7 @@ def add_edit_filename_template(request):
             
             if 'name' in request.params and \
                 'target_entity_type' in request.params and \
-                'type' in request.params and\
+                'type_id' in request.params and\
                 'path' in request.params and \
                 'filename' in request.params and \
                 'output_path' in request.params:
@@ -558,12 +538,35 @@ def add_edit_filename_template(request):
                         logger.debug(e.message)
                         transaction.abort()
                     else:
-                        logger.debug('flusing the DBSession, no problem here!')
+                        logger.debug('flushing the DBSession, no problem here!')
                         DBSession.flush()
                         logger.debug('finished adding FilenameTemplate')
             else:
                 logger.debug('there are missing parameters')
-        elif request.params['submitted'] == 'edit':
+    return {
+        'entity_types': EntityType.query().all(),
+        'filename_template_types': 
+            Type.query()
+                .filter_by(target_entity_type="FilenameTemplate")
+                .all()
+    }
+
+@view_config(
+    route_name='edit_filename_template',
+    renderer='templates/edit_filename_template.jinja2',
+    permission='Edit_FilenameTemplate'
+)
+def edit_filename_template(request):
+    """called when editing a FilenameTemplate instance
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    login_name = authenticated_userid(request)
+    user = User.query().filter_by(login_name=login_name).first()
+    
+    if 'submitted' in request.params:
+        if request.params['submitted'] == 'edit':
             logger.debug('editing a Filename Template')
             # just edit the given filename_template
             ft_id = request.matchdict['filename_template_id']
@@ -576,16 +579,11 @@ def add_edit_filename_template(request):
                 ft.output_path = request.params['output_path']
                 ft.updated_by = user
                 DBSession.add(ft)
-    
-            logger.debug('finished editing FilenameTemplate')
-    
-    return {
-        'entity_types': EntityType.query().all(),
-        'filename_template_types': 
-            Type.query()
-                .filter_by(target_entity_type="FilenameTemplate")
-                .all()
-    }
+        
+        logger.debug('finished editing FilenameTemplate')
+ 
+     
+    return {}
 
 @view_config(
     route_name='add_status',
@@ -639,7 +637,7 @@ def add_edit_status(request):
                         logger.debug(e.message)
                         transaction.abort()
                     else:
-                        logger.debug('flusing the DBSession, no problem here!')
+                        logger.debug('flushing the DBSession, no problem here!')
                         DBSession.flush()
                         logger.debug('finished adding Status')
             else:
@@ -670,15 +668,9 @@ def add_edit_status(request):
     renderer='templates/add_status_list.jinja2',
     permission='Add_StatusList'
 )
-@view_config(
-    route_name='edit_status_list',
-    renderer='templates/edit_status_list.jinja2',
-    permission='Edit_StatusList'
-)
-def add_edit_status_list(request):
+def add_status_list(request):
     """called when adding or editing a StatusList
     """
-    
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
@@ -731,33 +723,624 @@ def add_edit_status_list(request):
                         logger.debug('finished adding StatusList')
             else:
                 logger.debug('there are missing parameters')
-        elif request.params['submitted'] == 'edit':
+    return {
+        'entity_types': EntityType.query().filter_by(statusable=True).all(),
+        'statuses': Status.query().all()
+    }
+
+
+@view_config(
+    route_name='edit_status_list',
+    renderer='templates/edit_status_list.jinja2',
+    permission='Edit_StatusList'
+)
+def edit_status_list(request):
+    """edits a StatusList
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    login_name = authenticated_userid(request)
+    user = User.query().filter_by(login_name=login_name).first()
+    
+    status_list_id = request.matchdict['status_list_id']
+    status_list = StatusList.query().filter_by(id=status_list_id).first()
+    
+    if 'submitted' in request.params:
+        if request.params['submitted'] == 'edit':
             logger.debug('editing a StatusList')
             # just edit the given StatusList
-            st_id = request.matchdict['status_list_id']
-            status_list = StatusList.query().filter_by(id=st_id).first()
             
             # get statuses
-            st_ids = [
-                int(re.sub(r"[^0-9]+", "", st_id))
-                    for st_id in 
+            logger.debug("request.params['statuses']: %s" % 
+                                                request.params['statuses'])
+            status_ids = [
+                int(re.sub(r"[^0-9]+", "", status_id))
+                    for status_id in
                         request.params['statuses'].split(',')
             ]
             
             statuses = [
-                Status.query().filter_by(id=st_id).first()
-                for st_id in st_ids
+                Status.query().filter_by(id=status_ids).first()
+                for status_ids in status_ids
             ]
             
-            with transaction.manager:
-                status_list.name = request.params['name']
-                status_list.statuses = statuses
-                status_list.updated_by = user
+            logger.debug("statuses: %s" % statuses)
+            
+            status_list.name = request.params['name']
+            status_list.statuses = statuses
+            status_list.updated_by = user
+            
+            try:
                 DBSession.add(status_list)
-    
+                transaction.commit()
+            except IntegrityError as e:
+                logger.debug(e.message)
+                transaction.abort()
+            else:
                 logger.debug('finished editing StatusList')
+                return HTTPFound(location=came_from)
     
     return {
-        'entity_types': EntityType.query().filter_by(statusable=True).all(),
-        'statuses': Status.query().all()
+        'status_list_id': status_list_id,
+        'status_list': status_list,
+        'statuses': Status.query().all(),
+        'entity_types': EntityType.query().filter_by(statusable=True).all()
+    }
+
+@view_config(
+    route_name='add_asset',
+    renderer='add_asset.jinja2',
+    permission='Add_Asset'
+)
+def add_asset(request):
+    """edits when adding a new asset
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    login_name = authenticated_userid(request)
+    logged_in_user = User.query().filter_by(login_name=login_name).first()
+    
+    if 'submitted' in request.params:
+        logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
+        
+        if request.params['submitted'] == 'add':
+            
+            if 'name' in request.params and \
+               'description' in request.params and \
+               'project_id' in request.params and \
+               'type' in request.params and \
+               'status_id' in request.params:
+                
+                logger.debug('request.params["name"]: %s' %
+                             request.params['name'])
+                logger.debug('request.params["description"]: %s' %
+                             request.params['description'])
+                logger.debug('request.params["project_id"]: %s' %
+                             request.params['project_id'])
+                logger.debug('request.params["type"]: %s' %
+                             request.params['type'])
+                logger.debug('request.params["status_id": %s' %
+                             request.params['status_id'])
+                
+                project_id = request.params['project_id']
+                
+                # type will always return with a type name
+                type_name = request.params['type']
+                
+                project = Project.query().filter_by(id=project_id).first()
+                type_ = Type.query()\
+                    .filter_by(target_entity_type='Asset')\
+                    .filter_by(name=type_name)\
+                    .first()
+                
+                if type_ is None:
+                    # create a new Type
+                    type_ = Type(name=type_name, target_entity_type='Asset')
+                
+                # get the status_list
+                status_list = StatusList.query().filter_by(
+                    target_entity_type='Asset'
+                ).first()
+                
+                logger.debug('status_list: %s' % status_list)
+                
+                # there should be a status_list
+                if status_list is None:
+                    return HTTPServerError(
+                        detail='No StatusList found'
+                    )
+                
+                status_id = int(
+                    re.sub("[^0-9]+", "", request.params['status_id'])
+                )
+                logger.debug('status_id: %s' % status_id)
+                status = Status.query().filter_by(id=status_id).first()
+                logger.debug('status: %s' % status)
+                
+#                logger.debug('status: %s' % status)
+#                logger.debug('status_list: %s' % status_list)
+#                logger.debug('status in status_list: %s' % status in status_list)
+                
+                # get the info
+                try:
+                    new_asset = Asset(
+                        name=request.params['name'],
+                        description=request.params['description'],
+                        project=project,
+                        type=type_,
+                        status_list=status_list,
+                        status=status,
+                        created_by=logged_in_user
+                    )
+                    
+                    logger.debug('new_asset.status: ' % new_asset.status)
+                    
+                    DBSession.add(new_asset)
+                except (AttributeError, TypeError) as e:
+                    logger.debug(e.message)
+                else:
+                    DBSession.add(new_asset)
+                    try:
+                        transaction.commit()
+                    except IntegrityError as e:
+                        logger.debug(e.message)
+                        transaction.abort()
+                    else:
+                        logger.debug('flushing the DBSession, no problem here!')
+                        DBSession.flush()
+                        logger.debug('finished adding Asset')
+                        return HTTPFound(location=came_from)
+            else:
+                logger.debug('there are missing parameters')
+    return {
+        'projects': Project.query().all(),
+        'types': Type.query().filter_by(target_entity_type='Asset').all(),
+        'status_list':
+            StatusList.query().filter_by(target_entity_type='Asset').first()
+    }
+
+@view_config(
+    route_name='add_sequence',
+    renderer='add_sequence.jinja2',
+    permission='Add_Sequence'
+)
+def add_sequence(request):
+    """runs when adding a new sequence
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    login_name = authenticated_userid(request)
+    logged_in_user = User.query().filter_by(login_name=login_name).first()
+    
+    if 'submitted' in request.params:
+        logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
+        
+        if request.params['submitted'] == 'add':
+            
+            if 'name' in request.params and \
+               'description' in request.params and \
+               'project_id' in request.params and \
+               'status_id' in request.params:
+                
+                logger.debug('request.params["name"]: %s' %
+                             request.params['name'])
+                logger.debug('request.params["description"]: %s' %
+                             request.params['description'])
+                logger.debug('request.params["project_id"]: %s' %
+                             request.params['project_id'])
+                logger.debug('request.params["status_id": %s' %
+                             request.params['status_id'])
+                
+                project_id = request.params['project_id']
+                
+                # type will always return with a type name
+                type_name = request.params['type']
+                
+                project = Project.query().filter_by(id=project_id).first()
+                type_ = Type.query()\
+                    .filter_by(target_entity_type='Sequence')\
+                    .filter_by(name=type_name)\
+                    .first()
+                
+                if type_ is None:
+                    # create a new Type
+                    type_ = Type(name=type_name, target_entity_type='Sequence')
+                
+                # get the status_list
+                status_list = StatusList.query().filter_by(
+                    target_entity_type='Sequence'
+                ).first()
+                
+                logger.debug('status_list: %s' % status_list)
+                
+                # there should be a status_list
+                if status_list is None:
+                    return HTTPServerError(
+                        detail='No StatusList found'
+                    )
+                
+                status_id = int(
+                    re.sub("[^0-9]+", "", request.params['status_id'])
+                )
+                logger.debug('status_id: %s' % status_id)
+                status = Status.query().filter_by(id=status_id).first()
+                logger.debug('status: %s' % status)
+                
+                # get the lead
+                lead = None
+                if 'lead_id' in request.params:
+                    lead = User.query()\
+                            .filter_by(id=request.params['lead_id'])\
+                            .first()
+                
+                # get the info
+                try:
+                    new_sequence = Sequence(
+                        name=request.params['name'],
+                        project=project,
+                        type=type_,
+                        status_list=status_list,
+                        status=status,
+                        created_by=logged_in_user,
+                        lead=lead
+                    )
+                    
+                    logger.debug('new_sequence.status: ' % new_sequence.status)
+                    
+                    DBSession.add(new_sequence)
+                except (AttributeError, TypeError) as e:
+                    logger.debug(e.message)
+                else:
+                    DBSession.add(new_sequence)
+                    try:
+                        transaction.commit()
+                    except IntegrityError as e:
+                        logger.debug(e.message)
+                        transaction.abort()
+                    else:
+                        logger.debug('flushing the DBSession, no problem here!')
+                        DBSession.flush()
+                        logger.debug('finished adding Sequence')
+                        return HTTPFound(location=came_from)
+            else:
+                logger.debug('there are missing parameters')
+    return {
+        'projects': Project.query().all(),
+        'types': Type.query().filter_by(target_entity_type='Sequence').all(),
+        'status_list':
+            StatusList.query().filter_by(target_entity_type='Sequence').first()
+    }
+
+
+@view_config(
+    route_name='edit_sequence',
+    renderer='templates/edit_sequence.jinja2',
+    permission='Edit_Sequence'
+)
+def edit_sequence(request):
+    """runs when editing a sequence
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    sequence_id = request.matchdict['sequence_id']
+    sequence = Sequence.query().filter_by(id=sequence_id).first()
+    
+    if request.params['submitted'] == 'edit':
+        login_name = authenticated_userid(request)
+        authenticated_user = User.query().filter_by(login_name=login_name).first()
+        
+        # get the sequence and update it
+        # TODO: add this part
+        
+        # return where we came from
+        return HTTPFound(location=came_from)
+    
+    # just give the info enough to fill the form
+    return {
+        'sequence': sequence,
+        'users': User.query().all(),
+        'status_lists': StatusList.query()\
+                            .filter_by(target_entity_type='Sequence')\
+                            .all(),
+    }
+
+
+@view_config(
+    route_name='add_shot',
+    renderer='add_shot.jinja2',
+    permission='Add_Shot'
+)
+def add_shot(request):
+    """runs when adding a new shot
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    login_name = authenticated_userid(request)
+    logged_in_user = User.query().filter_by(login_name=login_name).first()
+    
+    if 'submitted' in request.params:
+        logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
+        
+        if request.params['submitted'] == 'add':
+            
+            if 'name' in request.params and \
+               'sequence_id' in request.params and \
+               'status_id' in request.params:
+                
+                logger.debug('request.params["name"]: %s' %
+                             request.params['name'])
+                logger.debug('request.params["status_id": %s' %
+                             request.params['status_id'])
+                
+                sequence_id = request.params['sequence_id']
+                
+                # type will always return with a type name
+#                type_name = request.params['type']
+                
+                sequence = Sequence.query().filter_by(id=sequence_id).first()
+#                type_ = Type.query()\
+#                    .filter_by(target_entity_type='Shot')\
+#                    .filter_by(name=type_name)\
+#                    .first()
+#                
+#                if type_ is None:
+#                    # create a new Type
+#                    type_ = Type(name=type_name, target_entity_type='Shot')
+                
+                # get the status_list
+                status_list = StatusList.query().filter_by(
+                    target_entity_type='Shot'
+                ).first()
+                
+                logger.debug('status_list: %s' % status_list)
+                
+                # there should be a status_list
+                if status_list is None:
+                    return HTTPServerError(
+                        detail='No StatusList found'
+                    )
+                
+                status_id = int(
+                    re.sub("[^0-9]+", "", request.params['status_id'])
+                )
+                logger.debug('status_id: %s' % status_id)
+                status = Status.query().filter_by(id=status_id).first()
+                logger.debug('status: %s' % status)
+                
+#                logger.debug('status: %s' % status)
+#                logger.debug('status_list: %s' % status_list)
+#                logger.debug('status in status_list: %s' % status in status_list)
+                
+                # get the info
+                try:
+                    new_shot = Shot(
+                        name=request.params['name'],
+                        sequence=sequence,
+                        status_list=status_list,
+                        status=status,
+                        created_by=logged_in_user
+                    )
+                    
+                    logger.debug('new_shot.status: ' % new_shot.status)
+                    
+                    DBSession.add(new_shot)
+                except (AttributeError, TypeError) as e:
+                    logger.debug(e.message)
+                else:
+                    DBSession.add(new_shot)
+                    try:
+                        transaction.commit()
+                    except IntegrityError as e:
+                        logger.debug(e.message)
+                        transaction.abort()
+                    else:
+                        logger.debug('flushing the DBSession, no problem here!')
+                        DBSession.flush()
+                        logger.debug('finished adding Shot')
+                        return HTTPFound(location=came_from)
+            else:
+                logger.debug('there are missing parameters')
+    return {
+        'projects': Project.query().all(),
+        'types': Type.query().filter_by(target_entity_type='Shot').all(),
+        'status_list':
+            StatusList.query().filter_by(target_entity_type='Shot').first()
+    }
+
+
+@view_config(
+    route_name='get_project_sequences',
+    renderer='json',
+    permission='View_Sequence'
+)
+def get_project_sequences(request):
+    """returns the related sequences of the given project as a json data
+    """
+    project_id = request.matchdict['project_id']
+    project = Project.query().filter_by(id=project_id).first()
+    return [
+            {'id': sequence.id, 'name': sequence.name}
+            for sequence in project.sequences
+    ]
+
+@view_config(
+    route_name='get_users',
+    renderer='json',
+    permission='View_User'
+)
+def get_users(request):
+    """returns all the users in database
+    """
+    return [
+        {'id': user.id, 'name': user.first_name + ' ' + user.last_name}
+        for user in User.query().all()
+    ]
+
+@view_config(
+    route_name='view_project',
+    renderer='templates/view_project.jinja2',
+    permission='View_Project'
+)
+@view_config(
+    route_name='view_assets',
+    renderer='view_assets.jinja2',
+    permission='View_Asset'
+)
+@view_config(
+    route_name='view_shots',
+    renderer='view_shots.jinja2',
+    permission='View_Shot'
+)
+def view_project_related_data(request):
+    """runs when viewing project related data
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    login_name = authenticated_userid(request)
+    user = User.query().filter_by(login_name=login_name).first()
+    
+    project_id = request.matchdict['project_id']
+    project = Project.query().filter_by(id=project_id).first()
+    
+    return {
+        'project': project
+    }
+
+@view_config(
+    route_name='view_tasks',
+    renderer='view_tasks.jinja2',
+    permission='View_Task'
+)
+def view_tasks(request):
+    """runs when viewing tasks of a TaskableEntity
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    login_name = authenticated_userid(request)
+    user = User.query().filter_by(login_name=login_name).first()
+    
+    taskable_entity_id = request.matchdict['taskable_entity_id']
+    taskable_entity = TaskableEntity.query()\
+        .filter_by(id=taskable_entity_id)\
+        .first()
+    
+    return {
+        'taskable_entity': taskable_entity
+    }
+
+@view_config(
+    route_name='add_task',
+    renderer='add_task.jinja2',
+    permission='Add_Task'
+)
+def add_task(request):
+    """runs when adding a new task
+    """
+    referrer = request.url
+    came_from = request.params.get('came_from', referrer)
+    
+    login_name = authenticated_userid(request)
+    logged_in_user = User.query().filter_by(login_name=login_name).first()
+    
+    if 'submitted' in request.params:
+        logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
+        
+        if request.params['submitted'] == 'add':
+            
+            if 'name' in request.params and \
+               'sequence_id' in request.params and \
+               'status_id' in request.params:
+                
+                logger.debug('request.params["name"]: %s' %
+                             request.params['name'])
+                logger.debug('request.params["status_id": %s' %
+                             request.params['status_id'])
+                
+                sequence_id = request.params['sequence_id']
+                
+                # type will always return with a type name
+#                type_name = request.params['type']
+                
+                sequence = Sequence.query().filter_by(id=sequence_id).first()
+#                type_ = Type.query()\
+#                    .filter_by(target_entity_type='Shot')\
+#                    .filter_by(name=type_name)\
+#                    .first()
+#                
+#                if type_ is None:
+#                    # create a new Type
+#                    type_ = Type(name=type_name, target_entity_type='Shot')
+                
+                # get the status_list
+                status_list = StatusList.query().filter_by(
+                    target_entity_type='Shot'
+                ).first()
+                
+                logger.debug('status_list: %s' % status_list)
+                
+                # there should be a status_list
+                if status_list is None:
+                    return HTTPServerError(
+                        detail='No StatusList found'
+                    )
+                
+                status_id = int(
+                    re.sub("[^0-9]+", "", request.params['status_id'])
+                )
+                logger.debug('status_id: %s' % status_id)
+                status = Status.query().filter_by(id=status_id).first()
+                logger.debug('status: %s' % status)
+                
+#                logger.debug('status: %s' % status)
+#                logger.debug('status_list: %s' % status_list)
+#                logger.debug('status in status_list: %s' % status in status_list)
+                
+                # get the info
+                try:
+                    new_shot = Shot(
+                        name=request.params['name'],
+                        sequence=sequence,
+                        status_list=status_list,
+                        status=status,
+                        created_by=logged_in_user
+                    )
+                    
+                    logger.debug('new_shot.status: ' % new_shot.status)
+                    
+                    DBSession.add(new_shot)
+                except (AttributeError, TypeError) as e:
+                    logger.debug(e.message)
+                else:
+                    DBSession.add(new_shot)
+                    try:
+                        transaction.commit()
+                    except IntegrityError as e:
+                        logger.debug(e.message)
+                        transaction.abort()
+                    else:
+                        logger.debug('flushing the DBSession, no problem here!')
+                        DBSession.flush()
+                        logger.debug('finished adding Shot')
+                        return HTTPFound(location=came_from)
+            else:
+                logger.debug('there are missing parameters')
+    
+    # return the necessary values to prepare the form
+    # get the taskable entity
+    te_id = request.matchdict['taskable_entity_id']
+    te = TaskableEntity.query().filter_by(id=te_id).first()
+    
+    return {
+        'taskable_entity': te,
+        'types': Type.query().filter_by(target_entity_type='Task').all(),
+        'users': User.query().all(),
+        'status_list':
+            StatusList.query().filter_by(target_entity_type='Task').first()
     }

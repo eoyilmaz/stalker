@@ -198,7 +198,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
     
     __unique_target__ = True
     
-    statusList_id = Column(
+    status_list_id = Column(
         "id",
         Integer,
         ForeignKey("Entities.id"),
@@ -217,26 +217,22 @@ class StatusList(Entity, TargetEntityTypeMixin):
         
         if statuses is None:
             statuses = []
-        
         self.statuses = statuses
 
     @validates("statuses")
     def _validate_statuses(self, key, status):
         """validates the given status
         """
-        
         if not isinstance(status, Status):
             raise TypeError("all the elements in %s.statuses must be an "
                             "instance of stalker.models.status.Status not %s" %
                             (self.__class__.__name__,
                              status.__class__.__name__))
-
         return status
 
     def __eq__(self, other):
         """the equality operator
         """
-
         return super(StatusList, self).__eq__(other) and\
                isinstance(other, StatusList) and\
                self.statuses == other.statuses and\
@@ -255,19 +251,16 @@ class StatusList(Entity, TargetEntityTypeMixin):
     def __setitem__(self, key, value):
         """the indexing attributes for setting item
         """
-
         self.statuses[key] = self._validate_status(value)
 
     def __delitem__(self, key):
         """the indexing attributes for deleting item
         """
-
         del self.statuses[key]
 
     def __len__(self):
         """the indexing attributes for getting the length
         """
-
         return len(self.statuses)
 
 
@@ -275,7 +268,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
 StatusList_Statuses = Table(
     "StatusList_Statuses", Base.metadata,
     Column(
-        "statusList_id",
+        "status_list_id",
         Integer,
         ForeignKey("StatusLists.id"),
         primary_key=True

@@ -1,17 +1,17 @@
-{% extends 'add_data_form.jinja2' %}
-{% block form_block %}
-  <div id='data_container'>
-    {% for project in projects %}
-      {{ project.name}}<br>
-    {% endfor %}
-  </div>
-  <script type="text/javascript">
-    require(['dijit/registry', 'dojo/_base/xhr', 'dijit/layout/SplitContainer',
-             'dijit/layout/TabContainer', 'dijit/layout/ContentPane',
-             'dojo/domReady!'],
-      function(registry, xhr, SplitContainer, TabContainer, ContentPane){
-        
-    });
-  </script>
-{% endblock %}
+{#{% extends 'form_base.jinja2' %}#}
+{#{% block form_block %}#}
+<div id='data_container'>
+  {% for project in projects %}
+    {{ project.name}}<br>
+  {% endfor %}
+</div>
+<script type='text/javascript'>
+  require(['dijit/registry', 'dojo/_base/xhr', 'dijit/layout/SplitContainer',
+           'dijit/layout/TabContainer', 'dijit/layout/ContentPane',
+           'dojo/domReady!'],
+    function(registry, xhr, SplitContainer, TabContainer, ContentPane){
+      
+  });
+</script>
+{#{% endblock %}#}
 

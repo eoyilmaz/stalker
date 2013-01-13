@@ -14,6 +14,11 @@ from stalker.conf import defaults
 from stalker.db import Base
 from stalker.db.session import DBSession
 
+
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 def make_plural(name):
     """Returns the plural version of the given name argument.
     """
@@ -157,7 +162,6 @@ class TargetEntityTypeMixin(object):
             )
         )
 
-
 class StatusMixin(object):
     """Makes the mixed in object statusable.
     
@@ -184,7 +188,7 @@ class StatusMixin(object):
     
     :param status: It is a :class:`~stalker.models.status.Status` instance
       which shows the current status of the statusable object. Integer values
-      are also accepted, which shows the index of the desired asset in the
+      are also accepted, which shows the index of the desired status in the
       ``status_list`` attribute of the current statusable object. If a
       :class:`~stalker.models.status.Status` instance is supplied, it should
       also be present in the ``status_list`` attribute. If set to None then the
@@ -201,48 +205,48 @@ class StatusMixin(object):
         :class:`~stalker.models.status.Status` instance.
     """
     
-    
-    def __init__(self, status=0, status_list=None, **kwargs):
+    def __init__(self, status=None, status_list=None, **kwargs):
         self.status_list = status_list
+        logger.debug('%s.status: %s' % (self.__class__.__name__, status))
         self.status = status
-
-    def _status_getter(self):
-        """The getter for the status property
-        """
-        # return the Status from the status_list with the _status index
-        return self.status_list[self._status]
     
-    def _status_setter(self, status):
-        """The setter for the status property
-        """
-        self._status = self._validate_status(status)
- 
     @declared_attr
-    def _status(cls):
-        return Column("_status", Integer, default=0)
+    def status_id(cls):
+        return Column(
+            "status_id",
+            Integer,
+            ForeignKey('Statuses.id'),
+            nullable=True # This is set to nullable=True but it is impossible
+                          # to set the status to None by using this Declarative
+                          # approach.
+                          # 
+                          # This is done in that way cause SqlAlchemy
+                          # was flushing the data (AutoFlush) preliminary while
+                          # checking if the given Status was in the related
+                          # StatusList, and it was complaining about the status
+                          # can not be null
+        )
     
     @declared_attr
     def status(cls):
-        return synonym(
-            "_status",
-            descriptor=property(
-                cls._status_getter,
-                cls._status_setter,
-                doc="""The current status of the object.
-                
-                It is a :class:`~stalker.models.status.Status` instance which
-                is one of the Statuses stored in the ``status_list`` attribute
-                of this object.
-                """
-            )
+        return relationship(
+            'Status',
+            primaryjoin=\
+            "%s.status_id==Status.status_id" % cls.__name__,
+            doc="""The current status of the object.
+            
+            It is a :class:`~stalker.models.status.Status` instance which
+            is one of the Statuses stored in the ``status_list`` attribute
+            of this object.
+            """
         )
-   
+    
     @declared_attr
     def status_list_id(cls):
         return Column(
             "status_list_id",
             Integer,
-            ForeignKey("StatusLists.id", use_alter=True, name="x"),
+            ForeignKey("StatusLists.id"), #, use_alter=True, name="x"),
             nullable=False
         )
 
@@ -251,9 +255,10 @@ class StatusMixin(object):
         return relationship(
             "StatusList",
             primaryjoin=\
-            "%s.status_list_id==StatusList.statusList_id" % cls.__name__,
+            "%s.status_list_id==StatusList.status_list_id" %
+                cls.__name__,
         )
-
+    
     @validates("status_list")
     def _validate_status_list(self, key, status_list):
         """validates the given status_list_in value
@@ -304,26 +309,29 @@ class StatusMixin(object):
                      self.__class__.__name__))
         
         return status_list
-
-    def _validate_status(self, status):
+    
+    @validates('status')
+    def _validate_status(self, key, status):
         """validates the given status value
         """
-        
         from stalker.models.status import Status, StatusList
         
         if not isinstance(self.status_list, StatusList):
             raise TypeError("please set the %s.status_list attribute first" %
                 self.__class__.__name__)
-
+        
         # it is set to None
         if status is None:
-            status = 0
+            status = self.status_list.statuses[0]
         
-        # it is not an instance of int
-        if not isinstance(status, (int, Status)):
-            raise TypeError("%s.status must be an instance of integer or "
-                            "stalker.models.status.Status not %s" % 
+        # it is not an instance of status or int
+        if not isinstance(status, (Status, int)):
+            raise TypeError("%s.status must be an instance of "
+                            "stalker.models.status.Status or an integer "
+                            "showing the index of the Status object in the "
+                            "%s.status_list, not %s" % 
                             (self.__class__.__name__,
+                             self.__class__.__name__,
                              status.__class__.__name__))
         
         if isinstance(status, int):
@@ -331,16 +339,25 @@ class StatusMixin(object):
             if status < 0:
                 raise ValueError("%s.status must be a non-negative integer" %
                     self.__class__.__name__)
-    
+            
             if status >= len(self.status_list.statuses):
                 raise ValueError("%s.status can not be bigger than the length "
                                  "of the status_list" % 
                                  self.__class__.__name__)
+            # get the tatus instance out of the status_list instance
+            status = self.status_list[status]
         
-        elif isinstance(status, Status):
-            # convert it to an integer
-            status = self.status_list.statuses.index(status)
-
+        # check if the given status is in the status_list
+        logger.debug('self.status_list: %s' % self.status_list)
+        logger.debug('given status: %s' % status)
+        
+        if status not in self.status_list:
+            raise ValueError("The given Status instance for %s.status is not "
+                             "in the %s.status_list, please supply a status "
+                             "from that list." % 
+                             (self.__class__.__name__, self.__class__.__name__)
+            )
+        
         return status
 
 
