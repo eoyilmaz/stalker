@@ -27,6 +27,7 @@ class SequenceTester(unittest.TestCase):
         # create a test project, user and a couple of shots
         self.project_type = Type(
             name="Test Project Type",
+            code='test',
             target_entity_type=Project,
         )
 
@@ -46,6 +47,7 @@ class SequenceTester(unittest.TestCase):
         # create a repository
         self.repository_type = Type(
             name="Test Type",
+            code='test',
             target_entity_type=Repository
         )
 
@@ -57,6 +59,7 @@ class SequenceTester(unittest.TestCase):
         # create projects
         self.test_project = Project(
             name="Test Project 1",
+            code='tp1',
             type=self.project_type,
             status_list=self.project_status_list,
             repository=self.test_repository,
@@ -64,6 +67,7 @@ class SequenceTester(unittest.TestCase):
 
         self.test_project2 = Project(
             name="Test Project 2",
+            code='tp2',
             type=self.project_type,
             status_list=self.project_status_list,
             repository=self.test_repository,
@@ -98,6 +102,7 @@ class SequenceTester(unittest.TestCase):
         # the parameters
         self.kwargs = {
             "name": "Test Sequence",
+            'code': 'tseq',
             "description": "A test sequence",
             "project": self.test_project,
             "lead": self.test_lead,
@@ -106,7 +111,13 @@ class SequenceTester(unittest.TestCase):
 
         # the test seuqence
         self.test_sequence = Sequence(**self.kwargs)
-
+    
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Sequence class
+        """
+        self.assertFalse(Sequence.__auto_name__)
+    
     def test_lead_attribute_defaults_to_None(self):
         """testing if the lead attribute defualts to None when no lead argument
         is given
@@ -239,7 +250,11 @@ class SequenceTester(unittest.TestCase):
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
         """
-        link_type_1 = Type(name="Image", target_entity_type="Link")
+        link_type_1 = Type(
+            name="Image",
+            code='image',
+            target_entity_type="Link"
+        )
 
         link1 = Link(
             name="Artwork 1",
@@ -278,16 +293,16 @@ class SequenceTester(unittest.TestCase):
         """testing if the ScheduleMixin part is initialized correctly
         """
         start_date = datetime.date.today() + datetime.timedelta(days=25)
-        due_date = start_date + datetime.timedelta(days=12)
+        end_date = start_date + datetime.timedelta(days=12)
 
         self.kwargs["start_date"] = start_date
-        self.kwargs["due_date"] = due_date
+        self.kwargs["end_date"] = end_date
 
         new_sequence = Sequence(**self.kwargs)
 
         self.assertEqual(new_sequence.start_date, start_date)
-        self.assertEqual(new_sequence.due_date, due_date)
-        self.assertEqual(new_sequence.duration, due_date - start_date)
+        self.assertEqual(new_sequence.end_date, end_date)
+        self.assertEqual(new_sequence.duration, end_date - start_date)
 
     def test_TaskableEntity_initialization(self):
         """testing if the TaskableEntity part is initialized correctly
@@ -307,11 +322,13 @@ class SequenceTester(unittest.TestCase):
 
         project_type = Type(
             name="Commercial",
+            code='comm',
             target_entity_type=Project
         )
 
         new_project = Project(
             name="Commercial",
+            code='comm',
             status_list=project_status_list,
             type=project_type,
             repository=self.test_repository,
@@ -364,11 +381,13 @@ class SequenceTester(unittest.TestCase):
 
         #project_type = Type(
         #name="Commercial",
+        #code='comm',
         #target_entity_type=Project,
         #)
 
         #new_project = Project(
         #name="Commercial",
+        #code='comm',
         #status_list=project_status_list,
         #type=project_type,
         #repository=self.test_repository,
@@ -408,12 +427,20 @@ class SequenceTester(unittest.TestCase):
             target_entity_type=Project
         )
 
-        project_type = Type(name="Commercial", target_entity_type=Project)
+        project_type = Type(
+            name="Commercial",
+            code='comm',
+            target_entity_type=Project
+        )
 
-        new_project = Project(name="Test Project", status=0,
-                              status_list=project_status_list,
-                              type=project_type,
-                              repository=self.test_repository)
+        new_project = Project(
+            name="Test Project",
+            code='tp',
+            status=project_status_list[0],
+            status_list=project_status_list,
+            type=project_type,
+            repository=self.test_repository
+        )
 
         self.kwargs["project"] = new_project
         new_sequence = Sequence(**self.kwargs)

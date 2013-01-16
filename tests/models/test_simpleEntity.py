@@ -43,13 +43,14 @@ class SimpleEntityTester(unittest.TestCase):
             "updated_by": self.test_user,
             "date_created": self.date_created,
             "date_updated": self.date_updated,
-            }
+        }
 
         # create a proper SimpleEntity to use it later in the tests
         self.test_simple_entity = SimpleEntity(**self.kwargs)
 
         self.test_type = Type(
             name="Test Type",
+            code='test',
             target_entity_type=SimpleEntity
         )
 
@@ -65,6 +66,7 @@ class SimpleEntityTester(unittest.TestCase):
             ("2423$ +^^+^ '%+%%&_ testName_ 35", "2423 _ testName_ 35"),
             ("SH001", "SH001"),
             ("46-BJ-3A", "46-BJ-3A"),
+            ('304-sb-0403-0040', '304-sb-0403-0040'),
             ("Ozgur    Yilmaz\n\n\n", "Ozgur Yilmaz"),
         ]
         
@@ -81,242 +83,59 @@ class SimpleEntityTester(unittest.TestCase):
              "this_is_another_name_for_an_asset"),
             ("Ozgur    Yilmaz\n\n\n", "ozgur_yilmaz"),
         ]
-
-        #self.code_test_values = [
-        #("testCode","TEST_CODE"),
-        #("1testCode", "TEST_CODE"),
-        #("_testCode", "TEST_CODE"),
-        #("2423$+^^+^'%+%%&_testCode", "TEST_CODE"),
-        #("2423$+^^+^'%+%%&_testCode_35", "TEST_CODE_35"),
-        #("2423$ +^^+^ '%+%%&_ testCode_ 35", "TEST_CODE_35"),
-        #("SH001","SH001"),
-        #("My CODE is Ozgur", "MY_CODE_IS_OZGUR"),
-
-        #(" this is another code for an asset", 
-        #"THIS_IS_ANOTHER_CODE_FOR_AN_ASSET"),
-
-        #([1, 3, "a", "list","for","testing",3],
-        #"A_LIST_FOR_TESTING_3"),
-        #]
-
-    def test_code_argument_skipped(self):
-        """testing if a value will be set if code argument is skipped
+    
+    def test___auto_name__attribute_is_True(self):
+        """testing if the __auto_name__ class attribute is set to True
         """
-        #code = None
-        #name = "something"
-        # code value ?
-
-        # be sure that we don't have code keyword
-        if self.kwargs.has_key("code"):
-            self.kwargs.pop("code")
-
-        new_simple_entity = SimpleEntity(**self.kwargs)
-
-        # check if it is not None and not an empty string and is an instance of
-        # string or unicode
-        self.assertTrue(new_simple_entity.code is not None)
-        self.assertTrue(new_simple_entity.code != "")
-        self.assertIsInstance(new_simple_entity.code, (str, unicode))
-
-    def test_code_argument_None(self):
-        """testing if a value will be set if code argument is set to None
-        """
-        self.kwargs["code"] = None
-        new_simple_entity = SimpleEntity(**self.kwargs)
-        self.assertTrue(new_simple_entity.code is not None)
-        self.assertTrue(new_simple_entity.code != "")
-        self.assertIsInstance(new_simple_entity.code, (str, unicode))
-
-    def test_code_argument_empty_string(self):
-        """testing if a value will be set if code argument is set to an empty
-        string
-        """
-        self.kwargs["code"] = ""
-        new_simple_entity = SimpleEntity(**self.kwargs)
-        self.assertTrue(new_simple_entity.code is not None)
-        self.assertTrue(new_simple_entity.code != "")
-        self.assertIsInstance(new_simple_entity.code, (str, unicode))
-
-    def test_code_attribute_format_when_code_argument_skipped(self):
-        """testing if code attribute is formatted correctly when skipped as an
-        argument
-        """
-        #code = None or ""
-        #name = "something"
-        # code format ?
-
-        # set the name and check the code
-        code_test_values = [
-            ("testCode", "testCode"),
-            ("1testCode", "1testCode"),
-            ("_testCode", "testCode"),
-            ("2423$+^^+^'%+%%&_testCode", "2423_testCode"),
-            ("2423$+^^+^'%+%%&_testCode_35", "2423_testCode_35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "2423_testCode_35"),
-            ("SH001", "SH001"),
-            ("My CODE is Ozgur", "My_CODE_is_Ozgur"),
-            (" this is another code for an asset",
-             "this_is_another_code_for_an_asset"),
-            ('Ozgur    Yilmaz \n\n\n', 'Ozgur_Yilmaz')
-        ]
-
-        self.kwargs.pop("code")
-
-        for test_value in code_test_values:
-            self.kwargs["name"] = test_value[0]
-            new_entity = SimpleEntity(**self.kwargs)
-
-            self.assertEqual(new_entity.code, test_value[1])
-
-    def test_code_attribute_is_set_when_both_code_and_name_is_given(self):
-        """testing if both code argument and name argument is given then it is
-        just set to the formatted version of code
-        """
-        code_test_values = [
-            ("testCode", "testCode"),
-            ("1testCode", "1testCode"),
-            ("_testCode", "testCode"),
-            ("2423$+^^+^'%+%%&_testCode", "2423_testCode"),
-            ("2423$+^^+^'%+%%&_testCode_35", "2423_testCode_35"),
-            ("2423$ +^^+^ '%+%%&_ testCode_ 35", "2423_testCode_35"),
-            ("SH001", "SH001"),
-            ("My CODE is Ozgur", "My_CODE_is_Ozgur"),
-
-            (" this is another code for an asset",
-             "this_is_another_code_for_an_asset"),
-
-            ([1, 3, "a", "list", "for", "testing", 3],
-             "1_3_a_list_for_testing_3"),
-        ]
-
-        # set the name and code and test the code
-        for test_value in code_test_values:
-            self.kwargs["name"] = "aName"
-            self.kwargs["code"] = test_value[0]
-
-            new_entity = SimpleEntity(**self.kwargs)
-
-            self.assertEqual(new_entity.code, test_value[1])
-
-    def test_code_attribute_is_not_changed_after_setting_name(self):
-        """testing if code attribute is not changed and reformatted after the
-        name attribute has changed
-        """
-        # create a SimpleEntity with code and name has values in it
-        code = "something"
-        name = "some name"
-        new_name = "something new"
-        expected_new_code = "something"
-
-        self.kwargs["code"] = code
-        self.kwargs["name"] = name
-
-        new_simple_entity = SimpleEntity(**self.kwargs)
-
-        # store the old code
-        old_code = new_simple_entity.code
-
-        # set the new name
-        new_simple_entity.name = new_name
-
-        # first check if it is not different then the old_code
-        self.assertEqual(new_simple_entity.code, old_code)
-
-        # then check if it is set to the expected result
-        self.assertEqual(new_simple_entity.code, expected_new_code)
-
-    def test_code_attribute_set_to_empty_string(self):
-        """testing if the code attribute will be restored from the nice_name
-        attribute when it is set to an empty string
-        """
-        self.test_simple_entity.code = ""
-        self.assertEqual(self.test_simple_entity.code, "test_entity")
-
-    def test_code_attribute_set_to_None(self):
-        """testing if the code is evauluated from the nice_name attribute when
-        set to None.
-        """
-        self.test_simple_entity.code = None
-        self.assertEqual(self.test_simple_entity.code, "test_entity")
-
-    def test_name_argument_init_as_None_and_also_the_code_is_None(self):
-        """testing if ValueError is raised for None name argument
+        self.assertTrue(SimpleEntity.__auto_name__)
+    
+    def test_name_argument_is_None(self):
+        """testing if the name attribute will be automatically generated if the
+        name argument is None
         """
         self.kwargs["name"] = None
-        self.kwargs["code"] = None
-        self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
-
-    def test_name_argument_init_as_None_and_also_the_code_is_empty_string(self):
-        """testing if TypeError is raised for None name argument
+        new_simple_entity = SimpleEntity(**self.kwargs)
+        self.assertTrue(new_simple_entity.name)
+    
+    def test_name_attribute_is_set_to_None(self):
+        """testing if the name attribute will be set to an automatic value if
+        it is set to None
         """
-        self.kwargs["name"] = None
-        self.kwargs["code"] = ""
-        self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
-
-    def test_name_argument_init_as_empty_string_and_also_the_code_is_None(self):
-        """testing if ValueError is raised for None name argument
+        self.test_simple_entity.name = ''
+        self.assertTrue(self.test_simple_entity.name)
+    
+    def test_name_argument_is_empty_string(self):
+        """testing if the name attribute will be set to an automatic value if
+        the name argument is an empty string
         """
         self.kwargs["name"] = ""
-        self.kwargs["code"] = None
-        self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
-
-    def test_name_argument_init_as_empty_string_and_also_the_code_is_empty_string(self):
-        """testing if TypeError is raised for None name argument
+        new_simple_entity = SimpleEntity(**self.kwargs)
+        self.assertTrue(new_simple_entity.name)
+    
+    def test_name_attribute_is_set_to_empty_string(self):
+        """testing if the name attribute will be set to an automatic value if
+        it is set to an automatic value
         """
-        self.kwargs["name"] = ""
-        self.kwargs["code"] = ""
-        self.assertRaises(ValueError, SimpleEntity, **self.kwargs)
-
-    def test_name_argument_is_None_but_there_is_code_argument(self):
-        """testing if the name attribute will be calculated from the code
-        argument if the name argument is given as none
-        """
-        self.kwargs["name"] = None
-        self.assertIsNot(self.kwargs["code"], None)
-
-        new_simpleEntity = SimpleEntity(**self.kwargs)
-        self.assertEqual(new_simpleEntity.name, new_simpleEntity.code)
-
-    def test_name_attribute_for_being_empty(self):
-        """testing if ValueError is raised when trying to set the name to an
-        empty string
-        """
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.test_simple_entity,
-            "name",
-            ""
-        )
-
-    def test_name_attribute_for_being_None(self):
-        """testing if TypeError is raised when trying to set the name to None
-        """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_simple_entity,
-            "name",
-            None
-        )
-
-    def test_name_argument_not_init_as_string_or_unicode(self):
+        self.test_simple_entity.name = ''
+        self.assertTrue(self.test_simple_entity)
+    
+    def test_name_argument_is_not_a_string_or_unicode_instance_or_None(self):
         """testing if a TypeError will be raised when the name argument is not
-        a string or unicode
+        a string or unicode or None
         """
         test_values = [
             12132,
             [1, "name"],
                 {"a": "name"}
         ]
-
+        
         for test_value in test_values:
             self.kwargs["name"] = test_value
             self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
-
-    def test_name_attribute_is_not_string_or_unicode(self):
+    
+    def test_name_attribute_is_not_string_or_unicode_or_None(self):
         """testing if a TypeError will be raised when the name attribute is
-        not a string or unicode
+        not a string or unicode or None
         """
         test_values = [
             12132, [1, "name"], {"a": "name"}
@@ -339,7 +158,7 @@ class SimpleEntityTester(unittest.TestCase):
                 "\nfor     : %s\nexpected: %s\ngot     : %s" %\
                 (str(test_value[0]), test_value[1], self.test_simple_entity.name)
             )
-
+    
     def test_nice_name_attribute_is_formatted_correctly(self):
         """testing if nice name attribute is formatted correctly
         """
@@ -645,10 +464,10 @@ class SimpleEntityTester(unittest.TestCase):
         """
         self.assertEqual(
             self.test_simple_entity.__repr__(),
-            "<%s (%s, %s)>" % (
-                self.test_simple_entity.entity_type,
+            "<%s (%s)>" % (
                 self.test_simple_entity.name,
-                self.test_simple_entity.code)
+                self.test_simple_entity.entity_type,
+            )
         )
 
     def test_type_argument_is_None(self):
@@ -821,7 +640,8 @@ class SimpleEntityTester(unittest.TestCase):
         from stalker import Project
         
         test_proj = Project(
-            name='Test Project',
+            name='Test Project 1',
+            code='tp1',
             repository=test_repo,
             structure=test_struct,
             status_list=test_project_status_list
@@ -838,7 +658,7 @@ class SimpleEntityTester(unittest.TestCase):
         # now check if it is added to the database correctly
         del new_simpleEntity
         
-        new_simpleEntity_DB = SimpleEntity.query()\
+        new_simpleEntity_DB = SimpleEntity.query\
             .filter_by(name=self.kwargs['name'])\
             .first()
         
@@ -852,4 +672,3 @@ class SimpleEntityTester(unittest.TestCase):
         DBSession.remove()
         from stalker.db.session import ZopeTransactionExtension
         DBSession.configure(extension=ZopeTransactionExtension)
-    

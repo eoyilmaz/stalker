@@ -18,11 +18,11 @@
               status: '{{ task.status.name }}',
               resources: [
                 {% for resource in task.resources %}
-                  '{{ resource.first_name }} {{ resource.last_name }}',
+                  '{{ resource.name }}',
                 {% endfor %}
               ],
               start_date: '{{ task.start_date }}',
-              due_date: '{{ task.due_date }}',
+              end_date: '{{ task.end_date }}',
               effort: '{{ task.effort }}'
             },
           {% endfor %}
@@ -41,7 +41,7 @@
           {name: 'Status',      field: 'status',      width: '150px'},
           {name: 'Resources',   field: 'user_name',   width: '150px'},
           {name: 'Start Date',  field: 'start_date',  width: '100px'},
-          {name: 'Due Date',    field: 'due_date',    width: '100px'},
+          {name: 'End Date',    field: 'end_date',    width: '100px'},
           {name: 'Effort',      field: 'effort',      width: '100px'}
         ],
         width: '100%',

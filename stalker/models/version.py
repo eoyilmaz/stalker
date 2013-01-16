@@ -12,9 +12,10 @@ from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import StatusMixin
 
+from stalker.log import logging_level
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging_level)
 
 # TODO: Add parent_version attribute to hold a parent child relation between
 # version to pin point the source of the given version.
@@ -59,7 +60,7 @@ class Version(Entity, StatusMixin):
     
     :type version_of: :class:`~stalker.models.task.Task`
     """
-    
+    __auto_name__ = True
     __tablename__ = "Versions"
     __mapper_args__ = {"polymorphic_identity": "Version"}
     

@@ -14,7 +14,6 @@ class AssetTester(unittest.TestCase):
     def setUp(self):
         """setup the test
         """
-
         # statuses
         self.test_data_status_complete = Status(
             name="Complete",
@@ -75,21 +74,25 @@ class AssetTester(unittest.TestCase):
         # types
         self.test_data_commmercial_project = Type(
             name="Commercial Project",
+            code='commproj',
             target_entity_type=Project,
         )
 
         self.test_data_asset_type1 = Type(
             name="Character",
+            code='char',
             target_entity_type=Asset
         )
 
         self.test_data_asset_type2 = Type(
             name="Environment",
+            code='env',
             target_entity_type=Asset
         )
 
         self.test_data_repository_type = Type(
             name="Test Repository Type",
+            code='testrepo',
             target_entity_type=Repository,
             )
 
@@ -102,6 +105,7 @@ class AssetTester(unittest.TestCase):
         # project
         self.test_data_project1 = Project(
             name="Test Project1",
+            code='tp1',
             type=self.test_data_commmercial_project,
             status_list=self.test_data_project_status_list,
             repository=self.test_data_repository,
@@ -110,6 +114,7 @@ class AssetTester(unittest.TestCase):
         # sequence
         self.test_data_sequence = Sequence(
             name="Test Sequence",
+            code='tseq',
             project=self.test_data_project1,
             status_list=self.test_data_sequence_status_list,
         )
@@ -141,12 +146,10 @@ class AssetTester(unittest.TestCase):
         
         self.kwargs = {
             "name": "Test Asset",
+            'code': 'ta',
             "description": "This is a test Asset object",
             "project": self.test_data_project1,
             "type": self.test_data_asset_type1,
-#            "shots": [self.test_data_shot1,
-#                      self.test_data_shot2,
-#                      self.test_data_shot3],
             "status": 0,
             "status_list": self.test_data_asset_status_list,
         }
@@ -171,7 +174,13 @@ class AssetTester(unittest.TestCase):
             task_of=self.test_data_test_asset,
             status_list=self.test_data_task_status_list
         )
-
+    
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Asset class
+        """
+        self.assertFalse(Asset.__auto_name__)
+    
     def test_equality(self):
         """testing equality of two Asset objects
         """
@@ -220,6 +229,7 @@ class AssetTester(unittest.TestCase):
 
         link_type_1 = Type(
             name="Image",
+            code='image',
             target_entity_type="Link"
         )
         
@@ -285,18 +295,21 @@ class AssetTester(unittest.TestCase):
 
         commercial_project_type = Type(
             name="Commercial",
+            code='comm',
             target_entity_type=Project,
             )
 
         new_project = Project(
             name="Commercial",
+            code='COM',
             type=commercial_project_type,
             status_list=project_status_list,
             repository=self.test_data_repository,
-            )
+        )
 
         character_asset_type = Type(
             name="Character",
+            code='char',
             target_entity_type=Asset
         )
 
@@ -331,7 +344,7 @@ class AssetTester(unittest.TestCase):
         self.assertItemsEqual(new_asset.tasks, tasks)
 
 
-        # UPDATE THIS: this test should be in tests.db
+        # TODO: this test should be in tests.db
         # because the property it is testing is using DBSession.query
         #
         #def test_asset_appends_itself_to_the_assets_list_of_project_instance(self):
@@ -355,6 +368,7 @@ class AssetTester(unittest.TestCase):
 
         #commercial_project_type = Type(
         #name="Commercial",
+        #code='comm',
         #target_entity_type=Project,
         #)
 
@@ -367,6 +381,7 @@ class AssetTester(unittest.TestCase):
 
         #character_asset_type = Type(
         #name="Character",
+        #code='char',
         #target_entity_type=Asset
         #)
 

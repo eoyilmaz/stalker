@@ -18,7 +18,7 @@
                 name: '{{ asset.name }}',
                 type: '{{ asset.type.name }}',
                 status: '{{ asset.status.name }}',
-                user_name: '{{ asset.created_by.first_name }} {{ asset.created_by.last_name }}',
+                user_name: '{{ asset.created_by.name }}',
                 description: '{{ asset.description }}'
               },
             {% endfor %}

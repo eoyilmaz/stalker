@@ -22,10 +22,17 @@ class StructureTester(unittest.TestCase):
         """setting up the tests
         """
         
-        vers_type = Type(name="Version",
-                         target_entity_type="FilenameTemplate")
-        ref_type = Type(name="Reference",
-                        target_entity_type="FilenameTemplate")
+        vers_type = Type(
+            name="Version",
+            code='vers',
+            target_entity_type="FilenameTemplate"
+        )
+        
+        ref_type = Type(
+            name="Reference",
+            code='ref',
+            target_entity_type="FilenameTemplate"
+        )
         
         # type templates
         self.asset_template = FilenameTemplate(
@@ -56,6 +63,7 @@ class StructureTester(unittest.TestCase):
 
         self.test_type = Type(
             name="Commercial Structure",
+            code='comm',
             target_entity_type=Structure,
         )
 
@@ -68,7 +76,13 @@ class StructureTester(unittest.TestCase):
             "type": self.test_type,
         }
         self.test_structure = Structure(**self.kwargs)
-
+    
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Structure class
+        """
+        self.assertFalse(Structure.__auto_name__) 
+    
     def test_custom_template_argument_can_be_skipped(self):
         """testing if the custom_template argument can be skipped
         """

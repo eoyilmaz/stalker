@@ -8,9 +8,15 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
 from stalker import User
 from stalker.models.entity import TaskableEntity
-from stalker.models.mixins import StatusMixin, ScheduleMixin, ReferenceMixin
+from stalker.models.mixins import (StatusMixin, ScheduleMixin, ReferenceMixin,
+                                   CodeMixin)
 
-class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
+class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     """Stores data about Sequences.
     
     Sequences are holders of the :class:`~stalker.models.shot.Shot` objects.
@@ -32,7 +38,7 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     A :class:`~stalker.models.sequence.Sequence` can not be created without a
     :class:`~stalker.models.project.Project` instance.
     """
-
+    __auto_name__ = False
     __tablename__ = "Sequences"
     __mapper_args__ = {"polymorphic_identity": "Sequence"}
     sequence_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
@@ -71,15 +77,10 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-        #TaskMixin.__init__(self, **kwargs)
-
-        #self._lead = self._validate_lead(lead)
+        CodeMixin.__init__(self, **kwargs)
+        
         self.lead = lead
         self.shots = []
-
-        ## update the Project._sequences attribute
-        #if not self in self.project.sequences:
-        #self._project._sequences.append(self)
 
     @validates("lead")
     def _validate_lead(self, key, lead):

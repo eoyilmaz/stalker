@@ -24,7 +24,13 @@ class ImageFormatTest(unittest.TestCase):
             }
 
         self.mock_imageFormat = ImageFormat(**self.kwargs)
-
+    
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        ImageFormat class
+        """
+        self.assertFalse(ImageFormat.__auto_name__)
+    
     def test_width_argument_accepts_int_or_float_only(self):
         """testing the width argument accepts integer or float and raises
         TypeError in any other case

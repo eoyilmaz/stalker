@@ -16,12 +16,14 @@ class LinkTester(unittest.TestCase):
         # create a mock LinkType object
         self.test_link_type1 = Type(
             name="Test Type 1",
+            code='test type1',
             target_entity_type=Link,
-            )
+        )
         self.test_link_type2 = Type(
             name="Test Type 2",
+            code='test type2',
             target_entity_type=Link,
-            )
+        )
 
         self.kwargs = {
             "name": "An Image Link",
@@ -31,7 +33,13 @@ class LinkTester(unittest.TestCase):
         }
 
         self.test_link = Link(**self.kwargs)
-
+    
+    def test___auto_name__class_attribute_is_set_to_True(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Link class
+        """
+        self.assertTrue(Link.__auto_name__)
+    
     def test_path_argument_accepts_string_or_unicode_only(self):
         """testing if a TypeError will be raised when the path argument is not
         a string or unicode instance

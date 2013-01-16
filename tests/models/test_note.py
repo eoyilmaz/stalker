@@ -21,7 +21,13 @@ class NoteTester(unittest.TestCase):
 
         # create a Note object
         self.test_note = Note(**self.kwargs)
-
+    
+    def test___auto_name__class_attribute_is_set_to_True(self):
+        """testing if the __auto_name__ class attribute is set to True for
+        Note class
+        """
+        self.assertTrue(Note.__auto_name__)
+    
     def test_content_argument_is_missing(self):
         """testing if nothing is going to happen when no content argument is
         given

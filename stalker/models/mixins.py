@@ -6,7 +6,7 @@
 
 import datetime
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Date,
-                        Interval)
+                        Interval, Unicode)
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
@@ -14,10 +14,10 @@ from stalker.conf import defaults
 from stalker.db import Base
 from stalker.db.session import DBSession
 
-
+from stalker.log import logging_level
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging_level)
 
 def make_plural(name):
     """Returns the plural version of the given name argument.
@@ -114,7 +114,6 @@ class TargetEntityTypeMixin(object):
     __nullable_target__ = False
     __unique_target__ = False
     
-    
     @declared_attr
     def _target_entity_type(cls):
         return Column(
@@ -207,8 +206,8 @@ class StatusMixin(object):
     
     def __init__(self, status=None, status_list=None, **kwargs):
         self.status_list = status_list
-        logger.debug('%s.status: %s' % (self.__class__.__name__, status))
         self.status = status
+        logger.debug('%s.status: %s' % (self.__class__.__name__, status))
     
     @declared_attr
     def status_id(cls):
@@ -216,15 +215,14 @@ class StatusMixin(object):
             "status_id",
             Integer,
             ForeignKey('Statuses.id'),
-            nullable=True # This is set to nullable=True but it is impossible
-                          # to set the status to None by using this Declarative
-                          # approach.
-                          # 
-                          # This is done in that way cause SqlAlchemy
-                          # was flushing the data (AutoFlush) preliminary while
-                          # checking if the given Status was in the related
-                          # StatusList, and it was complaining about the status
-                          # can not be null
+            nullable=False
+            # This is set to nullable=True but it is impossible to set the
+            # status to None by using this Declarative approach.
+            # 
+            # This is done in that way cause SQLAlchemy was flushing the data
+            # (AutoFlush) preliminarily while checking if the given Status was
+            # in the related StatusList, and it was complaining about the
+            # status can not be null
         )
     
     @declared_attr
@@ -269,6 +267,9 @@ class StatusMixin(object):
             # check if there is a db setup and try to get the appropriate 
             # StatusList from the database
             
+            # disable autoflush to prevent premature class initialization
+            autoflush = DBSession.autoflush
+            DBSession.autoflush = False
             try:
                 # try to get a StatusList with the target_entity_type is 
                 # matching the class name
@@ -278,6 +279,9 @@ class StatusMixin(object):
             except UnboundExecutionError:
                 # it is not mapped just skip it
                 pass
+            finally:
+                # restore autoflush
+                DBSession.autoflush = autoflush
         
         # if it is still None
         if status_list is None:
@@ -364,47 +368,47 @@ class StatusMixin(object):
 class ScheduleMixin(object):
     """Adds schedule info to the mixed in class.
     
-    Adds schedule information like ``start_date``, ``due_date`` and
+    Adds schedule information like ``start_date``, ``end_date`` and
     ``duration``. There are theree parameters to initialize a class with
-    ScheduleMixin, which are, ``start_date``, ``due_date`` and ``duration``.
-    Only two of them are enough to initialize the class. The preceeding order
+    ScheduleMixin, which are, ``start_date``, ``end_date`` and ``duration``.
+    Only two of them are enough to initialize the class. The preceding order
     for the parameters is as follows::
       
-      start_date > due_date > duration
+      start_date > end_date > duration
     
     So if all of the parameters are given only the ``start_date`` and the
-    ``due_date`` will be used and the ``duration`` will be calculated
+    ``end_date`` will be used and the ``duration`` will be calculated
     accordingly. In any other conditions the missing parameter will be
     calculated from the following table:
     
     +------------+----------+----------+----------------------------------------+
-    | start_date | due_date | duration | DEFAULTS                               |
+    | start_date | end_date | duration | DEFAULTS                               |
     +============+==========+==========+========================================+
     |            |          |          | start_date = datetime.date.today()     |
     |            |          |          |                                        |
     |            |          |          | duration = datetime.timedelta(days=10) |
     |            |          |          |                                        |
-    |            |          |          | due_date = start_date + duration       |
+    |            |          |          | end_date = start_date + duration       |
     +------------+----------+----------+----------------------------------------+
     |     X      |          |          | duration = datetime.timedelta(days=10) |
     |            |          |          |                                        |
-    |            |          |          | due_date = start_date + duration       |
+    |            |          |          | end_date = start_date + duration       |
     +------------+----------+----------+----------------------------------------+
-    |     X      |    X     |          | duration = due_date - start_date       |
+    |     X      |    X     |          | duration = end_date - start_date       |
     +------------+----------+----------+----------------------------------------+
-    |     X      |          |    X     | due_date = start_date + duration       |
+    |     X      |          |    X     | end_date = start_date + duration       |
     +------------+----------+----------+----------------------------------------+
-    |     X      |    X     |    X     | duration = due_date - start_date       |
+    |     X      |    X     |    X     | duration = end_date - start_date       |
     +------------+----------+----------+----------------------------------------+
-    |            |    X     |    X     | start_date = due_date - duration       |
+    |            |    X     |    X     | start_date = end_date - duration       |
     +------------+----------+----------+----------------------------------------+
     |            |    X     |          | duration = datetime.timedelta(days=10) |
     |            |          |          |                                        |
-    |            |          |          | start_date = due_date - duration       |
+    |            |          |          | start_date = end_date - duration       |
     +------------+----------+----------+----------------------------------------+
     |            |          |    X     | start_date = datetime.date.today()     |
     |            |          |          |                                        |
-    |            |          |          | due_date = start_date + duration       |
+    |            |          |          | end_date = start_date + duration       |
     +------------+----------+----------+----------------------------------------+
       
     The date attributes can be managed with timezones. Follow the Python idioms
@@ -415,18 +419,18 @@ class ScheduleMixin(object):
     :param start_date: the start date of the entity, should be a datetime.date
       instance, the start_date is the pin point for the date calculation. In
       any condition if the start_date is available then the value will be
-      preserved. If start_date passes the due_date the due_date is also changed
+      preserved. If start_date passes the end_date the end_date is also changed
       to a date to keep the timedelta between dates. The default value is
       datetime.date.today()
     
     :type start_date: :class:`datetime.datetime`
     
-    :param due_date: the due_date of the entity, should be a datetime.date
-      instance, when the start_date is changed to a date passing the due_date,
-      then the due_date is also changed to a later date so the timedelta
+    :param end_date: the end_date of the entity, should be a datetime.date
+      instance, when the start_date is changed to a date passing the end_date,
+      then the end_date is also changed to a later date so the timedelta
       between the dates is kept.
     
-    :type due_date: :class:`datetime.datetime` or :class:`datetime.timedelta`
+    :type end_date: :class:`datetime.datetime` or :class:`datetime.timedelta`
     
     :param duration: The duration of the entity. It is a
       :class:`datetime.timedelta` instance. The default value is read from
@@ -441,36 +445,36 @@ class ScheduleMixin(object):
     
     def __init__(self,
                  start_date=None,
-                 due_date=None,
+                 end_date=None,
                  duration=None,
                  **kwargs):
-        self._validate_dates(start_date, due_date, duration)
+        self._validate_dates(start_date, end_date, duration)
 
     @declared_attr
-    def _due_date(cls):
-        return Column("due_date", Date)
+    def _end_date(cls):
+        return Column("end_date", Date)
     
-    def _due_date_getter(self):
+    def _end_date_getter(self):
         """The date that the entity should be delivered.
         
-        The due_date can be set to a datetime.timedelta and in this case it
+        The end_date can be set to a datetime.timedelta and in this case it
         will be calculated as an offset from the start_date and converted to
         datetime.date again. Setting the start_date to a date passing the
-        due_date will also set the due_date so the timedelta between them is
+        end_date will also set the end_date so the timedelta between them is
         preserved, default value is 10 days
         """
-        return self._due_date
+        return self._end_date
 
-    def _due_date_setter(self, due_date_in):
-        self._validate_dates(self.start_date, due_date_in, self.duration)
+    def _end_date_setter(self, end_date_in):
+        self._validate_dates(self.start_date, end_date_in, self.duration)
     
     @declared_attr
-    def due_date(cls):
+    def end_date(cls):
         return synonym(
-            "_due_date",
+            "_end_date",
             descriptor=property(
-                cls._due_date_getter,
-                cls._due_date_setter
+                cls._end_date_getter,
+                cls._end_date_setter
             )
         )
     
@@ -482,12 +486,12 @@ class ScheduleMixin(object):
         """The date that this entity should start.
         
         Also effects the
-        :attr:`~stalker.models.mixins.ScheduleMixin.due_date` attribute value
+        :attr:`~stalker.models.mixins.ScheduleMixin.end_date` attribute value
         in certain conditions, if the
         :attr:`~stalker.models.mixins.ScheduleMixin.start_date` is set to a
-        time passing the :attr:`~stalker.models.mixins.ScheduleMixin.due_date`
+        time passing the :attr:`~stalker.models.mixins.ScheduleMixin.end_date`
         it will also offset the
-        :attr:`~stalker.models.mixins.ScheduleMixin.due_date` to keep the
+        :attr:`~stalker.models.mixins.ScheduleMixin.end_date` to keep the
         :attr:`~stalker.models.mixins.ScheduleMixin.duration` value
         fixed. :attr:`~stalker.models.mixins.ScheduleMixin.start_date` should be
         an instance of class:`datetime.date` and the default value is
@@ -496,7 +500,7 @@ class ScheduleMixin(object):
         return self._start_date
     
     def _start_date_setter(self, start_date_in):
-        self._validate_dates(start_date_in, self.due_date, self.duration)
+        self._validate_dates(start_date_in, self.end_date, self.duration)
     
     @declared_attr
     def start_date(cls):
@@ -517,8 +521,8 @@ class ScheduleMixin(object):
         
         It is a datetime.timedelta instance. Showing the difference of the
         :attr:`~stalker.models.mixins.ScheduleMixin.start_date` and the
-        :attr:`~stalker.models.mixins.ScheduleMixin.due_date`. If edited it
-        changes the :attr:`~stalker.models.mixins.ScheduleMixin.due_date`
+        :attr:`~stalker.models.mixins.ScheduleMixin.end_date`. If edited it
+        changes the :attr:`~stalker.models.mixins.ScheduleMixin.end_date`
         attribute value.
         """
         return self._duration
@@ -526,14 +530,14 @@ class ScheduleMixin(object):
     def _duration_setter(self, duration_in):
         if duration_in is not None:
             if isinstance(duration_in, datetime.timedelta):
-                # set the due_date to None
+                # set the end_date to None
                 # to make it recalculated
                 self._validate_dates(self.start_date, None, duration_in)
             else:
-                self._validate_dates(self.start_date, self.due_date,
+                self._validate_dates(self.start_date, self.end_date,
                                      duration_in)
         else:
-            self._validate_dates(self.start_date, self.due_date, duration_in)
+            self._validate_dates(self.start_date, self.end_date, duration_in)
     
     @declared_attr
     def duration(cls):
@@ -545,22 +549,22 @@ class ScheduleMixin(object):
             )
         )
     
-    def _validate_dates(self, start_date, due_date, duration):
+    def _validate_dates(self, start_date, end_date, duration):
         """updates the date values
         """
         if not isinstance(start_date, datetime.date):
             start_date = None
         
-        if not isinstance(due_date, datetime.date):
-            due_date = None
+        if not isinstance(end_date, datetime.date):
+            end_date = None
         
         if not isinstance(duration, datetime.timedelta):
             duration = None
         
         # check start_date
         if start_date is None:
-            # try to calculate the start_date from due_date and duration
-            if due_date is None:
+            # try to calculate the start_date from end_date and duration
+            if end_date is None:
                 # set the defaults
                 start_date = datetime.date.today()
 
@@ -568,30 +572,30 @@ class ScheduleMixin(object):
                     # set the defaults
                     duration = defaults.DEFAULT_TASK_DURATION
 
-                due_date = start_date + duration
+                end_date = start_date + duration
             else:
                 if duration is None:
                     duration = defaults.DEFAULT_TASK_DURATION
 
-                start_date = due_date - duration
+                start_date = end_date - duration
 
-        # check due_date
-        if due_date is None:
+        # check end_date
+        if end_date is None:
             if duration is None:
                 duration = defaults.DEFAULT_TASK_DURATION
 
-            due_date = start_date + duration
+            end_date = start_date + duration
 
-        if due_date < start_date:
+        if end_date < start_date:
             # check duration
             if duration < datetime.timedelta(1):
                 duration = datetime.timedelta(1)
 
-            due_date = start_date + duration
+            end_date = start_date + duration
 
         self._start_date = start_date
-        self._due_date = due_date
-        self._duration = self._due_date - self._start_date
+        self._end_date = end_date
+        self._duration = self._end_date - self._start_date
 
 class ProjectMixin(object):
     """Gives the ability to connect to a :class:`~stalker.models.project.Project` to the mixed in object.
@@ -770,3 +774,60 @@ class ACLMixin(object):
                  self.__class__.__name__ + ':' + self.name,
                  perm.action + '_' + perm.class_name)
                  for perm in self.permissions]
+
+class CodeMixin(object):
+    """Adds code info to the mixed in class.
+    
+    .. versionadded:: 0.2.0
+      
+      The code attribute of the SimpleEntity is now introduced as a separate
+      mixin. To let it be used by the classes it is really needed. 
+    
+    The CodeMixin just adds a new field called ``code``. It is a very simple
+    attribute and is used for simplifying long names (like Project.name etc.).
+    
+    Contrary to previous implementations the code attribute is not formatted in
+    anyway, so care needs to be taken if the code attribute is going to be used
+    in filesystem as file and directory names.
+    
+    :param str code: The code attribute is a string, can not be empty or can
+      not be None.
+    """
+    
+    def __init__(
+            self,
+            code=None,
+            **kwargs):
+        logger.debug('code: %s' % code)
+        self.code = code
+
+    @declared_attr
+    def code(cls):
+        return Column(
+            'code',
+            String(256),
+            nullable=False,
+            doc="""The code name of this object.
+                
+                It accepts strings. Can not be None."""
+        )
+    
+    @validates('code')
+    def _validate_code(self, key, code):
+        """validates the given code attribute
+        """
+        logger.debug('validating code value of: %s' % code)
+        if code is None:
+            raise TypeError("%s.code cannot be None" % self.__class__.__name__)
+        
+        if not isinstance(code, (str, unicode)):
+            raise TypeError('%s.code should be an instance of string or '
+                            'unicode not %s' %
+                            (self.__class__.__name__,
+                             code.__class__.__name__)
+            )
+        
+        if code == '':
+            raise ValueError('%s.code can not be an empty string')
+        
+        return code

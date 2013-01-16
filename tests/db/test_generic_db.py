@@ -28,10 +28,15 @@ project_status_list = StatusList(
     statuses=[status1]
 )
 
-project_type = Type(name="test", target_entity_type=Project)
+project_type = Type(
+    name="test",
+    code='test',
+    target_entity_type=Project
+)
 
 new_project1 = Project(
     name="test project1",
+    code='tp1',
     type=project_type,
     status_list=project_status_list,
     repository=repo1
@@ -39,12 +44,17 @@ new_project1 = Project(
 
 new_project2 = Project(
     name="test project2",
+    code='tp2',
     type=project_type,
     status_list=project_status_list,
     repository=repo1
 )
 
-character_asset_type = Type(name="Character", target_entity_type=Asset)
+character_asset_type = Type(
+    name="Character",
+    code='char',
+    target_entity_type=Asset
+)
 
 asset_status_list = StatusList(
     name="Asset Statuses",
@@ -54,6 +64,7 @@ asset_status_list = StatusList(
 
 new_asset1 = Asset(
     name="test asset",
+    code='ta',
     type=character_asset_type,
     project=new_project1,
     status_list=asset_status_list
@@ -61,6 +72,7 @@ new_asset1 = Asset(
 
 new_asset2 = Asset(
     name="test",
+    code='t',
     type=character_asset_type,
     project=new_project2,
     status_list=asset_status_list

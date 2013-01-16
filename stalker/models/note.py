@@ -8,6 +8,11 @@ from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
 from stalker.models.entity import SimpleEntity
 
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
 class Note(SimpleEntity):
     """Notes for any of the SOM objects.
     
@@ -17,7 +22,7 @@ class Note(SimpleEntity):
     
     :param attached_to: The object that this note is attached to.
     """
-
+    __auto_name__ = True
     __tablename__ = "Notes"
     __mapper_args__ = {"polymorphic_identity": "Note"}
 

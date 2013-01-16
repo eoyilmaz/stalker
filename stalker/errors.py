@@ -11,7 +11,7 @@ This module contains the Errors in Stalker.
 class LoginError(Exception):
     """Raised when the login information is not correct or not correlate with the data in the database.
     """
-
+    
     def __init__(self, value=""):
         super(LoginError, self).__init__(value)
         self.value = value

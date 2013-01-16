@@ -8,12 +8,12 @@ Stalker is a Production Asset Management System (ProdAM) designed for animation
 and vfx studios. See docs for more information.
 """
 
-__version__ = '0.2.0.a4'
+__version__ = '0.2.0.a5'
 
 from pyramid.config import Configurator
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
 
-#from stalker.db.declarative import Base
-#from stalker.db.session import DBSession
 from stalker.models.asset import Asset
 from stalker.models.auth import Group, Permission, User
 from stalker.models.department import Department
@@ -22,7 +22,8 @@ from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message
 from stalker.models.mixins import (ProjectMixin, ReferenceMixin, ScheduleMixin,
-                                   StatusMixin, TargetEntityTypeMixin)
+                                   StatusMixin, TargetEntityTypeMixin,
+                                   CodeMixin)
 from stalker.models.note import Note
 from stalker.models.project import Project
 from stalker.models.repository import Repository
@@ -36,10 +37,6 @@ from stalker.models.template import FilenameTemplate
 from stalker.models.ticket import Ticket, TicketLog
 from stalker.models.type import Type, EntityType
 from stalker.models.version import Version
-
-
-from pyramid.authentication import AuthTktAuthenticationPolicy
-from pyramid.authorization import ACLAuthorizationPolicy
 from stalker.models.auth import group_finder
 
 def main(global_config, **settings):

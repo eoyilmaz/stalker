@@ -9,6 +9,11 @@ from sqlalchemy.orm import relationship, validates
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
 class Structure(Entity):
     """Holds data about how the physical files are arranged in the :class:`~stalker.models.repository.Repository`.
     
@@ -104,11 +109,9 @@ class Structure(Entity):
     another one for **Print** projects etc. and can reuse them with new
     :class:`~stalker.models.project.Project`\ s.
     """
-
-
-
+    
     #__strictly_typed__ = True
-
+    __auto_name__ = False
     __tablename__ = "Structures"
     __mapper_args__ = {"polymorphic_identity": "Structure"}
 

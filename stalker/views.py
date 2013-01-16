@@ -12,6 +12,7 @@ from pyramid.httpexceptions import HTTPFound, HTTPServerError
 from pyramid.security import remember, forget, authenticated_userid
 from pyramid.view import view_config, forbidden_view_config
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import DetachedInstanceError
 
 import transaction
 
@@ -21,9 +22,10 @@ from stalker import (User, ImageFormat, Project, Repository, Structure,
                      FilenameTemplate, EntityType, Type, StatusList, Status,
                      Asset, Shot, Sequence, TaskableEntity)
 
+from stalker.log import logging_level
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging_level)
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
@@ -47,9 +49,9 @@ try it again.
 @view_config(route_name='me_menu',
              renderer='templates/me_menu.jinja2')
 def home(request):
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
-    projects = Project.query().all()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
+    projects = Project.query.all()
     
     return {
         'stalker': stalker,
@@ -60,8 +62,8 @@ def home(request):
 @view_config(route_name='user_menu',
              renderer='templates/user_menu.jinja2')
 def user_menu(request):
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     return {
         'stalker': stalker,
         'user': user,
@@ -72,7 +74,7 @@ def user_menu(request):
              permission='View_Project')
 def projects_menu(request):
     return {
-        'projects': Project.query().all()
+        'projects': Project.query.all()
     }
 
 @view_config(route_name='login', renderer='templates/login.jinja2')
@@ -80,6 +82,7 @@ def projects_menu(request):
 def login(request):
     """the login view
     """
+    logger.debug('login start')
     login_url = request.route_url('login')
     referrer = request.url
     if referrer == login_url:
@@ -95,13 +98,13 @@ def login(request):
         password = request.params['password']
         
         # need to find the user
-        # check with the login_name or email attribute
-        user_obj = User.query()\
-            .filter(or_(User.login_name==login, User.email==login)).first()
+        # check with the login or email attribute
+        user_obj = User.query\
+            .filter(or_(User.login==login, User.email==login)).first()
         
         if user_obj:
-#            login = 'User:' + user_obj.login_name
-            login = user_obj.login_name
+#            login = 'User:' + user_obj.login
+            login = user_obj.login
         
         if user_obj and user_obj.check_password(password):
             headers = remember(request, login)
@@ -112,6 +115,7 @@ def login(request):
         
         message = 'Wrong username or password!!!'
     
+    logger.debug('login end')
     return dict(
         message=message,
         url=request.application_url + '/login',
@@ -140,54 +144,111 @@ def add_project(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         if request.params['submitted'] == 'add':
-            #login = request.params['login']
-            # so create the project
-            
-            with transaction.manager:
+            # TODO: remove this later
+            for param in ['name',
+                          'code',
+                          'image_format',
+                          'repository',
+                          'structure',
+                          'lead',
+                          'status_list']:
+                if param not in request.params:
+                    logger.debug('%s is not in parameters' % param)
+ 
+            if 'name' in request.params and \
+                'code' in request.params and \
+                'image_format' in request.params and \
+                'repository' in request.params and \
+                'structure' in request.params and \
+                'lead' in request.params and \
+                'status_list' in request.params:
+                #login = request.params['login']
+                # so create the project
+                
+                
+               
                 # get the image format
                 imf_id = int(request.params['image_format'])
-                imf = ImageFormat.query().filter_by(id=imf_id).one()
+                imf = ImageFormat.query.filter_by(id=imf_id).one()
                 
                 # get repository
                 repo_id = int(request.params['repository'])
-                repo = Repository.query().filter_by(id=repo_id).one()
+                repo = Repository.query.filter_by(id=repo_id).one()
                 
                 # get structure
                 structure_id = int(request.params['structure'])
-                structure = Structure.query().filter_by(id=structure_id).one()
+                structure = Structure.query.filter_by(id=structure_id).one()
                 
-                new_project = Project(
-                    name=request.params['name'],
-                    image_format=imf,
-                    repository=repo,
-                    created_by=user,
-                    fps=request.params['fps'],
-                    structure=structure,
-                )
+                # get lead
+                lead_id = int(request.params['lead'])
+                lead = User.query.filter_by(id=lead_id).first()
                 
-                DBSession.add(new_project)
-        
-        # do not return anything
-        # or maybe we should return to where we came from
-        return HTTPFound(location=came_from)
+                logger.debug('project.lead = %s' % lead)
+                
+                # status list
+                status_list_id = int(request.params['status_list'])
+                status_list = StatusList.query\
+                    .filter_by(id=status_list_id).first()
+                
+                try:
+                    new_project = Project(
+                        name=request.params['name'],
+                        code=request.params['code'],
+                        image_format=imf,
+                        repository=repo,
+                        created_by=user,
+                        fps=request.params['fps'],
+                        structure=structure,
+                        lead=lead,
+                        status_list=status_list,
+                        status=status_list[0]
+                    )
+                except (AttributeError, TypeError, ValueError) as e:
+                    logger.debug(e.message)
+                else:
+                    DBSession.add(new_project)
+                    try:
+                        transaction.commit()
+                    except (IntegrityError, AssertionError) as e:
+                        logger.debug(e.message)
+                        transaction.abort()
+                    else:
+                        logger.debug('flushing the DBSession, no problem here!')
+                        DBSession.flush()
+                        logger.debug('finished adding Project')
+            else:
+                logger.debug('there are missing parameters')
+            # do not return anything
+            # or maybe we should return to where we came from
+#           return HTTPFound(location=came_from)
     
     # restore previous choices
-   
+    def get_req_param(param):
+        return request[param] if param in request.params else None
+    
     # just one wants to see the add project form
     return {
         'user': user,
-        'users': User.query().all(),
-        'image_formats': ImageFormat.query().all(),
-        'repositories': Repository.query().all(),
-        'structures': Structure.query().all(),
-        'status_lists': StatusList.query()\
+        'users': User.query.all(),
+        'image_formats': ImageFormat.query.all(),
+        'repositories': Repository.query.all(),
+        'structures': Structure.query.all(),
+        'status_lists': StatusList.query\
                             .filter_by(target_entity_type='Project')\
                             .all(),
+        'name': get_req_param('name'),
+        'code': get_req_param('code'),
+        'imf_id': get_req_param('imf_id'),
+        'fps': get_req_param('fps'),
+        'repo_id': get_req_param('repo_id'),
+        'struct_id': get_req_param('struct_id'),
+        'lead_id': get_req_param('lead_id'),
+        'status_list_id': get_req_param('status_list_id')
     }
 
 @view_config(
@@ -200,7 +261,7 @@ def view_projects(request):
     """
     # just return all the projects
     return {
-        'projects': Project.query().all()
+        'projects': Project.query.all()
     }
 
 
@@ -216,12 +277,12 @@ def edit_project(request):
     came_from = request.params.get('came_from', referrer)
     
     proj_id = request.matchdict['project_id']
-    proj = Project.query().filter_by(id=proj_id).first()
+    proj = Project.query.filter_by(id=proj_id).first()
     
     if request.params['submitted'] == 'edit':
         #return HTTPFound(location=came_from)
-        login_name = authenticated_userid(request)
-        authenticated_user = User.query().filter_by(login_name=login_name).first()
+        login = authenticated_userid(request)
+        authenticated_user = User.query.filter_by(login=login).first()
         
         # get the project and update it
         # TODO: add this part
@@ -232,11 +293,11 @@ def edit_project(request):
     # just give the info enough to fill the form
     return {
         'project': proj,
-        'users': User.query().all(),
-        'image_formats': ImageFormat.query().all(),
-        'repositories': Repository.query().all(),
-        'structures': Structure.query().all(),
-        'status_lists': StatusList.query()\
+        'users': User.query.all(),
+        'image_formats': ImageFormat.query.all(),
+        'repositories': Repository.query.all(),
+        'structures': Structure.query.all(),
+        'status_lists': StatusList.query\
                             .filter_by(target_entity_type='Project')\
                             .all(),
     }
@@ -252,8 +313,8 @@ def add_image_format(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     if 'name' in request.params and \
        'width' in request.params and \
@@ -287,27 +348,34 @@ def edit_image_format(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     imf_id = request.matchdict['imf_id']
-    imf = ImageFormat.query()\
+    imf = ImageFormat.query\
             .filter(ImageFormat.id==imf_id)\
             .one()
     
-    if 'name' in request.params and \
-        'width' in request.params and \
-        'height' in request.params and \
-        'pixel_aspect' in request.params and \
-        'submitted' in request.params:
-        if request.params['submitted'] == 'edit':
-            with transaction.manager:
+    if 'submitted' in request.params:
+        if 'name' in request.params and \
+            'width' in request.params and \
+            'height' in request.params and \
+            'pixel_aspect' in request.params and \
+            'submitted' in request.params:
+            if request.params['submitted'] == 'edit':
                 imf.name = request.params['name']
                 imf.width = int(request.params['width'])
                 imf.height = int(request.params['height'])
                 imf.pixel_aspect = float(request.params['pixel_aspect'])
                 imf.updated_by = user
                 DBSession.add(imf)
+                #try:
+                #    transaction.commit()
+                #except (IntegrityError, DetachedInstanceError) as e:
+                #    logging.debug(e)
+                #    transaction.abort()
+                #else:
+                #    DBSession.flush()
     
     return {'image_format': imf}
 
@@ -327,8 +395,8 @@ def add_edit_repository(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     if 'name' in request.params and \
        'windows_path' in request.params and \
@@ -336,15 +404,15 @@ def add_edit_repository(request):
        'osx_path' in request.params:
         
         # create a new Repository and save it to the database
-        with transaction.manager:
-            new_repository = Repository(
-                name=request.params['name'],
-                windows_path=request.params['windows_path'],
-                linux_path=request.params['linux_path'],
-                osx_path=request.params['osx_path'],
-                created_by=user
-            )
-            DBSession.add(new_repository)
+#        with transaction.manager:
+         new_repository = Repository(
+             name=request.params['name'],
+             windows_path=request.params['windows_path'],
+             linux_path=request.params['linux_path'],
+             osx_path=request.params['osx_path'],
+             created_by=user
+         )
+         DBSession.add(new_repository)
     
     return {}
 
@@ -364,8 +432,8 @@ def add_edit_structure(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         logger.debug('"submitted" in request.params')
@@ -385,7 +453,7 @@ def add_edit_structure(request):
                     ]
                     
                     fts = [
-                        FilenameTemplate.query().filter_by(id=ft_id).first()
+                        FilenameTemplate.query.filter_by(id=ft_id).first()
                         for ft_id in ft_ids
                     ]
                     
@@ -402,7 +470,7 @@ def add_edit_structure(request):
         elif request.params['submitted'] == 'edit':
             # just edit the given structure
             structure_id = request.matchdict['structure_id']
-            structure = Structure.query().filter_by(id=structure_id).one()
+            structure = Structure.query.filter_by(id=structure_id).one()
             
             with transaction.manager:
                 structure.name = request.params['name']
@@ -413,7 +481,7 @@ def add_edit_structure(request):
     else:
         logger.debug('submitted is not in request.params')
     
-    f_templates = FilenameTemplate.query().all()
+    f_templates = FilenameTemplate.query.all()
     logger.debug('we got %i FilenameTemplates' % len(f_templates))
     for f_template in f_templates:
         logger.debug('FilenameTemplate: %s' %f_template.name)
@@ -438,20 +506,18 @@ def add_edit_user(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    logged_user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         if request.params['submit'] == 'add':
             # create and add a new user
-            if 'first_name' in request.params and \
-                'last_name' in request.params and \
-                'email' in request.params and \
-                'password' in request.params:
+            if 'name' in request.params and \
+               'email' in request.params and \
+               'password' in request.params:
                 with transaction.manager:
                     new_user = User(
-                        first_name=request.params['first_name'],
-                        last_name=request.params['last_name'],
+                        name=request.params['name'],
                         email=request.params['email'],
                         password=request.params['password'],
                         created_by=logged_user
@@ -460,11 +526,10 @@ def add_edit_user(request):
         elif request.params['submitted'] == 'edit':
             # just edit the given user
             user_id = request.matchdict['user_id']
-            user = User.query().filter_by(id=user_id).one()
+            user = User.query.filter_by(id=user_id).one()
             
             with transaction.manager:
-                user.first_name = request.params['first_name']
-                user.last_name = request.params['last_name']
+                user.name = request.params['name']
                 user.email = request.params['email']
                 user.password = request.params['password']
                 user.updated_by = logged_user
@@ -486,8 +551,8 @@ def add_filename_template(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         if request.params['submitted'] == 'add':
@@ -514,7 +579,7 @@ def add_filename_template(request):
                 logger.debug('we got all the parameters')
                 
                 # get the typ
-                type_ = Type.query()\
+                type_ = Type.query\
                     .filter_by(id=request.params['type_id'])\
                     .first()
                 
@@ -544,9 +609,9 @@ def add_filename_template(request):
             else:
                 logger.debug('there are missing parameters')
     return {
-        'entity_types': EntityType.query().all(),
+        'entity_types': EntityType.query.all(),
         'filename_template_types': 
-            Type.query()
+            Type.query
                 .filter_by(target_entity_type="FilenameTemplate")
                 .all()
     }
@@ -562,23 +627,30 @@ def edit_filename_template(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         if request.params['submitted'] == 'edit':
             logger.debug('editing a Filename Template')
             # just edit the given filename_template
             ft_id = request.matchdict['filename_template_id']
-            ft = FilenameTemplate.query().filter_by(id=ft_id).one()
+            ft = FilenameTemplate.query.filter_by(id=ft_id).first()
             
-            with transaction.manager:
-                ft.name = request.params['name']
-                ft.path = request.params['path']
-                ft.filename = request.params['filename']
-                ft.output_path = request.params['output_path']
-                ft.updated_by = user
-                DBSession.add(ft)
+            ft.name = request.params['name']
+            ft.path = request.params['path']
+            ft.filename = request.params['filename']
+            ft.output_path = request.params['output_path']
+            ft.updated_by = user
+            
+            DBSession.add(ft)
+            try:
+                transaction.commit()
+            except (IntegrityError, DetachedInstanceError) as e:
+                logging.debug(e)
+                transaction.abort()
+            else:
+                DBSession.flush()
         
         logger.debug('finished editing FilenameTemplate')
  
@@ -601,8 +673,8 @@ def add_edit_status(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         if request.params['submitted'] == 'add':
@@ -649,7 +721,7 @@ def add_edit_status(request):
             logger.debug('editing a Status')
             # just edit the given Status
             st_id = request.matchdict['status_id']
-            status = Status.query().filter_by(id=st_id).first()
+            status = Status.query.filter_by(id=st_id).first()
             
             with transaction.manager:
                 status.name = request.params['name']
@@ -674,8 +746,8 @@ def add_status_list(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         if request.params['submitted'] == 'add':
@@ -696,7 +768,7 @@ def add_status_list(request):
                 ]
                 
                 statuses = [
-                    Status.query().filter_by(id=st_id).first()
+                    Status.query.filter_by(id=st_id).first()
                     for st_id in st_ids
                 ]
                  
@@ -724,8 +796,8 @@ def add_status_list(request):
             else:
                 logger.debug('there are missing parameters')
     return {
-        'entity_types': EntityType.query().filter_by(statusable=True).all(),
-        'statuses': Status.query().all()
+        'entity_types': EntityType.query.filter_by(statusable=True).all(),
+        'statuses': Status.query.all()
     }
 
 
@@ -740,11 +812,11 @@ def edit_status_list(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     status_list_id = request.matchdict['status_list_id']
-    status_list = StatusList.query().filter_by(id=status_list_id).first()
+    status_list = StatusList.query.filter_by(id=status_list_id).first()
     
     if 'submitted' in request.params:
         if request.params['submitted'] == 'edit':
@@ -761,7 +833,7 @@ def edit_status_list(request):
             ]
             
             statuses = [
-                Status.query().filter_by(id=status_ids).first()
+                Status.query.filter_by(id=status_ids).first()
                 for status_ids in status_ids
             ]
             
@@ -784,8 +856,8 @@ def edit_status_list(request):
     return {
         'status_list_id': status_list_id,
         'status_list': status_list,
-        'statuses': Status.query().all(),
-        'entity_types': EntityType.query().filter_by(statusable=True).all()
+        'statuses': Status.query.all(),
+        'entity_types': EntityType.query.filter_by(statusable=True).all()
     }
 
 @view_config(
@@ -799,8 +871,8 @@ def add_asset(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    logged_in_user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
@@ -808,6 +880,7 @@ def add_asset(request):
         if request.params['submitted'] == 'add':
             
             if 'name' in request.params and \
+               'code' in request.params and \
                'description' in request.params and \
                'project_id' in request.params and \
                'type' in request.params and \
@@ -821,26 +894,32 @@ def add_asset(request):
                              request.params['project_id'])
                 logger.debug('request.params["type"]: %s' %
                              request.params['type'])
-                logger.debug('request.params["status_id": %s' %
+                logger.debug('request.params["status_id"]: %s' %
                              request.params['status_id'])
+                logger.debug('request.params["code"]: %s' %
+                             request.params['code'])
                 
                 project_id = request.params['project_id']
                 
                 # type will always return with a type name
                 type_name = request.params['type']
                 
-                project = Project.query().filter_by(id=project_id).first()
-                type_ = Type.query()\
+                project = Project.query.filter_by(id=project_id).first()
+                type_ = Type.query\
                     .filter_by(target_entity_type='Asset')\
                     .filter_by(name=type_name)\
                     .first()
                 
                 if type_ is None:
                     # create a new Type
-                    type_ = Type(name=type_name, target_entity_type='Asset')
+                    type_ = Type(
+                        name=type_name,
+                        code=type_name,
+                        target_entity_type='Asset'
+                    )
                 
                 # get the status_list
-                status_list = StatusList.query().filter_by(
+                status_list = StatusList.query.filter_by(
                     target_entity_type='Asset'
                 ).first()
                 
@@ -856,7 +935,7 @@ def add_asset(request):
                     re.sub("[^0-9]+", "", request.params['status_id'])
                 )
                 logger.debug('status_id: %s' % status_id)
-                status = Status.query().filter_by(id=status_id).first()
+                status = Status.query.filter_by(id=status_id).first()
                 logger.debug('status: %s' % status)
                 
 #                logger.debug('status: %s' % status)
@@ -865,8 +944,11 @@ def add_asset(request):
                 
                 # get the info
                 try:
+                    logger.debug('*****************************')
+                    logger.debug('code: %s' % request.params['code'])
                     new_asset = Asset(
                         name=request.params['name'],
+                        code=request.params['code'],
                         description=request.params['description'],
                         project=project,
                         type=type_,
@@ -877,28 +959,28 @@ def add_asset(request):
                     
                     logger.debug('new_asset.status: ' % new_asset.status)
                     
-                    DBSession.add(new_asset)
+                    #DBSession.add(new_asset)
                 except (AttributeError, TypeError) as e:
                     logger.debug(e.message)
                 else:
                     DBSession.add(new_asset)
-                    try:
-                        transaction.commit()
-                    except IntegrityError as e:
-                        logger.debug(e.message)
-                        transaction.abort()
-                    else:
-                        logger.debug('flushing the DBSession, no problem here!')
-                        DBSession.flush()
-                        logger.debug('finished adding Asset')
-                        return HTTPFound(location=came_from)
+                    #try:
+                    #    transaction.commit()
+                    #except IntegrityError as e:
+                    #    logger.debug(e.message)
+                    #    transaction.abort()
+                    #else:
+                    #    logger.debug('flushing the DBSession, no problem here!')
+                    #    DBSession.flush()
+                    #    logger.debug('finished adding Asset')
+                    return HTTPFound(location=came_from)
             else:
                 logger.debug('there are missing parameters')
     return {
-        'projects': Project.query().all(),
-        'types': Type.query().filter_by(target_entity_type='Asset').all(),
+        'projects': Project.query.all(),
+        'types': Type.query.filter_by(target_entity_type='Asset').all(),
         'status_list':
-            StatusList.query().filter_by(target_entity_type='Asset').first()
+            StatusList.query.filter_by(target_entity_type='Asset').first()
     }
 
 @view_config(
@@ -912,8 +994,8 @@ def add_sequence(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    logged_in_user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
@@ -939,8 +1021,8 @@ def add_sequence(request):
                 # type will always return with a type name
                 type_name = request.params['type']
                 
-                project = Project.query().filter_by(id=project_id).first()
-                type_ = Type.query()\
+                project = Project.query.filter_by(id=project_id).first()
+                type_ = Type.query\
                     .filter_by(target_entity_type='Sequence')\
                     .filter_by(name=type_name)\
                     .first()
@@ -950,7 +1032,7 @@ def add_sequence(request):
                     type_ = Type(name=type_name, target_entity_type='Sequence')
                 
                 # get the status_list
-                status_list = StatusList.query().filter_by(
+                status_list = StatusList.query.filter_by(
                     target_entity_type='Sequence'
                 ).first()
                 
@@ -966,13 +1048,13 @@ def add_sequence(request):
                     re.sub("[^0-9]+", "", request.params['status_id'])
                 )
                 logger.debug('status_id: %s' % status_id)
-                status = Status.query().filter_by(id=status_id).first()
+                status = Status.query.filter_by(id=status_id).first()
                 logger.debug('status: %s' % status)
                 
                 # get the lead
                 lead = None
                 if 'lead_id' in request.params:
-                    lead = User.query()\
+                    lead = User.query\
                             .filter_by(id=request.params['lead_id'])\
                             .first()
                 
@@ -1008,10 +1090,10 @@ def add_sequence(request):
             else:
                 logger.debug('there are missing parameters')
     return {
-        'projects': Project.query().all(),
-        'types': Type.query().filter_by(target_entity_type='Sequence').all(),
+        'projects': Project.query.all(),
+        'types': Type.query.filter_by(target_entity_type='Sequence').all(),
         'status_list':
-            StatusList.query().filter_by(target_entity_type='Sequence').first()
+            StatusList.query.filter_by(target_entity_type='Sequence').first()
     }
 
 
@@ -1027,11 +1109,11 @@ def edit_sequence(request):
     came_from = request.params.get('came_from', referrer)
     
     sequence_id = request.matchdict['sequence_id']
-    sequence = Sequence.query().filter_by(id=sequence_id).first()
+    sequence = Sequence.query.filter_by(id=sequence_id).first()
     
     if request.params['submitted'] == 'edit':
-        login_name = authenticated_userid(request)
-        authenticated_user = User.query().filter_by(login_name=login_name).first()
+        login = authenticated_userid(request)
+        authenticated_user = User.query.filter_by(login=login).first()
         
         # get the sequence and update it
         # TODO: add this part
@@ -1042,8 +1124,8 @@ def edit_sequence(request):
     # just give the info enough to fill the form
     return {
         'sequence': sequence,
-        'users': User.query().all(),
-        'status_lists': StatusList.query()\
+        'users': User.query.all(),
+        'status_lists': StatusList.query\
                             .filter_by(target_entity_type='Sequence')\
                             .all(),
     }
@@ -1060,8 +1142,8 @@ def add_shot(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    logged_in_user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
@@ -1082,8 +1164,8 @@ def add_shot(request):
                 # type will always return with a type name
 #                type_name = request.params['type']
                 
-                sequence = Sequence.query().filter_by(id=sequence_id).first()
-#                type_ = Type.query()\
+                sequence = Sequence.query.filter_by(id=sequence_id).first()
+#                type_ = Type.query\
 #                    .filter_by(target_entity_type='Shot')\
 #                    .filter_by(name=type_name)\
 #                    .first()
@@ -1093,7 +1175,7 @@ def add_shot(request):
 #                    type_ = Type(name=type_name, target_entity_type='Shot')
                 
                 # get the status_list
-                status_list = StatusList.query().filter_by(
+                status_list = StatusList.query.filter_by(
                     target_entity_type='Shot'
                 ).first()
                 
@@ -1109,7 +1191,7 @@ def add_shot(request):
                     re.sub("[^0-9]+", "", request.params['status_id'])
                 )
                 logger.debug('status_id: %s' % status_id)
-                status = Status.query().filter_by(id=status_id).first()
+                status = Status.query.filter_by(id=status_id).first()
                 logger.debug('status: %s' % status)
                 
 #                logger.debug('status: %s' % status)
@@ -1146,10 +1228,10 @@ def add_shot(request):
             else:
                 logger.debug('there are missing parameters')
     return {
-        'projects': Project.query().all(),
-        'types': Type.query().filter_by(target_entity_type='Shot').all(),
+        'projects': Project.query.all(),
+        'types': Type.query.filter_by(target_entity_type='Shot').all(),
         'status_list':
-            StatusList.query().filter_by(target_entity_type='Shot').first()
+            StatusList.query.filter_by(target_entity_type='Shot').first()
     }
 
 
@@ -1162,7 +1244,7 @@ def get_project_sequences(request):
     """returns the related sequences of the given project as a json data
     """
     project_id = request.matchdict['project_id']
-    project = Project.query().filter_by(id=project_id).first()
+    project = Project.query.filter_by(id=project_id).first()
     return [
             {'id': sequence.id, 'name': sequence.name}
             for sequence in project.sequences
@@ -1177,8 +1259,8 @@ def get_users(request):
     """returns all the users in database
     """
     return [
-        {'id': user.id, 'name': user.first_name + ' ' + user.last_name}
-        for user in User.query().all()
+        {'id': user.id, 'name': user.name}
+        for user in User.query.all()
     ]
 
 @view_config(
@@ -1202,11 +1284,11 @@ def view_project_related_data(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     project_id = request.matchdict['project_id']
-    project = Project.query().filter_by(id=project_id).first()
+    project = Project.query.filter_by(id=project_id).first()
     
     return {
         'project': project
@@ -1223,11 +1305,11 @@ def view_tasks(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
     
     taskable_entity_id = request.matchdict['taskable_entity_id']
-    taskable_entity = TaskableEntity.query()\
+    taskable_entity = TaskableEntity.query\
         .filter_by(id=taskable_entity_id)\
         .first()
     
@@ -1246,8 +1328,8 @@ def add_task(request):
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
     
-    login_name = authenticated_userid(request)
-    logged_in_user = User.query().filter_by(login_name=login_name).first()
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
@@ -1268,8 +1350,8 @@ def add_task(request):
                 # type will always return with a type name
 #                type_name = request.params['type']
                 
-                sequence = Sequence.query().filter_by(id=sequence_id).first()
-#                type_ = Type.query()\
+                sequence = Sequence.query.filter_by(id=sequence_id).first()
+#                type_ = Type.query\
 #                    .filter_by(target_entity_type='Shot')\
 #                    .filter_by(name=type_name)\
 #                    .first()
@@ -1279,7 +1361,7 @@ def add_task(request):
 #                    type_ = Type(name=type_name, target_entity_type='Shot')
                 
                 # get the status_list
-                status_list = StatusList.query().filter_by(
+                status_list = StatusList.query.filter_by(
                     target_entity_type='Shot'
                 ).first()
                 
@@ -1295,7 +1377,7 @@ def add_task(request):
                     re.sub("[^0-9]+", "", request.params['status_id'])
                 )
                 logger.debug('status_id: %s' % status_id)
-                status = Status.query().filter_by(id=status_id).first()
+                status = Status.query.filter_by(id=status_id).first()
                 logger.debug('status: %s' % status)
                 
 #                logger.debug('status: %s' % status)
@@ -1335,12 +1417,12 @@ def add_task(request):
     # return the necessary values to prepare the form
     # get the taskable entity
     te_id = request.matchdict['taskable_entity_id']
-    te = TaskableEntity.query().filter_by(id=te_id).first()
+    te = TaskableEntity.query.filter_by(id=te_id).first()
     
     return {
         'taskable_entity': te,
-        'types': Type.query().filter_by(target_entity_type='Task').all(),
-        'users': User.query().all(),
+        'types': Type.query.filter_by(target_entity_type='Task').all(),
+        'users': User.query.all(),
         'status_list':
-            StatusList.query().filter_by(target_entity_type='Task').first()
+            StatusList.query.filter_by(target_entity_type='Task').first()
     }

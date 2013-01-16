@@ -4,16 +4,17 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
-
-
-#from sqlalchemy.orm.descriptor_props import SynonymProperty
- 
 from sqlalchemy import Column, Integer, ForeignKey, String, Boolean
 from stalker.db.declarative import Base
-from stalker.models.entity import Entity, SimpleEntity
-from stalker.models.mixins import TargetEntityTypeMixin
+from stalker.models.entity import Entity
+from stalker.models.mixins import TargetEntityTypeMixin, CodeMixin
 
-class Type(Entity, TargetEntityTypeMixin):
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
+class Type(Entity, TargetEntityTypeMixin, CodeMixin):
     """Everything can have a type.
     
     .. versionadded:: 0.1.1
@@ -55,14 +56,18 @@ class Type(Entity, TargetEntityTypeMixin):
     :param string target_entity_type: The string defining the target type of
       this :class:`~stalker.models.type.Type`.
     """
+    __auto_name__ = False
     __tablename__ = "Types"
     __mapper_args__ = {"polymorphic_identity": "Type"}
     type_id_local = Column("id", Integer, ForeignKey("Entities.id"),
                            primary_key=True)
     
-    def __init__(self, **kwargs):
+    def __init__(self, name=None, code=None, **kwargs):
+        kwargs['name'] = name
         super(Type, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, **kwargs)
+        #CodeMixin.__init__(self, **kwargs)
+        self.code = code
     
     def __eq__(self, other):
         """the equality operator

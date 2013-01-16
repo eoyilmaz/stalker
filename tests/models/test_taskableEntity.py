@@ -18,6 +18,7 @@ class TaskableEntityTester(unittest.TestCase):
         # create a repository
         self.repository_type = Type(
             name="Test Repository Type",
+            code='test',
             target_entity_type=Repository
         )
         
@@ -45,12 +46,14 @@ class TaskableEntityTester(unittest.TestCase):
         # project type
         self.test_project_type = Type(
             name="Test Project Type",
+            code='test',
             target_entity_type=Project,
         )
         
         # create projects
         self.test_project1 = Project(
             name="Test Project 1",
+            code='tp1',
             type=self.test_project_type,
             status_list=self.project_status_list,
             repository=self.test_repository,
@@ -58,6 +61,7 @@ class TaskableEntityTester(unittest.TestCase):
         
         self.test_project2 = Project(
             name="Test Project 2",
+            code='tp2',
             type=self.test_project_type,
             status_list=self.project_status_list,
             repository=self.test_repository,
@@ -70,14 +74,18 @@ class TaskableEntityTester(unittest.TestCase):
         
         self.test_taskable_entity = TaskableEntity(**self.kwargs)
     
+    def test___auto_name__class_attribute_is_set_to_True(self):
+        """testing if the __auto_name__ class attribute is set to True for
+        TaskableEntity class
+        """
+        self.assertTrue(TaskableEntity.__auto_name__)
+     
     def test_tasks_element_attributes_are_set_to_other_object_than_Task(self):
         """testing if a TypeError will be raised when trying to set the
         individual elements in the tasks attribute to other objects than a
         Task instance
         """
-        
         test_values = [1, 1.2, "a str"]
-        
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
@@ -108,11 +116,13 @@ class TaskableEntityTester(unittest.TestCase):
         
         commercial_project_type = Type(
             name="Commercial",
+            code='comm',
             target_entity_type=Project
         )
         
         new_project1 = Project(
             name="Test Project 1",
+            code='tp1',
             status_list=project_statusList,
             type=commercial_project_type,
             repository=self.test_repository,
@@ -120,6 +130,7 @@ class TaskableEntityTester(unittest.TestCase):
         
         new_project2 = Project(
             name="Test Project 2",
+            code='tp2',
             status_list=project_statusList,
             type=commercial_project_type,
             repository=self.test_repository,
@@ -183,7 +194,7 @@ class TaskableEntityTester(unittest.TestCase):
         # check it
         self.assertEqual(new_task1.task_of, self.test_taskable_entity)
         
-        # poping or removing elements should raise RuntimeError
+        # popping or removing elements should raise RuntimeError
         self.assertRaises(TypeError, self.test_taskable_entity.tasks.pop, 0)
         
         # because the test is recovering from the previous error

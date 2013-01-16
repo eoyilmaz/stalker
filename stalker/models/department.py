@@ -9,6 +9,11 @@ from sqlalchemy.orm import relationship, validates
 from stalker.models.auth import User
 from stalker.models.entity import Entity
 
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
 class Department(Entity):
     """The departments that forms the studio itself.
     
@@ -34,7 +39,7 @@ class Department(Entity):
       the department. So another departments member can be a lead for another
       department. Lead attribute can not be empty or None.
     """
-
+    __auto_name__ = False
     __tablename__ = "Departments"
     __mapper_args__ = {"polymorphic_identity": "Department"}
     department_id = Column(

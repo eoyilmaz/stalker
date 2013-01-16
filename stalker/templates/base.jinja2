@@ -29,7 +29,7 @@
 <body class='claro' style='border-radius: 10px'>
 {% block body %}
   <div id='appLayout' class='demoLayout'>
-    <div id='header' class='edgePanel'>
+    <div id='header' class='edgePanel' style="overflow: hidden">
       {% block header %}
         <div id='stalker_logo'>
           Stalker <span style='font-size: 12px;'>v{{stalker.__version__}}</span>
@@ -52,7 +52,7 @@
         </div>
         
         <div id='mebar'>
-          <span>{{user.first_name}} {{user.last_name}}</span>
+          <span>{{user.name}}</span>
           <div id='expand_icon'
                style='
                  background-image: url({{ request.static_url('stalker:static/images/gmail_icons.png') }});

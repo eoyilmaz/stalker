@@ -5,7 +5,6 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import datetime
-import logging
 from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, Interval
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 from stalker import User
@@ -15,8 +14,10 @@ from stalker.errors import OverBookedWarning, CircularDependencyError
 from stalker.models.entity import Entity
 from stalker.models.mixins import ScheduleMixin, StatusMixin
 
+from stalker.log import logging_level
+import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging_level)
 
 class Booking(Entity, ScheduleMixin):
     """Holds information about the time spend on a specific
@@ -41,7 +42,7 @@ class Booking(Entity, ScheduleMixin):
     :param resource: The :class:`~stalker.models.auth.User` instance that this
       booking is created for.
     """
-
+    __auto_name__ = True
     __tablename__ = "Bookings"
     __mapper_args__ = {"polymorphic_identity": "Booking"}
     booking_id = Column("id", Integer, ForeignKey("Entities.id"),
@@ -66,10 +67,19 @@ class Booking(Entity, ScheduleMixin):
         booking is created for"""
     )
 
-    def __init__(self, task=None, resource=None, **kwargs):
+    def __init__(
+            self,
+            task=None,
+            resource=None,
+            start_date=None,
+            end_date=None,
+            duration=None,
+            **kwargs):
         super(Booking, self).__init__(**kwargs)
+        kwargs['start_date'] = start_date
+        kwargs['end_date'] = end_date
+        kwargs['duration'] = duration
         ScheduleMixin.__init__(self, **kwargs)
-
         self.task = task
         self.resource = resource
 
@@ -107,11 +117,11 @@ class Booking(Entity, ScheduleMixin):
             logger.debug('self.start_date: %s' % self.start_date)
 
             if booking.start_date == self.start_date or\
-               booking.due_date == self.due_date or\
-               (self.due_date > booking.start_date and
-                self.due_date < booking.due_date) or\
+               booking.end_date == self.end_date or \
+               (self.end_date > booking.start_date and
+                self.end_date < booking.end_date) or \
                (self.start_date > booking.start_date and
-                self.start_date < booking.due_date):
+                self.start_date < booking.end_date):
                 raise OverBookedWarning(
                     "The resource %s is overly booked with %s and %s" %
                     (resource, self, booking)
@@ -207,7 +217,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 
     #.. giving information about the dependent tasks. The given list is iterated
     #and the :attr:`~stalker.models.task.Task.start_date` attribute is set to
-    #the latest found :attr:`~stalker.models.task.Task.due_date` attribute of
+    #the latest found :attr:`~stalker.models.task.Task.end_date` attribute of
     #the dependent :class:`~stalker.models.task.Task`\ s.
 
     #.. :type depends: list of :class:`~stalker.models.task.TaskDependencyRelation`
@@ -235,7 +245,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #is meaningles to let a parent :class:`~stalker.models.task.Task` to have
     #any resource or any effort or any verions. The
     #:attr:`~stalker.models.task.Task.start_date`,
-    #:attr:`~stalker.models.task.Task.due_date` and
+    #:attr:`~stalker.models.task.Task.end_date` and
     #:attr:`~stalker.models.task.Task.duration` attributes of a
     #:class:`~stalker.models.task.Task` with child classes will be based on
     #it childrens date attributes.
@@ -249,7 +259,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #:type versions: list of :class:`~stalker.models.version.Version`
     #"""
 
-
+    __auto_name__ = False
     __tablename__ = "Tasks"
     __mapper_args__ = {"polymorphic_identity": "Task"}
     task_id = Column("id", Integer, ForeignKey("Entities.id"),
@@ -341,14 +351,22 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 
     def __init__(self,
                  depends=None,
+                 start_date=None,
+                 end_date=None,
+                 duration=None,
                  effort=None,
                  resources=None,
                  is_milestone=False,
                  priority=defaults.DEFAULT_TASK_PRIORITY,
                  task_of=None,
                  **kwargs):
+        # update kwargs with extras
+        kwargs['start_date'] = start_date
+        kwargs['end_date'] = end_date
+        kwargs['duration'] = duration
+        
         super(Task, self).__init__(**kwargs)
-
+        
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
@@ -587,13 +605,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # code copied and pasted from ScheduleMixin - Fix it later
         if duration is not None:
             if isinstance(duration, datetime.timedelta):
-                # set the due_date to None
+                # set the end_date to None
                 # to make it recalculated
                 self._validate_dates(self.start_date, None, duration)
             else:
-                self._validate_dates(self.start_date, self.due_date, duration)
+                self._validate_dates(self.start_date, self.end_date, duration)
         else:
-            self._validate_dates(self.start_date, self.due_date, duration)
+            self._validate_dates(self.start_date, self.end_date, duration)
             #------------------------------------------------------------
 
 
@@ -620,8 +638,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         It is a datetime.timedelta instance. Showing the difference of the
         :attr:`~stalker.models.mixins.ScheduleMixin.start_date` and the
-        :attr:`~stalker.models.mixins.ScheduleMixin.due_date`. If edited it
-        changes the :attr:`~stalker.models.mixins.ScheduleMixin.due_date`
+        :attr:`~stalker.models.mixins.ScheduleMixin.end_date`. If edited it
+        changes the :attr:`~stalker.models.mixins.ScheduleMixin.end_date`
         attribute value.
         """
     )
@@ -668,9 +686,9 @@ def _check_circular_dependency(task, check_for_task):
 #:class:`~stalker.models.task.Task` which is held by the
 #:attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
 #dependening on. The :attr:`~stalker.models.task.Task.start_date` and the
-#:attr:`~stalker.models.task.Task.due_date` attributes of the
+#:attr:`~stalker.models.task.Task.end_date` attributes of the
 #:class:`~stalker.models.task.Task` is updated if it is before the
-#``due_date`` of the dependent :class:`~stalker.models.task.Task`.
+#``end_date`` of the dependent :class:`~stalker.models.task.Task`.
 
 #:type depends: :class:`~stalker.models.task.Task`
 

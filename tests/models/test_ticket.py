@@ -20,9 +20,9 @@ from stalker.models.ticket import Ticket
 from stalker.models.type import Type
 from stalker.models.version import Version
 
-import logging
-logger = logging.getLogger("stalker.models.ticket")
-logger.setLevel(logging.DEBUG)
+import log
+logger = log.getLogger("stalker.models.ticket")
+logger.setLevel(log.DEBUG)
 
 class TicketTester(unittest.TestCase):
     """Tests the :class:`~stalker.models.ticket.Ticket` class
@@ -41,7 +41,7 @@ class TicketTester(unittest.TestCase):
         self.test_status2 = Status(name='R', code='R')
        
         # get the ticket types
-        ticket_types = Type.query()\
+        ticket_types = Type.query\
             .filter(Type.target_entity_type=='Ticket').all()
         self.ticket_type_1 = ticket_types[0]
         self.ticket_type_2 = ticket_types[1]
@@ -60,6 +60,7 @@ class TicketTester(unittest.TestCase):
         # create a Project Type
         self.test_project_type = Type(
             name='Commercial Project',
+            code='comm',
             target_entity_type=Project,
         )
         
@@ -103,11 +104,13 @@ class TicketTester(unittest.TestCase):
         
         self.test_asset_type = Type(
             name='Character Asset',
+            code='char',
             target_entity_type=Asset
         )
         
         self.test_asset = Asset(
             name="Test Asset",
+            code='ta',
             project=self.test_project,
             status_list=self.test_asset_status_list,
             type=self.test_asset_type
@@ -170,6 +173,12 @@ class TicketTester(unittest.TestCase):
         # revert the session back to the normal state
         DBSession.remove()
         DBSession.configure(extension=ZopeTransactionExtension())
+    
+    def test___auto_name__class_attribute_is_set_to_True(self):
+        """testing if the __auto_name__ class attribute is set to True for
+        Ticket class
+        """
+        self.assertTrue(Ticket.__auto_name__)
     
     def test_name_argument_is_not_used(self):
         """testing if the given name argument is not used

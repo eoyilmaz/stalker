@@ -8,6 +8,11 @@ from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.entity import Entity
 from stalker.models.mixins import StatusMixin
 
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
 class Message(Entity, StatusMixin):
     """The base of the messaging system in Stalker
     
@@ -36,7 +41,7 @@ class Message(Entity, StatusMixin):
       this message (so anything can be attached to a message)
     
     """
-
+    __auto_name__ = True
     __tablename__ = "Messages"
     __mapper_args__ = {"polymorphic_identity": "Message"}
     message_id = Column("id", Integer, ForeignKey("Entities.id"),

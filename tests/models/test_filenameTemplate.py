@@ -20,8 +20,11 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs = {
             "name": "Test FilenameTemplate",
-            "type": Type(name="Test Type",
-                         target_entity_type="FilenameTemplate"),
+            "type": Type(
+                name="Test Type",
+                code='tt',
+                target_entity_type="FilenameTemplate"
+            ),
             "path": "ASSETS/{{asset.code}}/{{task.type.code}}/",
             "filename": "{{asset.code}}_{{version.take}}_{{task.type.code}}_"\
                          "{{version.version}}_{{user.initials}}",
@@ -29,6 +32,12 @@ class FilenameTemplateTester(unittest.TestCase):
             "target_entity_type": Asset,
         }
         self.filename_template = FilenameTemplate(**self.kwargs)
+    
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Asset class
+        """
+        self.assertFalse(FilenameTemplate.__auto_name__)
     
     def test_filename_template_is_strictly_typed(self):
         """testing if the FilenameTemplate class is strictly typed

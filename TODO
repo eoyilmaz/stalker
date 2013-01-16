@@ -7,12 +7,6 @@ TODO
   are checked against being a string should now be checked against being
   unicode.
 
-* Start & End Date For Classes Mixed With TaskMixin:
-
-  All the classes which are mixed with TaskMixin should have a start and end
-  date attribute which will be set to the start date of the first task to the
-  due_date of the last task.
-
 * datetime instead of date
 
   In the Task class all the time calculation should be done over the
@@ -24,51 +18,12 @@ TODO
   The repository can be a local path, and the project can be managed with an
   SCM, preferably with Mercurial.
 
-* Commandline Module:
-
-  Create a commandline module which resembles the mercurials "hg" command to
-  let the users to manage their assets and data. Examples::
-    
-    st create project "Deneme"
-  
-  Also, to let the users easily use the commandline tool all the models 
-  should be easy to create.
-
-* Scrum:
-
-  Use scrum.
-
-* Implicit instance creation with back references:
-
-  Instead of::
-  
-    object2 = AClass(name="A Data", related_to=object1)
-  
-  Allow object creation with the following idiom::
-  
-    object1.data_list.append( AClass(name="A Data") )
-  
-  This is much easier to understand, because it both shows where is the new
-  data connected to and the user doesn't need to come up with a name for the
-  new object, but the first usage needs less knowledge about the internals of
-  the system (ex: to know that ``object2`` should go to ``object1.data_list``)
-
-* StatusMixin and string indices:
-
-  StatusMixin should be able to set the status with a string, because it is
-  possible to use strings in StatusList.
-
 * ``project`` or ``projects`` field:
 
   Most of the data is related with a Project. It is possible to add the
   ``project`` field to a higher level in the hierarchy than the TaskableEntity.
   A TaskableEntity needs to have a project but not all of them needs a tasks 
   field. So creating a project field in the super will be nice.
-
-* SimpleEntity.code attribute:
-
-  ``code`` is a more important field than the name, so replace their roles in 
-  the system.
 
 * don't forget to add tests for:
 
@@ -87,16 +42,6 @@ TODO
   There could be also an $STRC environment variable which is showing a common
   place lets say in the fileserver, which also may have a ".strc" file. In 
   this way it will be easy to setup only one ".strc" file for the whole studio.
-
-* Logging:
-
-  Use the Python logging module to output Debug messages.
-
-* ``end_date`` attribute in ScheduleMixin:
-  
-  there could be a synonym for the ``due_date`` attribute in the
-  :class:`~stalker.core.models.ScheduleMixin`\ . Which will be meaningful for
-  :class:`~stalker.core.models.Booking` class.
 
 * ``__tablename__`` and ``__mapper_args__``:
   
@@ -135,9 +80,28 @@ TODO
   The database tests should test if all the Create, Read, Update and Delete
   operations are happening properly.
 
-
 DONE:
 =====
+
+* ``end_date`` attribute in ScheduleMixin:
+  
+  there could be a synonym for the ``due_date`` attribute in the
+  :class:`~stalker.core.models.ScheduleMixin`\ . Which will be meaningful for
+  :class:`~stalker.core.models.Booking` class.
+* Logging:
+
+  Use the Python logging module to output Debug messages.
+
+* StatusMixin and string indices:
+
+  StatusMixin should be able to set the status with a string, because it is
+  possible to use strings in StatusList.
+
+* Start & End Date For Classes Mixed With TaskMixin:
+
+  All the classes which are mixed with TaskMixin should have a start and end
+  date attribute which will be set to the start date of the first task to the
+  due_date of the last task.
 
 * Refactor target_entity_type attributes
 

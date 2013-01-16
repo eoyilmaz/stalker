@@ -8,6 +8,11 @@ from sqlalchemy import Column, Integer, ForeignKey, Float
 from sqlalchemy.orm import validates, reconstructor
 from stalker.models.entity import Entity
 
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
 class ImageFormat(Entity):
     """Common image formats for the :class:`~stalker.models.project.Project`\ s.
     
@@ -24,7 +29,7 @@ class ImageFormat(Entity):
     :param print_resolution: The print resolution of the ImageFormat given as
       DPI (dot-per-inch). It can not be zero or negative
     """
-
+    __auto_name__ = False
     __tablename__ = "ImageFormats"
     __mapper_args__ = {"polymorphic_identity": "ImageFormat"}
 
@@ -33,7 +38,7 @@ class ImageFormat(Entity):
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
-        )
+    )
 
     width = Column(
         Integer,

@@ -9,9 +9,15 @@ from sqlalchemy.orm import relationship, validates
 from stalker import User
 from stalker.db.session import DBSession
 from stalker.models.entity import TaskableEntity
-from stalker.models.mixins import StatusMixin, ScheduleMixin, ReferenceMixin
+from stalker.models.mixins import (StatusMixin, ScheduleMixin, ReferenceMixin,
+                                   CodeMixin)
 
-class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
+class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     """All the information about a Project in Stalker is hold in this class.
     
     Project is one of the main classes that will direct the others. A project
@@ -19,10 +25,11 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     
     It is mixed with :class:`~stalker.models.mixins.ReferenceMixin`,
     :class:`~stalker.models.mixins.StatusMixin`,
-    :class:`~stalker.models.mixins.ScheduleMixin` and
-    :class:`~stalker.models.mixins.TaskMixin` to give reference, status,
-    schedule and task abilities. Please read the individual documentation of
-    each of the mixins.
+    :class:`~stalker.models.mixins.ScheduleMixin`,
+    :class:`~stalker.models.mixins.TaskMixin` and
+    :class:`~stalker.models.mixins.CodeMixin` to give reference, status,
+    schedule, task abilities and code attribute. Please read the individual
+    documentation of each of the mixins.
     
     The :attr:`~stalker.models.project.Project.users` attributes content is
     gathered from all the :class:`~stalker.models.task.Task`\ s of the project
@@ -94,6 +101,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     # for the created instance, I consider doing this safe.
     # ------------------------------------------------------------------------
 
+    __auto_name__ = False
     #__strictly_typed__ = True
     __tablename__ = "Projects"
     project_id_local = Column("id", Integer, ForeignKey("TaskableEntities.id"),
@@ -165,6 +173,8 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
     )
     
     def __init__(self,
+                 name=None,
+                 code=None,
                  lead=None,
                  repository=None,
                  structure=None,
@@ -175,14 +185,17 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
                  **kwargs):
         # a projects project should be self
         # initialize the project argument to self
-        kwargs["project"] = self
-
+        kwargs['project'] = self
+        
+        kwargs['name'] = name
+        
         super(Project, self).__init__(**kwargs)
         # call the mixin __init__ methods
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-
+        #CodeMixin.__init__(self, **kwargs)
+        
         self.lead = lead
         self._users = []
         self.repository = repository
@@ -193,6 +206,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin):
         self.image_format = image_format
         self.fps = fps
         self.is_stereoscopic = bool(is_stereoscopic)
+        self.code = code
     
     @validates("fps")
     def _validate_fps(self, key, fps):

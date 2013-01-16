@@ -5,31 +5,51 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
         // ********************************************************************
         // ADD DATA BUTTON
         // TODO: what is parent and what is dialog_id
-        create_add_data_button = function(
-            parent,
-            label,
-            dialog_id,
-            content_creator,
-            dom_element,
-            parent_form,
-            data_id
-            ){
-            // parent: The parent widget, null if there are no parents defined
-            // label: The label of the add button
-            // dialog_id: the id of the parent dialog
-            // dialog_creator: the content creator function for the dialog
-            // dom_element: the dom element to attach this button to
+        create_add_data_button = function(kwargs){
+            
+            // PARAMETERS
+            // 
+            // parent:
+            //   The parent widget, null if there are no parents defined,
+            //   generally it is another form.
+            // 
+            // button_label:
+            //   The label of the add button, default is 'Add'
+            // 
+            // dialog_id:
+            //   the id of the parent dialog
+            // 
+            // content_creator:
+            //   the content creator function for the dialog
+            // 
+            // dom_element:
+            //   the dom element to attach this button to
+            // 
+            // parent_data_id:
+            //   if we already have some id for the data, let say if we are
+            //   adding a new Sequence to a Project then this is the Project.id
+            //   or 
+            //   are 
+            
+            var parent = kwargs.parent;
+            var button_label = kwargs.label || 'Add';
+            var dialog_id = kwargs.dialog_id;
+            var content_creator = kwargs.content_creator;
+            var dom_element = kwargs.dom_element;
+            var parent_data_id = kwargs.data_id;
+            
             return new Button({
-                label: label,
+                label: button_label,
                 type: 'Button',
                 onClick: function(){
                     // create the dialog if it doesn't already exists
                     var dialog = dijit.byId(dialog_id);
                     if (dialog == null){
-                        dialog = content_creator(parent, data_id);
+                        dialog = content_creator(parent, parent_data_id);
                     }
                     
-                    dialog['parent_form'] = parent_form;
+                    // set the parent
+                    dialog.set('parent', parent);
                     
                     // show the dialog
                     dialog.show();
@@ -39,18 +59,19 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
         
         // ********************************************************************
         // EDIT DATA BUTTON
-        create_edit_data_button = function(
-            parent,
-            label,
-            dialog_id,
-            content_creator,
-            dom_element,
-            edited_data_id_getter,
-            parent_form
-            ){
+        create_edit_data_button = function(kwargs){
             // parent: The parent widget, null if there are no parents defined
             // label: The label of the add button
             // dialog_id: The id of the parent dialog
+            
+            var parent = kwargs.parent;
+            var label = kwargs.label;
+            var dialog_id = kwargs.dialog_id;
+            var content_creator = kwargs.content_creator;
+            var dom_element = kwargs.dom_element;
+            var edited_data_id_getter = kwargs.edited_data_id_getter;
+            var parent_form = kwargs.parent_form;
+            
             return new Button({
                 label: label,
                 type: 'Button',
@@ -82,6 +103,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -98,6 +126,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -111,6 +146,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -126,6 +168,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -139,6 +188,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -154,6 +210,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -167,6 +230,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -182,6 +252,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -196,6 +273,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
          
@@ -211,6 +295,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -224,6 +315,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -239,6 +337,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -252,6 +357,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -267,6 +379,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -280,6 +399,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -295,6 +421,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -311,6 +444,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -324,6 +464,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -339,6 +486,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -352,6 +506,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -367,6 +528,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
         
@@ -380,6 +548,13 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                 executeScripts: true
             });
             myDialog.set('parent', parent);
+            myDialog.connect(
+                myDialog,
+                'close',
+                function(){
+                    myDialog.destroy();
+                }
+            );
             return myDialog;
         };
    });

@@ -60,6 +60,7 @@ class UserTest(unittest.TestCase):
         # a repository type
         self.test_repository_type = Type(
             name="Test",
+            code='test',
             target_entity_type=Repository,
         )
 
@@ -72,12 +73,14 @@ class UserTest(unittest.TestCase):
         # a project type
         self.commercial_project_type = Type(
             name="Commercial Project",
+            code='comm',
             target_entity_type=Project,
         )
 
         # a couple of projects
         self.test_project1 = Project(
             name="Test Project 1",
+            code='tp1',
             status_list=self.project_status_list,
             type=self.commercial_project_type,
             repository=self.test_repository,
@@ -85,6 +88,7 @@ class UserTest(unittest.TestCase):
 
         self.test_project2 = Project(
             name="Test Project 2",
+            code='tp2',
             status_list=self.project_status_list,
             type=self.commercial_project_type,
             repository=self.test_repository,
@@ -92,6 +96,7 @@ class UserTest(unittest.TestCase):
 
         self.test_project3 = Project(
             name="Test Project 3",
+            code='tp3',
             status_list=self.project_status_list,
             type=self.commercial_project_type,
             repository=self.test_repository,
@@ -153,24 +158,28 @@ class UserTest(unittest.TestCase):
         # a couple of sequences
         self.test_sequence1 = Sequence(
             name="Test Seq 1",
+            code='ts1',
             project=self.test_project1,
             status_list=self.sequence_status_list
         )
 
         self.test_sequence2 = Sequence(
             name="Test Seq 2",
+            code='ts2',
             project=self.test_project1,
             status_list=self.sequence_status_list
         )
 
         self.test_sequence3 = Sequence(
             name="Test Seq 3",
+            code='ts3',
             project=self.test_project1,
             status_list=self.sequence_status_list
         )
 
         self.test_sequence4 = Sequence(
             name="Test Seq 4",
+            code='ts4',
             project=self.test_project1,
             status_list=self.sequence_status_list
         )
@@ -208,48 +217,54 @@ class UserTest(unittest.TestCase):
         # create a proper user object
         self.test_user = User(**self.kwargs)
     
-    def test_code_argument_is_skipped(self):
-        """testing if the code attribute will be copied from login if it is
-        skipped
-        """
-        try:
-            self.kwargs.pop('code')
-        except KeyError:
-            pass
-        
-        new_user = User(**self.kwargs)
-        self.assertEqual(new_user.code, new_user.login)
+#    def test_code_argument_is_skipped(self):
+#        """testing if the code attribute will be copied from login if it is
+#        skipped
+#        """
+#        try:
+#            self.kwargs.pop('code')
+#        except KeyError:
+#            pass
+#        
+#        new_user = User(**self.kwargs)
+#        self.assertEqual(new_user.code, new_user.login)
     
-    def test_code_argument_is_None(self):
-        """testing if the code attribute will be copied from login attribute if
-        the code argument is None
-        """
-        self.kwargs['code'] = None
-        new_user = User(**self.kwargs)
-        self.assertEqual(new_user.code, new_user.login)
+#    def test_code_argument_is_None(self):
+#        """testing if the code attribute will be copied from login attribute if
+#        the code argument is None
+#        """
+#        self.kwargs['code'] = None
+#        new_user = User(**self.kwargs)
+#        self.assertEqual(new_user.code, new_user.login)
     
-    def test_code_attribute_is_set_to_None(self):
-        """testing if the code attribute will be copied from login attribute if
-        it is set to None
-        """
-        self.test_user.code = None
-        self.assertEqual(self.test_user.code, self.test_user.login)
+#    def test_code_attribute_is_set_to_None(self):
+#        """testing if the code attribute will be copied from login attribute if
+#        it is set to None
+#        """
+#        self.test_user.code = None
+#        self.assertEqual(self.test_user.code, self.test_user.login)
     
-    def test_code_argument_is_empty_string(self):
-        """testing if the code attribute will be copied from login attribute if
-        is the code argument is an empty string
-        """
-        self.kwargs['code'] = ''
-        new_user = User(**self.kwargs)
-        self.assertEqual(new_user.code, new_user.login)
+#    def test_code_argument_is_empty_string(self):
+#        """testing if the code attribute will be copied from login attribute if
+#        is the code argument is an empty string
+#        """
+#        self.kwargs['code'] = ''
+#        new_user = User(**self.kwargs)
+#        self.assertEqual(new_user.code, new_user.login)
     
-    def test_code_attribute_is_empty_string(self):
-        """testing if the code attribute will be copied from login attribute if
-        it is set to an empty string
-        """
-        self.test_user.code = ''
-        self.assertEqual(self.test_user.code, self.test_user.login)
+#    def test_code_attribute_is_empty_string(self):
+#        """testing if the code attribute will be copied from login attribute if
+#        it is set to an empty string
+#        """
+#        self.test_user.code = ''
+#        self.assertEqual(self.test_user.code, self.test_user.login)
     
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        User class
+        """
+        self.assertFalse(User.__auto_name__)
+     
     def test_email_argument_accepting_only_string_or_unicode(self):
         """testing if email argument accepting only string or unicode
         values
@@ -674,7 +689,6 @@ class UserTest(unittest.TestCase):
     def test_projects_attribute_is_read_only(self):
         """testing if the project attribute is read-only
         """
-
         self.assertRaises(AttributeError, setattr, self.test_user, "projects",
             [])
 
@@ -685,6 +699,7 @@ class UserTest(unittest.TestCase):
         # create a new project
         commercial_project_type = Type(
             name="Commercial Project",
+            code='comm',
             target_entity_type=Project
         )
 
@@ -699,6 +714,7 @@ class UserTest(unittest.TestCase):
 
         new_project1 = Project(
             name="New Project 1",
+            code='np1',
             type=commercial_project_type,
             status_list=project_status_list,
             repository=self.test_repository,
@@ -706,6 +722,7 @@ class UserTest(unittest.TestCase):
 
         new_project2 = Project(
             name="New Project 2",
+            code='np2',
             type=commercial_project_type,
             status_list=project_status_list,
             repository=self.test_repository,
@@ -726,11 +743,23 @@ class UserTest(unittest.TestCase):
         )
 
         # create a couple of tasks
-        design_task_type = Type(name="Design", target_entity_type=Task)
+        design_task_type = Type(
+            name="Design",
+            code='design',
+            target_entity_type=Task
+        )
 
-        modeling_task_type = Type(name="Modeling", target_entity_type=Task)
+        modeling_task_type = Type(
+            name="Modeling",
+            code='modeling',
+            target_entity_type=Task
+        )
 
-        shading_task_type = Type(name="Shading", target_entity_type=Task)
+        shading_task_type = Type(
+            name="Shading",
+            code='shading',
+            target_entity_type=Task
+        )
 
         task1 = Task(
             name="Modeling",
@@ -913,7 +942,7 @@ class UserTest(unittest.TestCase):
         """testing if sequences_lead attribute accepts an empty list
         """
         # this should work without any error
-        self.test_user.leader_of_seuqences = []
+        self.test_user.sequences_lead = []
 
     def test_sequences_lead_argument_accepts_only_lists(self):
         """testing if a TypeError will be raised when trying to assign a list

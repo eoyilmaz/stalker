@@ -72,9 +72,10 @@ class ProjectMixinTester(unittest.TestCase):
         )
 
         self.test_project_type = Type(
-            name="Test Project",
+            name='Test Project Type',
+            code='testproj',
             target_entity_type=Project,
-            )
+        )
 
         self.test_repository = Repository(
             name="Test Repo",
@@ -82,10 +83,11 @@ class ProjectMixinTester(unittest.TestCase):
 
         self.test_project = Project(
             name="Test Project",
+            code='tp',
             type=self.test_project_type,
             status_list=self.test_project_statusList,
             repository=self.test_repository,
-            )
+        )
 
         self.kwargs = {
             "name": "ozgur",

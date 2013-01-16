@@ -10,7 +10,6 @@ class EntityTester(unittest.TestCase):
     def setUp(self):
         """setting up some proper values
         """
-        
         # create a user
         self.test_user = User(
             name="Test User",
@@ -45,7 +44,14 @@ class EntityTester(unittest.TestCase):
 
         # create a proper SimpleEntity to use it later in the tests
         self.test_entity = Entity(**self.kwargs)
+    
 
+    def test___auto_name__class_attribute_is_set_to_True(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Entity class
+        """
+        self.assertTrue(Entity.__auto_name__)
+     
     def test_notes_argument_being_omitted(self):
         """testing if no error raised when omitted the notes argument
         """

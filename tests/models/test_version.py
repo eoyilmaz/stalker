@@ -11,9 +11,9 @@ from stalker import (Link, Project, Repository, Sequence, Shot, Status,
 from stalker import db
 from stalker.db.session import DBSession, ZopeTransactionExtension
 
-import logging
-logger = logging.getLogger('stalker.models.version.Version')
-logger.setLevel(logging.DEBUG)
+import log
+logger = log.getLogger('stalker.models.version.Version')
+logger.setLevel(log.DEBUG)
 
 class VersionTester(unittest.TestCase):
     """tests stalker.models.version.Version class
@@ -105,7 +105,7 @@ class VersionTester(unittest.TestCase):
                 self.test_status5,
                 ],
             target_entity_type=Version,
-            )
+        )
 
         # repository
         self.test_repo = Repository(
@@ -115,16 +115,18 @@ class VersionTester(unittest.TestCase):
         # a project type
         self.test_project_type = Type(
             name="Test",
+            code='test',
             target_entity_type=Project,
-            )
+        )
 
         # create a project
         self.test_project = Project(
             name="Test Project",
+            code='tp',
             type=self.test_project_type,
             status_list=self.test_project_status_list,
             repository=self.test_repo,
-            )
+        )
 
         # create a sequence
         self.test_sequence = Sequence(
@@ -132,14 +134,14 @@ class VersionTester(unittest.TestCase):
             code="SEQ1",
             project=self.test_project,
             status_list=self.test_sequence_status_list,
-            )
+        )
 
         # create a shot
         self.test_shot1 = Shot(
             code="SH001",
             sequence=self.test_sequence,
             status_list=self.test_shot_status_list,
-            )
+        )
 
         # create a group of Tasks for the shot
         self.test_task1 = Task(
@@ -206,6 +208,12 @@ class VersionTester(unittest.TestCase):
         """
         DBSession.remove()
     
+    def test___auto_name__class_attribute_is_set_to_True(self):
+        """testing if the __auto_name__ class attribute is set to True for
+        Version class
+        """
+        self.assertTrue(Version.__auto_name__)
+     
     def test_take_name_argument_is_skipped_defaults_to_default_value(self):
         """testing if the take_name argument is skipped the take attribute is
         going to be set to the default value which is

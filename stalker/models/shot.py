@@ -7,9 +7,14 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, synonym, reconstructor
 from stalker.models.entity import TaskableEntity
-from stalker.models.mixins import StatusMixin, ReferenceMixin
+from stalker.models.mixins import (StatusMixin, ReferenceMixin, CodeMixin)
 
-class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
+class Shot(TaskableEntity, ReferenceMixin, StatusMixin, CodeMixin):
     """Manages Shot related data.
     
     .. deprecated:: 0.1.2
@@ -89,7 +94,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
       :attr:`~stalker.models.shot.Shot.cut_duration` attribute will be set to
       1. Can be skipped. The default value is None.
     """
-
+    __auto_name__ = True
     __tablename__ = "Shots"
     __mapper_args__ = {"polymorphic_identity": "Shot"}
 
@@ -108,7 +113,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     _cut_out = Column(Integer)
 
     def __init__(self,
-                 #code=None,
+                 code=None,
                  sequence=None,
                  cut_in=1,
                  cut_out=None,
@@ -116,26 +121,24 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
                  #assets=None,
                  **kwargs):
         sequence = self._validate_sequence(sequence)
-
+        
         # initialize TaskableMixin
-        kwargs["project"] = sequence.project
-
+        kwargs['project'] = sequence.project
+        kwargs['code'] = code
+        #kwargs['name'] = code
+        
         super(Shot, self).__init__(**kwargs)
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
-
+        CodeMixin.__init__(self, **kwargs)
+        
         self.sequence = self._validate_sequence(sequence)
-
+        
         self._cut_in = cut_in
         self._cut_duration = cut_duration
         self._cut_out = cut_out
-
+        
         self._update_cut_info(cut_in, cut_duration, cut_out)
-
-        #self._assets = self._validate_assets(assets)
-        #if assets is None:
-        #    assets = []
-        #self.assets = assets
 
     @reconstructor
     def __init_on_load__(self):
@@ -151,7 +154,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
     def __repr__(self):
         """the representation of the Shot
         """
-        return "<%s (%s, %s)>" % (self.entity_type, self.code, self.code)
+        return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
 
     def __eq__(self, other):
         """equality operator
@@ -159,7 +162,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin):
         # __eq__ always returns false but to be safe the code will be added
         # here
 
-        return self.code == other.code and isinstance(other, Shot) and\
+        return isinstance(other, Shot) and self.code == other.code and \
                self.sequence == other.sequence
 
     def _update_cut_info(self, cut_in, cut_duration, cut_out):

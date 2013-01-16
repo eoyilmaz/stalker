@@ -59,13 +59,13 @@
       login_form.startup();
       
       // Login or Email
-      var login_name_validationTextBox = new ValidationTextBox({
+      var login_validationTextBox = new ValidationTextBox({
         name: 'login',
         required: true,
         type: 'text',
         value: '{{login}}'
       }, 'e-mail');
-      login_name_validationTextBox.startup();
+      login_validationTextBox.startup();
       
       // Password
       var password_validationTextBox = new ValidationTextBox({

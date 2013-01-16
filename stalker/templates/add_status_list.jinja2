@@ -49,7 +49,9 @@
 {#            <button id='status_list_edit_status_button'>Edit</button>#}
         </td>
       </tr>
-    
+      
+      <input id='status_list_statuses_wrapper' type='hidden'>
+      
     </table>
   </form>
 </div>
@@ -79,7 +81,8 @@
             // on parent widget
             var deferred = xhr.post({
               content: {
-                submitted: 'add'
+                submitted: 'add',
+                statuses: statuses_multiSelect_wrapper.get('value')
               },
               url: '{{ request.route_url("add_status_list") }}',
               form: dojo.byId('add_status_list_form')
@@ -136,10 +139,24 @@
       
       // ********************************************************************
       // STATUSES
+      var statuses_multiSelect_wrapper = new TextBox({
+        name: 'statuses',
+        label: 'Statuses Wrapper',
+        type: 'hidden'
+      }, 'status_list_statuses_wrapper');
+      statuses_multiSelect_wrapper.startup();
+      
       var statuses_multiSelect = new MultiSelect({
         name: 'statuses',
         required: false,
-        style: 'height: 300px'
+        style: 'height: 300px',
+        onChange: function(){
+          // update the wrapper field
+          statuses_multiSelect_wrapper.set(
+            'value',
+            this.get('value')
+          )
+        }
       }, 'status_list_statuses');
       statuses_multiSelect.startup();
       

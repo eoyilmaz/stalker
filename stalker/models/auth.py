@@ -19,28 +19,28 @@ from stalker.db.declarative import Base
 from stalker.models.mixins import ACLMixin
 from stalker.models.entity import Entity
 
+from stalker.log import logging_level
 import logging
-
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging_level)
 
-def group_finder(login_name, request):
-    """Returns the group of the given login_name. The login name will be in
-    'User:{login_name}' format.
+def group_finder(login, request):
+    """Returns the group of the given login. The login name will be in
+    'User:{login}' format.
     
-    :param login_name: The login_name of the user, both '{login_name}' and
-      'User:{login_name}' format is accepted.
+    :param login: The login of the user, both '{login}' and
+      'User:{login}' format is accepted.
     
     :param request: The Request object
     
     :return: Will return the groups of the user in ['Group:{group_name}']
       format.
     """
-    if ':' in login_name:
-        login_name = login_name.split(':')[1]
+    if ':' in login:
+        login = login.split(':')[1]
     
     # return the group of the given User object
-    user_obj = User.query().filter_by(login_name=login_name).first()
+    user_obj = User.query.filter_by(login=login).first()
     
     if user_obj:
         # just return the groups names if there is any group
@@ -61,7 +61,7 @@ class RootFactory(object):
         # create the default acl and give admins all the permissions
         all_permissions = map(
             lambda x: x.action + '_' + x.class_name,
-            Permission.query().all()
+            Permission.query.all()
         )
         
         d = defaults
@@ -114,8 +114,8 @@ class Permission(Base):
       # What is left to you is to create the permissions
       setup.db()
       
-      user1 = User(login_name='test_user1', password='1234')
-      user2 = User(login_name='test_user2', password='1234')
+      user1 = User(login='test_user1', password='1234')
+      user2 = User(login='test_user2', password='1234')
       
       group1 = Group(name='users')
       group1.users = [user1, user2]
@@ -243,7 +243,7 @@ class Group(Entity, ACLMixin):
     """
     
     # TODO: Update Group class documentation
-    
+    __auto_name__ = False
     __tablename__ = "Groups"
     __mapper_args__ = {"polymorphic_identity": "Group"}
 
@@ -289,7 +289,7 @@ class User(Entity, ACLMixin):
       the :attr:`~stalker.models.auth.User.nice_name` as it is in a
       :class:`~stalker.models.entity.SimpleEntity`, but the
       :attr:`~stalker.models.auth.User.nice_name` is derived from the
-      :attr:`~stalker.models.auth.User.login_name` instead of the
+      :attr:`~stalker.models.auth.User.login` instead of the
       :attr:`~stalker.models.auth.User.name` attribute, so the
       :attr:`~stalker.models.auth.User.code` of a
       :class:`~stalker.models.auth.User` and a
@@ -359,7 +359,7 @@ class User(Entity, ACLMixin):
     
     :type last_login: datetime.datetime
     """
-    
+    __auto_name__ = False
     __tablename__ = "Users"
     __mapper_args__ = {"polymorphic_identity": "User"}
 
@@ -466,7 +466,6 @@ class User(Entity, ACLMixin):
         self,
         name=None,
         login=None,
-        code=None,
         email=None,
         password=None,
         department=None,
@@ -479,19 +478,12 @@ class User(Entity, ACLMixin):
     ):
         kwargs['name'] = name
         
-        self.login = login
-        
-        if code is None or code=='':
-            code = self.login
-        
-        kwargs['code'] = code
-        
         super(User, self).__init__(**kwargs)
-        
+
+        self.login = login
         self.department = department
         
         self.email = email
-        self.code = code
         
         # to be able to mangle the password do it like this
         self.password = password
@@ -561,29 +553,9 @@ class User(Entity, ACLMixin):
             raise ValueError('%s.login can not be an empty string' %
                              self.__class__.__name__)
         
-        # also set the nice_name
-        #self._nice_name = self._format_nice_name(login)
-        
-        ## and also the code
-        #self.code = login
-        
         logger.debug("name out: %s" % login)
         
         return login
-    
-    @validates('code')
-    def _validate_code(self, key, code):
-        """validates the given code attribute
-        """
-        print "THIS IS WORKING!!!!!!!"
-        logger.debug('code in: %s' % code)
-        if code is None or code == '' or not isinstance(code, str):
-            logger.debug('code is %s, setting it to: %s' % (code, self.login))
-            code = self.login
-        
-        code = self._format_code(code)
-        
-        return code
     
     @validates("department")
     def _validate_department(self, key, department):

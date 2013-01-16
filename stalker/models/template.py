@@ -9,6 +9,11 @@ from sqlalchemy.orm import validates
 from stalker.models.entity import Entity
 from stalker.models.mixins import TargetEntityTypeMixin
 
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
 class FilenameTemplate(Entity, TargetEntityTypeMixin):
     """Holds templates for filename conventions.
     
@@ -36,12 +41,12 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     Versions and References::
       
       # first get the Types
-      vers_type = Type.query()\
+      vers_type = Type.query\
                   .filter_by(target_entity_type="FilenameTemplate")\
                   .filter_by(type="Version")\
                   .first()
       
-      ref_type = Type.query()\
+      ref_type = Type.query\
                  .filter_by(target_entity_type="FilenameTemplate")\
                  .filter_by(type="Reference")\
                  .first()
@@ -194,6 +199,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     
     .. _Jinja2: http://jinja.pocoo.org/docs/
     """
+    __auto_name__ = False
     __strictly_typed__ = True
     __tablename__ = "FilenameTemplates"
     __mapper_args__ = {"polymorphic_identity": "FilenameTemplate"}

@@ -14,7 +14,7 @@
         <tr>
           <td style='text-align: right'><b>Lead</b></td>
           <td>&nbsp</td>
-          <td>{{ project.lead.first_name }} {{ project.lead.last_name }} ({{ project.lead.login_name }})</td>
+          <td>{{ project.lead.name }} ({{ project.lead.login }})</td>
         </tr>
         <tr>
           <td style='text-align: right'><b>Image Format</b></td>
@@ -37,9 +37,9 @@
           <td>{{ project.start_date }}</td>
         </tr>
         <tr>
-          <td style='text-align: right'><b>Due Date</b></td>
+          <td style='text-align: right'><b>End Date</b></td>
           <td>&nbsp</td>
-          <td>{{ project.due_date }}</td>
+          <td>{{ project.end_date }}</td>
         </tr>
       </table>
     </div>

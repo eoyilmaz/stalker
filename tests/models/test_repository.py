@@ -11,6 +11,7 @@ from stalker import Repository, Tag
 class RepositoryTester(unittest.TestCase):
     """tests the Repository class
     """
+    
     def setUp(self):
         """setup the test
         """
@@ -28,7 +29,13 @@ class RepositoryTester(unittest.TestCase):
         }
 
         self.test_repo = Repository(**self.kwargs)
-
+    
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Repository class
+        """
+        self.assertFalse(Repository.__auto_name__)
+    
     def test_linux_path_argument_accepts_only_strings(self):
         """testing if linux_path argument accepts only string or unicode
         values

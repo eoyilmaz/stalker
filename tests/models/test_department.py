@@ -72,8 +72,13 @@ class DepartmentTester(unittest.TestCase):
 
         # create a default department object
         self.test_department = Department(**self.kwargs)
-
-
+    
+    def test___auto_name__class_attribute_is_set_to_false(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Department class
+        """
+        self.assertFalse(Department.__auto_name__)
+    
     def test_members_argument_accepts_an_empty_list(self):
         """testing if members argument accepts an empty list
         """

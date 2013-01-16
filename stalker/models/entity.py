@@ -6,6 +6,7 @@
 
 import datetime
 import re
+import uuid
 from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship, validates, reconstructor
 
@@ -13,44 +14,10 @@ import stalker
 from stalker.db import Base
 from stalker.models.mixins import ProjectMixin
 
-#class EntityMeta(type):
-#    """The metaclass for the very basic entity.
-#    
-#    Just adds the name of the class as the entity_type class attribute and
-#    creates an attribute called plural_name to hold the auto generated plural
-#    form of the class name. These two attributes can be overridden in the
-#    class itself.
-#    """
-#    
-#    def __new__(mcs, class_name, bases, dict_):
-#        # create the entity_type
-#        #dict_["entity_type"] = unicode(class_name)
-#        
-#        # try to find a plural name for the class if not given
-#        if not dict_.has_key("plural_name"):
-#            plural_name = unicode(class_name + "s")
-#            
-#            if class_name[-1] == "y":
-#                plural_name = unicode(class_name[:-1] + "ies")
-#            elif class_name[-2] == "ch":
-#                plural_name = unicode(class_name + "es")
-#            elif class_name[-1] == "f":
-#                plural_name = unicode(class_name[:-1] + "ves")
-#            elif class_name[-1] == "s":
-#                plural_name = unicode(class_name + "es")
-#
-#            dict_["plural_name"] = plural_name
-#
-#        #if not dict_.has_key("__strictly_typed__"):
-#        #    dict_["__strictly_typed__"] = False
-#        
-#        # add the class to the ACLs
-#        ACLs.insert().values(action='add', class_name=class_name)
-#        from stalker.db.session import DBSession
-#        if DBSession.engine:
-#            pass
-#        
-#        return super(EntityMeta, mcs).__new__(mcs, class_name, bases, dict_)
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
 
 class SimpleEntity(Base):
     """The base class of all the others
@@ -63,7 +30,7 @@ class SimpleEntity(Base):
     :attr:`~stalker.models.entity.SimpleEntity.updated_by`,
     :attr:`~stalker.models.entity.SimpleEntity.date_created`,
     :attr:`~stalker.models.entity.SimpleEntity.date_updated` and a couple of
-    naming attributes like :attr:`~stalker.models.entity.SimpleEntity.code` and
+    naming attributes like
     :attr:`~stalker.models.entity.SimpleEntity.nice_name` and last but not
     least the :attr:`~stalker.models.entity.SimpleEntity.type` attribute which
     is very important for entities that needs a type.
@@ -83,45 +50,22 @@ class SimpleEntity(Base):
     Two SimpleEntities considered to be equal if they have the same name, the
     other attributes doesn't matter.
     
-    The formatting rules for the code attribute is as follows:
-      
-        * only alphanumerics and underscore is allowed \[a-zA-Z0-9\_\]
-        * no number is allowed at the beginning
-        * no white spaces are allowed
-        * all the white spaces will be converted to underscore characters
-        * all the underscores are converted to only one underscore character if
-          more than one follows each other
+    .. versionadded: 0.2.0: Name attribute can be skipped.
     
-    Examples:
+      Starting from version 0.2.0 the ``name`` attribute can be skipped. For
+      derived classes use the ``__auto_name__`` class attribute to control
+      auto naming behaviour.
     
-        +-----------------------------------+-----------------------------------+
-        | Input Value                       | Formatted Output                  |
-        +===================================+===================================+
-        | testCode                          | testCode                          |
-        +-----------------------------------+-----------------------------------+
-        | 1testCode                         | testCode                          |
-        +-----------------------------------+-----------------------------------+
-        | _testCode                         | testCode                          |
-        +-----------------------------------+-----------------------------------+
-        | 2423$+^^+^'%+%%&_testCode         | testCode                          |
-        +-----------------------------------+-----------------------------------+
-        | 2423$+^^+^'%+%%&_testCode_35      | testCode_35                       |
-        +-----------------------------------+-----------------------------------+
-        | 2423$ +^^+^ '%+%%&_ testCode\_ 35 | testCode_35                       |
-        +-----------------------------------+-----------------------------------+
-        | SH001                             | SH001                             |
-        +-----------------------------------+-----------------------------------+
-        | My CODE is Code                   | My_CODE_is_Code                   |
-        +-----------------------------------+-----------------------------------+
-        | this is another code for an asset | this_is_another_code_for_an_asset |
-        +-----------------------------------+-----------------------------------+
-      
     :param string name: A string or unicode value that holds the name of this
-      entity. It can not be empty, the first letter should be an alphabetic
-      ([a-zA-z]) (not alphanumeric [a-zA-Z0-9]) letter and it should not
-      contain any white space at the beginning and at the end of the string,
-      giving an object the object will be converted to string and then the
-      resulting string will be formatted.
+      entity.  It should not contain any white space at the beginning and at
+      the end of the string. Valid characters are [a-zA-Z0-9_/S].
+      
+      Advanced::
+      
+        For classes derived from the SimpleEntity, if an automatic name is
+        desired, the ``__auto_name__`` class attribute can be set to True. Then
+        Stalker will automatically generate a uuid4 sequence for the name
+        attribute.
     
     :param str description: A string or unicode attribute that holds the
       description of this entity object, it could be an empty string, and it
@@ -147,22 +91,16 @@ class SimpleEntity(Base):
     
     :type date_updated: :class:`datetime.datetime`
     
-    :param str code: The code name of this object. It accepts string or
-      unicode values and any other kind of objects will be converted to
-      string. Can be omitted and it will be set to the same value of the
-      nice_name attribute. If both the name and code arguments are given the
-      code attribute will be set to the given code argument value, but in any
-      update to name attribute the code also will be updated to the nice_name
-      attribute. When the code is directly edited the code will not be
-      formatted other than removing any illegal characters. The default value
-      is the same value of the nice_name.
-    
     :param type: The type of the current SimpleEntity. Used across several
       places in Stalker. Can be None. The default value is None.
     
     :type type: :class:`~stalker.models.type.Type`
     """
     
+    # TODO: Allow the user to specify the formatting of the name attribute as a Regular Expression
+    
+    # auto generate name values
+    __auto_name__ = True
     __strictly_typed__ = False
     
     __tablename__ = "SimpleEntities"
@@ -173,20 +111,7 @@ class SimpleEntity(Base):
         "polymorphic_on": entity_type,
         "polymorphic_identity": "SimpleEntity"
     }
-    
-    code = Column(
-        String(256),
-        nullable=False,
-        doc="""The code name of this object.
-        
-        It accepts string or unicode values and any other kind of objects will
-        be converted to string. In any update to the name attribute the code
-        also will be updated. If the code is not initialized or given as None,
-        it will be set to the uppercase version of the nice_name attribute.
-        Setting the code attribute to None will reset it to the default value.
-        The default value is the upper case form of the nice_name."""
-    )
-    
+   
     name = Column(
         String(256),
         nullable=False,
@@ -267,38 +192,23 @@ class SimpleEntity(Base):
     
     __stalker_version__ = Column("stalker_version", String(256))
     
-    def __init__(self,
-                 name=None,
-                 description="",
-                 type=None,
-                 created_by=None,
-                 updated_by=None,
-                 date_created=None,
-                 date_updated=None,
-                 code=None,
-                 **kwargs
+    def __init__(
+        self,
+        name=None,
+        description="",
+        type=None,
+        created_by=None,
+        updated_by=None,
+        date_created=None,
+        date_updated=None,
+        **kwargs
     ): # pylint: disable=W0613
         
         # name and nice_name
         self._nice_name = ""
-
-        # check the name
-        if name is None or name == "":
-            if code is None:
-                code = ""
-            name = code
-
+        
         self.name = name
-
-        # code
-        # if the given code argument is not None
-        # use it to set the code
-        if code is not None and code is not "":
-            #self._code = self._validate_code(code)
-            self.code = code
-        else:
-            self.code = name
-
+        
         self.description = description
         self.created_by = created_by
         self.updated_by = updated_by
@@ -324,14 +234,12 @@ class SimpleEntity(Base):
     def __repr__(self):
         """the representation of the SimpleEntity
         """
-
-        return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
+        return "<%s (%s)>" % (self.name, self.entity_type)
     
     @validates("description")
     def _validate_description(self, key, description_in):
         """validates the given description_in value
         """
-
         if description_in is None:
             description_in = ""
 
@@ -341,6 +249,12 @@ class SimpleEntity(Base):
     def _validate_name(self, key, name):
         """validates the given name_in value
         """
+        if self.__auto_name__:
+            if name is None or name == '':
+                # generate a uuid4
+                name = self.__class__.__name__ + '_' + \
+                       uuid.uuid4().urn.split(':')[2]
+        
         # it is None
         if name is None:
             raise TypeError("%s.name can not be None" %
@@ -350,7 +264,7 @@ class SimpleEntity(Base):
             raise TypeError("%s.name should be an instance of string or "
                             "unicode not %s" %
                             (self.__class__.__name__,
-                             name.__class__.__name__))
+                            name.__class__.__name__))
         
         name = self._format_name(str(name))
         
@@ -364,25 +278,6 @@ class SimpleEntity(Base):
         
         return name
     
-    def _format_code(self, code_in):
-        """formats the given code_in value
-        """
-
-        # just set it to the uppercase of what nice_name gives
-        # remove unnecessary characters from the string
-        code_in = self._format_name(str(code_in))
-
-        # replace camel case letters
-        #code_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", code_in)
-
-        # replace white spaces with under score
-        code_in = re.sub("([\s\-])+", r"_", code_in)
-
-        # remove multiple underscores
-        code_in = re.sub(r"([_]+)", r"_", code_in)
-
-        return code_in
-
     def _format_name(self, name_in):
         """formats the name_in value
         """
@@ -400,7 +295,6 @@ class SimpleEntity(Base):
     def _format_nice_name(self, nice_name_in):
         """formats the given nice name
         """
-
         # remove unnecessary characters from the string
         nice_name_in = self._format_name(str(nice_name_in))
 
@@ -426,29 +320,12 @@ class SimpleEntity(Base):
         format like, all the white spaces replaced by underscores ("\_"), all
         the CamelCase form will be expanded by underscore (\_) characters and
         it is always lower case.
-        
-        There is also the ``code`` attribute which is simply the upper case
-        form of ``nice_name`` if it is not defined differently (i.e set to
-        another value)."""
-
+        """
         # also set the nice_name
         if self._nice_name is None or self._nice_name == "":
             self._nice_name = self._format_nice_name(self.name)
-
         return self._nice_name
-
-    @validates("code")
-    def _validate_code(self, key, code_in):
-        """validates the given code value
-        """
-        # check if the code_in is None or empty string
-        if code_in is None or code_in == "":
-            # restore the value from nice_name and let it be reformatted
-            #code_in = self.nice_name.upper()
-            code_in = self.nice_name
-
-        return self._format_code(str(code_in))
-
+    
     @validates("created_by")
     def _validate_created_by(self, key, created_by_in):
         """validates the given created_by_in attribute
@@ -466,7 +343,6 @@ class SimpleEntity(Base):
     def _validate_updated_by(self, key, updated_by_in):
         """validates the given updated_by_in attribute
         """
-        
         from stalker.models.auth import User
 
         if updated_by_in is None:
@@ -478,14 +354,12 @@ class SimpleEntity(Base):
                 raise TypeError("%s.updated_by should be an instance of"
                                 "stalker.models.auth.User" %
                                 self.__class__.__name__)
-
         return updated_by_in
 
     @validates("date_created")
     def _validate_date_created(self, key, date_created_in):
         """validates the given date_created_in
         """
-
         if date_created_in is None:
             raise TypeError("%s.date_created can not be None" %
                             self.__class__.__name__)
@@ -500,7 +374,6 @@ class SimpleEntity(Base):
     def _validate_date_updated(self, key, date_updated_in):
         """validates the given date_updated_in
         """
-
         # it is None
         if date_updated_in is None:
             raise TypeError("%s.date_updated can not be None" %
@@ -524,7 +397,6 @@ class SimpleEntity(Base):
     def _validate_type(self, key, type_in):
         """validates the given type value
         """
-        
         from stalker.models.type import Type
 
         raise_error = False
@@ -541,21 +413,17 @@ class SimpleEntity(Base):
             raise TypeError("%s.type must be an instance of "
                             "stalker.models.type.Type not %s" %
                             (self.__class__.__name__, type_in))
-
         return type_in
 
     def __eq__(self, other):
         """the equality operator
         """
-
         return isinstance(other, SimpleEntity) and\
-               self.name == other.name #and \
-        #self.description == other.description
+               self.name == other.name
 
     def __ne__(self, other):
         """the inequality operator
         """
-
         return not self.__eq__(other)
 
 
@@ -576,7 +444,7 @@ class Entity(SimpleEntity):
       Can be an empty list, or when omitted it will be set to an empty list,
       when set to None it will be converted to an empty list.
     """
-
+    __auto_name__ = True
     __tablename__ = "Entities"
     __mapper_args__ = {"polymorphic_identity": "Entity"}
     entity_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
@@ -624,7 +492,6 @@ class Entity(SimpleEntity):
         """initialized the instance variables when the instance created with
         SQLAlchemy
         """
-
         super(Entity, self).__init_on_load__()
 
     @validates("notes")
@@ -679,7 +546,7 @@ class TaskableEntity(Entity, ProjectMixin):
     ``project`` argument needs to be initialized. See the
     :class:`~stalker.models.mixins.ProjectMixin` for more detail.
     """
-
+    __auto_name__ = True
     __tablename__ = "TaskableEntities"
     __mapper_args__ = {"polymorphic_identity": "TaskableEntity"}
     taskableEntity_id = Column("id", Integer, ForeignKey("Entities.id"),

@@ -29,7 +29,6 @@ class GroupTester(unittest.TestCase):
     def setUp(self):
         """set up the test in method level
         """
-        
         # create a couple of Users
         self.test_user1 = User(
             name='User1',
@@ -53,7 +52,6 @@ class GroupTester(unittest.TestCase):
         )
         
         # create a test group
-        
         self.kwargs= {
             "name": "Test Group",
             "users": [
@@ -64,6 +62,13 @@ class GroupTester(unittest.TestCase):
         }
         
         self.test_group = Group(**self.kwargs)
+    
+
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Group class
+        """
+        self.assertFalse(Group.__auto_name__)
     
     def test_users_argument_is_skipped(self):
         """testing if the users argument is skipped the users attribute will be

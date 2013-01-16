@@ -4,21 +4,22 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
-from sqlalchemy.ext.mutable import MutableComposite
 
 from stalker.conf import defaults
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import TargetEntityTypeMixin
+from stalker.models.mixins import CodeMixin
 
-class Status(Entity):
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
+class Status(Entity, CodeMixin):
     """Defines object statutes.
     
     No extra parameters, use the *code* attribute to give a short name for the
@@ -54,7 +55,7 @@ class Status(Entity):
       skipped or given as None the color will be set to the default foreground
       color (which is black).
     """
-
+    __auto_name__ = False
     __tablename__ = "Statuses"
     __mapper_args__ = {"polymorphic_identity": "Status"}
     status_id = Column(
@@ -74,8 +75,11 @@ class Status(Entity):
                  **kwargs):
         kwargs['name'] = name
         kwargs['code'] = code
-        super(Status, self).__init__(**kwargs)
         
+        super(Status, self).__init__(**kwargs)
+        #CodeMixin.__init__(self, **kwargs)
+        
+        self.code = code
         self.bg_color = bg_color
         self.fg_color = fg_color
 
@@ -192,7 +196,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
       its :attr:`~stalker.models.status.StatusList.statuses`. But it is
       useless. The validation for empty statuses list is left to the SOM user.
     """
-
+    __auto_name__ = False
     __tablename__ = "StatusLists"
     __mapper_args__ = {"polymorphic_identity": "StatusList"}
     
@@ -204,13 +208,13 @@ class StatusList(Entity, TargetEntityTypeMixin):
         ForeignKey("Entities.id"),
         primary_key=True
     )
-
+    
     statuses = relationship(
         "Status",
         secondary="StatusList_Statuses",
         doc="""list of :class:`~stalker.models.status.Status` objects, showing the possible statuses"""
     )
-
+    
     def __init__(self, statuses=None, target_entity_type=None, **kwargs):
         super(StatusList, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, target_entity_type, **kwargs)
@@ -218,7 +222,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
         if statuses is None:
             statuses = []
         self.statuses = statuses
-
+    
     @validates("statuses")
     def _validate_statuses(self, key, status):
         """validates the given status
@@ -241,12 +245,22 @@ class StatusList(Entity, TargetEntityTypeMixin):
     def __getitem__(self, key):
         """the indexing attributes for getting item
         """
+        # disable autoflush
+        from stalker.db import DBSession
+        autoflush = DBSession.autoflush
+        DBSession.autoflush = False
+        
+        return_item = None
         if isinstance(key, (str, unicode)):
             for item in self.statuses:
                 if item == key:
-                    return item
+                    return_item = item
         else:
-            return self.statuses[key]
+           return_item = self.statuses[key]
+        
+        # restore autoflush
+        DBSession.autoflush = autoflush
+        return return_item
 
     def __setitem__(self, key, value):
         """the indexing attributes for setting item

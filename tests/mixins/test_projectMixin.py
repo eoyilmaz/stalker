@@ -33,6 +33,7 @@ class ProjectMixinTester(unittest.TestCase):
         # create a repository
         self.repository_type = Type(
             name="Test Repository Type",
+            code='testproj',
             target_entity_type=Repository
         )
 
@@ -60,28 +61,31 @@ class ProjectMixinTester(unittest.TestCase):
         # project type
         self.test_project_type = Type(
             name="Test Project Type",
+            code='testproj',
             target_entity_type=Project,
-            )
+        )
 
         # create projects
         self.test_project1 = Project(
             name="Test Project 1",
+            code='tp1',
             type=self.test_project_type,
             status_list=self.project_status_list,
             repository=self.test_repository,
-            )
+        )
 
         self.test_project2 = Project(
             name="Test Project 2",
+            code='tp2',
             type=self.test_project_type,
             status_list=self.project_status_list,
             repository=self.test_repository,
-            )
+        )
 
         self.kwargs = {
             "name": "Test Class",
             "project": self.test_project1,
-            }
+        }
 
         self.test_foo_obj = ProjMixClass(**self.kwargs)
 

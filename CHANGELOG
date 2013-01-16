@@ -2,6 +2,35 @@
 Stalker Changes
 ===============
 
+0.2.0.a5
+--------
+
+* The ``code`` attribute of the SimpleEntity is now introduced as a separate
+  mixin. To let it be used by the classes it is really needed.
+
+* The ``query`` method is now converted to a property so it is now possible to
+  use it like a property as in the SQLAlchemy.orm.Session as shown below::
+    
+    from stalker import Project
+    Project.query.all() # instead of Project.query().all()
+
+* ScheduleMixin.due_date is renamed to ScheduleMixin.end_date.
+
+* Added a new class attribute to SimpleEntity called ``__auto_name__`` which
+  controls the naming of the instances and instances derived from SimpleEntity.
+  If ``__auto_name__`` is set to True the ``name`` attribute of the instance
+  will be automatically generated and it will have the following format::
+    
+    {{ClassName}}_{{UUID4}}
+    
+  Here are a couple of naming examples::
+    
+    Ticket_74bb46b0-29de-4f3e-b4e6-8bcf6aed352d
+    Version_2fa5749e-8cdb-4887-aef2-6d8cec6a4faa
+
+* Fixed an autoflush issue with SQLAlchemy in StatusList class. Now the status
+  column is again not nullable in StatusMixin.
+
 0.2.0.a4
 --------
 

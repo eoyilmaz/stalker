@@ -77,11 +77,11 @@
               form: dojo.byId('add_repository_form')
             });
             
+            // update the caller dialog
             var dialog = dijit.byId('add_repository_dialog');
-            
-            // update the caller form
-            if (dialog.parent != null){
-              dialog.parent.refresh();
+            var parent = dialog.get('parent');
+            if (parent != null){
+              parent.refresh();
             }
             
             // destroy the form

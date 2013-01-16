@@ -27,7 +27,13 @@ class StatusTest(unittest.TestCase):
         # (it should return False for __eq__ and True for __ne__ for same
         # kwargs)
         self.entity1 = Entity(**self.kwargs)
-
+    
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Status class
+        """
+        self.assertFalse(Status.__auto_name__)
+     
     def test_equality(self):
         """testing equality of two statuses
         """

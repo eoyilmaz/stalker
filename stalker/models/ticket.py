@@ -3,7 +3,7 @@
 # 
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
-import logging
+
 import uuid
 from sqlalchemy.orm import synonym, relationship
 from sqlalchemy.orm.mapper import validates
@@ -15,8 +15,10 @@ from stalker.db.session import DBSession
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import StatusMixin
 
+from stalker.log import logging_level
+import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging_level)
 
 class Ticket(Entity, StatusMixin):
     """Tickets are the way of reporting errors or asking for changes in Stalker.
@@ -96,7 +98,7 @@ class Ticket(Entity, StatusMixin):
     """
     
     # logs attribute
-    
+    __auto_name__ = True
     __tablename__ = "Tickets"
     __mapper_args__ = {"polymorphic_identity": "Ticket"}
     
@@ -175,9 +177,13 @@ class Ticket(Entity, StatusMixin):
     
     def __init__(self, ticket_for=None, priority='TRIVIAL', **kwargs):
         # generate a name
-        kwargs['name'] = "Ticket_" + uuid.uuid4().hex
+        #kwargs['name'] = "Ticket_" + uuid.uuid4().urn.split(':')[2]
         #logger.debug('name of the newly created Ticket is: %s' % 
         #             kwargs['name'])
+        
+        # just force auto name generation
+        kwargs['name'] = ''
+        
         
         super(Ticket, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)

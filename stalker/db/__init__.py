@@ -9,7 +9,6 @@ Whenever stalker.db or something under it imported, the
 :func:`stalker.db.setup` becomes available to let one setup the database.
 """
 
-import logging
 from sqlalchemy.exc import IntegrityError
 
 import transaction
@@ -19,9 +18,10 @@ from stalker.conf import defaults
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 
-# create a logger
+from stalker.log import logging_level
+import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging_level)
 
 def setup(settings=None, callback=None):
     """Utility function that helps to connect the system to the given database.
@@ -109,7 +109,7 @@ def __create_admin__():
     from stalker.models.department import Department
     
     # check if there is already an admin in the database
-    if len(User.query()
+    if len(User.query
         .filter_by(name=defaults.ADMIN_NAME)
         .all()) > 0:
         #there should be an admin user do nothing
@@ -119,7 +119,7 @@ def __create_admin__():
     logger.debug("creating the default administrator user")
     
     # create the admin department
-    admin_department = Department.query().filter_by(
+    admin_department = Department.query.filter_by(
         name=defaults.ADMIN_DEPARTMENT_NAME
     ).first()
     
@@ -130,7 +130,7 @@ def __create_admin__():
     
     from stalker.models.auth import Group
     
-    admins_group = Group.query()\
+    admins_group = Group.query\
         .filter_by(name=defaults.ADMIN_GROUP_NAME)\
         .first()
     
@@ -139,7 +139,7 @@ def __create_admin__():
         DBSession.add(admins_group)
     
     # create the admin user
-    admin = User.query()\
+    admin = User.query\
         .filter_by(name=defaults.ADMIN_NAME)\
         .first()
     
@@ -172,7 +172,7 @@ def __create_ticket_statuses():
     """
     from stalker import User
     
-    admin = User.query().filter(User.login==defaults.ADMIN_NAME).first()
+    admin = User.query.filter(User.login==defaults.ADMIN_NAME).first()
     
     # create statuses for Tickets
     from stalker import Status, StatusList
@@ -222,7 +222,7 @@ def __create_ticket_statuses():
     
     # Again I hate doing this in this way
     from stalker import Type
-    types = Type.query()\
+    types = Type.query\
         .filter_by(target_entity_type="Ticket")\
         .all()
     t_names = [t.name for t in types]
@@ -232,6 +232,7 @@ def __create_ticket_statuses():
     if 'Defect' not in t_names:
         ticket_type_1 = Type(
             name='Defect',
+            code='Defect',
             target_entity_type='Ticket',
             created_by=admin,
             updated_by=admin
@@ -241,6 +242,7 @@ def __create_ticket_statuses():
     if 'Enhancement' not in t_names:
         ticket_type_2 = Type(
             name='Enhancement',
+            code='Enhancement',
             target_entity_type='Ticket',
             created_by=admin,
             updated_by=admin
@@ -266,31 +268,38 @@ def __create_filename_template_types():
     # between derived and mixed-in attributes ("name" and "target_entity_type")
     # So I need to be sure that there are no "Version" and "Reference"
     # FilenameTemplate Types before creating them, cause I literally can.
-    types = Type.query()\
+    types = Type.query\
         .filter_by(target_entity_type="FilenameTemplate")\
         .all()
     type_names = [t.name for t in types]
     
     logger.debug("creating default Types for FilenameTemplates")
     
-    admin = User.query().filter_by(login=defaults.ADMIN_NAME).first()
+    admin = User.query.filter_by(login=defaults.ADMIN_NAME).first()
     
     if "Version" not in type_names:
         # mark them as created by admin
-        vers_type = Type(name="Version",
-                         target_entity_type="FilenameTemplate",
-                         created_by=admin)
+        vers_type = Type(
+            name='Version',
+            code='Vers',
+            target_entity_type='FilenameTemplate',
+            created_by=admin
+        )
         DBSession.add(vers_type)
     
-    if "Reference" not in type_names:
-        ref_type = Type(name="Reference",
-                    target_entity_type="FilenameTemplate",
-                    created_by=admin)
+    if 'Reference' not in type_names:
+        ref_type = Type(
+            name='Reference',
+            code='Ref',
+            target_entity_type='FilenameTemplate',
+            created_by=admin
+        )
         DBSession.add(ref_type)
     
     try:
         transaction.commit()
-    except IntegrityError:
+    except IntegrityError as e:
+        logger.debug(e)
         transaction.abort()
         logger.debug('FilenameTemplate Types are already in database')
     else:
@@ -348,7 +357,7 @@ def register(class_):
     from stalker.models.auth import Permission
     
     # create the Permissions
-    permissions_db = Permission.query().all()
+    permissions_db = Permission.query.all()
     
     if not isinstance(class_, type):
         raise TypeError('To register a class please supply the class itself ')
@@ -358,7 +367,7 @@ def register(class_):
     
     class_name = class_.__name__
     
-    if not EntityType.query().filter_by(name=class_name).first():
+    if not EntityType.query.filter_by(name=class_name).first():
         new_entity_type = EntityType(class_name)
         # update attributes
         if issubclass(class_, StatusMixin):

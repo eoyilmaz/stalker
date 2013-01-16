@@ -12,9 +12,9 @@ from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
                      User, db)
 from stalker.db.session import DBSession, ZopeTransactionExtension
 
-import logging
-logger = logging.getLogger('stalker.models.project')
-logger.setLevel(logging.DEBUG)
+import log
+logger = log.getLogger('stalker.models.project')
+logger.setLevel(log.DEBUG)
 
 class ProjectTester(unittest.TestCase):
     """tests the Project class
@@ -53,7 +53,7 @@ class ProjectTester(unittest.TestCase):
         
         # create test objects
         self.start_date = datetime.date.today()
-        self.due_date = self.start_date + datetime.timedelta(days=20)
+        self.end_date = self.start_date + datetime.timedelta(days=20)
 
         self.test_lead = User(
             name="lead",
@@ -161,22 +161,26 @@ class ProjectTester(unittest.TestCase):
         # type for project
         self.test_project_type = Type(
             name="Project Type 1",
+            code='projt1',
             target_entity_type=Project
         )
 
         self.test_project_type2 = Type(
             name="Project Type 2",
+            code='projt2',
             target_entity_type=Project
         )
 
         # type for structure
         self.test_structure_type1 = Type(
             name="Structure Type 1",
+            code='struct1',
             target_entity_type=Structure
         )
 
         self.test_structure_type2 = Type(
             name="Structure Type 2",
+            code='struct2',
             target_entity_type=Structure
         )
 
@@ -197,6 +201,7 @@ class ProjectTester(unittest.TestCase):
         # create a project object
         self.kwargs = {
             "name": "Test Project",
+            'code': 'tp',
             "description": "This is a project object for testing purposes",
             "lead": self.test_lead,
             "image_format": self.test_imageFormat,
@@ -207,7 +212,7 @@ class ProjectTester(unittest.TestCase):
             "is_stereoscopic": False,
             "display_width": 15,
             "start_date": self.start_date,
-            "due_date": self.due_date,
+            "end_date": self.end_date,
             "status_list": self.project_status_list,
             #"tasks": [self.test_task1, self.test_task2, self.test_task3]
         }
@@ -230,18 +235,21 @@ class ProjectTester(unittest.TestCase):
         # sequences without tasks
         self.test_seq1 = Sequence(
             name="Seq1",
+            code='Seq1',
             project=self.test_project,
             status_list=self.sequence_status_list,
         )
 
         self.test_seq2 = Sequence(
             name="Seq2",
+            code='Seq2',
             project=self.test_project,
             status_list=self.sequence_status_list,
         )
 
         self.test_seq3 = Sequence(
             name="Seq3",
+            code='Seq3',
             project=self.test_project,
             status_list=self.sequence_status_list,
         )
@@ -249,12 +257,14 @@ class ProjectTester(unittest.TestCase):
         # sequences with tasks
         self.test_seq4 = Sequence(
             name="Seq4",
+            code='Seq4',
             project=self.test_project,
             status_list=self.sequence_status_list,
         )
 
         self.test_seq5 = Sequence(
             name="Seq5",
+            code='Seq5',
             project=self.test_project,
             status_list=self.sequence_status_list,
         )
@@ -262,12 +272,14 @@ class ProjectTester(unittest.TestCase):
         # sequences without tasks but with shots
         self.test_seq6 = Sequence(
             name="Seq6",
+            code='Seq6',
             project=self.test_project,
             status_list=self.sequence_status_list,
         )
 
         self.test_seq7 = Sequence(
             name="Seq7",
+            code='Seq7',
             project=self.test_project,
             status_list=self.sequence_status_list,
         )
@@ -326,12 +338,14 @@ class ProjectTester(unittest.TestCase):
         # asset types
         self.asset_type = Type(
             name="Character",
+            code='char',
             target_entity_type=Asset,
         )
 
         # assets without tasks
         self.test_asset1 = Asset(
             name="Test Asset 1",
+            code='ta1',
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
@@ -339,6 +353,7 @@ class ProjectTester(unittest.TestCase):
 
         self.test_asset2 = Asset(
             name="Test Asset 2",
+            code='ta2',
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
@@ -346,6 +361,7 @@ class ProjectTester(unittest.TestCase):
 
         self.test_asset3 = Asset(
             name="Test Asset 3",
+            code='ta3',
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
@@ -354,6 +370,7 @@ class ProjectTester(unittest.TestCase):
         # assets with tasks
         self.test_asset4 = Asset(
             name="Test Asset 4",
+            code='ta4',
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
@@ -361,6 +378,7 @@ class ProjectTester(unittest.TestCase):
 
         self.test_asset5 = Asset(
             name="Test Asset 5",
+            code='ta5',
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
@@ -581,7 +599,13 @@ class ProjectTester(unittest.TestCase):
     
         DBSession.add(self.test_project)
         DBSession.commit()
-
+    
+    def test___auto_name__class_attribute_is_set_to_False(self):
+        """testing if the __auto_name__ class attribute is set to False for
+        Project class
+        """
+        self.assertFalse(Project.__auto_name__)
+    
     def test_setup_is_working_correctly(self):
         """testing if the setup is done correctly
         """
@@ -1454,7 +1478,11 @@ class ProjectTester(unittest.TestCase):
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
         """
-        link_type_1 = Type(name="Image", target_entity_type="Link")
+        link_type_1 = Type(
+            name="Image",
+            code='image',
+            target_entity_type="Link"
+        )
 
         link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
                      filename="a.jpg", type=link_type_1)
@@ -1486,15 +1514,15 @@ class ProjectTester(unittest.TestCase):
         """testing if the ScheduleMixin part is initialized correctly
         """
         start_date = datetime.date.today() + datetime.timedelta(days=25)
-        due_date = start_date + datetime.timedelta(days=12)
+        end_date = start_date + datetime.timedelta(days=12)
 
         self.kwargs["start_date"] = start_date
-        self.kwargs["due_date"] = due_date
+        self.kwargs["end_date"] = end_date
 
         new_project = Project(**self.kwargs)
         self.assertEqual(new_project.start_date, start_date)
-        self.assertEqual(new_project.due_date, due_date)
-        self.assertEqual(new_project.duration, due_date - start_date)
+        self.assertEqual(new_project.end_date, end_date)
+        self.assertEqual(new_project.duration, end_date - start_date)
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ is True for Project class

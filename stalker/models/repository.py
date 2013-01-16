@@ -9,6 +9,11 @@ from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
 from stalker.models.entity import Entity
 
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
 class Repository(Entity):
     """Manages fileserver/repository related data.
     
@@ -33,7 +38,8 @@ class Repository(Entity):
     :param windows_path: shows the windows path of the repository root, should
       be a string
     """
-
+    
+    __auto_name__ = False
     __tablename__ = "Repositories"
     __mapper_args__ = {"polymorphic_identity": "Repository"}
     repository_id = Column(

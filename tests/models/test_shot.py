@@ -21,11 +21,19 @@ class ShotTester(unittest.TestCase):
         self.test_data = TestData()
 
         # statuses
-        self.test_data.status_complete = Status(name="Complete", code="CMPLT")
-        self.test_data.status_wip = Status(name="Work In Progress", code="WIP")
-        self.test_data.status_waiting = Status(name="Waiting To Start",
-                                               code="WTS")
-
+        self.test_data.status_complete = Status(
+            name="Complete",
+            code="CMPLT"
+        )
+        self.test_data.status_wip = Status(
+            name="Work In Progress",
+            code="WIP"
+        )
+        self.test_data.status_waiting = Status(
+            name="Waiting To Start",
+            code="WTS"
+        )
+        
         # status lists
         self.test_data.project_status_list = StatusList(
             name="Project Status List",
@@ -33,7 +41,7 @@ class ShotTester(unittest.TestCase):
                       self.test_data.status_waiting,
                       self.test_data.status_wip],
             target_entity_type=Project,
-            )
+        )
 
         self.test_data.sequence_status_list = StatusList(
             name="Project Status List",
@@ -41,7 +49,7 @@ class ShotTester(unittest.TestCase):
                       self.test_data.status_waiting,
                       self.test_data.status_wip],
             target_entity_type=Sequence,
-            )
+        )
 
         self.test_data.shot_status_list = StatusList(
             name="Shot Status List",
@@ -49,7 +57,7 @@ class ShotTester(unittest.TestCase):
                       self.test_data.status_waiting,
                       self.test_data.status_wip],
             target_entity_type=Shot,
-            )
+        )
 
         self.test_data.asset_status_list = StatusList(
             name="Asset Status List",
@@ -57,21 +65,24 @@ class ShotTester(unittest.TestCase):
                       self.test_data.status_waiting,
                       self.test_data.status_wip],
             target_entity_type=Asset,
-            )
+        )
 
         # types
         self.test_data.commercial_project_type = Type(
             name="Commercial Project",
+            code='comm',
             target_entity_type=Project,
-            )
+        )
 
         self.test_data.character_asset_type = Type(
             name="Character",
+            code='char',
             target_entity_type=Asset,
-            )
+        )
 
         self.test_data.repository_type = Type(
             name="Test Repository Type",
+            code='test',
             target_entity_type=Repository
         )
 
@@ -79,54 +90,61 @@ class ShotTester(unittest.TestCase):
         self.test_data.repository = Repository(
             name="Test Repository",
             type=self.test_data.repository_type,
-            )
+        )
 
         # project and sequences
         self.test_data.project1 = Project(
             name="Test Project1",
+            code='tp1',
             type=self.test_data.commercial_project_type,
             status_list=self.test_data.project_status_list,
             repository=self.test_data.repository,
-            )
-
+        )
+        
         self.test_data.sequence1 = Sequence(
             name="Test Seq1",
+            code='ts1',
             project=self.test_data.project1,
             status_list=self.test_data.sequence_status_list,
-            )
+        )
 
         self.test_data.sequence2 = Sequence(
             name="Test Seq2",
+            code='ts2',
             project=self.test_data.project1,
             status_list=self.test_data.sequence_status_list,
-            )
+        )
 
         self.test_data.sequence3 = Sequence(
             name="Test Seq3",
+            code='ts3',
             project=self.test_data.project1,
             status_list=self.test_data.sequence_status_list,
-            )
+        )
 
         self.test_data.asset1 = Asset(
             name="Test Asset1",
+            code='ta1',
             project=self.test_data.project1,
             status_list=self.test_data.asset_status_list,
             type=self.test_data.character_asset_type,
-            )
+        )
 
         self.test_data.asset2 = Asset(
             name="Test Asset2",
+            code='ta2',
             project=self.test_data.project1,
             status_list=self.test_data.asset_status_list,
             type=self.test_data.character_asset_type,
-            )
+        )
 
         self.test_data.asset3 = Asset(
             name="Test Asset3",
+            code='ta3',
             project=self.test_data.project1,
             status_list=self.test_data.asset_status_list,
             type=self.test_data.character_asset_type,
-            )
+        )
 
         self.test_data.cut_in_default = 1
         self.test_data.cut_duration_default = 1
@@ -149,28 +167,12 @@ class ShotTester(unittest.TestCase):
         # create a mock shot object
         self.test_data.test_shot = Shot(**self.kwargs)
 
-
-        #def test_name_attribute_is_a_uuid4_sequence(self):
-        #"""testing if the name attribute is set to a proper uuid4 sequence
-        #"""
-        ## the length is 32 character
-        #self.assertEqual(len(self.test_data.test_shot.name), 32)
-
-        #import re
-
-        ## and all the characters are in [0-9a-f] range
-        #self.assertEqual(
-        #re.sub("[0-9a-f]+","", self.test_data.test_shot.name), ""
-        #)
-
-        #def test_name_attribute_can_not_be_changed(self):
-        #"""testing if the name attribute can not be changed
-        #"""
-        #test_value = "new_name"
-        #before_value = self.test_data.test_shot.name
-        #self.test_data.test_shot.name = test_value
-        #self.assertEqual(self.test_data.test_shot.name, before_value)
-
+    def test___auto_name__class_attribute_is_set_to_True(self):
+        """testing if the __auto_name__ class attribute is set to True for Shot
+        class
+        """
+        self.assertTrue(Shot.__auto_name__)
+    
     def test_sequence_argument_is_skipped(self):
         """testing if a TypeError will be raised when the sequence argument is
         skipped
@@ -577,7 +579,11 @@ class ShotTester(unittest.TestCase):
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
         """
-        link_type_1 = Type(name="Image", target_entity_type="Link")
+        link_type_1 = Type(
+            name="Image",
+            code='image',
+            target_entity_type="Link"
+        )
 
         link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
                      filename="a.jpg", type=link_type_1)
@@ -600,9 +606,11 @@ class ShotTester(unittest.TestCase):
         status1 = Status(name="On Hold", code="OH")
         status2 = Status(name="Complete", code="CMPLT")
 
-        status_list = StatusList(name="Project Statuses",
-                                 statuses=[status1, status2],
-                                 target_entity_type=Shot)
+        status_list = StatusList(
+            name="Project Statuses",
+            statuses=[status1, status2],
+            target_entity_type=Shot
+        )
 
         self.kwargs["code"] = "SH12314"
         self.kwargs["status"] = 0
@@ -622,17 +630,20 @@ class ShotTester(unittest.TestCase):
                                       target_entity_type=Task)
 
         project_status_list = StatusList(
-            name="Project Statuses", statuses=[status1],
+            name="Project Statuses",
+            statuses=[status1],
             target_entity_type=Project
         )
 
         project_type = Type(
             name="Commercial",
+            code='comm',
             target_entity_type=Project
         )
 
         new_project = Project(
-            name="Commercial",
+            name="Commercial1",
+            code='comm1',
             status_list=project_status_list,
             type=project_type,
             repository=self.test_data.repository,

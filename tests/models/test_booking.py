@@ -18,7 +18,6 @@ class BookingTester(unittest.TestCase):
     def setUp(self):
         """setup the test
         """
-
         # create a resource
         self.test_resource = User(
             name="User1",
@@ -55,6 +54,7 @@ class BookingTester(unittest.TestCase):
 
         self.test_project = Project(
             name="test project",
+            code='tp',
             repository=self.test_repo,
             status_list=self.test_project_status_list
         )
@@ -78,6 +78,12 @@ class BookingTester(unittest.TestCase):
         # and test it
         self.test_booking = Booking(**self.kwargs)
 
+    def test___auto_name__class_attribute_is_set_to_True(self):
+        """testing if the __auto_name__ class attribute is set to True for
+        Booking class
+        """
+        self.assertTrue(Booking.__auto_name__)
+    
     def test_task_argument_is_Skipped(self):
         """testing if a TypeError will be raised when the task argument is
         skipped
@@ -246,15 +252,13 @@ class BookingTester(unittest.TestCase):
     def test_ScheduleMixin_initialization(self):
         """testing if the ScheduleMixin part is initialized correctly
         """
-
         # it should have schedule attributes
-
         self.assertEqual(self.test_booking.start_date,
                          self.kwargs["start_date"])
         self.assertEqual(self.test_booking.duration, self.kwargs["duration"])
 
         self.test_booking.start_date = datetime.date.today()
-        self.test_booking.due_date = self.test_booking.start_date +\
+        self.test_booking.end_date = self.test_booking.start_date +\
                                      datetime.timedelta(10)
         self.assertEqual(self.test_booking.duration, datetime.timedelta(10))
 
@@ -266,7 +270,6 @@ class BookingTester(unittest.TestCase):
         #####
         #####
         """
-
         # booking1
         self.kwargs["name"] = "booking1"
         self.kwargs["resource"] = self.test_resource2
@@ -287,7 +290,6 @@ class BookingTester(unittest.TestCase):
         #######
         #####
         """
-
         # booking1
         self.kwargs["name"] = "booking1"
         self.kwargs["resource"] = self.test_resource2

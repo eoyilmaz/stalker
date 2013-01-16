@@ -35,7 +35,8 @@ class ReferenceMixinTester(unittest.TestCase):
         """
         # link type
         self.test_link_type = Type(
-            name="Test Link Type",
+            name='Test Link Type',
+            code='testlink',
             target_entity_type=Link,
         )
 
@@ -161,7 +162,11 @@ class ReferenceMixinTester(unittest.TestCase):
         # we should have a references attribute right now
         myGreatEntity.references
 
-        image_link_type = Type(name="Image", target_entity_type="Link")
+        image_link_type = Type(
+            name='Image',
+            code='image',
+            target_entity_type="Link"
+        )
         new_link = Link(name="NewTestLink", path="nopath",
                         filename="nofilename", type=image_link_type)
 

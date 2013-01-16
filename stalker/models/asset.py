@@ -7,9 +7,14 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import reconstructor
 from stalker.models.entity import TaskableEntity
-from stalker.models.mixins import StatusMixin, ReferenceMixin
+from stalker.models.mixins import StatusMixin, ReferenceMixin, CodeMixin
 
-class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
+class Asset(TaskableEntity, ReferenceMixin, StatusMixin, CodeMixin):
     """The Asset class is the whole idea behind Stalker.
     
     *Assets* are containers of :class:`~stalker.models.task.Task`\ s. And
@@ -41,7 +46,7 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
         is easy to track which shots are referencing this Asset by querying
         with a join of Shot Versions referencing this Asset.
     """
-    
+    __auto_name__ = False
     __strictly_typed__ = True
     __tablename__ = "Assets"
     __mapper_args__ = {"polymorphic_identity": "Asset"}
@@ -49,12 +54,16 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin):
     asset_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
                       primary_key=True)
     
-    def __init__(self, **kwargs):
+    def __init__(self, code, **kwargs):
+        kwargs['code'] = code
+        
+        logger.debug('Asset.kwargs --> %s' % kwargs)
         super(Asset, self).__init__(**kwargs)
         
         # call the mixin init methods
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
+        CodeMixin.__init__(self, **kwargs)
     
     @reconstructor
     def __init_on_load__(self):

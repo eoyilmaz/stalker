@@ -8,6 +8,11 @@ from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
 from stalker.models.entity import Entity
 
+from stalker.log import logging_level
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
+
 class Link(Entity):
     """Holds data about external links.
     
@@ -30,7 +35,7 @@ class Link(Entity):
     
     .. _PySeq Documentation: http://packages.python.org/pyseq/
     """
-    
+    __auto_name__ = True
     __tablename__ = "Links"
     __mapper_args__ = {"polymorphic_identity": "Link"}
     link_id = Column(
