@@ -227,10 +227,6 @@ def add_project(request):
             # or maybe we should return to where we came from
 #           return HTTPFound(location=came_from)
     
-    # restore previous choices
-    def get_req_param(param):
-        return request[param] if param in request.params else None
-    
     # just one wants to see the add project form
     return {
         'user': user,
@@ -241,14 +237,6 @@ def add_project(request):
         'status_lists': StatusList.query\
                             .filter_by(target_entity_type='Project')\
                             .all(),
-        'name': get_req_param('name'),
-        'code': get_req_param('code'),
-        'imf_id': get_req_param('imf_id'),
-        'fps': get_req_param('fps'),
-        'repo_id': get_req_param('repo_id'),
-        'struct_id': get_req_param('struct_id'),
-        'lead_id': get_req_param('lead_id'),
-        'status_list_id': get_req_param('status_list_id')
     }
 
 @view_config(
@@ -341,9 +329,8 @@ def add_image_format(request):
     renderer='templates/edit_image_format.jinja2',
     permission='Edit_ImageFormat'
 )
-
 def edit_image_format(request):
-    """called when adding or editing an image format
+    """called when editing an image format
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
@@ -354,7 +341,7 @@ def edit_image_format(request):
     imf_id = request.matchdict['imf_id']
     imf = ImageFormat.query\
             .filter(ImageFormat.id==imf_id)\
-            .one()
+            .first()
     
     if 'submitted' in request.params:
         if 'name' in request.params and \
@@ -380,20 +367,59 @@ def edit_image_format(request):
     return {'image_format': imf}
 
 @view_config(
+    route_name='edit_structure',
+    renderer='templates/edit_structure.jinja2',
+    permission='Edit_Structure'
+)
+def edit_structure(request):
+    """called when editing a structure
+    """
+    
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
+    
+    structure_id = request.matchdict['structure_id']
+    structure = Structure.query.filter_by(id=structure_id).first()
+    
+    if 'submitted' in request.params:
+        if request.params['submitted'] == 'edit':
+            if 'name' in request.params and \
+                'custom_template' in request.params and \
+                'filename_templates' in request.params:
+                    
+                    # get all FilenameTemplates
+                    ft_ids = [
+                        int(ft_id)
+                        for ft_id in request.POST.getall('filename_templates')
+                    ]
+                    
+                    fts = [
+                        FilenameTemplate.query.filter_by(id=ft_id).first()
+                        for ft_id in ft_ids
+                    ]
+                    
+                    # edit structure
+                    structure.name = request.params['name']
+                    structure.templates = fts
+                    structure.custom_template = \
+                        request.params['custom_template']
+                    structure.updated_by = user
+                    
+                    DBSession.add(structure)
+                    # TODO: update date_updated
+                        
+    return {'structure': structure}
+
+
+@view_config(
     route_name='add_repository',
     renderer='templates/add_repository.jinja2',
     permission='Add_Repository'
 )
-@view_config(
-    route_name='edit_repository',
-    renderer='templates/add_repository.jinja2',
-    permission='Edit_Repository'
-)
-def add_edit_repository(request):
-    """called when adding or editing a repository
+def add_repository(request):
+    """called when adding a repository
     """
     referrer = request.url
-    came_from = request.params.get('came_from', referrer)
     
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
@@ -404,7 +430,6 @@ def add_edit_repository(request):
        'osx_path' in request.params:
         
         # create a new Repository and save it to the database
-#        with transaction.manager:
          new_repository = Repository(
              name=request.params['name'],
              windows_path=request.params['windows_path'],
@@ -417,20 +442,65 @@ def add_edit_repository(request):
     return {}
 
 @view_config(
+    route_name='edit_repository',
+    renderer='templates/edit_repository.jinja2',
+    permission='Edit_Repository'
+)
+def edit_repository(request):
+    """called when editing a repository
+    """
+    login = authenticated_userid(request)
+    user = User.query.filter_by(login=login).first()
+    
+    repo_id = request.matchdict['repository_id']
+    repo = Repository.query.filter_by(id=repo_id).first()
+    
+    logger.debug('repo_id: %s' % repo_id)
+    logger.debug('repo   : %s' % repo)
+    if 'submitted' in request.params:
+        logger.debug('submitted in request.params')
+        logger.debug('submitted: %s ' % request.params['submitted'])
+        if request.params['submitted'] == 'edit':
+            if 'name' in request.params and \
+               'windows_path' in request.params and \
+               'linux_path' in request.params and \
+               'osx_path' in request.params:
+                
+                logger.debug('we have all parameters')
+                repo.name=request.params['name']
+                repo.windows_path=request.params['windows_path']
+                repo.linux_path=request.params['linux_path']
+                repo.osx_path=request.params['osx_path']
+                repo.updated_by=user
+                
+                DBSession.add(repo)
+            else:
+                logger.debug('there are missing parameters')
+                def log_param(param):
+                    if param in request.params:
+                        logger.debug('%s: %s' % (param, request.params[param]))
+                    else:
+                        logger.debug('%s not in params' % param)
+                log_param('name')
+                log_param('windows_path')
+                log_param('linux_path')
+                log_param('osx_path')
+    else:
+        logger.debug('submitted NOT in request.params')
+    
+    return {
+        'repository': repo
+    }
+
+
+@view_config(
     route_name='add_structure',
     renderer='templates/add_structure.jinja2',
     permission='Add_Structure'
 )
-@view_config(
-    route_name='edit_structure',
-    renderer='templates/edit_structure.jinja2',
-    permission='Edit_Structure'
-)
-def add_edit_structure(request):
-    """called when adding or editing a structure
+def add_structure(request):
+    """called when adding a structure
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
     
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
@@ -445,11 +515,10 @@ def add_edit_structure(request):
                 'filename_templates' in request.params:
                 logger.debug('all the parameters are in place')
                 with transaction.manager:
-                    # get FilenameTemplates
+                    # get all FilenameTemplates
                     ft_ids = [
-                        int(re.sub(r"[^0-9]+", "", ft_id))
-                            for ft_id in 
-                                request.params['filename_templates'].split(',')
+                        int(ft_id)
+                        for ft_id in request.POST.getall('filename_templates')
                     ]
                     
                     fts = [
@@ -467,27 +536,11 @@ def add_edit_structure(request):
                     DBSession.add(new_structure)
             else:
                 logger.debug('there are missing parameters in request')
-        elif request.params['submitted'] == 'edit':
-            # just edit the given structure
-            structure_id = request.matchdict['structure_id']
-            structure = Structure.query.filter_by(id=structure_id).one()
-            
-            with transaction.manager:
-                structure.name = request.params['name']
-                structure.custom_template = request.params['custom_template']
-                structure.updated_by = user
-                # TODO: update the FilenameTemplates later
-                DBSession.add(structure)
     else:
         logger.debug('submitted is not in request.params')
     
-    f_templates = FilenameTemplate.query.all()
-    logger.debug('we got %i FilenameTemplates' % len(f_templates))
-    for f_template in f_templates:
-        logger.debug('FilenameTemplate: %s' %f_template.name)
-    
     return {
-        'filename_templates': f_templates
+        'filename_templates': FilenameTemplate.query.all()
     }
 
 @view_config(
@@ -743,8 +796,6 @@ def add_edit_status(request):
 def add_status_list(request):
     """called when adding or editing a StatusList
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
     
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
@@ -1234,13 +1285,68 @@ def add_shot(request):
             StatusList.query.filter_by(target_entity_type='Shot').first()
     }
 
+@view_config(
+    route_name='get_filename_templates',
+    renderer='json',
+    permission='View_FilenameTemplate'
+)
+def get_filename_templates(request):
+    """returns all the FilenameTemplates in the database
+    """
+    return [
+        {
+            'id': ft.id,
+            'name': ft.name,
+            'target_entity_type': ft.target_entity_type,
+            'type': ft.type.name
+        }
+        for ft in FilenameTemplate.query.all()
+    ]
 
 @view_config(
-    route_name='get_project_sequences',
+    route_name='get_image_formats',
+    renderer='json',
+    permission='View_ImageFormat'
+)
+def get_image_formats(request):
+    """returns all the image formats in the database
+    """
+    return [
+        {
+            'id': imf.id,
+            'name': imf.name,
+            'width': imf.width,
+            'height': imf.height,
+            'pixel_aspect': imf.pixel_aspect
+        }
+        for imf in ImageFormat.query.all()
+    ]
+
+@view_config(
+    route_name='get_repositories',
+    renderer='json',
+    permission='View_Repository'
+)
+def get_repositories(request):
+    """returns all the repositories in the database
+    """
+    return [
+        {
+            'id': repo.id,
+            'name': repo.name,
+            'linux_path': repo.linux_path,
+            'osx_path': repo.osx_path,
+            'windows_path': repo.windows_path
+        }
+        for repo in Repository.query.all()
+    ]
+
+@view_config(
+    route_name='get_sequences',
     renderer='json',
     permission='View_Sequence'
 )
-def get_project_sequences(request):
+def get_sequences(request):
     """returns the related sequences of the given project as a json data
     """
     project_id = request.matchdict['project_id']
@@ -1248,6 +1354,22 @@ def get_project_sequences(request):
     return [
             {'id': sequence.id, 'name': sequence.name}
             for sequence in project.sequences
+    ]
+
+@view_config(
+    route_name='get_structures',
+    renderer='json',
+    permission='View_Structure'
+)
+def get_structures(request):
+    """returns all the structures in the database
+    """
+    return [
+        {
+            'id': structure.id,
+            'name': structure.name
+        }
+        for structure in Structure.query.all()
     ]
 
 @view_config(

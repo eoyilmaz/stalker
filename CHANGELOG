@@ -31,6 +31,8 @@ Stalker Changes
 * Fixed an autoflush issue with SQLAlchemy in StatusList class. Now the status
   column is again not nullable in StatusMixin.
 
+* The WebUI form fields are now refreshed with newly added data.
+
 0.2.0.a4
 --------
 

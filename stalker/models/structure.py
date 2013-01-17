@@ -153,7 +153,7 @@ class Structure(Entity):
         if custom_template_in is None:
             custom_template_in = ""
         
-        if not isinstance(custom_template_in, str):
+        if not isinstance(custom_template_in, (str, unicode)):
             raise TypeError("%s.custom_template should be a string not %s" 
                             % (self.__class__.__name__,
                                custom_template_in.__class__.__name__))

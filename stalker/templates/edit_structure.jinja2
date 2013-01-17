@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea' style='height: 380px'>
-  <form id='add_structure_form'>
+  <form id='edit_structure_form'>
     <table style='width: 100%'>
     
     {# Name #}
@@ -47,7 +47,7 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='structure_add_button'></button>
+  <button id='structure_edit_button'></button>
   <button id='structure_cancel_button'></button>
 </div>
 
@@ -62,10 +62,10 @@
       
       // ********************************************************************
       // Form
-      var add_structure_form = new Form({
-        id: 'add_structure_form'
-      }, 'add_structure_form');
-      add_structure_form.startup();
+      var edit_structure_form = new Form({
+        id: 'edit_structure_form'
+      }, 'edit_structure_form');
+      edit_structure_form.startup();
       
       
       
@@ -75,6 +75,7 @@
       var name_textBox = new ValidationTextBox({
         name: 'name',
         label: 'Name',
+        value: '{{ structure.name }}',
         placeHolder: 'Enter a name',
         required: true
       }, 'structure_name');
@@ -88,6 +89,7 @@
       var custom_template_simpleTextarea = new SimpleTextarea({
         name: 'custom_template',
         label: 'Custom Template',
+        value: '{{ structure.custom_template }}',
         placeHolder: 'Enter any custom template here',
         required: false,
         style: 'height: 250px; overflow:auto'
@@ -109,10 +111,23 @@
       }, 'structure_filename_template');
       filename_template_multi_select.startup();
       
+      console.log(
+        [
+          {% for ft in structure.templates %}
+            {{ ft.id}},
+          {% endfor %}
+        ]
+      )
+      
       // The Updater
       var filename_template_field_updater = field_updater({
         'memory': filename_template_memory,
-        'widget': filename_template_multi_select
+        'widget': filename_template_multi_select,
+        'selected': [
+          {% for ft in structure.templates %}
+            {{ ft.id}},
+          {% endfor %}
+        ]
       });
       // run the function to fill the data for the first time
       filename_template_field_updater({animate: false});
@@ -131,21 +146,21 @@
       
       
       // ********************************************************************
-      // Add Button
-      var add_button = new Button({
-        label: 'Add',
+      // Edit Button
+      var edit_button = new Button({
+        label: 'Edit',
         type: 'button',
         onClick: function(){
           submit_form({
-            dialog: dijit.byId('add_structure_dialog'),
-            form: add_structure_form,
-            additional_data: {submitted: 'add'},
-            url: '{{ request.route_url('add_structure') }}',
+            dialog: dijit.byId('edit_structure_dialog'),
+            form: edit_structure_form,
+            additional_data: {submitted: 'edit'},
+            url: '{{ request.route_url('edit_structure', structure_id=structure.id) }}',
             method: 'POST'
           });
         }
-      }, 'structure_add_button');
-      add_button.startup();
+      }, 'structure_edit_button');
+      edit_button.startup();
       
       
       
@@ -156,7 +171,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = dijit.byId('add_structure_dialog');
+          var dialog = dijit.byId('edit_structure_dialog');
           dialog.destroyRecursive();
         }
       }, 'structure_cancel_button');

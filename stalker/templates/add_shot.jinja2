@@ -258,7 +258,7 @@
       // ********************************************************************
       // SEQUENCE
       var sequence_memory = new JsonRest({
-        target: "/get/project_sequences/"
+        target: "/get/sequences/"
       });
       
       var sequence_select = new FilteringSelect({
@@ -268,7 +268,7 @@
       sequence_select.startup();
       
       // ADD SEQUENCE BUTTON
-      var add_sequence_button = create_add_data_button(
+      var add_sequence_button = create_add_edit_data_button(
         dijit.byId('add_shot_form').getParent(),
         'Add',
         'add_sequence_dialog',
@@ -294,7 +294,7 @@
       // STATUS OR STATUS_LIST
       {% if not status_list %}
         // ADD STATUS LIST BUTTON
-        var add_status_list_button = create_add_data_button(
+        var add_status_list_button = create_add_edit_data_button(
           dijit.byId('add_shot_form').getParent(),
           'Add',
           'add_status_list_dialog',

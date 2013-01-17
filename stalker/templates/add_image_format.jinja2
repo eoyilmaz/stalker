@@ -58,110 +58,26 @@
   <button id='image_format_cancel_button'></button>
 </div>
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/_base/xhr', 'dojo/store/Memory',
+  require(['dijit/registry', 'dojo/request/xhr', 'dojo/store/Memory',
     'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/NumberTextBox', 'dijit/form/Button', 'dojo/Deferred',
     'dojo/domReady!'
   ],
     function(registry, xhr, Memory, Form, ValidationTextBox, NumberTextBox,
              TextBox, Button, Deferred){
+      
+      // **********************************************************************
+      // Form
       var add_image_format_form = new Form({
-        id: 'add_image_format_form',
-        method: 'POST',
-        onSubmit: function(event){
-          if (this.validate()){
-            // just close the dialog and somehow change the related field
-            // on parent widget
-            var deferred = xhr.post({
-              content: {
-                submitted: 'add'
-              },
-              url: '{{ request.route_url("add_image_format") }}',
-              form: dojo.byId('add_image_format_form')
-            });
-            
-            // update the caller dialog
-            var dialog = dijit.byId('add_image_format_dialog');
-            //var parent_dialog = dialog.get('parent_dialog');
-            // get the parent form data if there are any
-            var parent = dialog.get('parent');
-            var parent_dialog = null;
-            var parent_form = null;
-            
-            // check if the parent is a form
-            if (parent.declaredClass == 'dijit.form.Form'){
-              parent_form = parent;
-              parent_dialog = parent.getParent();
-            } else if (parent.declaredClass == 'dojox.widget.DialogSimple') {
-              parent_dialog = parent;
-              // try to get the first form of the dialog;
-              var children = parent.getChildren();
-              for (var i = 0; i < children.length; i++){
-                if (children[i].declaredClass == 'dijit.form.Form'){
-                  parent_form = children[i];
-                  break;
-                }
-              }
-            } else {
-              console.log('can not find neither the form nor the dialog');
-            }
-            
-            // if we have a form
-            if (parent_form != null){
-              // get form data
-              var parent_form_data = parent.get('value');
-              console.log('parent_form_data:');
-              console.log(parent_form_data);
-            } else {
-              console.log('parent_form is NULL 1');
-            }
-            
-            // if we have a dialog
-            if (parent_dialog != null){
-              
-              // refresh it
-              function do_refresh (){
-                var deferred_refresh = new Deferred();
-                parent_dialog.refresh();
-                return deferred_refresh.promise;
-              }
-              
-              do_refresh().then(function(){
-                // restore form data
-                // get the form again
-                parent_form = null;
-                children = parent_dialog.getChildren();
-                for (var i = 0; i < children.length; i++){
-                  if (children[i].declaredClass == 'dijit.form.Form'){
-                    parent_form = children[i];
-                    break;
-                  }
-                }
-                
-                if (parent_form != null){
-                  if (parent_form_data != null){
-                    // restore the data by calling the form.restore(data)
-                    console.log('restoring form data');
-                    parent.restore(parent_form_data);
-                  } else {
-                    console.log('parent_form_data is NULL');
-                  }
-                } else {
-                  console.log('parent_form is NULL 2');
-                }
-              });
-            } else {
-              console.log('parent_dialog is NULL');
-            }
-              
-            // destroy the dialog
-            dialog.destroyRecursive();
-          }
-        }
+        id: 'add_image_format_form'
       }, 'add_image_format_form');
       add_image_format_form.startup();
       
-      // NAME
+      
+      
+      
+      // **********************************************************************
+      // Name
       var name_textBox = new ValidationTextBox({
         name: 'name',
         label: 'Name',
@@ -170,6 +86,10 @@
       }, 'image_format_name');
       name_textBox.startup();
       
+      
+      
+      
+      // **********************************************************************
       // WIDTH
       var width_numberTextBox = new NumberTextBox({
         name: 'width',
@@ -179,6 +99,10 @@
       }, 'image_format_width');
       width_numberTextBox.startup();
       
+      
+      
+      
+      // **********************************************************************
       // HEIGHT
       var height_numberTextBox = new NumberTextBox({
         name: 'height',
@@ -188,6 +112,10 @@
       }, 'image_format_height');
       height_numberTextBox.startup();
       
+      
+      
+      
+      // **********************************************************************
       // PIXEL_ASPECT
       var pixel_aspect_numberTextBox = new NumberTextBox({
         name: 'pixel_aspect',
@@ -197,25 +125,36 @@
       }, 'image_format_pixel_aspect');
       pixel_aspect_numberTextBox.startup();
       
+      
+      
+      
+      // **********************************************************************
       // ADD BUTTON
       var add_button = new Button({
         label: 'Add',
         type: 'button',
         onClick: function(){
-          return add_image_format_form.submit();
+          submit_form({
+            dialog: dijit.byId('add_image_format_dialog'),
+            form: add_image_format_form,
+            additional_data: {submitted: 'add'},
+            url: '{{ request.route_url("add_image_format") }}',
+            method: 'POST'
+          });
         }
       }, 'image_format_add_button');
       add_button.startup();
       
+      
+      
+      
+      // **********************************************************************
       // CANCEL BUTTON
       var cancel_button = new Button({
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = dijit.byId('add_image_format_dialog');
-          dialog.destroyRecursive();
-{#            dialog.onCancel();#}
-{#            dialog.hide();#}
+          dijit.byId('add_image_format_dialog').destroyRecursive();
         }
       }, 'image_format_cancel_button');
       cancel_button.startup();        

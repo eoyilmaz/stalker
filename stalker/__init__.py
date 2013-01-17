@@ -91,16 +91,19 @@ def main(global_config, **settings):
     # ImageFormat
     config.add_route('add_image_format', 'add/image_format')
     config.add_route('edit_image_format', 'edit/image_format/{imf_id}')
+    config.add_route('get_image_formats', 'get/image_formats')
     
     # *************************************************************************
     # Repository
     config.add_route('add_repository', 'add/repository')
-    config.add_route('edit_repository', 'edit/repository')
+    config.add_route('edit_repository', 'edit/repository/{repository_id}')
+    config.add_route('get_repositories', 'get/repositories')
     
     # ************************************************************************* 
     # Structure
     config.add_route('add_structure', 'add/structure')
     config.add_route('edit_structure', 'edit/structure/{structure_id}')
+    config.add_route('get_structures', 'get/structures')
     
     # ************************************************************************* 
     # User
@@ -113,6 +116,7 @@ def main(global_config, **settings):
     config.add_route('add_filename_template', 'add/filename_template')
     config.add_route('edit_filename_template',
                      'edit/filename_template/{filename_template_id}')
+    config.add_route('get_filename_templates', 'get/filename_templates')
     
     # ************************************************************************* 
     # StatusList
@@ -144,8 +148,8 @@ def main(global_config, **settings):
     config.add_route('view_sequence', 'view/sequence/{sequence_id}')
     config.add_route('edit_sequence', 'edit/sequence/{sequence_id}')
     config.add_route('view_sequences', 'view/sequences/{project_id}')
-    config.add_route('get_project_sequences',
-                     'get/project_sequences/{project_id}')
+    config.add_route('get_sequences',
+                     'get/sequences/{project_id}')
     
     # *************************************************************************
     # Task

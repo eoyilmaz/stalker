@@ -241,7 +241,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
                isinstance(other, StatusList) and\
                self.statuses == other.statuses and\
                self.target_entity_type == other.target_entity_type
-
+    
     def __getitem__(self, key):
         """the indexing attributes for getting item
         """

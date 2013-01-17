@@ -1,5 +1,3 @@
-{#{% extends 'form_base.jinja2' %}#}
-{#{% block form_block %}#}
 <div class='dijitDialogPaneContentArea'>
   <form id='add_filename_template_form'>
     <table style='width: 100%;'>
@@ -84,58 +82,25 @@
   <button id='filename_template_cancel_button'></button>
 </div>
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/request/xhr', 'dojo/store/Memory',
+  require(['dijit/registry', 'dojo/store/Memory',
     'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/FilteringSelect', 'dijit/form/Button', 'dojo/domReady!'
   ],
-    function(registry, xhr, Memory, Form, ValidationTextBox, TextBox,
+    function(registry, Memory, Form, ValidationTextBox, TextBox,
              FilteringSelect, Button){
       
+      // **********************************************************************
+      // Form
       var add_filename_template_form = new Form({
-        id: 'add_filename_template_form',
-        method: 'POST',
-        onSubmit: function(event){
-          if (this.validate()){
-            // just close the dialog and somehow change the related field
-            // on parent widget
-            
-            // get the form data
-            var form_data = {};
-            var myFormData = dijit.byId('add_filename_template_form').get('value');
-            form_data.name = myFormData.name;
-            form_data.target_entity_type = myFormData.target_entity_type;
-            form_data.type_id = myFormData.type_id;
-            form_data.path = myFormData.path;
-            form_data.filename = myFormData.filename;
-            form_data.output_path = myFormData.output_path;
-            form_data.submitted = 'add';
-            
-            var deferred = xhr.post(
-              '{{ request.route_url("add_filename_template") }}',
-              {
-                method: 'POST',
-                data: form_data
-              }
-            );
-            
-            // update the caller dialog
-            var dialog = dijit.byId('add_filename_template_dialog');
-            var parent = dialog.get('parent');
-            if (parent != null){
-              // TODO: just update the image format field of the parent dialog
-              parent.refresh()
-            }
-            
-            // destroy the dialog
-            dialog.destroyRecursive();
-            
-          }
-          return false;
-        }
+        id: 'add_filename_template_form'
       }, 'add_filename_template_form');
       add_filename_template_form.startup();
       
-      // NAME
+      
+      
+      
+      // **********************************************************************
+      // Name
       var name_textBox = new ValidationTextBox({
         name: 'name',
         label: 'Name',
@@ -144,7 +109,12 @@
       }, 'filename_template_name');
       name_textBox.startup();
       
-      // TARGET ENTITY TYPE
+      
+      
+      
+      // **********************************************************************
+      // Target Entity Type
+      // No update needed here just use a simple memory
       var target_entity_type_memory = new Memory({
         data: [
           {% for entity_type in entity_types %}
@@ -165,8 +135,11 @@
       }, 'filename_template_target_entity_type');
       target_entity_type_select.startup();
       
-
-      // TYPE
+      
+      
+      
+      // **********************************************************************
+      // Type
       var type_memory = new Memory({
         data: [
           {% for type in filename_template_types %}
@@ -186,8 +159,12 @@
         value: type_memory.data[0].id
       }, 'filename_template_type');
       type_select.startup();
-       
-      // PATH
+      
+      
+      
+      
+      // **********************************************************************
+      // Path
       var path_textBox = new TextBox({
         name: 'path',
         label: 'Path Template',
@@ -196,7 +173,11 @@
       }, 'filename_template_path');
       path_textBox.startup();
       
-      // FILENAME
+      
+      
+      
+      // **********************************************************************
+      // Filename
       var filename_textBox = new TextBox({
         name: 'filename',
         label: 'Filename Template',
@@ -204,8 +185,12 @@
         required: true
       }, 'filename_template_filename');
       filename_textBox.startup();
-    
-      // OUTPUT PATH
+      
+      
+      
+      
+      // **********************************************************************
+      // Output Path
       var output_path_textBox = new TextBox({
         name: 'output_path',
         label: 'Output Path Template',
@@ -214,29 +199,39 @@
       }, 'filename_template_output_path');
       output_path_textBox.startup();
       
-      // ADD BUTTON
+      
+      
+      
+      // **********************************************************************
+      // Add Button
       var add_button = new Button({
         label: 'Add',
         type: 'button',
         onClick: function(){
-          return add_filename_template_form.submit();
+          submit_form({
+            dialog: dijit.byId('add_filename_template_dialog'),
+            form: add_filename_template_form,
+            additional_data: {submitted: 'add'},
+            url: '{{ request.route_url('add_filename_template') }}',
+            method: 'POST'
+          });
         }
       }, 'filename_template_add_button');
       add_button.startup();
       
-      // CANCEL BUTTON
+      
+      
+      // **********************************************************************
+      // Cancel Button
       var cancel_button = new Button({
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = dijit.byId('add_filename_template_dialog');
-          dialog.destroyRecursive();
+          dijit.byId('add_filename_template_dialog').destroyRecursive();
         }
       }, 'filename_template_cancel_button');
       cancel_button.startup();        
       
-      
   });
 </script>
-{#{% endblock %}#}
 

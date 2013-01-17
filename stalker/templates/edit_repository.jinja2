@@ -1,60 +1,60 @@
 <div class='dijitDialogPaneContentArea'>
-  <form id='edit_image_format_form'>
+  <div id='edit_repository_form'>
     <table style='width: 100%'>
-    
+      
       {# NAME #}
       <tr>
         <td class='label_column'>
-          <label for='image_format_name'>
+          <label for='repository_name'>
             Name
           </label>
         </td>
         <td class='input_column'>
-          <input id='image_format_name'>
+          <input id='repository_name'>
         </td>
       </tr>
       
-      {# WIDTH #}
+      {# WINDOWS_PATH #}
       <tr>
         <td class='label_column'>
-          <label for='image_format_width'>
-            Width
+          <label for='repository_windows_path'>
+            Windows Path
           </label>
         </td>
         <td class='input_column'>
-          <input id='image_format_width'>
+          <input id='repository_windows_path'>
         </td>
       </tr>
       
-      {# HEIGHT #}
+      {# LINUX_PATH #}
       <tr>
         <td class='label_column'>
-          <label for='image_format_height'>
-            Height
+          <label for='repository_linux_path'>
+            Linux Path
           </label>
         </td>
         <td class='input_column'>
-          <input id='image_format_height'>
+          <input id='repository_linux_path'>
         </td>
       </tr>
-      
+
+      {# OSX_PATH #}
       <tr>
         <td class='label_column'>
-          <label for='image_format_pixel_aspect'>
-            Pixel Aspect
+          <label for='repository_osx_path'>
+            OSX Path
           </label>
         </td>
         <td class='input_column'>
-          <input id='image_format_pixel_aspect'>
+          <input id='repository_osx_path'>
         </td>
       </tr>
-      
     </table>
-  </form>
+  </div>
 </div>
 <div class='dijitDialogPaneActionBar'>
-  <button id='image_format_edit_button'></button>
-  <button id='image_format_cancel_button'></button>
+  <button id='repository_edit_button'></button>
+  <button id='repository_cancel_button'></button>
 </div>
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
@@ -64,12 +64,11 @@
     function(registry, Memory, Form, ValidationTextBox, NumberTextBox, TextBox,
              Button){
       
-      // **********************************************************************
-      // Form
-      var edit_image_format_form = new Form({
-        id: 'edit_image_format_form'
-      }, 'edit_image_format_form');
-      edit_image_format_form.startup();
+      var edit_repository_form = new Form({
+        id: 'edit_repository_form'
+      }, 'edit_repository_form');
+      edit_repository_form.startup();
+      
       
       
       
@@ -78,51 +77,53 @@
       var name_textBox = new ValidationTextBox({
         name: 'name',
         label: 'Name',
-        placeHolder: 'Enter a name',
-        value: '{{ image_format.name }}',
+        value: '{{ repository.name }}',
+        placeHolder: 'Enter a Name',
         required: true
-      }, 'image_format_name');
+      }, 'repository_name');
       name_textBox.startup();
       
       
       
       
       // **********************************************************************
-      // Width
-      var width_numberTextBox = new NumberTextBox({
-        name: 'width',
-        label: 'Width',
-        placeHolder: '',
-        value: {{ image_format.width }},
+      // Windows Path
+      var windows_path_textBox = new ValidationTextBox({
+        name: 'windows_path',
+        label: 'Windows Path',
+        value: '{{ repository.windows_path }}',
+        placeHolder: 'Enter the Windows Path',
         required: true
-      }, 'image_format_width');
-      width_numberTextBox.startup();
-      
-      
-      
-      // **********************************************************************
-      // Height
-      var height_numberTextBox = new NumberTextBox({
-        name: 'height',
-        label: 'Height',
-        placeHolder: '',
-        value: {{ image_format.height }},
-        required: true
-      }, 'image_format_height');
-      height_numberTextBox.startup();
+      }, 'repository_windows_path');
+      windows_path_textBox.startup();
       
       
       
       
       // **********************************************************************
-      // Pixel Aspect
-      var pixel_aspect_numberTextBox = new NumberTextBox({
-        name: 'pixel_aspect',
-        label: 'Pixel Aspect',
-        value: {{ image_format.pixel_aspect }},
+      // Linux Path
+      var linux_path_textBox = new ValidationTextBox({
+        name: 'linux_path',
+        label: 'Linux Path',
+        value: '{{ repository.linux_path }}',
+        placeHolder: 'Enter the Linux Path',
         required: true
-      }, 'image_format_pixel_aspect');
-      pixel_aspect_numberTextBox.startup();
+      }, 'repository_linux_path');
+      linux_path_textBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // OSX Path
+      var osx_path_textBox = new ValidationTextBox({
+        name: 'osx_path',
+        label: 'OSX Path',
+        value: '{{ repository.osx_path }}',
+        placeHolder: 'Enter the OSX Path',
+        required: true
+      }, 'repository_osx_path');
+      osx_path_textBox.startup();
       
       
       
@@ -134,14 +135,14 @@
         type: 'button',
         onClick: function(){
           submit_form({
-            dialog: dijit.byId('edit_image_format_dialog'),
-            form: edit_image_format_form,
+            dialog: dijit.byId('edit_repository_dialog'),
+            form: edit_repository_form,
             additional_data: {submitted: 'edit'},
-            url: '{{ request.route_url('edit_image_format', imf_id=image_format.id) }}',
+            url: '{{ request.route_url('edit_repository', repository_id=repository.id) }}',
             method: 'POST'
           });
         }
-      }, 'image_format_edit_button');
+      }, 'repository_edit_button');
       edit_button.startup();
       
       
@@ -153,11 +154,10 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          dijit.byId('edit_image_format_dialog').destroyRecursive();
+          dijit.byId('edit_repository_dialog').destroyRecursive();
         }
-      }, 'image_format_cancel_button');
-      cancel_button.startup();
-      
+      }, 'repository_cancel_button');
+      cancel_button.startup();        
   });
 </script>
 

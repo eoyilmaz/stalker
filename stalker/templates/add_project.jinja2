@@ -1,5 +1,3 @@
-{#{% extends 'form_base.jinja2' %}#}
-{#{% block form_block %}#}
 <div class='dijitDialogPaneContentArea'> 
   <form id='add_project_form'>
     <table style='width: 100%;'>
@@ -119,120 +117,100 @@
   require(['dijit/registry', 'dojo/_base/xhr', 'dojo/on',
     'dojo/store/Memory', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
     'dijit/form/TextBox', 'dijit/form/NumberTextBox',
-    'dijit/form/FilteringSelect', 'dijit/form/Button', 'dojo/Deferred',
+    'dijit/form/FilteringSelect', 'dijit/form/Button', 'dojo/store/JsonRest',
     'dojo/ready'
   ],
   function(registry, xhr, on, Memory, Form, ValidationTextBox, TextBox,
-           NumberTextBox, FilteringSelect, Button, Deferred){
+           NumberTextBox, FilteringSelect, Button, JsonRest){
     
     // ********************************************************************
-    // FORM
+    // Form
     var add_project_form = new Form({
-      id: 'add_project_form',
-      method: 'POST',
-      onSubmit: function(event){
-        if (this.validate()){
-          var deferred = xhr.post({
-            content: {
-              submitted: 'add'
-            },
-            url: '{{ request.route_url("add_project") }}',
-            form: dojo.byId('add_project_form')
-          });
-          
-          // update the caller dialog
-          var dialog = dijit.byId('add_project_dialog');
-          var parent = dialog.get('parent');
-          if (parent != null){
-            parent.refresh()
-          }
-          
-          // destroy dialog
-          dialog.destroyRecursive();
-        }
-      }
+      id: 'add_project_form'
     }, 'add_project_form');
     
-    add_project_form.set('restore', function(data){
-      console.log('got data:');
-      console.log(data);
-    });
+    
+    
     
     // ********************************************************************
-    // NAME
+    // Name
     var name_textBox = new ValidationTextBox({
       name: 'name',
       label: 'Name',
-      value: '{{ name }}',
-      placeHolder: 'Enter a name',
-      required: true
+      required: true,
+      placeHolder: 'Enter a name'
     }, 'project_name');
     name_textBox.startup();
     
+    
+    
+    
     // ********************************************************************
-    // CODE
-    var code_textBox = new TextBox({
+    // Code
+    var code_textBox = new ValidationTextBox({
       name: 'code',
       label: 'Code',
-      value: '',
+      required: true,
       placeHolder: 'Enter a code'
     }, 'project_code');
     name_textBox.startup();
     
+    
+    
+    
     // ********************************************************************
-    // IMAGE FORMAT
-    var image_format_memory = new Memory({
-      data: [
-        {% for image_format in image_formats %}
-          {
-            name: '{{image_format.name}} - {{image_format.width}}'+
-                  'x{{image_format.height}}x{{image_format.pixel_aspect}}',
-            id: '{{ image_format.id }}'
-          },
-        {% endfor %}
-      ]
+    // Image Format
+    // 
+    // The memory
+    var imf_memory = new JsonRest({
+      target: '/get/image_formats'
     });
     
-    var image_format_filteringSelect = new FilteringSelect({
+    // The Field
+    var imf_filteringSelect = new FilteringSelect({
       name: 'image_format',
       required: true,
-      store: image_format_memory,
       {% if not image_formats|length %}
         disabled: true,
         placeHolder: 'No Image Format in DB'
       {% endif %}
     }, 'project_image_format');
-    image_format_filteringSelect.startup();
+    imf_filteringSelect.startup();
     
-    try {
-      image_format_filteringSelect.attr(
-        'value',
-        image_format_memory.data[0].id
-      );
-    } catch(e) {
-      // don't do anything
-    }
+    // The Updater
+    // supply a function to refresh the content of the format
+    var imf_field_updater = field_updater({
+      'memory': imf_memory,
+      'widget': imf_filteringSelect
+    });
+    // run the function to fill the data for the first time
+    imf_field_updater({animate: false});
     
-    // ADD IMAGE FORMAT BUTTON
-    var add_image_format_button = create_add_data_button({
-      parent: add_project_form,
+    // Add Image Format Button
+    var add_image_format_button = create_add_edit_data_button({
+      button_label: 'Add',
       dialog_id: 'add_image_format_dialog',
       content_creator: create_add_image_format_dialog,
-      dom_element: 'project_add_image_format_button',
+      attach_to: 'project_add_image_format_button',
+      related_field_updater: imf_field_updater
     });
+    add_image_format_button.startup();
     
-    // EDIT IMAGE FORMAT BUTTON
-    var edit_image_format_button = create_edit_data_button({
-      parent: dijit.byId('add_project_form').getParent(),
-      label: 'Edit',
+    // Edit Image Format Button
+    var edit_image_format_button = create_add_edit_data_button({
+      button_label: 'Edit',
       dialog_id: 'edit_image_format_dialog',
       content_creator: create_edit_image_format_dialog,
-      dom_element: 'project_edit_image_format_button',
-      edited_data_id_getter: function(){
-        return image_format_filteringSelect.get('value');
+      attach_to: 'project_edit_image_format_button',
+      related_field_updater: imf_field_updater,
+      data_id_getter: function(){
+        return imf_filteringSelect.get('value');
       }
     });
     edit_image_format_button.startup();
+    
+    
+    
     
     // ********************************************************************
     // FPS
@@ -245,23 +223,19 @@
     }, 'project_fps');
     fps_numberTextBox.startup();
     
+    
+    
+    
     // ********************************************************************
     // REPOSITORY
-    var repository_memory = new Memory({
-      data: [
-        {% for repository in repositories %}
-          {
-            name: '{{ repository.name }}',
-            id: '{{ repository.id }}'
-          },
-        {% endfor %}
-      ]
+    // The Memory
+    var repository_memory = new JsonRest({
+      target: '/get/repositories'
     });
     
     var repository_filteringSelect = new FilteringSelect({
       name: 'repository',
       required: true,
-      store: repository_memory,
       {% if not repositories|length %}
         disabled: true,
         placeHolder: 'No Repository in DB'
@@ -269,166 +243,155 @@
     }, 'project_repository');
     repository_filteringSelect.startup();
     
-    try {
-      repository_filteringSelect.attr(
-        'value',
-        repository_memory.data[0].id
-      );
-    } catch(e) {
-      // don't do anything
-    }
+    // The Updater
+    var repo_field_updater = field_updater({
+      'memory': repository_memory,
+      'widget': repository_filteringSelect
+    });
+    // run the function to fill the data
+    repo_field_updater({animate: false});
    
-    // ADD REPOSITORY BUTTON
-    var add_repository_button = create_add_data_button(
-            dijit.byId('add_project_form').getParent(),
-            'Add',
-            'add_repository_dialog',
-            create_add_repository_dialog,
-            'project_add_repository_button'
-    );
+    // Add Repository Button
+    var add_repository_button = create_add_edit_data_button({
+      button_label: 'Add',
+      dialog_id: 'add_repository_dialog',
+      content_creator: create_add_repository_dialog,
+      attach_to: 'project_add_repository_button',
+      related_field_updater: repo_field_updater
+    });
     add_repository_button.startup();
     
-    // EDIT REPOSITORY BUTTON
-    var edit_repository_button = create_edit_data_button(
-            dijit.byId('add_project_form').getParent(),
-            'Edit',
-            'edit_repository_dialog',
-            create_add_repository_dialog,
-            'project_edit_repository_button',
-            function(){
-              repository_filteringSelect.get('value');
-            }
-    );
+    // Edit Repository Button
+    var edit_repository_button = create_add_edit_data_button({
+      button_label: 'Edit',
+      dialog_id: 'edit_repository_dialog',
+      content_creator: create_edit_repository_dialog,
+      attach_to: 'project_edit_repository_button',
+      related_field_updater: repo_field_updater,
+      data_id_getter: function(){
+        return repository_filteringSelect.get('value');
+      }
+    });
     edit_repository_button.startup();
+    
+    
+    
     
     // ********************************************************************
     // STRUCTURE
-    var structure_memory = new Memory({
-      data: [
-        {% for structure in structures %}
-          {
-            name: '{{ structure.name }}',
-            id: '{{ structure.id }}'
-          },
-        {% endfor %}
-      ]
+    // 
+    // The memory
+    var structure_memory = new JsonRest({
+      target: '/get/structures'
     });
-    var structure_select = new FilteringSelect({
+    
+    // The Field
+    var structure_filteringSelect = new FilteringSelect({
       name: 'structure',
       required: true,
-      store: structure_memory,
       {% if not structures|length %}
         disabled: true,
         placeHolder: 'No Structure in DB'
       {% endif %}
     }, 'project_structure');
-    structure_select.startup();
+    structure_filteringSelect.startup();
     
-    try {
-      structure_select.attr(
-        'value',
-        structure_memory.data[0].id
-      );
-    } catch(e) {
-      // don't do anything
-    }
-  
-    // ADD STRUCTURE BUTTON
-    var add_structure_button = create_add_data_button(
-            dijit.byId('add_project_form').getParent(),
-            'Add',
-            'add_structure_dialog',
-            create_add_structure_dialog,
-            'project_add_structure_button'
-    );
+    // The Updater
+    var structure_field_updater = field_updater({
+      'memory': structure_memory,
+      'widget': structure_filteringSelect
+    });
+    // call the updater to fill the field for the first time
+    structure_field_updater({animate: false});
+    
+    // Add Structure Button
+    var add_structure_button = create_add_edit_data_button({
+      button_label: 'Add',
+      dialog_id: 'add_structure_dialog',
+      content_creator: create_add_structure_dialog,
+      attach_to: 'project_add_structure_button',
+      related_field_updater: structure_field_updater
+    });
     add_structure_button.startup();
     
     // EDIT STRUCTURE BUTTON
-    var edit_structure_button = create_edit_data_button(
-            dijit.byId('add_project_form').getParent(),
-            'Edit',
-            'edit_structure_dialog',
-            create_edit_structure_dialog,
-            'project_edit_structure_button',
-            function(){
-              return structure_select.get('value')
-            }
-    );
+    var edit_structure_button = create_add_edit_data_button({
+      button_label:'Edit',
+      dialog_id: 'edit_structure_dialog',
+      content_creator: create_edit_structure_dialog,
+      attach_to: 'project_edit_structure_button',
+      related_field_updater: structure_field_updater,
+      data_id_getter: function(){
+        return structure_filteringSelect.get('value')
+      }
+    });
     edit_structure_button.startup();
+    
+    
+    
     
     // ********************************************************************
     // LEAD
-    var lead_memory = new Memory({
-      data: [
-        {%  for user in users %}
-          {
-            name: '{{ user.name }}',
-            id: '{{ user.id }}'
-          }
-        {% endfor %}
-      ]
+    var lead_memory = new JsonRest({
+      target: '/get/users'
     });
     
-    var lead_select = new FilteringSelect({
+    // The Field
+    var lead_filteringSelect = new FilteringSelect({
       name: 'lead',
       required: true,
-      store: lead_memory,
       {% if not users|length %}
         disabled: true,
         placeHolder: 'No Users in DB'
       {% endif %}
     }, 'project_lead');
-    lead_select.startup();
+    lead_filteringSelect.startup();
     
-    try{
-      lead_select.set(
-        'value',
-        lead_memory.data[0].id
-      );
-    } catch(e) {
-      // do nothing
-    }
+    // The Updater
+    var lead_field_updater = field_updater({
+      'memory': lead_memory,
+      'widget': lead_filteringSelect
+    });
+    lead_field_updater({animate: false});
     
-    // ADD LEAD BUTTON
-    var add_lead_button = create_add_data_button(
-            dijit.byId('add_project_form').getParent(),
-            'Add',
-            'add_user_dialog',
-            create_add_user_dialog,
-            'project_add_lead_button'
-    );
+    // Add Lead Button
+    var add_lead_button = create_add_edit_data_button({
+      button_label: 'Add',
+      dialog_id: 'add_user_dialog',
+      content_creator: create_add_user_dialog,
+      attach_to: 'project_add_lead_button',
+      related_field_updater: lead_field_updater
+    });
     add_lead_button.startup();
     
-    // EDIT LEAD BUTTON
-    var edit_lead_button = create_edit_data_button(
-            dijit.byId('add_project_form').getParent(),
-            'Edit',
-            'edit_user_dialog',
-            create_edit_user_dialog,
-            'project_edit_lead_button',
-            function(){
-              return lead_select.get('value')
-            }
-    );
+    // Edit Lead Button
+    var edit_lead_button = create_add_edit_data_button({
+      button_label: 'Edit',
+      dialog_id: 'edit_user_dialog',
+      content_creator: create_edit_user_dialog,
+      attach_to: 'project_edit_lead_button',
+      related_field_updater: lead_field_updater,
+      data_id_getter: function(){
+        return lead_filteringSelect.get('value')
+      }
+    });
     edit_lead_button.startup();
+    
+    
+    
     
     // ********************************************************************
     // STATUS LIST
-    var status_list_memory = new Memory({
-      data: [
-        {% for status_list in status_lists %}
-          {
-            name: '{{ status_list.name }}',
-            id: '{{ status_list.id }}'
-          },
-        {% endfor %}
-      ]
+    //
+    // The Memory
+    var status_list_memory = new JsonRest({
+      target: 'get/status_lists'
     });
     
+    // The Field
     var status_list_select = new FilteringSelect({
       name: 'status_list',
       required: true,
-      store: status_list_memory,
       {% if not status_lists|length %}
         disabled: true,
         placeHolder: 'No StatusList in DB',
@@ -436,37 +399,37 @@
     }, 'project_status_list');
     status_list_select.startup();
     
-    try{
-      status_list_select.set(
-        'value',
-        status_list_memory.data[0].id
-      )
-    } catch(e) {
-      // to nothing
-    }
+    // The Updater
+    var status_list_field_updater = field_updater({
+      'memory': status_list_memory,
+      'widget': status_list_select
+    });
     
-    // ADD STATUS LIST BUTTON
-    var add_status_list_button = create_add_data_button(
-            dijit.byId('add_project_form').getParent(),
-            'Add',
-            'add_status_list_dialog',
-            create_add_status_list_dialog,
-            'project_add_status_list_button'
-    );
+    // Add Status List Button
+    var add_status_list_button = create_add_edit_data_button({
+      button_label: 'Add',
+      dialog_id: 'add_status_list_dialog',
+      content_creator: create_add_status_list_dialog,
+      attach_to: 'project_add_status_list_button',
+      related_field_updater: status_list_field_updater
+    });
     add_status_list_button.startup();
     
-    // EDIT STATUS LIST BUTTON
-    var edit_status_list_button = create_edit_data_button(
-            dijit.byId('add_project_form').getParent(),
-            'Edit',
-            'edit_status_list_dialog',
-            create_edit_status_list_dialog,
-            'project_edit_status_list_button',
-            function(){
-              return status_list_select.get('value')
-            }
-    );
+    // Edit Status List Button
+    var edit_status_list_button = create_add_edit_data_button({
+      button_label: 'Edit',
+      dialog_id: 'edit_status_list_dialog',
+      content_creator: create_edit_status_list_dialog,
+      attach_to: 'project_edit_status_list_button',
+      related_field_updater: status_list_field_updater,
+      data_id_getter: function(){
+        return status_list_select.get('value')
+      }
+    });
     edit_status_list_button.startup();
+    
+    
+    
     
     // ********************************************************************
     // ADD BUTTON
@@ -474,7 +437,13 @@
       label: 'Add',
       type: 'button',
       onClick: function(){
-        return dijit.byId('add_project_form').submit();
+        submit_form({
+          dialog: dijit.byId('add_project_dialog'),
+          form: add_project_form,
+          additional_data: {submitted: 'add'},
+          url: '{{ request.route_url("add_project") }}',
+          method: 'POST'
+        });
       }
     }, 'project_add_button');
     add_button.startup();
@@ -494,5 +463,4 @@
     
 });
 </script>
-{#{% endblock %}#}
 

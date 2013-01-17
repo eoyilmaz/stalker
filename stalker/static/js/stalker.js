@@ -1,42 +1,183 @@
-
-require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
-    function(registry, DialogSimple, Button){
+require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
+    'dojo/store/Memory', 'dojox/widget/DialogSimple', 'dijit/form/Button',
+    'dojo/_base/fx', 'dojo/dom-style'],
+    function(registry, lang, xhr, Memory, DialogSimple, Button, fx, style){
         
         // ********************************************************************
-        // ADD DATA BUTTON
-        // TODO: what is parent and what is dialog_id
-        create_add_data_button = function(kwargs){
+        // DO_SUBMIT
+        // 
+        // A helper function for form submission.
+        // 
+        // Helps to submit the data and update a related field together. Uses
+        // Deferred post and waits for the data to be send before updating the
+        // related field if any.
+        // 
+        // 
+        // PARAMETERS
+        // 
+        // dialog:
+        //   the dialog to reset and destroy
+        // 
+        // form:
+        //   the form to get the data form
+        // 
+        // additional_data:
+        //   additional data to append to the form data
+        // 
+        // url:
+        //   the url to submit the data to
+        // 
+        // method:
+        //   the method POST or GET
+        // 
+        submit_form = function(kwargs){
+            var dialog = kwargs.dialog;
+            var form = kwargs.form;
+            var additional_data = kwargs.additional_data || {};
+            var url = kwargs.url;
+            var method = kwargs.method;
             
-            // PARAMETERS
-            // 
-            // parent:
-            //   The parent widget, null if there are no parents defined,
-            //   generally it is another form.
-            // 
-            // button_label:
-            //   The label of the add button, default is 'Add'
-            // 
-            // dialog_id:
-            //   the id of the parent dialog
-            // 
-            // content_creator:
-            //   the content creator function for the dialog
-            // 
-            // dom_element:
-            //   the dom element to attach this button to
-            // 
-            // parent_data_id:
-            //   if we already have some id for the data, let say if we are
-            //   adding a new Sequence to a Project then this is the Project.id
-            //   or 
-            //   are 
+            if (form.validate()){
+                // get the form data
+                var form_data = form.get('value');
+                form_data = lang.mixin(form_data, additional_data);
+                
+                var deferred = xhr.post(
+                  url,
+                  {
+                    method: method,
+                    data: form_data
+                  }
+                );
+                
+                deferred.then(function(){
+                  // update the caller dialog
+                  var related_field_updater = dialog.get(
+                      'related_field_updater'
+                  );
+                  if (related_field_updater != null){
+                    related_field_updater();
+                  }
+                  // destroy the dialog
+                  dialog.reset();
+                  dialog.destroyRecursive();
+                });
+            }
+        };
+        
+        // ********************************************************************
+        // FIELD_UPDATER
+        // 
+        // Returns a function which when called updates a field
+        //
+        // memory:
+        //  the JsonRest instance
+        // 
+        // widget:
+        //  the widget to update the data to
+        // 
+        // selected:
+        //  stores what is selected among the data
+        // 
+        field_updater = function(kwargs){
+            var memory = kwargs.memory;
+            var widget = kwargs.widget;
+            var selected = kwargs.selected || [];
             
-            var parent = kwargs.parent;
-            var button_label = kwargs.label || 'Add';
+            return function(){
+                var animate = arguments[0] || true;
+                var result = memory.query().then(function(data){
+                    widget.reset();
+                    
+                    // if the widget is a MultiSelect
+                    if (widget.declaredClass == "dijit.form.MultiSelect"){
+                        // add options manually
+                        // remove the previous options first
+                        dojo.query('option', widget.domNode).forEach(function(opt, idx, arr){
+                            dojo.destroy(opt);
+                        });
+                        
+                        // add options
+                        for (var i=0; i < data.length; i++){
+                            dojo.create(
+                                'option',
+                                {
+                                    'value': data[i].id,
+                                    'innerHTML': data[i].name
+                                },
+                                widget.domNode
+                            );
+                        }
+                        
+                        // select selected
+                        if (selected.length){
+                            widget.setValue(selected);
+                        }
+                    } else {
+                        // set the data normally
+                        widget.set('store', new Memory({data: data}));
+                        if (data.length > 0){
+                            widget.attr('value', data[0].id);
+                        }
+                    }
+                    
+                    if (animate == true){
+                        // animate the field to indicate it is updated
+                        var domNode = widget.domNode;
+                        fx.animateProperty({
+                            node: domNode,
+                            duration: 500,
+                            properties: {
+                                backgroundColor: {  
+                                    start: "#00ff00",
+                                    end: "white"
+                                }
+                            }
+                        }).play();
+                    }
+                });
+            };
+        };
+        
+        // ********************************************************************
+        // CREATE ADD EDIT DATA BUTTON
+        //
+        // Creates a button to add/edit some data depending on to the given
+        // dialog.
+        // 
+        // PARAMETERS
+        // 
+        // button_label:
+        //   The label of the add button, default is 'Add'
+        // 
+        // dialog_id:
+        //   the id of the parent dialog
+        // 
+        // content_creator:
+        //   the content creator function for the dialog
+        // 
+        // attach_to:
+        //   the dom element to attach this button to
+        // 
+        // data_id_getter:
+        //   if we already have some id for the data, let say if we are
+        //   adding a new Sequence to a Project then this is the function
+        //   that returns the Project.id or if we are editing a data then
+        //   this is the function returning the edited data id.
+        //   
+        //   It is a function because it needs to have the current value of
+        //   the edited data, so it can not be a direct value.
+        //
+        // related_field_updater:
+        //   a function object without any parameters which will update the
+        //   the related field which this form is adding data to.
+        create_add_edit_data_button = function(kwargs){
+            var button_label = kwargs.button_label || 'Add';
             var dialog_id = kwargs.dialog_id;
             var content_creator = kwargs.content_creator;
-            var dom_element = kwargs.dom_element;
-            var parent_data_id = kwargs.data_id;
+            var attach_to = kwargs.attach_to;
+            var data_id_getter = kwargs.data_id_getter|| function(){};
+            var related_field_updater = kwargs.related_field_updater;
             
             return new Button({
                 label: button_label,
@@ -45,517 +186,293 @@ require(["dijit/registry", "dojox/widget/DialogSimple", "dijit/form/Button"],
                     // create the dialog if it doesn't already exists
                     var dialog = dijit.byId(dialog_id);
                     if (dialog == null){
-                        dialog = content_creator(parent, parent_data_id);
+                        dialog = content_creator(data_id_getter());
                     }
                     
-                    // set the parent
-                    dialog.set('parent', parent);
+                    // set the field updater
+                    dialog.set('related_field_updater', related_field_updater);
                     
                     // show the dialog
                     dialog.show();
                 }
-            }, dom_element);
+            }, attach_to);
         };
-        
-        // ********************************************************************
-        // EDIT DATA BUTTON
-        create_edit_data_button = function(kwargs){
-            // parent: The parent widget, null if there are no parents defined
-            // label: The label of the add button
-            // dialog_id: The id of the parent dialog
-            
-            var parent = kwargs.parent;
-            var label = kwargs.label;
-            var dialog_id = kwargs.dialog_id;
-            var content_creator = kwargs.content_creator;
-            var dom_element = kwargs.dom_element;
-            var edited_data_id_getter = kwargs.edited_data_id_getter;
-            var parent_form = kwargs.parent_form;
-            
-            return new Button({
-                label: label,
-                type: 'Button',
-                onClick: function(){
-                    // create the dialog and pass the data in to it
-                    var dialog = dijit.byId(dialog_id);
-                    if (dialog == null){
-                        dialog = content_creator(parent, edited_data_id_getter());
-                    }
-                    
-                    dialog['parent_form'] = parent_form;
-                    
-                    // show the dialog
-                    dialog.show();
-                }
-            }, dom_element)
-        };
-        
         
         // ********************************************************************
         // PROJECT
-        create_add_project_dialog = function (parent){
-            // create the dialog
-            var myDialog = new DialogSimple({
+        create_add_project_dialog = function (){
+            return new DialogSimple({
                 id: 'add_project_dialog',
                 title: 'Add Project',
                 href: '/add/project',
-                style: "width: 380px; height auto; padding: 0px",
+                resize: true,
+                style: 'width: auto; height auto; padding: 0px;',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
+        create_edit_project_dialog = function(project_id){
+            return new DialogSimple({
+                id: 'edit_project_dialog',
+                title: 'Edit Project',
+                href: '/edit/project/' + project_id,
+                resize: true,
+                style: 'width: auto; height: auto; padding 0px;',
+                executeScripts: true
+            })
+        };
         
         // ********************************************************************
         // IMAGE FORMAT
-        create_add_image_format_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_image_format_dialog = function(){
+            return new DialogSimple({
                 id: 'add_image_format_dialog',
                 title: 'Add Image Format',
                 href: '/add/image_format',
                 resize: true,
-                style: "width: 380px; height auto; padding: 0px",
+                style: 'width: auto; height auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
-        create_edit_image_format_dialog = function(parent, image_format_id){
-            var myDialog = new DialogSimple({
+        create_edit_image_format_dialog = function(image_format_id){
+            return new DialogSimple({
                 id: 'edit_image_format_dialog',
                 title: 'Edit Image Format',
                 href: '/edit/image_format/' + image_format_id,
                 resize: true,
-                style: "width: 380px; height: auto; padding: 0px",
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
         // ********************************************************************
         // STRUCTURE
-        create_add_structure_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_structure_dialog = function(){
+            return new DialogSimple({
                 id: 'add_structure_dialog',
                 title: 'Add Structure',
                 href: '/add/structure',
                 resize: true,
-                style: "width: 380px; height: auto; padding: 0px",
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
-            });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
+            }); 
         };
         
-        create_edit_structure_dialog = function(parent, structure_id){
-            var myDialog = new DialogSimple({
+        create_edit_structure_dialog = function(structure_id){
+            return new DialogSimple({
                 id: 'edit_structure_dialog',
                 title: 'Edit Structure',
                 href: '/edit/structure/' + structure_id,
                 resize: true,
-                style: "width: 380px; height: auto; padding: 0px",
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
         // ********************************************************************
         // USER
-        create_add_user_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_user_dialog = function(){
+            return new DialogSimple({
                 id: 'add_user_dialog',
                 title: 'Add User',
                 href: '/add/user',
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
-        create_edit_user_dialog = function(parent, user_id){
+        create_edit_user_dialog = function(user_id){
             var myDialog = new DialogSimple({
                 id: 'edit_user_dialog',
                 title: 'Edit User',
                 href: 'edit/user/' + user_id,
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
         // ********************************************************************
         // FILENAME TEMPLATE
-        create_add_filename_template_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_filename_template_dialog = function(){
+            return new DialogSimple({
                 id: 'add_filename_template_dialog',
                 title: 'Add Filename Template',
                 href: '/add/filename_template',
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
-        create_edit_filename_template_dialog = function(parent,
-                                                        filename_template_id){
+        create_edit_filename_template_dialog = function(filename_template_id){
             var myDialog = new DialogSimple({
                 id: 'edit_filename_template_dialog',
                 title: 'Edit Filename Template',
                 href: 'edit/filename_template/' + filename_template_id,
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
          
         // ********************************************************************
         // REPOSITORY
-        create_add_repository_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_repository_dialog = function(){
+            return new DialogSimple({
                 id: 'add_repository_dialog',
                 title: 'Add Repository',
                 href: '/add/repository',
                 resize: true,
-                style: "width: 380px; height auto; padding: 0px",
+                style: 'width: auto; height auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
-        create_edit_repository_dialog = function(parent, repo_id){
-            var myDialog = new DialogSimple({
+        create_edit_repository_dialog = function(repo_id){
+            return new DialogSimple({
                 id: 'edit_repository_dialog',
                 title: 'Edit Repository',
                 href: '/edit/repository/' + repo_id,
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
         // ********************************************************************
         // STATUS LIST
-        create_add_status_list_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_status_list_dialog = function(){
+            return new DialogSimple({
                 id: 'add_status_list_dialog',
                 title: 'Add Status List',
                 href: '/add/status_list',
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
-        create_edit_status_list_dialog = function(parent, status_list_id){
-            var myDialog = new DialogSimple({
+        create_edit_status_list_dialog = function(status_list_id){
+            return new DialogSimple({
                 id: 'edit_status_list_dialog',
                 title: 'Edit Status List',
                 href: '/edit/status_list/' + status_list_id,
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
         // ********************************************************************
         // STATUS
-        create_add_status_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_status_dialog = function(){
+            return new DialogSimple({
                 id: 'add_status_dialog',
                 title: 'Add Status',
                 href: '/add/status',
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
-        create_edit_status_dialog = function(parent, status_id){
-            var myDialog = new DialogSimple({
+        create_edit_status_dialog = function(status_id){
+            return new DialogSimple({
                 id: 'edit_status_dialog',
                 title: 'Edit Status',
                 href: '/edit/status/' + status_id,
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
         // ********************************************************************
         // ASSET
-        create_add_asset_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_asset_dialog = function(){
+            return new DialogSimple({
                 id: 'add_asset_dialog',
                 title: 'Add Asset',
                 href: '/add/asset',
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
-        
         
         // ********************************************************************
         // SHOT
-        create_add_shot_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_shot_dialog = function(){
+            return new DialogSimple({
                 id: 'add_shot_dialog',
                 title: 'Add Shot',
                 href: '/add/shot',
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
-        create_edit_shot_dialog = function(parent, shot_id){
-            var myDialog = new DialogSimple({
+        create_edit_shot_dialog = function(shot_id){
+            return new DialogSimple({
                 id: 'edit_shot_dialog',
                 title: 'Edit Shot',
                 href: '/edit/shot/' + shot_id,
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
         // ********************************************************************
         // SEQUENCE
-        create_add_sequence_dialog = function(parent){
-            var myDialog = new DialogSimple({
+        create_add_sequence_dialog = function(){
+            return new DialogSimple({
                 id: 'add_sequence_dialog',
                 title: 'Add Sequence',
                 href: '/add/sequence',
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
-        create_edit_sequence_dialog = function(parent, sequence_id){
-            var myDialog = new DialogSimple({
+        create_edit_sequence_dialog = function(sequence_id){
+            return new DialogSimple({
                 id: 'edit_sequence_dialog',
                 title: 'Edit Sequence',
                 href: '/edit/sequence/' + sequence_id,
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
         // ********************************************************************
         // TASK
-        create_add_task_dialog = function(parent, taskable_entity_id){
-            var myDialog = new DialogSimple({
+        create_add_task_dialog = function(taskable_entity_id){
+            return new DialogSimple({
                 id: 'add_task_dialog',
                 title: 'Add Task',
                 href: '/add/task/' + taskable_entity_id,
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
         
-        create_edit_task_dialog = function(parent, task_id){
-            var myDialog = new DialogSimple({
+        create_edit_task_dialog = function(task_id){
+            return new DialogSimple({
                 id: 'edit_task_dialog',
                 title: 'Edit Task',
                 href: '/edit/task/' + task_id,
                 resize: true,
-                style: 'width: 380px; height: auto; padding: 0px',
+                style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true
             });
-            myDialog.set('parent', parent);
-            myDialog.connect(
-                myDialog,
-                'close',
-                function(){
-                    myDialog.destroy();
-                }
-            );
-            return myDialog;
         };
    });
 

@@ -59,40 +59,25 @@
   <button id='repository_cancel_button'></button>
 </div>
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/_base/xhr', 'dojo/store/Memory',
-    'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
+  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
+    'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/NumberTextBox', 'dijit/form/Button', 'dojo/domReady!'
   ],
-    function(registry, xhr, Memory, Form, ValidationTextBox, NumberTextBox,
+    function(registry, Memory, Form, ValidationTextBox, NumberTextBox,
              TextBox, Button){
       
+      // **********************************************************************
+      // Form
       var add_repository_form = new Form({
-        id: 'add_repository_form',
-        method: 'POST',
-        onSubmit: function(event){
-          if (this.validate()){
-            // just close the dialog and somehow change the referrer
-            var deferred = xhr.post({
-              url: '{{ request.route_url("add_repository") }}',
-              form: dojo.byId('add_repository_form')
-            });
-            
-            // update the caller dialog
-            var dialog = dijit.byId('add_repository_dialog');
-            var parent = dialog.get('parent');
-            if (parent != null){
-              parent.refresh();
-            }
-            
-            // destroy the form
-            dialog.destroyRecursive();
-          }
-          return false;
-        }
+        id: 'add_repository_form'
       }, 'add_repository_form');
       add_repository_form.startup();
       
-      // NAME
+      
+      
+      
+      // **********************************************************************
+      // Name
       var name_textBox = new ValidationTextBox({
         name: 'name',
         label: 'Name',
@@ -101,7 +86,11 @@
       }, 'repository_name');
       name_textBox.startup();
       
-      // WINDOWS PATH
+      
+      
+      
+      // **********************************************************************
+      // Windows Path
       var windows_path_textBox = new ValidationTextBox({
         name: 'windows_path',
         label: 'Windows Path',
@@ -110,7 +99,11 @@
       }, 'repository_windows_path');
       windows_path_textBox.startup();
       
-      // LINUX PATH
+      
+      
+      
+      // **********************************************************************
+      // Linux Path
       var linux_path_textBox = new ValidationTextBox({
         name: 'linux_path',
         label: 'Linux Path',
@@ -119,7 +112,11 @@
       }, 'repository_linux_path');
       linux_path_textBox.startup();
       
-      // OSX PATH
+      
+      
+      
+      // **********************************************************************
+      // OSX Path
       var osx_path_textBox = new ValidationTextBox({
         name: 'osx_path',
         label: 'OSX Path',
@@ -128,23 +125,36 @@
       }, 'repository_osx_path');
       osx_path_textBox.startup();
       
-       // ADD BUTTON
+      
+      
+      
+      // **********************************************************************
+      // Add Button
       var add_button = new Button({
         label: 'Add',
         type: 'button',
         onClick: function(){
-          return add_repository_form.submit();
+          submit_form({
+            dialog: dijit.byId('add_repository_dialog'),
+            form: add_repository_form,
+            additional_data: {submitted: 'add'},
+            url: '{{ request.route_url('add_repository') }}',
+            method: 'POST'
+          });
         }
       }, 'repository_add_button');
       add_button.startup();
       
-      // CANCEL BUTTON
+      
+      
+      
+      // **********************************************************************
+      // Cancel Button
       var cancel_button = new Button({
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = dijit.byId('add_repository_dialog');
-          dialog.destroyRecursive();
+          dijit.byId('add_repository_dialog').destroyRecursive();
         }
       }, 'repository_cancel_button');
       cancel_button.startup();        

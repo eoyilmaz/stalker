@@ -346,8 +346,16 @@ class SimpleEntity(Base):
         from stalker.models.auth import User
 
         if updated_by_in is None:
+            # disable autoflush for a minute
+#            from stalker.db import DBSession
+#            autoflush = DBSession.autoflush
+#            DBSession.autoflush = False
+            
             # set it to what created_by attribute has
             updated_by_in = self.created_by
+            
+#            # restore autoflush
+#            DBSession.autoflush = autoflush
 
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
