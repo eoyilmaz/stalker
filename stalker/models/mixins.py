@@ -743,7 +743,6 @@ class ACLMixin(object):
     def _validate_permissions(self, key, permission):
         """validates the given permission value
         """
-        
         from stalker.models.auth import Permission
         
         if not isinstance(permission, Permission):

@@ -14,7 +14,7 @@
             {
               id: {{ task.id }},
               name: '{{ task.name }}',
-              task_of: '{{ task.task_of.name }}'
+              task_of: '{{ task.task_of.name }}',
               status: '{{ task.status.name }}',
               resources: [
                 {% for resource in task.resources %}
@@ -48,18 +48,17 @@
         autoHeight: true,
         rowSelector: '20px'
       }, 'tasks_data_grid');
-      
       tasks_data_grid.startup();
       
-      var add_task_button = create_add_edit_data_button(
-        null,
-        'Add',
-        'add_task_dialog',
-        create_add_task_dialog,
-        'view_tasks_add_task_button',
-        null,
-        '{{ taskable_entity.id }}'
-      );
+      
+      
+      var add_task_button = create_add_edit_data_button({
+        button_label: 'Add',
+        dialog_id: 'add_task_dialog',
+        content_creator: create_add_task_dialog,
+        attach_to: 'view_tasks_add_task_button',
+        data_id: '{{ taskable_entity.id }}'
+      });
       add_task_button.startup();
   });
 </script>

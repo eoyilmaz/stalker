@@ -225,7 +225,6 @@ def add_project(request):
                 logger.debug('there are missing parameters')
             # do not return anything
             # or maybe we should return to where we came from
-#           return HTTPFound(location=came_from)
     
     # just one wants to see the add project form
     return {
@@ -793,10 +792,14 @@ def add_edit_status(request):
     renderer='templates/add_status_list.jinja2',
     permission='Add_StatusList'
 )
+@view_config(
+    route_name='add_status_list_for',
+    renderer='templates/add_status_list.jinja2',
+    permission='Add_StatusList'
+)
 def add_status_list(request):
     """called when adding or editing a StatusList
     """
-    
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
     
@@ -813,16 +816,12 @@ def add_status_list(request):
                 
                 # get statuses
                 st_ids = [
-                    int(re.sub(r"[^0-9]+", "", st_id))
-                        for st_id in 
-                            request.params['statuses'].split(',')
+                    int(st_id)
+                    for st_id in request.POST.getall('statuses')
                 ]
                 
-                statuses = [
-                    Status.query.filter_by(id=st_id).first()
-                    for st_id in st_ids
-                ]
-                 
+                statuses = Status.query.filter(Status.id.in_(st_ids)).all()
+                
                 try:
                     new_status_list = StatusList(
                         name=request.params['name'],
@@ -834,19 +833,27 @@ def add_status_list(request):
                 except (AttributeError, TypeError) as e:
                     logger.debug(e.message)
                 else:
-                    DBSession.add(new_status_list)
+                    # TODO: This is just a test for HTTPExceptions, do it properly later!
+                    DBSession.add(new_status_list)  
                     try:
                         transaction.commit()
                     except IntegrityError as e:
                         logger.debug(e.message)
                         transaction.abort()
+                        http_error = HTTPServerError()
+                        http_error.explanation = e.message
+                        return(http_error)
                     else:
                         logger.debug('flushing the DBSession, no problem here!')
                         DBSession.flush()
                         logger.debug('finished adding StatusList')
             else:
                 logger.debug('there are missing parameters')
+    
+    target_entity_type = request.matchdict.get('target_entity_type')
+    
     return {
+        'target_entity_type': target_entity_type,
         'entity_types': EntityType.query.filter_by(statusable=True).all(),
         'statuses': Status.query.all()
     }
@@ -858,11 +865,8 @@ def add_status_list(request):
     permission='Edit_StatusList'
 )
 def edit_status_list(request):
-    """edits a StatusList
+    """called when editing a StatusList
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
     
@@ -877,16 +881,12 @@ def edit_status_list(request):
             # get statuses
             logger.debug("request.params['statuses']: %s" % 
                                                 request.params['statuses'])
-            status_ids = [
-                int(re.sub(r"[^0-9]+", "", status_id))
-                    for status_id in
-                        request.params['statuses'].split(',')
+            st_ids = [
+                int(st_id)
+                for st_id in request.POST.getall('statuses')
             ]
             
-            statuses = [
-                Status.query.filter_by(id=status_ids).first()
-                for status_ids in status_ids
-            ]
+            statuses = Status.query.filter(Status.id.in_(st_ids)).all()
             
             logger.debug("statuses: %s" % statuses)
             
@@ -894,21 +894,10 @@ def edit_status_list(request):
             status_list.statuses = statuses
             status_list.updated_by = user
             
-            try:
-                DBSession.add(status_list)
-                transaction.commit()
-            except IntegrityError as e:
-                logger.debug(e.message)
-                transaction.abort()
-            else:
-                logger.debug('finished editing StatusList')
-                return HTTPFound(location=came_from)
+            DBSession.add(status_list)
     
     return {
-        'status_list_id': status_list_id,
         'status_list': status_list,
-        'statuses': Status.query.all(),
-        'entity_types': EntityType.query.filter_by(statusable=True).all()
     }
 
 @view_config(
@@ -917,11 +906,8 @@ def edit_status_list(request):
     permission='Add_Asset'
 )
 def add_asset(request):
-    """edits when adding a new asset
+    """runs when adding a new Asset instance
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
     
@@ -934,26 +920,29 @@ def add_asset(request):
                'code' in request.params and \
                'description' in request.params and \
                'project_id' in request.params and \
-               'type' in request.params and \
+               'type_name' in request.params and \
+               'status_list_id' in request.params and \
                'status_id' in request.params:
                 
                 logger.debug('request.params["name"]: %s' %
+                             request.params['name'])
+                logger.debug('request.params["code"]: %s' %
                              request.params['name'])
                 logger.debug('request.params["description"]: %s' %
                              request.params['description'])
                 logger.debug('request.params["project_id"]: %s' %
                              request.params['project_id'])
-                logger.debug('request.params["type"]: %s' %
-                             request.params['type'])
+                logger.debug('request.params["type_name"]: %s' %
+                             request.params['type_name'])
+                logger.debug('request.params["status_list_id"]: %s' %
+                             request.params['status_list_id'])
                 logger.debug('request.params["status_id"]: %s' %
                              request.params['status_id'])
-                logger.debug('request.params["code"]: %s' %
-                             request.params['code'])
                 
                 project_id = request.params['project_id']
                 
                 # type will always return with a type name
-                type_name = request.params['type']
+                type_name = request.params['type_name']
                 
                 project = Project.query.filter_by(id=project_id).first()
                 type_ = Type.query\
@@ -982,9 +971,7 @@ def add_asset(request):
                         detail='No StatusList found'
                     )
                 
-                status_id = int(
-                    re.sub("[^0-9]+", "", request.params['status_id'])
-                )
+                status_id = int(request.params['status_id'])
                 logger.debug('status_id: %s' % status_id)
                 status = Status.query.filter_by(id=status_id).first()
                 logger.debug('status: %s' % status)
@@ -1024,9 +1011,20 @@ def add_asset(request):
                     #    logger.debug('flushing the DBSession, no problem here!')
                     #    DBSession.flush()
                     #    logger.debug('finished adding Asset')
-                    return HTTPFound(location=came_from)
             else:
                 logger.debug('there are missing parameters')
+                def get_param(param):
+                    if param in request.params:
+                        logger.debug('%s: %s' % (param, request.params[param]))
+                    else:
+                        logger.debug('%s not in params' % param)
+                get_param('name')
+                get_param('code')
+                get_param('description')
+                get_param('project_id')
+                get_param('type_name')
+                get_param('status_list_id')
+                get_param('status_id')
     return {
         'projects': Project.query.all(),
         'types': Type.query.filter_by(target_entity_type='Asset').all(),
@@ -1042,9 +1040,6 @@ def add_asset(request):
 def add_sequence(request):
     """runs when adding a new sequence
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
     
@@ -1054,40 +1049,19 @@ def add_sequence(request):
         if request.params['submitted'] == 'add':
             
             if 'name' in request.params and \
+               'code' in request.params and \
                'description' in request.params and \
                'project_id' in request.params and \
+               'status_list_id' in request.params and \
                'status_id' in request.params:
                 
-                logger.debug('request.params["name"]: %s' %
-                             request.params['name'])
-                logger.debug('request.params["description"]: %s' %
-                             request.params['description'])
-                logger.debug('request.params["project_id"]: %s' %
-                             request.params['project_id'])
-                logger.debug('request.params["status_id": %s' %
-                             request.params['status_id'])
-                
                 project_id = request.params['project_id']
-                
-                # type will always return with a type name
-                type_name = request.params['type']
-                
                 project = Project.query.filter_by(id=project_id).first()
-                type_ = Type.query\
-                    .filter_by(target_entity_type='Sequence')\
-                    .filter_by(name=type_name)\
-                    .first()
-                
-                if type_ is None:
-                    # create a new Type
-                    type_ = Type(name=type_name, target_entity_type='Sequence')
                 
                 # get the status_list
                 status_list = StatusList.query.filter_by(
-                    target_entity_type='Sequence'
+                    id=int(request.params['status_list_id'])
                 ).first()
-                
-                logger.debug('status_list: %s' % status_list)
                 
                 # there should be a status_list
                 if status_list is None:
@@ -1095,35 +1069,19 @@ def add_sequence(request):
                         detail='No StatusList found'
                     )
                 
-                status_id = int(
-                    re.sub("[^0-9]+", "", request.params['status_id'])
-                )
-                logger.debug('status_id: %s' % status_id)
+                status_id = int(request.params['status_id'])
                 status = Status.query.filter_by(id=status_id).first()
-                logger.debug('status: %s' % status)
                 
-                # get the lead
-                lead = None
-                if 'lead_id' in request.params:
-                    lead = User.query\
-                            .filter_by(id=request.params['lead_id'])\
-                            .first()
-                
-                # get the info
                 try:
                     new_sequence = Sequence(
                         name=request.params['name'],
+                        code=request.params['code'],
+                        description=request.params['description'],
                         project=project,
-                        type=type_,
                         status_list=status_list,
                         status=status,
                         created_by=logged_in_user,
-                        lead=lead
                     )
-                    
-                    logger.debug('new_sequence.status: ' % new_sequence.status)
-                    
-                    DBSession.add(new_sequence)
                 except (AttributeError, TypeError) as e:
                     logger.debug(e.message)
                 else:
@@ -1137,9 +1095,9 @@ def add_sequence(request):
                         logger.debug('flushing the DBSession, no problem here!')
                         DBSession.flush()
                         logger.debug('finished adding Sequence')
-                        return HTTPFound(location=came_from)
             else:
                 logger.debug('there are missing parameters')
+    
     return {
         'projects': Project.query.all(),
         'types': Type.query.filter_by(target_entity_type='Sequence').all(),
@@ -1190,9 +1148,6 @@ def edit_sequence(request):
 def add_shot(request):
     """runs when adding a new shot
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
     
@@ -1200,37 +1155,19 @@ def add_shot(request):
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
         
         if request.params['submitted'] == 'add':
-            
             if 'name' in request.params and \
+               'code' in request.params and  \
                'sequence_id' in request.params and \
+               'status_list_id' in request.params and \
                'status_id' in request.params:
                 
-                logger.debug('request.params["name"]: %s' %
-                             request.params['name'])
-                logger.debug('request.params["status_id": %s' %
-                             request.params['status_id'])
-                
                 sequence_id = request.params['sequence_id']
-                
-                # type will always return with a type name
-#                type_name = request.params['type']
-                
                 sequence = Sequence.query.filter_by(id=sequence_id).first()
-#                type_ = Type.query\
-#                    .filter_by(target_entity_type='Shot')\
-#                    .filter_by(name=type_name)\
-#                    .first()
-#                
-#                if type_ is None:
-#                    # create a new Type
-#                    type_ = Type(name=type_name, target_entity_type='Shot')
                 
                 # get the status_list
                 status_list = StatusList.query.filter_by(
-                    target_entity_type='Shot'
+                    id=request.params["status_list_id"]
                 ).first()
-                
-                logger.debug('status_list: %s' % status_list)
                 
                 # there should be a status_list
                 if status_list is None:
@@ -1238,28 +1175,19 @@ def add_shot(request):
                         detail='No StatusList found'
                     )
                 
-                status_id = int(
-                    re.sub("[^0-9]+", "", request.params['status_id'])
-                )
-                logger.debug('status_id: %s' % status_id)
+                status_id = int(request.params['status_id'])
                 status = Status.query.filter_by(id=status_id).first()
-                logger.debug('status: %s' % status)
-                
-#                logger.debug('status: %s' % status)
-#                logger.debug('status_list: %s' % status_list)
-#                logger.debug('status in status_list: %s' % status in status_list)
                 
                 # get the info
                 try:
                     new_shot = Shot(
                         name=request.params['name'],
+                        code=request.params['code'],
                         sequence=sequence,
                         status_list=status_list,
                         status=status,
                         created_by=logged_in_user
                     )
-                    
-                    logger.debug('new_shot.status: ' % new_shot.status)
                     
                     DBSession.add(new_shot)
                 except (AttributeError, TypeError) as e:
@@ -1275,15 +1203,34 @@ def add_shot(request):
                         logger.debug('flushing the DBSession, no problem here!')
                         DBSession.flush()
                         logger.debug('finished adding Shot')
-                        return HTTPFound(location=came_from)
             else:
                 logger.debug('there are missing parameters')
     return {
         'projects': Project.query.all(),
-        'types': Type.query.filter_by(target_entity_type='Shot').all(),
         'status_list':
             StatusList.query.filter_by(target_entity_type='Shot').first()
     }
+
+@view_config(
+    route_name='get_assets',
+    renderer='json',
+    permission='View_Asset'
+)
+def get_assets(request):
+    """returns all the Assets of a given Project
+    """
+    proj_id = request.matchdict['project_id']
+    return [
+        {
+            'id': asset.id,
+            'name': asset.name,
+            'type': asset.type.name,
+            'status': asset.status.name,
+            'user_name': asset.created_by.name,
+            'description': asset.description
+        }
+        for asset in Asset.query.filter_by(project_id=proj_id).all()
+    ]
 
 @view_config(
     route_name='get_filename_templates',
@@ -1357,6 +1304,100 @@ def get_sequences(request):
     ]
 
 @view_config(
+    route_name='get_shots',
+    renderer='json',
+    permission='View_Shot'
+)
+def get_shots(request):
+    """returns all the Shots of the given Project
+    """
+    project_id = request.matchdict['project_id']
+#    project = Project.query.filter_by(id=project_id).first()
+    return [
+        {
+            'id': shot.id,
+            'name': shot.name,
+            'sequence': shot.sequence.name,
+            'status': shot.status.name,
+            'user_name': shot.created_by.name
+        }
+        for shot in Shot.query\
+            .join(Sequence, Shot.sequence_id==Sequence.id)
+            .join(Project, Sequence.project_id==Project.id)
+            .filter(Project.id==project_id)
+            .all()
+    ]
+
+@view_config(
+    route_name='get_statuses',
+    renderer='json',
+    permission='View_Status'
+)
+def get_statuses(request):
+    """returns all the Statuses in the database
+    """
+    return [
+        {
+            'id': status.id,
+            'name': status.name,
+            'code': status.code
+        }
+        for status in Status.query.all()
+    ]
+
+@view_config(
+    route_name='get_statuses_of',
+    renderer='json',
+    permission='View_Status'
+)
+def get_statuses_of(request):
+    """returns the Statuses of given StatusList
+    """
+    status_list_id = request.matchdict['status_list_id']
+    status_list = StatusList.query.filter_by(id=status_list_id).first()
+    return [
+        {
+            'id': status.id,
+            'name': status.name + " (" + status.code+ ")"
+        }
+        for status in status_list.statuses
+    ]
+
+@view_config(
+    route_name='get_status_lists',
+    renderer='json',
+    permission='View_StatusList'
+)
+def get_status_lists(request):
+    """returns all the StatusList instances in the databases
+    """
+    return [
+        {
+            'id': status_list.id,
+            'name': status_list.name,
+        }
+        for status_list in StatusList.query.all()
+    ]
+
+@view_config(
+    route_name='get_status_lists_for',
+    renderer='json',
+    permission='View_StatusList'
+)
+def get_status_lists_for(request):
+    """returns all the StatusList for a specific target_entity_type
+    """
+    return [
+        {
+            'id': status_list.id,
+            'name': status_list.name,
+        }
+        for status_list in StatusList.query
+            .filter_by(target_entity_type=request.matchdict['target_entity_type'])
+            .all()
+    ]
+
+@view_config(
     route_name='get_structures',
     renderer='json',
     permission='View_Structure'
@@ -1370,6 +1411,55 @@ def get_structures(request):
             'name': structure.name
         }
         for structure in Structure.query.all()
+    ]
+
+@view_config(
+    route_name='get_tasks',
+    renderer='json',
+    permission='View_Task'
+)
+def get_tasks(request):
+    """returns all the tasks in database related to the given taskable_entity
+    """
+    taskable_entity_id = request.matchdict.get('taskable_entity_id')
+    taskable_entity = TaskableEntity.query\
+                        .filter_by(id=taskable_entity_id).first()
+    tasks = None
+    if taskable_entity:
+        tasks = taskable_entity.tasks
+    
+    return [
+        {
+            'id': task.id,
+            'name': '%s (%s in %s)' % (task.name,
+                                       task.task_of.name,
+                                       task.task_of.project),
+        }
+        for task in tasks
+    ]
+
+@view_config(
+    route_name='get_project_tasks',
+    renderer='json',
+    permission='View_Task'
+)
+def get_project_tasks(request):
+    """returns all the tasks of the given Project instance
+    """
+    project_id = request.matchdict.get('project_id')
+    project = Project.query.filter_by(id=project_id).first()
+    tasks = None
+    if project:
+        tasks = project.project_tasks
+    
+    return [
+        {
+            'id': task.id,
+            'name': '%s (%s in %s)' % (task.name,
+                                       task.task_of.name,
+                                       task.task_of.project),
+        }
+        for task in tasks
     ]
 
 @view_config(
@@ -1400,12 +1490,14 @@ def get_users(request):
     renderer='view_shots.jinja2',
     permission='View_Shot'
 )
+@view_config(
+    route_name='overview_project',
+    renderer='overview_project.jinja2',
+    permission='View_Project'
+)
 def view_project_related_data(request):
     """runs when viewing project related data
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
     
@@ -1413,6 +1505,7 @@ def view_project_related_data(request):
     project = Project.query.filter_by(id=project_id).first()
     
     return {
+        'user': user,
         'project': project
     }
 
@@ -1447,9 +1540,6 @@ def view_tasks(request):
 def add_task(request):
     """runs when adding a new task
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
     
@@ -1458,9 +1548,13 @@ def add_task(request):
         
         if request.params['submitted'] == 'add':
             
-            if 'name' in request.params and \
-               'sequence_id' in request.params and \
-               'status_id' in request.params:
+            if 'task_of_id' in request.params and \
+                'name' in request.params and \
+                'description' in request.params and \
+                'dependencies' in request.params and \
+                'is_milestone' in request.params and \
+                'resources' in request.params and \
+                'status_id' in request.params:
                 
                 logger.debug('request.params["name"]: %s' %
                              request.params['name'])

@@ -15,19 +15,19 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         // 
         // PARAMETERS
         // 
-        // dialog:
+        // dialog: dijit.dialog.Dialog
         //   the dialog to reset and destroy
         // 
-        // form:
+        // form: dijit.form.Form
         //   the form to get the data form
         // 
-        // additional_data:
+        // additional_data: Dictionary
         //   additional data to append to the form data
         // 
-        // url:
+        // url: String
         //   the url to submit the data to
         // 
-        // method:
+        // method: String
         //   the method POST or GET
         // 
         submit_form = function(kwargs){
@@ -61,7 +61,11 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
                   // destroy the dialog
                   dialog.reset();
                   dialog.destroyRecursive();
+                }, function(err){
+                    // Do something when the process errors out
+                    alert(err);
                 });
+                
             }
         };
         
@@ -70,27 +74,50 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         // 
         // Returns a function which when called updates a field
         //
-        // memory:
+        // memory: dojo.store.JsonRest
         //  the JsonRest instance
         // 
-        // widget:
+        // widget: dojo._WidgetBase
         //  the widget to update the data to
+        //
+        // query_data: String or function
+        //  the data to be queried to, Anonymous functions are accepted
         // 
-        // selected:
+        // selected: Array
         //  stores what is selected among the data
         // 
         field_updater = function(kwargs){
             var memory = kwargs.memory;
             var widget = kwargs.widget;
+            var query_data = kwargs.query_data || null;
             var selected = kwargs.selected || [];
             
             return function(){
                 var animate = arguments[0] || true;
-                var result = memory.query().then(function(data){
-                    widget.reset();
+                var query;
+                
+                if (query_data != null){
+                    var data_id;
+                    if (typeof(query_data) == 'function'){
+                        data_id = query_data();
+                    } else {
+                        data_id = query_data;
+                    }
+                    
+                    if (data_id == ''){
+                        return;
+                    }
+                    
+                    query = memory.query(data_id);
+                } else {
+                    query = memory.query();
+                }
+                
+                var result = query.then(function(data){
                     
                     // if the widget is a MultiSelect
                     if (widget.declaredClass == "dijit.form.MultiSelect"){
+                        widget.reset();
                         // add options manually
                         // remove the previous options first
                         dojo.query('option', widget.domNode).forEach(function(opt, idx, arr){
@@ -113,7 +140,11 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
                         if (selected.length){
                             widget.setValue(selected);
                         }
+                    } else if (widget.declaredClass == 'dojox.grid.DataGrid') {
+                        // just call render
+                        widget.render();
                     } else {
+                        widget.reset();
                         // set the data normally
                         widget.set('store', new Memory({data: data}));
                         if (data.length > 0){
@@ -159,41 +190,55 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         // attach_to:
         //   the dom element to attach this button to
         // 
-        // data_id_getter:
-        //   if we already have some id for the data, let say if we are
-        //   adding a new Sequence to a Project then this is the function
-        //   that returns the Project.id or if we are editing a data then
-        //   this is the function returning the edited data id.
+        // data_id:
+        //   if we already have some id for the data, let say if we are adding
+        //   a new Sequence to a Project then this is the id or a function that
+        //   returns the Project.id or if we are editing a data then this is
+        //   the id or a function returning the edited data id (ex:
+        //   sequence_id).
         //   
-        //   It is a function because it needs to have the current value of
-        //   the edited data, so it can not be a direct value.
+        //   If the id of the edited data is not yet known you can pass a
+        //   function that will return the data id.
         //
         // related_field_updater:
         //   a function object without any parameters which will update the
         //   the related field which this form is adding data to.
+        // 
         create_add_edit_data_button = function(kwargs){
             var button_label = kwargs.button_label || 'Add';
-            var dialog_id = kwargs.dialog_id;
+            var dialog_id = kwargs.dialog_id || null;
             var content_creator = kwargs.content_creator;
             var attach_to = kwargs.attach_to;
-            var data_id_getter = kwargs.data_id_getter|| function(){};
-            var related_field_updater = kwargs.related_field_updater;
+            var data_id = kwargs.data_id || function(){};
+            var related_field_updater = kwargs.related_field_updater || function(){};
             
             return new Button({
                 label: button_label,
                 type: 'Button',
                 onClick: function(){
                     // create the dialog if it doesn't already exists
-                    var dialog = dijit.byId(dialog_id);
-                    if (dialog == null){
-                        dialog = content_creator(data_id_getter());
+                    if (dialog_id != null){
+                        var dialog = dijit.byId(dialog_id);
+                        if (dialog == null){
+                            // get the data_id
+                            if (data_id != null){
+                                if (typeof(data_id) == 'function') {
+                                    dialog = content_creator(data_id());
+                                } else {
+                                    dialog = content_creator(data_id);
+                                }
+                            }
+                        }
+                        
+                        // set the field updater
+                        dialog.set(
+                            'related_field_updater',
+                            related_field_updater
+                        );
+                        
+                        // show the dialog
+                        dialog.show();
                     }
-                    
-                    // set the field updater
-                    dialog.set('related_field_updater', related_field_updater);
-                    
-                    // show the dialog
-                    dialog.show();
                 }
             }, attach_to);
         };
@@ -344,11 +389,17 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // STATUS LIST
-        create_add_status_list_dialog = function(){
+        create_add_status_list_dialog = function(target_entity_type){
+            var href;
+            if (target_entity_type == null){
+                href = '/add/status_list'
+            } else {
+                href = '/add/status_list/' + target_entity_type
+            }
             return new DialogSimple({
                 id: 'add_status_list_dialog',
                 title: 'Add Status List',
-                href: '/add/status_list',
+                href: href,
                 resize: true,
                 style: 'width: auto; height: auto; padding: 0px',
                 executeScripts: true

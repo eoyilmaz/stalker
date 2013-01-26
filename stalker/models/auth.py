@@ -53,7 +53,7 @@ def group_finder(login, request):
 class RootFactory(object):
     """The main purpose of having a root factory is to generate the objects
     used as the context by the request. But in our case it just used to
-    determine the deafult ACLs.
+    determine the default ACLs.
     """
    
     @property

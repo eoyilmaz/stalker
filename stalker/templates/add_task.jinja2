@@ -1,19 +1,7 @@
 <div class='dijitDialogPaneContentArea'> 
   <form id='add_task_form'>
     <table style='width: 100%;'>
-      {# TASK OF TYPE
       
-      Tasks should be assigned to a TaskableEntity while they are created. So the
-      attribute task_of should be chosen by using a selection box. The user can
-      filter the type of the taskable entity by selecting the type of the
-      TaskableEntity from a list containing "Project, Sequence, Shot or Asset" then
-      another Filtering select should be filled with appropriate entities.
-      
-      Tasks are created under a Project, Sequence, Shot or an Asset detail page. So
-      we should be aware of who is going to be placed to the task_of attribute.
-      
-      #}
-    
       {# TASK_OF #}
       <tr>
         <td class='label_column'>
@@ -23,7 +11,7 @@
           <input id='task_task_of'>
         </td>
       </tr>
-    
+      
       {# NAME #}
       <tr>
         <td class='label_column'>
@@ -41,6 +29,17 @@
         </td>
         <td class='input_column'>
           <input id='task_description'>
+        </td>
+      </tr>
+      
+      {# DEPENDENCIES #}
+      <tr>
+        <td class='label_column'>
+          <label for='task_depends'>Depends</label>
+        </td>
+        <td class='input_column'>
+{#          <div id='task_dependencies_tag_list'></div>#}
+          <input id='task_depends'>
         </td>
       </tr>
       
@@ -63,34 +62,35 @@
           <label for='task_resources'>Resources</label>
         </td>
         <td class='input_column'>
-          <input id='task_resources'>
+{#          <div id='task_resources_tag_list'></div>#}
+          <div id='task_resources'></div>
+        </td>
+      </tr>
+      
+      {# STATUS LIST #}
+      <tr>
+        <td class='label_column'>
+          <label for='task_status_list'>Status List</label>
+        </td>
+        <td class='input_column'>
+          <input id='task_status_list'>
+        </td>
+        <td class='button_column'>
+          <button id='task_add_status_list_button'>Add</button>
+          <button id='task_edit_status_list_button'>Edit</button>
         </td>
       </tr>
       
       {# STATUS #}
       <tr>
         <td class='label_column'>
-         <label for='task_status'>Status</label>
+          <label for='task_status'>Status</label>
         </td>
-        {%  if not status_list %}
-          {# There is no status List so add a button to call add StatusList #}
-          <td class='input_column'>
-            --NO STATUS LIST FOR SHOT--
-          </td>
-          <td class='button_column'>
-            <button id='task_add_status_list_button'>Add New Status List</button>
-          </td>
-        {% else %}
-          {# There are a suitable StatusList just task the statuses #}
-          <td class='input_column'>
-            <input id='task_status'>
-          </td>
-          <td class='button_column'>
-            <button id='task_edit_status_list_button'>Edit</button>
-          </td>
-        {% endif %}
+        <td class='input_column'>
+          <input id='task_status'>
+        </td>
       </tr>
-      
+     
     </table>
   </form>
 </div>
@@ -101,74 +101,29 @@
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/request/xhr', 'dojo/on',
+  require(['dijit/registry',
     'dojo/store/Memory', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
     'dijit/form/TextBox', 'dijit/form/FilteringSelect',
     'dijit/form/ComboBox', 'dijit/form/Button', 'dijit/form/CheckBox',
-    'dojox/form/MultiComboBox', 'dojo/store/JsonRest',
+    'dojox/form/MultiComboBox', 'dojo/store/JsonRest', 'dojo/dom-construct',
+    'stalker/TagWidget',
     'dojo/ready'
   ],
-  function(registry, xhr, on, Memory, Form, ValidationTextBox, TextBox,
+  function(registry, Memory, Form, ValidationTextBox, TextBox,
            FilteringSelect, ComboBox, Button, CheckBox, MultiComboBox,
-           JsonRest){
+           JsonRest, domConstruct, TagWidget){
     
-    // ***********************************************************************
-    // FORM
+    // ************************************************************************
+    // Form
     var add_task_form = new Form({
-      id: 'add_task_form',
-      method: 'POST',
-      onSubmit: function(event){
-        if (this.validate()){
-          
-          // get the form data
-          var form_data = {};
-          var myFormData = dijit.byId('add_task_form').get('value');
-          form_data.name = myFormData.name;
-          form_data.description = myFormData.description;
-{#          form_data.project_id = myFormData.project;#}
-{#          form_data.sequence_id = myFormData.sequence;#}
-{#          form_data.type = myFormData.type;#}
-{#          form_data.status_id = myFormData.status;#}
-          form_data.submitted = 'add';
-          
-          var deferred = xhr.post(
-            '{{ request.route_url(
-                "add_task",
-                taskable_entity_id=taskable_entity.id) }}',
-            {
-              method: 'POST',
-              data: form_data
-            }
-          );
-          
-          // update the caller dialog
-          var dialog = dijit.byId('add_task_dialog');
-          var parent = dialog.get('parent');
-          if (parent != null){
-            parent.refresh();
-          }
-          
-          // destroy dialog
-          dialog.destroyRecursive();
-        }
-      }
+      id: 'add_task_form'
     }, 'add_task_form');
     
-    add_task_form.get_form_data = function(){
-      {# returns the data currently entered in the form
-      
-      this can be used to fill the form and also for posting data
-      #}
-      // prepare data to be submitted
-    };
     
-    // add the restore_form_data function
-    add_task_form.restore_form_data = function(form_data){
-      this.set('value', form_data);
-    };
     
-    // ***********************************************************************
-    // TASK OF
+    
+    // ************************************************************************
+    // Task Of
     var task_of = new TextBox({
       name: 'task_of',
       label: 'Task Of',
@@ -177,8 +132,11 @@
     }, 'task_task_of');
     task_of.startup();
     
-    // ***********************************************************************
-    // NAME
+    
+    
+    
+    // ************************************************************************
+    // Name
     var name_textBox = new ValidationTextBox({
       name: 'name',
       label: 'Name',
@@ -188,8 +146,11 @@
     }, 'task_name');
     name_textBox.startup();
     
-    // ***********************************************************************
-    // DESCRIPTION
+    
+    
+    
+    // ************************************************************************
+    // Description
     var description_textBox = new TextBox({
       name: 'description',
       label: 'Description',
@@ -197,93 +158,166 @@
     }, 'task_description');
     description_textBox.startup();
     
-    // ***********************************************************************
-    // IS MILESTONE
+
+    // ************************************************************************
+    // Depends
+    var tasks_jsonRest = new JsonRest({
+      target:'get/all_tasks/{{ taskable_entity.project.id }}'
+    });
+    
+    var depends_multiComboBox = new MultiComboBox({
+      searchAttr: 'name'
+    }, "task_depends");
+    depends_multiComboBox.startup();
+    
+    var tasks_result = tasks_jsonRest.query().then(function(data){
+      depends_multiComboBox.set('store', new Memory({data: data}));
+    });
+     
+    
+    // ************************************************************************
+    // Is Milestone
     var is_milestone_checkBox = new CheckBox({
       name: 'is_milestone_checkBox',
       label: 'Is Milestone',
       value: 'checked',
-      checked: false
-    });
+      checked: false,
+      onChange: function(new_value){
+        // disable the resources field if checked
+        if (new_value){
+          resources_filteringSelect.set('disabled', true);
+        } else {
+          resources_filteringSelect.set('disabled', false);
+        }
+      }
+    }, 'task_is_milestone');
     is_milestone_checkBox.startup();
     
-    // ***********************************************************************
-    // RESOURCES
+    
+    
+    
+    // ************************************************************************
+    // Resources
     var users_jsonRest = new JsonRest({
-      target:"get/users"
+      target:'get/users'
     });
     
-    var resources_multiComboBox = new MultiComboBox({
-      searchAttr: 'name'
-    }, "task_resources");
-    resources_multiComboBox.startup();
+    var resources_tagWidget = new TagWidget({
+      name: 'resource_ids'
+    }, 'task_resources');
+    resources_tagWidget.startup();
     
     var result = users_jsonRest.query().then(function(data){
       var user_memory = new Memory({data: data});
-      resources_multiComboBox.set('store', user_memory);
+      resources_tagWidget.set('store', user_memory);
     });
     
-    // ***********************************************************************
-    // STATUS OR STATUS_LIST
-    {% if not status_list %}
-      // ADD STATUS LIST BUTTON
-      var add_status_list_button = create_add_edit_data_button(
-        dijit.byId('add_task_form').getParent(),
-        'Add',
-        'add_status_list_dialog',
-        create_add_status_list_dialog,
-        'task_add_status_list_button'
-      );
-      add_status_list_button.startup();
-    {% else %}
-      // ADD STATUS
-      var status_memory = new Memory({
-        data: [
-          {% for status in status_list.statuses %}
-            {
-              name: '{{ status.name }} / {{ status.code }}',
-              id: '{{ status.id }}'
-            },
-          {% endfor %}
-        ]
-      });
-      
-      var status_select = new FilteringSelect({
-        name: 'status',
-        required: true,
-        store: status_memory,
-        value: status_memory.data[0].id
-      }, 'task_status');
-      status_select.startup();
-    {% endif %}
     
-    // EDIT STATUS LIST BUTTON
-    var edit_status_list_button = create_edit_data_button(
-      dijit.byId('add_task_form').getParent(),
-      'Edit',
-      'edit_status_list_dialog',
-      create_edit_status_list_dialog,
-      'task_edit_status_list_button',
-      function(){
-        return {{ status_list.id }};
-      },
-      add_task_form.get('value')
-    );
+    // ************************************************************************
+    // Status_List
+    //
+    // The Memory
+    var status_list_memory = new JsonRest({
+      target: 'get/status_lists_for/Task'
+    });
+    
+    // The Field
+    var status_list_filtering_select = new FilteringSelect({
+      name: 'status_list_id',
+      required: true,
+      onChange: function(){
+        status_updater({animate: true});
+      }
+    }, 'task_status_list');
+    status_list_filtering_select.startup();
+    
+    // The Updater
+    var status_list_field_updater = field_updater({
+      'memory': status_list_memory,
+      'widget': status_list_filtering_select
+    });
+    status_list_field_updater({animate: false});
+    
+    // Add Status List Button
+    var add_status_list_button = create_add_edit_data_button({
+      button_label: 'Add',
+      dialog_id: 'add_status_list_dialog',
+      content_creator: create_add_status_list_dialog,
+      attach_to: 'task_add_status_list_button',
+      related_field_updater: status_list_field_updater,
+      data_id: 'Task'
+    });
+    add_status_list_button.startup();
+    
+    // Edit Status List Button
+    var edit_status_list_button = create_add_edit_data_button({
+      button_label: 'Edit',
+      dialog_id: 'edit_status_list_dialog',
+      content_creator: create_edit_status_list_dialog,
+      attach_to: 'task_edit_status_list_button',
+      related_field_updater: status_list_field_updater,
+      data_id: function(){
+        return status_list_filtering_select.get('value');
+      }
+    });
     edit_status_list_button.startup();
     
-    // ********************************************************************
-    // ADD BUTTON
+    
+    
+    
+    // ************************************************************************
+    // Status
+    //
+    // The Memory
+    var status_memory = new JsonRest({
+      target: 'get/statuses_of/'
+    });
+    
+    // The Field
+    var status_filtering_select = new FilteringSelect({
+      name: 'status_id',
+      required: true,
+      store: status_memory
+    }, 'task_status');
+    status_filtering_select.startup();
+    
+    // The Updater
+    var status_updater = field_updater({
+      memory: status_memory,
+      query_data: function(){
+        var widget = dijit.byId('task_status_list');
+        return widget.get('value');
+      },
+      widget: status_filtering_select
+    });
+    // don't call the updater now, the status_list may not been set yet!!!
+    
+    
+   
+    // ************************************************************************
+    // Add Button
     var add_button = new Button({
       label: 'Add',
       type: 'button',
       onClick: function(){
-        return add_task_form.submit();
+        submit_form({
+          dialog: dijit.byId('add_task_dialog'),
+          form: add_task_form,
+          additional_data: {
+            submitted: 'add'
+          },
+          url: '{{ request.route_url('add_task', taskable_entity_id=taskable_entity.id) }}',
+          method: 'POST'
+        });
       }
     }, 'task_add_button');
     add_button.startup();
     
-    // ********************************************************************
-    // CANCEL BUTTON
+    
+    
+    
+    // ************************************************************************
+    // Cancel Button
     var cancel_button = new Button({
       label: 'Cancel',
       type: 'button',
@@ -292,6 +326,7 @@
       }
     }, 'task_cancel_button');
     cancel_button.startup();
+ 
     
     add_task_form.startup();
     

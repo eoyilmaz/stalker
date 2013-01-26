@@ -86,6 +86,7 @@ def main(global_config, **settings):
     config.add_route('edit_project', 'edit/project/{project_id}')
     config.add_route('view_project', 'view/project/{project_id}')
     config.add_route('view_projects', 'view/projects')
+    config.add_route('overview_project', 'overview/project/{project_id}')
     
     # *************************************************************************
     # ImageFormat
@@ -121,12 +122,19 @@ def main(global_config, **settings):
     # ************************************************************************* 
     # StatusList
     config.add_route('add_status_list', 'add/status_list')
+    config.add_route('add_status_list_for',
+                     'add/status_list/{target_entity_type}')
     config.add_route('edit_status_list', 'edit/status_list/{status_list_id}')
+    config.add_route('get_status_lists', 'get/status_lists')
+    config.add_route('get_status_lists_for',
+                     'get/status_lists_for/{target_entity_type}')
     
     # *************************************************************************
     # Status
     config.add_route('add_status', 'add/status')
     config.add_route('edit_status', 'edit/status')
+    config.add_route('get_statuses', 'get/statuses')
+    config.add_route('get_statuses_of', 'get/statuses_of/{status_list_id}')
     
     # *************************************************************************
     # Assets
@@ -134,6 +142,7 @@ def main(global_config, **settings):
     config.add_route('view_asset', 'view/asset/{asset_id}')
     config.add_route('edit_asset', 'edit/asset/{asset_id}')
     config.add_route('view_assets', 'view/assets/{project_id}')
+    config.add_route('get_assets', 'get/assets/{project_id}')
     
     # *************************************************************************
     # Shots
@@ -141,6 +150,7 @@ def main(global_config, **settings):
     config.add_route('view_shot', 'view/shot/{shot_id}')
     config.add_route('edit_shot', 'edit/shot/{shot_id}')
     config.add_route('view_shots', 'view/shots/{project_id}')
+    config.add_route('get_shots', 'get/shots/{project_id}')
     
     # *************************************************************************
     # Sequence
@@ -157,8 +167,9 @@ def main(global_config, **settings):
     config.add_route('view_task', 'view/task/{task_id}')
     config.add_route('edit_task', 'edit/task/{task_id}')
     config.add_route('view_tasks', 'view/tasks/{taskable_entity_id}')
-    config.add_route('get_project_tasks',
-                     'get_project_tasks/{project_id}')
+    config.add_route('get_tasks',
+                     'get/tasks/{taskable_entity_id}')
+    config.add_route('get_project_tasks', 'get/project_tasks/{project_id}')
     
     config.scan()
     return config.make_wsgi_app()

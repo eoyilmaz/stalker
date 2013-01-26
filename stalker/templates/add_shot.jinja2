@@ -1,5 +1,3 @@
-{#{% extends 'form_base.jinja2' %}#}
-{#{% block form_block %}#}
 <div class='dijitDialogPaneContentArea'> 
   <form id='add_shot_form'>
     <table style='width: 100%;'>
@@ -23,26 +21,6 @@
           <input id='shot_code'>
         </td>
       </tr>
-      
-      {# DESCRIPTION #}
-{#        <tr>#}
-{#          <td class='label_column'>#}
-{#            <label for='shot_description'>Description</label>#}
-{#          </td>#}
-{#          <td class='input_column'>#}
-{#            <input id='shot_description'>#}
-{#          </td>#}
-{#        </tr>#}
-      
-      {# TYPE #}
-{#        <tr>#}
-{#          <td class='label_column'>#}
-{#            <label for='shot_type'>Type</label>#}
-{#          </td>#}
-{#          <td class='input_column'>#}
-{#            <input id='shot_type'>#}
-{#          </td>#}
-{#        </tr>#}
       
       {# PROJECT #}
       <tr>
@@ -68,28 +46,28 @@
         </td>
       </tr>
       
+      {# STATUS LIST #}
+      <tr>
+        <td class='label_column'>
+          <label for='shot_status_list'>Status List</label>
+        </td>
+        <td class='input_column'>
+          <input id='shot_status_list'>
+        </td>
+        <td class='button_column'>
+          <button id='shot_add_status_list_button'>Add</button>
+          <button id='shot_edit_status_list_button'>Edit</button>
+        </td>
+      </tr>
+      
       {# STATUS #}
       <tr>
         <td class='label_column'>
-         <label for='shot_status'>Status</label>
+          <label for='shot_status'>Status</label>
         </td>
-        {%  if not status_list %}
-          {# There is no status List so add a button to call add StatusList #}
-          <td class='input_column'>
-            --NO STATUS LIST FOR SHOT--
-          </td>
-          <td class='button_column'>
-            <button id='shot_add_status_list_button'>Add New Status List</button>
-          </td>
-        {% else %}
-          {# There are a suitable StatusList just shot the statuses #}
-          <td class='input_column'>
-            <input id='shot_status'>
-          </td>
-          <td class='button_column'>
-            <button id='shot_edit_status_list_button'>Edit</button>
-          </td>
-        {% endif %}
+        <td class='input_column'>
+          <input id='shot_status'>
+        </td>
       </tr>
 
     </table>      
@@ -102,267 +80,241 @@
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/request/xhr', 'dojo/on',
-    'dojo/store/Memory', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
-    'dijit/form/TextBox', 'dijit/form/FilteringSelect',
-    'dijit/form/ComboBox', 'dijit/form/Button', 'dojo/store/JsonRest',
-    'dojo/ready'
+  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
+    'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
+    'dijit/form/FilteringSelect', 'dijit/form/ComboBox', 'dijit/form/Button',
+    'dojo/store/JsonRest', 'dojo/ready'
   ],
-    function(registry, xhr, on, Memory, Form, ValidationTextBox, TextBox,
-             FilteringSelect, ComboBox, Button, JsonRest){
-      
-      // ********************************************************************
-      // FORM
-      var add_shot_form = new Form({
-        id: 'add_shot_form',
-        method: 'POST',
-        onSubmit: function(event){
-          if (this.validate()){
-            
-            // get the form data
-            var form_data = {};
-            var myFormData = dijit.byId('add_shot_form').get('value');
-            form_data.name = myFormData.name;
-{#            form_data.description = myFormData.description;#}
-{#            form_data.project_id = myFormData.project;#}
-            form_data.sequence_id = myFormData.sequence;
-{#            form_data.type = myFormData.type;#}
-            form_data.status_id = myFormData.status;
-            form_data.submitted = 'add';
-            
-            var deferred = xhr.post(
-              '{{ request.route_url("add_shot") }}',
-              {
-                method: 'POST',
-                data: form_data
-              }
-            );
-            
-            // update the caller dialog
-            var dialog = dijit.byId('add_shot_dialog');
-            var parent = dialog.get('parent');
-            if (parent != null){
-              parent.refresh();
-            }
-            
-            // destroy dialog
-            dialog.destroyRecursive();
-          }
-        }
-      }, 'add_shot_form');
-      
-      add_shot_form.get_form_data = function(){
-        {# returns the data currently entered in the form
-        
-        this can be used to fill the form and also for posting data
-        #}
-        // prepare data to be submitted
+  function(registry, Memory, Form, ValidationTextBox, TextBox,
+           FilteringSelect, ComboBox, Button, JsonRest){
+    
+    // **********************************************************************
+    // Form
+    var add_shot_form = new Form({
+      id: 'add_shot_form'
+    }, 'add_shot_form');
+    
+    
+    
+    
+    // **********************************************************************
+    // Name
+    var name_textBox = new ValidationTextBox({
+      name: 'name',
+      label: 'Name',
+      placeHolder: 'Enter a name',
+      required: true
+    }, 'shot_name');
+    name_textBox.startup();
+    
+    
+    
+    
+    // **********************************************************************
+    // Code
+    var code_textBox = new TextBox({
+      name: 'code',
+      label: 'Code',
+      value: '',
+      placeHolder: 'Enter a code'
+    }, 'shot_code');
+    name_textBox.startup();
+    
+    
+    
+    
+    // **********************************************************************
+    // Project
+    var project_memory = new Memory({
+      data: [
+        {% for project in projects %}
+          {
+            name: '{{ project.name }}',
+            id: '{{ project.id }}'
+          },
+        {% endfor %}
+      ]
+    });
+    
+    var project_filtering_select = new FilteringSelect({
+      name: 'project_id',
+      required: true,
+      store: project_memory,
+      onChange: function(){
+        sequence_field_updater();
       }
-      
-      // add the restore_form_data function
-      add_shot_form.restore_form_data = function(form_data){
-        this.set('value', form_data);
+    }, 'shot_project');
+    project_filtering_select.startup();
+    
+    
+    
+    
+    // **********************************************************************
+    // Sequence
+    var sequence_memory = new JsonRest({
+      target: '/get/sequences/'
+    });
+    
+    var sequence_filtering_select = new FilteringSelect({
+      name: 'sequence_id',
+      required: true
+    }, 'shot_sequence');
+    sequence_filtering_select.startup();
+    
+    // The Updater
+    var sequence_field_updater = field_updater({
+      memory: sequence_memory,
+      query_data: function(){
+        return project_filtering_select.get('value');
+      },
+      widget: sequence_filtering_select
+    });
+    
+    // Add Sequence Button
+    var add_sequence_button = create_add_edit_data_button({
+      button_label: 'Add',
+      dialog_id: 'add_sequence_dialog',
+      content_creator: create_add_sequence_dialog,
+      attach_to: 'shot_add_sequence_button',
+      related_field_updater: sequence_field_updater,
+      data_id: function(){
+        return project_filtering_select.get('value');
       }
-      
-      // ********************************************************************
-      // NAME
-      var name_textBox = new ValidationTextBox({
-        name: 'name',
-        label: 'Name',
-        value: '',
-        placeHolder: 'Enter a name',
-        required: true
-      }, 'shot_name');
-      name_textBox.startup();
-      
-      // ********************************************************************
-      // CODE
-      var code_textBox = new TextBox({
-        name: 'code',
-        label: 'Code',
-        value: '',
-        placeHolder: 'Enter a code'
-      }, 'shot_code');
-      name_textBox.startup();
-      
-{#        // ********************************************************************#}
-{#        // DESCRIPTION#}
-{#        var description_textBox = new TextBox({#}
-{#          name: 'description',#}
-{#          label: 'Description',#}
-{#          placeHolder: 'Enter description'#}
-{#        }, 'shot_description');#}
-{#        description_textBox.startup();#}
-      
-{#        // ********************************************************************#}
-{#        // TYPE#}
-{#        var type_memory = new Memory({#}
-{#          data: [#}
-{#            {% for type_ in types %}#}
-{#              {#}
-{#                name: '{{type_.name}}',#}
-{#                id: '{{ type_.id }}'#}
-{#              },#}
-{#            {% endfor %}#}
-{#          ]#}
-{#        });#}
-{#        #}
-{#        var type_comboBox = new ComboBox({#}
-{#          name: 'type',#}
-{#          required: true,#}
-{#          store: type_memory#}
-{#        }, 'shot_type');#}
-{#        #}
-{#        // set value of Type#}
-{#        #}
-{#        if (type_memory.data[0] != undefined ){#}
-{#          try {#}
-{#            type_comboBox.attr('value', type_memory.data[0].name);#}
-{#          } catch(e) {#}
-{#            // don't do anything#}
-{#          }#}
-{#        }#}
-{#        #}
-{#        type_comboBox.startup();#}
-      
-      // ********************************************************************
-      // PROJECT
-      var project_memory = new Memory({
-        data: [
-          {% for project in projects %}
-            {
-              name: '{{ project.name }}',
-              id: '{{ project.id }}'
-            },
-          {% endfor %}
-        ]
-      });
-      
-      var project_select = new FilteringSelect({
-        name: 'project',
-        required: true,
-        store: project_memory,
-        onChange: function(){
-          // update the sequence store
-          var proj_id = this.get('value');
-          var result = sequence_memory.query(proj_id).then(function(data){
-             sequence_select.reset();
-             var seq_mem = new Memory({data: data});
-             sequence_select.set('store', seq_mem);
-             sequence_select.attr('value', data[0].id);
-          });
-        }
-      }, 'shot_project');
-      project_select.startup();
-      
-      // ********************************************************************
-      // SEQUENCE
-      var sequence_memory = new JsonRest({
-        target: "/get/sequences/"
-      });
-      
-      var sequence_select = new FilteringSelect({
-        name: 'sequence',
-        required: true
-      }, 'shot_sequence');
-      sequence_select.startup();
-      
-      // ADD SEQUENCE BUTTON
-      var add_sequence_button = create_add_edit_data_button(
-        dijit.byId('add_shot_form').getParent(),
-        'Add',
-        'add_sequence_dialog',
-        create_add_sequence_dialog,
-        'shot_add_sequence_button'
-      );
-      add_sequence_button.startup();
-      
-      // EDIT SEQUENCE BUTTON
-      var edit_sequence_button = create_edit_data_button(
-              dijit.byId('add_shot_form').getParent(),
-              'Edit',
-              'edit_sequence_dialog',
-              create_edit_sequence_dialog,
-              'shot_edit_sequence_button',
-              function(){
-                return sequence_select.get('value')
-              }
-      );
-      edit_sequence_button.startup();
-      
-      // ********************************************************************
-      // STATUS OR STATUS_LIST
-      {% if not status_list %}
-        // ADD STATUS LIST BUTTON
-        var add_status_list_button = create_add_edit_data_button(
-          dijit.byId('add_shot_form').getParent(),
-          'Add',
-          'add_status_list_dialog',
-          create_add_status_list_dialog,
-          'shot_add_status_list_button'
-        );
-        add_status_list_button.startup();
-      {% else %}
-        // ADD STATUS
-        var status_memory = new Memory({
-          data: [
-            {% for status in status_list.statuses %}
-              {
-                name: '{{ status.name }} / {{ status.code }}',
-                id: '{{ status.id }}'
-              },
-            {% endfor %}
-          ]
+    });
+    add_sequence_button.startup();
+    
+    // Edit Sequence Button
+    var edit_sequence_button = create_add_edit_data_button({
+      button_label: 'Edit',
+      dialog_id: 'edit_sequence_dialog',
+      content_creator: create_edit_sequence_dialog,
+      attach_to: 'shot_edit_sequence_button',
+      data_id: function(){
+        return sequence_filtering_select.get('value')
+      },
+      related_field_updater: sequence_field_updater
+    });
+    edit_sequence_button.startup();
+    
+    
+    
+    
+    // ************************************************************************
+    // Status_List
+    //
+    // The Memory
+    var status_list_memory = new JsonRest({
+      target: 'get/status_lists_for/Shot'
+    });
+    
+    // The Field
+    var status_list_filtering_select = new FilteringSelect({
+      name: 'status_list_id',
+      required: true,
+      onChange: function(){
+        status_updater({animate: true});
+      }
+    }, 'shot_status_list');
+    status_list_filtering_select.startup();
+    
+    // The Updater
+    var status_list_field_updater = field_updater({
+      'memory': status_list_memory,
+      'widget': status_list_filtering_select
+    });
+    status_list_field_updater({animate: false});
+    
+    // Add Status List Button
+    var add_status_list_button = create_add_edit_data_button({
+      button_label: 'Add',
+      dialog_id: 'add_status_list_dialog',
+      content_creator: create_add_status_list_dialog,
+      attach_to: 'shot_add_status_list_button',
+      related_field_updater: status_list_field_updater,
+      data_id: 'Shot'
+    });
+    add_status_list_button.startup();
+    
+    // Edit Status List Button
+    var edit_status_list_button = create_add_edit_data_button({
+      button_label: 'Edit',
+      dialog_id: 'edit_status_list_dialog',
+      content_creator: create_edit_status_list_dialog,
+      attach_to: 'shot_edit_status_list_button',
+      related_field_updater: status_list_field_updater,
+      data_id: function(){
+        return status_list_filtering_select.get('value');
+      }
+    });
+    edit_status_list_button.startup();
+    
+    
+    
+    
+    // ************************************************************************
+    // Status
+    //
+    // The Memory
+    var status_memory = new JsonRest({
+      target: 'get/statuses_of/'
+    });
+    
+    // The Field
+    var status_filtering_select = new FilteringSelect({
+      name: 'status_id',
+      required: true,
+      store: status_memory
+    }, 'shot_status');
+    status_filtering_select.startup();
+    
+    // The Updater
+    var status_updater = field_updater({
+      memory: status_memory,
+      query_data: function(){
+        var widget = dijit.byId('shot_status_list');
+        return widget.get('value');
+      },
+      widget: status_filtering_select
+    });
+    // don't call the updater now, the status_list may not been set yet!!!
+    
+    
+    
+    
+    // ************************************************************************
+    // Add Button
+    var add_button = new Button({
+      label: 'Add',
+      type: 'button',
+      onClick: function(){
+        submit_form({
+          dialog: dijit.byId('add_shot_dialog'),
+          form: add_shot_form,
+          additional_data: {
+            submitted: 'add'
+          },
+          url: '{{ request.route_url('add_shot') }}',
+          method: 'POST'
         });
-        
-        var status_select = new FilteringSelect({
-          name: 'status',
-          required: true,
-          store: status_memory,
-          value: status_memory.data[0].id
-        }, 'shot_status');
-        status_select.startup();
-      {% endif %}
-      
-      // EDIT STATUS LIST BUTTON
-      var edit_status_list_button = create_edit_data_button(
-        dijit.byId('add_shot_form').getParent(),
-        'Edit',
-        'edit_status_list_dialog',
-        create_edit_status_list_dialog,
-        'shot_edit_status_list_button',
-        function(){
-          return {{ status_list.id }};
-        },
-        add_shot_form.get('value')
-      );
-      edit_status_list_button.startup();
-      
-      // ********************************************************************
-      // ADD BUTTON
-      var add_button = new Button({
-        label: 'Add',
-        type: 'button',
-        onClick: function(){
-          return add_shot_form.submit();
-        }
-      }, 'shot_add_button');
-      add_button.startup();
-      
-      // ********************************************************************
-      // CANCEL BUTTON
-      var cancel_button = new Button({
-        label: 'Cancel',
-        type: 'button',
-        onClick: function(){
-          dijit.byId('add_shot_dialog').destroyRecursive();
-        }
-      }, 'shot_cancel_button');
-      cancel_button.startup();
-      
-      add_shot_form.startup();
-      
-  });
+      }
+    }, 'shot_add_button');
+    add_button.startup();
+    
+    
+    
+    
+    // ************************************************************************
+    // Cancel Button
+    var cancel_button = new Button({
+      label: 'Cancel',
+      type: 'button',
+      onClick: function(){
+        dijit.byId('add_shot_dialog').destroyRecursive();
+      }
+    }, 'shot_cancel_button');
+    cancel_button.startup();
+    
+    add_shot_form.startup();
+    
+});
 </script>
-{#{% endblock %}#}
-

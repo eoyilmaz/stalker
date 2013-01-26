@@ -33,6 +33,9 @@ Stalker Changes
 
 * The WebUI form fields are now refreshed with newly added data.
 
+* Added a new Dojo widget called TagSelect. Which is basically a widget for
+  adding Tag style widgets.
+
 0.2.0.a4
 --------
 

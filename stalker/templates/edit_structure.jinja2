@@ -34,8 +34,7 @@
         </label>
       </td>
       <td class='input_column'>
-        <select id='structure_filename_template'>
-        </select>
+        <select id='structure_filename_template'></select>
       </td>
       <td class='button_column'>
         <button id='structure_add_filename_template_button'>Add</button>
@@ -60,7 +59,7 @@
     function(registry, Memory, Form, ValidationTextBox, 
              SimpleTextarea, Button, MultiSelect, JsonRest){
       
-      // ********************************************************************
+      // **********************************************************************
       // Form
       var edit_structure_form = new Form({
         id: 'edit_structure_form'
@@ -70,7 +69,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Name
       var name_textBox = new ValidationTextBox({
         name: 'name',
@@ -84,7 +83,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Custom Template
       var custom_template_simpleTextarea = new SimpleTextarea({
         name: 'custom_template',
@@ -99,25 +98,18 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Filename Template
       var filename_template_memory = new JsonRest({
         target: '/get/filename_templates'
       });
       
+      // The Widget
       var filename_template_multi_select = new MultiSelect({
         name: 'filename_templates',
         required: false
       }, 'structure_filename_template');
       filename_template_multi_select.startup();
-      
-      console.log(
-        [
-          {% for ft in structure.templates %}
-            {{ ft.id}},
-          {% endfor %}
-        ]
-      )
       
       // The Updater
       var filename_template_field_updater = field_updater({
@@ -145,7 +137,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Edit Button
       var edit_button = new Button({
         label: 'Edit',
@@ -165,7 +157,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Cancel Button
       var cancel_button = new Button({
         label: 'Cancel',

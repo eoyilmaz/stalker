@@ -1,5 +1,3 @@
-{#{% extends 'form_base.jinja2' %}#}
-{#{% block form_block %}#}
 <div class='dijitDialogPaneContentArea'> 
   <form id='add_sequence_form'>
     <table style='width: 100%;'>
@@ -35,14 +33,14 @@
       </tr>
       
       {# TYPE #}
-      <tr>
-        <td class='label_column'>
-          <label for='sequence_type'>Type</label>
-        </td>
-        <td class='input_column'>
-          <input id='sequence_type'>
-        </td>
-      </tr>
+{#      <tr>#}
+{#        <td class='label_column'>#}
+{#          <label for='sequence_type'>Type</label>#}
+{#        </td>#}
+{#        <td class='input_column'>#}
+{#          <input id='sequence_type'>#}
+{#        </td>#}
+{#      </tr>#}
       
       {# PROJECT #}
       <tr>
@@ -54,28 +52,28 @@
         </td>
       </tr>
       
+      {# STATUS LIST #}
+      <tr>
+        <td class='label_column'>
+          <label for='sequence_status_list'>Status List</label>
+        </td>
+        <td class='input_column'>
+          <input id='sequence_status_list'>
+        </td>
+        <td class='button_column'>
+          <button id='sequence_add_status_list_button'>Add</button>
+          <button id='sequence_edit_status_list_button'>Edit</button>
+        </td>
+      </tr>
+      
       {# STATUS #}
       <tr>
         <td class='label_column'>
-         <label for='sequence_status'>Status</label>
+          <label for='sequence_status'>Status</label>
         </td>
-        {%  if not status_list %}
-          {# There is no status List so add a button to call add StatusList #}
-          <td class='input_column'>
-            --NO STATUS LIST FOR ASSET--
-          </td>
-          <td class='button_column'>
-            <button id='sequence_add_status_list_button'>Add New Status List</button>
-          </td>
-        {% else %}
-          {# There are a suitable StatusList just sequence the statuses #}
-          <td class='input_column'>
-            <input id='sequence_status'>
-          </td>
-          <td class='button_column'>
-            <button id='sequence_edit_status_list_button'>Edit</button>
-          </td>
-        {% endif %}
+        <td class='input_column'>
+          <input id='sequence_status'>
+        </td>
       </tr>
 
     </table>      
@@ -88,220 +86,228 @@
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/request/xhr', 'dojo/on',
-    'dojo/store/Memory', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
-    'dijit/form/TextBox', 'dijit/form/FilteringSelect',
-    'dijit/form/ComboBox', 'dijit/form/Button', 'dojo/ready'
+  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
+    'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
+    'dijit/form/FilteringSelect', 'dijit/form/ComboBox',
+    'dijit/form/Button', 'dojo/store/JsonRest', 'dojo/ready'
   ],
-    function(registry, xhr, on, Memory, Form, ValidationTextBox, TextBox,
-             FilteringSelect, ComboBox, Button){
-      
-      // ********************************************************************
-      // FORM
-      var add_sequence_form = new Form({
-        id: 'add_sequence_form',
-        method: 'POST',
-        onSubmit: function(event){
-          if (this.validate()){
-            
-            // get the form data
-            var form_data = {};
-            var myFormData = dijit.byId('add_sequence_form').get('value');
-            form_data.name = myFormData.name;
-            form_data.description = myFormData.description;
-            form_data.project_id = myFormData.project;
-            form_data.type = myFormData.type;
-            form_data.status_id = myFormData.status;
-            form_data.submitted = 'add';
-            
-            var deferred = xhr.post(
-              '{{ request.route_url("add_sequence") }}',
-              {
-                method: 'POST',
-                data: form_data
-              }
-            );
-            
-            // update the caller dialog
-            var dialog = dijit.byId('add_sequence_dialog');
-            var parent = dialog.get('parent');
-            if (parent != null){
-              parent.refresh();
-            }
-            
-            // destroy dialog
-            dialog.destroyRecursive();
-          }
-        }
-      }, 'add_sequence_form');
-      
-      add_sequence_form.get_form_data = function(){
-        {# returns the data currently entered in the form
-        
-        this can be used to fill the form and also for posting data
-        #}
-        // prepare data to be submitted
+  function(registry, Memory, Form, ValidationTextBox, TextBox,
+           FilteringSelect, ComboBox, Button, JsonRest){
+    
+    // **********************************************************************
+    // Form
+    var add_sequence_form = new Form({
+      id: 'add_sequence_form'
+    }, 'add_sequence_form');
+    
+    
+    
+    
+    // ************************************************************************
+    // Name
+    var name_textBox = new ValidationTextBox({
+      name: 'name',
+      label: 'Name',
+      placeHolder: 'Enter a name',
+      required: true
+    }, 'sequence_name');
+    name_textBox.startup();
+    
+    
+    
+    
+    // ************************************************************************
+    // Code
+    var code_textBox = new TextBox({
+      name: 'code',
+      label: 'Code',
+      value: '',
+      placeHolder: 'Enter a code'
+    }, 'sequence_code');
+    name_textBox.startup();
+    
+    
+    
+    
+    // ************************************************************************
+    // Description
+    var description_textBox = new TextBox({
+      name: 'description',
+      label: 'Description',
+      placeHolder: 'Enter description'
+    }, 'sequence_description');
+    description_textBox.startup();
+    
+    
+    
+    // TODO: add 'add field' controls and let the user to add a wide variaty of other standard fields
+{#    // ************************************************************************#}
+{#    // Type#}
+{#    var type_memory = new Memory({#}
+{#      data: [#}
+{#        {% for type_ in types %}#}
+{#          {#}
+{#            name: '{{type_.name}}',#}
+{#            id: '{{ type_.id }}'#}
+{#          },#}
+{#        {% endfor %}#}
+{#      ]#}
+{#    });#}
+{#    #}
+{#    var type_comboBox = new ComboBox({#}
+{#      name: 'type',#}
+{#      required: true,#}
+{#      store: type_memory#}
+{#    }, 'sequence_type');#}
+{#    #}
+{#    // set value of Type#}
+{#    if (type_memory.data[0] != undefined ){#}
+{#      try {#}
+{#        type_comboBox.attr('value', type_memory.data[0].name);#}
+{#      } catch(e) {#}
+{#        // don't do anything#}
+{#      }#}
+{#    }#}
+{#    type_comboBox.startup();#}
+    
+    
+    
+    
+    // ************************************************************************
+    // Project
+    var project_memory = new Memory({
+      data: [
+        {% for project in projects %}
+          {
+            name: '{{ project.name }}',
+            id: '{{ project.id }}'
+          },
+        {% endfor %}
+      ]
+    });
+    
+    var project_select = new FilteringSelect({
+      name: 'project_id',
+      required: true,
+      store: project_memory
+    }, 'sequence_project');
+    project_select.startup();
+    
+    
+    
+    
+    // ************************************************************************
+    // Status List
+    //
+    // The Memory
+    var status_list_memory = new JsonRest({
+      target: 'get/status_lists_for/Sequence'
+    });
+    
+    // The Field
+    var status_list_filtering_select = new FilteringSelect({
+      name: 'status_list_id',
+      requeired: true,
+      onChange: function(){
+        status_updater({animate: true});
       }
-      
-      // add the restore_form_data function
-      add_sequence_form.restore_form_data = function(form_data){
-        this.set('value', form_data);
+    }, 'sequence_status_list');
+    status_list_filtering_select.startup();
+    
+    // The Updater
+    var status_list_field_updater = field_updater({
+      'memory': status_list_memory,
+      'widget': status_list_filtering_select
+    });
+    status_list_field_updater({animate: false});
+    
+    // Add Status List Button
+    var add_status_list_button = create_add_edit_data_button({
+      button_label: 'Add',
+      dialog_id: 'add_status_list_dialog',
+      content_creator: create_add_status_list_dialog,
+      attach_to: 'sequence_add_status_list_button',
+      related_field_updater: status_list_field_updater,
+      data_id: 'Sequence'
+    });
+    add_status_list_button.startup();
+    
+    // Edit Status List Button
+    var edit_status_list_button = create_add_edit_data_button({
+      button_label: 'Edit',
+      dialog_id: 'edit_status_list_dialog',
+      content_creator: create_edit_status_list_dialog,
+      attach_to: 'sequence_edit_status_list_button',
+      data_id: function(){
+        var widget = dijit.byId('sequence_status_list');
+        return widget.get('value');
       }
-      
-      // ********************************************************************
-      // NAME
-      var name_textBox = new ValidationTextBox({
-        name: 'name',
-        label: 'Name',
-        value: '',
-        placeHolder: 'Enter a name',
-        required: true
-      }, 'sequence_name');
-      name_textBox.startup();
-      
-      // ********************************************************************
-      // CODE
-      var code_textBox = new TextBox({
-        name: 'code',
-        label: 'Code',
-        value: '',
-        placeHolder: 'Enter a code'
-      }, 'sequence_code');
-      name_textBox.startup();
-      
-      // ********************************************************************
-      // DESCRIPTION
-      var description_textBox = new TextBox({
-        name: 'description',
-        label: 'Description',
-        placeHolder: 'Enter description'
-      }, 'sequence_description');
-      description_textBox.startup();
-      
-      // ********************************************************************
-      // TYPE
-      var type_memory = new Memory({
-        data: [
-          {% for type_ in types %}
-            {
-              name: '{{type_.name}}',
-              id: '{{ type_.id }}'
-            },
-          {% endfor %}
-        ]
-      });
-      
-      var type_comboBox = new ComboBox({
-        name: 'type',
-        required: true,
-        store: type_memory
-      }, 'sequence_type');
-      
-      // set value of Type
-      
-      if (type_memory.data[0] != undefined ){
-        try {
-          type_comboBox.attr('value', type_memory.data[0].name);
-        } catch(e) {
-          // don't do anything
-        }
-      }
-      
-      type_comboBox.startup();
-      
-      // ********************************************************************
-      // PROJECT
-      var project_memory = new Memory({
-        data: [
-          {% for project in projects %}
-            {
-              name: '{{ project.name }}',
-              id: '{{ project.id }}'
-            },
-          {% endfor %}
-        ]
-      });
-      
-      var project_select = new FilteringSelect({
-        name: 'project',
-        required: true,
-        store: project_memory
-      }, 'sequence_project');
-      project_select.startup();
-      
-      // ********************************************************************
-      // STATUS OR STATUS_LIST
-      {% if not status_list %}
-        // ADD STATUS LIST BUTTON
-        var add_status_list_button = create_add_edit_data_button(
-          dijit.byId('add_sequence_form').getParent(),
-          'Add',
-          'add_status_list_dialog',
-          create_add_status_list_dialog,
-          'sequence_add_status_list_button'
-        );
-        add_status_list_button.startup();
-      {% else %}
-        // ADD STATUS
-        var status_memory = new Memory({
-          data: [
-            {% for status in status_list.statuses %}
-              {
-                name: '{{ status.name }} / {{ status.code }}',
-                id: '{{ status.id }}'
-              },
-            {% endfor %}
-          ]
+    });
+    edit_status_list_button.startup();
+    
+    
+    
+    
+    // ************************************************************************
+    // Status
+    var status_memory = new JsonRest({
+      target: 'get/statuses_of/'
+    });
+    
+    // The Field
+    var status_filtering_select = new FilteringSelect({
+      name: 'status_id',
+      required: true,
+      store: status_memory
+    }, 'sequence_status');
+    status_filtering_select.startup();
+    
+    // The Updater
+    var status_updater = field_updater({
+      memory: status_memory,
+      query_data: function(){
+        var widget = dijit.byId('sequence_status_list');
+        return widget.get('value');
+      },
+      widget: status_filtering_select
+    });
+    
+    
+    // ********************************************************************
+    // Add Button
+    var add_button = new Button({
+      label: 'Add',
+      type: 'button',
+      onClick: function(){
+        submit_form({
+          dialog: dijit.byId('add_sequence_dialog'),
+          form: add_sequence_form,
+          additional_data: {
+            submitted: 'add'
+          },
+          url: '{{ request.route_url('add_sequence') }}',
+          method: 'POST'
         });
-        
-        var status_select = new FilteringSelect({
-          name: 'status',
-          required: true,
-          store: status_memory,
-          value: status_memory.data[0].id
-        }, 'sequence_status');
-        status_select.startup();
-      {% endif %}
-      
-      // EDIT STATUS LIST BUTTON
-      var edit_status_list_button = create_edit_data_button(
-        dijit.byId('add_sequence_form').getParent(),
-        'Edit',
-        'edit_status_list_dialog',
-        create_edit_status_list_dialog,
-        'sequence_edit_status_list_button',
-        function(){
-          return {{ status_list.id }};
-        },
-        add_sequence_form.get('value')
-      );
-      edit_status_list_button.startup();
-      
-      // ********************************************************************
-      // ADD BUTTON
-      var add_button = new Button({
-        label: 'Add',
-        type: 'button',
-        onClick: function(){
-          return add_sequence_form.submit();
-        }
-      }, 'sequence_add_button');
-      add_button.startup();
-      
-      // ********************************************************************
-      // CANCEL BUTTON
-      var cancel_button = new Button({
-        label: 'Cancel',
-        type: 'button',
-        onClick: function(){
-          dijit.byId('add_sequence_dialog').destroyRecursive();
-        }
-      }, 'sequence_cancel_button');
-      cancel_button.startup();
-      
-      add_sequence_form.startup();
-      
-  });
+      }
+    }, 'sequence_add_button');
+    add_button.startup();
+    
+    
+    
+    
+    // ********************************************************************
+    // Cancel Button
+    var cancel_button = new Button({
+      label: 'Cancel',
+      type: 'button',
+      onClick: function(){
+        dijit.byId('add_sequence_dialog').destroyRecursive();
+      }
+    }, 'sequence_cancel_button');
+    cancel_button.startup();
+    
+    add_sequence_form.startup();
+    
+});
 </script>
-{#{% endblock %}#}
 

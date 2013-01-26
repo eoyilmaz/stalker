@@ -9,6 +9,9 @@ docs/doctrees/*
 docs/source/generated/*
 docs/source/static/stalker_design*.vue
 docs/source/static/design
+stalker/static/dojo*
+stalker/static/stalker/fonts/*
+stalker/static/stalker/images/*
 .coverage
 .DS_Store
 dist/*
@@ -20,5 +23,4 @@ bin/*
 include/*
 local
 *.swp
-stalker/static/*
 stalker.db

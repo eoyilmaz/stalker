@@ -203,7 +203,7 @@
       content_creator: create_edit_image_format_dialog,
       attach_to: 'project_edit_image_format_button',
       related_field_updater: imf_field_updater,
-      data_id_getter: function(){
+      data_id: function(){
         return imf_filteringSelect.get('value');
       }
     });
@@ -268,7 +268,7 @@
       content_creator: create_edit_repository_dialog,
       attach_to: 'project_edit_repository_button',
       related_field_updater: repo_field_updater,
-      data_id_getter: function(){
+      data_id: function(){
         return repository_filteringSelect.get('value');
       }
     });
@@ -321,7 +321,7 @@
       content_creator: create_edit_structure_dialog,
       attach_to: 'project_edit_structure_button',
       related_field_updater: structure_field_updater,
-      data_id_getter: function(){
+      data_id: function(){
         return structure_filteringSelect.get('value')
       }
     });
@@ -371,7 +371,7 @@
       content_creator: create_edit_user_dialog,
       attach_to: 'project_edit_lead_button',
       related_field_updater: lead_field_updater,
-      data_id_getter: function(){
+      data_id: function(){
         return lead_filteringSelect.get('value')
       }
     });
@@ -381,11 +381,11 @@
     
     
     // ********************************************************************
-    // STATUS LIST
+    // Status List
     //
     // The Memory
     var status_list_memory = new JsonRest({
-      target: 'get/status_lists'
+      target: 'get/status_lists_for/Project'
     });
     
     // The Field
@@ -404,6 +404,9 @@
       'memory': status_list_memory,
       'widget': status_list_select
     });
+    status_list_field_updater({animate: true});
+    
+    console.log('this is here 0')
     
     // Add Status List Button
     var add_status_list_button = create_add_edit_data_button({
@@ -411,7 +414,8 @@
       dialog_id: 'add_status_list_dialog',
       content_creator: create_add_status_list_dialog,
       attach_to: 'project_add_status_list_button',
-      related_field_updater: status_list_field_updater
+      related_field_updater: status_list_field_updater,
+      data_id: 'Project'
     });
     add_status_list_button.startup();
     
@@ -422,14 +426,13 @@
       content_creator: create_edit_status_list_dialog,
       attach_to: 'project_edit_status_list_button',
       related_field_updater: status_list_field_updater,
-      data_id_getter: function(){
-        return status_list_select.get('value')
+      data_id: function(){
+        return function(){
+          return 'edit/status_list/' + status_list_select.get('value');
+        }
       }
     });
     edit_status_list_button.startup();
-    
-    
-    
     
     // ********************************************************************
     // ADD BUTTON

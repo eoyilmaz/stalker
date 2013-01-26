@@ -3,25 +3,12 @@
 <script type='text/javascript'>
   require(['dijit/registry',
            'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
-           'dojo/store/Memory',
+           'dojo/store/Memory', 'dojo/store/JsonRest',
            'dojo/domReady!'],
-    function(registry, ObjectStore, DataGrid, Memory){
+    function(registry, ObjectStore, DataGrid, Memory, JsonRest){
       
-      /* set up data store */
-      var shot_memory = new Memory({
-        data: [
-          {% for sequence in project.sequences %}
-            {% for shot in sequence.shots %}
-              {
-                id: {{ shot.id }},
-                name: '{{ shot.name }}',
-                sequence: '{{ shot.sequence.name }}',
-                status: '{{ shot.status.name }}',
-                user_name: '{{ shot.created_by.name }}'
-              },
-            {% endfor %}
-          {% endfor %}
-        ]
+      var shot_memory = new JsonRest({
+        target: '/get/shots/{{ project.id }}'
       });
       
       var my_store = new ObjectStore({objectStore: shot_memory});
@@ -34,22 +21,26 @@
           {name: 'Name',        field: 'name',        width: '100px'},
           {name: 'Sequence',    field: 'sequence',    width: '200px'},
           {name: 'Status',      field: 'status',      width: '150px'},
-          {name: 'Created By',  field: 'user_name',   width: '150px'},
+          {name: 'Created By',  field: 'user_name',   width: '150px'}
         ],
         width: '100%',
         autoHeight: true,
         rowSelector: '20px'
       }, 'shots_data_grid');
-      
       shot_data_grid.startup();
       
-      var add_shot_button = create_add_edit_data_button(
-        null,
-        'Add',
-        'add_shot_dialog',
-        create_add_shot_dialog,
-        'view_shots_add_shot_button'
-      );
+      var shot_data_grid_updater = field_updater({
+        'memory': shot_memory,
+        'widget': shot_data_grid
+      })
+      
+      var add_shot_button = create_add_edit_data_button({
+        button_label: 'Add',
+        dialog_id: 'add_shot_dialog',
+        content_creator: create_add_shot_dialog,
+        attach_to: 'view_shots_add_shot_button',
+        related_field_updater: shot_data_grid_updater
+      });
       add_shot_button.startup();        
       
   });
