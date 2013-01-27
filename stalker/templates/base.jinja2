@@ -9,15 +9,18 @@
   <meta name='keywords' content='python web application'/>
   <meta name='description' content='pyramid web application'/>
   <link rel='shortcut icon'
-        href='{{request.static_url("stalker:static/images/favicon.ico")}}'/>
+        href='{{request.static_url("stalker:static/stalker/images/favicon.ico")}}'/>
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{request.static_url("stalker:static/css/stalker.css")}}'/>
+        href='{{request.static_url("stalker:static/stalker/css/stalker.css")}}'/>
+  
+  
+{# DOJO COMPRESSED #}
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/js/dijit/themes/claro/claro.css") }}'/>
+        href='{{ request.static_url("stalker:static/dijit/themes/claro/claro.css") }}'/>
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/js/dojox/grid/resources/claroGrid.css") }}'/>
+        href='{{ request.static_url("stalker:static/dojox/grid/resources/claroGrid.css") }}'/>
   <script type='text/javascript' data-dojo-config='async: true, parseOnLoad: true'
-          src='{{ request.static_url("stalker:static/js/dojo/dojo.js") }}'>
+          src='{{ request.static_url("stalker:static/dojo/dojo.js") }}'>
   </script>
   
 {#  <script type='text/javascript'#}
@@ -25,10 +28,10 @@
 {#  </script>#}
   
   <script type='text/javascript'
-          src='{{ request.static_url("stalker:static/js/stalker.js") }}'>
+          src='{{ request.static_url("stalker:static/stalker/stalker.js") }}'>
   </script>
 </head>
-<body class='claro' style='border-radius: 10px'>
+<body class='claro'>
 {% block body %}
   <div id='appLayout' class='demoLayout'>
     <div id='header' class='edgePanel' style="overflow: hidden">
@@ -41,7 +44,7 @@
           <span>Projects</span>
           <div id='expand_project_icon'
                style='
-                 background-image: url({{ request.static_url('stalker:static/images/gmail_icons.png') }});
+                 background-image: url({{ request.static_url('stalker:static/stalker/images/gmail_icons.png') }});
                  background-position: -240px 0;
                  font-size: 0;
                  line-height: 0;
@@ -57,7 +60,7 @@
           <span>{{user.name}}</span>
           <div id='expand_icon'
                style='
-                 background-image: url({{ request.static_url('stalker:static/images/gmail_icons.png') }});
+                 background-image: url({{ request.static_url('stalker:static/stalker/images/gmail_icons.png') }});
                  background-position: -240px 0;
                  font-size: 0;
                  line-height: 0;

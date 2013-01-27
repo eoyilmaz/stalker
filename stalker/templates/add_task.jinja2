@@ -90,7 +90,18 @@
           <input id='task_status'>
         </td>
       </tr>
-     
+      
+      
+      {# EXTRA TAGS FOR TESTING PURPOSES #}
+      <tr>
+        <td class='label_column'>
+          <label for='extra_tag'>Extra Tag</label>
+        </td>
+        <td class='input_column'>
+          <div id='extra_tag'></div>
+        </td>
+      </tr>
+      
     </table>
   </form>
 </div>
@@ -106,12 +117,12 @@
     'dijit/form/TextBox', 'dijit/form/FilteringSelect',
     'dijit/form/ComboBox', 'dijit/form/Button', 'dijit/form/CheckBox',
     'dojox/form/MultiComboBox', 'dojo/store/JsonRest', 'dojo/dom-construct',
-    'stalker/TagWidget',
+    'stalker/TagSelect', 'stalker/Tag',
     'dojo/ready'
   ],
   function(registry, Memory, Form, ValidationTextBox, TextBox,
            FilteringSelect, ComboBox, Button, CheckBox, MultiComboBox,
-           JsonRest, domConstruct, TagWidget){
+           JsonRest, domConstruct, TagSelect, Tag){
     
     // ************************************************************************
     // Form
@@ -202,14 +213,14 @@
       target:'get/users'
     });
     
-    var resources_tagWidget = new TagWidget({
+    var resources_tagSelect = new TagSelect({
       name: 'resource_ids'
     }, 'task_resources');
-    resources_tagWidget.startup();
+    resources_tagSelect.startup();
     
     var result = users_jsonRest.query().then(function(data){
       var user_memory = new Memory({data: data});
-      resources_tagWidget.set('store', user_memory);
+      resources_tagSelect.set('store', user_memory);
     });
     
     
@@ -291,6 +302,14 @@
       widget: status_filtering_select
     });
     // don't call the updater now, the status_list may not been set yet!!!
+    
+    
+    // TODO: remove this, extra tag for development remove later
+    var test_tag = new Tag({
+      label: 'Test Tag'
+    }, 'extra_tag');
+    test_tag.startup();
+    
     
     
    

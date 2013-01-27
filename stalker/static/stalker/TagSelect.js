@@ -1,12 +1,17 @@
 // stalker.TagSelect
+// 
+// A customized widget for Tag creation
+//
+// TODO: It should either create a FilteringSelect or a TextField by the choice of User
+// 
 define([
     'require',
     'dojo/_base/declare', 'dijit/_WidgetBase', 'dijit/_TemplatedMixin',
     'dojo/text!stalker/templates/TagSelect.html',
-    'dojo/_base/lang', 'dojo/dom-construct', 'dijit/form/Button',
+    'dojo/_base/lang', 'dojo/dom-construct', 'stalker/Tag',
     'dijit/form/FilteringSelect', 'dojo/on', 'dojo/domReady!'
 ], function(require, declare, _WidgetBase, _TemplatedMixin, template, lang,
-            domConstruct, Button, FilteringSelect, on){
+            domConstruct, Tag, FilteringSelect, on){
     return declare('stalker.TagSelect', [_WidgetBase, _TemplatedMixin],
         {
             templateString: template,
@@ -41,7 +46,7 @@ define([
                 return value;
             },
             
-            baseClass: 'tagSelect',
+            baseClass: 'stalker.tagSelect',
             
             constructor: function stalker_tagSelect_constructor(args){
                 if (args){
@@ -54,6 +59,42 @@ define([
                 this.filtering_select.startup();
             },
             
+            // 
+            // adds the given value to the store again
+            // 
+            // TODO: if this is a FilteringSelect use {id, name} but if it is a TextField
+            //       do nothing
+            add_value: function(value){
+                // add the value back to the store
+                this.store.add(value);
+            },
+            
+            //
+            // removes the given tag from the tagList and returns the value of
+            // the tag to the store
+            // 
+            remove_tag: function(/*stalker.Tag*/tag){
+                // check if it is really a Tag instance
+                if (tag.declaredClass!='stalker.Tag'){
+                    // TODO: it can be an instance of a derived class
+                    // don't bother doing anything with that
+                    return;
+                }
+                
+                // return the tag value to the store
+                var value = tag.getValue();
+                this.store.add(value);
+                
+                // remove the tag from the tags list
+                var index = this.tags.indexOf(tag);
+                if (index){
+                    this.tags.pop(index);
+                }
+                
+                // destroy the tag
+                tag.destroyRecursive();
+            },
+            
             postCreate: function tagSelect_postCreate(){
                 // Run any parent postCreate processes - can be done at any point
                 this.inherited(arguments);
@@ -63,7 +104,7 @@ define([
                 var domNode = this.domNode;
                 
                 var input_widget_ap = this.input_widget_ap;
-                var button_list_ap = this.tag_list_ap;
+                var tag_list_ap = this.tag_list_ap;
                 
                 this.tags = [];
                 
@@ -72,11 +113,9 @@ define([
                     domConstruct.create("div", {}, input_widget_ap)
                 );
                 
-                // connect th onChange method
-                on(
-                    this.filtering_select,
-                    'change',
-                    lang.hitch(this, function(){
+                // connect the `change` event
+                on(this.filtering_select, 'change',
+                    lang.hitch(this, function(){ // to protect `this`
                         var item = this.filtering_select.item;
                         if (item != null){
                             var current_label = item.name;
@@ -84,58 +123,17 @@ define([
                                 var current_id = this.filtering_select.value;
                                 
                                 // add a new button to the the tagList
-                                var button = new Button({
+                                var tag = new Tag({
                                     label: current_label,
-                                    value: current_id,
-                                    iconClass: 'dijitEditorIcon dijitEditorIconDelete'
-                                }, domConstruct.create('div', null, button_list_ap));
-                                button.startup();
+                                    value: current_id
+                                }, domConstruct.create('div', null, tag_list_ap));
+                                tag.startup();
                                 
-                                // style the button
-                                var dNode = button.domNode;
-                                dNode.children[0].style.borderRadius = '25px';
-                                dNode.children[0].style.height = '13px';
-                                
-                                // replace the icon to the end
-                                domConstruct.place(
-                                    button.iconNode,
-                                    button.containerNode,
-                                    'after'
-                                );
-                                
-                                // button resize and replace icon picture
-                                button.iconNode.style.backgroundSize = '414px';
-                                button.iconNode.style.backgroundPosition = '-54px';
-                                button.iconNode.style.width = '9px';
-                                button.iconNode.style.height = '9px';
-                                
-                                
-                                // 414 px size
-                                // -54 px offset
-                                // 9px 9px icon size
-                                
-                                
-                                on(button, 'click',
-                                    lang.hitch(this, function(){
-                                        // add the value back to the store
-                                        var id = button.value;
-                                        var name = button.label;
-                                        this.store.add({
-                                            id: id,
-                                            name: name
-                                        });
-                                        // remove it self from the tags list
-                                        var index = this.tags.indexOf(button);
-                                        this.tags.pop(index);
-                                        
-                                        // destroy it self
-                                        button.destroyRecursive();
-                                    })
-                                );
-                                
+                                // attach self to the tag
+                                tag.tagSelect = this;
                                 
                                 // add the button as a tag to this widget
-                                this.tags.push(button);
+                                this.tags.push(tag);
                                 
                                 // delete the current value from the FilteringSelect
                                 this.filtering_select.set('value', '');
@@ -146,7 +144,6 @@ define([
                         }
                     })
                 );
-                
             }
     });
 });

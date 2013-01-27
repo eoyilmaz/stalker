@@ -1,48 +1,6 @@
-@font-face {
-    font-family: 'Ubuntu';
-    src: url('../fonts/ubuntu-r-webfont.eot');
-    src: url('../fonts/ubuntu-r-webfont.eot?#iefix') format('embedded-opentype'),
-    url('../fonts/ubuntu-r-webfont.woff') format('woff'),
-    url('../fonts/ubuntu-r-webfont.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'UbuntuBold';
-    src: url('../fonts/ubuntu-b-webfont.eot');
-    src: url('../fonts/ubuntu-b-webfont.eot?#iefix') format('embedded-opentype'),
-    url('../fonts/ubuntu-b-webfont.woff') format('woff'),
-    url('../fonts/ubuntu-b-webfont.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-
-}
-
-@font-face {
-    font-family: 'UbuntuBoldItalic';
-    src: url('../fonts/ubuntu-bi-webfont.eot');
-    src: url('../fonts/ubuntu-bi-webfont.eot?#iefix') format('embedded-opentype'),
-    url('../fonts/ubuntu-bi-webfont.woff') format('woff'),
-    url('../fonts/ubuntu-bi-webfont.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-
-}
-
-@font-face {
-    font-family: 'UbuntuCondensedRegular';
-    src: url('../fonts/ubuntu-c-webfont.eot');
-    src: url('../fonts/ubuntu-c-webfont.eot?#iefix') format('embedded-opentype'),
-    url('../fonts/ubuntu-c-webfont.woff') format('woff'),
-    url('../fonts/ubuntu-c-webfont.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-
-}
-
 html, body {
-    font-family: 'Ubuntu', "Bitstream Vera Sans", 'DejaVu Sans', 'Tahoma', 'sans-serif';
+    font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif; 
+    *font-size: 75%;
     background-color: #c0c0c0;
     font-size: 12px;
     height: 100%;

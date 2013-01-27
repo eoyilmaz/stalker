@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.0.a6
+--------
+
+* Added a new Dojo Widget called Tag to help the creation of the tags in the
+  TagSelect.
+
 0.2.0.a5
 --------
 

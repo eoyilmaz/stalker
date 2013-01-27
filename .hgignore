@@ -9,7 +9,10 @@ docs/doctrees/*
 docs/source/generated/*
 docs/source/static/stalker_design*.vue
 docs/source/static/design
-stalker/static/dojo*
+stalker/static/dojo/
+stalker/static/dojox/
+stalker/static/dijit/
+stalker/static/util/
 stalker/static/stalker/fonts/*
 stalker/static/stalker/images/*
 .coverage
