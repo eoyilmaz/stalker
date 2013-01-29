@@ -222,8 +222,8 @@
     status_list_field_updater({animate: false});
     
     // Add Status List Button
-    var add_status_list_button = create_add_edit_data_button({
-      button_label: 'Add',
+    var add_status_list_button = create_add_edit_data_widget({
+      label: 'Add',
       dialog_id: 'add_status_list_dialog',
       content_creator: create_add_status_list_dialog,
       attach_to: 'sequence_add_status_list_button',
@@ -233,8 +233,8 @@
     add_status_list_button.startup();
     
     // Edit Status List Button
-    var edit_status_list_button = create_add_edit_data_button({
-      button_label: 'Edit',
+    var edit_status_list_button = create_add_edit_data_widget({
+      label: 'Edit',
       dialog_id: 'edit_status_list_dialog',
       content_creator: create_edit_status_list_dialog,
       attach_to: 'sequence_edit_status_list_button',

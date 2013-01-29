@@ -19,6 +19,8 @@ define([
             name: null,
             store: null,
             
+            required: false,
+            
             tags: [],
             filtering_select: null,
             
@@ -44,6 +46,18 @@ define([
                     value.push(this.tags.get('value'));
                 }
                 return value;
+            },
+            
+            _setDisabledAttr: function(value){
+                // set the filtering select and all the tags disabled
+                this.filtering_select.set('disabled', value);
+                for (var i=0; i < this.tags.length; i++){
+                    this.tags[i].set('disabled', value);
+                }
+            },
+            
+            isValid: function(){
+                console.log('TagSelect is validating!!!!');
             },
             
             baseClass: 'stalker.tagSelect',
@@ -73,9 +87,9 @@ define([
             // removes the given tag from the tagList and returns the value of
             // the tag to the store
             // 
-            remove_tag: function(/*stalker.Tag*/tag){
+            remove_tag: function(/*stalker.Tag*/ tag){
                 // check if it is really a Tag instance
-                if (tag.declaredClass!='stalker.Tag'){
+                if (tag.declaredClass != 'stalker.Tag'){
                     // TODO: it can be an instance of a derived class
                     // don't bother doing anything with that
                     return;
@@ -87,8 +101,8 @@ define([
                 
                 // remove the tag from the tags list
                 var index = this.tags.indexOf(tag);
-                if (index){
-                    this.tags.pop(index);
+                if (index != -1){
+                    this.tags.splice(index, 1);
                 }
                 
                 // destroy the tag
@@ -109,7 +123,9 @@ define([
                 this.tags = [];
                 
                 // create the filtering select with the given arguments
-                this.filtering_select = new FilteringSelect({},
+                this.filtering_select = new FilteringSelect({
+                        required: false
+                    },
                     domConstruct.create("div", {}, input_widget_ap)
                 );
                 

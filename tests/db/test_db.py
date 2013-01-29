@@ -9,7 +9,6 @@ import shutil
 import datetime
 import unittest
 import tempfile
-import log
 from sqlalchemy.exc import IntegrityError
 
 from stalker.conf import defaults
@@ -20,9 +19,10 @@ from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
                      Status, StatusList, Structure, Tag, Task, Type,
                      FilenameTemplate, User, Version, Permission, Group,
                      Booking)
-
-logger = log.getLogger(__name__)
-logger.setLevel(log.DEBUG)
+import logging
+from stalker import log
+logger = logging.getLogger(__name__)
+logger.setLevel(log.logging_level)
 
 class DatabaseTester(unittest.TestCase):
     """tests the database and connection to the database
@@ -590,7 +590,7 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_Booking(self):
         """testing the persistence of Booking
         """
-        logger.setLevel(log.DEBUG)
+        logger.setLevel(log.logging_level)
         
         name = 'Test Booking'
         description = 'this is a booking'
@@ -692,7 +692,7 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_Department(self):
         """testing the persistence of Department
         """
-        logger.setLevel(log.DEBUG)
+        logger.setLevel(log.logging_level)
         
         name = "TestDepartment_test_persistence_Department"
         description = "this is for testing purposes"
@@ -2246,7 +2246,7 @@ class DatabaseModelsTester(unittest.TestCase):
             "email": "testuser@test.com",
             "password": "12345",
             "description": "This user has been created for testing purposes",
-            "department": new_department,
+            "departments": [new_department],
         }
         
         new_user = User(**user_kwargs)
@@ -2258,7 +2258,7 @@ class DatabaseModelsTester(unittest.TestCase):
         created_by = new_user.created_by
         date_created = new_user.date_created
         date_updated = new_user.date_updated
-        department = new_user.department
+        departments = new_user.departments
         description = new_user.description
         email = new_user.email
         last_login = new_user.last_login
@@ -2289,7 +2289,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(created_by, new_user_DB.created_by)
         self.assertEqual(date_created, new_user_DB.date_created)
         self.assertEqual(date_updated, new_user_DB.date_updated)
-        self.assertEqual(department, new_user_DB.department)
+        self.assertEqual(departments, new_user_DB.departments)
         self.assertEqual(description, new_user_DB.description)
         self.assertEqual(email, new_user_DB.email)
         self.assertEqual(last_login, new_user_DB.last_login)

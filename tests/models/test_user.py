@@ -217,48 +217,6 @@ class UserTest(unittest.TestCase):
         # create a proper user object
         self.test_user = User(**self.kwargs)
     
-#    def test_code_argument_is_skipped(self):
-#        """testing if the code attribute will be copied from login if it is
-#        skipped
-#        """
-#        try:
-#            self.kwargs.pop('code')
-#        except KeyError:
-#            pass
-#        
-#        new_user = User(**self.kwargs)
-#        self.assertEqual(new_user.code, new_user.login)
-    
-#    def test_code_argument_is_None(self):
-#        """testing if the code attribute will be copied from login attribute if
-#        the code argument is None
-#        """
-#        self.kwargs['code'] = None
-#        new_user = User(**self.kwargs)
-#        self.assertEqual(new_user.code, new_user.login)
-    
-#    def test_code_attribute_is_set_to_None(self):
-#        """testing if the code attribute will be copied from login attribute if
-#        it is set to None
-#        """
-#        self.test_user.code = None
-#        self.assertEqual(self.test_user.code, self.test_user.login)
-    
-#    def test_code_argument_is_empty_string(self):
-#        """testing if the code attribute will be copied from login attribute if
-#        is the code argument is an empty string
-#        """
-#        self.kwargs['code'] = ''
-#        new_user = User(**self.kwargs)
-#        self.assertEqual(new_user.code, new_user.login)
-    
-#    def test_code_attribute_is_empty_string(self):
-#        """testing if the code attribute will be copied from login attribute if
-#        it is set to an empty string
-#        """
-#        self.test_user.code = ''
-#        self.assertEqual(self.test_user.code, self.test_user.login)
-    
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         User class
@@ -514,10 +472,49 @@ class UserTest(unittest.TestCase):
         test_value = datetime.datetime.now()
         self.test_user.last_login = test_value
         self.assertEqual(self.test_user.last_login, test_value)
-
-    def test_department_argument_only_accepts_department_objects(self):
+    
+    def test_departments_argument_is_skipped(self):
+        """testing if a User can be created without a Department instance
+        """
+        try:
+            self.kwargs.pop('departments')
+        except KeyError:
+            pass
+        
+        new_user = User(**self.kwargs)
+        self.assertEqual(new_user.departments, [])
+    
+    def test_departments_argument_is_None(self):
+        """testing if a User can be created with the departments argument value
+        is to None
+        """
+        self.kwargs['departments'] = None
+        new_user = User(**self.kwargs)
+        self.assertEqual(new_user.departments, [])
+    
+    def test_departments_attribute_is_set_None(self):
+        """testing if a TypeError will be raised when the User's departments
+        attribute set to None
+        """
+        self.assertRaises(TypeError, setattr, self.test_user, 'departments',
+                          None)
+    
+    def test_departments_argument_is_an_empty_list(self):
+        """testing if a User can be created with the departments argument is an
+        empty list
+        """
+        self.kwargs['departments'] = []
+        new_user = User(**self.kwargs)
+    
+    def test_departments_attribute_is_an_empty_list(self):
+        """testing if the departments attribute can be set to an empty list
+        """
+        self.test_user.departments = []
+        self.assertEqual(self.test_user.departments, [])
+    
+    def test_departments_argument_only_accepts_list_of_department_objects(self):
         """testing if a TypeError will be raised when trying to assign
-        anything other than a Department object to department argument
+        anything other than a Department object to departments argument
         """
         # try to assign something other than a department object
         test_values = [
@@ -528,13 +525,12 @@ class UserTest(unittest.TestCase):
             {"a": "deparment"}
         ]
         
-        for test_value in test_values:
-            self.kwargs["department"] = test_value
-            self.assertRaises(TypeError, User, **self.kwargs)
-
-    def test_department_attribute_only_accepts_department_objects(self):
+        self.kwargs["departments"] = test_values
+        self.assertRaises(TypeError, User, **self.kwargs)
+    
+    def test_departments_attribute_only_accepts_department_objects(self):
         """testing if a TypeError will be raised when trying to assign
-        anything other than a Department object to department attribute
+        anything other than a Department object to departments attribute
         """
         # try to assign something other than a department
         test_value = "a department"
@@ -542,17 +538,26 @@ class UserTest(unittest.TestCase):
             TypeError,
             setattr,
             self.test_user,
-            "department",
+            "departments",
             test_value
         )
 
-    def test_department_attribute_works_properly(self):
-        """testing if department attribute works properly
+    def test_departments_attribute_works_properly(self):
+        """testing if departments attribute works properly
         """
         # try to set and get the same value back
-        self.test_user.department = self.test_department2
-        self.assertEqual(self.test_user.department, self.test_department2)
-
+        self.test_user.departments = [self.test_department2]
+        self.assertItemsEqual(self.test_user.departments, [self.test_department2])
+    
+    def test_departments_attribute_supports_appending(self):
+        """testing if departments attribute supports appending
+        """
+        self.test_user.departments = []
+        self.test_user.departments.append(self.test_department1)
+        self.test_user.departments.append(self.test_department2)
+        self.assertItemsEqual(self.test_user.departments,
+                              [self.test_department1, self.test_department2])
+    
     def test_password_argument_being_None(self):
         """testing if a TypeError will be raised when trying to assign None
         to the password argument

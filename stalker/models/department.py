@@ -48,29 +48,28 @@ class Department(Entity):
         ForeignKey("Entities.id"),
         primary_key=True
     )
-
+    
     lead_id = Column(
         "lead_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="x")
     )
-
+    
     lead = relationship(
         "User",
         uselist=False,
         primaryjoin="Department.lead_id==User.user_id",
         post_update=True,
         doc="""The lead of this department, it is a User object""",
-        )
-
+    )
+    
     members = relationship(
         "User",
-        #backref="department",
-        primaryjoin="Departments.c.id==Users.c.department_id",
-        back_populates="department",
+        secondary='User_Departments',
+        back_populates="departments",
         doc="""List of users representing the members of this department.""",
-        )
-
+    )
+    
     def __init__(self, members=None, lead=None, **kwargs):
         super(Department, self).__init__(**kwargs)
 
@@ -79,7 +78,7 @@ class Department(Entity):
 
         self.members = members
         self.lead = lead
-
+    
     @validates("members")
     def _validate_members(self, key, member):
         """validates the given member attribute

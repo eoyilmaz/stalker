@@ -74,7 +74,7 @@ def main(global_config, **settings):
     # *************************************************************************
     # Menus
     config.add_route('user_menu', '/user_menu')
-    config.add_route('projects_menu', '/projects_menu')
+    config.add_route('create_menu', '/create_menu')
     
     # *************************************************************************
     # DATA VIEWS

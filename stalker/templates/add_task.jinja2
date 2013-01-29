@@ -38,8 +38,37 @@
           <label for='task_depends'>Depends</label>
         </td>
         <td class='input_column'>
-{#          <div id='task_dependencies_tag_list'></div>#}
           <input id='task_depends'>
+        </td>
+      </tr>
+      
+      {# START DATE #}
+      <tr>
+        <td class='label_column'>
+          <label for='task_start_date'>Start Date</label>
+        </td>
+        <td class='input_column'>
+          <input id='task_start_date'>
+        </td>
+      </tr>
+      
+      {# END DATE #}
+      <tr>
+        <td class='label_column'>
+          <label for='task_end_date'>End Date</label>
+        </td>
+        <td class='input_column'>
+          <input id='task_end_date'>
+        </td>
+      </tr>
+      
+      {# DURATION #}
+      <tr>
+        <td class='label_column'>
+          <label for='task_duration'>Duration</label>
+        </td>
+        <td class='input_column'>
+          <input id="task_duration">
         </td>
       </tr>
       
@@ -62,7 +91,6 @@
           <label for='task_resources'>Resources</label>
         </td>
         <td class='input_column'>
-{#          <div id='task_resources_tag_list'></div>#}
           <div id='task_resources'></div>
         </td>
       </tr>
@@ -91,17 +119,6 @@
         </td>
       </tr>
       
-      
-      {# EXTRA TAGS FOR TESTING PURPOSES #}
-      <tr>
-        <td class='label_column'>
-          <label for='extra_tag'>Extra Tag</label>
-        </td>
-        <td class='input_column'>
-          <div id='extra_tag'></div>
-        </td>
-      </tr>
-      
     </table>
   </form>
 </div>
@@ -118,11 +135,13 @@
     'dijit/form/ComboBox', 'dijit/form/Button', 'dijit/form/CheckBox',
     'dojox/form/MultiComboBox', 'dojo/store/JsonRest', 'dojo/dom-construct',
     'stalker/TagSelect', 'stalker/Tag',
-    'dojo/ready'
+    'dojo/date', 'dojo/date/stamp', 'dojo/date/locale',
+    'dijit/form/DateTextBox', 'dijit/form/NumberTextBox', 'dojo/ready'
   ],
   function(registry, Memory, Form, ValidationTextBox, TextBox,
            FilteringSelect, ComboBox, Button, CheckBox, MultiComboBox,
-           JsonRest, domConstruct, TagSelect, Tag){
+           JsonRest, domConstruct, TagSelect, Tag, date, stamp, locale,
+           DateTextBox, NumberTextBox){
     
     // ************************************************************************
     // Form
@@ -169,7 +188,9 @@
     }, 'task_description');
     description_textBox.startup();
     
-
+    
+    
+    
     // ************************************************************************
     // Depends
     var tasks_jsonRest = new JsonRest({
@@ -184,7 +205,97 @@
     var tasks_result = tasks_jsonRest.query().then(function(data){
       depends_multiComboBox.set('store', new Memory({data: data}));
     });
-     
+    
+    
+    
+    
+    // ************************************************************************
+    // Start Date
+    var start_date_dateTextBox = new DateTextBox({
+      name: 'start_date',
+      label: 'Start Date',
+      value: new Date(),// set it today by default
+      required: true,
+      datePattern: 'dd-mm-yyyy',
+      onChange: function(){
+        if (this.focused){
+          update_dates(
+            start_date_dateTextBox.getValue(),
+            end_date_dateTextBox.getValue(),
+            null
+          );
+        }
+      }
+    }, 'task_start_date');
+    start_date_dateTextBox.startup();
+    
+    
+    
+    
+    // ************************************************************************
+    // End Date
+    var end_date_dateTextBox = new DateTextBox({
+      name: 'end_date',
+      label: 'End Date',
+      value: new Date(), // set it today by default
+      required: true,
+      datePattern: 'dd-mm-yyyy',
+      onChange: function(){
+        if (this.focused){
+          update_dates(
+            start_date_dateTextBox.getValue(),
+            end_date_dateTextBox.getValue(),
+            null
+          );
+        }
+      }
+    }, 'task_end_date');
+    end_date_dateTextBox.startup();
+    
+    
+    
+    
+    // ************************************************************************
+    // Duration
+    var duration_numberTextBox = new NumberTextBox({
+      name: 'duration',
+      label: 'Duration',
+      value: 0,
+      onKeyUp: function(){
+        if (this.focused){
+          update_dates(
+            start_date_dateTextBox.getValue(),
+            null,
+            this.get('value')
+          )
+        }
+      }
+    }, 'task_duration');
+    duration_numberTextBox.startup();
+    
+    var update_dates = function(start_date, end_date, duration){
+      if (duration == null){
+         // update the duration
+        duration_numberTextBox.set(
+          'value',
+          date.difference(start_date, end_date)
+        );
+      } else if (end_date == null) {
+         // update end date
+        end_date_dateTextBox.set(
+          'value',
+          date.add(
+            start_date,
+            'day',
+            duration
+          )
+        );
+      }
+    };
+    //update_dates();
+    
+    
+    
     
     // ************************************************************************
     // Is Milestone
@@ -196,9 +307,9 @@
       onChange: function(new_value){
         // disable the resources field if checked
         if (new_value){
-          resources_filteringSelect.set('disabled', true);
+          resources_tagSelect.set('disabled', true);
         } else {
-          resources_filteringSelect.set('disabled', false);
+          resources_tagSelect.set('disabled', false);
         }
       }
     }, 'task_is_milestone');
@@ -250,8 +361,8 @@
     status_list_field_updater({animate: false});
     
     // Add Status List Button
-    var add_status_list_button = create_add_edit_data_button({
-      button_label: 'Add',
+    var add_status_list_button = create_add_edit_data_widget({
+      label: 'Add',
       dialog_id: 'add_status_list_dialog',
       content_creator: create_add_status_list_dialog,
       attach_to: 'task_add_status_list_button',
@@ -261,8 +372,8 @@
     add_status_list_button.startup();
     
     // Edit Status List Button
-    var edit_status_list_button = create_add_edit_data_button({
-      button_label: 'Edit',
+    var edit_status_list_button = create_add_edit_data_widget({
+      label: 'Edit',
       dialog_id: 'edit_status_list_dialog',
       content_creator: create_edit_status_list_dialog,
       attach_to: 'task_edit_status_list_button',
@@ -304,15 +415,8 @@
     // don't call the updater now, the status_list may not been set yet!!!
     
     
-    // TODO: remove this, extra tag for development remove later
-    var test_tag = new Tag({
-      label: 'Test Tag'
-    }, 'extra_tag');
-    test_tag.startup();
     
     
-    
-   
     // ************************************************************************
     // Add Button
     var add_button = new Button({

@@ -11,9 +11,10 @@ from stalker import (Link, Project, Repository, Sequence, Shot, Status,
 from stalker import db
 from stalker.db.session import DBSession, ZopeTransactionExtension
 
-import log
-logger = log.getLogger('stalker.models.version.Version')
-logger.setLevel(log.DEBUG)
+import logging
+from stalker import log
+logger = logging.getLogger('stalker.models.version.Version')
+logger.setLevel(log.logging_level)
 
 class VersionTester(unittest.TestCase):
     """tests stalker.models.version.Version class

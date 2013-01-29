@@ -75,7 +75,7 @@
           <input id='asset_status'>
         </td>
       </tr>
-
+      
     </table>      
   </form>
 </div>
@@ -86,13 +86,13 @@
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
+  require(['dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/FilteringSelect', 'dijit/form/ComboBox', 'dijit/form/Button',
     'dojo/store/JsonRest', 'dojo/ready'
   ],
-  function(registry, Memory, Form, ValidationTextBox, TextBox,
-           FilteringSelect, ComboBox, Button, JsonRest){
+  function(Memory, Form, ValidationTextBox, TextBox, FilteringSelect, ComboBox,
+           Button, JsonRest){
     
     // ************************************************************************
     // Form
@@ -220,8 +220,8 @@
     status_list_field_updater({animate: false});
     
     // Add Status List Button
-    var add_status_list_button = create_add_edit_data_button({
-      button_label: 'Add',
+    var add_status_list_button = create_add_edit_data_widget({
+      label: 'Add',
       dialog_id: 'add_status_list_dialog',
       content_creator: create_add_status_list_dialog,
       attach_to: 'asset_add_status_list_button',
@@ -231,8 +231,8 @@
     add_status_list_button.startup();
     
     // Edit Status List Button
-    var edit_status_list_button = create_add_edit_data_button({
-      button_label: 'Edit',
+    var edit_status_list_button = create_add_edit_data_widget({
+      label: 'Edit',
       dialog_id: 'edit_status_list_dialog',
       content_creator: create_edit_status_list_dialog,
       attach_to: 'asset_edit_status_list_button',

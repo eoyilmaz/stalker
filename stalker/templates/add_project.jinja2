@@ -5,7 +5,7 @@
       {# NAME #}
       <tr>
         <td class='label_column'>
-          <label for='project_name'><strong>Name</strong></label>
+          <label for='project_name'>Name</label>
         </td>
         <td class='input_column'>
           <input id='project_name'>
@@ -15,7 +15,7 @@
       {# CODE #}
       <tr>
         <td class='label_column'>
-          <label for='project_code'><strong>Code</strong></label>
+          <label for='project_code'>Code</label>
         </td>
         <td class='input_column'>
           <input id='project_code'>
@@ -25,9 +25,7 @@
       {# IMAGE FORMAT #}
       <tr>
         <td class='label_column'>
-          <label for='project_image_format'>
-            <strong>Image Format</strong>
-          </label>
+          <label for='project_image_format'>Image Format</label>
         </td>
         <td class='input_column'>
           <input id='project_image_format'>
@@ -41,7 +39,7 @@
       {# FPS #}
       <tr>
         <td class='label_column'>
-          <label for='project_fps'><strong>FPS</strong></label>
+          <label for='project_fps'>FPS</label>
         </td>
         <td class='input_column'>
           <input id='project_fps'>
@@ -51,7 +49,7 @@
       {# REPOSITORY #}
       <tr>
         <td class='label_column'>
-          <label for='project_repository'><strong>Repository</strong></label>
+          <label for='project_repository'>Repository</label>
         </td>
         <td class='input_column'>
           <input id='project_repository'>
@@ -65,7 +63,7 @@
       {# STRUCTURE #}
       <tr>
         <td class='label_column'>
-          <label for='project_structure'><strong>Structure</strong></label>
+          <label for='project_structure'>Structure</label>
         </td>
         <td class='input_column'>
           <input id='project_structure'>
@@ -79,7 +77,7 @@
       {# LEAD #}
       <tr>
         <td class='label_column'>
-          <label for='project_lead'><strong>Lead</strong></label>
+          <label for='project_lead'>Lead</label>
         </td>
         <td class='input_column'>
           <input id='project_lead'>
@@ -93,7 +91,7 @@
       {# STATUS LIST #}
       <tr>
         <td class='label_column'>
-          <label for='project_status_list'><strong>Status List</strong></label>
+          <label for='project_status_list'>Status List</label>
         </td>
         <td class='input_column'>
           <input id='project_status_list'>
@@ -114,14 +112,14 @@
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/_base/xhr', 'dojo/on',
-    'dojo/store/Memory', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
-    'dijit/form/TextBox', 'dijit/form/NumberTextBox',
-    'dijit/form/FilteringSelect', 'dijit/form/Button', 'dojo/store/JsonRest',
+  require(['dojo/store/Memory', 'dijit/form/Form',
+    'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
+    'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect',
+    'dijit/form/Button', 'dojo/store/JsonRest', 'stalker/submitForm',
     'dojo/ready'
   ],
-  function(registry, xhr, on, Memory, Form, ValidationTextBox, TextBox,
-           NumberTextBox, FilteringSelect, Button, JsonRest){
+  function(Memory, Form, ValidationTextBox, TextBox,
+           NumberTextBox, FilteringSelect, Button, JsonRest, submitForm){
     
     // ********************************************************************
     // Form
@@ -187,8 +185,8 @@
     imf_field_updater({animate: false});
     
     // Add Image Format Button
-    var add_image_format_button = create_add_edit_data_button({
-      button_label: 'Add',
+    var add_image_format_button = create_add_edit_data_widget({
+      label: 'Add',
       dialog_id: 'add_image_format_dialog',
       content_creator: create_add_image_format_dialog,
       attach_to: 'project_add_image_format_button',
@@ -197,8 +195,8 @@
     add_image_format_button.startup();
     
     // Edit Image Format Button
-    var edit_image_format_button = create_add_edit_data_button({
-      button_label: 'Edit',
+    var edit_image_format_button = create_add_edit_data_widget({
+      label: 'Edit',
       dialog_id: 'edit_image_format_dialog',
       content_creator: create_edit_image_format_dialog,
       attach_to: 'project_edit_image_format_button',
@@ -252,8 +250,8 @@
     repo_field_updater({animate: false});
    
     // Add Repository Button
-    var add_repository_button = create_add_edit_data_button({
-      button_label: 'Add',
+    var add_repository_button = create_add_edit_data_widget({
+      label: 'Add',
       dialog_id: 'add_repository_dialog',
       content_creator: create_add_repository_dialog,
       attach_to: 'project_add_repository_button',
@@ -262,8 +260,8 @@
     add_repository_button.startup();
     
     // Edit Repository Button
-    var edit_repository_button = create_add_edit_data_button({
-      button_label: 'Edit',
+    var edit_repository_button = create_add_edit_data_widget({
+      label: 'Edit',
       dialog_id: 'edit_repository_dialog',
       content_creator: create_edit_repository_dialog,
       attach_to: 'project_edit_repository_button',
@@ -305,8 +303,8 @@
     structure_field_updater({animate: false});
     
     // Add Structure Button
-    var add_structure_button = create_add_edit_data_button({
-      button_label: 'Add',
+    var add_structure_button = create_add_edit_data_widget({
+      label: 'Add',
       dialog_id: 'add_structure_dialog',
       content_creator: create_add_structure_dialog,
       attach_to: 'project_add_structure_button',
@@ -315,8 +313,8 @@
     add_structure_button.startup();
     
     // EDIT STRUCTURE BUTTON
-    var edit_structure_button = create_add_edit_data_button({
-      button_label:'Edit',
+    var edit_structure_button = create_add_edit_data_widget({
+      label:'Edit',
       dialog_id: 'edit_structure_dialog',
       content_creator: create_edit_structure_dialog,
       attach_to: 'project_edit_structure_button',
@@ -355,8 +353,8 @@
     lead_field_updater({animate: false});
     
     // Add Lead Button
-    var add_lead_button = create_add_edit_data_button({
-      button_label: 'Add',
+    var add_lead_button = create_add_edit_data_widget({
+      label: 'Add',
       dialog_id: 'add_user_dialog',
       content_creator: create_add_user_dialog,
       attach_to: 'project_add_lead_button',
@@ -365,8 +363,8 @@
     add_lead_button.startup();
     
     // Edit Lead Button
-    var edit_lead_button = create_add_edit_data_button({
-      button_label: 'Edit',
+    var edit_lead_button = create_add_edit_data_widget({
+      label: 'Edit',
       dialog_id: 'edit_user_dialog',
       content_creator: create_edit_user_dialog,
       attach_to: 'project_edit_lead_button',
@@ -406,11 +404,9 @@
     });
     status_list_field_updater({animate: true});
     
-    console.log('this is here 0')
-    
     // Add Status List Button
-    var add_status_list_button = create_add_edit_data_button({
-      button_label: 'Add',
+    var add_status_list_button = create_add_edit_data_widget({
+      label: 'Add',
       dialog_id: 'add_status_list_dialog',
       content_creator: create_add_status_list_dialog,
       attach_to: 'project_add_status_list_button',
@@ -420,8 +416,8 @@
     add_status_list_button.startup();
     
     // Edit Status List Button
-    var edit_status_list_button = create_add_edit_data_button({
-      button_label: 'Edit',
+    var edit_status_list_button = create_add_edit_data_widget({
+      label: 'Edit',
       dialog_id: 'edit_status_list_dialog',
       content_creator: create_edit_status_list_dialog,
       attach_to: 'project_edit_status_list_button',
@@ -440,7 +436,7 @@
       label: 'Add',
       type: 'button',
       onClick: function(){
-        submit_form({
+        submitForm({
           dialog: dijit.byId('add_project_dialog'),
           form: add_project_form,
           additional_data: {submitted: 'add'},

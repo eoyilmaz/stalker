@@ -35,156 +35,327 @@
 {% block body %}
   <div id='appLayout' class='demoLayout'>
     <div id='header' class='edgePanel' style="overflow: hidden">
-      {% block header %}
-        <div id='stalker_logo'>
+    {% block header %}
+      <div id='stalker_logo'>
+        <a href="/">
           Stalker <span style='font-size: 12px;'>v{{stalker.__version__}}</span>
-        </div>
-        
-        <div id='projects_menu'>
-          <span>Projects</span>
-          <div id='expand_project_icon'
-               style='
-                 background-image: url({{ request.static_url('stalker:static/stalker/images/gmail_icons.png') }});
-                 background-position: -240px 0;
-                 font-size: 0;
-                 line-height: 0;
-                 height: 8px;
-                 width: 8px;
-                 position: relative;
-                 left: 48px;
-                 top: -10px;'>
-          </div>
-        </div>
-        
-        <div id='mebar'>
-          <span>{{user.name}}</span>
-          <div id='expand_icon'
-               style='
-                 background-image: url({{ request.static_url('stalker:static/stalker/images/gmail_icons.png') }});
-                 background-position: -240px 0;
-                 font-size: 0;
-                 line-height: 0;
-                 height: 8px;
-                 width: 8px;
-                 position: relative;
-                 left: 39px;
-                 top: -10px;'>
-          </div>
-        </div>
-      {% endblock %}
+        </a>
+      </div>
+      
+      <div id='projects_menu'>
+        Projects
+      </div>
+      
+      <div id='mebar'>
+        <div id='mebutton'></div>
+      </div>
+      
+      <div id='create_menu'>
+        +
+      </div>
+    {% endblock %}
     </div>
     <div id='central_content' class='centralPanel'>
-      {% block content %}
-        <div id='main_view'>
-          <div id='top_menu'>
-          </div>
-          {% block main_view %}{% endblock %}
-        </div>
-      {% endblock %}
+    {% block content %}
+      <div id='main_view'>
+        {% block main_view %}{% endblock %}
+      </div>
+    {% endblock %}
     </div>
 
     <div id='footer' class='edgePanel'>
-      {% block footer %}
-        <div class='footer'>&copy; Copyright 2008-2012, Erkan Ozgur Yilmaz.</div>
-      {% endblock %}
+    {% block footer %}
+      <div class='footer'>&copy; Copyright 2008-2012, Erkan Ozgur Yilmaz.</div>
+    {% endblock %}
     </div>
   </div>
-{% endblock %}
+
   <script type='text/javascript'>
     require(['dojo/dom', 'dijit/registry', 'dijit/layout/BorderContainer',
       'dijit/layout/TabContainer', 'dijit/layout/SplitContainer',
       'dojox/layout/ContentPane', 'dijit/TooltipDialog', 'dijit/popup',
-      'dojo/on', 'dojo/domReady!'],
-        function(dom, registry, BorderContainer, TabContainer,
-                 SplitContainer, ContentPane, TooltipDialog, popup, on){
-          
-          // create the BorderContainer and attach it to our appLayout div
-          var appLayout = new BorderContainer({
-            design: 'headline',
-            style: 'padding: 0px',
-            splitter: true,
-            gutters: false
-          }, 'appLayout');
-          
-          // create the Header
-          appLayout.addChild(
-            new ContentPane({
-              region: 'top',
-              style: 'height: 24px; padding: 0px;'
-            }, 'header')
-          );
-          
-          // create Footer
-          appLayout.addChild(
-            new ContentPane({
-              region: 'bottom',
-              style: 'height: 14px; padding: 0px'
-            }, 'footer')
-          );
-          
-          // projects_bar
-          var projects_menu_tooltipDialog = new TooltipDialog({
-            id: 'projects_menu_tooltipDialog',
-            style: 'width: 250px;',
-            href: '/projects_menu',
-            executeScripts: true,
-            onMouseLeave: function(){
-              popup.close(projects_menu_tooltipDialog);
-            }
-          });
-          
-          // attach the TooltipDialog to our projects_bar
-          on(dojo.byId('projects_menu'), 'click', function(){
-            
-            // refresh the projects_menu_tooltipDialog content
-            projects_menu_tooltipDialog.refresh();
-            
-            popup.open({
-              popup: projects_menu_tooltipDialog,
-              around: dom.byId('projects_menu')
-            });
-          });
-          
-          // mebar
-          var mebar_tooltipDialog = new TooltipDialog({
-            id: 'mebar_tooltipDialog',
-            style: 'width: 250px; height: 100%',
-            href: '/me_menu',
-            onMouseLeave: function(){
-              mebar_tooltipDialog.set('visible', false);
-              popup.close(mebar_tooltipDialog);
-            }
-          });
-          mebar_tooltipDialog.startup();
-          
-          // attach the TooltipDialog to our mebar
-          on(dojo.byId('mebar'), 'click', function(){
-            
-            if (mebar_tooltipDialog.get('visible')){
-              mebar_tooltipDialog.set('visible', false);
-              popup.close(mebar_tooltipDialog);
-            } else {
-              mebar_tooltipDialog.set('visible', true);
-              popup.open({
-                popup: mebar_tooltipDialog,
-                around: dom.byId('mebar')
-              }); 
-            }
-          });
-          
-         
-          
-          // create main content
-          appLayout.addChild(
-            new ContentPane({
-              region: 'center',
-              style: 'padding: 0px'
-            }, 'central_content')
-          );
-          
-          appLayout.startup();
-          
+      'dojo/on', 'dijit/form/DropDownButton', 'dijit/DropDownMenu',
+      'dijit/MenuItem', 'dojo/domReady!'],
+      function(dom, registry, BorderContainer, TabContainer,
+               SplitContainer, ContentPane, TooltipDialog, popup, on,
+               DropDownButton, DropDownMenu, MenuItem){
+        
+        // ********************************************************************
+        // create the BorderContainer and attach it to our appLayout div
+        var appLayout = new BorderContainer({
+          design: 'headline',
+          style: 'padding: 0px',
+          splitter: true,
+          gutters: false
+        }, 'appLayout');
+        
+        
+        // ********************************************************************
+        // Header
+        var header_pane = new ContentPane({
+          name: 'header_pane',
+          region: 'top',
+          style: 'height: 24px; padding: 0px;',
+          executeScripts: true
+        }, 'header');
+        appLayout.addChild(header_pane);
+        
+        
+        // ********************************************************************
+        // Create Main Content
+        var central_content_pane = new ContentPane({
+          name: 'central_content_pane',
+          region: 'center',
+          style: 'padding: 0px',
+          executeScripts: true
+        }, 'central_content');
+        appLayout.addChild(central_content_pane);
+        
+        
+        // ********************************************************************
+        // Footer
+        var footer_content_pane = new ContentPane({
+          name: 'footer_pane',
+          region: 'bottom',
+          style: 'height: 14px; padding: 0px'
+        }, 'footer');
+        footer_content_pane.startup();
+        appLayout.addChild(footer_content_pane);
+        
+        
+        // ********************************************************************
+        // Projects Menu
+        // DropDownMenu
+        var projects_menu_dropDownMenu = new DropDownMenu({
+          style: 'display: none;'
         });
+        
+        // ********************************************************************
+        // Menu Items
+        {% for project in projects %}
+          projects_menu_dropDownMenu.addChild(
+            new MenuItem({
+              label: '{{ project.name }}',
+              onClick: function(){
+                central_content_pane.set(
+                  'href',
+                  'view/project/{{ project.id }}'
+                );
+                central_content_pane.refresh();
+              }
+            })
+          );
+        {% endfor %}
+        
+        // Drop Down Button
+        var projects_menu_button = new DropDownButton({
+          label: 'Projects',
+          style: 'margin-top: 0px; margin-bottom: 0px;',
+          dropDown: projects_menu_dropDownMenu
+        }, 'projects_menu');
+        projects_menu_button.startup();
+        
+        
+        
+        // ********************************************************************
+        // Create Menu
+        // Drop Down Menu
+        var create_menu_dropDownMenu = new DropDownMenu({
+          style: 'display: none;'  
+        });
+
+        // **********
+        // Menu Items
+        
+        // -----
+        // Asset
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Asset',
+            dialog_id:'add_asset_dialog',
+            content_creator: create_add_asset_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+        // ------------
+        // Image Format
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Image Format',
+            dialog_id:'add_image_format_dialog',
+            content_creator: create_add_image_format_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+
+        // ------------
+        // Filename Template
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Filename Tamplate',
+            dialog_id:'add_filename_template_dialog',
+            content_creator: create_add_filename_template_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+        // -------
+        // Project
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Project',
+            dialog_id:'add_project_dialog',
+            content_creator: create_add_project_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+        // -------
+        // Repository
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Repository',
+            dialog_id:'add_repository_dialog',
+            content_creator: create_add_repository_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+        // --------
+        // Sequence
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Sequence',
+            dialog_id:'add_sequence_dialog',
+            content_creator: create_add_sequence_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+        // ----
+        // Shot
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Shot',
+            dialog_id:'add_shot_dialog',
+            content_creator: create_add_shot_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+        // -------
+        // Status
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Status',
+            dialog_id:'add_status_dialog',
+            content_creator: create_add_status_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+        // -------
+        // Status List
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Status List',
+            dialog_id:'add_status_list_dialog',
+            content_creator: create_add_status_list_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+        // -------
+        // Structure
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Structure',
+            dialog_id:'add_structure_dialog',
+            content_creator: create_add_structure_dialog,
+            widget_type: 'MenuItem'
+          })
+        ); 
+        
+        // ----
+        // Task
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'Task',
+            dialog_id:'add_task_dialog',
+            content_creator: create_add_task_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+        
+        // -------
+        // User
+        create_menu_dropDownMenu.addChild(
+          create_add_edit_data_widget({
+            label:'User',
+            dialog_id:'add_user_dialog',
+            content_creator: create_add_user_dialog,
+            widget_type: 'MenuItem'
+          })
+        );
+         
+        // ****************
+        // Drop Down Button
+        var create_menu_button = new DropDownButton({
+          label: '+',
+          style: 'margin-top: 0px; margin-bottom: 0px;',
+          dropDown: create_menu_dropDownMenu
+        }, 'create_menu');
+        create_menu_button.startup();
+        
+{#        var create_menu_tooltipDialog = new TooltipDialog({#}
+{#          id: 'create_menu_tooltipDialog',#}
+{#          style: 'width: 250px;',#}
+{#          href: '/create_menu',#}
+{#          executeScripts: true,#}
+{#          onMouseLeave: function(){#}
+{#            popup.close(create_menu_tooltipDialog);#}
+{#          }#}
+{#        });#}
+        
+{#        // attach the TooltipDialog to our create_menu#}
+{#        on(dojo.byId('create_menu'), 'click', function(){#}
+{#          // refresh the create_menu_tooltipDialog content#}
+{#          create_menu_tooltipDialog.refresh();#}
+{#          #}
+{#          popup.open({#}
+{#            popup: create_menu_tooltipDialog,#}
+{#            around: dom.byId('create_menu')#}
+{#          });#}
+{#        });#}
+        
+        // ********************************************************************
+        // mebar
+        var mebar_tooltipDialog = new TooltipDialog({
+          id: 'mebar_tooltipDialog',
+          style: 'width: 250px; height: 100%',
+          href: '/me_menu',
+          onMouseLeave: function(){
+            mebar_tooltipDialog.set('visible', false);
+            popup.close(mebar_tooltipDialog);
+          }
+        });
+        mebar_tooltipDialog.startup();
+        
+        // 
+        var mebar_dropDownButton = DropDownButton({
+          label: '{{ user.name }}',
+          dropDown: mebar_tooltipDialog,
+          style: 'margin-top: 0px; margin-bottom: 0px;'
+        }, 'mebutton');
+        mebar_dropDownButton.startup();
+        
+        // ********************************************************************
+        // startup app layout
+        appLayout.startup();
+    });
   </script>
+{% endblock %}
 </body>
 </html>

@@ -318,12 +318,11 @@ class User(Entity, ACLMixin):
     
     :type login: str, unicode
     
-    :param department: it is the department of the current user. It should be
-      a Department object. One user can only be listed in one department. A
-      user is allowed to have no department to make it easy to create a new
-      user and create the department and assign the user it later.
+    :param departments: It is the departments that the user is a part of. It
+      should be a list of Department objects. One user can be listed in
+      multiple departments.
     
-    :type department: :class:`~stalker.models.department.Department`
+    :type departments: list of :class:`~stalker.models.department.Department`\ s
     
     :param password: it is the password of the user, can contain any character.
       Stalker doesn't store the raw passwords of the users. To check a stored
@@ -366,17 +365,12 @@ class User(Entity, ACLMixin):
     user_id = Column("id", Integer, ForeignKey("Entities.id"),
                      primary_key=True)
     
-    department_id = Column(
-        Integer,
-        ForeignKey("Departments.id", use_alter=True, name="department_x"),
-    )
-    
-    department = relationship(
+    departments = relationship(
         "Department",
-        primaryjoin="Users.c.department_id==Departments.c.id",
+        secondary='User_Departments',
         back_populates="members",
-        uselist=False,
-        doc=""":class:`~stalker.models.department.Department` of the user""",
+        doc="""A list of :class:`~stalker.models.department.Department`\ s that
+        this user is a part of""",
     )
     
     email = Column(
@@ -468,7 +462,7 @@ class User(Entity, ACLMixin):
         login=None,
         email=None,
         password=None,
-        department=None,
+        departments=None,
         groups=None,
         projects_lead=None,
         sequences_lead=None,
@@ -481,7 +475,10 @@ class User(Entity, ACLMixin):
         super(User, self).__init__(**kwargs)
 
         self.login = login
-        self.department = department
+        
+        if departments is None:
+            departments = []
+        self.departments = departments
         
         self.email = email
         
@@ -557,21 +554,20 @@ class User(Entity, ACLMixin):
         
         return login
     
-    @validates("department")
+    @validates("departments")
     def _validate_department(self, key, department):
         """validates the given department value
         """
         
         from stalker.models.department import Department
-
-        # check if it is intance of Department object
-        if department is not None:
-            if not isinstance(department, Department):
-                raise TypeError("%s.department should be instance of "
-                                "stalker.models.department.Department not %s" %
-                                (self.__class__.__name__,
-                                 department.__class__.__name__))
-
+        
+        # check if it is instance of Department object
+        if not isinstance(department, Department):
+            raise TypeError("%s.department should be instance of "
+                            "stalker.models.department.Department not %s" %
+                            (self.__class__.__name__,
+                             department.__class__.__name__))
+        
         return department
 
     @validates("email")
@@ -791,8 +787,12 @@ class User(Entity, ACLMixin):
 User_Groups = Table(
     "User_Groups", Base.metadata,
     Column("uid", Integer, ForeignKey("Users.id"), primary_key=True),
-    Column("gid", Integer, ForeignKey("Groups.id"),
-           primary_key=True
-    )
+    Column("gid", Integer, ForeignKey("Groups.id"), primary_key=True)
 )
 
+# USER_DEPARTMENTS
+User_Departments = Table(
+    'User_Departments', Base.metadata,
+    Column('uid', Integer, ForeignKey('Users.id'), primary_key=True),
+    Column('did', Integer, ForeignKey('Departments.id'), primary_key=True)
+)

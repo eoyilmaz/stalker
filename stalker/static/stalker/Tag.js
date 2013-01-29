@@ -12,12 +12,17 @@ define([
             value: '',
             
             _getValueAttr: function(){
-                // returns either the {id: value, name; label}
                 return {
                     id: this.value,
                     name: this.label
                 };
             },
+            
+            //_setValueAttr: function(value){
+            //    // value is a id, name pair
+            //    this.set('value', value.id);
+            //    this.set('label', value.name);
+            //},
             
             postCreate: function tag_postCreate(){
                 this.inherited(arguments);
@@ -26,14 +31,21 @@ define([
             
             // replace onClick
             _onClick: function(/*Event*/e){
+                // it still runs even it is disabled
+                // so prevent it
+                if (this.disabled){
+                    return;
+                }
+                
                 // if there is a tagSelect, remove it self
                 // if not just kill itself
                 if (this.tagSelect){
                     this.tagSelect.remove_tag(this);
-                } else {
-                    // and destroy itself
-                    this.destroyRecursive();
                 }
+                
+                // and destroy itself
+                this.destroyRecursive();
+                
                 // call user defined onClick
                 return this.onClick(e);
             },

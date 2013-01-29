@@ -89,55 +89,44 @@ a:hover {
     clear: both;
     color: white;
     float: left;
-    height: 24px;
+    height: 30px;
     margin: 0;
     width: 100%;
 }
 
-#header #stalker_logo{
+#stalker_logo{
     float: left;
     clear: both;
     font-size: 16px;
     margin-left: 10px;
     margin-top: 3px;
-}
-
-#mebar {
-    float: right;
-    color: lightGrey;
-    font-weight: bold;
-    cursor: pointer;
-    position: relative;
-    right: 16px;
-    top: 6px;
-    height: 12px;
-}
-
-#mebar:hover {
-    color:white;
-}
-
-#projects_menu {
-    clear: both;
-    float: left;
-    position: absolute;
-    left: 168px;
-    top: 5px;
-    font-weight: bold;
-    color: lightgrey;
-    cursor: pointer;
-}
-
-#projects_menu:hover {
     color: white;
 }
 
-.project_name {
-    cursor: pointer;
-    clear: both;
+#stalker_logo a:link {
+    color: white;
+    text-decoration: none;
 }
-.project_name:hover {
-    background-color: #add8e6;
+#stalker_logo a:visited {
+    color: white;
+    text-decoration: none;
+}
+#stalker_logo a:active {
+    color: white;
+    text-decoration: none
+}
+#stalker_logo a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+#mebar {
+    margin-top: 0;
+    margin-bottom: 0;
+    clear: both;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 .link_with_action {
@@ -161,41 +150,12 @@ a:hover {
     bottom: 0px;
     background-color: #e3e3e3;
     color: #a0a0a0;
-}
-
-#main_menu{
-    background-color: #A0A0A0;
-    float: left;
-    font-size: 14px;
-    height: 100%;
-    line-height: 20px;
-    margin: 0;
-    width: 18%;
-}
-
-#main_menu li {
-    list-style: none;
-}
-
-#main_menu ul{
-    padding-left: 20px;
-}
-
-#main_menu li {
-    padding-left: 20px;
+    overflow: hidden;
 }
 
 #main_view {
     float: left;
     height: 100%;
-    width: 100%;
-}
-
-#top_menu {
-    background-color: #e0e0e0;
-    clear: both;
-    float: left;
-    height: 32px;
     width: 100%;
 }
 

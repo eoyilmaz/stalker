@@ -1,73 +1,7 @@
 require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
     'dojo/store/Memory', 'dojox/widget/DialogSimple', 'dijit/form/Button',
-    'dojo/_base/fx', 'dojo/dom-style'],
-    function(registry, lang, xhr, Memory, DialogSimple, Button, fx, style){
-        
-        // ********************************************************************
-        // DO_SUBMIT
-        // 
-        // A helper function for form submission.
-        // 
-        // Helps to submit the data and update a related field together. Uses
-        // Deferred post and waits for the data to be send before updating the
-        // related field if any.
-        // 
-        // 
-        // PARAMETERS
-        // 
-        // dialog: dijit.dialog.Dialog
-        //   the dialog to reset and destroy
-        // 
-        // form: dijit.form.Form
-        //   the form to get the data form
-        // 
-        // additional_data: Dictionary
-        //   additional data to append to the form data
-        // 
-        // url: String
-        //   the url to submit the data to
-        // 
-        // method: String
-        //   the method POST or GET
-        // 
-        submit_form = function(kwargs){
-            var dialog = kwargs.dialog;
-            var form = kwargs.form;
-            var additional_data = kwargs.additional_data || {};
-            var url = kwargs.url;
-            var method = kwargs.method;
-            
-            if (form.validate()){
-                // get the form data
-                var form_data = form.get('value');
-                form_data = lang.mixin(form_data, additional_data);
-                
-                var deferred = xhr.post(
-                  url,
-                  {
-                    method: method,
-                    data: form_data
-                  }
-                );
-                
-                deferred.then(function(){
-                  // update the caller dialog
-                  var related_field_updater = dialog.get(
-                      'related_field_updater'
-                  );
-                  if (related_field_updater != null){
-                    related_field_updater();
-                  }
-                  // destroy the dialog
-                  dialog.reset();
-                  dialog.destroyRecursive();
-                }, function(err){
-                    // Do something when the process errors out
-                    alert(err);
-                });
-                
-            }
-        };
+    'dojo/_base/fx', 'dijit/MenuItem'],
+    function(registry, lang, xhr, Memory, DialogSimple, Button, fx, MenuItem){
         
         // ********************************************************************
         // FIELD_UPDATER
@@ -171,15 +105,15 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         };
         
         // ********************************************************************
-        // CREATE ADD EDIT DATA BUTTON
+        // CREATE ADD EDIT DATA WIDGET
         //
-        // Creates a button to add/edit some data depending on to the given
-        // dialog.
+        // Creates a widget (a button or a menuItem) to add/edit some data
+        // depending on to the given dialog.
         // 
         // PARAMETERS
         // 
-        // button_label:
-        //   The label of the add button, default is 'Add'
+        // label:
+        //   The label of the widget, default is 'Add'
         // 
         // dialog_id:
         //   the id of the parent dialog
@@ -204,17 +138,25 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         //   a function object without any parameters which will update the
         //   the related field which this form is adding data to.
         // 
-        create_add_edit_data_button = function(kwargs){
-            var button_label = kwargs.button_label || 'Add';
+        // widget_type: 'Button' or 'MenuItem'
+        //   the type of widget
+        // 
+        create_add_edit_data_widget = function(kwargs){
+            var label = kwargs.label || 'Add';
             var dialog_id = kwargs.dialog_id || null;
             var content_creator = kwargs.content_creator;
             var attach_to = kwargs.attach_to;
             var data_id = kwargs.data_id || function(){};
             var related_field_updater = kwargs.related_field_updater || function(){};
+            var widget_type = kwargs.widget_type || 'Button';
             
-            return new Button({
-                label: button_label,
-                type: 'Button',
+            var WidgetClass = Button;
+            if (widget_type == 'MenuItem'){
+                WidgetClass = MenuItem;
+            }
+            
+            var widget = new WidgetClass({
+                label: label,
                 onClick: function(){
                     // create the dialog if it doesn't already exists
                     if (dialog_id != null){
@@ -241,6 +183,13 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
                     }
                 }
             }, attach_to);
+            
+//            if (attach_to){
+//                domConstruct.attach(widget, attach_to);
+//                widget.attach(attach_to);
+//            }
+            
+            return widget;
         };
         
         // ********************************************************************

@@ -12,9 +12,10 @@ from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
                      User, db)
 from stalker.db.session import DBSession, ZopeTransactionExtension
 
-import log
-logger = log.getLogger('stalker.models.project')
-logger.setLevel(log.DEBUG)
+import logging
+from stalker import log
+logger = logging.getLogger('stalker.models.project')
+logger.setLevel(log.logging_level)
 
 class ProjectTester(unittest.TestCase):
     """tests the Project class

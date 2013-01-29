@@ -20,9 +20,10 @@ from stalker.models.ticket import Ticket
 from stalker.models.type import Type
 from stalker.models.version import Version
 
-import log
-logger = log.getLogger("stalker.models.ticket")
-logger.setLevel(log.DEBUG)
+from stalker import log
+import logging
+logger = logging.getLogger("stalker.models.ticket")
+logger.setLevel(log.logging_level)
 
 class TicketTester(unittest.TestCase):
     """Tests the :class:`~stalker.models.ticket.Ticket` class

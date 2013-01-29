@@ -69,13 +69,10 @@ def user_menu(request):
         'user': user,
     }
 
-@view_config(route_name='projects_menu',
-             renderer='templates/projects_menu.jinja2',
-             permission='View_Project')
-def projects_menu(request):
-    return {
-        'projects': Project.query.all()
-    }
+@view_config(route_name='create_menu',
+             renderer='templates/create_menu.jinja2')
+def create_menu(request):
+    return {}
 
 @view_config(route_name='login', renderer='templates/login.jinja2')
 @forbidden_view_config(renderer='templates/login.jinja2')
