@@ -10,6 +10,8 @@ Stalker Changes
 
 * Users now can have more than one Department.
 
+* Updated java scripts to be `required` in Dojo AMD way.
+
 0.2.0.a5
 --------
 

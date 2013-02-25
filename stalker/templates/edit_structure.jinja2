@@ -54,10 +54,11 @@
   require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox',  'dijit/form/SimpleTextarea',
     'dijit/form/Button', 'dijit/form/MultiSelect', 'dojo/store/JsonRest',
-    'dojo/domReady!'
-  ],
+    'stalker/submitForm', 'stalker/fieldUpdater', 'stalker/dialogCaller',
+    'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, 
-             SimpleTextarea, Button, MultiSelect, JsonRest){
+             SimpleTextarea, Button, MultiSelect, JsonRest, submitForm,
+             dialogCaller, fieldUpdater){
       
       // **********************************************************************
       // Form
@@ -112,7 +113,7 @@
       filename_template_multi_select.startup();
       
       // The Updater
-      var filename_template_field_updater = field_updater({
+      var filename_template_field_updater = fieldUpdater({
         'memory': filename_template_memory,
         'widget': filename_template_multi_select,
         'selected': [
@@ -125,7 +126,7 @@
       filename_template_field_updater({animate: false});
       
       // Add Filename Template Button
-      var add_filename_template_button = create_add_edit_data_widget({
+      var add_filename_template_button = dialogCaller({
         label: 'Add',
         dialog_id: 'add_filename_template_dialog',
         content_creator: create_add_filename_template_dialog,
@@ -143,8 +144,8 @@
         label: 'Edit',
         type: 'button',
         onClick: function(){
-          submit_form({
-            dialog: dijit.byId('edit_structure_dialog'),
+          submitForm({
+            dialog: registry.byId('edit_structure_dialog'),
             form: edit_structure_form,
             additional_data: {submitted: 'edit'},
             url: '{{ request.route_url('edit_structure', structure_id=structure.id) }}',
@@ -163,7 +164,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = dijit.byId('edit_structure_dialog');
+          var dialog = registry.byId('edit_structure_dialog');
           dialog.destroyRecursive();
         }
       }, 'structure_cancel_button');

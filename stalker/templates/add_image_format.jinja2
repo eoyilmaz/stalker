@@ -61,10 +61,9 @@
   require(['dijit/registry', 'dojo/request/xhr', 'dojo/store/Memory',
     'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/NumberTextBox', 'dijit/form/Button', 'dojo/Deferred',
-    'dojo/domReady!'
-  ],
+    'stalker/submitForm', 'dojo/domReady!'],
     function(registry, xhr, Memory, Form, ValidationTextBox, NumberTextBox,
-             TextBox, Button, Deferred){
+             TextBox, Button, Deferred, submitForm){
       
       // **********************************************************************
       // Form
@@ -134,8 +133,8 @@
         label: 'Add',
         type: 'button',
         onClick: function(){
-          submit_form({
-            dialog: dijit.byId('add_image_format_dialog'),
+          submitForm({
+            dialog: registry.byId('add_image_format_dialog'),
             form: add_image_format_form,
             additional_data: {submitted: 'add'},
             url: '{{ request.route_url("add_image_format") }}',
@@ -154,7 +153,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          dijit.byId('add_image_format_dialog').destroyRecursive();
+          registry.byId('add_image_format_dialog').destroyRecursive();
         }
       }, 'image_format_cancel_button');
       cancel_button.startup();        

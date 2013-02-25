@@ -42,6 +42,16 @@
         </td>
       </tr>
       
+      {# CONFIRM PASSWORD #}
+      <tr>
+        <td class='label_column'>
+          <label for='user_confirm_password'>Confirm Password</label>
+        </td>
+        <td class='input_column'>
+          <input id='user_confirm_password'>
+        </td>
+      </tr>
+      
       {# DEPARTMENTS #}
       <tr>
         <td class='label_column'>
@@ -63,6 +73,9 @@
         <td class='input_column'>
           <input id='user_groups'>
         </td>
+        <td class='button_column'>
+          <button id='user_add_group_button'>Add</button>
+        </td>
       </tr>
       
       {# TAGS #}
@@ -80,10 +93,212 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='project_add_button'>Add</button>
-  <button id='project_cancel_button'>Cancel</button>
+  <button id='user_add_button'>Add</button>
+  <button id='user_cancel_button'>Cancel</button>
 </div>
 
 <script type="text/javascript">
-  require([])
+  require(['dijit/registry', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
+    'dojo/store/Memory', 'dojo/store/JsonRest', 'dijit/form/Button',
+    'stalker/TagSelect', 'stalker/submitForm', 'stalker/fieldUpdater',
+    'stalker/dialogCaller', 'dojo/domReady!'],
+    function(registry, Form, ValidationTextBox, Memory, JsonRest, Button,
+             TagSelect, submitForm, fieldUpdater, dialogCaller){
+      
+      
+      
+      
+      // **********************************************************************
+      // Form
+      var add_user_form = new Form({
+        id: 'add_user_form'
+      }, 'add_user_form');
+      add_user_form.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Name
+      var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        required: true
+      }, 'user_name');
+      name_textBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Login Name
+      var login_name_textBox = new ValidationTextBox({
+        name: 'login',
+        label: 'Login',
+        required: true
+      }, 'user_login');
+      login_name_textBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Email
+      var email_textBox = new ValidationTextBox({
+        name: 'e-mail',
+        label: 'e-mail',
+        required: true
+      }, 'user_email');
+      email_textBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Password
+      var password_textBox = new ValidationTextBox({
+        name: 'password',
+        label: 'Password',
+        type: 'password',
+        required: true
+      }, 'user_password');
+      password_textBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Re-Type Password
+      var confirm_password_textBox = new ValidationTextBox({
+        label: 'Confirm Password',
+        type: 'password',
+        required: true,
+        invalidMessage: "Passwords doesn't match!",
+        validator: function(value, constrains){
+          // check if the value matches the password field
+          var pass = password_textBox.value;
+          if (value != pass){
+            return false;
+          } else {
+            return true;
+          }
+        }
+      }, 'user_confirm_password');
+      confirm_password_textBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Departments
+      var departments_jsonRest = new JsonRest({
+        target: 'get/departments'
+      });
+      
+      var departments_tagSelect = new TagSelect({
+        name: 'department_ids'
+      }, 'user_departments');
+      departments_tagSelect.startup();
+      
+{#      var result_dep = departments_jsonRest.query().then(function(data){#}
+{#        var departments_memory = new Memory({data: data});#}
+{#        departments_tagSelect.set('store', departments_memory);#}
+{#      });#}
+      
+      // The Updater
+      var departments_field_updater = fieldUpdater({
+        memory: departments_jsonRest,
+        widget: departments_tagSelect
+      });
+      departments_field_updater({animate: false});
+      
+      // Add Department Button
+      var add_department_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_department_dialog',
+        content_creator: create_add_department_dialog,
+        attach_to: 'user_add_department_button',
+        related_field_updater: departments_field_updater
+      });
+      add_department_button.startup();
+      
+      
+      
+      
+      // ********************************************************************** 
+      // Groups
+      var groups_jsonRest = new JsonRest({
+        target: 'get/groups'
+      });
+      
+      var groups_tagSelect = new TagSelect({
+        name: 'group_ids'
+      }, 'user_groups');
+      groups_tagSelect.startup();
+      
+      var result_group = groups_jsonRest.query().then(function(data){
+        var groups_memory = new Memory({data: data});
+        groups_tagSelect.set('store', groups_memory);
+      });
+      
+      // The Updater
+      var groups_field_updater = fieldUpdater({
+        memory: groups_jsonRest,
+        widget: groups_tagSelect
+      });
+      
+      // Add Group Button
+      var add_group_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_group_dialog',
+        content_creator: create_add_group_dialog,
+        attach_to: 'user_add_group_button',
+        related_field_updater: groups_field_updater
+      }, 'user_add_group');
+      add_group_button.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Tags
+      var tags_tagSelect = new TagSelect({
+        name: 'tags',
+        type: 'TextBox'
+      }, 'user_tags');
+      tags_tagSelect.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Add Button
+      var add_button = new Button({
+        label: 'Add',
+        type: 'button',
+        onClick: function(){
+          submitForm({
+            dialog: registry.byId('add_user_dialog'),
+            form: add_user_form,
+            additional_data: {submitted: 'add'},
+            url: '{{ request.route_url('add_user') }}',
+            method: 'POST'
+          });
+        }
+      }, 'user_add_button');
+      add_button.startup();
+      
+      // **********************************************************************
+      // Cancel Button
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          var dialog = registry.byId('add_user_dialog');
+          dialog.destroyRecursive();
+        }
+      }, 'user_cancel_button');
+      cancel_button.startup();
+      
+  });
 </script>

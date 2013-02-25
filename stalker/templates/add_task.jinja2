@@ -72,10 +72,7 @@
         </td>
       </tr>
       
-      {# MILESTONE
-      is it a Milestone or not
-      this should disable the resources field, without emptying it
-      #}
+      {# MILESTONE #}
       <tr>
         <td class='label_column'>
           <label for='task_is_milestone'>Is Milestone</label>
@@ -93,6 +90,9 @@
         <td class='input_column'>
           <div id='task_resources'></div>
         </td>
+{#        <td class='button_column'>#}
+{#          <button id='task_add_resource_button'>Add</button>#}
+{#        </td>#}
       </tr>
       
       {# STATUS LIST #}
@@ -131,328 +131,338 @@
 <script type='text/javascript'>
   require(['dijit/registry',
     'dojo/store/Memory', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
-    'dijit/form/TextBox', 'dijit/form/FilteringSelect',
-    'dijit/form/ComboBox', 'dijit/form/Button', 'dijit/form/CheckBox',
-    'dojox/form/MultiComboBox', 'dojo/store/JsonRest', 'dojo/dom-construct',
-    'stalker/TagSelect', 'stalker/Tag',
-    'dojo/date', 'dojo/date/stamp', 'dojo/date/locale',
-    'dijit/form/DateTextBox', 'dijit/form/NumberTextBox', 'dojo/ready'
-  ],
-  function(registry, Memory, Form, ValidationTextBox, TextBox,
-           FilteringSelect, ComboBox, Button, CheckBox, MultiComboBox,
-           JsonRest, domConstruct, TagSelect, Tag, date, stamp, locale,
-           DateTextBox, NumberTextBox){
-    
-    // ************************************************************************
-    // Form
-    var add_task_form = new Form({
-      id: 'add_task_form'
-    }, 'add_task_form');
-    
-    
-    
-    
-    // ************************************************************************
-    // Task Of
-    var task_of = new TextBox({
-      name: 'task_of',
-      label: 'Task Of',
-      value: '{{ taskable_entity.name }} ({{ taskable_entity.entity_type }})',
-      disabled: true
-    }, 'task_task_of');
-    task_of.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Name
-    var name_textBox = new ValidationTextBox({
-      name: 'name',
-      label: 'Name',
-      value: '',
-      placeHolder: 'Enter a name',
-      required: true
-    }, 'task_name');
-    name_textBox.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Description
-    var description_textBox = new TextBox({
-      name: 'description',
-      label: 'Description',
-      placeHolder: 'Enter description'
-    }, 'task_description');
-    description_textBox.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Depends
-    var tasks_jsonRest = new JsonRest({
-      target:'get/all_tasks/{{ taskable_entity.project.id }}'
-    });
-    
-    var depends_multiComboBox = new MultiComboBox({
-      searchAttr: 'name'
-    }, "task_depends");
-    depends_multiComboBox.startup();
-    
-    var tasks_result = tasks_jsonRest.query().then(function(data){
-      depends_multiComboBox.set('store', new Memory({data: data}));
-    });
-    
-    
-    
-    
-    // ************************************************************************
-    // Start Date
-    var start_date_dateTextBox = new DateTextBox({
-      name: 'start_date',
-      label: 'Start Date',
-      value: new Date(),// set it today by default
-      required: true,
-      datePattern: 'dd-mm-yyyy',
-      onChange: function(){
-        if (this.focused){
-          update_dates(
-            start_date_dateTextBox.getValue(),
-            end_date_dateTextBox.getValue(),
-            null
+    'dijit/form/TextBox', 'dijit/form/FilteringSelect', 'dijit/form/ComboBox',
+    'dijit/form/Button', 'dijit/form/CheckBox', 'dojox/form/MultiComboBox',
+    'dojo/store/JsonRest', 'dojo/dom-construct', 'stalker/TagSelect',
+    'stalker/Tag', 'dojo/date', 'dojo/date/stamp', 'dojo/date/locale',
+    'dijit/form/DateTextBox', 'dijit/form/NumberTextBox', 'stalker/submitForm',
+    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/domReady!'],
+    function(registry, Memory, Form, ValidationTextBox, TextBox,
+             FilteringSelect, ComboBox, Button, CheckBox, MultiComboBox,
+             JsonRest, domConstruct, TagSelect, Tag, date, stamp, locale,
+             DateTextBox, NumberTextBox, submitForm, fieldUpdater,
+             dialogCaller){
+      
+      // **********************************************************************
+      // Form
+      var add_task_form = new Form({
+        id: 'add_task_form'
+      }, 'add_task_form');
+      
+      
+      
+      
+      // **********************************************************************
+      // Task Of
+      var task_of = new TextBox({
+        name: 'task_of',
+        label: 'Task Of',
+        value: '{{ taskable_entity.name }} ({{ taskable_entity.entity_type }})',
+        disabled: true
+      }, 'task_task_of');
+      task_of.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Name
+      var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        value: '',
+        placeHolder: 'Enter a name',
+        required: true
+      }, 'task_name');
+      name_textBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Description
+      var description_textBox = new TextBox({
+        name: 'description',
+        label: 'Description',
+        placeHolder: 'Enter description'
+      }, 'task_description');
+      description_textBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Depends
+      var tasks_jsonRest = new JsonRest({
+        target:'get/all_tasks/{{ taskable_entity.project.id }}'
+      });
+      
+      var depends_multiComboBox = new MultiComboBox({
+        searchAttr: 'name'
+      }, "task_depends");
+      depends_multiComboBox.startup();
+      
+      var tasks_result = tasks_jsonRest.query().then(function(data){
+        depends_multiComboBox.set('store', new Memory({data: data}));
+      });
+      
+      
+      
+      
+      // **********************************************************************
+      // Start Date
+      var start_date_dateTextBox = new DateTextBox({
+        name: 'start_date',
+        label: 'Start Date',
+        value: new Date(),// set it today by default
+        required: true,
+        datePattern: 'dd-mm-yyyy',
+        onChange: function(){
+          if (this.focused){
+            update_dates(
+              start_date_dateTextBox.getValue(),
+              end_date_dateTextBox.getValue(),
+              null
+            );
+          }
+        }
+      }, 'task_start_date');
+      start_date_dateTextBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // End Date
+      var end_date_dateTextBox = new DateTextBox({
+        name: 'end_date',
+        label: 'End Date',
+        value: new Date(), // set it today by default
+        required: true,
+        datePattern: 'dd-mm-yyyy',
+        onChange: function(){
+          if (this.focused){
+            update_dates(
+              start_date_dateTextBox.getValue(),
+              end_date_dateTextBox.getValue(),
+              null
+            );
+          }
+        }
+      }, 'task_end_date');
+      end_date_dateTextBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Duration
+      var duration_numberTextBox = new NumberTextBox({
+        name: 'duration',
+        label: 'Duration',
+        value: 0,
+        onKeyUp: function(){
+          if (this.focused){
+            update_dates(
+              start_date_dateTextBox.getValue(),
+              null,
+              this.get('value')
+            )
+          }
+        }
+      }, 'task_duration');
+      duration_numberTextBox.startup();
+      
+      var update_dates = function(start_date, end_date, duration){
+        if (duration == null){
+           // update the duration
+          duration_numberTextBox.set(
+            'value',
+            date.difference(start_date, end_date)
+          );
+        } else if (end_date == null) {
+           // update end date
+          end_date_dateTextBox.set(
+            'value',
+            date.add(
+              start_date,
+              'day',
+              duration
+            )
           );
         }
-      }
-    }, 'task_start_date');
-    start_date_dateTextBox.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // End Date
-    var end_date_dateTextBox = new DateTextBox({
-      name: 'end_date',
-      label: 'End Date',
-      value: new Date(), // set it today by default
-      required: true,
-      datePattern: 'dd-mm-yyyy',
-      onChange: function(){
-        if (this.focused){
-          update_dates(
-            start_date_dateTextBox.getValue(),
-            end_date_dateTextBox.getValue(),
-            null
-          );
+      };
+      //update_dates();
+      
+      
+      
+      
+      // **********************************************************************
+      // Is Milestone
+      var is_milestone_checkBox = new CheckBox({
+        name: 'is_milestone_checkBox',
+        label: 'Is Milestone',
+        value: 'checked',
+        checked: false,
+        onChange: function(new_value){
+          // disable the resources field if checked
+          if (new_value){
+            resources_tagSelect.set('disabled', true);
+          } else {
+            resources_tagSelect.set('disabled', false);
+          }
         }
-      }
-    }, 'task_end_date');
-    end_date_dateTextBox.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Duration
-    var duration_numberTextBox = new NumberTextBox({
-      name: 'duration',
-      label: 'Duration',
-      value: 0,
-      onKeyUp: function(){
-        if (this.focused){
-          update_dates(
-            start_date_dateTextBox.getValue(),
-            null,
-            this.get('value')
-          )
+      }, 'task_is_milestone');
+      is_milestone_checkBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Resources
+      var users_jsonRest = new JsonRest({
+        target:'get/users'
+      });
+      
+      var resources_tagSelect = new TagSelect({
+        name: 'resource_ids'
+      }, 'task_resources');
+      resources_tagSelect.startup();
+      
+      var result = users_jsonRest.query().then(function(data){
+        var user_memory = new Memory({data: data});
+        resources_tagSelect.set('store', user_memory);
+      });
+      
+{#      // Add Button#}
+{#      var add_resource_button = dialogCaller({#}
+{#        label: 'Add',#}
+{#        dialog_id: 'add_user_dialog',#}
+{#        content_creator: create_add_user_dialog,#}
+{#        attach_to: 'task_add_resource_button',#}
+{#        related_field_updater:#}
+{#        #}
+{#      });#}
+      
+      
+      // **********************************************************************
+      // Status_List
+      //
+      // The Memory
+      var status_list_memory = new JsonRest({
+        target: 'get/status_lists_for/Task'
+      });
+      
+      // The Field
+      var status_list_filtering_select = new FilteringSelect({
+        name: 'status_list_id',
+        required: true,
+        onChange: function(){
+          status_updater({animate: true});
         }
-      }
-    }, 'task_duration');
-    duration_numberTextBox.startup();
-    
-    var update_dates = function(start_date, end_date, duration){
-      if (duration == null){
-         // update the duration
-        duration_numberTextBox.set(
-          'value',
-          date.difference(start_date, end_date)
-        );
-      } else if (end_date == null) {
-         // update end date
-        end_date_dateTextBox.set(
-          'value',
-          date.add(
-            start_date,
-            'day',
-            duration
-          )
-        );
-      }
-    };
-    //update_dates();
-    
-    
-    
-    
-    // ************************************************************************
-    // Is Milestone
-    var is_milestone_checkBox = new CheckBox({
-      name: 'is_milestone_checkBox',
-      label: 'Is Milestone',
-      value: 'checked',
-      checked: false,
-      onChange: function(new_value){
-        // disable the resources field if checked
-        if (new_value){
-          resources_tagSelect.set('disabled', true);
-        } else {
-          resources_tagSelect.set('disabled', false);
+      }, 'task_status_list');
+      status_list_filtering_select.startup();
+      
+      // The Updater
+      var status_list_field_updater = fieldUpdater({
+        'memory': status_list_memory,
+        'widget': status_list_filtering_select
+      });
+      status_list_field_updater({animate: false});
+      
+      // Add Status List Button
+      var add_status_list_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_status_list_dialog',
+        content_creator: create_add_status_list_dialog,
+        attach_to: 'task_add_status_list_button',
+        related_field_updater: status_list_field_updater,
+        data_id: 'Task'
+      });
+      add_status_list_button.startup();
+      
+      // Edit Status List Button
+      var edit_status_list_button = dialogCaller({
+        label: 'Edit',
+        dialog_id: 'edit_status_list_dialog',
+        content_creator: create_edit_status_list_dialog,
+        attach_to: 'task_edit_status_list_button',
+        related_field_updater: status_list_field_updater,
+        data_id: function(){
+          return status_list_filtering_select.get('value');
         }
-      }
-    }, 'task_is_milestone');
-    is_milestone_checkBox.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Resources
-    var users_jsonRest = new JsonRest({
-      target:'get/users'
-    });
-    
-    var resources_tagSelect = new TagSelect({
-      name: 'resource_ids'
-    }, 'task_resources');
-    resources_tagSelect.startup();
-    
-    var result = users_jsonRest.query().then(function(data){
-      var user_memory = new Memory({data: data});
-      resources_tagSelect.set('store', user_memory);
-    });
-    
-    
-    // ************************************************************************
-    // Status_List
-    //
-    // The Memory
-    var status_list_memory = new JsonRest({
-      target: 'get/status_lists_for/Task'
-    });
-    
-    // The Field
-    var status_list_filtering_select = new FilteringSelect({
-      name: 'status_list_id',
-      required: true,
-      onChange: function(){
-        status_updater({animate: true});
-      }
-    }, 'task_status_list');
-    status_list_filtering_select.startup();
-    
-    // The Updater
-    var status_list_field_updater = field_updater({
-      'memory': status_list_memory,
-      'widget': status_list_filtering_select
-    });
-    status_list_field_updater({animate: false});
-    
-    // Add Status List Button
-    var add_status_list_button = create_add_edit_data_widget({
-      label: 'Add',
-      dialog_id: 'add_status_list_dialog',
-      content_creator: create_add_status_list_dialog,
-      attach_to: 'task_add_status_list_button',
-      related_field_updater: status_list_field_updater,
-      data_id: 'Task'
-    });
-    add_status_list_button.startup();
-    
-    // Edit Status List Button
-    var edit_status_list_button = create_add_edit_data_widget({
-      label: 'Edit',
-      dialog_id: 'edit_status_list_dialog',
-      content_creator: create_edit_status_list_dialog,
-      attach_to: 'task_edit_status_list_button',
-      related_field_updater: status_list_field_updater,
-      data_id: function(){
-        return status_list_filtering_select.get('value');
-      }
-    });
-    edit_status_list_button.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Status
-    //
-    // The Memory
-    var status_memory = new JsonRest({
-      target: 'get/statuses_of/'
-    });
-    
-    // The Field
-    var status_filtering_select = new FilteringSelect({
-      name: 'status_id',
-      required: true,
-      store: status_memory
-    }, 'task_status');
-    status_filtering_select.startup();
-    
-    // The Updater
-    var status_updater = field_updater({
-      memory: status_memory,
-      query_data: function(){
-        var widget = dijit.byId('task_status_list');
-        return widget.get('value');
-      },
-      widget: status_filtering_select
-    });
-    // don't call the updater now, the status_list may not been set yet!!!
-    
-    
-    
-    
-    // ************************************************************************
-    // Add Button
-    var add_button = new Button({
-      label: 'Add',
-      type: 'button',
-      onClick: function(){
-        submit_form({
-          dialog: dijit.byId('add_task_dialog'),
-          form: add_task_form,
-          additional_data: {
-            submitted: 'add'
-          },
-          url: '{{ request.route_url('add_task', taskable_entity_id=taskable_entity.id) }}',
-          method: 'POST'
-        });
-      }
-    }, 'task_add_button');
-    add_button.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Cancel Button
-    var cancel_button = new Button({
-      label: 'Cancel',
-      type: 'button',
-      onClick: function(){
-        dijit.byId('add_task_dialog').destroyRecursive();
-      }
-    }, 'task_cancel_button');
-    cancel_button.startup();
- 
-    
-    add_task_form.startup();
-    
+      });
+      edit_status_list_button.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Status
+      //
+      // The Memory
+      var status_memory = new JsonRest({
+        target: 'get/statuses_of/'
+      });
+      
+      // The Field
+      var status_filtering_select = new FilteringSelect({
+        name: 'status_id',
+        required: true,
+        store: status_memory
+      }, 'task_status');
+      status_filtering_select.startup();
+      
+      // The Updater
+      var status_updater = fieldUpdater({
+        memory: status_memory,
+        query_data: function(){
+          var widget = registry.byId('task_status_list');
+          return widget.get('value');
+        },
+        widget: status_filtering_select
+      });
+      // don't call the updater now, the status_list may not been set yet!!!
+      
+      
+      
+      
+      // **********************************************************************
+      // Add Button
+      var add_button = new Button({
+        label: 'Add',
+        type: 'button',
+        onClick: function(){
+          submitForm({
+            dialog: registry.byId('add_task_dialog'),
+            form: add_task_form,
+            additional_data: {
+              submitted: 'add'
+            },
+            url: '{{ request.route_url('add_task', taskable_entity_id=taskable_entity.id) }}',
+            method: 'POST'
+          });
+        }
+      }, 'task_add_button');
+      add_button.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Cancel Button
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          registry.byId('add_task_dialog').destroyRecursive();
+        }
+      }, 'task_cancel_button');
+      cancel_button.startup();
+   
+      
+      add_task_form.startup();
+      
   });
 </script>
 

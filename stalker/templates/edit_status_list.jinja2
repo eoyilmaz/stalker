@@ -56,15 +56,13 @@
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/SimpleTextarea', 'dijit/form/Button',
     'dijit/form/FilteringSelect', 'dijit/form/MultiSelect',
-    'dojo/store/JsonRest', 'dojo/domReady!'
-  ],
+    'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
+    'stalker/dialogCaller', 'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, TextBox,
-             SimpleTextarea, Button, FilteringSelect, MultiSelect, JsonRest){
+             SimpleTextarea, Button, FilteringSelect, MultiSelect, JsonRest,
+             submitForm, fieldUpdater, dialogCaller){
       
-      
-      
-      
-      // ********************************************************************
+      // **********************************************************************
       // Form
       var edit_status_list_form = new Form({
         id: 'edit_status_list_form'
@@ -74,7 +72,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Name
       var name_textBox = new ValidationTextBox({
         name: 'name',
@@ -88,7 +86,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Target Entity Type
       var target_entity_type_select = new TextBox({
         name: 'target_entity_type',
@@ -102,7 +100,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Statuses
       // 
       // The Memory
@@ -119,7 +117,7 @@
       statuses_multiSelect.startup();
       
       // The Updater
-      var statuses_field_updater = field_updater({
+      var statuses_field_updater = fieldUpdater({
         'memory': statuses_memory,
         'widget': statuses_multiSelect,
         'selected': [
@@ -132,7 +130,7 @@
       statuses_field_updater({animate: false});
       
       // Add Status Button
-      var add_status_button = create_add_edit_data_widget({
+      var add_status_button = dialogCaller({
         label: 'Add',
         dialog_id: 'add_status_dialog',
         content_creator: create_add_status_dialog,
@@ -144,14 +142,14 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Edit Button
       var edit_button = new Button({
         label: 'Edit',
         type: 'button',
         onClick: function(){
-          submit_form({
-            dialog: dijit.byId('edit_status_list_dialog'),
+          submitForm({
+            dialog: registry.byId('edit_status_list_dialog'),
             form: edit_status_list_form,
             additional_data: {submitted: 'edit'},
             url: '{{ request.route_url("edit_status_list", status_list_id=status_list.id) }}',
@@ -164,13 +162,13 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Cancel Button
       var cancel_button = new Button({
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          dijit.byId('edit_status_list_dialog').destroyRecursive();
+          registry.byId('edit_status_list_dialog').destroyRecursive();
         }
       }, 'status_list_cancel_button');
       cancel_button.startup();

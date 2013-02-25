@@ -86,221 +86,222 @@
 </div>
 
 <script type='text/javascript'>
-  require(['dojo/store/Memory', 'dijit/form/Form',
+  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/FilteringSelect', 'dijit/form/ComboBox', 'dijit/form/Button',
-    'dojo/store/JsonRest', 'dojo/ready'
-  ],
-  function(Memory, Form, ValidationTextBox, TextBox, FilteringSelect, ComboBox,
-           Button, JsonRest){
-    
-    // ************************************************************************
-    // Form
-    var add_asset_form = new Form({
-      id: 'add_asset_form'
-    }, 'add_asset_form');
-    
-    
-    
-    
-    // ************************************************************************
-    // Name
-    var name_textBox = new ValidationTextBox({
-      name: 'name',
-      label: 'Name',
-      placeHolder: 'Enter a name',
-      required: true
-    }, 'asset_name');
-    name_textBox.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Code
-    var code_textBox = new TextBox({
-      name: 'code',
-      label: 'Code',
-      placeHolder: 'Enter a code'
-    }, 'asset_code');
-    name_textBox.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Description
-    var description_textBox = new TextBox({
-      name: 'description',
-      label: 'Description',
-      placeHolder: 'Enter description'
-    }, 'asset_description');
-    description_textBox.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Type
-    var type_memory = new Memory({
-      data: [
-        {% for type_ in types %}
-          {
-            id: '{{ type_.id }}',
-            name: '{{type_.name}}'
-          },
-        {% endfor %}
-      ]
-    });
-    
-    var type_comboBox = new ComboBox({
-      name: 'type_name',
-      required: true,
-      store: type_memory
-    }, 'asset_type');
-    
-    // set value of Type
-    
-    if (type_memory.data[0] != undefined ){
-      try {
-        type_comboBox.attr('value', type_memory.data[0].name);
-      } catch(e) {
-        // don't do anything
+    'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
+    'stalker/dialogCaller', 'dojo/ready'],
+    function(registry, Memory, Form, ValidationTextBox, TextBox,
+             FilteringSelect, ComboBox, Button, JsonRest, submitForm,
+             fieldUpdater, dialogCaller){
+      
+      // ************************************************************************
+      // Form
+      var add_asset_form = new Form({
+        id: 'add_asset_form'
+      }, 'add_asset_form');
+      
+      
+      
+      
+      // ************************************************************************
+      // Name
+      var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        placeHolder: 'Enter a name',
+        required: true
+      }, 'asset_name');
+      name_textBox.startup();
+      
+      
+      
+      
+      // ************************************************************************
+      // Code
+      var code_textBox = new TextBox({
+        name: 'code',
+        label: 'Code',
+        placeHolder: 'Enter a code'
+      }, 'asset_code');
+      name_textBox.startup();
+      
+      
+      
+      
+      // ************************************************************************
+      // Description
+      var description_textBox = new TextBox({
+        name: 'description',
+        label: 'Description',
+        placeHolder: 'Enter description'
+      }, 'asset_description');
+      description_textBox.startup();
+      
+      
+      
+      
+      // ************************************************************************
+      // Type
+      var type_memory = new Memory({
+        data: [
+          {% for type_ in types %}
+            {
+              id: '{{ type_.id }}',
+              name: '{{type_.name}}'
+            },
+          {% endfor %}
+        ]
+      });
+      
+      var type_comboBox = new ComboBox({
+        name: 'type_name',
+        required: true,
+        store: type_memory
+      }, 'asset_type');
+      
+      // set value of Type
+      
+      if (type_memory.data[0] != undefined ){
+        try {
+          type_comboBox.attr('value', type_memory.data[0].name);
+        } catch(e) {
+          // don't do anything
+        }
       }
-    }
-    
-    type_comboBox.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Project
-    var project_memory = new Memory({
-      data: [
-        {% for project in projects %}
-          {
-            name: '{{ project.name }}',
-            id: '{{ project.id }}'
-          },
-        {% endfor %}
-      ]
-    });
-    
-    var project_select = new FilteringSelect({
-      name: 'project_id',
-      required: true,
-      store: project_memory
-    }, 'asset_project');
-    project_select.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Status List
-    //
-    // The Memory
-    var status_list_memory = new JsonRest({
-      target: 'get/status_lists_for/Asset'
-    });
-    
-    // The Field
-    var status_list_filtering_select = new FilteringSelect({
-      name: 'status_list_id',
-      required: true
-    }, 'asset_status_list');
-    status_list_filtering_select.startup();
-    
-    // The Updater
-    var status_list_field_updater = field_updater({
-      'memory': status_list_memory,
-      'widget': status_list_filtering_select
-    });
-    status_list_field_updater({animate: false});
-    
-    // Add Status List Button
-    var add_status_list_button = create_add_edit_data_widget({
-      label: 'Add',
-      dialog_id: 'add_status_list_dialog',
-      content_creator: create_add_status_list_dialog,
-      attach_to: 'asset_add_status_list_button',
-      related_field_updater: status_list_field_updater,
-      data_id: 'Asset'
-    });
-    add_status_list_button.startup();
-    
-    // Edit Status List Button
-    var edit_status_list_button = create_add_edit_data_widget({
-      label: 'Edit',
-      dialog_id: 'edit_status_list_dialog',
-      content_creator: create_edit_status_list_dialog,
-      attach_to: 'asset_edit_status_list_button',
-      related_field_updater: status_list_field_updater,
-      data_id: function(){
-        return status_list_filtering_select.get('value')
-      }
-    });
-    edit_status_list_button.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Status 
-    // 
-    // The Memory
-    var status_memory = new JsonRest({
-      target: 'get/statuses_of/{{ status_list.id }}'
-    });
-    
-    // The Field
-    var status_select = new FilteringSelect({
-      name: 'status_id',
-      required: true,
-      store: status_memory
-    }, 'asset_status');
-    status_select.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Add Button
-    var add_button = new Button({
-      label: 'Add',
-      type: 'button',
-      onClick: function(){
-        submit_form({
-          dialog: dijit.byId('add_asset_dialog'),
-          form: add_asset_form,
-          additional_data: {
-            submitted: 'add',
-            type_name: type_comboBox.get('value')
-          },
-          url: '{{ request.route_url('add_asset') }}',
-          method: 'POST'
-        });
-      }
-    }, 'asset_add_button');
-    add_button.startup();
-    
-    
-    
-    
-    // ************************************************************************
-    // Cancel Button
-    var cancel_button = new Button({
-      label: 'Cancel',
-      type: 'button',
-      onClick: function(){
-        dijit.byId('add_asset_dialog').destroyRecursive();
-      }
-    }, 'asset_cancel_button');
-    cancel_button.startup();
-    
-    add_asset_form.startup();
-    
-});
+      
+      type_comboBox.startup();
+      
+      
+      
+      
+      // ************************************************************************
+      // Project
+      var project_memory = new Memory({
+        data: [
+          {% for project in projects %}
+            {
+              name: '{{ project.name }}',
+              id: '{{ project.id }}'
+            },
+          {% endfor %}
+        ]
+      });
+      
+      var project_select = new FilteringSelect({
+        name: 'project_id',
+        required: true,
+        store: project_memory
+      }, 'asset_project');
+      project_select.startup();
+      
+      
+      
+      
+      // ************************************************************************
+      // Status List
+      //
+      // The Memory
+      var status_list_memory = new JsonRest({
+        target: 'get/status_lists_for/Asset'
+      });
+      
+      // The Field
+      var status_list_filtering_select = new FilteringSelect({
+        name: 'status_list_id',
+        required: true
+      }, 'asset_status_list');
+      status_list_filtering_select.startup();
+      
+      // The Updater
+      var status_list_field_updater = fieldUpdater({
+        'memory': status_list_memory,
+        'widget': status_list_filtering_select
+      });
+      status_list_field_updater({animate: false});
+      
+      // Add Status List Button
+      var add_status_list_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_status_list_dialog',
+        content_creator: create_add_status_list_dialog,
+        attach_to: 'asset_add_status_list_button',
+        related_field_updater: status_list_field_updater,
+        data_id: 'Asset'
+      });
+      add_status_list_button.startup();
+      
+      // Edit Status List Button
+      var edit_status_list_button = dialogCaller({
+        label: 'Edit',
+        dialog_id: 'edit_status_list_dialog',
+        content_creator: create_edit_status_list_dialog,
+        attach_to: 'asset_edit_status_list_button',
+        related_field_updater: status_list_field_updater,
+        data_id: function(){
+          return status_list_filtering_select.get('value')
+        }
+      });
+      edit_status_list_button.startup();
+      
+      
+      
+      
+      // ************************************************************************
+      // Status 
+      // 
+      // The Memory
+      var status_memory = new JsonRest({
+        target: 'get/statuses_of/{{ status_list.id }}'
+      });
+      
+      // The Field
+      var status_select = new FilteringSelect({
+        name: 'status_id',
+        required: true,
+        store: status_memory
+      }, 'asset_status');
+      status_select.startup();
+      
+      
+      
+      
+      // ************************************************************************
+      // Add Button
+      var add_button = new Button({
+        label: 'Add',
+        type: 'button',
+        onClick: function(){
+          submitForm({
+            dialog: registry.byId('add_asset_dialog'),
+            form: add_asset_form,
+            additional_data: {
+              submitted: 'add',
+              type_name: type_comboBox.get('value')
+            },
+            url: '{{ request.route_url('add_asset') }}',
+            method: 'POST'
+          });
+        }
+      }, 'asset_add_button');
+      add_button.startup();
+      
+      
+      
+      
+      // ************************************************************************
+      // Cancel Button
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          registry.byId('add_asset_dialog').destroyRecursive();
+        }
+      }, 'asset_cancel_button');
+      cancel_button.startup();
+      
+      add_asset_form.startup();
+      
+  });
 </script>
 

@@ -1,5 +1,3 @@
-{#{% extends 'form_base.jinja2' %}#}
-{#{% block form_block %}#}
 <div class='dijitDialogPaneContentArea'>
   <div id='add_repository_form'>
     <table style='width: 100%'>
@@ -61,10 +59,10 @@
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-    'dijit/form/NumberTextBox', 'dijit/form/Button', 'dojo/domReady!'
-  ],
+    'dijit/form/NumberTextBox', 'dijit/form/Button', 'stalker/submitForm',
+    'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, NumberTextBox,
-             TextBox, Button){
+             TextBox, Button, submitForm){
       
       // **********************************************************************
       // Form
@@ -134,8 +132,8 @@
         label: 'Add',
         type: 'button',
         onClick: function(){
-          submit_form({
-            dialog: dijit.byId('add_repository_dialog'),
+          submitForm({
+            dialog: registry.byId('add_repository_dialog'),
             form: add_repository_form,
             additional_data: {submitted: 'add'},
             url: '{{ request.route_url('add_repository') }}',
@@ -154,11 +152,10 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          dijit.byId('add_repository_dialog').destroyRecursive();
+          registry.byId('add_repository_dialog').destroyRecursive();
         }
       }, 'repository_cancel_button');
       cancel_button.startup();        
   });
 </script>
-{#{% endblock %}#}
 

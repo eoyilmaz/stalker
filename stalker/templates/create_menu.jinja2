@@ -4,7 +4,7 @@
           // create the dialog if it doesn't already exists
           
           var dialog_id = 'add_project_dialog';
-          var dialog = dijit.byId(dialog_id);
+          var dialog = registry.byId(dialog_id);
           if (dialog == null){
             dialog = create_add_project_dialog();
           }

@@ -482,8 +482,7 @@ class Entity(SimpleEntity):
     def __init__(self,
                  tags=None,
                  notes=None,
-                 **kwargs
-    ):
+                 **kwargs):
         super(Entity, self).__init__(**kwargs)
 
         if tags is None:

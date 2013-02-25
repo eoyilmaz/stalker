@@ -2,16 +2,16 @@
 // 
 // A customized widget for Tag creation
 //
-// TODO: It should either create a FilteringSelect or a TextField by the choice of User
+// TODO: It should either create a FilteringSelect or a TextBox by the choice of User
 // 
 define([
     'require',
     'dojo/_base/declare', 'dijit/_WidgetBase', 'dijit/_TemplatedMixin',
     'dojo/text!stalker/templates/TagSelect.html',
-    'dojo/_base/lang', 'dojo/dom-construct', 'stalker/Tag',
-    'dijit/form/FilteringSelect', 'dojo/on', 'dojo/domReady!'
+    'dojo/_base/lang', 'dojo/dom-construct', 'dojo/dom-geometry', 'stalker/Tag',
+    'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dojo/on', 'dojo/domReady!'
 ], function(require, declare, _WidgetBase, _TemplatedMixin, template, lang,
-            domConstruct, Tag, FilteringSelect, on){
+            domConstruct, domGeometry, Tag, FilteringSelect, TextBox, on){
     return declare('stalker.TagSelect', [_WidgetBase, _TemplatedMixin],
         {
             templateString: template,
@@ -22,19 +22,20 @@ define([
             required: false,
             
             tags: [],
-            filtering_select: null,
+            input_field_widget: null,
+            type: 'FilteringSelect',
             
             button_div: null,
             
             _setNameAttr: function(value){
-                if (this.filtering_select){
-                    this.filtering_select.set('name', value);
+                if (this.input_field_widget){
+                    this.input_field_widget.set('name', value);
                 }
             },
             
             _setStoreAttr: function(value){
-                if (this.filtering_select){
-                    this.filtering_select.set('store', value);
+                if (this.input_field_widget){
+                    this.input_field_widget.set('store', value);
                     this.store = value;
                 }
             },
@@ -49,8 +50,8 @@ define([
             },
             
             _setDisabledAttr: function(value){
-                // set the filtering select and all the tags disabled
-                this.filtering_select.set('disabled', value);
+                // set the input field widget and all the tags disabled
+                this.input_field_widget.set('disabled', value);
                 for (var i=0; i < this.tags.length; i++){
                     this.tags[i].set('disabled', value);
                 }
@@ -70,7 +71,15 @@ define([
             
             startup: function stalker_tagSelect_startup(){
                 this.inherited(arguments);
-                this.filtering_select.startup();
+                this.input_field_widget.startup();
+            },
+            
+            reset: function stalker_tagSelect_reset(){
+                this.inherited(arguments);
+                this.input_field_widget.reset();
+                for (var i=0; i < this.tags.length; i++){
+                    this.tags[i].destroyRecursive();
+                }
             },
             
             // 
@@ -96,8 +105,10 @@ define([
                 }
                 
                 // return the tag value to the store
-                var value = tag.getValue();
-                this.store.add(value);
+                if (this.store){
+                    var value = tag.getValue();
+                    this.store.add(value);
+                }
                 
                 // remove the tag from the tags list
                 var index = this.tags.indexOf(tag);
@@ -122,44 +133,72 @@ define([
                 
                 this.tags = [];
                 
-                // create the filtering select with the given arguments
-                this.filtering_select = new FilteringSelect({
+                // create the input field widget with the given arguments
+                var WidgetClass = null;
+                if (this.type == 'FilteringSelect'){
+                    WidgetClass = FilteringSelect;
+                } else if (this.type == 'TextBox') {
+                    WidgetClass = TextBox;
+                }
+                
+                this.input_field_widget = new WidgetClass({
                         required: false
-                    },
-                    domConstruct.create("div", {}, input_widget_ap)
+                    }, domConstruct.create("div", {}, input_widget_ap)
                 );
                 
+                // set the input_widget_ap width to limit the size of the
+                // tag list
+                var content_box = domGeometry.getContentBox(
+                    this.input_field_widget.domNode
+                );
+                tag_list_ap.style.width = String(content_box.w) + 'px';
+                
                 // connect the `change` event
-                on(this.filtering_select, 'change',
-                    lang.hitch(this, function(){ // to protect `this`
-                        var item = this.filtering_select.item;
+                
+                var tag_create_func = lang.hitch(this, function(e){ // to protect `this`
+                    
+                    var item;
+                    var current_label;
+                    
+                    if (this.type == 'FilteringSelect'){
+                        item = this.input_field_widget.item;
                         if (item != null){
-                            var current_label = item.name;
-                            if (current_label != ''){
-                                var current_id = this.filtering_select.value;
-                                
-                                // add a new button to the the tagList
-                                var tag = new Tag({
-                                    label: current_label,
-                                    value: current_id
-                                }, domConstruct.create('div', null, tag_list_ap));
-                                tag.startup();
-                                
-                                // attach self to the tag
-                                tag.tagSelect = this;
-                                
-                                // add the button as a tag to this widget
-                                this.tags.push(tag);
-                                
-                                // delete the current value from the FilteringSelect
-                                this.filtering_select.set('value', '');
-                                
-                                // also remove the current value from the store
+                            current_label = item.name;
+                        }
+                    } else if (this.type == 'TextBox'){
+                        current_label = this.input_field_widget.value;
+                    }
+                    
+                    if (current_label != null){
+                        if (current_label != ''){
+                            var current_id = this.input_field_widget.value;
+                            
+                            // add a new button to the the tagList
+                            var tag = new Tag({
+                                label: current_label,
+                                value: current_id
+                            }, domConstruct.create('div', null, tag_list_ap));
+                            tag.startup();
+                            
+                            // attach self to the tag
+                            tag.tagSelect = this;
+                            
+                            // add the button as a tag to this widget
+                            this.tags.push(tag);
+                            
+                            // delete the current value from the FilteringSelect
+                            this.input_field_widget.set('value', '');
+                            
+                            // also remove the current value from the store
+                            if (this.store){
                                 this.store.remove(current_id);
                             }
                         }
-                    })
-                );
+                    }
+                });
+                
+                on(this.input_field_widget, 'change', tag_create_func);
+//                on(this.input_field_widget, 'keyPress', tag_create_func);
             }
     });
 });

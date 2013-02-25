@@ -112,354 +112,354 @@
 </div>
 
 <script type='text/javascript'>
-  require(['dojo/store/Memory', 'dijit/form/Form',
+  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect',
     'dijit/form/Button', 'dojo/store/JsonRest', 'stalker/submitForm',
-    'dojo/ready'
-  ],
-  function(Memory, Form, ValidationTextBox, TextBox,
-           NumberTextBox, FilteringSelect, Button, JsonRest, submitForm){
-    
-    // ********************************************************************
-    // Form
-    var add_project_form = new Form({
-      id: 'add_project_form'
-    }, 'add_project_form');
-    
-    
-    
-    
-    // ********************************************************************
-    // Name
-    var name_textBox = new ValidationTextBox({
-      name: 'name',
-      label: 'Name',
-      required: true,
-      placeHolder: 'Enter a name'
-    }, 'project_name');
-    name_textBox.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // Code
-    var code_textBox = new ValidationTextBox({
-      name: 'code',
-      label: 'Code',
-      required: true,
-      placeHolder: 'Enter a code'
-    }, 'project_code');
-    name_textBox.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // Image Format
-    // 
-    // The memory
-    var imf_memory = new JsonRest({
-      target: '/get/image_formats'
-    });
-    
-    // The Field
-    var imf_filteringSelect = new FilteringSelect({
-      name: 'image_format',
-      required: true,
-      {% if not image_formats|length %}
-        disabled: true,
-        placeHolder: 'No Image Format in DB'
-      {% endif %}
-    }, 'project_image_format');
-    imf_filteringSelect.startup();
-    
-    // The Updater
-    // supply a function to refresh the content of the format
-    var imf_field_updater = field_updater({
-      'memory': imf_memory,
-      'widget': imf_filteringSelect
-    });
-    // run the function to fill the data for the first time
-    imf_field_updater({animate: false});
-    
-    // Add Image Format Button
-    var add_image_format_button = create_add_edit_data_widget({
-      label: 'Add',
-      dialog_id: 'add_image_format_dialog',
-      content_creator: create_add_image_format_dialog,
-      attach_to: 'project_add_image_format_button',
-      related_field_updater: imf_field_updater
-    });
-    add_image_format_button.startup();
-    
-    // Edit Image Format Button
-    var edit_image_format_button = create_add_edit_data_widget({
-      label: 'Edit',
-      dialog_id: 'edit_image_format_dialog',
-      content_creator: create_edit_image_format_dialog,
-      attach_to: 'project_edit_image_format_button',
-      related_field_updater: imf_field_updater,
-      data_id: function(){
-        return imf_filteringSelect.get('value');
-      }
-    });
-    edit_image_format_button.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // FPS
-    var fps_numberTextBox = new NumberTextBox({
-      name: 'fps',
-      label: 'FPS',
-      value: 25,
-      placeHolder: '',
-      required: true
-    }, 'project_fps');
-    fps_numberTextBox.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // REPOSITORY
-    // The Memory
-    var repository_memory = new JsonRest({
-      target: '/get/repositories'
-    });
-    
-    var repository_filteringSelect = new FilteringSelect({
-      name: 'repository',
-      required: true,
-      {% if not repositories|length %}
-        disabled: true,
-        placeHolder: 'No Repository in DB'
-      {% endif %}
-    }, 'project_repository');
-    repository_filteringSelect.startup();
-    
-    // The Updater
-    var repo_field_updater = field_updater({
-      'memory': repository_memory,
-      'widget': repository_filteringSelect
-    });
-    // run the function to fill the data
-    repo_field_updater({animate: false});
-   
-    // Add Repository Button
-    var add_repository_button = create_add_edit_data_widget({
-      label: 'Add',
-      dialog_id: 'add_repository_dialog',
-      content_creator: create_add_repository_dialog,
-      attach_to: 'project_add_repository_button',
-      related_field_updater: repo_field_updater
-    });
-    add_repository_button.startup();
-    
-    // Edit Repository Button
-    var edit_repository_button = create_add_edit_data_widget({
-      label: 'Edit',
-      dialog_id: 'edit_repository_dialog',
-      content_creator: create_edit_repository_dialog,
-      attach_to: 'project_edit_repository_button',
-      related_field_updater: repo_field_updater,
-      data_id: function(){
-        return repository_filteringSelect.get('value');
-      }
-    });
-    edit_repository_button.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // STRUCTURE
-    // 
-    // The memory
-    var structure_memory = new JsonRest({
-      target: '/get/structures'
-    });
-    
-    // The Field
-    var structure_filteringSelect = new FilteringSelect({
-      name: 'structure',
-      required: true,
-      {% if not structures|length %}
-        disabled: true,
-        placeHolder: 'No Structure in DB'
-      {% endif %}
-    }, 'project_structure');
-    structure_filteringSelect.startup();
-    
-    // The Updater
-    var structure_field_updater = field_updater({
-      'memory': structure_memory,
-      'widget': structure_filteringSelect
-    });
-    // call the updater to fill the field for the first time
-    structure_field_updater({animate: false});
-    
-    // Add Structure Button
-    var add_structure_button = create_add_edit_data_widget({
-      label: 'Add',
-      dialog_id: 'add_structure_dialog',
-      content_creator: create_add_structure_dialog,
-      attach_to: 'project_add_structure_button',
-      related_field_updater: structure_field_updater
-    });
-    add_structure_button.startup();
-    
-    // EDIT STRUCTURE BUTTON
-    var edit_structure_button = create_add_edit_data_widget({
-      label:'Edit',
-      dialog_id: 'edit_structure_dialog',
-      content_creator: create_edit_structure_dialog,
-      attach_to: 'project_edit_structure_button',
-      related_field_updater: structure_field_updater,
-      data_id: function(){
-        return structure_filteringSelect.get('value')
-      }
-    });
-    edit_structure_button.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // LEAD
-    var lead_memory = new JsonRest({
-      target: '/get/users'
-    });
-    
-    // The Field
-    var lead_filteringSelect = new FilteringSelect({
-      name: 'lead',
-      required: true,
-      {% if not users|length %}
-        disabled: true,
-        placeHolder: 'No Users in DB'
-      {% endif %}
-    }, 'project_lead');
-    lead_filteringSelect.startup();
-    
-    // The Updater
-    var lead_field_updater = field_updater({
-      'memory': lead_memory,
-      'widget': lead_filteringSelect
-    });
-    lead_field_updater({animate: false});
-    
-    // Add Lead Button
-    var add_lead_button = create_add_edit_data_widget({
-      label: 'Add',
-      dialog_id: 'add_user_dialog',
-      content_creator: create_add_user_dialog,
-      attach_to: 'project_add_lead_button',
-      related_field_updater: lead_field_updater
-    });
-    add_lead_button.startup();
-    
-    // Edit Lead Button
-    var edit_lead_button = create_add_edit_data_widget({
-      label: 'Edit',
-      dialog_id: 'edit_user_dialog',
-      content_creator: create_edit_user_dialog,
-      attach_to: 'project_edit_lead_button',
-      related_field_updater: lead_field_updater,
-      data_id: function(){
-        return lead_filteringSelect.get('value')
-      }
-    });
-    edit_lead_button.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // Status List
-    //
-    // The Memory
-    var status_list_memory = new JsonRest({
-      target: 'get/status_lists_for/Project'
-    });
-    
-    // The Field
-    var status_list_select = new FilteringSelect({
-      name: 'status_list',
-      required: true,
-      {% if not status_lists|length %}
-        disabled: true,
-        placeHolder: 'No StatusList in DB',
-      {% endif %}
-    }, 'project_status_list');
-    status_list_select.startup();
-    
-    // The Updater
-    var status_list_field_updater = field_updater({
-      'memory': status_list_memory,
-      'widget': status_list_select
-    });
-    status_list_field_updater({animate: true});
-    
-    // Add Status List Button
-    var add_status_list_button = create_add_edit_data_widget({
-      label: 'Add',
-      dialog_id: 'add_status_list_dialog',
-      content_creator: create_add_status_list_dialog,
-      attach_to: 'project_add_status_list_button',
-      related_field_updater: status_list_field_updater,
-      data_id: 'Project'
-    });
-    add_status_list_button.startup();
-    
-    // Edit Status List Button
-    var edit_status_list_button = create_add_edit_data_widget({
-      label: 'Edit',
-      dialog_id: 'edit_status_list_dialog',
-      content_creator: create_edit_status_list_dialog,
-      attach_to: 'project_edit_status_list_button',
-      related_field_updater: status_list_field_updater,
-      data_id: function(){
-        return function(){
-          return 'edit/status_list/' + status_list_select.get('value');
+    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/domReady!'],
+    function(registry, Memory, Form, ValidationTextBox, TextBox,
+             NumberTextBox, FilteringSelect, Button, JsonRest, submitForm,
+             fieldUpdater, dialogCaller){
+      
+      // ********************************************************************
+      // Form
+      var add_project_form = new Form({
+        id: 'add_project_form'
+      }, 'add_project_form');
+      
+      
+      
+      
+      // ********************************************************************
+      // Name
+      var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        required: true,
+        placeHolder: 'Enter a name'
+      }, 'project_name');
+      name_textBox.startup();
+      
+      
+      
+      
+      // ********************************************************************
+      // Code
+      var code_textBox = new ValidationTextBox({
+        name: 'code',
+        label: 'Code',
+        required: true,
+        placeHolder: 'Enter a code'
+      }, 'project_code');
+      name_textBox.startup();
+      
+      
+      
+      
+      // ********************************************************************
+      // Image Format
+      // 
+      // The memory
+      var imf_memory = new JsonRest({
+        target: '/get/image_formats'
+      });
+      
+      // The Field
+      var imf_filteringSelect = new FilteringSelect({
+        name: 'image_format',
+        required: true,
+        {% if not image_formats|length %}
+          disabled: true,
+          placeHolder: 'No Image Format in DB'
+        {% endif %}
+      }, 'project_image_format');
+      imf_filteringSelect.startup();
+      
+      // The Updater
+      // supply a function to refresh the content of the format
+      var imf_field_updater = fieldUpdater({
+        'memory': imf_memory,
+        'widget': imf_filteringSelect
+      });
+      // run the function to fill the data for the first time
+      imf_field_updater({animate: false});
+      
+      // Add Image Format Button
+      var add_image_format_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_image_format_dialog',
+        content_creator: create_add_image_format_dialog,
+        attach_to: 'project_add_image_format_button',
+        related_field_updater: imf_field_updater
+      });
+      add_image_format_button.startup();
+      
+      // Edit Image Format Button
+      var edit_image_format_button = dialogCaller({
+        label: 'Edit',
+        dialog_id: 'edit_image_format_dialog',
+        content_creator: create_edit_image_format_dialog,
+        attach_to: 'project_edit_image_format_button',
+        related_field_updater: imf_field_updater,
+        data_id: function(){
+          return imf_filteringSelect.get('value');
         }
-      }
-    });
-    edit_status_list_button.startup();
-    
-    // ********************************************************************
-    // ADD BUTTON
-    var add_button = new Button({
-      label: 'Add',
-      type: 'button',
-      onClick: function(){
-        submitForm({
-          dialog: dijit.byId('add_project_dialog'),
-          form: add_project_form,
-          additional_data: {submitted: 'add'},
-          url: '{{ request.route_url("add_project") }}',
-          method: 'POST'
-        });
-      }
-    }, 'project_add_button');
-    add_button.startup();
-    
-    // ********************************************************************
-    // CANCEL BUTTON
-    var cancel_button = new Button({
-      label: 'Cancel',
-      type: 'button',
-      onClick: function(){
-        dijit.byId('add_project_dialog').destroyRecursive();
-      }
-    }, 'project_cancel_button');
-    cancel_button.startup();
-    
-    add_project_form.startup();
-    
-});
+      });
+      edit_image_format_button.startup();
+      
+      
+      
+      
+      // ********************************************************************
+      // FPS
+      var fps_numberTextBox = new NumberTextBox({
+        name: 'fps',
+        label: 'FPS',
+        value: 25,
+        placeHolder: '',
+        required: true
+      }, 'project_fps');
+      fps_numberTextBox.startup();
+      
+      
+      
+      
+      // ********************************************************************
+      // REPOSITORY
+      // The Memory
+      var repository_memory = new JsonRest({
+        target: '/get/repositories'
+      });
+      
+      var repository_filteringSelect = new FilteringSelect({
+        name: 'repository',
+        required: true,
+        {% if not repositories|length %}
+          disabled: true,
+          placeHolder: 'No Repository in DB'
+        {% endif %}
+      }, 'project_repository');
+      repository_filteringSelect.startup();
+      
+      // The Updater
+      var repo_field_updater = fieldUpdater({
+        'memory': repository_memory,
+        'widget': repository_filteringSelect
+      });
+      // run the function to fill the data
+      repo_field_updater({animate: false});
+     
+      // Add Repository Button
+      var add_repository_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_repository_dialog',
+        content_creator: create_add_repository_dialog,
+        attach_to: 'project_add_repository_button',
+        related_field_updater: repo_field_updater
+      });
+      add_repository_button.startup();
+      
+      // Edit Repository Button
+      var edit_repository_button = dialogCaller({
+        label: 'Edit',
+        dialog_id: 'edit_repository_dialog',
+        content_creator: create_edit_repository_dialog,
+        attach_to: 'project_edit_repository_button',
+        related_field_updater: repo_field_updater,
+        data_id: function(){
+          return repository_filteringSelect.get('value');
+        }
+      });
+      edit_repository_button.startup();
+      
+      
+      
+      
+      // ********************************************************************
+      // STRUCTURE
+      // 
+      // The memory
+      var structure_memory = new JsonRest({
+        target: '/get/structures'
+      });
+      
+      // The Field
+      var structure_filteringSelect = new FilteringSelect({
+        name: 'structure',
+        required: true,
+        {% if not structures|length %}
+          disabled: true,
+          placeHolder: 'No Structure in DB'
+        {% endif %}
+      }, 'project_structure');
+      structure_filteringSelect.startup();
+      
+      // The Updater
+      var structure_field_updater = fieldUpdater({
+        'memory': structure_memory,
+        'widget': structure_filteringSelect
+      });
+      // call the updater to fill the field for the first time
+      structure_field_updater({animate: false});
+      
+      // Add Structure Button
+      var add_structure_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_structure_dialog',
+        content_creator: create_add_structure_dialog,
+        attach_to: 'project_add_structure_button',
+        related_field_updater: structure_field_updater
+      });
+      add_structure_button.startup();
+      
+      // EDIT STRUCTURE BUTTON
+      var edit_structure_button = dialogCaller({
+        label:'Edit',
+        dialog_id: 'edit_structure_dialog',
+        content_creator: create_edit_structure_dialog,
+        attach_to: 'project_edit_structure_button',
+        related_field_updater: structure_field_updater,
+        data_id: function(){
+          return structure_filteringSelect.get('value')
+        }
+      });
+      edit_structure_button.startup();
+      
+      
+      
+      
+      // ********************************************************************
+      // LEAD
+      var lead_memory = new JsonRest({
+        target: '/get/users'
+      });
+      
+      // The Field
+      var lead_filteringSelect = new FilteringSelect({
+        name: 'lead',
+        required: true,
+        {% if not users|length %}
+          disabled: true,
+          placeHolder: 'No Users in DB'
+        {% endif %}
+      }, 'project_lead');
+      lead_filteringSelect.startup();
+      
+      // The Updater
+      var lead_field_updater = fieldUpdater({
+        'memory': lead_memory,
+        'widget': lead_filteringSelect
+      });
+      lead_field_updater({animate: false});
+      
+      // Add Lead Button
+      var add_lead_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_user_dialog',
+        content_creator: create_add_user_dialog,
+        attach_to: 'project_add_lead_button',
+        related_field_updater: lead_field_updater
+      });
+      add_lead_button.startup();
+      
+      // Edit Lead Button
+      var edit_lead_button = dialogCaller({
+        label: 'Edit',
+        dialog_id: 'edit_user_dialog',
+        content_creator: create_edit_user_dialog,
+        attach_to: 'project_edit_lead_button',
+        related_field_updater: lead_field_updater,
+        data_id: function(){
+          return lead_filteringSelect.get('value')
+        }
+      });
+      edit_lead_button.startup();
+      
+      
+      
+      
+      // ********************************************************************
+      // Status List
+      //
+      // The Memory
+      var status_list_memory = new JsonRest({
+        target: 'get/status_lists_for/Project'
+      });
+      
+      // The Field
+      var status_list_filteringSelect = new FilteringSelect({
+        name: 'status_list',
+        required: true,
+        {% if not status_lists|length %}
+          disabled: true,
+          placeHolder: 'No StatusList in DB',
+        {% endif %}
+      }, 'project_status_list');
+      status_list_filteringSelect.startup();
+      
+      // The Updater
+      var status_list_field_updater = fieldUpdater({
+        'memory': status_list_memory,
+        'widget': status_list_filteringSelect
+      });
+      status_list_field_updater({animate: true});
+      
+      // Add Status List Button
+      var add_status_list_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_status_list_dialog',
+        content_creator: create_add_status_list_dialog,
+        attach_to: 'project_add_status_list_button',
+        related_field_updater: status_list_field_updater,
+        data_id: 'Project'
+      });
+      add_status_list_button.startup();
+      
+      // Edit Status List Button
+      var edit_status_list_button = dialogCaller({
+        label: 'Edit',
+        dialog_id: 'edit_status_list_dialog',
+        content_creator: create_edit_status_list_dialog,
+        attach_to: 'project_edit_status_list_button',
+        related_field_updater: status_list_field_updater,
+        data_id: function(){
+          return function(){
+            return 'edit/status_list/' + status_list_filteringSelect.get('value');
+          }
+        }
+      });
+      edit_status_list_button.startup();
+      
+      // ********************************************************************
+      // ADD BUTTON
+      var add_button = new Button({
+        label: 'Add',
+        type: 'button',
+        onClick: function(){
+          submitForm({
+            dialog: registry.byId('add_project_dialog'),
+            form: add_project_form,
+            additional_data: {submitted: 'add'},
+            url: '{{ request.route_url("add_project") }}',
+            method: 'POST'
+          });
+        }
+      }, 'project_add_button');
+      add_button.startup();
+      
+      // ********************************************************************
+      // CANCEL BUTTON
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          registry.byId('add_project_dialog').destroyRecursive();
+        }
+      }, 'project_cancel_button');
+      cancel_button.startup();
+      
+      add_project_form.startup();
+      
+  });
 </script>
 

@@ -87,6 +87,7 @@ def main(global_config, **settings):
     config.add_route('view_project', 'view/project/{project_id}')
     config.add_route('view_projects', 'view/projects')
     config.add_route('overview_project', 'overview/project/{project_id}')
+    config.add_route('get_projects', 'get/projects')
     
     # *************************************************************************
     # ImageFormat
@@ -170,6 +171,22 @@ def main(global_config, **settings):
     config.add_route('get_tasks',
                      'get/tasks/{taskable_entity_id}')
     config.add_route('get_project_tasks', 'get/project_tasks/{project_id}')
+    
+    # *************************************************************************
+    # Department
+    config.add_route('add_department', 'add/department')
+    config.add_route('edit_department', 'edit/department/{department_id}')
+    config.add_route('view_department', 'view/department/{department_id}')
+    config.add_route('get_departments', 'get/departments')
+    
+    # *************************************************************************
+    # group
+    config.add_route('add_group', 'add/group')
+    config.add_route('edit_group', 'edit/group/{group_id}')
+    config.add_route('view_group', 'view/group/{group_id}')
+    config.add_route('get_groups', 'get/groups')
+    
+    
     
     config.scan()
     return config.make_wsgi_app()

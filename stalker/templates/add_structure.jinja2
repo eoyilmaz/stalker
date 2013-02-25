@@ -55,114 +55,115 @@
   require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox',  'dijit/form/SimpleTextarea',
     'dijit/form/Button', 'dijit/form/MultiSelect', 'dojo/store/JsonRest',
-    'dojo/domReady!'
-  ],
-  function(registry, Memory, Form, ValidationTextBox, 
-           SimpleTextarea, Button, MultiSelect, JsonRest){
-    
-    // ********************************************************************
-    // Form
-    var add_structure_form = new Form({
-      id: 'add_structure_form'
-    }, 'add_structure_form');
-    add_structure_form.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // Name
-    var name_textBox = new ValidationTextBox({
-      name: 'name',
-      label: 'Name',
-      placeHolder: 'Enter a name',
-      required: true
-    }, 'structure_name');
-    name_textBox.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // Custom Template
-    var custom_template_simpleTextarea = new SimpleTextarea({
-      name: 'custom_template',
-      label: 'Custom Template',
-      placeHolder: 'Enter any custom template here',
-      required: false,
-      style: 'height: 250px; overflow:auto'
-    }, 'structure_custom_template');
-    custom_template_simpleTextarea.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // Filename Template
-    var filename_template_memory = new JsonRest({
-      target: '/get/filename_templates'
-    });
-    
-    var filename_template_multi_select = new MultiSelect({
-      name: 'filename_templates',
-      required: false
-    }, 'structure_filename_template');
-    filename_template_multi_select.startup();
-    
-    // The Updater
-    var filename_template_field_updater = field_updater({
-      'memory': filename_template_memory,
-      'widget': filename_template_multi_select
-    });
-    // run the function to fill the data for the first time
-    filename_template_field_updater({animate: false});
-    
-    // Add Filename Template Button
-    var add_filename_template_button = create_add_edit_data_button({
-      label: 'Add',
-      dialog_id: 'add_filename_template_dialog',
-      content_creator: create_add_filename_template_dialog,
-      attach_to: 'structure_add_filename_template_button',
-      related_field_updater: filename_template_field_updater
-    });
-    add_filename_template_button.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // Add Button
-    var add_button = new Button({
-      label: 'Add',
-      type: 'button',
-      onClick: function(){
-        submit_form({
-          dialog: dijit.byId('add_structure_dialog'),
-          form: add_structure_form,
-          additional_data: {submitted: 'add'},
-          url: '{{ request.route_url('add_structure') }}',
-          method: 'POST'
-        });
-      }
-    }, 'structure_add_button');
-    add_button.startup();
-    
-    
-    
-    
-    // ********************************************************************
-    // Cancel Button
-    var cancel_button = new Button({
-      label: 'Cancel',
-      type: 'button',
-      onClick: function(){
-        var dialog = dijit.byId('add_structure_dialog');
-        dialog.destroyRecursive();
-      }
-    }, 'structure_cancel_button');
-    cancel_button.startup();
-    
-    
-});
+    'stalker/submitForm', 'stalker/fieldUpdater', 'stalker/dialogCaller',
+    'dojo/domReady!'],
+    function(registry, Memory, Form, ValidationTextBox, 
+             SimpleTextarea, Button, MultiSelect, JsonRest, submitForm,
+             fieldUpdater, dialogCaller){
+      
+      // **********************************************************************
+      // Form
+      var add_structure_form = new Form({
+        id: 'add_structure_form'
+      }, 'add_structure_form');
+      add_structure_form.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Name
+      var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        placeHolder: 'Enter a name',
+        required: true
+      }, 'structure_name');
+      name_textBox.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Custom Template
+      var custom_template_simpleTextarea = new SimpleTextarea({
+        name: 'custom_template',
+        label: 'Custom Template',
+        placeHolder: 'Enter any custom template here',
+        required: false,
+        style: 'height: 250px; overflow:auto'
+      }, 'structure_custom_template');
+      custom_template_simpleTextarea.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Filename Template
+      var filename_template_memory = new JsonRest({
+        target: '/get/filename_templates'
+      });
+      
+      var filename_template_multi_select = new MultiSelect({
+        name: 'filename_templates',
+        required: false
+      }, 'structure_filename_template');
+      filename_template_multi_select.startup();
+      
+      // The Updater
+      var filename_template_field_updater = fieldUpdater({
+        'memory': filename_template_memory,
+        'widget': filename_template_multi_select
+      });
+      // run the function to fill the data for the first time
+      filename_template_field_updater({animate: false});
+      
+      // Add Filename Template Button
+      var add_filename_template_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_filename_template_dialog',
+        content_creator: create_add_filename_template_dialog,
+        attach_to: 'structure_add_filename_template_button',
+        related_field_updater: filename_template_field_updater
+      });
+      add_filename_template_button.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Add Button
+      var add_button = new Button({
+        label: 'Add',
+        type: 'button',
+        onClick: function(){
+          submitForm({
+            dialog: registry.byId('add_structure_dialog'),
+            form: add_structure_form,
+            additional_data: {submitted: 'add'},
+            url: '{{ request.route_url('add_structure') }}',
+            method: 'POST'
+          });
+        }
+      }, 'structure_add_button');
+      add_button.startup();
+      
+      
+      
+      
+      // **********************************************************************
+      // Cancel Button
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          var dialog = registry.byId('add_structure_dialog');
+          dialog.destroyRecursive();
+        }
+      }, 'structure_cancel_button');
+      cancel_button.startup();
+      
+      
+  });
 </script>
 

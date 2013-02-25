@@ -20,7 +20,7 @@ import stalker
 from stalker.db.session import DBSession
 from stalker import (User, ImageFormat, Project, Repository, Structure,
                      FilenameTemplate, EntityType, Type, StatusList, Status,
-                     Asset, Shot, Sequence, TaskableEntity)
+                     Asset, Shot, Sequence, TaskableEntity, Department, Group)
 
 from stalker.log import logging_level
 import logging
@@ -84,34 +84,33 @@ def login(request):
     referrer = request.url
     if referrer == login_url:
         referrer = '/'
-    
+
     came_from = request.params.get('came_from', referrer)
     message = ''
     login = ''
     password = ''
-    
+
     if 'form.submitted' in request.params:
         login = request.params['login']
         password = request.params['password']
-        
+
         # need to find the user
         # check with the login or email attribute
         user_obj = User.query\
             .filter(or_(User.login==login, User.email==login)).first()
-        
+
         if user_obj:
-#            login = 'User:' + user_obj.login
             login = user_obj.login
-        
+
         if user_obj and user_obj.check_password(password):
             headers = remember(request, login)
             return HTTPFound(
                 location=came_from,
                 headers=headers,
             )
-        
+
         message = 'Wrong username or password!!!'
-    
+
     logger.debug('login end')
     return dict(
         message=message,
@@ -544,17 +543,9 @@ def add_structure(request):
     renderer='templates/add_user.jinja2',
     permission='Add_User'
 )
-@view_config(
-    route_name='edit_user',
-    renderer='templates/edit_user.jinja2',
-    permission='Edit_User'
-)
-def add_edit_user(request):
-    """called when adding or editing a user
+def add_user(request):
+    """called when adding a User
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
     login = authenticated_userid(request)
     logged_user = User.query.filter_by(login=login).first()
     
@@ -562,16 +553,52 @@ def add_edit_user(request):
         if request.params['submit'] == 'add':
             # create and add a new user
             if 'name' in request.params and \
+               'login' in request.params and \
                'email' in request.params and \
                'password' in request.params:
                 with transaction.manager:
+                    # Departments
+                    departments = []
+                    if 'department_ids' in request.params:
+                        dep_ids = [
+                            int(dep_id)
+                            for dep_id in request.POST.getall('department_ids')
+                        ]
+                        departments = Department.query.filter(
+                                        Department.id.in_(dep_ids)).all()
+                    
+                    # Groups
+                    groups = []
+                    if 'group_ids' in request.params:
+                        grp_ids = [
+                            int(grp_id)
+                            for grp_id in request.POST.getall('group_ids')
+                        ]
+                        groups = Group.query.filter(
+                                        Group.id.in_(grp_ids)).all()
+                    
+                    # Tags
+                    tags = []
+                    #if 'tag_ids' in request.params:
+                    #    tag_ids = [
+                    #        int(tag_id)
+                    #        for tag_id in request.POST.getall('tag_ids')
+                    #    ]
+                    #    tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+                    
                     new_user = User(
                         name=request.params['name'],
+                        login=request.params['login'],
                         email=request.params['email'],
                         password=request.params['password'],
-                        created_by=logged_user
+                        created_by=logged_user,
+                        departments=departments,
+                        groups=groups,
+                        tags=tags
                     )
+                    
                     DBSession.add(new_user)
+                    
         elif request.params['submitted'] == 'edit':
             # just edit the given user
             user_id = request.matchdict['user_id']
@@ -588,6 +615,16 @@ def add_edit_user(request):
     return {
         'user': logged_user,
     }
+
+@view_config(
+    route_name='edit_user',
+    renderer='templates/edit_user.jinja2',
+    permission='Edit_User'
+)
+def edit_user(request):
+    """called when editing a user
+    """
+    pass
 
 @view_config(
     route_name='add_filename_template',
@@ -1460,6 +1497,22 @@ def get_project_tasks(request):
     ]
 
 @view_config(
+    route_name='get_projects',
+    renderer='json',
+    permission='View_Project'
+)
+def get_projects(request):
+    """returns all the Project instances in the database
+    """
+    return [
+        {
+            'id': proj.id,
+            'name': proj.name
+        }
+        for proj in Project.query.all()
+    ]
+
+@view_config(
     route_name='get_users',
     renderer='json',
     permission='View_User'
@@ -1623,7 +1676,7 @@ def add_task(request):
                         logger.debug('flushing the DBSession, no problem here!')
                         DBSession.flush()
                         logger.debug('finished adding Shot')
-                        return HTTPFound(location=came_from)
+                        return {}
             else:
                 logger.debug('there are missing parameters')
     
@@ -1639,3 +1692,64 @@ def add_task(request):
         'status_list':
             StatusList.query.filter_by(target_entity_type='Task').first()
     }
+
+@view_config(
+    route_name='add_department',
+    renderer='add_department.jinja2',
+    permission='Add_Department'
+)
+def add_department(request):
+    """called when adding a new Department
+    """
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+    
+    logger.debug('called add_department')
+    
+    try:
+        logger.debug('submitted: %s' % request.params['submitted'])
+        if request.params['submitted'] == 'add':
+            # get the params and create the Department
+            try:
+                name = request.params['name']
+            except KeyError:
+                message = 'The name parameter is missing'
+                logger.debug(message)
+                return HTTPServerError(detail=message)
+            
+            try:
+                lead_id = request.params['lead_id']
+                lead = User.query.filter_by(id=lead_id).first()
+            except KeyError:
+                lead = None
+            
+            logger.debug('creating new department')
+            new_department = Department(
+                name=name,
+                lead=lead,
+                created_by=logged_in_user
+            )
+            DBSession.add(new_department)
+            logger.debug('created new department')
+    except KeyError:
+        logger.debug('submitted is not in params')
+    
+    return {
+        'users': User.query.all()
+    }
+
+@view_config(
+    route_name='get_departments',
+    renderer='json',
+    permission='View_Department'
+)
+def get_departments(request):
+    """returns all the departments in the database
+    """
+    return [
+        {
+            'id': dep.id,
+            'name': dep.name
+        }
+        for dep in Department.query.all()
+    ]

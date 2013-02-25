@@ -56,15 +56,13 @@
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/SimpleTextarea', 'dijit/form/Button',
     'dijit/form/FilteringSelect', 'dijit/form/MultiSelect',
-    'dojo/store/JsonRest', 'dojo/domReady!'
-  ],
+    'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
+    'stalker/dialogCaller', 'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, TextBox,
-             SimpleTextarea, Button, FilteringSelect, MultiSelect, JsonRest){
+             SimpleTextarea, Button, FilteringSelect, MultiSelect, JsonRest,
+             submitForm, fieldUpdater, dialogCaller){
       
-      
-      
-      
-      // ********************************************************************
+      // **********************************************************************
       // Form
       var add_status_list_form = new Form({
         id: 'add_status_list_form'
@@ -74,7 +72,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Name
       var name_textBox = new ValidationTextBox({
         name: 'name',
@@ -87,7 +85,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Target Entity Type
       var target_entity_type_store = new Memory({
         data: [
@@ -106,7 +104,7 @@
         required: true,
         store: target_entity_type_store,
 {#        value: target_entity_type_store.data[0].id#}
-        value: {% if target_entity_type %}'{{ target_entity_type }}'{% else %}''{% endif %}
+        value: '{% if target_entity_type %}{{ target_entity_type }}{% else %}{% endif %}'
       }, 'status_list_target_entity_type');
       target_entity_type_select.startup();
       
@@ -114,7 +112,7 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Statuses
       // 
       // The Memory
@@ -131,7 +129,7 @@
       statuses_multiSelect.startup();
       
       // The Updater
-      var statuses_field_updater = field_updater({
+      var statuses_field_updater = fieldUpdater({
         'memory': statuses_memory,
         'widget': statuses_multiSelect
       });
@@ -139,7 +137,7 @@
       statuses_field_updater({animate: false});
       
       // Add Status Button
-      var add_status_button = create_add_edit_data_widget({
+      var add_status_button = dialogCaller({
         label: 'Add',
         dialog_id: 'add_status_dialog',
         content_creator: create_add_status_dialog,
@@ -151,14 +149,14 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Add Button
       var add_button = new Button({
         label: 'Add',
         type: 'button',
         onClick: function(){
-          submit_form({
-            dialog: dijit.byId('add_status_list_dialog'),
+          submitForm({
+            dialog: registry.byId('add_status_list_dialog'),
             form: add_status_list_form,
             additional_data: {submitted: 'add'},
             url: '{{ request.route_url('add_status_list') }}',
@@ -171,13 +169,13 @@
       
       
       
-      // ********************************************************************
+      // **********************************************************************
       // Cancel Button
       var cancel_button = new Button({
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          dijit.byId('add_status_list_dialog').destroyRecursive();
+          registry.byId('add_status_list_dialog').destroyRecursive();
         }
       }, 'status_list_cancel_button');
       cancel_button.startup();

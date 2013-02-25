@@ -84,10 +84,10 @@
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/store/Memory',
     'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-    'dijit/form/FilteringSelect', 'dijit/form/Button', 'dojo/domReady!'
-  ],
+    'dijit/form/FilteringSelect', 'dijit/form/Button', 'stalker/submitForm',
+    'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, TextBox,
-             FilteringSelect, Button){
+             FilteringSelect, Button, submitForm){
       
       // **********************************************************************
       // Form
@@ -208,8 +208,8 @@
         label: 'Add',
         type: 'button',
         onClick: function(){
-          submit_form({
-            dialog: dijit.byId('add_filename_template_dialog'),
+          submitForm({
+            dialog: registry.byId('add_filename_template_dialog'),
             form: add_filename_template_form,
             additional_data: {submitted: 'add'},
             url: '{{ request.route_url('add_filename_template') }}',
@@ -227,7 +227,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          dijit.byId('add_filename_template_dialog').destroyRecursive();
+          registry.byId('add_filename_template_dialog').destroyRecursive();
         }
       }, 'filename_template_cancel_button');
       cancel_button.startup();        

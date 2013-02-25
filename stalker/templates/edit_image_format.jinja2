@@ -59,10 +59,10 @@
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-    'dijit/form/NumberTextBox', 'dijit/form/Button', 'dojo/domReady!'
-  ],
+    'dijit/form/NumberTextBox', 'dijit/form/Button', 'stalker/submitForm',
+    'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, NumberTextBox, TextBox,
-             Button){
+             Button, submitForm){
       
       // **********************************************************************
       // Form
@@ -133,8 +133,8 @@
         label: 'Edit',
         type: 'button',
         onClick: function(){
-          submit_form({
-            dialog: dijit.byId('edit_image_format_dialog'),
+          submitForm({
+            dialog: registry.byId('edit_image_format_dialog'),
             form: edit_image_format_form,
             additional_data: {submitted: 'edit'},
             url: '{{ request.route_url('edit_image_format', imf_id=image_format.id) }}',
@@ -153,7 +153,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          dijit.byId('edit_image_format_dialog').destroyRecursive();
+          registry.byId('edit_image_format_dialog').destroyRecursive();
         }
       }, 'image_format_cancel_button');
       cancel_button.startup();

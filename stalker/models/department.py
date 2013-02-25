@@ -16,24 +16,24 @@ logger.setLevel(logging_level)
 
 class Department(Entity):
     """The departments that forms the studio itself.
-    
+
     The information that a Department object holds is like:
-      
+
       * The members of the department
       * The lead of the department
       * and all the other things those are inherited from the AuditEntity class
-      
+
     Two Department object considered the same if they have the same name, the
     the members list nor the lead info is important, a "Modeling" department
     should of course be the same with another department which has the name
     "Modeling" again.
-    
+
     so creating a department object needs the following parameters:
-    
+
     :param members: it can be an empty list, so one department can be created
       without any member in it. But this parameter should be a list of User
       objects.
-    
+
     :param lead: this is a User object, that holds the lead information, a lead
       could be in this department but it is not forced to be also a member of
       the department. So another departments member can be a lead for another
@@ -48,13 +48,13 @@ class Department(Entity):
         ForeignKey("Entities.id"),
         primary_key=True
     )
-    
+
     lead_id = Column(
         "lead_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="x")
     )
-    
+
     lead = relationship(
         "User",
         uselist=False,
@@ -62,14 +62,14 @@ class Department(Entity):
         post_update=True,
         doc="""The lead of this department, it is a User object""",
     )
-    
+
     members = relationship(
         "User",
         secondary='User_Departments',
         back_populates="departments",
         doc="""List of users representing the members of this department.""",
     )
-    
+
     def __init__(self, members=None, lead=None, **kwargs):
         super(Department, self).__init__(**kwargs)
 
@@ -90,16 +90,13 @@ class Department(Entity):
                             "not %s" %
                             (self.__class__.__name__,
                              member.__class__.__name__))
-
         return member
 
     @validates("lead")
     def _validate_lead(self, key, lead):
         """validates the given lead attribute
         """
-        
         from stalker.models.auth import User
-        
         if lead is not None:
             # the lead should be an instance of User class
             if not isinstance(lead, User):
@@ -107,7 +104,6 @@ class Department(Entity):
                                 "stalker.models.auth.User not %s" %
                                 (self.__class__.__name__,
                                  lead.__class__.__name__))
-
         return lead
 
     def __eq__(self, other):
