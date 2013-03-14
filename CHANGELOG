@@ -12,6 +12,10 @@ Stalker Changes
 
 * Updated java scripts to be `required` in Dojo AMD way.
 
+* Updated setup.py to include "pyramid_jinja2"
+
+* Added new helper script to run pserve
+
 0.2.0.a5
 --------
 
