@@ -17,6 +17,7 @@ requires = [
     'waitress',
     'pyseq',
     'jinja2',
+    'pyramid_jinja2',
 ]
 
 setup(name='stalker',

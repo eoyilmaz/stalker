@@ -1,0 +1,3 @@
+#!/bin/sh
+export PYTHONPATH=$PYTHONPATH:`pwd`
+../bin/pserve $1
