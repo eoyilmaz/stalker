@@ -300,7 +300,8 @@
       // **********************************************************************
       // Is Milestone
       var is_milestone_checkBox = new CheckBox({
-        name: 'is_milestone_checkBox',
+        id: 'is_milestone',
+        name: 'is_milestone',
         label: 'Is Milestone',
         value: 'checked',
         checked: false,
@@ -325,7 +326,9 @@
       });
       
       var resources_tagSelect = new TagSelect({
-        name: 'resource_ids'
+        id: 'resources_tagSelect',
+        name: 'resource_ids',
+        required: true
       }, 'task_resources');
       resources_tagSelect.startup();
       
@@ -437,7 +440,11 @@
             dialog: registry.byId('add_task_dialog'),
             form: add_task_form,
             additional_data: {
-              submitted: 'add'
+              submitted: 'add',
+              is_milestone: eval(is_milestone_checkBox.get('checked')) ? 1 : 0 ,
+              task_of_id: {{ taskable_entity.id }},
+              start_date: stamp.toISOString(start_date_dateTextBox.value),
+              end_date: stamp.toISOString(end_date_dateTextBox.value)
             },
             url: '{{ request.route_url('add_task', taskable_entity_id=taskable_entity.id) }}',
             method: 'POST'

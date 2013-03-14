@@ -1,16 +1,61 @@
-<button id='view_tasks_add_task_button'>Add</button>
+{% if taskable_entity %}
+  <button id='view_tasks_add_task_button'>Add</button>
+{% endif %}
+<div id='tasks_gantt_chart'></div>
 <div id='tasks_data_grid'></div>
 <script type='text/javascript'>
   require(['dijit/registry',
            'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
            'dojo/store/Memory', 'stalker/dialogCaller',
+           'dojox/gantt/GanttChart', 'dojox/gantt/GanttProjectItem',
+           'dojox/gantt/GanttTaskItem',
            'dojo/domReady!'],
-    function(registry, ObjectStore, DataGrid, Memory, dialogCaller){
+    function(registry, ObjectStore, DataGrid, Memory, dialogCaller,
+             GanttChart, GanttProjectItem, GanttTaskItem){
+      
+      // Declare gantt chart.
+      var ganttChart = new GanttChart({
+        readOnly: false,        // optional: determine if gantt chart is editable
+{#        dataFilePath: "gantt_default.json",    // optional: json data file path for load and save, default is "gantt_default.json"#}
+{#        height: 300,            // optional: chart height in pixel, default is 400px#}
+        width: 800,            // optional: chart width in pixel, default is 600px
+        withResource: true      // optional: display the resource chart or not
+      }, 'tasks_gantt_chart');              //"gantt" is the node container id of gantt chart widget
+      // create the projects
+      
+      {% for project in projects %}
+        var project_{{ project.id }} = new GanttProjectItem({
+          id: {{ project.id }},
+          name: '{{ project.name }}',
+          startDate: new Date('{{ project.start_date }}')
+        });
+        ganttChart.addProject(project_{{ project.id }});
+      {% endfor %}
+      
+      // Add tasks
+      {% for task in tasks %}
+        project_{{ task.project.id }}.addTask(
+          new GanttTaskItem({
+            id: {{ task.id }},
+            name: '{{ task.name }}',
+            startTime: new Date('{{ task.start_date }}'),
+            duration: {{ task.duration.days }},
+            taskOwner: [
+              {% for resource in task.resources %}
+                '{{ resource.name }}',
+              {% endfor %}
+            ]
+          })
+        );
+      {% endfor %}
+      
+      // Initialize and Render
+      ganttChart.init();
       
       /* set up data store */
       var task_memory = new Memory({
         data: [
-          {% for task in taskable_entity.tasks %}
+          {% for task in tasks %}
             {
               id: {{ task.id }},
               name: '{{ task.name }}',
@@ -39,7 +84,7 @@
           {name: 'Name',        field: 'name',        width: '100px'},
           {name: 'Task Of',     field: 'task_of',     width: '200px'},
           {name: 'Status',      field: 'status',      width: '150px'},
-          {name: 'Resources',   field: 'user_name',   width: '150px'},
+          {name: 'Resources',   field: 'resources',   width: '150px'},
           {name: 'Start Date',  field: 'start_date',  width: '100px'},
           {name: 'End Date',    field: 'end_date',    width: '100px'},
           {name: 'Effort',      field: 'effort',      width: '100px'}
@@ -52,15 +97,18 @@
       
       
       
-      
-      var add_task_button = dialogCaller({
-        label: 'Add',
-        dialog_id: 'add_task_dialog',
-        content_creator: create_add_task_dialog,
-        attach_to: 'view_tasks_add_task_button',
-        data_id: '{{ taskable_entity.id }}'
-      });
-      add_task_button.startup();
+      {% if taskable_entity %}
+        var add_task_button = dialogCaller({
+          label: 'Add',
+          dialog_id: 'add_task_dialog',
+          content_creator: create_add_task_dialog,
+          attach_to: 'view_tasks_add_task_button',
+          {% if taskable_entity %}
+          data_id: '{{ taskable_entity.id }}'
+          {% endif %}
+        });
+        add_task_button.startup();
+      {% endif %}
   });
 </script>
 

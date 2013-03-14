@@ -20,7 +20,8 @@ import stalker
 from stalker.db.session import DBSession
 from stalker import (User, ImageFormat, Project, Repository, Structure,
                      FilenameTemplate, EntityType, Type, StatusList, Status,
-                     Asset, Shot, Sequence, TaskableEntity, Department, Group)
+                     Asset, Shot, Sequence, TaskableEntity, Department, Group,
+                     Tag, Task)
 
 from stalker.log import logging_level
 import logging
@@ -43,24 +44,42 @@ After you fix the problem, please restart the Pyramid application to
 try it again.
 """
 
+
+def log_param(request, param):
+    if param in request.params:
+        logger.debug('%s: %s' % (param, request.params[param]))
+    else:
+        logger.debug('%s not in params' % param)
+
+
 @view_config(route_name='home',
-             renderer='templates/base.jinja2',
-             permission='View_Project')
+            renderer='templates/base.jinja2')
 @view_config(route_name='me_menu',
              renderer='templates/me_menu.jinja2')
+@view_config(route_name='user_home',
+             renderer='templates/user_home.jinja2')
 def home(request):
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
     projects = Project.query.all()
-    
     return {
         'stalker': stalker,
         'user': user,
         'projects': projects,
     }
 
-@view_config(route_name='user_menu',
-             renderer='templates/user_menu.jinja2')
+@forbidden_view_config(
+    renderer='templates/no_permission.jinja2'
+)
+def forbidden(request):
+    """runs when user has no permission for the requested page
+    """
+    return {}
+
+@view_config(
+    route_name='user_menu',
+    renderer='templates/user_menu.jinja2'
+)
 def user_menu(request):
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
@@ -74,8 +93,10 @@ def user_menu(request):
 def create_menu(request):
     return {}
 
-@view_config(route_name='login', renderer='templates/login.jinja2')
-@forbidden_view_config(renderer='templates/login.jinja2')
+@view_config(
+    route_name='login',
+    renderer='templates/login.jinja2'
+)
 def login(request):
     """the login view
     """
@@ -167,7 +188,6 @@ def add_project(request):
                 # so create the project
                 
                 
-               
                 # get the image format
                 imf_id = int(request.params['image_format'])
                 imf = ImageFormat.query.filter_by(id=imf_id).one()
@@ -471,15 +491,10 @@ def edit_repository(request):
                 DBSession.add(repo)
             else:
                 logger.debug('there are missing parameters')
-                def log_param(param):
-                    if param in request.params:
-                        logger.debug('%s: %s' % (param, request.params[param]))
-                    else:
-                        logger.debug('%s not in params' % param)
-                log_param('name')
-                log_param('windows_path')
-                log_param('linux_path')
-                log_param('osx_path')
+                log_param(request, 'name')
+                log_param(request, 'windows_path')
+                log_param(request, 'linux_path')
+                log_param(request, 'osx_path')
     else:
         logger.debug('submitted NOT in request.params')
     
@@ -550,67 +565,85 @@ def add_user(request):
     logged_user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
-        if request.params['submit'] == 'add':
+        logger.debug('submitted in params')
+        if request.params['submitted'] == 'add':
+            logger.debug('submitted value is: add')
             # create and add a new user
             if 'name' in request.params and \
                'login' in request.params and \
                'email' in request.params and \
                'password' in request.params:
-                with transaction.manager:
-                    # Departments
-                    departments = []
-                    if 'department_ids' in request.params:
-                        dep_ids = [
-                            int(dep_id)
-                            for dep_id in request.POST.getall('department_ids')
-                        ]
-                        departments = Department.query.filter(
-                                        Department.id.in_(dep_ids)).all()
-                    
-                    # Groups
-                    groups = []
-                    if 'group_ids' in request.params:
-                        grp_ids = [
-                            int(grp_id)
-                            for grp_id in request.POST.getall('group_ids')
-                        ]
-                        groups = Group.query.filter(
-                                        Group.id.in_(grp_ids)).all()
-                    
-                    # Tags
-                    tags = []
-                    #if 'tag_ids' in request.params:
-                    #    tag_ids = [
-                    #        int(tag_id)
-                    #        for tag_id in request.POST.getall('tag_ids')
-                    #    ]
-                    #    tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
-                    
-                    new_user = User(
-                        name=request.params['name'],
-                        login=request.params['login'],
-                        email=request.params['email'],
-                        password=request.params['password'],
-                        created_by=logged_user,
-                        departments=departments,
-                        groups=groups,
-                        tags=tags
-                    )
-                    
-                    DBSession.add(new_user)
-                    
-        elif request.params['submitted'] == 'edit':
-            # just edit the given user
-            user_id = request.matchdict['user_id']
-            user = User.query.filter_by(id=user_id).one()
-            
-            with transaction.manager:
-                user.name = request.params['name']
-                user.email = request.params['email']
-                user.password = request.params['password']
-                user.updated_by = logged_user
-                # TODO: update the rest later
-                DBSession.add(user)
+                
+                # Departments
+                departments = []
+                if 'department_ids' in request.params:
+                    dep_ids = [
+                        int(dep_id)
+                        for dep_id in request.POST.getall('department_ids')
+                    ]
+                    departments = Department.query.filter(
+                                    Department.id.in_(dep_ids)).all()
+                
+                # Groups
+                groups = []
+                if 'group_ids' in request.params:
+                    grp_ids = [
+                        int(grp_id)
+                        for grp_id in request.POST.getall('group_ids')
+                    ]
+                    groups = Group.query.filter(
+                                    Group.id.in_(grp_ids)).all()
+                
+                # Tags
+                tags = []
+                if 'tag_ids' in request.params:
+                    tag_ids = [
+                        int(tag_id)
+                        for tag_id in request.POST.getall('tag_ids')
+                    ]
+                    tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+                
+                logger.debug('creating new user')
+                new_user = User(
+                    name=request.params['name'],
+                    login=request.params['login'],
+                    email=request.params['email'],
+                    password=request.params['password'],
+                    created_by=logged_user,
+                    departments=departments,
+                    groups=groups,
+                    tags=tags
+                )
+                
+                logger.debug('adding new user to db')
+                DBSession.add(new_user)
+                logger.debug('added new user successfully')
+            else:
+                logger.debug('not all parameters are in request.params')
+                log_param(request, 'name')
+                log_param(request, 'login')
+                log_param(request, 'email')
+                log_param(request, 'password')
+                
+        #elif request.params['submitted'] == 'edit':
+        #    # just edit the given user
+        #    user_id = request.matchdict['user_id']
+        #    user = User.query.filter_by(id=user_id).one()
+        #    
+        #    with transaction.manager:
+        #        user.name = request.params['name']
+        #        user.email = request.params['email']
+        #        user.password = request.params['password']
+        #        user.updated_by = logged_user
+        #        # TODO: update the rest later
+        #        DBSession.add(user)
+        else:
+            logger.debug('submitted value is not add but: %s' %
+                         request.params['submitted'])
+    else:
+        logger.debug('submitted is not among parameters')
+        for key in request.params.keys():
+            logger.debug('request.params[%s]: %s' % (key, request.params[key]))
     
     return {
         'user': logged_user,
@@ -1578,8 +1611,16 @@ def view_tasks(request):
         .filter_by(id=taskable_entity_id)\
         .first()
     
+    tasks = sorted(taskable_entity.tasks, key=lambda x: x.project.id)
+    
+    # get distinct projects
+    # TODO: again, please update it with a proper database query
+    projects = list(set([task.project for task in tasks]))
+    
     return {
-        'taskable_entity': taskable_entity
+        'taskable_entity': taskable_entity,
+        'tasks': tasks,
+        'projects': projects
     }
 
 @view_config(
@@ -1601,34 +1642,17 @@ def add_task(request):
             if 'task_of_id' in request.params and \
                 'name' in request.params and \
                 'description' in request.params and \
-                'dependencies' in request.params and \
                 'is_milestone' in request.params and \
-                'resources' in request.params and \
+                'resource_ids' in request.params and \
                 'status_id' in request.params:
                 
-                logger.debug('request.params["name"]: %s' %
-                             request.params['name'])
-                logger.debug('request.params["status_id": %s' %
-                             request.params['status_id'])
-                
-                sequence_id = request.params['sequence_id']
-                
-                # type will always return with a type name
-#                type_name = request.params['type']
-                
-                sequence = Sequence.query.filter_by(id=sequence_id).first()
-#                type_ = Type.query\
-#                    .filter_by(target_entity_type='Shot')\
-#                    .filter_by(name=type_name)\
-#                    .first()
-#                
-#                if type_ is None:
-#                    # create a new Type
-#                    type_ = Type(name=type_name, target_entity_type='Shot')
+                # get the taskable entity
+                task_of_id = request.params['task_of_id']
+                taskable_entity = TaskableEntity.query.filter_by(id=task_of_id).first()
                 
                 # get the status_list
                 status_list = StatusList.query.filter_by(
-                    target_entity_type='Shot'
+                    target_entity_type='Task'
                 ).first()
                 
                 logger.debug('status_list: %s' % status_list)
@@ -1639,34 +1663,52 @@ def add_task(request):
                         detail='No StatusList found'
                     )
                 
-                status_id = int(
-                    re.sub("[^0-9]+", "", request.params['status_id'])
-                )
+                status_id = int(request.params['status_id'])
                 logger.debug('status_id: %s' % status_id)
                 status = Status.query.filter_by(id=status_id).first()
                 logger.debug('status: %s' % status)
                 
-#                logger.debug('status: %s' % status)
-#                logger.debug('status_list: %s' % status_list)
-#                logger.debug('status in status_list: %s' % status in status_list)
+                # get the resources
+                resource_ids = [
+                    int(r_id)
+                    for r_id in request.POST.getall('resource_ids')
+                ]
+                resources = User.query.filter(User.id.in_(resource_ids)).all()
                 
-                # get the info
+                # get the dates
+                # TODO: no time zone info here, please add time zone
+                start_date = datetime.datetime.strptime(
+                    request.params['start_date'][:-6],
+                    "%Y-%m-%dT%H:%M:%S"
+                )
+                end_date = datetime.datetime.strptime(
+                    request.params['end_date'][:-6],
+                    "%Y-%m-%dT%H:%M:%S"
+                )
+                
+                logger.debug('start_date : %s' % start_date)
+                logger.debug('end_date : %s' % end_date)
+                
                 try:
-                    new_shot = Shot(
+                    new_task = Task(
                         name=request.params['name'],
-                        sequence=sequence,
+                        task_of=taskable_entity,
                         status_list=status_list,
                         status=status,
-                        created_by=logged_in_user
+                        created_by=logged_in_user,
+                        start_date=start_date,
+                        end_date=end_date,
+                        resources=resources,
+                        
                     )
                     
-                    logger.debug('new_shot.status: ' % new_shot.status)
+                    logger.debug('new_task.status: ' % new_task.status)
                     
-                    DBSession.add(new_shot)
+                    DBSession.add(new_task)
                 except (AttributeError, TypeError) as e:
                     logger.debug(e.message)
                 else:
-                    DBSession.add(new_shot)
+                    DBSession.add(new_task)
                     try:
                         transaction.commit()
                     except IntegrityError as e:
@@ -1675,10 +1717,21 @@ def add_task(request):
                     else:
                         logger.debug('flushing the DBSession, no problem here!')
                         DBSession.flush()
-                        logger.debug('finished adding Shot')
+                        logger.debug('finished adding Task')
                         return {}
             else:
                 logger.debug('there are missing parameters')
+                def get_param(param):
+                    if param in request.params:
+                        logger.debug('%s: %s' % (param, request.params[param]))
+                    else:
+                        logger.debug('%s not in params' % param)
+                get_param('task_of_id')
+                get_param('name')
+                get_param('description')
+                get_param('is_milestone')
+                get_param('resource_ids')
+                get_param('status_id')
     
     # return the necessary values to prepare the form
     # get the taskable entity
@@ -1753,3 +1806,53 @@ def get_departments(request):
         }
         for dep in Department.query.all()
     ]
+
+
+@view_config(
+    route_name='add_group',
+    renderer='add_groups.jinja2',
+    permission='Add_Group'
+)
+def add_group(request):
+    """runs when adding a new Group
+    """
+    return {}
+
+@view_config(
+    route_name='overview_user',
+    renderer='overview_user.jinja2'
+)
+def overview_user(request):
+    """runs when over viewing general User info
+    """
+    # get the user id
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+    
+    return {
+        'user': user
+    }
+
+@view_config(
+    route_name='view_user_tasks',
+    renderer='view_tasks.jinja2'
+)
+def view_user_tasks(request):
+    # get user id
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+    
+    # get tasks
+    tasks = []
+    if user is not None:
+        tasks = sorted(user.tasks, key=lambda x: x.project.id)
+    
+    # get distinct projects
+    # TODO: please, and I really beg you here, update it with a proper database query
+    projects = list(set([task.project for task in tasks]))
+    
+    return {
+        'user': user,
+        'tasks': tasks,
+        'projects': projects
+    }

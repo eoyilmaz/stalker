@@ -11,32 +11,32 @@
       <table>
         <tr>
           <td style='text-align: right'><b>Lead</b></td>
-          <td>&nbsp</td>
+          <td>&nbsp;</td>
           <td>{{ project.lead.name }} ({{ project.lead.login }})</td>
         </tr>
         <tr>
           <td style='text-align: right'><b>Image Format</b></td>
-          <td>&nbsp</td>
+          <td>&nbsp;</td>
           <td>{{ project.image_format.name }} ({{ project.image_format.width }} x {{ project.image_format.height }} x {{ project.image_format.pixel_aspect }})</td>
         </tr>
         <tr>
           <td style='text-align: right'><b>Status</b></td>
-          <td>&nbsp</td>
+          <td>&nbsp;</td>
           <td>{{ project.status.name }} / {{ project.status.code }}</td>
         </tr>
         <tr>
           <td style='text-align: right'><b>Repository</b></td>
-          <td>&nbsp</td>
+          <td>&nbsp;</td>
           <td>{{ project.repository.name }}</td>
         </tr>
         <tr>
           <td style='text-align: right'><b>Start Date</b></td>
-          <td>&nbsp</td>
+          <td>&nbsp;</td>
           <td>{{ project.start_date }}</td>
         </tr>
         <tr>
           <td style='text-align: right'><b>End Date</b></td>
-          <td>&nbsp</td>
+          <td>&nbsp;</td>
           <td>{{ project.end_date }}</td>
         </tr>
       </table>
@@ -49,10 +49,9 @@
   </div>
 </div>
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/_base/xhr', 'dijit/layout/SplitContainer',
-           'dijit/layout/TabContainer', 'dojox/layout/ContentPane',
-           'dojo/domReady!'],
-    function(registry, xhr, SplitContainer, TabContainer, ContentPane){
+  require(['dijit/registry', 'dijit/layout/SplitContainer',
+    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+    function(registry, SplitContainer, TabContainer, ContentPane){
       
       // **********************************************************************
       // Split Container - The Main View
@@ -76,13 +75,13 @@
       var project_related_data_tab_container = new TabContainer({
         region: 'bottom'
       }, 'project_related_data_tab_container');
-      
+      project_related_data_tab_container.startup();
       data_split_container.addChild(project_related_data_tab_container);
       
-      var overview_content_pane = new ContentPane({
-        title: 'Overview',
-        href: 'overview/{{ project.id }}'
-      });
+{#      var overview_content_pane = new ContentPane({#}
+{#        title: 'Overview',#}
+{#        href: 'overview/{{ project.id }}'#}
+{#      });#}
       
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
@@ -104,7 +103,7 @@
         content: 'view/tickets/{{ project.id }}'
       });
       
-      project_related_data_tab_container.addChild(overview_content_pane);
+{#      project_related_data_tab_container.addChild(overview_content_pane);#}
       project_related_data_tab_container.addChild(tasks_content_pane);
       project_related_data_tab_container.addChild(assets_content_pane);
       project_related_data_tab_container.addChild(shots_content_pane);

@@ -1533,3 +1533,17 @@ class TaskTester(unittest.TestCase):
         test_obj = TestClass(name="Test Class")
         self.kwargs["task_of"] = test_obj
         self.assertRaises(TypeError, Task, **self.kwargs)
+    
+    def test_project_attribute_is_a_read_only_attribute(self):
+        """testing if the project attribute is a read only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_data_task,
+                          'project', self.test_data_project1)
+    
+    def test_project_attribute_returns_task_of_project_attribute(self):
+        """testing if the project attribute returns the Task.task_of.project
+        value
+        """
+        self.assertEquals(self.test_data_task.project,
+                          self.test_data_task.task_of.project)
+    

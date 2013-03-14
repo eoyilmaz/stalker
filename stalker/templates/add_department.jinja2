@@ -46,7 +46,7 @@
   require(['dijit/registry', 'dojo/store/JsonRest', 'dijit/form/Form',
     'dijit/form/Button', 'dijit/form/ValidationTextBox',
     'dijit/form/FilteringSelect', 'stalker/submitForm', 'stalker/TagSelect',
-    'stalker/fieldUpdater'
+    'stalker/fieldUpdater', 'dojo/domReady!'
   ], function(registry, JsonRest, Form, Button, ValidationTextBox,
               FilteringSelect, submitForm, TagSelect, fieldUpdater){
     
@@ -59,13 +59,13 @@
     
     // ************************************************************************
     // Name
-    var name_textBox = new ValidationTextBox({
+    var name_validationTextBox = new ValidationTextBox({
       name: 'name',
       label: 'Name',
       placeHodler: 'Enter Department Name',
       required: true
     }, 'department_name');
-    name_textBox.startup();
+    name_validationTextBox.startup();
     
     // ************************************************************************
     // Lead

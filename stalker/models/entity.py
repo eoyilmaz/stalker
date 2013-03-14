@@ -282,22 +282,23 @@ class SimpleEntity(Base):
         """formats the name_in value
         """
         # remove unnecessary characters from the string
-        name_in = re.sub(r'([^a-zA-Z0-9\s_\-]+)', '', name_in).strip()
-
-        # remove all the characters which are not alphabetic
+        name_in = re.sub(r'([^a-zA-Z0-9\s_\-#]+)', '', name_in).strip()
+        
+        # remove all the characters which are not alphabetic from the start of
+        # the string
         name_in = re.sub(r"(^[^a-zA-Z0-9]+)", '', name_in)
         
         # remove multiple spaces
         name_in = re.sub(r'[\s]+', ' ', name_in)
-
+        
         return name_in
-
+    
     def _format_nice_name(self, nice_name_in):
         """formats the given nice name
         """
         # remove unnecessary characters from the string
         nice_name_in = self._format_name(str(nice_name_in))
-
+        
         # replace camel case letters
         nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
 

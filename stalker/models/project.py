@@ -310,7 +310,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMi
         from stalker.models.sequence import Sequence
         
         if DBSession is not None:
-            return DBSession.query(Sequence)\
+            return Sequence.query\
                 .join(Sequence.project)\
                 .filter(Project.name == self.name).all()
         else:
@@ -326,7 +326,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMi
         """
         if DBSession is not None:
             from stalker import Task
-            return DBSession.query(Task)\
+            return Task.query\
                 .join(Task.task_of)\
                 .join(TaskableEntity.project)\
                 .filter(Project.id == self.id)\

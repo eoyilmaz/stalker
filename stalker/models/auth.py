@@ -64,6 +64,8 @@ class RootFactory(object):
             Permission.query.all()
         )
         
+        # logger.debug('all_permissions: %s' % all_permissions)
+        
         d = defaults
         
         return [
@@ -121,7 +123,7 @@ class Permission(Base):
       group1.users = [user1, user2]
       
       # get the permissions for the Project class
-      project_permissions = DBSession.query(Permission)\
+      project_permissions = Permission.query\
           .filter(Actions.access='Allow')\
           .filter(Actions.class_name='Project')\
           .filter(Actions.action='Add')\
@@ -130,7 +132,7 @@ class Permission(Base):
       # now we have the permission specifying the allowance of creating a
       # Project
       
-      # to make group1 users able to create a Project we simple add this
+      # to make group1 users able to create a Project we simply add this
       # Permission to the groups permission attribute
       group1.permissions.append(permission)
       
@@ -302,10 +304,10 @@ class User(Entity, ACLMixin):
         underscores, in :class:`~stalker.models.auth.User` class it is not
         allowed.
       * all the letters in the code will be converted to lower case.
-      
+
       Other than these two new rules all the previous formatting rules from the
       :class:`~stalker.models.entity.SimpleEntity` are valid.
-    
+      
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
     
@@ -782,7 +784,51 @@ class User(Entity, ACLMixin):
             projects.append(task.task_of.project)
 
         return list(set(projects))
-
+    
+    @property
+    def tickets(self):
+        """The list of :class:`~stalker.models.ticket.Ticket`\ s that this user has.
+        
+        returns a list of :class:`~stalker.models.ticket.Ticket` instances
+        which are derived from the :class:`~stalker.models.task.Task`\ s that
+        this user is assigned to
+        (Stalker checks the related :class:`~stalker.models.version.Version`
+        instances and then the `~stalker.models.ticket.Ticket` instances
+        assigned to the Versions.).
+        """
+        # do it with sqlalchemy
+        from stalker import Ticket, Version, Task
+        
+        return Ticket.query\
+            .join(Ticket.ticket_for)\
+            .join(Version.version_of)\
+            .join(Task.resources)\
+            .filter(User.id==self.id)\
+            .all()
+    
+    @property
+    def open_tickets(self):
+        """The list of open :class:`~stalker.models.ticket.Ticket`\ s that this user has.
+        
+        returns a list of :class:`~stalker.models.ticket.Ticket` instances
+        which has a status of `Open` and are derived from the
+        :class:`~stalker.models.task.Task`\ s that this user is assigned to
+        (Stalker checks the related :class:`~stalker.models.version.Version`
+        instances and then the `~stalker.models.ticket.Ticket` instances
+        assigned to the Version and has a status of `Open`.).
+        """
+        # do it with sqlalchemy
+        from stalker import Ticket, Version, Task, Status
+        
+        return Ticket.query\
+            .join(Ticket.ticket_for)\
+            .join(Version.version_of)\
+            .join(Task.resources)\
+            .filter(User.id==self.id)\
+            .join(Ticket.status)\
+            .filter(Status.code!='CLOSED')\
+            .all()
+ 
 # USER_PERMISSIONGROUPS
 User_Groups = Table(
     "User_Groups", Base.metadata,

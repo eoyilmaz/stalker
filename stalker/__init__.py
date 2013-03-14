@@ -67,6 +67,7 @@ def main(global_config, **settings):
     # *************************************************************************
     # Basics
     config.add_route('home', '/')
+    config.add_route('user_home', '/user_home')
     config.add_route('me_menu', '/me_menu')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
@@ -112,6 +113,10 @@ def main(global_config, **settings):
     config.add_route('add_user', 'add/user')
     config.add_route('edit_user', 'edit/user/{user_id}')
     config.add_route('get_users', 'get/users')
+    config.add_route('overview_user', 'overview/user/{user_id}')
+    config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
+    config.add_route('view_user_versions', 'view/user/versions/{user_id}')
+    config.add_route('view_user_tickets', 'view/user/tickets/{user_id}')
     
     # *************************************************************************
     # FilenameTemplate
@@ -180,7 +185,7 @@ def main(global_config, **settings):
     config.add_route('get_departments', 'get/departments')
     
     # *************************************************************************
-    # group
+    # Group
     config.add_route('add_group', 'add/group')
     config.add_route('edit_group', 'edit/group/{group_id}')
     config.add_route('view_group', 'view/group/{group_id}')

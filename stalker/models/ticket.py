@@ -5,13 +5,14 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import uuid
+from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import synonym, relationship
 from sqlalchemy.orm.mapper import validates
 from sqlalchemy import Column, Integer
 from sqlalchemy.schema import ForeignKey, Table
 from sqlalchemy.types import Enum
+from stalker.conf import defaults
 from stalker.db.declarative import Base
-from stalker.db.session import DBSession
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import StatusMixin
 
@@ -182,14 +183,14 @@ class Ticket(Entity, StatusMixin):
         #             kwargs['name'])
         
         # just force auto name generation
-        kwargs['name'] = ''
-        
+        self._number = self._generate_ticket_number()
+        kwargs['name'] = defaults.DEFAULT_TICKET_LABEL + ' #%i' % self.number
         
         super(Ticket, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
         
         self.ticket_for = ticket_for
-        self._number = self._generate_ticket_number()
+        #self._number = self._generate_ticket_number()
         self.priority = priority
       
     def _number_getter(self):
@@ -209,9 +210,13 @@ class Ticket(Entity, StatusMixin):
         
         :return: integer
         """
-        max_ticket = DBSession.query(Ticket)\
-            .order_by(Ticket.number.desc())\
-            .first()
+        try:
+            max_ticket = Ticket.query\
+                .order_by(Ticket.number.desc())\
+                .first()
+        except UnboundExecutionError:
+            max_ticket = None
+        
         return max_ticket.number if max_ticket is not None else 0
     
     def _generate_ticket_number(self):
@@ -227,28 +232,28 @@ class Ticket(Entity, StatusMixin):
         """validates the given ticket_for value
         """
         if ticket_for is None:
-            raise TypeError('Ticket.ticket_for can not be None, please set it '
-                            'to a stalker.models.version.Version instance')
+            raise TypeError('%s.ticket_for can not be None, please set it '
+                            'to a stalker.models.version.Version instance' % 
+                            self.__class__.__name__)
         from stalker.models.version import Version
         if not isinstance(ticket_for, Version):
-            raise TypeError('Ticket.ticket_for attribute should be an '
+            raise TypeError('%s.ticket_for attribute should be an '
                 'instance of stalker.models.version.Version instance not %s' %
-                ticket_for.__class__.__name__)
+                (self.__class__.__name__, ticket_for.__class__.__name__))
         return ticket_for
     
     @validates('related_tickets')
     def _validate_related_tickets(self, key, related_ticket):
         """validates the given related_ticket attribute
         """
-        
         if not isinstance(related_ticket, Ticket):
-            raise TypeError('Ticket.related_ticket attribute should be a list '
+            raise TypeError('%s.related_ticket attribute should be a list '
                 'of other stalker.models.ticket.Ticket instances not %s' %
-                related_ticket.__class__.__name__)
+                (self.__class__.__name__, related_ticket.__class__.__name__))
         
         if related_ticket is self:
-            raise ValueError('Ticket.related_ticket attribute can not have '
-            'itself in the list')
+            raise ValueError('%s.related_ticket attribute can not have '
+            'itself in the list' % self.__class__.__name__)
         
         return related_ticket
     
@@ -276,7 +281,7 @@ class Ticket(Entity, StatusMixin):
             
             # create a log entry
             self.logs.append(
-                TicketLog(self, from_status, to_status, 'REOPENED',
+                TicketLog(self, from_status, to_status, 'REOPEN',
                           created_by=created_by)
             )
     
@@ -289,7 +294,7 @@ class Ticket(Entity, StatusMixin):
                other.number == self.number and \
                other.status == self.status and \
                other.logs == self.logs and \
-               other.prioty == self.priority and \
+               other.priority == self.priority and \
                other.ticket_for == self.ticket_for
 
 class TicketLog(SimpleEntity):

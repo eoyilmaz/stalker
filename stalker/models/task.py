@@ -613,8 +613,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         else:
             self._validate_dates(self.start_date, self.end_date, duration)
             #------------------------------------------------------------
-
-
+        
         # then update the effort
         num_of_resources = len(self.resources)
         if num_of_resources == 0:
@@ -643,6 +642,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         attribute value.
         """
     )
+    
+    @property
+    def project(self):
+        """returns the Task.task_of.project
+        """
+        return self.task_of.project
 
 
 def _check_circular_dependency(task, check_for_task):
@@ -715,3 +720,8 @@ Task_Resources = Table(
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("resource_id", Integer, ForeignKey("Users.id"), primary_key=True)
 )
+
+
+# TODO: subscribe to task: Users should be able to subscribe to any task they
+# want so they can be informed about the tickets as if they are a resource for
+# that task.

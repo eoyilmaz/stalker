@@ -24,8 +24,8 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     Because the ``type`` attribute is used to define the correct
     FilenameTemplate in a :class:`~stalker.models.structure.Structure`, the
     FilenameTemplate class is `strictly typed`. This means you can not define
-    a FilenameTEmplate instance without assigning a
-    :class:`~stalker.models.type.Type` instance.
+    a FilenameTemplate instance without assigning a
+    :class:`~stalker.models.type.Type` instance to it.
     
     For now there are two possible values for the type attribute:
       
@@ -57,11 +57,11 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
           type=vers_type,
           path="Assets/{{asset.type.code}}/{{asset.code}}/{{task.type.code}}",
           filename="{{asset.code}}_{{version.take_name}}_{{task.type.code}}_v{{'%03d'|version.version_number}}{{link.extension}}"
-          output_path="{{version.path}}/Outputs/{{version.take_name}}"
+          custom_path="{{version.path}}/Outputs/{{version.take_name}}"
       )
       
       # and now define a FilenameTemplate for placing Asset Reference files.
-      # no need to have an output_path here...
+      # no need to have a custom_path here...
       f_ref = FilenameTemplate(
           target_entity_type="Asset",
           type=ref_type,
@@ -69,9 +69,9 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
           filename="{{link.type.code}}/{{link.id}}{{link.extension}}"
       )
     
-    The first very important usage of FilenameTemplates is to place asset file
-    :class:`~stalker.models.version.Version`'s to proper places inside a
-    :class:`~stalker.models.project.Project`'s
+    The first very important usage of FilenameTemplates is to place
+    :class:`~stalker.models.version.Version` related files to proper places
+    inside a :class:`~stalker.models.project.Project`'s
     :attr:`~stalker.models.project.Project.structure`.
     
     The :attr:`~stalker.models.template.FilenameTemplate.type` attribute of
@@ -91,15 +91,23 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
             target_entity_type="FilenameTemplate"
         )
         
-        # this is going to be used by the Version instance to decide the
-        # Link filename and path
+        # this is going to be used by Stalker to decide the
+        # :stalker:`~stalker.models.link.Link`
+        # :stalker:`~stalker.models.link.Link.filename` and
+        # :stalker:`~stalker.models.link.Link.path` (which is the way Stalker
+        # links external files to Version instances)
         f1 = FilenameTemplate(
             name="Asset Version",
             target_entity_type="Asset",
             type=t1,
             path_code="{{project.code}}/Assets/{{asset.type.name}}/{{task.type.name}}",
             filename_code="{{taskable.code}}_{{version.take}}_{{task.type.name}}_v{{'%03d'|version.version_number}}{{link.extension}}",
-            
+            custom_path="use if needed for outputs from the version (renders, exports, etc)"
+        )
+        
+        # now because we have defined a FilenameTemplate for Asset Versions,
+        # Stalker is now able to produce a path and a filename for you.
+        
         
     
     :param str target_entity_type: The class name that this FilenameTemplate

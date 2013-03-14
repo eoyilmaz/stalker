@@ -105,15 +105,12 @@
     function(registry, Form, ValidationTextBox, Memory, JsonRest, Button,
              TagSelect, submitForm, fieldUpdater, dialogCaller){
       
-      
-      
-      
       // **********************************************************************
       // Form
       var add_user_form = new Form({
         id: 'add_user_form'
       }, 'add_user_form');
-      add_user_form.startup();
+      
       
       
       
@@ -131,7 +128,8 @@
       
       
       // **********************************************************************
-      // Login Name
+      // Login
+      // TODO: check login availability
       var login_name_textBox = new ValidationTextBox({
         name: 'login',
         label: 'Login',
@@ -144,8 +142,9 @@
       
       // **********************************************************************
       // Email
+      // TODO: check email availability
       var email_textBox = new ValidationTextBox({
-        name: 'e-mail',
+        name: 'email',
         label: 'e-mail',
         required: true
       }, 'user_email');
@@ -281,7 +280,7 @@
             dialog: registry.byId('add_user_dialog'),
             form: add_user_form,
             additional_data: {submitted: 'add'},
-            url: '{{ request.route_url('add_user') }}',
+            url: '{{request.route_url('add_user')}}',
             method: 'POST'
           });
         }
@@ -294,11 +293,12 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = registry.byId('add_user_dialog');
-          dialog.destroyRecursive();
+          registry.byId('add_user_dialog').destroyRecursive();
         }
       }, 'user_cancel_button');
       cancel_button.startup();
+      
+      add_user_form.startup();
       
   });
 </script>

@@ -6,6 +6,7 @@
 
 import re
 from sqlalchemy import Table, Column, Integer, ForeignKey, String, Boolean
+from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates, synonym
 from stalker.conf import defaults
 from stalker.db.declarative import Base
@@ -123,7 +124,6 @@ class Version(Entity, StatusMixin):
                  source_file=None,
                  inputs=None,
                  outputs=None,
-                 task=None,
                  **kwargs):
         # call supers __init__
         super(Version, self).__init__(**kwargs)
@@ -190,19 +190,21 @@ class Version(Entity, StatusMixin):
         """returns the maximum version number for this Version
         :return: int
         """
-        from stalker.db.session import DBSession
         
-        all_versions = DBSession.query(Version)\
-            .filter(Version.version_of==self.version_of)\
-            .filter(Version.take_name==self.take_name)\
-            .order_by(Version.version_number.desc())\
-            .all()
+        try:
+            all_versions = Version.query\
+                .filter(Version.version_of==self.version_of)\
+                .filter(Version.take_name==self.take_name)\
+                .order_by(Version.version_number.desc())\
+                .all()
+        except UnboundExecutionError:
+            all_versions = []
         
         if len(all_versions):
             version_with_max_version_number = all_versions[-1]
             
             # skip the current version if it is itself to prevent increasing
-            # the version number unnecessarliy
+            # the version number unnecessarily
             if version_with_max_version_number is not self:
                 return version_with_max_version_number.version_number
             elif len(all_versions) > 1:

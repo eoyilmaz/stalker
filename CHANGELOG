@@ -12,6 +12,11 @@ Stalker Changes
 
 * Updated java scripts to be `required` in Dojo AMD way.
 
+* User instances now have two new properties for getting the user tickets
+  (User.tickets) and the open tickets (User.open_tickets).
+
+* New shortcut Task.project returns the Task.task_of.project value.
+
 0.2.0.a5
 --------
 

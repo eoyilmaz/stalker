@@ -28,6 +28,7 @@ define([
             button_div: null,
             
             _setNameAttr: function(value){
+                console.log('TagSelect._setNameAttr is running!!!');
                 if (this.input_field_widget){
                     this.input_field_widget.set('name', value);
                 }
@@ -40,11 +41,16 @@ define([
                 }
             },
             
+            // value: Array
+            //      The value of this widget
+            value: [],
+            
             _getValueAttr: function(){
+                console.log('TagSelect._getValueAttr is running!!!');
                 // return the value of the buttons
                 var value = [];
-                for(var i; i < this.tags.length; i++){
-                    value.push(this.tags.get('value'));
+                for(var i=0; i < this.tags.length; i++){
+                    value.push(this.tags[i].value);
                 }
                 return value;
             },
@@ -58,7 +64,11 @@ define([
             },
             
             isValid: function(){
-                console.log('TagSelect is validating!!!!');
+                console.log('TagSelect.isValid is running!');
+            },
+            
+            validator: function(){
+                console.log('TagSelect.validator is running!');
             },
             
             baseClass: 'stalker.tagSelect',

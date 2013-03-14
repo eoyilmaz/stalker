@@ -15,12 +15,24 @@
   
   
 {# DOJO COMPRESSED #}
+{#  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'#}
+{#        href='{{ request.static_url("stalker:static/dijit/themes/claro/claro.css") }}'/>#}
+{#  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'#}
+{#        href='{{ request.static_url("stalker:static/dojox/grid/resources/claroGrid.css") }}'/>#}
+{#  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'#}
+{#        href='{{ request.static_url("stalker:static/dojox/gantt/resources/gantt.css") }}'/>#}
+  
+
+{# DOJO DAILY #}
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/dijit/themes/claro/claro.css") }}'/>
+        href='{{ request.static_url("stalker:static/dijit_daily/themes/claro/claro.css") }}'/>
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/dojox/grid/resources/claroGrid.css") }}'/>
+        href='{{ request.static_url("stalker:static/dojox_daily/grid/resources/claroGrid.css") }}'/>
+  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
+        href='{{ request.static_url("stalker:static/dojox_daily/gantt/resources/gantt.css") }}'/>
+   
   <script type='text/javascript' data-dojo-config='async: true, parseOnLoad: true'
-          src='{{ request.static_url("stalker:static/dojo/dojo.js") }}'>
+          src='{{ request.static_url("stalker:static/dojo_daily/dojo.js") }}'>
   </script>
 
 {# STALKER #}
@@ -63,7 +75,7 @@
 
     <div id='footer' class='edgePanel'>
     {% block footer %}
-      <div class='footer'>&copy; Copyright 2008-2012, Erkan Ozgur Yilmaz.</div>
+      <div class='footer'>&copy; Copyright 2008-2013, Erkan Ozgur Yilmaz.</div>
     {% endblock %}
     </div>
   </div>
@@ -102,11 +114,12 @@
         
         
         // ********************************************************************
-        // Create Main Content
+        // Main Content
         var central_content_pane = new ContentPane({
           name: 'central_content_pane',
           region: 'center',
           style: 'padding: 0px',
+          href: 'user_home',
           executeScripts: true
         }, 'central_content');
         appLayout.addChild(central_content_pane);
@@ -426,6 +439,13 @@
         // ********************************************************************
         // startup app layout
         appLayout.startup();
+        
+        // load user home by default
+        central_content_pane.set(
+          'href',
+          'user_home'
+        );
+        central_content_pane.refresh();
     });
   </script>
 {% endblock %}

@@ -1,0 +1,74 @@
+<div class='dijitDialogPaneContentArea'>
+  <form id='add_group_form'>
+    <table style='width: 100%'>
+      
+      {# NAME #}
+      <tr>
+        <td class='label_column'>
+          <label for='group_name'>Name</label>
+        </td>
+        <td class='input_column'>
+          <input id='group_name'>
+        </td>
+      </tr>
+      
+    </table>
+  </form>
+</div>
+
+<div class='dijitDialogPaneActionBar'>
+  <button id='group_add_button'>Add</button>
+  <button id='group_cancel_button'>Cancel</button>
+</div>
+
+
+<script type='text/javascript'>
+  require(['dijit/form/Form', 'dijit/form/ValidationTextBox',
+    'dojo/domReady!'], function(Form, ValidationTextBox){
+    
+    // ************************************************************************
+    // Form
+    var add_group_form = new Form({
+      id: 'add_group_form'
+    }, 'add_group_form');
+    add_group_form.startup();
+    
+    // ************************************************************************
+    // Name
+    var name_validationTextBox = new ValidationTextBox({
+      name: 'name',
+      required: true
+    }, 'group_name');
+    name_validationTextBox.startup();
+    
+    
+    // ************************************************************************
+    // Add Button
+    var add_button = new Button({
+      label: 'Add',
+      type: 'button',
+      onClick: function(){
+        submitForm({
+          dialog: registry.byId('add_group_dialog'),
+          form: add_group_form,
+          additional_data: {submitted: 'add'},
+          url: '{{request.route_url("add_group")}}',
+          method: 'POST'
+        });
+      }
+    }, 'group_add_button');
+    add_button.startup();
+    
+    // ************************************************************************
+    // Cancel Button
+    var cancel_button = new Button({
+      label: 'Cancel',
+      type: 'button',
+      onClick: function(){
+        registry.byId('add_group_dialog').destroyRecursive();
+      }
+    }, 'group_cancel_button');
+    cancel_button.startup();
+    
+  });
+</script>
