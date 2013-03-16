@@ -5,7 +5,6 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import datetime
-import re
 
 from sqlalchemy import or_
 from pyramid.httpexceptions import HTTPFound, HTTPServerError
@@ -1524,7 +1523,7 @@ def get_project_tasks(request):
             'id': task.id,
             'name': '%s (%s in %s)' % (task.name,
                                        task.task_of.name,
-                                       task.task_of.project),
+                                       task.task_of.project.name),
         }
         for task in tasks
     ]
@@ -1689,6 +1688,13 @@ def add_task(request):
                 logger.debug('start_date : %s' % start_date)
                 logger.debug('end_date : %s' % end_date)
                 
+                # get the dependencies
+                depend_ids = [
+                    int(d_id)
+                    for d_id in request.POST.getall('depend_ids')
+                ]
+                depends = Task.query.filter(Task.id.in_(depend_ids)).all()
+                
                 try:
                     new_task = Task(
                         name=request.params['name'],
@@ -1699,7 +1705,7 @@ def add_task(request):
                         start_date=start_date,
                         end_date=end_date,
                         resources=resources,
-                        
+                        depends=depends
                     )
                     
                     logger.debug('new_task.status: ' % new_task.status)
@@ -1718,7 +1724,7 @@ def add_task(request):
                         logger.debug('flushing the DBSession, no problem here!')
                         DBSession.flush()
                         logger.debug('finished adding Task')
-                        return {}
+                        #return {}
             else:
                 logger.debug('there are missing parameters')
                 def get_param(param):

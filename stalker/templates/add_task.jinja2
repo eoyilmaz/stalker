@@ -151,7 +151,6 @@
       
       
       
-      
       // **********************************************************************
       // Task Of
       var task_of = new TextBox({
@@ -194,16 +193,18 @@
       // **********************************************************************
       // Depends
       var tasks_jsonRest = new JsonRest({
-        target:'get/all_tasks/{{ taskable_entity.project.id }}'
+        target:'get/project_tasks/{{ taskable_entity.project.id }}'
       });
       
-      var depends_multiComboBox = new MultiComboBox({
-        searchAttr: 'name'
+      var depends_tagSelect = new TagSelect({
+        id: 'depends_tagSelect',
+        name: 'depend_ids',
+        required: false
       }, "task_depends");
-      depends_multiComboBox.startup();
+      depends_tagSelect.startup();
       
       var tasks_result = tasks_jsonRest.query().then(function(data){
-        depends_multiComboBox.set('store', new Memory({data: data}));
+        depends_tagSelect.set('store', new Memory({data: data}));
       });
       
       
