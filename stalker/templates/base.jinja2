@@ -12,28 +12,44 @@
         href='{{request.static_url("stalker:static/stalker/images/favicon.ico")}}'/>
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
         href='{{request.static_url("stalker:static/stalker/css/stalker.css")}}'/>
-  
-  
-{# DOJO COMPRESSED #}
-{#  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'#}
-{#        href='{{ request.static_url("stalker:static/dijit/themes/claro/claro.css") }}'/>#}
-{#  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'#}
-{#        href='{{ request.static_url("stalker:static/dojox/grid/resources/claroGrid.css") }}'/>#}
-{#  <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'#}
-{#        href='{{ request.static_url("stalker:static/dojox/gantt/resources/gantt.css") }}'/>#}
-  
 
-{# DOJO DAILY #}
+{# load jQuery and jQuery Gantt first#}
+  <link rel=stylesheet href='{{ request.static_url("stalker:static/jQueryGantt/platform.css") }}' type="text/css">
+  <link rel=stylesheet href='{{ request.static_url("stalker:static/jQueryGantt/libs/dateField/jquery.dateField.css") }}' type="text/css">
+  <link rel=stylesheet href='{{ request.static_url("stalker:static/jQueryGantt/gantt.css") }}' type="text/css">
+ 
+  <script src='{{ request.static_url("stalker:static/jquery/1.7/jquery.min.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jqueryui/1.8/jquery-ui.min.js") }}'></script>
+{#  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>#}
+{#  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>#}
+  
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/jquery.livequery.min.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/jquery.timers.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/platform.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/date.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/i18nJs.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/dateField/jquery.dateField.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/JST/jquery.JST.js") }}'></script>
+
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttUtilities.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttTask.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttDrawer.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttGridEditor.js") }}'></script>
+  <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttMaster.js") }}'></script>
+
+{# DOJO COMPRESSED #}
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/dijit_daily/themes/claro/claro.css") }}'/>
+        href='{{ request.static_url("stalker:static/dijit/themes/claro/claro.css") }}'/>
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/dojox_daily/grid/resources/claroGrid.css") }}'/>
+        href='{{ request.static_url("stalker:static/dojox/grid/resources/claroGrid.css") }}'/>
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/dojox_daily/gantt/resources/gantt.css") }}'/>
-   
-  <script type='text/javascript' data-dojo-config='async: true, parseOnLoad: true'
-          src='{{ request.static_url("stalker:static/dojo_daily/dojo.js") }}'>
+        href='{{ request.static_url("stalker:static/dojox/gantt/resources/gantt.css") }}'/>
+  
+  <script type='text/javascript'
+          data-dojo-config="async: true, parseOnLoad: true"
+          src='{{ request.static_url("stalker:static/dojo/dojo.js") }}'>
   </script>
+
 
 {# STALKER #}
   <script type='text/javascript'
