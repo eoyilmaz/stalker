@@ -167,11 +167,9 @@
       // The Field
       var imf_filteringSelect = new FilteringSelect({
         name: 'image_format',
+        label: 'Image Format',
         required: true,
-        {% if not image_formats|length %}
-          disabled: true,
-          placeHolder: 'No Image Format in DB'
-        {% endif %}
+        placeHolder: '{% if not image_formats|length %}{{ 'No Image Format in DB' }}{% else %}{{ 'Select Image Format' }}{% endif %}'
       }, 'project_image_format');
       imf_filteringSelect.startup();
       
@@ -233,11 +231,9 @@
       
       var repository_filteringSelect = new FilteringSelect({
         name: 'repository',
+        label: 'Repository',
         required: true,
-        {% if not repositories|length %}
-          disabled: true,
-          placeHolder: 'No Repository in DB'
-        {% endif %}
+        placeHolder: '{% if not repositories|length %}{{ 'No Repository in DB' }}{% else %}{{ 'Select A Repository' }}{% endif %}'
       }, 'project_repository');
       repository_filteringSelect.startup();
       
@@ -286,11 +282,9 @@
       // The Field
       var structure_filteringSelect = new FilteringSelect({
         name: 'structure',
+        label: 'Structure',
         required: true,
-        {% if not structures|length %}
-          disabled: true,
-          placeHolder: 'No Structure in DB'
-        {% endif %}
+        placeHolder: '{% if not structures|length %}{{ 'No Structure in DB' }}{% else %}{{ 'Select A Structure' }}{% endif %}'
       }, 'project_structure');
       structure_filteringSelect.startup();
       
@@ -337,11 +331,9 @@
       // The Field
       var lead_filteringSelect = new FilteringSelect({
         name: 'lead',
+        label: 'User',
         required: true,
-        {% if not users|length %}
-          disabled: true,
-          placeHolder: 'No Users in DB'
-        {% endif %}
+        placeHolder: '{% if not users|length %}{{ 'No User in DB' }}{% else %}{{ 'Select A User' }}{% endif %}'
       }, 'project_lead');
       lead_filteringSelect.startup();
       
@@ -389,11 +381,10 @@
       // The Field
       var status_list_filteringSelect = new FilteringSelect({
         name: 'status_list',
+        label: 'Status List',
         required: true,
-        {% if not status_lists|length %}
-          disabled: true,
-          placeHolder: 'No StatusList in DB',
-        {% endif %}
+        placeHolder: '{% if not status_lists|length %}{{ 'No StatusList in DB' }}{% else %}{{ 'Select A StatusList' }}{% endif %}'
+
       }, 'project_status_list');
       status_list_filteringSelect.startup();
       
@@ -402,7 +393,7 @@
         'memory': status_list_memory,
         'widget': status_list_filteringSelect
       });
-      status_list_field_updater({animate: true});
+      status_list_field_updater({animate: false});
       
       // Add Status List Button
       var add_status_list_button = dialogCaller({

@@ -22,11 +22,25 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
             var widget = kwargs.widget;
             var query_data = kwargs.query_data || null;
             var selected = kwargs.selected || [];
-            
+            var placeHolder = kwargs.placeHolder || '';
+
+            // set default placeHolder
+            if (placeHolder == '' ){
+                if(widget.label){
+                    placeHolder = 'Select a ' + widget.label;
+                }
+                else{
+
+                    placeHolder = 'Select an item from list';
+
+                }
+
+            }
+
             return function(){
                 var animate = arguments[0] || true;
                 var query;
-                
+
                 if (query_data != null){
                     var data_id;
                     if (typeof(query_data) == 'function'){
@@ -45,7 +59,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                 }
                 
                 var result = query.then(function(data){
-                    
+
                     // if the widget is a MultiSelect
                     if (widget.declaredClass == "dijit.form.MultiSelect"){
                         widget.reset();
@@ -54,7 +68,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                         dojo.query('option', widget.domNode).forEach(function(opt, idx, arr){
                             dojo.destroy(opt);
                         });
-                        
+
                         // add options
                         for (var i=0; i < data.length; i++){
                             dojo.create(
@@ -75,6 +89,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                         // just call render
                         widget.render();
                     } else {
+
                         try{
                             widget.reset();
                         } catch(err) {
@@ -82,17 +97,31 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                         }
                         // set the data normally
                         widget.set('store', new Memory({data: data}));
+
                         if (data.length > 0){
-                            try{
-                                widget.attr('value', data[0].id);
-                            } catch(err) {
-                                // don't do anything
+                            widget.set('placeHolder', placeHolder);
+                            console.log("placeHolder "+placeHolder);
+
+                            if(widget.declaredClass == 'dijit.form.FilteringSelect'){
+
+                            }
+                            else{
+
+                                try{
+                                    widget.attr('value', data[0].id);
+                                } catch(err) {
+                                    // don't do anything
+                                }
                             }
                         }
+
+
                     }
                     
                     if (animate == true){
                         // animate the field to indicate it is updated
+                        console.log("animate");
+
                         var domNode = widget.domNode;
                         var bgColor = domNode.style.backgroundColor;
                         fx.animateProperty({

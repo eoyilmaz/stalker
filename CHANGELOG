@@ -21,6 +21,11 @@ Stalker Changes
 
 * New shortcut Task.project returns the Task.task_of.project value.
 
+* Added 'PlaceHolder' property for 'FilterSelect Widgets'. And 'Label' property
+  is used in construction of 'PlaceHolder' property.
+
+* Set disabled prerequisite fields, until their prerequisite is selected.
+
 0.2.0.a5
 --------
 

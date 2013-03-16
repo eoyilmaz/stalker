@@ -141,6 +141,7 @@
         name: 'project_id',
         required: true,
         store: project_memory,
+        placeHolder: 'Select A Project',
         onChange: function(){
           sequence_field_updater();
         }
@@ -158,7 +159,9 @@
       
       var sequence_filtering_select = new FilteringSelect({
         name: 'sequence_id',
-        required: true
+        required: true,
+        disabled: true,
+        label: 'Sequence'
       }, 'shot_sequence');
       sequence_filtering_select.startup();
       
@@ -166,6 +169,7 @@
       var sequence_field_updater = fieldUpdater({
         memory: sequence_memory,
         query_data: function(){
+          sequence_filtering_select.set('disabled', false);
           return project_filtering_select.get('value');
         },
         widget: sequence_filtering_select
@@ -190,10 +194,11 @@
         dialog_id: 'edit_sequence_dialog',
         content_creator: create_edit_sequence_dialog,
         attach_to: 'shot_edit_sequence_button',
+        related_field_updater: sequence_field_updater,
         data_id: function(){
           return sequence_filtering_select.get('value')
-        },
-        related_field_updater: sequence_field_updater
+        }
+
       });
       edit_sequence_button.startup();
       
@@ -211,6 +216,7 @@
       // The Field
       var status_list_filtering_select = new FilteringSelect({
         name: 'status_list_id',
+        label: 'Status List',
         required: true,
         onChange: function(){
           status_updater({animate: true});
@@ -263,8 +269,10 @@
       // The Field
       var status_filtering_select = new FilteringSelect({
         name: 'status_id',
+        label: 'Status',
         required: true,
-        store: status_memory
+        store: status_memory,
+        disabled: true
       }, 'shot_status');
       status_filtering_select.startup();
       
@@ -272,6 +280,7 @@
       var status_updater = fieldUpdater({
         memory: status_memory,
         query_data: function(){
+          status_filtering_select.set('disabled', false);
           var widget = registry.byId('shot_status_list');
           return widget.get('value');
         },

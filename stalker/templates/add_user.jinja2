@@ -120,6 +120,7 @@
       var name_textBox = new ValidationTextBox({
         name: 'name',
         label: 'Name',
+        placeHolder: 'Enter a user name',
         required: true
       }, 'user_name');
       name_textBox.startup();
@@ -133,6 +134,7 @@
       var login_name_textBox = new ValidationTextBox({
         name: 'login',
         label: 'Login',
+        placeHolder: 'Enter a login name',
         required: true
       }, 'user_login');
       login_name_textBox.startup();
@@ -146,6 +148,7 @@
       var email_textBox = new ValidationTextBox({
         name: 'email',
         label: 'e-mail',
+        placeHolder: 'Enter an e-mail',
         required: true
       }, 'user_email');
       email_textBox.startup();
@@ -159,6 +162,7 @@
         name: 'password',
         label: 'Password',
         type: 'password',
+        placeHolder: 'Enter a password',
         required: true
       }, 'user_password');
       password_textBox.startup();
@@ -172,6 +176,7 @@
         label: 'Confirm Password',
         type: 'password',
         required: true,
+        placeHolder: 'Re-enter password',
         invalidMessage: "Passwords doesn't match!",
         validator: function(value, constrains){
           // check if the value matches the password field
@@ -195,7 +200,9 @@
       });
       
       var departments_tagSelect = new TagSelect({
-        name: 'department_ids'
+        name: 'department_ids',
+        label: 'Department',
+        placeHolder: 'Select departments'
       }, 'user_departments');
       departments_tagSelect.startup();
       
@@ -231,7 +238,8 @@
       });
       
       var groups_tagSelect = new TagSelect({
-        name: 'group_ids'
+        name: 'group_ids',
+        placeHolder: 'Select groups'
       }, 'user_groups');
       groups_tagSelect.startup();
       

@@ -157,7 +157,8 @@
       var type_comboBox = new ComboBox({
         name: 'type_name',
         required: true,
-        store: type_memory
+        store: type_memory,
+        placeHolder: 'Enter A New Type or Select A Type'
       }, 'asset_type');
       
       // set value of Type
@@ -191,7 +192,8 @@
       var project_select = new FilteringSelect({
         name: 'project_id',
         required: true,
-        store: project_memory
+        store: project_memory,
+        placeHolder: 'Select A Project'
       }, 'asset_project');
       project_select.startup();
       
@@ -209,7 +211,9 @@
       // The Field
       var status_list_filtering_select = new FilteringSelect({
         name: 'status_list_id',
-        required: true
+        label: 'Status List',
+        required: true,
+        placeHolder: '{% if not status_lists|length %}{{ 'No StatusList in DB' }}{% else %}{{ 'Select A StatusList' }}{% endif %}'
       }, 'asset_status_list');
       status_list_filtering_select.startup();
       
@@ -259,7 +263,8 @@
       var status_select = new FilteringSelect({
         name: 'status_id',
         required: true,
-        store: status_memory
+        store: status_memory,
+        placeHolder: 'Select A Status'
       }, 'asset_status');
       status_select.startup();
       

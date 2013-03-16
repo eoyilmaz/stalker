@@ -190,7 +190,8 @@
       var project_select = new FilteringSelect({
         name: 'project_id',
         required: true,
-        store: project_memory
+        store: project_memory,
+        placeHolder: 'Select A Project'
       }, 'sequence_project');
       project_select.startup();
       
@@ -208,7 +209,8 @@
       // The Field
       var status_list_filtering_select = new FilteringSelect({
         name: 'status_list_id',
-        requeired: true,
+        required: true,
+        label: 'Status List',
         onChange: function(){
           status_updater({animate: true});
         }
@@ -239,6 +241,7 @@
         dialog_id: 'edit_status_list_dialog',
         content_creator: create_edit_status_list_dialog,
         attach_to: 'sequence_edit_status_list_button',
+        related_field_updater: status_list_field_updater,
         data_id: function(){
           var widget = registry.byId('sequence_status_list');
           return widget.get('value');
@@ -259,7 +262,9 @@
       var status_filtering_select = new FilteringSelect({
         name: 'status_id',
         required: true,
-        store: status_memory
+        store: status_memory,
+        label: 'Status',
+        disabled: true
       }, 'sequence_status');
       status_filtering_select.startup();
       
@@ -267,6 +272,7 @@
       var status_updater = fieldUpdater({
         memory: status_memory,
         query_data: function(){
+          status_filtering_select.set('disabled', false);
           var widget = registry.byId('sequence_status_list');
           return widget.get('value');
         },
