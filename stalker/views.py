@@ -1479,6 +1479,64 @@ def get_structures(request):
         for structure in Structure.query.all()
     ]
 
+def convert_to_depend_index(task, tasks):
+    """converts the given task and its dependencies to the format suitable
+    for jQueryGantt's depends input
+    
+    :param task: A Stalker Task
+    
+    :param [] tasks: A list of Stalker Tasks
+    """
+    depends = ''
+    for dependent_task in task.depends:
+        # find the index of the task in the given tasks
+        try:
+            i = tasks.index(dependent_task)
+        except ValueError:
+            pass
+        else:
+            depends += ", %i" % i
+    if depends.startswith(','):
+        logger.debug('converted to depends: %s' % depends[1:])
+        return depends[1:]
+    else:
+        return ''
+
+def convert_to_jquery_gantt_task_format(tasks):
+    """Converts the given tasks to the jQuery Gantt compatible json format.
+    
+    :param tasks: List of Stalker Tasks.
+    :return: json compatible list
+    """
+    return {
+        'tasks' : [
+            {
+                'id': task.id,
+                'name': '%s' % task.name,
+                'code': task.id,
+                'level': 0,
+                'status': 'STATUS_ACTIVE',
+                'start': int(task.start_date.strftime('%s')) * 1000,
+                'end': int(task.end_date.strftime('%s')) * 1000,
+                'depends': convert_to_depend_index(task, tasks),
+                'description': task.description,
+                'assigs': [
+                    {
+                        'resourceId': resource.id,
+                        'id': resource.id
+                    } for resource in task.resources
+                ]
+            }
+            for task in tasks
+        ],
+        'resources' : [{
+            'id': resource.id,
+            'name': resource.name
+        } for resource in User.query.all()],
+        "canWrite": 1,
+        "canWriteOnParent": 1
+    }
+
 @view_config(
     route_name='get_tasks',
     renderer='json',
@@ -1494,15 +1552,13 @@ def get_tasks(request):
     if taskable_entity:
         tasks = taskable_entity.tasks
     
-    return [
-        {
-            'id': task.id,
-            'name': '%s (%s in %s)' % (task.name,
-                                       task.task_of.name,
-                                       task.task_of.project),
-        }
-        for task in tasks
-    ]
+    for task in tasks:
+        logger.debug('------------------------------')
+        logger.debug('task name: %s' % task.name)
+        logger.debug('start date: %s' % task.start_date)
+        logger.debug('end date: %s' % task.end_date)
+    
+    return convert_to_jquery_gantt_task_format(tasks)
 
 @view_config(
     route_name='get_project_tasks',
@@ -1694,6 +1750,7 @@ def add_task(request):
                     for d_id in request.POST.getall('depend_ids')
                 ]
                 depends = Task.query.filter(Task.id.in_(depend_ids)).all()
+                logger.debug('depends: %s' % depends)
                 
                 try:
                     new_task = Task(

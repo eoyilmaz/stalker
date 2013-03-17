@@ -370,7 +370,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-
+        
         self.bookings = []
         self.versions = []
 

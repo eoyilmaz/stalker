@@ -17,14 +17,17 @@ Stalker Changes
 * User instances now have two new properties for getting the user tickets
   (User.tickets) and the open tickets (User.open_tickets).
 
-* Added new helper script to run pserve
-
 * New shortcut Task.project returns the Task.task_of.project value.
 
 * Added 'PlaceHolder' property for 'FilterSelect Widgets'. And 'Label' property
   is used in construction of 'PlaceHolder' property.
 
 * Set disabled prerequisite fields, until their prerequisite is selected.
+
+* jQueryGannt:
+  * Gannt view is now communicating with Stalker correctly. The only left issue
+    is the end date value is not properly shown in the gannt view.
+  * Updated the jQueryGannt css's to work with Stalker and Dojo.
 
 0.2.0.a5
 --------
