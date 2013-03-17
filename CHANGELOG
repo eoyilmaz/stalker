@@ -24,6 +24,9 @@ Stalker Changes
 
 * Set disabled prerequisite fields, until their prerequisite is selected.
 
+* Added 'StartDate', 'EndDate' and 'Duration' field to add_project page.
+  'StartDate', 'EndDate' properties are written on database.
+
 * jQueryGannt:
   * Gannt view is now communicating with Stalker correctly. The only left issue
     is the end date value is not properly shown in the gannt view.

@@ -21,6 +21,36 @@
           <input id='project_code'>
         </td>
       </tr>
+
+       {# START DATE #}
+       <tr>
+         <td class='label_column'>
+           <label for='project_start_date'>Start Date</label>
+         </td>
+         <td class='input_column'>
+           <input id='project_start_date'>
+         </td>
+        </tr>
+
+        {# END DATE #}
+        <tr>
+            <td class='label_column'>
+                <label for='project_end_date'>End Date</label>
+            </td>
+            <td class='input_column'>
+                <input id='project_end_date'>
+            </td>
+        </tr>
+
+        {# DURATION #}
+        <tr>
+            <td class='label_column'>
+                <label for='project_duration'>Duration</label>
+            </td>
+            <td class='input_column'>
+                <input id="project_duration">
+            </td>
+        </tr>
   
       {# IMAGE FORMAT #}
       <tr>
@@ -115,11 +145,12 @@
   require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect',
-    'dijit/form/Button', 'dojo/store/JsonRest', 'stalker/submitForm',
+    'dijit/form/Button', 'dojo/store/JsonRest', 'dojo/date', 'dojo/date/stamp',
+    'dojo/date/locale', 'dijit/form/DateTextBox', 'stalker/submitForm',
     'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, TextBox,
-             NumberTextBox, FilteringSelect, Button, JsonRest, submitForm,
-             fieldUpdater, dialogCaller){
+             NumberTextBox, FilteringSelect, Button, JsonRest,date, stamp, locale,
+             DateTextBox, submitForm, fieldUpdater, dialogCaller){
       
       // ********************************************************************
       // Form
@@ -152,6 +183,90 @@
         placeHolder: 'Enter a code'
       }, 'project_code');
       name_textBox.startup();
+
+
+
+       // **********************************************************************
+       // Start Date
+      var start_date_dateTextBox = new DateTextBox({
+        name: 'start_date',
+        label: 'Start Date',
+        value: new Date(),// set it today by default
+        required: true,
+        datePattern: 'dd-mm-yyyy',
+        onChange: function(){
+            if (this.focused){
+                update_dates(
+                    start_date_dateTextBox.getValue(),
+                    end_date_dateTextBox.getValue(),
+                    null
+                    );
+                }
+            }
+      }, 'project_start_date');
+      start_date_dateTextBox.startup();
+
+        // **********************************************************************
+        // End Date
+        var end_date_dateTextBox = new DateTextBox({
+                                                       name: 'end_date',
+                                                       label: 'End Date',
+                                                       value: new Date(), // set it today by default
+                                                       required: true,
+                                                       datePattern: 'dd-mm-yyyy',
+                                                       onChange: function(){
+                                                           if (this.focused){
+                                                               update_dates(
+                                                                       start_date_dateTextBox.getValue(),
+                                                                       end_date_dateTextBox.getValue(),
+                                                                       null
+                                                               );
+                                                           }
+                                                       }
+                                                   }, 'project_end_date');
+        end_date_dateTextBox.startup();
+
+
+
+
+        // **********************************************************************
+        // Duration
+        var duration_numberTextBox = new NumberTextBox({
+                                                           name: 'duration',
+                                                           label: 'Duration',
+                                                           value: 0,
+                                                           onKeyUp: function(){
+                                                               if (this.focused){
+                                                                   update_dates(
+                                                                           start_date_dateTextBox.getValue(),
+                                                                           null,
+                                                                           this.get('value')
+                                                                   )
+                                                               }
+                                                           }
+                                                       }, 'project_duration');
+        duration_numberTextBox.startup();
+
+        var update_dates = function(start_date, end_date, duration){
+            if (duration == null){
+                // update the duration
+                duration_numberTextBox.set(
+                        'value',
+                        date.difference(start_date, end_date)
+                );
+            } else if (end_date == null) {
+                // update end date
+                end_date_dateTextBox.set(
+                        'value',
+                        date.add(
+                                start_date,
+                                'day',
+                                duration
+                        )
+                );
+            }
+        };
+        //update_dates();
       
       
       
@@ -430,7 +545,11 @@
           submitForm({
             dialog: registry.byId('add_project_dialog'),
             form: add_project_form,
-            additional_data: {submitted: 'add'},
+            additional_data: {
+                submitted: 'add',
+                start_date: stamp.toISOString(start_date_dateTextBox.value),
+                end_date: stamp.toISOString(end_date_dateTextBox.value)
+            },
             url: '{{ request.route_url("add_project") }}',
             method: 'POST'
           });

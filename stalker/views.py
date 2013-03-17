@@ -209,7 +209,21 @@ def add_project(request):
                 status_list_id = int(request.params['status_list'])
                 status_list = StatusList.query\
                     .filter_by(id=status_list_id).first()
-                
+
+                # get the dates
+                # TODO: no time zone info here, please add time zone
+                start_date = datetime.datetime.strptime(
+                    request.params['start_date'][:-6],
+                    "%Y-%m-%dT%H:%M:%S"
+                )
+                end_date = datetime.datetime.strptime(
+                    request.params['end_date'][:-6],
+                    "%Y-%m-%dT%H:%M:%S"
+                )
+
+                logger.debug('start_date : %s' % start_date)
+                logger.debug('end_date : %s' % end_date)
+
                 try:
                     new_project = Project(
                         name=request.params['name'],
@@ -221,7 +235,9 @@ def add_project(request):
                         structure=structure,
                         lead=lead,
                         status_list=status_list,
-                        status=status_list[0]
+                        status=status_list[0],
+                        start_date=start_date,
+                        end_date=end_date
                     )
                 except (AttributeError, TypeError, ValueError) as e:
                     logger.debug(e.message)
