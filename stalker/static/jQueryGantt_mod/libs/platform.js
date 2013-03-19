@@ -840,7 +840,8 @@ function openBlackPopup(url,width,height,onCloseCallBack,iframeId){
 
   //add black only if not already in blackpupup
   if(window.name!=iframeId)
-    bg.css({backgroundImage:"url('"+contextPath+"/applications/teamwork/images/black_70.png')"});
+    //bg.css({backgroundImage:"url('"+contextPath+"/applications/teamwork/images/black_70.png')"});
+    bg.css({backgroundColor:"rgba(0,0,0,0.5)"});
 
   bg.append("<iframe id='"+iframeId+"' name='"+iframeId+"' frameborder='0'></iframe>");
   bg.bringToFront();

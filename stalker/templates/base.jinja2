@@ -39,9 +39,9 @@
 
 {# DOJO COMPRESSED #}
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/dijit/themes/claro/claro.css") }}'/>
+        href='{{ request.static_url("stalker:static/dijit/themes/nihilo/nihilo.css") }}'/>
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/dojox/grid/resources/claroGrid.css") }}'/>
+        href='{{ request.static_url("stalker:static/dojox/grid/resources/nihiloGrid.css") }}'/>
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
         href='{{ request.static_url("stalker:static/dojox/gantt/resources/gantt.css") }}'/>
   
@@ -57,7 +57,7 @@
   </script>
   
 </head>
-<body class='claro'>
+<body class='nihilo'>
 {% block body %}
   <div id='appLayout' class='demoLayout'>
     <div id='header' class='edgePanel' style="overflow: hidden">
@@ -68,7 +68,7 @@
         </a>
       </div>
       
-      <div id='projects_menu'>
+      <div id='projects_menu' style='color: #000000'>
         Projects
       </div>
       

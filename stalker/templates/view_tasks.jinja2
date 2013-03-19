@@ -31,16 +31,15 @@
   <table class="gdfTable" cellspacing="0" cellpadding="0">
     <thead>
     <tr style="height:40px">
-      <th class="gdfColHeader" style="width:10px;"></th>
+      <th class="gdfColHeader" style="width:15px;"></th>
       <th class="gdfColHeader" style="width:25px;"></th>
-      <th class="gdfColHeader gdfResizable" style="width:0px;">code/short name</th>
       <th class="gdfColHeader gdfResizable" style="width:10px;"></th>
       <th class="gdfColHeader gdfResizable" style="width:100px;">name</th>
       <th class="gdfColHeader gdfResizable" style="width:50px;">start</th>
       <th class="gdfColHeader gdfResizable" style="width:50px;">end</th>
       <th class="gdfColHeader gdfResizable" style="width:25px;">dur.</th>
       <th class="gdfColHeader gdfResizable" style="width:50px;">dep.</th>
-      <th class="gdfColHeader gdfResizable" style="width:200px;">assignees</th>
+      <th class="gdfColHeader gdfResizable" style="width:800px;">assignees</th>
     </tr>
     </thead>
   </table>
@@ -48,9 +47,8 @@
 
   <div class="__template__" type="TASKROW"><!--
   <tr taskId="(#=obj.id#)" class="taskEditRow" level="(#=level#)">
-    <th class="gdfCell edit" align="right" style="cursor:pointer;"><span class="taskRowIndex">(#=obj.getRow()+1#)</span> <span class="teamworkIcon" style="font-size:12px;" >e</span></th>
+    <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
     <td class="gdfCell" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
-    <td class="gdfCell"><input type="text" name="code" value="(#=obj.code?obj.code:''#)"></td>
     <td class="gdfCell"><span>-</span></td>
 
     <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.level>0?'border-left:2px dotted orange':''#)"></td>
@@ -172,31 +170,36 @@
       position:relative;
       margin:0 5px;
       width:100%;
-      height:800px;">
+      height:100%;">
 </div>
 
 <script type="text/javascript">
   require(['dijit/registry',
            'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dijit/form/Button',
-           'stalker/dialogCaller', 'dojo/store/JsonRest',
+           'stalker/dialogCaller', 'dojo/store/JsonRest', 'dojo/request/xhr',
            'dojo/domReady!'],
-    function(registry, ObjectStore, DataGrid, Button, dialogCaller, JsonRest){
+    function(registry, ObjectStore, DataGrid, Button, dialogCaller, JsonRest,
+             xhr){
       
       $('#gantttemplates').loadTemplates();
       var ge = new GanttMaster();
       ge.init($("#workSpace"));
       
+      var target;
+      {%  if taskable_entity %}
+        target = '/get/tasks/{{ taskable_entity.id }}';
+      {% else %}
+        target =  '/get/user_tasks/{{ user.id }}';
+      {% endif %}
+      
+      
       // The Memory
       var tasks_memory = new JsonRest({
-        {%  if taskable_entity %}
-          target: '/get/tasks/{{ taskable_entity.id }}'
-        {% else %}
-          target: '/get/user_tasks/{{ user.id }}'
-        {% endif %}
+        target: target
       });
       
       
-      function loadGanttFromServer(taskId, callback) {
+      function loadGanttFromServer() {
         tasks_memory.query().then(function(data){
           ge.loadProject(data);
         });
@@ -207,53 +210,64 @@
       function saveGanttOnServer() {
       
         //this is a simulation: save data to the local storage or to the textarea
-        saveInLocalStorage();
+{#        saveInLocalStorage();#}
         
         
-        /*
         var prj = ge.saveProject();
-      
+        
         delete prj.resources;
         delete prj.roles;
-      
-        var prof = new Profiler("saveServerSide");
-        prof.reset();
         
         if (ge.deletedTaskIds.length>0) {
           if (!confirm("TASK_THAT_WILL_BE_REMOVED\n"+ge.deletedTaskIds.length)) {
             return;
           }
         }
-      
-        $.ajax("ganttAjaxController.jsp", {
-          dataType:"json",
-          data: {CM:"SVPROJECT",prj:JSON.stringify(prj)},
-          type:"POST",
-      
-          success: function(response) {
-            if (response.ok) {
-              prof.stop();
-              if (response.project) {
-                ge.loadProject(response.project); //must reload as "tmp_" ids are now the good ones
-              } else {
-                ge.reset();
-              }
-            } else {
-              var errMsg="Errors saving project\n";
-              if (response.message) {
-                errMsg=errMsg+response.message+"\n";
-              }
-      
-              if (response.errorMessages.length) {
-                errMsg += response.errorMessages.join("\n");
-              }
-      
-              alert(errMsg);
-            }
+        
+        var deffered = xhr.post(
+          '/edit/tasks',
+          {
+            method: 'POST',
+            data: {CM:'save_tasks', prj: JSON.stringify(prj)}
           }
-      
+        );
+        
+        deffered.then(function(){
+          // load the project from server again
+          loadGanttFromServer();
+        }, function(err){
+          alert(err);
         });
-        */
+        
+        
+        //$.ajax("ganttAjaxController.jsp", {
+        //  dataType:"json",
+        //  data: {CM:"SVPROJECT",prj:JSON.stringify(prj)},
+        //  type:"POST",
+      
+        //  success: function(response) {
+        //    if (response.ok) {
+        //      if (response.project) {
+        //        ge.loadProject(response.project); //must reload as "tmp_" ids are now the good ones
+        //      } else {
+        //        ge.reset();
+        //      }
+        //    } else {
+        //      var errMsg="Errors saving project\n";
+        //      if (response.message) {
+        //        errMsg=errMsg+response.message+"\n";
+        //      }
+      
+        //      if (response.errorMessages.length) {
+        //        errMsg += response.errorMessages.join("\n");
+        //      }
+      
+        //      alert(errMsg);
+        //    }
+        //  }
+      
+        //});
+        
       }
       
       
@@ -420,8 +434,12 @@
         });
         add_task_button.startup();
       {% endif %}
+      
       var save_gantt_button = new Button({
-        label: 'Save'
+        label: 'Save',
+        onClick: function(){
+          saveGanttOnServer();
+        }
       }, 'view_tasks_gannt_save_button')
       save_gantt_button.startup();
   });
@@ -429,7 +447,7 @@
 
 <script type="text/javascript">
   $.JST.loadDecorator("ASSIGNMENT_ROW", function(assigTr, taskAssig) {
-
+    
     var resEl = assigTr.find("[name=resourceId]");
     for (var i in taskAssig.task.master.resources) {
       var res = taskAssig.task.master.resources[i];

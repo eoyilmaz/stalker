@@ -1522,7 +1522,7 @@ def convert_to_jquery_gantt_task_format(tasks):
     """Converts the given tasks to the jQuery Gantt compatible json format.
     
     :param tasks: List of Stalker Tasks.
-    :return: json compatible list
+    :return: json compatible dictionary
     """
     return {
         'tasks' : [
@@ -1533,6 +1533,7 @@ def convert_to_jquery_gantt_task_format(tasks):
                 'level': 0,
                 'status': 'STATUS_ACTIVE',
                 'start': int(task.start_date.strftime('%s')) * 1000,
+                'duration': task.duration.days,
                 'end': int(task.end_date.strftime('%s')) * 1000,
                 'depends': convert_to_depend_index(task, tasks),
                 'description': task.description,
@@ -1552,6 +1553,86 @@ def convert_to_jquery_gantt_task_format(tasks):
         "canWrite": 1,
         "canWriteOnParent": 1
     }
+
+def update_with_jquery_gantt_task_data(json_data):
+    """updates the given tasks in database
+    
+    :param data: jQueryGantt produced json string
+    """
+    
+    logger.debug(json_data)
+    import json
+    data = json.loads(json_data)
+    
+    # Updated Tasks
+    for task_data in data['tasks']:
+        task_id = task_data['id']
+        task_name = task_data['name']
+        task_start = task_data['start']
+        task_duration = task_data.get('duration', 0)
+        task_resource_ids = [resource_data['resourceId']
+                             for resource_data in task_data['assigs']]
+        task_description = task_data.get('description', '')
+        
+        # task_depend_ids : " 2, 3, 5, 6:3, 12" these are the index numbers of
+        # the task in the Gantt chart, be carefull it is not the id of the task
+        task_depend_ids = []
+        if len(task_data.get('depends', [])):
+            for index_str in task_data['depends'].split(','):
+                index = int(index_str.split(':')[0])
+                dependent_task_id = data['tasks'][index]['id']
+                task_depend_ids.append(dependent_task_id)
+        
+        # get the task itself
+        if not task_id.startswith('tmp_'): 
+            # update task
+            task = Task.query.filter(Task.id==task_id).first()
+        else:
+            # create a new Task
+            #
+            # there is a problem here, there is no task_of defined for new
+            # tasks
+            task = Task()
+        
+        # update it
+        if task:
+            task.name = task_name
+            task.start_date = datetime.date.fromtimestamp(task_start/1000)
+            task.duration = datetime.timedelta(task_duration)
+            
+            resources = User.query.filter(User.id.in_(task_resource_ids)).all()
+            task.resources = resources
+            
+            task.description = task_description
+            
+            task_depends = Task.query.filter(Task.id.in_(task_depend_ids)).all()
+            task.depends = task_depends
+            DBSession.add(task)
+    
+    # Deleted tasks
+    deleted_tasks = Task.query.filter(Task.id.in_(data['deletedTaskIds'])).all()
+    for task in deleted_tasks:
+        DBSession.delete(task)
+    
+    # create new tasks
+    
+    
+    # transaction will handle the commit don't bother doing anything
+ 
+@view_config(
+    route_name='edit_tasks',
+    renderer='json'
+)
+def edit_tasks(request):
+    """edits the given tasks with the given JSON data
+    """
+    
+    # get the data
+    data = request.params['prj']
+    if data:
+        update_with_jquery_gantt_task_data(data)
+    
+    return {}
 
 @view_config(
     route_name='get_tasks',

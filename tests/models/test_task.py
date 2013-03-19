@@ -833,7 +833,7 @@ class TaskTester(unittest.TestCase):
             email="testuser2@test.com",
             password="testpass"
         )
-
+        
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
         self.kwargs["resources"] = [new_user1, new_user2]
