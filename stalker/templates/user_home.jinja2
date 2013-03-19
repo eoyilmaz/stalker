@@ -1,73 +1,23 @@
-<div id='data_split_container'>
-  <div id='user_details_content_pane'>
-    
-    {# Avatar #}
-    <div id='user_avatar' class='user_avatar'>No Avatar</div>
-    
-    {# Basic Info #}
-    <div id='user_info' class='user_info'>
-      <h2 style='margin: 0px; text-align: right'>{{ user.name }}</h2>
-      <h5 style='margin: 0px; text-align: right'>({{ user.login }})</h5>
-      <table>
-        <tr>
-          <td style='text-align: right'><b>Messages</b></td>
-          <td>&nbsp;</td>
-          <td>({{ user.messages|count }})</td>
-        </tr>
-        <tr>
-          <td style='text-align: right'><b>Tasks</b></td>
-          <td>&nbsp;</td>
-          <td>({{ user.tasks|count }})</td>
-        </tr>
-        <tr>
-          <td style='text-align: right'><b>Open Tickets</b></td>
-          <td>&nbsp;</td>
-          <td>({{ user.open_tickets|count }})</td>
-        </tr>
-      </table>
-    </div>
-  </div>
-    
-  {# Complex Info #}
-  <div id='user_related_data_tab_container'>
+{# Complex Info #}
+<div id='user_related_data_tab_container'>
     {# Tab View #}
-  </div>
 </div>
 <script type='text/javascript'>
-  require(['dijit/registry', 'dijit/layout/SplitContainer',
-    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
-    function(registry, SplitContainer, TabContainer, ContentPane){
-      
-      // **********************************************************************
-      // Split Container - The Main View
-      var data_split_container = new SplitContainer({
-        region: 'center',
-        orientation: 'vertical',
-        splitter: false
-      }, 'data_split_container');
-      
-      var user_details_content_pane = new ContentPane({
-        region: 'top',
-        style: 'height: 256px'
-      }, 'user_details_content_pane');
-      
-      data_split_container.addChild(user_details_content_pane);
-      
-      user_details_content_pane.startup();
-      
+  require(['dijit/registry', 'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+    function(registry, TabContainer, ContentPane){
+
+      console.log('user_id : {{ user.id }}');
+
       // **********************************************************************
       // Bottom Part - Complex Data View
       var user_related_data_tab_container = new TabContainer({
         region: 'bottom'
       }, 'user_related_data_tab_container');
-      user_related_data_tab_container.startup();
-      
-      data_split_container.addChild(user_related_data_tab_container);
-      
-{#      var overview_content_pane = new ContentPane({#}
-{#        title: 'Overview',#}
-{#        href: 'overview/user/{{ user.id }}'#}
-{#      });#}
+
+      var overview_content_pane = new ContentPane({
+        title: 'Overview',
+        href: 'overview/user/{{ user.id }}'
+      });
       
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
@@ -84,12 +34,13 @@
         content: 'view/user_tickets/{{ user.id }}'
       });
       
-{#      user_related_data_tab_container.addChild(overview_content_pane);#}
+      user_related_data_tab_container.addChild(overview_content_pane);
       user_related_data_tab_container.addChild(tasks_content_pane);
       user_related_data_tab_container.addChild(assets_content_pane);
       user_related_data_tab_container.addChild(tickets_content_pane);
-      
-      data_split_container.startup();
+
+      user_related_data_tab_container.startup();
+
   });
 </script>
 
