@@ -204,11 +204,12 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // ASSET
-        create_add_asset_dialog = function(){
+        create_add_asset_dialog = function(project_id){
+            project_id = project_id || -1;
             return new DialogSimple({
                 id: 'add_asset_dialog',
                 title: 'Add Asset',
-                href: '/add/asset',
+                href: '/add/asset/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -217,11 +218,12 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // SHOT
-        create_add_shot_dialog = function(){
+        create_add_shot_dialog = function(project_id){
+            project_id = project_id || -1;
             return new DialogSimple({
                 id: 'add_shot_dialog',
                 title: 'Add Shot',
-                href: '/add/shot',
+                href: '/add/shot/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true

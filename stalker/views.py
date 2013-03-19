@@ -1107,7 +1107,11 @@ def add_asset(request):
                 get_param('type_name')
                 get_param('status_list_id')
                 get_param('status_id')
+
+    project = Project.query.filter_by(id=request.matchdict['project_id']).first()
+
     return {
+        'project': project,
         'projects': Project.query.all(),
         'types': Type.query.filter_by(target_entity_type='Asset').all(),
         'status_list':
@@ -1287,7 +1291,17 @@ def add_shot(request):
                         logger.debug('finished adding Shot')
             else:
                 logger.debug('there are missing parameters')
+                def get_param(param):
+                    if param in request.params:
+                        logger.debug('%s: %s' % (param, request.params[param]))
+                    else:
+                        logger.debug('%s not in params' % param)
+                get_param('project_id')
+
+    project = Project.query.filter_by(id=request.matchdict['project_id']).first()
+
     return {
+        'project': project,
         'projects': Project.query.all(),
         'status_list':
             StatusList.query.filter_by(target_entity_type='Shot').first()
@@ -1727,7 +1741,7 @@ def get_users(request):
 )
 @view_config(
     route_name='overview_project',
-    renderer='overview_project.jinja2',
+    renderer='templates/overview_project.jinja2',
     permission='View_Project'
 )
 def view_project_related_data(request):

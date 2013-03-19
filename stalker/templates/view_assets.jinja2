@@ -35,13 +35,15 @@
         'memory': asset_memory,
         'widget': asset_data_grid
       });
-      
+
+
       var add_asset_button = dialogCaller({
         label: 'Add',
         dialog_id: 'add_asset_dialog',
         content_creator: create_add_asset_dialog,
         attach_to: 'view_assets_add_asset_button',
-        related_field_updater: asset_data_grid_updater
+        related_field_updater: asset_data_grid_updater,
+        data_id: '{{ project.id }}'
       });
       add_asset_button.startup();        
       

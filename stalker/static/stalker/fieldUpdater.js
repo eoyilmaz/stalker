@@ -23,19 +23,9 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
             var query_data = kwargs.query_data || null;
             var selected = kwargs.selected || [];
             var placeHolder = kwargs.placeHolder || '';
-
+            console.log("fieldUpdater runs");
             // set default placeHolder
-            if (placeHolder == '' ){
-                if(widget.label){
-                    placeHolder = 'Select a ' + widget.label;
-                }
-                else{
 
-                    placeHolder = 'Select an item from list';
-
-                }
-
-            }
 
             return function(){
                 var animate = arguments[0] || true;
@@ -99,6 +89,17 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                         widget.set('store', new Memory({data: data}));
 
                         if (data.length > 0){
+                            if (placeHolder == '' ){
+                                if(widget.label){
+                                    placeHolder = 'Select a ' + widget.label;
+                                }
+                                else{
+
+                                    placeHolder = 'Select an item from list';
+
+                                }
+
+                            }
                             widget.set('placeHolder', placeHolder);
                             console.log("placeHolder "+placeHolder);
 
@@ -113,6 +114,20 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                                     // don't do anything
                                 }
                             }
+                        }
+                        else{
+                            if (placeHolder == '' ){
+                                if(widget.label){
+                                    placeHolder = 'No ' + widget.label + " in DB.";
+                                }
+                                else{
+
+                                    placeHolder = 'No item in DB';
+
+                                }
+
+                            }
+                            widget.set('placeHolder', placeHolder);
                         }
 
 

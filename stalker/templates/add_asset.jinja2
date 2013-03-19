@@ -176,8 +176,20 @@
       
       
       
-      // ************************************************************************
-      // Project
+    // ************************************************************************
+    // Project
+
+    var project_select;
+
+    {% if project %}
+        project_select = new TextBox({
+             name: 'project_id',
+             label: 'Project',
+             value: '{{ project.name }} ({{ project.entity_type }})',
+             disabled: true
+        }, 'asset_project');
+        project_select.startup();
+    {% else %}
       var project_memory = new Memory({
         data: [
           {% for project in projects %}
@@ -187,16 +199,16 @@
             },
           {% endfor %}
         ]
-      });
-      
-      var project_select = new FilteringSelect({
-        name: 'project_id',
-        required: true,
-        store: project_memory,
-        placeHolder: 'Select A Project'
-      }, 'asset_project');
-      project_select.startup();
-      
+        });
+
+        project_select = new FilteringSelect({
+            name: 'project_id',
+            required: true,
+            store: project_memory,
+            placeHolder: 'Select A Project'
+        }, 'asset_project');
+        project_select.startup();
+    {% endif %}
       
       
       
@@ -284,7 +296,7 @@
               submitted: 'add',
               type_name: type_comboBox.get('value')
             },
-            url: '{{ request.route_url('add_asset') }}',
+            url: '{{ request.route_url('add_asset', project_id=project.id) }}',
             method: 'POST'
           });
         }

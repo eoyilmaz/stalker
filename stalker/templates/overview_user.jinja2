@@ -1,0 +1,28 @@
+<div id='user_details_content_pane'>
+
+    {# Avatar #}
+    <div id='user_avatar' class='user_avatar'>No Avatar</div>
+
+    {# Basic Info #}
+    <div id='user_info' class='user_info'>
+        <h2 style='margin: 0px; text-align: right'>{{ user.name }}</h2>
+        <h5 style='margin: 0px; text-align: right'>({{ user.login }})</h5>
+        <table>
+            <tr>
+                <td style='text-align: right'><b>Messages</b></td>
+                <td>&nbsp;</td>
+                <td>({{ user.messages|count }})</td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><b>Tasks</b></td>
+                <td>&nbsp;</td>
+                <td>({{ user.tasks|count }})</td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><b>Open Tickets</b></td>
+                <td>&nbsp;</td>
+                <td>({{ user.open_tickets|count }})</td>
+            </tr>
+        </table>
+    </div>
+</div>

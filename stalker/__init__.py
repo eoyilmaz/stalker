@@ -144,7 +144,7 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Assets
-    config.add_route('add_asset', 'add/asset')
+    config.add_route('add_asset', 'add/asset/{project_id}')
     config.add_route('view_asset', 'view/asset/{asset_id}')
     config.add_route('edit_asset', 'edit/asset/{asset_id}')
     config.add_route('view_assets', 'view/assets/{project_id}')
@@ -152,7 +152,7 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Shots
-    config.add_route('add_shot', 'add/shot')
+    config.add_route('add_shot', 'add/shot/{project_id}')
     config.add_route('view_shot', 'view/shot/{shot_id}')
     config.add_route('edit_shot', 'edit/shot/{shot_id}')
     config.add_route('view_shots', 'view/shots/{project_id}')

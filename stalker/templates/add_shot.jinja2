@@ -120,24 +120,36 @@
         placeHolder: 'Enter a code'
       }, 'shot_code');
       name_textBox.startup();
-      
-      
-      
+
+
+
       
       // **********************************************************************
       // Project
-      var project_memory = new Memory({
-        data: [
-          {% for project in projects %}
-            {
-              name: '{{ project.name }}',
-              id: '{{ project.id }}'
-            },
-          {% endfor %}
-        ]
-      });
-      
-      var project_filtering_select = new FilteringSelect({
+      var project_filtering_select;
+
+      {% if project %}
+        project_filtering_select = new TextBox({
+          name: 'project_id',
+          label: 'Project',
+          value: '{{ project.name }} ({{ project.entity_type }})',
+          disabled: true
+        }, 'shot_project');
+      project_filtering_select.startup();
+
+      {% else %}
+        var project_memory = new Memory({
+          data: [
+            {% for project in projects %}
+              {
+                name: '{{ project.name }}',
+                id: '{{ project.id }}'
+              },
+            {% endfor %}
+          ]
+        });
+
+      project_filtering_select = new FilteringSelect({
         name: 'project_id',
         required: true,
         store: project_memory,
@@ -147,16 +159,15 @@
         }
       }, 'shot_project');
       project_filtering_select.startup();
-      
-      
-      
-      
+      {% endif %}
+
+
       // **********************************************************************
       // Sequence
       var sequence_memory = new JsonRest({
         target: '/get/sequences/'
       });
-      
+
       var sequence_filtering_select = new FilteringSelect({
         name: 'sequence_id',
         required: true,
@@ -164,18 +175,35 @@
         label: 'Sequence'
       }, 'shot_sequence');
       sequence_filtering_select.startup();
-      
+
+
       // The Updater
-      var sequence_field_updater = fieldUpdater({
-        memory: sequence_memory,
-        query_data: function(){
-          sequence_filtering_select.set('disabled', false);
-          return project_filtering_select.get('value');
-        },
-        widget: sequence_filtering_select
-      });
-      
-      // Add Sequence Button
+      var sequence_field_updater;
+
+      {% if project %}
+
+        sequence_field_updater = fieldUpdater({
+          memory: sequence_memory,
+          query_data: function(){
+            return {{ project.id }};
+          },
+          widget: sequence_filtering_select
+        });
+        sequence_filtering_select.set('disabled', false);
+        sequence_field_updater();
+
+      {% else %}
+        sequence_field_updater = fieldUpdater({
+          memory: sequence_memory,
+          query_data: function(){
+            sequence_filtering_select.set('disabled', false);
+            return project_filtering_select.get('value');
+          },
+          widget: sequence_filtering_select
+        });
+      {% endif %}
+
+        // Add Sequence Button
       var add_sequence_button = dialogCaller({
         label: 'Add',
         dialog_id: 'add_sequence_dialog',
@@ -303,7 +331,7 @@
             additional_data: {
               submitted: 'add'
             },
-            url: '{{ request.route_url('add_shot') }}',
+            url: '{{ request.route_url('add_shot', project_id=project.id) }}',
             method: 'POST'
           });
         }

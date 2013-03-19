@@ -32,14 +32,15 @@
       var shot_data_grid_updater = fieldUpdater({
         'memory': shot_memory,
         'widget': shot_data_grid
-      })
+      });
       
       var add_shot_button = dialogCaller({
         label: 'Add',
         dialog_id: 'add_shot_dialog',
         content_creator: create_add_shot_dialog,
         attach_to: 'view_shots_add_shot_button',
-        related_field_updater: shot_data_grid_updater
+        related_field_updater: shot_data_grid_updater,
+        data_id: '{{ project.id }}'
       });
       add_shot_button.startup();        
       

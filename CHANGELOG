@@ -34,8 +34,14 @@ Stalker Changes
 
 *  Project page is redesigned. SplitContainer is removed. All contents are
    displayed in TabContainer. New Contents in TabContainer are:
-    - ProjectName (Disabled Field - Using for displaying projectname.)
-    - Overview  (It has InlineEditable fields. It is not connected with DB.)
+    * ProjectName (Disabled Field - Used for displaying projectname.)
+    * Overview  (It has InlineEditable fields. Although they are not connected
+      to DB.)
+
+* Shot and Asset creation dialogs now automatically updated with the given
+  Project instance info.
+
+* User overview page is now reflection the new design.
 
 0.2.0.a5
 --------
