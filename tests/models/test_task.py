@@ -133,6 +133,7 @@ class TaskTester(unittest.TestCase):
         self.kwargs = {
             "name": "Modeling",
             "description": "A Modeling Task",
+            "parent": self.test_data_project1,
             "priority": 500,
             "resources": [self.test_data_user1, self.test_data_user2],
             "effort": datetime.timedelta(4),
@@ -145,10 +146,9 @@ class TaskTester(unittest.TestCase):
             "is_milestone": False,
             "status": 0,
             "status_list": self.test_data_task_status_list,
-            "task_of": self.test_data_project1,
         }
 
-        # create a mock Task
+        # create a test Task
         self.test_data_task = Task(**self.kwargs)
     
     def test___auto_name__class_attribute_is_set_to_False(self):
@@ -849,7 +849,19 @@ class TaskTester(unittest.TestCase):
 
         new_task.resources.remove(new_user2)
         self.assertNotIn(new_task, new_user2.tasks)
-
+    
+    def testing_resources_attribute_will_be_an_empty_list_for_a_container_Task(self):
+        """testing if the resources attribute will be an empty list for a
+        container Task
+        """
+        self.fail('test is not implemented yet')
+    
+    def testing_resources_attribute_will_not_append_any_data_to_itself_for_a_container_Task(self):
+        """testing if the resources attribute will not append any data to
+        itself for a container Task
+        """
+        self.fail('test is not implemented yet')
+    
     def test_effort_and_duration_argument_is_skipped(self):
         """testing if the effort attribute is set to the default value of
         duration divided by the number of resources
@@ -1343,196 +1355,97 @@ class TaskTester(unittest.TestCase):
 
         self.assertTrue(self.test_data_task != entity1)
         self.assertFalse(self.test_data_task != task1)
-
-    def test_task_of_argument_skipped_raises_TypeError(self):
-        """testing if an TypeError will be raised when the task_of
-        argument has been skipped
-        """
-        self.kwargs.pop("task_of")
-        self.assertRaises(TypeError, Task, **self.kwargs)
-
-    def test_task_of_argument_None_raises_TypeError(self):
-        """testing if an AttributeError will be raised when the task_of
-        argument is None
-        """
-        self.kwargs["task_of"] = None
-        self.assertRaises(TypeError, Task, **self.kwargs)
-
-    def test_task_of_attribute_None_raises_TypeError(self):
-        """testing if an AttributeError will be raised when the task_of
-        attribute is None
-        """
-        self.assertRaises(TypeError, setattr, self.test_data_task, "task_of",
-                          None)
-
-    def test_task_of_argument_accepts_anything_thats_been_inherited_from_TaskableEntity(self):
-        """testing if the task_of argument accepts anything that has been
-        inherited from TaskableEntity
-        """
-        status_complete = Status(name="Complete", code="CMPLT")
-        status_wip = Status(name="Work In Progress", code="WIP")
-
-        project_status_list = StatusList(
-            name="Project Status List",
-            statuses=[status_complete, status_wip],
-            target_entity_type=Project
-        )
-
-        commercial_project_type = Type(
-            name="Commercial Project",
-            code='comm',
-            target_entity_type=Project,
-        )
-
-        new_project = Project(
-            name="Test Project",
-            code='tp',
-            status_list=project_status_list,
-            type=commercial_project_type,
-            repository=self.test_data_test_repository
-        )
-
-        someClass_ins = SomeClass(name="test", project=new_project)
-        someOtherClass_ins = SomeOtherClass()
-
-        self.kwargs["task_of"] = someClass_ins
-        new_task = Task(**self.kwargs) # it should accept it
-
-        self.kwargs["task_of"] = someOtherClass_ins
-        self.assertRaises(TypeError, Task, **self.kwargs)
     
-    def test_task_of_attribute_accepts_anything_thats_been_inherited_from_Taskable(self):
-        """testing if the task_of attribute accepts anything that has mixed
-        with TaskMixin
+    def test_parent_argument_is_skipped(self):
+        """testing if the Task is still be able to be created without a parent
         """
-        status_complete = Status(name="Complete", code="CMPLT")
-        status_wip = Status(name="Work In Progress", code="WIP")
-
-        project_status_list = StatusList(
-            name="Project Status List",
-            statuses=[status_complete, status_wip],
-            target_entity_type=Project
-        )
-
-        commercial_project_type = Type(
-            name="Commercial Project",
-            code='comm',
-            target_entity_type=Project,
-        )
-
-        new_project = Project(
-            name="Test Project",
-            code='tp',
-            status_list=project_status_list,
-            type=commercial_project_type,
-            repository=self.test_data_test_repository,
-        )
-
-        someClass_ins = SomeClass(name="test", project=new_project)
-        someOtherClass_ins = SomeOtherClass()
-
-        self.kwargs["task_of"] = new_project
-        new_task = Task(**self.kwargs)
-
-        # it should accept the SomeClass instance
-        new_task.task_of = someClass_ins
-
-        self.assertRaises(TypeError, setattr, new_task, "task_of",
-                          someOtherClass_ins)
-
-    def test_task_of_attribute_updates_the_back_reference_attribute_tasks(self):
-        """testing if the task_of updates the back reference attribute which
-        is called tasks
-        """
-        # create a project and test if the Task.task_of will also update the
-        # project.tasks attribute
-        status_complete = Status(name="complete", code="CMPLT")
-        status_wip = Status(name="work in progress", code="WIP")
-
-        project_status_list = StatusList(
-            name="Project Status List",
-            target_entity_type=Project,
-            statuses=[status_complete, status_wip],
-        )
-
-        project_type_commercial = Type(
-            name="Commercial",
-            code='comm',
-            target_entity_type=Project,
-        )
-
-        new_project1 = Project(
-            name="Test Project 1",
-            code='tp1',
-            status_list=project_status_list,
-            type=project_type_commercial,
-            repository=self.test_data_test_repository
-        )
-
-        new_project2 = Project(
-            name="Test Project 2",
-            code='tp2',
-            status_list=project_status_list,
-            type=project_type_commercial,
-            repository=self.test_data_test_repository,
-        )
-
-        # create a Task
-        task_status_list = StatusList(
-            name="Task Status List",
-            target_entity_type=Task,
-            statuses=[status_complete, status_wip],
-            )
-
-        #print "111111111111111111111"
-        #print new_project1.tasks
-        #print new_project2.tasks
-
-        new_task = Task(
-            name="Modeling",
-            status_list=task_status_list,
-            task_of=new_project1,
-            )
-        #print "222222222222222222222"
-        #print new_task.task_of
-        #print new_project1.tasks
-        #print new_project2.tasks
-
-        # now assign a new project to the task_of attribute
-        new_task.task_of = new_project2
-        self.assertNotIn(new_task, new_project1.tasks)
-        self.assertIn(new_task, new_project2.tasks)
-        #print "333333333333333333333"
-        #print new_task.task_of
-        #print new_project1.tasks
-        #print new_project2.tasks
-
-        #new_project1.tasks.append(new_task)
-        ##new_project1.tasks.append(new_task)
-        ##new_project1.tasks.append(new_task)
-        ##new_project1.tasks.append(new_task)
-        ##print "44444444444444444444444"
-        ##print new_task.task_of
-        ##print new_project1.tasks
-        ##print new_project2.tasks
-        
-        #self.assertIn(new_task, new_project1.tasks)
-        #self.assertNotIn(new_task, new_project2.tasks)
-        ##print "555555555555555555555"
-        ##print new_task.task_of
-        ##print new_project1.tasks
-        ##print new_project2.tasks
-
-        #new_task.task_of = new_project2
-        #self.assertNotIn(new_task, new_project1.tasks)
-        #self.assertIn(new_task, new_project2.tasks)
+        self.fail('test is not implemented yet')
     
-    def test_task_of_argument_only_accepts_TaskableEntity_instances(self):
-        """testing if task_of argument only accepts TaskableEntity instances
+    def test_parent_argument_is_None(self):
+        """testing if the task is still be able to be created without a parent
         """
-        test_obj = TestClass(name="Test Class")
-        self.kwargs["task_of"] = test_obj
-        self.assertRaises(TypeError, Task, **self.kwargs)
+        self.fail('test is not implemented yet')
+    
+    def test_parent_attribute_is_set_to_None(self):
+        """testing if the parent attribute can be set to None
+        """
+        self.fail('test is not implemented yet')
+    
+    def  test_parent_argument_is_not_a_Task_instance(self):
+        """testing if a TypeError will be raised when the parent argument is
+        not a Task instance
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_parent_attribute_is_not_a_Task_instance(self):
+        """testing if a TypeError will be raised when the parent attribute is
+        not a Task instance
+        """
+        self.fail('test is not implemented yet')
+    
+    # there is no way to generate a CycleError by using the parent argument,
+    # cause the Task is just created, it is not in relationship with other
+    # Tasks, there is no parent nor child.
+    
+    def test_parent_attribute_creates_a_cycle(self):
+        """testing if a CycleError will be raised if a child class is tried to
+        be set as a parent.
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_parent_argument_is_working_properly(self):
+        """testing if the parent argument is working properly
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_parent_attribute_is_working_properly(self):
+        """testing if the parent attribute is working properly
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_children_attribute_is_empty_list_by_default(self):
+        """testing if the children attribute is an empty list by default
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_children_attribute_is_set_to_None(self):
+        """testing if a TypeError will be raised when the children attribute is
+        set to None
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_children_attribute_accepts_Tasks_only(self):
+        """testing if a TypeError will be raised when the item assigned to the
+        children attribute is not a Task instance
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_children_attribute_is_working_properly(self):
+        """testing if the children attribute is working properly
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_is_leaf_attribute_is_read_only(self):
+        """testing if the is_leaf attribute is a read only attribute
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_is_leaf_attribute_is_working_properly(self):
+        """testing if the is_leaf attribute is True for a Task without a child
+        Task and False for Task with at least one child Task
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_is_container_attribute_is_read_only(self):
+        """testing if the is_container attribute is a read only attribute
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_is_container_attribute_working_properly(self):
+        """testing if the is_container attribute is True for a Task with at
+        least one child Task and False for a Task with no child Task
+        """
+        self.fail('test is not implemented yet')
     
     def test_project_attribute_is_a_read_only_attribute(self):
         """testing if the project attribute is a read only attribute
@@ -1547,3 +1460,26 @@ class TaskTester(unittest.TestCase):
         self.assertEquals(self.test_data_task.project,
                           self.test_data_task.task_of.project)
     
+    def test_start_date_attribute_value_of_a_container_task_is_defined_by_its_child_tasks(self):
+        """testing if the start_date attribute value is defined by the earliest
+        start date of the children Tasks for a container Task
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_start_date_attribute_value_doesnt_change_for_a_container_Task(self):
+        """testing if the start_date attribute doesn't change when it is set to
+        another value for a container Task.
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_end_date_attribute_value_of_a_container_task_is_defined_by_its_child_tasks(self):
+        """testing if the end_date attribute value is defined by the latest
+        end date value of the children Tasks for a container Task.
+        """
+        self.fail('test is not implemented yet')
+    
+    def test_end_date_attribute_value_doesnt_change_for_a_container_Task(self):
+        """testing if the end_date attribute doesn't change when it is set to
+        another value for a container Task.
+        """
+        self.fail('test is not implemented yet')

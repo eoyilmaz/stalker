@@ -134,25 +134,36 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
     Tasks are the smallest meaningful part that should be accomplished to
-    complete the a :class:`~stalker.models.project.Project`.
+    complete a :class:`~stalker.models.project.Project`.
     
-    In Stalker, currently these items supports Tasks:
+    .. versionadded: 0.2.0: Parent-child relation in Tasks
+      
+      Tasks can now have child Tasks. But Stalker will check if there will be a
+      cycle if one wants to parent a Task to a child Task of its own.
     
-      * :class:`~stalker.models.project.Project`
-      * :class:`~stalker.models.sequence.Sequence`
-      * :class:`~stalker.models.asset.Asset`
-      * :class:`~stalker.models.shot.Shot`
-      * :class:`~stalker.models.entity.TaskableEntity` itself and any class 
-        which derives from :class:`~stalker.models.entity.TaskableEntity`.
+    A Tasks is called a ``container task`` if it has at least one child Task.
+    And it will be called a ``leaf task`` if it doesn't have any children
+    Tasks.
     
-    If you want to have your own class to be *taskable* derive it from the
-    :class:`~stalker.models.entity.TaskableEntity` to add the ability to 
-    connect a :class:`~stalker.models.task.Task` to it.
+    The :attr:`~stalker.core.models.task.Task.start_date` and
+    :attr:`~stalker.core.models.task.Task.end_date` values for a container task
+    is gathered from the child tasks. The start_date is equal to the earliest
+    start_date value of the children tasks, and the end_date is equal to the
+    latest end_date value of the children tasks.
     
     The Task class itself is mixed with
     :class:`~stalker.models.mixins.StatusMixin` and
     :class:`~stalker.models.mixins.ScheduleMixin`. To be able to give the
     :class:`~stalker.models.task.Task` a *Status* and a *start* and *end* time.
+    
+    With every release of Stalker, the Stalker Tasks will try to be more
+    compliant with TaskJuggler Tasks.
+    
+    :param parent: The parent Task of this Task. Every Task in Stalker should
+      be related with a :class:`~stalker.models.project.Project` instance. So
+      if no parent task is desired, at least a Project instance should be
+      passed as the parent of the created Task or the Task will be an orphan
+      task.
     
     :param int priority: It is a number between 0 to 1000 which defines the
       priority of the :class:`~stalker.models.task.Task`. The higher the value
@@ -204,11 +215,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
-    
-    :param task_of: A :class:`~stalker.models.entity.TaskableEntity` instance
-      which is the owner of this Task.
-    
-    :type task_of: :class:`~stalker.models.entity.TaskableEntity`
     """
     #.. :param depends: A list of
     #:class:`~stalker.models.task.TaskDependencyRelation` objects. Holds
@@ -654,7 +660,7 @@ def _check_circular_dependency(task, check_for_task):
     """checks the circular dependency in task if it has check_for_task in its
     depends list
     
-    !!!!WARNING THERE IS NO TEST FOR THIS FUNCTION!!!!
+    TODO: !!!WARNING THERE IS NO TEST FOR THIS FUNCTION!!!
     """
 
     for dependent_task in task.depends:

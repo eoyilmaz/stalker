@@ -553,6 +553,15 @@ class TaskableEntity(Entity, ProjectMixin):
     :attr:`~stalker.models.mixins.TaskMixin.project` attribute. Only the
     ``project`` argument needs to be initialized. See the
     :class:`~stalker.models.mixins.ProjectMixin` for more detail.
+    
+    TaskMixin by default creates a Task instance and stores it in the
+    :attr:`~stalker.model.entity.TaskableEntity.shadow_task` attribute.
+    This Task instance will be the parent of the Tasks assigned to the
+    TaskableEntity. This is done mainly to have a Task in
+    Gantt Charts showing the Taskable Entity without breaking or bending the
+    object models of Gantt Chart libraries. Tasks assigned to the
+    TaskableEntities will automatically be child of the shadow task of the
+    TaskableEntity.
     """
     __auto_name__ = True
     __tablename__ = "TaskableEntities"
