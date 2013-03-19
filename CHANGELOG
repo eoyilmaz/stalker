@@ -32,6 +32,11 @@ Stalker Changes
     is the end date value is not properly shown in the gannt view.
   * Updated the jQueryGannt css's to work with Stalker and Dojo.
 
+*  Project page is redesigned. SplitContainer is removed. All contents are
+   displayed in TabContainer. New Contents in TabContainer are:
+    - ProjectName (Disabled Field - Using for displaying projectname.)
+    - Overview  (It has InlineEditable fields. It is not connected with DB.)
+
 0.2.0.a5
 --------
 

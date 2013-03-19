@@ -87,7 +87,7 @@ def main(global_config, **settings):
     config.add_route('edit_project', 'edit/project/{project_id}')
     config.add_route('view_project', 'view/project/{project_id}')
     config.add_route('view_projects', 'view/projects')
-    config.add_route('overview_project', 'overview/project/{project_id}')
+    config.add_route('overview_project', 'overview_project/{project_id}')
     config.add_route('get_projects', 'get/projects')
     
     # *************************************************************************

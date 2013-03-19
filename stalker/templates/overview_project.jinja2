@@ -1,0 +1,164 @@
+<div id='project_details'>
+    {# Thumbnail #}
+    <div id='project_thumbnail' class='project_thumbnail'>No Thumbnail</div>
+
+    {# Basic Info #}
+    <div id='project_info' class='project_info'>
+        <h2 style='margin: 0px;' id='project_info_name'/>
+        <h5 style='margin: 0px;'>({{ project.code }})</h5>
+        <table width='500px'>
+            <tr>
+                <td><b>Lead</b></td>
+                <td id='project_info_lead'></td>
+            </tr>
+            <tr>
+                <td><b>Image Format</b></td>
+                <td id='project_info_image_format'></td>
+            </tr>
+            <tr>
+                <td><b>Status</b></td>
+                <td id='project_info_status'></td>
+            </tr>
+            <tr>
+                <td><b>Repository</b></td>
+                <td id='project_info_repository'></td>
+            </tr>
+            <tr>
+                <td><b>Start Date</b></td>
+                <td id="project_info_start_date"></td>
+            </tr>
+            <tr>
+                <td><b>End Date</b></td>
+                <td id="project_info_end_date"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script type='text/javascript'>
+    require(['dijit/registry',
+    'dojo/store/Memory', 'dijit/InlineEditBox', 'dijit/form/Textarea',
+    'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
+    'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect',
+    'dijit/form/Button', 'dojo/store/JsonRest', 'dojo/date', 'dojo/date/stamp',
+    'dojo/date/locale', 'dijit/form/DateTextBox', 'stalker/submitForm',
+    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/domReady!'],
+    function(registry, Memory,  InlineEditBox, Textarea, ValidationTextBox, TextBox,
+    NumberTextBox, FilteringSelect, Button, JsonRest,date, stamp, locale,
+    DateTextBox, submitForm, fieldUpdater, dialogCaller){
+
+    // ********************************************************************
+    //PROJECT NAME
+
+    var name_textBox = new InlineEditBox({
+       editor: TextBox,
+       value: '{{ project.name }}'
+    }, "project_info_name");
+
+    // ********************************************************************
+    // LEAD
+
+    var lead_memory = new JsonRest({
+       target: '/get/users'
+    });
+
+    var leadName_textBox = new InlineEditBox({
+       editor: FilteringSelect,
+       editorParams:{ store: lead_memory },
+       value: ' {{ project.lead.name }} ({{ project.lead.login }})'
+    }, "project_info_lead");
+
+    leadName_textBox.startup();
+
+    // ********************************************************************
+    // IMAGE FORMAT
+
+    var imf_memory = new JsonRest({
+       target: '/get/image_formats'
+    });
+
+    var imageFormat_textBox = new InlineEditBox({
+       editor: FilteringSelect,
+       editorParams:{id: 'imf_FilteringSelect',
+                     store: imf_memory
+                    },
+       onChange: function(){
+           //console.log("onChange "+ imageFormat_textBox.value.width);
+       },
+       value: '{{ project.image_format.name }} ({{ project.image_format.width }} x {{ project.image_format.height }} x {{ project.image_format.pixel_aspect }})'
+    }, "project_info_image_format");
+
+    imageFormat_textBox.startup();
+
+    // ********************************************************************
+    // STATUS
+    var status_memory = new JsonRest({
+       target: '/get/statuses'
+    });
+
+    var status_textBox = new InlineEditBox({
+       editor: FilteringSelect,
+       editorParams:{id: 'status_FilteringSelect',
+                     store: status_memory
+                     },
+        onChange: function(){
+
+        },
+        value: '{{ project.status.name }} / {{ project.status.code }}'
+    }, "project_info_status");
+
+    status_textBox.startup();
+
+    // ********************************************************************
+    // REPOSITORY
+    var repository_memory = new JsonRest({
+       target: '/get/repositories'
+    });
+
+    var repository_textBox = new InlineEditBox({
+       editor: FilteringSelect,
+       editorParams:{id: 'repository_FilteringSelect',
+                     store: repository_memory
+                    },
+       onChange: function(){
+       },
+       value: '{{ project.repository.name }}'
+    }, "project_info_repository");
+
+    repository_textBox.startup();
+
+    // ********************************************************************
+    // STARTDATE
+
+    var startDate_textBox = new InlineEditBox({
+       editor: DateTextBox,
+       editorParams:{id: 'startDate_DateTextBox',
+                    value: new Date(),
+                    datePattern: 'dd-mm-yyyy'
+                    },
+       onChange: function(){
+       },
+       value: '{{ project.start_date }}'
+    }, "project_info_start_date");
+
+    startDate_textBox.startup();
+
+
+    // ********************************************************************
+    // ENDDATE
+
+    var endDate_textBox = new InlineEditBox({
+        editor: DateTextBox,
+        editorParams:{id: 'endDate_DateTextBox',
+                      value: new Date(),
+                      datePattern: 'dd-mm-yyyy'
+        },
+        onChange: function(){
+        },
+        value: '{{ project.end_date }}'
+    }, "project_info_end_date");
+
+    endDate_textBox.startup();
+
+
+});
+</script>
