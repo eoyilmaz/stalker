@@ -77,7 +77,7 @@ h4 {
 }
 
 #savingMessage{
-  background-color:#E3EDED;
+  background-color:#dedede;
   display:none;
   color:#617777;
   font-weight:bolder;
@@ -180,7 +180,7 @@ TH, .tableHeader {
   font-weight: normal;
   color: #FFFFFF;
   border: none;
-  background-color: #BCD8F4;
+  background-color: #dedede;
   padding:2px
 }
 

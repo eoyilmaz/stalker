@@ -33,7 +33,6 @@
     <tr style="height:40px">
       <th class="gdfColHeader" style="width:15px;"></th>
       <th class="gdfColHeader" style="width:25px;"></th>
-      <th class="gdfColHeader gdfResizable" style="width:10px;"></th>
       <th class="gdfColHeader gdfResizable" style="width:100px;">name</th>
       <th class="gdfColHeader gdfResizable" style="width:50px;">start</th>
       <th class="gdfColHeader gdfResizable" style="width:50px;">end</th>
@@ -49,7 +48,6 @@
   <tr taskId="(#=obj.id#)" class="taskEditRow" level="(#=level#)">
     <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
     <td class="gdfCell" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
-    <td class="gdfCell"><span>-</span></td>
 
     <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.level>0?'border-left:2px dotted orange':''#)"></td>
 
@@ -65,7 +63,6 @@
   <tr class="taskEditRow emptyRow" >
     <th class="gdfCell" align="right"></th>
     <td class="gdfCell" align="center"></td>
-    <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
@@ -177,9 +174,9 @@
   require(['dijit/registry',
            'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dijit/form/Button',
            'stalker/dialogCaller', 'dojo/store/JsonRest', 'dojo/request/xhr',
-           'dojo/domReady!'],
+           'dojo/_base/lang', 'dojo/domReady!'],
     function(registry, ObjectStore, DataGrid, Button, dialogCaller, JsonRest,
-             xhr){
+             xhr, lang){
       
       $('#gantttemplates').loadTemplates();
       var ge = new GanttMaster();
@@ -189,9 +186,8 @@
       {%  if taskable_entity %}
         target = '/get/tasks/{{ taskable_entity.id }}';
       {% else %}
-        target =  '/get/user_tasks/{{ user.id }}';
+        target =  '/get/user/{{ user.id }}/tasks';
       {% endif %}
-      
       
       // The Memory
       var tasks_memory = new JsonRest({
@@ -201,6 +197,10 @@
       
       function loadGanttFromServer() {
         tasks_memory.query().then(function(data){
+          // user should not be able to edit data
+          {% if not taskable_entity %}
+            data = lang.mixin(data,{'canWrite': 0, 'canWriteOnParent': 0});
+          {% endif %}
           ge.loadProject(data);
         });
       }
@@ -239,64 +239,7 @@
           alert(err);
         });
         
-        
-        //$.ajax("ganttAjaxController.jsp", {
-        //  dataType:"json",
-        //  data: {CM:"SVPROJECT",prj:JSON.stringify(prj)},
-        //  type:"POST",
-      
-        //  success: function(response) {
-        //    if (response.ok) {
-        //      if (response.project) {
-        //        ge.loadProject(response.project); //must reload as "tmp_" ids are now the good ones
-        //      } else {
-        //        ge.reset();
-        //      }
-        //    } else {
-        //      var errMsg="Errors saving project\n";
-        //      if (response.message) {
-        //        errMsg=errMsg+response.message+"\n";
-        //      }
-      
-        //      if (response.errorMessages.length) {
-        //        errMsg += response.errorMessages.join("\n");
-        //      }
-      
-        //      alert(errMsg);
-        //    }
-        //  }
-      
-        //});
-        
       }
-      
-      
-      //-------------------------------------------  Create some demo data ------------------------------------------------------
-      function setRoles() {
-        ge.roles = [
-          {
-            id:"tmp_1",
-            name:"Project Manager"
-          },
-          {
-            id:"tmp_2",
-            name:"Worker"
-          },
-          {
-            id:"tmp_3",
-            name:"Stakeholder/Customer"
-          }
-        ];
-      }
-      
-      function setResource() {
-        var res = [];
-        for (var i = 1; i <= 10; i++) {
-          res.push({id:"tmp_" + i,name:"Resource " + i});
-        }
-        ge.resources = res;
-      }
-      
       
       function clearGantt() {
         ge.reset();
@@ -362,64 +305,7 @@
          neww=window.open(uriContent,"dl");*/
       }
       
-      
-      //-------------------------------------------  LOCAL STORAGE MANAGEMENT (for this demo only) ------------------------------------------------------
-      Storage.prototype.setObject = function(key, value) {
-        this.setItem(key, JSON.stringify(value));
-      };
-      
-      
-      Storage.prototype.getObject = function(key) {
-        return this.getItem(key) && JSON.parse(this.getItem(key));
-      };
-      
-      
-      function loadFromLocalStorage() {
-        var ret;
-        if (localStorage) {
-          if (localStorage.getObject("teamworkGantDemo")) {
-            ret = localStorage.getObject("teamworkGantDemo");
-          }
-        } else {
-          $("#taZone").show();
-        }
-        if (!ret || !ret.tasks || ret.tasks.length == 0){
-          ret = JSON.parse($("#ta").val());
-      
-      
-          //actualiza data
-          var offset=new Date().getTime()-ret.tasks[0].start;
-          for (var i=0;i<ret.tasks.length;i++)
-            ret.tasks[i].start=ret.tasks[i].start+offset;
-      
-      
-        }
-        ge.loadProject(ret);
-        ge.checkpoint(); //empty the undo stack
-      }
-      
-      
-      function saveInLocalStorage() {
-        var prj = ge.saveProject();
-        if (localStorage) {
-          localStorage.setObject("teamworkGantDemo", prj);
-        } else {
-          $("#ta").val(JSON.stringify(prj));
-        }
-      }
-      
       loadGanttFromServer();
-      
-      //fill default Teamwork roles if any
-      if (!ge.roles || ge.roles.length == 0) {
-        setRoles();
-      }
-
-      //fill default Resources roles if any
-      if (!ge.resources || ge.resources.length == 0) {
-        setResource();
-      }
-
       
       {% if taskable_entity %}
         var add_task_button = dialogCaller({
@@ -433,8 +319,8 @@
           {% endif %}
         });
         add_task_button.startup();
-      {% endif %}
       
+      // TODO: This should be disabled upon permission not according to the existence of a template variable
       var save_gantt_button = new Button({
         label: 'Save',
         onClick: function(){
@@ -442,6 +328,7 @@
         }
       }, 'view_tasks_gannt_save_button')
       save_gantt_button.startup();
+      {% endif %}
   });
 </script>
 

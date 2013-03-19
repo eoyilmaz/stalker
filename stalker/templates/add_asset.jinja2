@@ -296,7 +296,11 @@
               submitted: 'add',
               type_name: type_comboBox.get('value')
             },
-            url: '{{ request.route_url('add_asset', project_id=project.id) }}',
+            {% if project %}
+              url: 'add/asset/{{project.id}}',
+            {% else %}
+              url: 'add/asset/' + project_select.value,
+            {% endif %}
             method: 'POST'
           });
         }

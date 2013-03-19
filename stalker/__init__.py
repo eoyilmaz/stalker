@@ -114,6 +114,7 @@ def main(global_config, **settings):
     config.add_route('edit_user', 'edit/user/{user_id}')
     config.add_route('get_users', 'get/users')
     config.add_route('overview_user', 'overview/user/{user_id}')
+    config.add_route('get_user_tasks', 'get/user/{user_id}/tasks')
     config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
     config.add_route('view_user_versions', 'view/user/versions/{user_id}')
     config.add_route('view_user_tickets', 'view/user/tickets/{user_id}')

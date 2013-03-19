@@ -112,7 +112,7 @@
       return val.substr(val.length - 2);
     };
 
-    var holidays = "#01_01#04_25#08_15#11_01#12_25#12_26#06_02#12_08#05_01#2010_04_05#2010_10_19#2010_05_15#2011_04_04#";
+    var holidays = ''; //"#01_01#04_25#08_15#11_01#12_25#12_26#06_02#12_08#05_01#2010_04_05#2010_10_19#2010_05_15#2011_04_04#";
 
     var ymd = "#" + date.getFullYear() + "_" + pad(date.getMonth() + 1) + "_" + pad(date.getDate()) + "#";
     var md = "#" + pad(date.getMonth() + 1) + "_" + pad(date.getDate()) + "#";

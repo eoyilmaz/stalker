@@ -1001,7 +1001,6 @@ def add_asset(request):
             if 'name' in request.params and \
                'code' in request.params and \
                'description' in request.params and \
-               'project_id' in request.params and \
                'type_name' in request.params and \
                'status_list_id' in request.params and \
                'status_id' in request.params:
@@ -1012,8 +1011,8 @@ def add_asset(request):
                              request.params['name'])
                 logger.debug('request.params["description"]: %s' %
                              request.params['description'])
-                logger.debug('request.params["project_id"]: %s' %
-                             request.params['project_id'])
+                # logger.debug('request.params["project_id"]: %s' %
+                #              request.params['project_id'])
                 logger.debug('request.params["type_name"]: %s' %
                              request.params['type_name'])
                 logger.debug('request.params["status_list_id"]: %s' %
@@ -1021,7 +1020,7 @@ def add_asset(request):
                 logger.debug('request.params["status_id"]: %s' %
                              request.params['status_id'])
                 
-                project_id = request.params['project_id']
+                project_id = request.matchdict['project_id']
                 
                 # type will always return with a type name
                 type_name = request.params['type_name']
@@ -1598,10 +1597,10 @@ def update_with_jquery_gantt_task_data(json_data):
                 task_depend_ids.append(dependent_task_id)
         
         # get the task itself
-        if not task_id.startswith('tmp_'): 
+        if not isinstance(task_id, basestring): 
             # update task
             task = Task.query.filter(Task.id==task_id).first()
-        else:
+        elif task_id.startswith('tmp_'):
             # create a new Task
             #
             # there is a problem here, there is no task_of defined for new
@@ -1996,6 +1995,10 @@ def add_group(request):
     route_name='overview_user',
     renderer='overview_user.jinja2'
 )
+@view_config(
+    route_name='view_user_tasks',
+    renderer='view_tasks.jinja2'
+)
 def overview_user(request):
     """runs when over viewing general User info
     """
@@ -2008,10 +2011,12 @@ def overview_user(request):
     }
 
 @view_config(
-    route_name='view_user_tasks',
-    renderer='view_tasks.jinja2'
+    route_name='get_user_tasks',
+    renderer='json'
 )
-def view_user_tasks(request):
+def get_user_tasks(request):
+    """returns the user tasks as jQueryGantt json
+    """
     # get user id
     user_id = request.matchdict['user_id']
     user = User.query.filter_by(id=user_id).first()
@@ -2021,12 +2026,4 @@ def view_user_tasks(request):
     if user is not None:
         tasks = sorted(user.tasks, key=lambda x: x.project.id)
     
-    # get distinct projects
-    # TODO: please, and I really beg you here, update it with a proper database query
-    projects = list(set([task.project for task in tasks]))
-    
-    return {
-        'user': user,
-        'tasks': tasks,
-        'projects': projects
-    }
+    return convert_to_jquery_gantt_task_format(tasks)
