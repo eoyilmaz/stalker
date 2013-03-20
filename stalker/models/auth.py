@@ -151,7 +151,7 @@ class Permission(Base):
     id = Column(Integer, primary_key=True)
     _access = Column('access', Enum('Allow', 'Deny', name='AccessNames'))
     _action = Column('action',
-                     Enum(*defaults.DEFAULT_ACTIONS,name='ActionNames'))
+                     Enum(*defaults.ACTIONS,name='ActionNames'))
     _class_name = Column('class_name', String)
     
     def __init__(self, access, action, class_name):
@@ -204,10 +204,10 @@ class Permission(Base):
             raise TypeError('Permission.action should be an instance of str '
                             'or unicode not %s' % action.__class__.__name__)
         
-        if action not in defaults.DEFAULT_ACTIONS:
+        if action not in defaults.ACTIONS:
             raise ValueError('Permission.action should be one of the values '
                              'of %s not %s' % 
-                             (defaults.DEFAULT_ACTIONS, action))
+                             (defaults.ACTIONS, action))
         
         return action
     

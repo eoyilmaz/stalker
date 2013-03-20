@@ -223,7 +223,7 @@ class VersionTester(unittest.TestCase):
         self.kwargs.pop("take_name")
         new_version = Version(**self.kwargs)
         self.assertEqual(new_version.take_name,
-                         defaults.DEFAULT_VERSION_TAKE_NAME)
+                         defaults.VERSION_TAKE_NAME)
 
     def test_take_name_argument_is_None(self):
         """testing if a TypeError will be raised when the take_name argument is

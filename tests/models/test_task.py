@@ -24,8 +24,7 @@ class TestClass(SimpleEntity):
     __tablename__ = "TestClasses"
     testClass_id = Column("id", ForeignKey("SimpleEntities.id"),
                           primary_key=True)
-    #tasks = 
-        
+
 class TaskTester(unittest.TestCase):
     """Tests the stalker.models.task.Task class
     """
@@ -164,7 +163,7 @@ class TaskTester(unittest.TestCase):
         """
         self.kwargs.pop("priority")
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.priority, defaults.DEFAULT_TASK_PRIORITY)
+        self.assertEqual(new_task.priority, defaults.TASK_PRIORITY)
 
     def test_priority_argument_is_given_as_None_will_default_to_DEFAULT_TASK_PRIORITY(
     self):
@@ -173,7 +172,7 @@ class TaskTester(unittest.TestCase):
         """
         self.kwargs["priority"] = None
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.priority, defaults.DEFAULT_TASK_PRIORITY)
+        self.assertEqual(new_task.priority, defaults.TASK_PRIORITY)
 
     def test_priority_attribute_is_given_as_None_will_default_to_DEFAULT_TASK_PRIORITY(
     self):
@@ -182,7 +181,7 @@ class TaskTester(unittest.TestCase):
         """
         self.test_data_task.priority = None
         self.assertEqual(self.test_data_task.priority,
-                         defaults.DEFAULT_TASK_PRIORITY)
+                         defaults.TASK_PRIORITY)
 
     def test_priority_argument_any_given_other_value_then_integer_will_default_to_DEFAULT_TASK_PRIORITY(self):
         """testing if any other value then an positif integer for priority
@@ -193,7 +192,7 @@ class TaskTester(unittest.TestCase):
         for test_value in test_values:
             self.kwargs["priority"] = test_value
             new_task = Task(**self.kwargs)
-            self.assertEqual(new_task.priority, defaults.DEFAULT_TASK_PRIORITY)
+            self.assertEqual(new_task.priority, defaults.TASK_PRIORITY)
 
     def test_priority_attribute_any_given_other_value_then_integer_will_default_to_DEFAULT_TASK_PRIORITY(self):
         """testing if any other value then an positif integer for priority
@@ -204,7 +203,7 @@ class TaskTester(unittest.TestCase):
         for test_value in test_values:
             self.test_data_task.priority = test_value
             self.assertEqual(self.test_data_task.priority,
-                             defaults.DEFAULT_TASK_PRIORITY)
+                             defaults.TASK_PRIORITY)
 
     def test_priority_argument_is_negative(self):
         """testing if the priority argument is given as a negative value will
@@ -871,8 +870,8 @@ class TaskTester(unittest.TestCase):
 
         new_task = Task(**self.kwargs)
 
-        self.assertEqual(new_task.duration, defaults.DEFAULT_TASK_DURATION)
-        self.assertEqual(new_task.effort, defaults.DEFAULT_TASK_DURATION *
+        self.assertEqual(new_task.duration, defaults.TASK_DURATION)
+        self.assertEqual(new_task.effort, defaults.TASK_DURATION *
                                           len(new_task.resources))
 
     def test_effort_argument_skipped_but_duration_is_present(self):
@@ -906,7 +905,7 @@ class TaskTester(unittest.TestCase):
         self.kwargs["effort"] = None
         self.kwargs["duration"] = None
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.duration, defaults.DEFAULT_TASK_DURATION)
+        self.assertEqual(new_task.duration, defaults.TASK_DURATION)
         self.assertEqual(new_task.effort, new_task.duration *
                                           len(new_task.resources))
 

@@ -379,7 +379,7 @@ def register(class_):
         
         DBSession.add(new_entity_type)
     
-    for action in defaults.DEFAULT_ACTIONS:
+    for action in defaults.ACTIONS:
         for access in  [Allow, Deny]:
             permission_obj = Permission(access, action, class_name)
             if permission_obj not in permissions_db:

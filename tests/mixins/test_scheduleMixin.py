@@ -227,7 +227,7 @@ class ScheduleMixinTester(unittest.TestCase):
             new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
 
             self.assertEqual(new_foo_obj.duration,
-                             defaults.DEFAULT_TASK_DURATION)
+                             defaults.TASK_DURATION)
 
     def test_duration_argument_is_not_an_instance_of_date_when_end_date_argument_is_missing(
     self):
@@ -244,7 +244,7 @@ class ScheduleMixinTester(unittest.TestCase):
             self.kwargs["duration"] = test_value
             new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
             self.assertEqual(new_foo_obj.duration,
-                             defaults.DEFAULT_TASK_DURATION)
+                             defaults.TASK_DURATION)
 
     def test_duration_attribute_is_calculated_correctly(self):
         """testing if the duration attribute is calculated correctly
@@ -346,7 +346,7 @@ class ScheduleMixinTester(unittest.TestCase):
 
         self.assertEqual(new_foo_entity.start_date, datetime.date.today())
         self.assertEqual(new_foo_entity.duration,
-                         defaults.DEFAULT_TASK_DURATION)
+                         defaults.TASK_DURATION)
         self.assertEqual(new_foo_entity.end_date,
                          new_foo_entity.start_date + new_foo_entity.duration)
 
@@ -363,7 +363,7 @@ class ScheduleMixinTester(unittest.TestCase):
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
 
         self.assertEqual(new_foo_entity.duration,
-                         defaults.DEFAULT_TASK_DURATION)
+                         defaults.TASK_DURATION)
         self.assertEqual(new_foo_entity.end_date,
                          new_foo_entity.start_date + new_foo_entity.duration)
 
@@ -430,7 +430,7 @@ class ScheduleMixinTester(unittest.TestCase):
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
 
         self.assertEqual(new_foo_entity.duration,
-                         defaults.DEFAULT_TASK_DURATION)
+                         defaults.TASK_DURATION)
         self.assertEqual(new_foo_entity.start_date,
                          new_foo_entity.end_date - new_foo_entity.duration)
 

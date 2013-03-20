@@ -184,7 +184,7 @@ class Ticket(Entity, StatusMixin):
         
         # just force auto name generation
         self._number = self._generate_ticket_number()
-        kwargs['name'] = defaults.DEFAULT_TICKET_LABEL + ' #%i' % self.number
+        kwargs['name'] = defaults.TICKET_LABEL + ' #%i' % self.number
         
         super(Ticket, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)

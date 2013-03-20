@@ -570,19 +570,19 @@ class ScheduleMixin(object):
 
                 if duration is None:
                     # set the defaults
-                    duration = defaults.DEFAULT_TASK_DURATION
+                    duration = defaults.TASK_DURATION
 
                 end_date = start_date + duration
             else:
                 if duration is None:
-                    duration = defaults.DEFAULT_TASK_DURATION
+                    duration = defaults.TASK_DURATION
 
                 start_date = end_date - duration
 
         # check end_date
         if end_date is None:
             if duration is None:
-                duration = defaults.DEFAULT_TASK_DURATION
+                duration = defaults.TASK_DURATION
 
             end_date = start_date + duration
 

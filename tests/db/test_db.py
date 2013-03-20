@@ -310,7 +310,7 @@ class DatabaseTester(unittest.TestCase):
         
         logger.debug("%s" % permissions_DB)
         
-        actions = defaults.DEFAULT_ACTIONS
+        actions = defaults.ACTIONS
         
         for action in permissions_DB:
             self.assertIn(action.action, actions)
@@ -350,14 +350,14 @@ class DatabaseTester(unittest.TestCase):
         
         self.assertEqual(
             len(permission_DB),
-            len(class_names) * len(defaults.DEFAULT_ACTIONS) * 2
+            len(class_names) * len(defaults.ACTIONS) * 2
         )
         
         from pyramid.security import Allow, Deny
         
         for permission in permission_DB:
             self.assertIn(permission.access, [Allow, Deny])
-            self.assertIn(permission.action,  defaults.DEFAULT_ACTIONS)
+            self.assertIn(permission.action,  defaults.ACTIONS)
             self.assertIn(permission.class_name, class_names)
             logger.debug('permission.access: %s' % permission.access)
             logger.debug('permission.action: %s' % permission.action)

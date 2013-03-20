@@ -2,6 +2,24 @@
 Stalker Changes
 ===============
 
+0.2.0.a7
+--------
+* Added a new helper class for Project working hour management, called
+  WorkingHours.
+
+* Changed these default setting value names to corresponding new names:
+  * ``DEFAULT_TASK_DURATION`` -> ``TASK_DURATION``
+  * ``DEFAULT_TASK_PRIORITY`` -> ``TASK_PRIORITY``
+  * ``DEFAULT_VERSION_TAKE_NAME`` -> ``VERSION_TAKE_NAME``
+  * ``DEFAULT_TICKET_LABEL`` -> ``TICKET_LABEL``
+  * ``DEFAULT_ACTIONS`` -> ``ACTIONS``
+  * ``DEFAULT_BG_COLOR`` -> ``BG_COLOR``
+  * ``DEFAULT_FG_COLOR`` -> ``FG_COLOR``
+
+* Added default settings for project working hours (``WORKING_HOURS``,
+  ``DAY_ORDER``, ``DAILY_WORKING_HOURS``)
+ 
+
 0.2.0.a6
 --------
 

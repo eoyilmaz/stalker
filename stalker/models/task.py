@@ -138,18 +138,47 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     .. versionadded: 0.2.0: Parent-child relation in Tasks
       
-      Tasks can now have child Tasks. But Stalker will check if there will be a
-      cycle if one wants to parent a Task to a child Task of its own.
+      Tasks can now have child Tasks. So you can create complex relations of
+      Tasks to comply with your project needs.
+    
+    A Task needs to be created with a Project instance passed to its project
+    argument or with a parent Task. So the following codes are both valid::
+      
+      # with a project instance
+      task1 = Task(name='Schedule', project=proj1)
+      
+      # with a parent task
+      task2 = Task(name='Documentation', parent=task1)
+      
+      # or with both
+      task3 = Task(name='Spec', project=proj1, parent=task2)
+      
+      # this will create a RuntimeError
+      task4 = Task(name='Failure', project=proj2, parent=task2) # the task2 is
+                                                                # not a task of
+                                                                # proj2 but
+                                                                # proj1
+      # this will also create a RuntimeError
+      task5 = Task(name='Failure 2') # no project no parent, this is an orphan
+                                     # task.
+    
+    The the end_date of a task is calculated by using the duration of the Task
+    it self and the working hours settings of the related Project instance. So
+    the holidays or the vacations of the resources are taken in to account.
     
     A Tasks is called a ``container task`` if it has at least one child Task.
-    And it will be called a ``leaf task`` if it doesn't have any children
-    Tasks.
+    And it is called a ``leaf task`` if it doesn't have any children Tasks. The
+    resources in a container task is meaningless, cause the resources are
+    defined by the child tasks.
     
     The :attr:`~stalker.core.models.task.Task.start_date` and
     :attr:`~stalker.core.models.task.Task.end_date` values for a container task
     is gathered from the child tasks. The start_date is equal to the earliest
     start_date value of the children tasks, and the end_date is equal to the
     latest end_date value of the children tasks.
+    
+    Stalker will check if there will be a cycle if one wants to parent a Task
+    to a child Task of its own.
     
     The Task class itself is mixed with
     :class:`~stalker.models.mixins.StatusMixin` and
@@ -363,7 +392,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  effort=None,
                  resources=None,
                  is_milestone=False,
-                 priority=defaults.DEFAULT_TASK_PRIORITY,
+                 priority=defaults.TASK_PRIORITY,
                  task_of=None,
                  **kwargs):
         # update kwargs with extras
@@ -563,7 +592,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             pass
         
         if not isinstance(priority, int):
-            priority = defaults.DEFAULT_TASK_PRIORITY
+            priority = defaults.TASK_PRIORITY
         
         if priority < 0:
             priority = 0
@@ -673,44 +702,45 @@ def _check_circular_dependency(task, check_for_task):
             _check_circular_dependency(dependent_task, check_for_task)
 
 
-#class TaskDependencyRelation(object):
-#"""Holds information about :class:`~stalker.models.task.Task` dependencies.
-
-#(DEVELOPERS: It could be an association proxy for the Task class)
-
-#A TaskDependencyRelation object basically defines which
-#:class:`~stalker.models.task.Task` is dependent
-#to which other :class:`~stalker.models.task.Task` and what is the lag
-#between the end of the dependent to the start of the dependee.
-
-#A :class:`~stalker.models.task.Task` can not be set dependent to it self.
-#So the the :attr:`~stalker.models.task.TaskDependencyRelation.depends` list
-#can not contain the same value with
-#:attr:`~stalker.models.task.TaskDependencyRelation.task`.
-
-#:param task: The :class:`~stalker.models.task.Task` that is dependent to
-#others.
-
-#:type task: :class:`~stalker.models.task.Task`
-
-#:param depends: A :class:`~stalker.models.task.Task`\ s that the
-#:class:`~stalker.models.task.Task` which is held by the
-#:attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
-#dependening on. The :attr:`~stalker.models.task.Task.start_date` and the
-#:attr:`~stalker.models.task.Task.end_date` attributes of the
-#:class:`~stalker.models.task.Task` is updated if it is before the
-#``end_date`` of the dependent :class:`~stalker.models.task.Task`.
-
-#:type depends: :class:`~stalker.models.task.Task`
-
-#:param lag: The lag between the end of the dependent task to the start of
-#the dependee. It is an instance of timedelta and could be a negative
-#value. The default is 0. So the end of the task is start of the other.
-#"""
-
-#
-    #def __init__(self):
-        #pass
+class TaskDependencyRelation(object):
+    """Holds information about :class:`~stalker.models.task.Task` dependencies.
+    
+    (DEVELOPERS: It could be an association proxy for the Task class)
+    
+    A TaskDependencyRelation object basically defines which
+    :class:`~stalker.models.task.Task` is dependent
+    to which other :class:`~stalker.models.task.Task`\ s and what is the lag
+    between the end of the dependee task to the start of the depender task.
+    
+    A :class:`~stalker.models.task.Task` can not be set dependent to it self.
+    So the the :attr:`~stalker.models.task.TaskDependencyRelation.dependees`
+    list can not contain the same value with
+    :attr:`~stalker.models.task.TaskDependencyRelation.dependent`.
+    
+    :param depender: The :class:`~stalker.models.task.Task` that is dependent
+      to others.
+    
+    :type depender: :class:`~stalker.models.task.Task`
+    
+    :param dependee: A :class:`~stalker.models.task.Task`\ s that the
+    :class:`~stalker.models.task.Task` which is held by the
+    :attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
+    dependening on. The :attr:`~stalker.models.task.Task.start_date` and the
+    :attr:`~stalker.models.task.Task.end_date` attributes of the
+    :class:`~stalker.models.task.Task` is updated if it is before the
+    ``end_date`` of the dependent :class:`~stalker.models.task.Task`.
+    
+    :type depends: :class:`~stalker.models.task.Task`
+    
+    :param lag: The lag between the end of the dependent task to the start of
+      the dependee. It is an instance of timedelta and could be a negative
+      value. The default is 0. So the end of the task is start of the other.
+    
+    :type lag: datetime.timedelta
+    """
+    
+    def __init__(self):
+        pass
 
 # TASK_TASKS
 Task_Tasks = Table(

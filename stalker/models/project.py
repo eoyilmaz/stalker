@@ -3,12 +3,14 @@
 # 
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
+import copy
 
 from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean
 from sqlalchemy.orm import relationship, validates
 from stalker import User
+from stalker.conf import defaults
 from stalker.db.session import DBSession
-from stalker.models.entity import TaskableEntity
+from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import (StatusMixin, ScheduleMixin, ReferenceMixin,
                                    CodeMixin)
 
@@ -17,7 +19,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
+class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     """All the information about a Project in Stalker is hold in this class.
     
     Project is one of the main classes that will direct the others. A project
@@ -25,22 +27,36 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMi
     
     It is mixed with :class:`~stalker.models.mixins.ReferenceMixin`,
     :class:`~stalker.models.mixins.StatusMixin`,
-    :class:`~stalker.models.mixins.ScheduleMixin`,
-    :class:`~stalker.models.mixins.TaskMixin` and
+    :class:`~stalker.models.mixins.ScheduleMixin` and
     :class:`~stalker.models.mixins.CodeMixin` to give reference, status,
-    schedule, task abilities and code attribute. Please read the individual
-    documentation of each of the mixins.
+    schedule and code attribute. Please read the individual documentation of
+    each of the mixins.
     
-    The :attr:`~stalker.models.project.Project.users` attributes content is
-    gathered from all the :class:`~stalker.models.task.Task`\ s of the project
-    itself and from the :class:`~stalker.models.task.Task`\ s of the
-    :class:`~stalker.models.sequence.Sequence`\ s stored in the
-    :attr:`~stalker.models.project.Project.sequences` attribute, the
-    :class:`~stalker.models.shot.Shot`\ s stored in the
-    :attr:`~stalker.models.sequence.Sequence.shots` attribute, the
-    :class:`~stalker.models.asset.Asset`\ s stored in the
-    :attr:`~stalker.models.project.Project.assets`. It is a read only
-    attribute.
+    Project Users
+    -------------
+    
+    The :attr:`~stalker.models.project.Project.users` attribute lists the users
+    in this project. UIs like task creation for example will only list these
+    users as available resources for this project.
+    
+    Root Task
+    ---------
+    
+    Project instances will be created with a default Task with the same name of
+    the project. This Task instance is stored in the ``root_task`` attribute of
+    the project. Renaming the project will also renamed the root Task.
+    
+    The Root Task is used in Gantt Chart views as the starting point for the
+    other Tasks. A new task can be created by passing the Project or by passing
+    the Root Task to the Task class.
+    
+    Working Hours
+    -------------
+    
+    Every Project in stalker has a working hour settings which defines the
+    default working hours for that project. It helps the scheduler to schedule
+    the tasks based on assigned resources and the working hours of that
+    project.
     
     :param lead: The lead of the project. Default value is None.
     
@@ -74,6 +90,15 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMi
     :param bool is_stereoscopic: a bool value, showing if the project is going
       to be a stereo 3D project, anything given as the argument will be
       converted to True or False. Default value is False.
+    
+    :param working_hours: A :class:`~stalker.models.project.WorkingHours`
+      instance showing the working hours settings for that project. This data
+      is stored as a PickleType in the database.
+    
+    :param users: A list of :class:`~stalker.models.auth.User`\ s holding the
+      users in this project. This will create a reduced or grouped list of
+      studio workers and will make it easier to define the resources for a Task
+      related to this project. The default value is an empty list.
     """
     
     # DELETED ARGUMENTS:
@@ -110,7 +135,7 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMi
     __mapper_args__ = {
         "polymorphic_identity": "Project",
         "inherit_condition":
-            project_id_local==TaskableEntity.taskableEntity_id
+            project_id_local==Entity.entity_id
     }
     
     lead_id = Column(Integer, ForeignKey("Users.id"))
@@ -342,3 +367,151 @@ class Project(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMi
         """
         return super(Project, self).__eq__(other) and\
                isinstance(other, Project)
+
+
+class WorkingHours(object):
+    """A helper class to manage Project working hours.
+    
+    Working hours is a data class to store the weekly working hours pattern of
+    the studio. 
+    
+    The data stored as a dictionary with the short day names are used as the
+    key and the value is a list of two integers showing the working hours
+    interval as the minutes after midnight. This is done in that way to ease
+    the data transfer to TaskJuggler. The default value is defined in
+    :mod:`stalker.conf.defaults` ::
+      
+      wh = WorkingHours()
+      wh.working_hours = {
+          'mon': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'tue': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'wed': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'thu': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'fri': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'sat': [], # saturday off
+          'sun': [], # sunday off
+      }
+    
+    The default value is 9:30 - 18:30 from Monday to Friday and Saturday and
+    Sunday are off.
+    
+    The working hours can be updated by the user supplied dictionary. If the
+    user supplied dictionary doesn't have all the days then the default values
+    will be used for those days.
+    
+    :param working_hours: The dictionary that shows the working hours. The keys
+      of the dictionary should be one of ['mon', 'tue', 'wed', 'thu', 'fri',
+      'sat', 'sun']. And the values should be a list of two integers like
+      [[int, int], [int, int], ...] format, showing the minutes after midnight.
+      For missing days the default value will be used. If skipped the default
+      value is going to be used.
+    """
+    
+    def __init__(self, working_hours=None, **kwargs):
+        if working_hours is None:
+            working_hours = defaults.WORKING_HOURS
+        self._wh = None
+        self.working_hours = self._validate_working_hours(working_hours)
+    
+    def _validate_working_hours(self, wh_in):
+        """validates the given working hours
+        """
+        if not isinstance(wh_in, dict):
+            raise TypeError('%s.working_hours should be a dictionary, not %s' % 
+                            (self.__class__.__name__,
+                             wh_in.__class__.__name__))
+        
+        for key in wh_in.keys():
+            if not isinstance(wh_in[key], list):
+                raise TypeError('%s.working_hours should be a dictionary with '
+                                'keys "sun, mon, tue, wed, thu, fri, sat" '
+                                'and the values should a list of lists of '
+                                'two integers like [[540, 720], [800, 1080]], '
+                                'not %s' % (self.__class__.__name__,
+                                            wh_in[key].__class__.__name__))
+            
+            # validate item values
+            self._validate_wh_value(wh_in[key])
+        
+        # update the default values with the supplied working_hour dictionary
+        # copy the defaults
+        wh_def = copy.copy(defaults.WORKING_HOURS)
+        # update them
+        wh_def.update(wh_in)
+        
+        return wh_def
+    
+    @property
+    def working_hours(self):
+        """the getter of _wh
+        """
+        return self._wh
+    
+    @working_hours.setter
+    def working_hours(self, wh_in):
+        """the setter of _wh
+        """
+        self._wh = self._validate_working_hours(wh_in)
+    
+    def is_working_hour(self, datetime):
+        """checks if the given datetime is in working hours
+        """
+        pass
+    
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            return self._wh[defaults.DAY_ORDER[item]]
+        elif isinstance(item, str):
+            return self._wh[item]
+    
+    def __setitem__(self, key, value):
+        self._validate_wh_value(value)
+        if isinstance(key, int):
+            self._wh[defaults.DAY_ORDER[key]] = value
+        elif isinstance(key, str):
+            # check if key is in
+            if key not in defaults.DAY_ORDER:
+                raise KeyError('%s accepts only %s as key, not %s' %
+                               (self.__class__.__name__, defaults.DAY_ORDER,
+                                key))
+            self._wh[key] = value
+    
+    def working_hours_of_day(self, day):
+        """returns the working hours of the given day
+        
+        :param day: if given an integer it will use it as the weekday number
+           ([0(Sunday),6]), if it is a string then it is considered the lower
+           case abbreviated weekday name (['sun', 'mon', 'tue', 'thu', 'fri',
+           'sat', 'sun'])
+        """
+        pass
+    
+    def _validate_wh_value(self, value):
+        """validates the working hour value
+        """
+        err = '%s.working_hours value should be a list of lists of two ' \
+              'integers between and the range of integers should be 0-1440, ' \
+              'not %s'
+        
+        if not isinstance(value, list):
+            raise TypeError(err % (self.__class__.__name__,
+                                   value.__class__.__name__))
+        
+        for i in value:
+            if not isinstance(i, list):
+                raise TypeError( err % (self.__class__.__name__,
+                                        i.__class__.__name__))
+            
+            # check list length
+            if len(i) != 2:
+                raise RuntimeError( err %  (self.__class__.__name__, value))
+            
+            # check type
+            if not isinstance(i[0], int) or not isinstance(i[1], int):
+                raise TypeError(err % (self.__class__.__name__, value))
+            
+            # check range
+            if i[0] < 0 or i[0] > 1440 or i[1] < 0 or i[1] > 1440:
+                raise ValueError(err % (self.__class__.__name__, value))
+        
+        return value
