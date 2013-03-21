@@ -4,13 +4,15 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 import copy
+import warnings
 
 from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean
 from sqlalchemy.orm import relationship, validates
 from stalker import User
 from stalker.conf import defaults
 from stalker.db.session import DBSession
-from stalker.models.entity import Entity, SimpleEntity
+from stalker.db.declarative import Base
+from stalker.models.entity import Entity
 from stalker.models.mixins import (StatusMixin, ScheduleMixin, ReferenceMixin,
                                    CodeMixin)
 
@@ -58,6 +60,23 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     the tasks based on assigned resources and the working hours of that
     project.
     
+    TaskJuggler Integration
+    -----------------------
+    
+    Stalker uses TaskJuggler for scheduling the project tasks. The
+    :attr:`~stalker.models.project.Project.to_tjp` attribute generates a tjp
+    compliant string which includes the project definition, the tasks of the
+    project, the resources in the project including the vacation definitions
+    and all the bookings recorded for the project.
+    
+    For custom attributes or directives that needs to be passed to TaskJuggler
+    you can use the :attr:`~stalker.models.project.Project.custom_tjp`
+    attribute which will be attached to the generated tjp file (inside the
+    "project" directive).
+    
+    To manage all the studio projects at once (schedule them at once please use
+    :class:`~stalker.models.studio.Studio`).
+    
     :param lead: The lead of the project. Default value is None.
     
     :type lead: :class:`~stalker.User`
@@ -101,35 +120,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
       related to this project. The default value is an empty list.
     """
     
-    # DELETED ARGUMENTS:
-    #
-    #:param float display_width: the width of the display that the output of the
-    #  project is going to be displayed (very unnecessary if you are not using
-    #  stereo 3D setup). Should be an int or float value, negative values
-    #  converted to the positive values. Default value is 1.
-    
-    # ------------------------------------------------------------------------
-    # NOTES:
-    #
-    # Because a Project instance is inherited from TaskableEntity and which is
-    # mixed with the ProjectMixin it has a project attribute. In SOM, the
-    # project instantly assigns itself to the project attribute (in __init__).
-    # But this creates a weird position in database table and mapper
-    # configuration where for the Project class the mapper should configure the
-    # `project` attribute with the post_update flag is set to True, and this
-    # implies the project_id column to be Null for a while, at least
-    # SQLAlchemy does an UPDATE to assign the Project itself to the project
-    # attribute, thus the project_id column shouldn't be nullable for Project
-    # class, but it is not necessary for the others.
-    # 
-    # And because SOM is also checking if the project attribute is None or Null
-    # for the created instance, I consider doing this safe.
-    # ------------------------------------------------------------------------
-
     __auto_name__ = False
     #__strictly_typed__ = True
     __tablename__ = "Projects"
-    project_id_local = Column("id", Integer, ForeignKey("TaskableEntities.id"),
+    project_id_local = Column("id", Integer, ForeignKey("Entities.id"),
                               primary_key=True)
     
     __mapper_args__ = {
@@ -137,6 +131,14 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         "inherit_condition":
             project_id_local==Entity.entity_id
     }
+    
+    tasks = relationship(
+        'Task',
+        primaryjoin='Tasks.c.project_id==Projects.c.id',
+        uselist=True
+    )
+    
+    users = relationship('ProjectUsers')
     
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
@@ -292,25 +294,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         return bool(is_stereoscopic_in)
     
     @property
-    def users(self):
-        """returns the users related to this project
-        """
-        from stalker.models.auth import User
-        from stalker.models.task import Task
-        
-        if DBSession is not None:
-            return DBSession.query(User).\
-            join(User.tasks).\
-            join(Task.task_of).\
-            join(TaskableEntity.project).\
-            filter(Project.name == self.name).all()
-        else:
-            RuntimeWarning("There is no database setup, the users can not "
-                           "be queried from this state, please use "
-                           "stalker.db.setup() to setup a database")
-            return []
-    
-    @property
     def assets(self):
         """returns the assets related to this project
         """
@@ -318,13 +301,15 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         from stalker.models.asset import Asset
         
         if DBSession is not None:
-            return DBSession.query(Asset).\
-            join(Asset.project).\
-            filter(Project.name == self.name).all()
+            return Asset.query\
+                .join(Asset.project)\
+                .filter(Project.name == self.name)\
+                .all()
         else:
-            RuntimeWarning("There is no database setup, the users can not "
+            warnings.warn("There is no database setup, the users can not "
                            "be queried from this state, please use "
-                           "stalker.db.setup() to setup a database")
+                           "stalker.db.setup() to setup a database",
+                          RuntimeWarning)
             return []
     
     @property
@@ -337,29 +322,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         if DBSession is not None:
             return Sequence.query\
                 .join(Sequence.project)\
-                .filter(Project.name == self.name).all()
-        else:
-            RuntimeWarning("There is no database setup, the sequences can not "
-                           "be queried from this state, please use "
-                           "stalker.db.setup() to setup a database")
-            return []
-    
-    @property
-    def project_tasks(self):
-        """returns the Tasks which are direct or indirectly related to this
-        Project
-        """
-        if DBSession is not None:
-            from stalker import Task
-            return Task.query\
-                .join(Task.task_of)\
-                .join(TaskableEntity.project)\
-                .filter(Project.id == self.id)\
+                .filter(Project.name == self.name)\
                 .all()
         else:
-            RuntimeWarning("There is no database setup, the tasks can not "
-                           "be queried from this state, please use "
-                           "stalker.db.setup() to setup a database")
+            warnings.warn("There is no database setup, the sequences can not "
+                          "be queried from this state, please use "
+                          "stalker.db.setup() to setup a database",
+                          RuntimeWarning)
             return []
      
     def __eq__(self, other):
@@ -398,6 +367,22 @@ class WorkingHours(object):
     The working hours can be updated by the user supplied dictionary. If the
     user supplied dictionary doesn't have all the days then the default values
     will be used for those days.
+    
+    It is possible to use day index and day short names as a key value to reach
+    the data::
+      
+      from stalker.conf import defaults
+      wh = WorkingHours()
+      
+      # this is same by doing wh.working_hours['sun']
+      assert wh['sun'] == defaults.WORKING_HOURS['sun']
+      
+      # you can reach the data using the weekday number as index
+      assert wh[0] == defaults.WORKING_HOURS['sun']
+      
+      # working hours of sunday if defaults are used or any other day defined
+      # by the stalker.conf.defaults.DAY_ORDER
+      assert wh[0] == defaults.WORKING_HOURS[defaults.DAY_ORDER[0]]
     
     :param working_hours: The dictionary that shows the working hours. The keys
       of the dictionary should be one of ['mon', 'tue', 'wed', 'thu', 'fri',
@@ -476,16 +461,6 @@ class WorkingHours(object):
                                 key))
             self._wh[key] = value
     
-    def working_hours_of_day(self, day):
-        """returns the working hours of the given day
-        
-        :param day: if given an integer it will use it as the weekday number
-           ([0(Sunday),6]), if it is a string then it is considered the lower
-           case abbreviated weekday name (['sun', 'mon', 'tue', 'thu', 'fri',
-           'sat', 'sun'])
-        """
-        pass
-    
     def _validate_wh_value(self, value):
         """validates the working hour value
         """
@@ -515,3 +490,27 @@ class WorkingHours(object):
                 raise ValueError(err % (self.__class__.__name__, value))
         
         return value
+    
+    def __str__(self):
+        # TODO: create a TaskJuggler suitable string representation
+        return super(object, WorkingHours).__str__(self)
+
+
+class ProjectUsers(Base):
+    """A helper for Project User relation
+    """
+    __tablename__ = 'ProjectUsers'
+    
+    user_id = Column(
+        'user_id',
+        Integer,
+        ForeignKey('Users.id'),
+        primary_key=True
+    )
+    
+    project_id = Column(
+        'project_id',
+        Integer,
+        ForeignKey('Projects.id'),
+        primary_key=True
+    )

@@ -417,6 +417,8 @@ class User(Entity, ACLMixin):
         """
     )
     
+    projects = relationship('ProjectUsers')
+    
     projects_lead = relationship(
         "Project",
         primaryjoin="Projects.c.lead_id==Users.c.id",
@@ -759,31 +761,6 @@ class User(Entity, ACLMixin):
             )
 
         return task
-
-    @property
-    def projects(self):
-        """The list of :class:`~stalker.models.project.Project`\ s those the current user assigned to.
-        
-        returns a list of :class:`~stalker.models.project.Project` objects.
-        It is a read-only attribute. To assign a
-        :class:`~stalker.models.auth.User` to a
-        :class:`~stalker.models.project.Project`, you need to create a new
-        :class:`~stalker.models.task.Task` with the
-        :attr:`~stalker.models.task.Task.resources` is set to this
-        :class:`~stalker.models.auth.User` and assign the
-        :class:`~stalker.models.task.Task` to the
-        :class:`~stalker.models.project.Project` by setting the
-        :attr:`~stalker.models.task.Task.project` attribute of the
-        :class:`~stalker.models.task.Task` to the
-        :class:`~stalker.models.project.Project`.
-        """
-        
-        # TODO: do it with SQLAlchemy
-        projects = []
-        for task in self.tasks:
-            projects.append(task.task_of.project)
-
-        return list(set(projects))
     
     @property
     def tickets(self):

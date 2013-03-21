@@ -368,47 +368,47 @@ class StatusMixin(object):
 class ScheduleMixin(object):
     """Adds schedule info to the mixed in class.
     
-    Adds schedule information like ``start_date``, ``end_date`` and
+    Adds schedule information like ``start``, ``end`` and
     ``duration``. There are theree parameters to initialize a class with
-    ScheduleMixin, which are, ``start_date``, ``end_date`` and ``duration``.
+    ScheduleMixin, which are, ``start``, ``end`` and ``duration``.
     Only two of them are enough to initialize the class. The preceding order
     for the parameters is as follows::
       
-      start_date > end_date > duration
+      start > end > duration
     
-    So if all of the parameters are given only the ``start_date`` and the
-    ``end_date`` will be used and the ``duration`` will be calculated
+    So if all of the parameters are given only the ``start`` and the
+    ``end`` will be used and the ``duration`` will be calculated
     accordingly. In any other conditions the missing parameter will be
     calculated from the following table:
     
     +------------+----------+----------+----------------------------------------+
-    | start_date | end_date | duration | DEFAULTS                               |
+    | start | end | duration | DEFAULTS                               |
     +============+==========+==========+========================================+
-    |            |          |          | start_date = datetime.date.today()     |
+    |            |          |          | start = datetime.date.today()     |
     |            |          |          |                                        |
     |            |          |          | duration = datetime.timedelta(days=10) |
     |            |          |          |                                        |
-    |            |          |          | end_date = start_date + duration       |
+    |            |          |          | end = start + duration       |
     +------------+----------+----------+----------------------------------------+
     |     X      |          |          | duration = datetime.timedelta(days=10) |
     |            |          |          |                                        |
-    |            |          |          | end_date = start_date + duration       |
+    |            |          |          | end = start + duration       |
     +------------+----------+----------+----------------------------------------+
-    |     X      |    X     |          | duration = end_date - start_date       |
+    |     X      |    X     |          | duration = end - start       |
     +------------+----------+----------+----------------------------------------+
-    |     X      |          |    X     | end_date = start_date + duration       |
+    |     X      |          |    X     | end = start + duration       |
     +------------+----------+----------+----------------------------------------+
-    |     X      |    X     |    X     | duration = end_date - start_date       |
+    |     X      |    X     |    X     | duration = end - start       |
     +------------+----------+----------+----------------------------------------+
-    |            |    X     |    X     | start_date = end_date - duration       |
+    |            |    X     |    X     | start = end - duration       |
     +------------+----------+----------+----------------------------------------+
     |            |    X     |          | duration = datetime.timedelta(days=10) |
     |            |          |          |                                        |
-    |            |          |          | start_date = end_date - duration       |
+    |            |          |          | start = end - duration       |
     +------------+----------+----------+----------------------------------------+
-    |            |          |    X     | start_date = datetime.date.today()     |
+    |            |          |    X     | start = datetime.date.today()     |
     |            |          |          |                                        |
-    |            |          |          | end_date = start_date + duration       |
+    |            |          |          | end = start + duration       |
     +------------+----------+----------+----------------------------------------+
       
     The date attributes can be managed with timezones. Follow the Python idioms
@@ -416,21 +416,20 @@ class ScheduleMixin(object):
     
     .. _documentation of datetime: http://docs.python.org/library/datetime.html
     
-    :param start_date: the start date of the entity, should be a datetime.date
-      instance, the start_date is the pin point for the date calculation. In
-      any condition if the start_date is available then the value will be
-      preserved. If start_date passes the end_date the end_date is also changed
+    :param start: the start date of the entity, should be a datetime.date
+      instance, the start is the pin point for the date calculation. In
+      any condition if the start is available then the value will be
+      preserved. If start passes the end the end is also changed
       to a date to keep the timedelta between dates. The default value is
       datetime.date.today()
     
-    :type start_date: :class:`datetime.datetime`
+    :type start: :class:`datetime.datetime`
     
-    :param end_date: the end_date of the entity, should be a datetime.date
-      instance, when the start_date is changed to a date passing the end_date,
-      then the end_date is also changed to a later date so the timedelta
-      between the dates is kept.
+    :param end: the end of the entity, should be a datetime.date instance, when
+      the start is changed to a date passing the end, then the end is also
+      changed to a later date so the timedelta between the dates is kept.
     
-    :type end_date: :class:`datetime.datetime` or :class:`datetime.timedelta`
+    :type end: :class:`datetime.datetime` or :class:`datetime.timedelta`
     
     :param duration: The duration of the entity. It is a
       :class:`datetime.timedelta` instance. The default value is read from
@@ -444,71 +443,71 @@ class ScheduleMixin(object):
     #    __tablename__ = "ScheduleMixins"
     
     def __init__(self,
-                 start_date=None,
-                 end_date=None,
+                 start=None,
+                 end=None,
                  duration=None,
                  **kwargs):
-        self._validate_dates(start_date, end_date, duration)
+        self._validate_dates(start, end, duration)
 
     @declared_attr
-    def _end_date(cls):
-        return Column("end_date", Date)
+    def _end(cls):
+        return Column("end", Date)
     
-    def _end_date_getter(self):
+    def _end_getter(self):
         """The date that the entity should be delivered.
         
-        The end_date can be set to a datetime.timedelta and in this case it
-        will be calculated as an offset from the start_date and converted to
-        datetime.date again. Setting the start_date to a date passing the
-        end_date will also set the end_date so the timedelta between them is
-        preserved, default value is 10 days
+        The end can be set to a datetime.timedelta and in this case it will be
+        calculated as an offset from the start and converted to datetime.date
+        again. Setting the start to a date passing the end will also set the
+        end, so the timedelta between them is preserved, default value is
+        10 days
         """
-        return self._end_date
+        return self._end
 
-    def _end_date_setter(self, end_date_in):
-        self._validate_dates(self.start_date, end_date_in, self.duration)
+    def _end_setter(self, end_in):
+        self._validate_dates(self.start, end_in, self.duration)
     
     @declared_attr
-    def end_date(cls):
+    def end(cls):
         return synonym(
-            "_end_date",
+            "_end",
             descriptor=property(
-                cls._end_date_getter,
-                cls._end_date_setter
+                cls._end_getter,
+                cls._end_setter
             )
         )
     
     @declared_attr
-    def _start_date(cls):
-        return Column("start_date", Date)
+    def _start(cls):
+        return Column("start", Date)
     
-    def _start_date_getter(self):
+    def _start_getter(self):
         """The date that this entity should start.
         
         Also effects the
-        :attr:`~stalker.models.mixins.ScheduleMixin.end_date` attribute value
+        :attr:`~stalker.models.mixins.ScheduleMixin.end` attribute value
         in certain conditions, if the
-        :attr:`~stalker.models.mixins.ScheduleMixin.start_date` is set to a
-        time passing the :attr:`~stalker.models.mixins.ScheduleMixin.end_date`
+        :attr:`~stalker.models.mixins.ScheduleMixin.start` is set to a
+        time passing the :attr:`~stalker.models.mixins.ScheduleMixin.end`
         it will also offset the
-        :attr:`~stalker.models.mixins.ScheduleMixin.end_date` to keep the
+        :attr:`~stalker.models.mixins.ScheduleMixin.end` to keep the
         :attr:`~stalker.models.mixins.ScheduleMixin.duration` value
-        fixed. :attr:`~stalker.models.mixins.ScheduleMixin.start_date` should be
+        fixed. :attr:`~stalker.models.mixins.ScheduleMixin.start` should be
         an instance of class:`datetime.date` and the default value is
         :func:`datetime.date.today()`
         """
-        return self._start_date
+        return self._start
     
-    def _start_date_setter(self, start_date_in):
-        self._validate_dates(start_date_in, self.end_date, self.duration)
+    def _start_setter(self, start_in):
+        self._validate_dates(start_in, self.end, self.duration)
     
     @declared_attr
-    def start_date(cls):
+    def start(cls):
         return synonym(
-            "_start_date",
+            "_start",
             descriptor=property(
-                cls._start_date_getter,
-                cls._start_date_setter,
+                cls._start_getter,
+                cls._start_setter,
                 )
         )
     
@@ -520,9 +519,9 @@ class ScheduleMixin(object):
         """Duration of the entity.
         
         It is a datetime.timedelta instance. Showing the difference of the
-        :attr:`~stalker.models.mixins.ScheduleMixin.start_date` and the
-        :attr:`~stalker.models.mixins.ScheduleMixin.end_date`. If edited it
-        changes the :attr:`~stalker.models.mixins.ScheduleMixin.end_date`
+        :attr:`~stalker.models.mixins.ScheduleMixin.start` and the
+        :attr:`~stalker.models.mixins.ScheduleMixin.end`. If edited it
+        changes the :attr:`~stalker.models.mixins.ScheduleMixin.end`
         attribute value.
         """
         return self._duration
@@ -530,14 +529,14 @@ class ScheduleMixin(object):
     def _duration_setter(self, duration_in):
         if duration_in is not None:
             if isinstance(duration_in, datetime.timedelta):
-                # set the end_date to None
+                # set the end to None
                 # to make it recalculated
-                self._validate_dates(self.start_date, None, duration_in)
+                self._validate_dates(self.start, None, duration_in)
             else:
-                self._validate_dates(self.start_date, self.end_date,
+                self._validate_dates(self.start, self.end,
                                      duration_in)
         else:
-            self._validate_dates(self.start_date, self.end_date, duration_in)
+            self._validate_dates(self.start, self.end, duration_in)
     
     @declared_attr
     def duration(cls):
@@ -549,53 +548,54 @@ class ScheduleMixin(object):
             )
         )
     
-    def _validate_dates(self, start_date, end_date, duration):
+    def _validate_dates(self, start, end, duration):
         """updates the date values
         """
-        if not isinstance(start_date, datetime.date):
-            start_date = None
+        if not isinstance(start, datetime.date):
+            start = None
         
-        if not isinstance(end_date, datetime.date):
-            end_date = None
+        if not isinstance(end, datetime.date):
+            end = None
         
         if not isinstance(duration, datetime.timedelta):
             duration = None
         
-        # check start_date
-        if start_date is None:
-            # try to calculate the start_date from end_date and duration
-            if end_date is None:
+        # check start
+        if start is None:
+            # try to calculate the start from end and duration
+            if end is None:
                 # set the defaults
-                start_date = datetime.date.today()
-
+                start = datetime.date.today()
+                
                 if duration is None:
                     # set the defaults
                     duration = defaults.TASK_DURATION
-
-                end_date = start_date + duration
+                
+                end = start + duration
             else:
                 if duration is None:
                     duration = defaults.TASK_DURATION
-
-                start_date = end_date - duration
-
-        # check end_date
-        if end_date is None:
+                    
+                start = end - duration
+        
+        # check end
+        if end is None:
             if duration is None:
                 duration = defaults.TASK_DURATION
 
-            end_date = start_date + duration
+            end = start + duration
 
-        if end_date < start_date:
+        if end < start:
             # check duration
             if duration < datetime.timedelta(1):
                 duration = datetime.timedelta(1)
 
-            end_date = start_date + duration
+            end = start + duration
 
-        self._start_date = start_date
-        self._end_date = end_date
-        self._duration = self._end_date - self._start_date
+        self._start = start
+        self._end = end
+        self._duration = self._end - self._start
+
 
 class ProjectMixin(object):
     """Gives the ability to connect to a :class:`~stalker.models.project.Project` to the mixed in object.

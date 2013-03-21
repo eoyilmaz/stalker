@@ -6,7 +6,7 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import reconstructor
-from stalker.models.entity import TaskableEntity
+from stalker.models.task import Task
 from stalker.models.mixins import StatusMixin, ReferenceMixin, CodeMixin
 
 from stalker.log import logging_level
@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-class Asset(TaskableEntity, ReferenceMixin, StatusMixin, CodeMixin):
+class Asset(Task, ReferenceMixin, CodeMixin):
     """The Asset class is the whole idea behind Stalker.
     
     *Assets* are containers of :class:`~stalker.models.task.Task`\ s. And
@@ -51,7 +51,7 @@ class Asset(TaskableEntity, ReferenceMixin, StatusMixin, CodeMixin):
     __tablename__ = "Assets"
     __mapper_args__ = {"polymorphic_identity": "Asset"}
 
-    asset_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
+    asset_id = Column("id", Integer, ForeignKey("Tasks.id"),
                       primary_key=True)
     
     def __init__(self, code, **kwargs):

@@ -47,8 +47,8 @@ class ScheduleMixinTester(unittest.TestCase):
 
         self.kwargs = {
             "name": "ozgur",
-            "start_date": datetime.date.today(),
-            "end_date": datetime.date.today() + datetime.timedelta(10),
+            "start": datetime.date.today(),
+            "end": datetime.date.today() + datetime.timedelta(10),
             "duration": datetime.timedelta(10)
         }
 
@@ -63,53 +63,53 @@ class ScheduleMixinTester(unittest.TestCase):
         """
 
         new_A = DeclSchedMixA(**self.kwargs) # should not create any problem
-        self.assertEqual(new_A.start_date, self.kwargs["start_date"])
-        self.assertEqual(new_A.end_date, self.kwargs["end_date"])
+        self.assertEqual(new_A.start, self.kwargs["start"])
+        self.assertEqual(new_A.end, self.kwargs["end"])
         self.assertEqual(new_A.duration, self.kwargs["duration"])
 
         #print "----------------------------"
-        #print new_A.start_date
-        #print new_A.end_date
+        #print new_A.start
+        #print new_A.end
         #print new_A.duration
 
-        # try to change the start_date and check if the duration is also
+        # try to change the start and check if the duration is also
         # updated
-        new_A.start_date = datetime.date.today() + datetime.timedelta(20)
+        new_A.start = datetime.date.today() + datetime.timedelta(20)
 
-        self.assertEqual(new_A.start_date, datetime.date.today() +
+        self.assertEqual(new_A.start, datetime.date.today() +
                                            datetime.timedelta(20))
-        self.assertEqual(new_A.end_date, self.kwargs["end_date"] +
+        self.assertEqual(new_A.end, self.kwargs["end"] +
                                          datetime.timedelta(20))
         self.assertEqual(new_A.duration, datetime.timedelta(10))
 
-        a_start_date = new_A.start_date
-        a_end_date = new_A.end_date
+        a_start = new_A.start
+        a_end = new_A.end
         a_duration = new_A.duration
 
-        # now check the start_date, end_date and duration
+        # now check the start, end and duration
         #print "----------------------------"
-        #print new_A.start_date
-        #print new_A.end_date
+        #print new_A.start
+        #print new_A.end
         #print new_A.duration
 
         # create a new class
         new_B = DeclSchedMixB(**self.kwargs)
-        # now check the start_date, end_date and duration
-        self.assertEqual(new_B.start_date, self.kwargs["start_date"])
-        self.assertEqual(new_B.end_date, self.kwargs["end_date"])
+        # now check the start, end and duration
+        self.assertEqual(new_B.start, self.kwargs["start"])
+        self.assertEqual(new_B.end, self.kwargs["end"])
         self.assertEqual(new_B.duration, self.kwargs["duration"])
 
         #print "----------------------------"
-        #print new_B.start_date
-        #print new_B.end_date
+        #print new_B.start
+        #print new_B.end
         #print new_B.duration
 
-        # now check the start_date, end_date and duration of A
+        # now check the start, end and duration of A
         #print "----------------------------"
-        #print new_A.start_date
-        #print new_A.end_date
+        #print new_A.start
+        #print new_A.end
         #print new_A.duration
-        self.assertEqual(new_A.start_date, a_start_date)
-        self.assertEqual(new_A.end_date, a_end_date)
+        self.assertEqual(new_A.start, a_start)
+        self.assertEqual(new_A.end, a_end)
         self.assertEqual(new_A.duration, a_duration)
     

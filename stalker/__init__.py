@@ -14,10 +14,10 @@ from pyramid.config import Configurator
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from stalker.models.asset import Asset
 from stalker.models.auth import Group, Permission, User
+from stalker.models.asset import Asset
 from stalker.models.department import Department
-from stalker.models.entity import SimpleEntity, Entity, TaskableEntity
+from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message

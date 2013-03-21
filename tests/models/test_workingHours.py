@@ -212,3 +212,4 @@ class WorkingHoursTester(unittest.TestCase):
         self.assertEqual(wh.working_hours, working_hours)
         self.assertEqual(wh.working_hours['sun'], working_hours['sun'])
         self.assertEqual(wh.working_hours['sat'], working_hours['sat'])
+    

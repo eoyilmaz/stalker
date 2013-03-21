@@ -7,7 +7,7 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
 from stalker import User
-from stalker.models.entity import TaskableEntity
+from stalker.models.task import Task
 from stalker.models.mixins import (StatusMixin, ScheduleMixin, ReferenceMixin,
                                    CodeMixin)
 
@@ -16,7 +16,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
+class Sequence(Task, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     """Stores data about Sequences.
     
     Sequences are holders of the :class:`~stalker.models.shot.Shot` objects.
@@ -41,7 +41,7 @@ class Sequence(TaskableEntity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeM
     __auto_name__ = False
     __tablename__ = "Sequences"
     __mapper_args__ = {"polymorphic_identity": "Sequence"}
-    sequence_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
+    sequence_id = Column("id", Integer, ForeignKey("Tasks.id"),
                          primary_key=True)
 
     lead_id = Column(Integer, ForeignKey("Users.id"))

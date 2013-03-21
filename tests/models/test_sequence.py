@@ -292,17 +292,17 @@ class SequenceTester(unittest.TestCase):
     def test_ScheduleMixin_initialization(self):
         """testing if the ScheduleMixin part is initialized correctly
         """
-        start_date = datetime.date.today() + datetime.timedelta(days=25)
-        end_date = start_date + datetime.timedelta(days=12)
+        start = datetime.date.today() + datetime.timedelta(days=25)
+        end = start + datetime.timedelta(days=12)
 
-        self.kwargs["start_date"] = start_date
-        self.kwargs["end_date"] = end_date
+        self.kwargs["start"] = start
+        self.kwargs["end"] = end
 
         new_sequence = Sequence(**self.kwargs)
 
-        self.assertEqual(new_sequence.start_date, start_date)
-        self.assertEqual(new_sequence.end_date, end_date)
-        self.assertEqual(new_sequence.duration, end_date - start_date)
+        self.assertEqual(new_sequence.start, start)
+        self.assertEqual(new_sequence.end, end)
+        self.assertEqual(new_sequence.duration, end - start)
 
     def test_TaskableEntity_initialization(self):
         """testing if the TaskableEntity part is initialized correctly

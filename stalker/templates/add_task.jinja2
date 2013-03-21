@@ -45,20 +45,20 @@
       {# START DATE #}
       <tr>
         <td class='label_column'>
-          <label for='task_start_date'>Start Date</label>
+          <label for='task_start'>Start Date</label>
         </td>
         <td class='input_column'>
-          <input id='task_start_date'>
+          <input id='task_start'>
         </td>
       </tr>
       
       {# END DATE #}
       <tr>
         <td class='label_column'>
-          <label for='task_end_date'>End Date</label>
+          <label for='task_end'>End Date</label>
         </td>
         <td class='input_column'>
-          <input id='task_end_date'>
+          <input id='task_end'>
         </td>
       </tr>
       
@@ -212,8 +212,8 @@
       
       // **********************************************************************
       // Start Date
-      var start_date_dateTextBox = new DateTextBox({
-        name: 'start_date',
+      var start_dateTextBox = new DateTextBox({
+        name: 'start',
         label: 'Start Date',
         value: new Date(),// set it today by default
         required: true,
@@ -221,22 +221,22 @@
         onChange: function(){
           if (this.focused){
             update_dates(
-              start_date_dateTextBox.getValue(),
-              end_date_dateTextBox.getValue(),
+              start_dateTextBox.getValue(),
+              end_dateTextBox.getValue(),
               null
             );
           }
         }
-      }, 'task_start_date');
-      start_date_dateTextBox.startup();
+      }, 'task_start');
+      start_dateTextBox.startup();
       
       
       
       
       // **********************************************************************
       // End Date
-      var end_date_dateTextBox = new DateTextBox({
-        name: 'end_date',
+      var end_dateTextBox = new DateTextBox({
+        name: 'end',
         label: 'End Date',
         value: new Date(), // set it today by default
         required: true,
@@ -244,14 +244,14 @@
         onChange: function(){
           if (this.focused){
             update_dates(
-              start_date_dateTextBox.getValue(),
-              end_date_dateTextBox.getValue(),
+              start_dateTextBox.getValue(),
+              end_dateTextBox.getValue(),
               null
             );
           }
         }
-      }, 'task_end_date');
-      end_date_dateTextBox.startup();
+      }, 'task_end');
+      end_dateTextBox.startup();
       
       
       
@@ -265,7 +265,7 @@
         onKeyUp: function(){
           if (this.focused){
             update_dates(
-              start_date_dateTextBox.getValue(),
+              start_dateTextBox.getValue(),
               null,
               this.get('value')
             )
@@ -274,19 +274,19 @@
       }, 'task_duration');
       duration_numberTextBox.startup();
       
-      var update_dates = function(start_date, end_date, duration){
+      var update_dates = function(start, end, duration){
         if (duration == null){
            // update the duration
           duration_numberTextBox.set(
             'value',
-            date.difference(start_date, end_date)
+            date.difference(start, end)
           );
-        } else if (end_date == null) {
+        } else if (end == null) {
            // update end date
-          end_date_dateTextBox.set(
+          end_dateTextBox.set(
             'value',
             date.add(
-              start_date,
+              start,
               'day',
               duration
             )
@@ -444,8 +444,8 @@
               submitted: 'add',
               is_milestone: eval(is_milestone_checkBox.get('checked')) ? 1 : 0 ,
               task_of_id: {{ taskable_entity.id }},
-              start_date: stamp.toISOString(start_date_dateTextBox.value),
-              end_date: stamp.toISOString(end_date_dateTextBox.value)
+              start: stamp.toISOString(start_dateTextBox.value),
+              end: stamp.toISOString(end_dateTextBox.value)
             },
             url: '{{ request.route_url('add_task', taskable_entity_id=taskable_entity.id) }}',
             method: 'POST'

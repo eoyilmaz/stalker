@@ -72,8 +72,8 @@ def __init_db__():
     # register all Actions available for all SOM classes
     class_names = [
         'Asset', 'Group', 'Permission', 'User', 'Department',
-        'SimpleEntity', 'Entity', 'TaskableEntity', 'ImageFormat', 'Link',
-        'Message', 'Note', 'Project', 'Repository', 'Sequence', 'Shot',
+        'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
+        'Project', 'Repository', 'Sequence', 'Shot',
         'Status', 'StatusList', 'Structure', 'Tag', 'Booking', 'Task',
         'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
     ]
@@ -363,7 +363,7 @@ def register(class_):
         raise TypeError('To register a class please supply the class itself ')
     
     # register the class name to entity_types table
-    from stalker import EntityType, StatusMixin, TaskableEntity, ScheduleMixin
+    from stalker import EntityType, StatusMixin, ScheduleMixin
     
     class_name = class_.__name__
     
@@ -372,8 +372,6 @@ def register(class_):
         # update attributes
         if issubclass(class_, StatusMixin):
             new_entity_type.statusable = True
-        if issubclass(class_, TaskableEntity):
-            new_entity_type.taskable = True
         if issubclass(class_, ScheduleMixin):
             new_entity_type.schedulable = True
         

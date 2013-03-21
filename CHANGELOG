@@ -669,7 +669,7 @@ Stalker Changes
   :class:`~stalker.core.mixins.ScheduleMixin` doesn't accept
   ``datetime.timedelta`` objects anymore.
 
-* The behavior of :attr:`~stalker.core.mixins.ScheduleMixin.start_date`,
+* The behavior of :attr:`~stalker.core.mixins.ScheduleMixin.start`,
   :attr:`~stalker.core.mixins.ScheduleMixin.due_date` and
   :attr:`~stalker.core.mixins.ScheduleMixin.duration` in
   :class:`~stalker.core.mixins.ScheduleMixin` is updated.
@@ -911,10 +911,10 @@ Stalker Changes
   initializing the references with an empty list no matter what is given.
 
 * Fixed a bug in :class:`~stalker.core.models.Project` where it was always
-  initializing the :attr:`~stalker.core.models.Project.start_date` to
+  initializing the :attr:`~stalker.core.models.Project.start` to
   **datetime.date.today** and the
   :attr:`~stalker.core.models.project.due_date` to 10 days later then the
-  :attr:`~stalker.core.models.project.start_date` no matter what are given.
+  :attr:`~stalker.core.models.project.start` no matter what are given.
 
 * Fixed a bug in :class:`~stalker.core.mixins.ReferenceMixin` where it was not
   initializing the reference attribute correctly.
@@ -943,7 +943,7 @@ Stalker Changes
   while getting the item.
 
 * Added :class:`stalker.core.models.mixin.ScheduleMixin` which introduces date
-  variables like, start_date, due_date and duration to the mixed in class.
+  variables like, start, due_date and duration to the mixed in class.
 
 * Removed some parts of the :class:`stalker.core.models.project.Project` class
   which are now satisfied by the

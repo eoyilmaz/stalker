@@ -14,6 +14,8 @@ from stalker.db.session import DBSession, ZopeTransactionExtension
 
 import logging
 from stalker import log
+from stalker.models.project import WorkingHours
+
 logger = logging.getLogger('stalker.models.project')
 logger.setLevel(log.logging_level)
 
@@ -212,8 +214,8 @@ class ProjectTester(unittest.TestCase):
             "repository": self.test_repo,
             "is_stereoscopic": False,
             "display_width": 15,
-            "start_date": self.start,
-            "end_date": self.end,
+            "start": self.start,
+            "end": self.end,
             "status_list": self.project_status_list,
             #"tasks": [self.test_task1, self.test_task2, self.test_task3]
         }
@@ -597,7 +599,7 @@ class ProjectTester(unittest.TestCase):
             resources=[self.test_user10, self.test_user1],
             status_list=self.task_status_list,
         )
-    
+        
         DBSession.add(self.test_project)
         DBSession.commit()
     
@@ -1021,16 +1023,16 @@ class ProjectTester(unittest.TestCase):
     def test_ScheduleMixin_initialization(self):
         """testing if the ScheduleMixin part is initialized correctly
         """
-        start_date = datetime.date.today() + datetime.timedelta(days=25)
-        end_date = start_date + datetime.timedelta(days=12)
+        start = datetime.date.today() + datetime.timedelta(days=25)
+        end = start + datetime.timedelta(days=12)
 
-        self.kwargs["start_date"] = start_date
-        self.kwargs["end_date"] = end_date
+        self.kwargs["start"] = start
+        self.kwargs["end"] = end
 
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.start_date, start_date)
-        self.assertEqual(new_project.end_date, end_date)
-        self.assertEqual(new_project.duration, end_date - start_date)
+        self.assertEqual(new_project.start, start)
+        self.assertEqual(new_project.end, end)
+        self.assertEqual(new_project.duration, end - start)
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ is True for Project class
@@ -1082,76 +1084,117 @@ class ProjectTester(unittest.TestCase):
         """testing if the users attribute will be an empty list when the users
         argument is skipped
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['name'] = 'New Project Name'
+        try:
+            self.kwargs.pop('users')
+        except KeyError:
+            pass
+        new_project = Project(**self.kwargs)
+        self.assertEquals(new_project.users, [])
     
     def test_users_argument_is_None(self):
         """testing if a the users attribute will be an empty list when the
         users argument is set to None
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['name'] = 'New Project Name'
+        self.kwargs['users'] = None
+        new_project = Project(**self.kwargs)
+        self.assertEquals(new_project.users, [])
     
     def test_users_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the users attribute is
         set to None
         """
-        self.fail('test is not implemented yet')
+        self.assertRaises(TypeError, setattr, self.test_project, 'users', None)
     
     def test_users_argument_is_not_a_list_of_User_instances(self):
         """testing if a TypeError will be raised when the users argument is not
         a list of Users
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['name'] = 'New Project Name'
+        self.kwargs['users'] = 'not a list of User instances'
+        self.assertRaises(TypeError, Project, **self.kwargs)
     
     def test_users_attribute_is_set_to_a_value_which_is_not_a_list_of_User_instances(self):
         """testing if a TypeError will be raised when the user attribute is set
         to a value which is not a list of User instances
         """
-        self.fail('test is not implemented yet')
+        self.assertRaises(TypeError, setattr, 'users', 'not a list of Users')
     
     def test_users_argument_is_working_properly(self):
         """testing if the users argument value is passed to the users attribute
         properly
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['users'] = [self.test_user1,
+                                self.test_user2,
+                                self.test_user3]
+        new_proj = Project(**self.kwargs)
+        self.assertItemsEqual(self.kwargs['users'], new_proj.users)
     
     def test_users_attribute_is_working_properly(self):
         """testing if the users attribute is working properly
         """
-        self.fail('test is not implemented yet')
+        users = [self.test_user1,
+                 self.test_user2,
+                 self.test_user3]
+        self.test_project.users = users
+        self.assertItemsEqual(users, self.test_project.users)
     
     def test_root_task_is_automatically_created_upon_project_creation(self):
         """testing if the root_task is automatically created when the project
         is created
         """
-        self.fail('test is not implemented yet')
+        self.assertIsInstance(self.test_project.root_task, Task)
     
     def test_root_task_has_the_same_name_with_the_project(self):
         """testing if the the name of the root task is the same with the
         project
         """
-        self.fail('test is not implemented yet')
+        self.assertEqual(self.test_project.name,
+                         self.test_project.root_task.name)
     
     def test_root_tasks_project_attribute_is_correctly_filled_with_the_project_instance(self):
         """testing if the Project.root_task.project is correctly filled with
         the project instance
         """
-        self.fail('test is not implemented yet')
+        self.assertEqual(self.test_project.root_task.project,
+                         self.test_project)
     
     def test_root_task_is_correctly_named_when_the_name_of_the_project_is_updated(self):
         """testing if the root_task.name is correctly updated when the project
         name is changed
         """
-        self.fail('test is not implemented yet')
+        project_name = 'New Project Name'
+        self.test_project.name = project_name
+        self.assertEqual(self.test_project.name,
+                         self.test_project.root_task.name)
     
     def test_working_hours_argument_is_skipped(self):
         """testing if the default working hours will be used when the
         working_hours argument is skipped
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['name'] = 'New Project'
+        try:
+            self.kwargs.pop('working_hours') # pop if there are any
+        except KeyError:
+            pass
+        
+        new_proj = Project(**self.kwargs)
+        self.assertEqual(new_proj.working_hours, WorkingHours())
     
     def test_working_hours_argument_is_None(self):
-        """testing if the default working hours will be used when the
-        working_hours argument is skipped
+        """testing if the a WorkingHour instance with default settings will be
+        used if the working_hours argument is skipped
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['name'] = 'New Project'
+        self.kwargs['working_hours'] = None
+        new_proj = Project(**self.kwargs)
+        self.assertEqual(new_proj.working_hours, WorkingHours())
+    
+    def test_working_hours_attribute_is_None(self):
+        """testing if a WorkingHour instance will be created with the default
+        values if the working_hours attribute is set to None
+        """
+        self.test_project.working_horus = None
+        self.assertEqual(self.test_project.working_hours, WorkingHours())
     
