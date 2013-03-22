@@ -1578,6 +1578,14 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**self.kwargs)
         self.assertEqual(new_task.project, self.test_project1)
     
+    def test_project_argument_is_not_a_Project_instance(self):
+        """testing if a TypeError will be raised if the given value for the
+        project argument is not a stalker.models.project.Project instance
+        """
+        self.kwargs['name'] = 'New Task 1'
+        self.kwargs['project'] = 'Not a Project instance'
+        self.assertRaises(TypeError, Task, **self.kwargs)
+    
     def test_project_attribute_is_a_read_only_attribute(self):
         """testing if the project attribute is a read only attribute
         """
@@ -1631,7 +1639,7 @@ class TaskTester(unittest.TestCase):
         self.kwargs.pop('effort')
         self.kwargs.pop('duration')
         
-        now = datetime.datetime.now()
+        now = datetime.datetime(2013, 3, 22, 15, 0)
         dt = datetime.timedelta
         
         # task1
@@ -1687,7 +1695,7 @@ class TaskTester(unittest.TestCase):
         self.kwargs.pop('effort')
         self.kwargs.pop('duration')
         
-        now = datetime.datetime.now()
+        now = datetime.datetime(2013, 3, 22, 15, 0)
         dt = datetime.timedelta
         
         # task1

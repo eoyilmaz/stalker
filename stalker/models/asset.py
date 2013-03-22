@@ -57,7 +57,8 @@ class Asset(Task, ReferenceMixin, CodeMixin):
     def __init__(self, code, **kwargs):
         kwargs['code'] = code
         
-        logger.debug('Asset.kwargs --> %s' % kwargs)
+        logger.debug('Asset kwargs : %s' % kwargs)
+        logger.debug('Asset kwargs["project"] : %s' % kwargs['project'])
         super(Asset, self).__init__(**kwargs)
         
         # call the mixin init methods

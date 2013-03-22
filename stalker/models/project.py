@@ -6,7 +6,8 @@
 import copy
 import warnings
 
-from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean, PickleType
+from sqlalchemy import (Column, Integer, ForeignKey, Float, Boolean,
+                        PickleType, Table)
 from sqlalchemy.orm import relationship, validates
 from stalker import User
 from stalker.conf import defaults
@@ -138,7 +139,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         uselist=True
     )
     
-    users = relationship('ProjectUsers')
+    users = relationship(
+        'User',
+        secondary='Project_Users',
+        back_populates='projects'
+    )
     
     lead_id = Column(Integer, ForeignKey("Users.id"))
     lead = relationship(
@@ -532,21 +537,9 @@ class WorkingHours(object):
         return super(object, WorkingHours).__str__(self)
 
 
-class ProjectUsers(Base):
-    """A helper for Project User relation
-    """
-    __tablename__ = 'ProjectUsers'
-    
-    user_id = Column(
-        'user_id',
-        Integer,
-        ForeignKey('Users.id'),
-        primary_key=True
-    )
-    
-    project_id = Column(
-        'project_id',
-        Integer,
-        ForeignKey('Projects.id'),
-        primary_key=True
-    )
+# PROJECT_USERS
+Project_Users = Table(
+    'Project_Users', Base.metadata,
+    Column('user_id', Integer, ForeignKey('Users.id'), primary_key=True),
+    Column('project_id', Integer, ForeignKey('Projects.id'), primary_key=True)
+)

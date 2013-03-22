@@ -84,6 +84,8 @@ Stalker Changes
   * Shots now have a new attribute called scenes, holding Scene instances. It
     is created to group same shots occurring in the same scenes.
 
+* In tests all the Warnings are now properly handled as Warnings.
+
 0.2.0.a6
 --------
 

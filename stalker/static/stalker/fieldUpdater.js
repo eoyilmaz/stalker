@@ -23,7 +23,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
             var query_data = kwargs.query_data || null;
             var selected = kwargs.selected || [];
             var placeHolder = kwargs.placeHolder || '';
-            console.log("fieldUpdater runs");
+
             // set default placeHolder
 
 

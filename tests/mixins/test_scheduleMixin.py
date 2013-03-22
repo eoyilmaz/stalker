@@ -36,7 +36,7 @@ class ScheduleMixinTester(unittest.TestCase):
         """setup the test
         """
         # create mock objects
-        self.start = datetime.datetime.now()
+        self.start = datetime.datetime(2013, 3, 22, 15, 15)
         self.end = self.start + datetime.timedelta(days=20)
         self.duration = datetime.timedelta(days=10)
 
@@ -103,8 +103,8 @@ class ScheduleMixinTester(unittest.TestCase):
         start to today
         """
         self.mock_foo_obj.start = None
-        # values are rounded can not check if it is datetime.now anymore
-        #self.assertEqual(self.mock_foo_obj.start, datetime.datetime.now())
+        self.assertEqual(self.mock_foo_obj.start,
+                         datetime.datetime(2013, 3, 22, 15, 30))
         self.assertIsInstance(self.mock_foo_obj.start, datetime.datetime)
     
     def test_start_attribute_works_properly(self):
@@ -230,7 +230,7 @@ class ScheduleMixinTester(unittest.TestCase):
         """testing if the duration attribute is calculated correctly
         """
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
-        new_foo_entity.start = datetime.datetime.now()
+        new_foo_entity.start = datetime.datetime(2013, 3, 22, 15, 0)
         new_foo_entity.end = new_foo_entity.start +\
                                   datetime.timedelta(201)
 
@@ -316,9 +316,11 @@ class ScheduleMixinTester(unittest.TestCase):
         
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
-        # cannot check if it is now
-        #self.assertEqual(new_foo_entity.start, datetime.datetime.now())
         self.assertIsInstance(new_foo_entity.start, datetime.datetime)
+        # can not check for start, just don't want to strugle with the round
+        # thing
+        #self.assertEqual(new_foo_entity.start,
+        #                 datetime.datetime(2013, 3, 22, 15, 30))
         self.assertEqual(new_foo_entity.duration,
                          defaults.TASK_DURATION)
         self.assertEqual(new_foo_entity.end,
@@ -405,12 +407,12 @@ class ScheduleMixinTester(unittest.TestCase):
         self.kwargs.pop("start")
         
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
-        
-        # cannot check if it is datetime.now() cause the time is passing and
-        # the datetime instance is rounded by the resolution
-        #self.assertEqual(new_foo_entity.start, datetime.datetime.now())
-        # just check if it is an instance of datetime.datetime.now()
+
+        # just check if it is an instance of datetime.datetime
         self.assertIsInstance(new_foo_entity.start, datetime.datetime)
+        # can not check for start
+        #self.assertEqual(new_foo_entity.start,
+        #                 datetime.datetime(2013, 3, 22, 15, 30))
         self.assertEqual(new_foo_entity.end,
                          new_foo_entity.start + new_foo_entity.duration)
     

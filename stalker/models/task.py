@@ -11,6 +11,7 @@ from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, Interval
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor, backref
 from stalker import User
 from stalker.conf import defaults
+from stalker.db import DBSession
 from stalker.db.declarative import Base
 from stalker.exceptions import OverBookedWarning, CircularDependencyError
 from stalker.models.entity import Entity
@@ -422,11 +423,18 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         kwargs['end'] = end
         kwargs['duration'] = duration
         
+        logger.debug('Task kwargs      : %s' % kwargs)
+        logger.debug('Task project arg : %s' % project)
+        logger.debug('Task parent arg  : %s' % parent)
         super(Task, self).__init__(**kwargs)
         
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
+        
+        logger.debug('Task kwargs (after super inits) : %s' % kwargs)
+        logger.debug('Task project arg (after inits)  : %s' % project)
+        logger.debug('Task parent arg (after inits)   : %s' % parent)
         
         self.parent = parent
         self._project =  project
@@ -593,8 +601,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                                 'a %s' %  (self.__class__.__name__,
                                            parent.__class__.__name__))
         
-        # check for cycle
-        _check_circular_dependency(self, parent, 'children')
+            # check for cycle
+            _check_circular_dependency(self, parent, 'children')
         
         return parent
     
@@ -602,14 +610,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def _validates_project(self, key, project):
         """validates the given project instance
         """
-        
-        from stalker import Project
-        
         if project is None:
             # check if there is a parent defined
             if self.parent:
                 # use its project as the project
+                
+                # disable autoflush
+                # to prevent prematurely flush the parent
+                autoflush = DBSession.autoflush
+                DBSession.autoflush = False
+                
                 project = self.parent.project
+                
+                # reset autoflush
+                DBSession.autoflush = autoflush
             else:
                 # no project, no task, go mad again!!!
                 raise TypeError('%s.project should be an instance of '
@@ -619,11 +633,19 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                                 'project of the supplied parent task' %
                                 (self.__class__.__name__,
                                  project.__class__.__name__))
-        elif isinstance(project, Project):
+        
+        from stalker import Project
+        if not isinstance(project, Project):
+            # go mad again it is not a project instance
+            raise TypeError('%s.project should be an instance of '
+                            'stalker.models.project.Project, not %s' % 
+                            (self.__class__.__name__,
+                             project.__class__.__name__))
+        else:
             # check if there is a parent
             if self.parent:
                 # check if given project is matching the parent.project
-                if self.parent.project != project:
+                if self.parent._project != project:
                     # don't go mad again, but warn the user that there is an
                     # ambiguity!!!
                     import warnings
@@ -632,13 +654,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                               'matching in %s, Stalker will use the parent ' \
                               'project (%s) as the parent of this %s' % \
                               (self,
-                               self.parent.project,
+                               self.parent._project,
                                self.__class__.__name__)
                     
                     warnings.warn(message, RuntimeWarning)
                     
                     # use the parent.project
-                    project = self.parent.project
+                    project = self.parent._project
         
         return project
     

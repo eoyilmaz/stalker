@@ -47,8 +47,8 @@ class ScheduleMixinTester(unittest.TestCase):
 
         self.kwargs = {
             "name": "ozgur",
-            "start": datetime.datetime(2013, 3, 22, 4, 0),
-            "end": datetime.datetime(2013, 13, 22, 4, 0),
+            "start": datetime.datetime(2013, 3, 20, 4, 0),
+            "end": datetime.datetime(2013, 3, 30, 4, 0),
             "duration": datetime.timedelta(10)
         }
 
@@ -72,16 +72,24 @@ class ScheduleMixinTester(unittest.TestCase):
         #print new_A.end
         #print new_A.duration
         
-        # try to change the start and check if the duration is also
-        # updated
-        new_A.start = datetime.datetime.today() + datetime.timedelta(20)
+        # try to change the start and check if the duration is also updated
+        new_A.start = \
+            datetime.datetime(2013, 3, 30, 10, 0) 
         
-        self.assertEqual(new_A.start, datetime.date.today() +
-                                           datetime.timedelta(20))
-        self.assertEqual(new_A.end, self.kwargs["end"] +
-                                         datetime.timedelta(20))
-        self.assertEqual(new_A.duration, datetime.timedelta(10))
-
+        self.assertEqual(
+            new_A.start,
+            datetime.datetime(2013, 3, 30, 10, 0)
+        )
+        self.assertEqual(
+            new_A.end,
+            datetime.datetime(2013, 4, 9, 10, 0)
+        )
+        
+        self.assertEqual(
+            new_A.duration,
+            datetime.timedelta(10)
+        )
+        
         a_start = new_A.start
         a_end = new_A.end
         a_duration = new_A.duration

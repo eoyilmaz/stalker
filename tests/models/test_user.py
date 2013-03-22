@@ -33,7 +33,6 @@ class UserTest(unittest.TestCase):
     def setUp(self):
         """setup the test
         """
-        
         # setup a test database
         self.TEST_DATABASE_URI = "sqlite:///:memory:"
         db.setup()
@@ -925,131 +924,39 @@ class UserTest(unittest.TestCase):
             0,
             0
         )
-
-    def test_projects_attribute_is_read_only(self):
-        """testing if the project attribute is read-only
-        """
-        self.assertRaises(AttributeError, setattr, self.test_user, "projects",
-            [])
-
-    def test_projects_attribute_is_calculated_from_the_tasks_attribute(self):
-        """testing if the projects is gathered from the tasks attribute
-        directly
-        """
-        # create a new project
-        commercial_project_type = Type(
-            name="Commercial Project",
-            code='comm',
-            target_entity_type=Project
-        )
-
-        complete_status = Status(name="Complete", code="CMPL")
-        wip_status = Status(name="Work In Progress", code="WIP")
-
-        project_status_list = StatusList(
-            name="Project Status List",
-            statuses=[wip_status, complete_status],
-            target_entity_type="Project"
-        )
-
-        new_project1 = Project(
-            name="New Project 1",
-            code='np1',
-            type=commercial_project_type,
-            status_list=project_status_list,
-            repository=self.test_repository,
-            )
-
-        new_project2 = Project(
-            name="New Project 2",
-            code='np2',
-            type=commercial_project_type,
-            status_list=project_status_list,
-            repository=self.test_repository,
-            )
-
-        task_status_list = StatusList(
-            name="Task Status List",
-            statuses=[wip_status, complete_status],
-            target_entity_type="Task"
-        )
-
-        # create a new user
-        new_user = User(
-            name='Erkan Ozgur Yilmaz',
-            login='eoyilmaz',
-            email='eoyilmaz@fake.com',
-            password='hidden'
-        )
-
-        # create a couple of tasks
-        design_task_type = Type(
-            name="Design",
-            code='design',
-            target_entity_type=Task
-        )
-
-        modeling_task_type = Type(
-            name="Modeling",
-            code='modeling',
-            target_entity_type=Task
-        )
-
-        shading_task_type = Type(
-            name="Shading",
-            code='shading',
-            target_entity_type=Task
-        )
-
-        task1 = Task(
-            name="Modeling",
-            resources=[new_user],
-            type=modeling_task_type,
-            status_list=task_status_list,
-            project=new_project1,
-        )
-
-        task2 = Task(
-            name="Shading",
-            resources=[new_user],
-            type=shading_task_type,
-            status_list=task_status_list,
-            project=new_project1,
-        )
-
-        task3 = Task(
-            name="Design",
-            resources=[new_user],
-            type=design_task_type,
-            status_list=task_status_list,
-            project=new_project2,
-        )
-
-        # now check the user.projects
-        #print new_user.projects
-        #print task1.project
-        #print task2.project
-        #print task3.project
-
-        self.assertItemsEqual(new_user.projects, [new_project1, new_project2])
-
-    #def test_projects_attribute_is_calculated_from_the_asset_tasks(self):
-        #"""testing if the projects is gathered from the asset tasks
-        #"""
-
-        #self.fail("test is not implemented yet")
-
-    #def test_projects_attribute_is_calculated_from_the_sequence_tasks(self):
-        #"""testing if the projects is gathered from the sequence tasks
-        #"""
-
-        #self.fail("test is not implemented yet")
     
-    #def test_projects_attribute_is_calculated_from_the_shot_tasks(self):
-        #"""testing if the projects is gathered from the shot tasks
-        #"""
-        #self.fail("test is not implemented yet")
-
+    def test_projects_attribute_is_None(self):
+        """testing if a TypeError will be raised when the projects attribute is
+        set to None
+        """
+        self.assertRaises(TypeError, setattr, self.test_user, 'projects', None)
+    
+    def test_projects_attribute_is_set_to_a_value_which_is_not_a_list(self):
+        """testing if the projects attribute is accepting lists only
+        """
+        self.assertRaises(TypeError, setattr, self.test_user, 'projects',
+                          'not a list')
+    
+    def test_projects_attribute_is_set_to_list_of_other_objects_than_Project_instances(self):
+        """testing if a TypeError will be raised when the projects attribute is
+        set to a value which is a list of other values than Projects instances
+        """
+        self.assertRaises(TypeError, setattr, self.test_user, 'projects',
+                          ['not', 'a', 'list', 'of', 'projects', 32])
+    
+    def test_projects_attribute_is_working_properly(self):
+        """testing if the projects attribute is working properly
+        """
+        test_list = [self.test_project1, self.test_project2]
+        self.test_user.projects = test_list
+        self.assertItemsEqual(test_list, self.test_user.projects)
+        self.test_user.projects.append(self.test_project3)
+        self.assertIn(self.test_project3, self.test_user.projects)
+        # also check the backref
+        self.assertIn(self.test_user, self.test_project1.users)
+        self.assertIn(self.test_user, self.test_project2.users)
+        self.assertIn(self.test_user, self.test_project3.users)
+    
     def test_projects_lead_argument_None(self):
         """testing if the projects_lead attribute will be an empty list when
         the projects_lead attribute is None

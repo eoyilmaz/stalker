@@ -70,7 +70,7 @@ class BookingTester(unittest.TestCase):
             "name": "test booking",
             "task": self.test_task,
             "resource": self.test_resource,
-            "start": datetime.datetime(2013, 3, 22, 0, 0),
+            "start": datetime.datetime(2013, 3, 22, 1, 0),
             "duration": datetime.timedelta(10)
         }
 
@@ -277,10 +277,17 @@ class BookingTester(unittest.TestCase):
         self.kwargs["duration"] = datetime.timedelta(10)
         
         booking1 = Booking(**self.kwargs)
-
+        
         # booking2
         self.kwargs["name"] = "booking2"
-        self.assertRaises(OverBookedWarning, Booking, **self.kwargs)
+        import warnings
+        warnings.resetwarnings()
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            new_booking = Booking(**self.kwargs)
+            self.assertTrue(
+                issubclass(w[-1].category, OverBookedWarning)
+            )
 
     def test_OverbookedWarning_2(self):
         """testing if a OverBookingWarning will be raised when the resource 
@@ -301,9 +308,16 @@ class BookingTester(unittest.TestCase):
         # booking2
         self.kwargs["name"] = "booking2"
         self.kwargs["duration"] = datetime.timedelta(8)
-
-        self.assertRaises(OverBookedWarning, Booking, **self.kwargs)
-
+        
+        import warnings
+        warnings.resetwarnings()
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            new_booking = Booking(**self.kwargs)
+            self.assertTrue(
+                issubclass(w[-1].category, OverBookedWarning)
+            )
+    
     def test_OverbookedWarning_3(self):
         """testing if a OverBookingWarning will be raised when the resource 
         is already booked for the given time period.
@@ -324,7 +338,13 @@ class BookingTester(unittest.TestCase):
         self.kwargs["name"] = "booking2"
         self.kwargs["duration"] = datetime.timedelta(10)
 
-        self.assertRaises(OverBookedWarning, Booking, **self.kwargs)
+        import warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            new_booking = Booking(**self.kwargs)
+            self.assertTrue(
+                issubclass(w[-1].category, OverBookedWarning)
+            )
 
     def test_OverbookedWarning_4(self):
         """testing if a OverBookingWarning will be raised when the resource 
@@ -348,7 +368,13 @@ class BookingTester(unittest.TestCase):
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(10)
 
-        self.assertRaises(OverBookedWarning, Booking, **self.kwargs)
+        import warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            new_booking = Booking(**self.kwargs)
+            self.assertTrue(
+                issubclass(w[-1].category, OverBookedWarning)
+            )
 
     def test_OverbookedWarning_5(self):
         """testing if a OverBookingWarning will be raised when the resource 
@@ -363,16 +389,22 @@ class BookingTester(unittest.TestCase):
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(10)
-
+        
         booking1 = Booking(**self.kwargs)
-
+        
         # booking2
         self.kwargs["name"] = "booking2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
                                     datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
-
-        self.assertRaises(OverBookedWarning, Booking, **self.kwargs)
+        
+        import warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            new_booking = Booking(**self.kwargs)
+            self.assertTrue(
+                issubclass(w[-1].category, OverBookedWarning)
+            )
 
     def test_OverbookedWarning_6(self):
         """testing if a OverBookingWarning will be raised when the resource 
@@ -387,17 +419,23 @@ class BookingTester(unittest.TestCase):
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(15)
-
+        
         booking1 = Booking(**self.kwargs)
-
+        
         # booking2
         self.kwargs["name"] = "booking2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
                                     datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
-
-        self.assertRaises(OverBookedWarning, Booking, **self.kwargs)
-
+        
+        import warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            new_booking = Booking(**self.kwargs)
+            self.assertTrue(
+                issubclass(w[-1].category, OverBookedWarning)
+            ) 
+    
     def test_OverbookedWarning_7(self):
         """testing if a OverBookingWarning will be raised when the resource 
         is already booked for the given time period.
@@ -412,15 +450,21 @@ class BookingTester(unittest.TestCase):
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
                                     datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
-
+        
         booking1 = Booking(**self.kwargs)
-
+        
         # booking2        
         self.kwargs["name"] = "booking2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(15)
-
-        self.assertRaises(OverBookedWarning, Booking, **self.kwargs)
+        
+        import warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            new_booking = Booking(**self.kwargs)
+            self.assertTrue(
+                issubclass(w[-1].category, OverBookedWarning)
+            )
 
     def test_OverbookedWarning_8(self):
         """testing if no OverBookingWarning will be raised when the resource 
