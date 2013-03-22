@@ -127,7 +127,7 @@ class StatusTest(unittest.TestCase):
         self.kwargs.pop('bg_color')
         new_status = Status(**self.kwargs)
         self.assertEqual(
-            defaults.DEFAULT_BG_COLOR,
+            defaults.STATUS_BG_COLOR,
             new_status.bg_color
         )
     
@@ -138,7 +138,7 @@ class StatusTest(unittest.TestCase):
         self.kwargs['bg_color'] = None
         new_status = Status(**self.kwargs)
         self.assertEqual(
-            defaults.DEFAULT_BG_COLOR,
+            defaults.STATUS_BG_COLOR,
             new_status.bg_color
         )
     
@@ -149,7 +149,7 @@ class StatusTest(unittest.TestCase):
         new_status = Status(**self.kwargs)
         new_status.bg_color = None
         self.assertEqual(
-            defaults.DEFAULT_BG_COLOR,
+            defaults.STATUS_BG_COLOR,
             new_status.bg_color
         )
     
@@ -223,7 +223,7 @@ class StatusTest(unittest.TestCase):
         self.kwargs.pop('fg_color')
         new_status = Status(**self.kwargs)
         self.assertEqual(
-            defaults.DEFAULT_FG_COLOR,
+            defaults.STATUS_FG_COLOR,
             new_status.fg_color
         )
     
@@ -234,7 +234,7 @@ class StatusTest(unittest.TestCase):
         self.kwargs['fg_color'] = None
         new_status = Status(**self.kwargs)
         self.assertEqual(
-            defaults.DEFAULT_FG_COLOR,
+            defaults.STATUS_FG_COLOR,
             new_status.fg_color
         )
     
@@ -245,7 +245,7 @@ class StatusTest(unittest.TestCase):
         new_status = Status(**self.kwargs)
         new_status.fg_color = None
         self.assertEqual(
-            defaults.DEFAULT_FG_COLOR,
+            defaults.STATUS_FG_COLOR,
             new_status.fg_color
         )
     

@@ -37,13 +37,21 @@ class DBError(Exception):
 class CircularDependencyError(Exception):
     """Raised when there is circular dependencies within Tasks
     """
-
     def __init__(self, value=""):
         super(CircularDependencyError, self).__init__(value)
         self.value = value
 
     def __str__(self):
         return repr(self.value)
+
+
+#class CycleError(Exception):
+#    """Raised when there is a cycle in parent child relation in tasks
+#    """
+#    
+#    def __init__(self, value=''):
+#        super(CycleError, self).__init__(value)
+#        self.value = value
 
 
 class OverBookedWarning(Warning):
@@ -56,3 +64,4 @@ class OverBookedWarning(Warning):
 
     def __str__(self):
         return repr(self.value)
+

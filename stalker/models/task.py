@@ -5,12 +5,15 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import datetime
+from sqlalchemy.ext.declarative import declared_attr
+import warnings
 from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, Interval
-from sqlalchemy.orm import relationship, validates, synonym, reconstructor
+from sqlalchemy.orm import relationship, validates, synonym, reconstructor, backref
 from stalker import User
 from stalker.conf import defaults
+from stalker.db import DBSession
 from stalker.db.declarative import Base
-from stalker.errors import OverBookedWarning, CircularDependencyError
+from stalker.exceptions import OverBookedWarning, CircularDependencyError
 from stalker.models.entity import Entity
 from stalker.models.mixins import ScheduleMixin, StatusMixin
 
@@ -56,7 +59,7 @@ class Booking(Entity, ScheduleMixin):
         doc="""The :class:`~stalker.models.task.Task` instance that this 
         booking is created for"""
     )
-
+    
     resource_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     resource = relationship(
         "User",
@@ -66,41 +69,40 @@ class Booking(Entity, ScheduleMixin):
         doc="""The :class:`~stalker.models.auth.User` instance that this 
         booking is created for"""
     )
-
+    
     def __init__(
             self,
             task=None,
             resource=None,
-            start_date=None,
-            end_date=None,
+            start=None,
+            end=None,
             duration=None,
             **kwargs):
         super(Booking, self).__init__(**kwargs)
-        kwargs['start_date'] = start_date
-        kwargs['end_date'] = end_date
+        kwargs['start'] = start
+        kwargs['end'] = end
         kwargs['duration'] = duration
         ScheduleMixin.__init__(self, **kwargs)
         self.task = task
         self.resource = resource
-
+    
     @validates("task")
     def _validate_task(self, key, task):
         """validates the given task value
         """
-
         if not isinstance(task, Task):
             raise TypeError("%s.task should be an instance of "
                             "stalker.models.task.Task not %s" %
                             (self.__class__.__name__,
                              task.__class__.__name__))
-
+        
         return task
-
+    
     @validates("resource")
     def _validate_resource(self, key, resource):
         """validates the given resource value
         """
-
+        
         if resource is None:
             raise TypeError("%s.resource can not be None" %
                             self.__class__.__name__)
@@ -113,20 +115,20 @@ class Booking(Entity, ScheduleMixin):
         
         # check for overbooking
         for booking in resource.bookings:
-            logger.debug('booking.start_date: %s' % booking.start_date)
-            logger.debug('self.start_date: %s' % self.start_date)
-
-            if booking.start_date == self.start_date or\
-               booking.end_date == self.end_date or \
-               (self.end_date > booking.start_date and
-                self.end_date < booking.end_date) or \
-               (self.start_date > booking.start_date and
-                self.start_date < booking.end_date):
-                raise OverBookedWarning(
+            logger.debug('booking.start: %s' % booking.start)
+            logger.debug('self.start: %s' % self.start)
+            
+            if booking.start == self.start or\
+               booking.end == self.end or \
+               (self.end > booking.start and
+                self.end < booking.end) or \
+               (self.start > booking.start and
+                self.start < booking.end):
+                warnings.warn(
                     "The resource %s is overly booked with %s and %s" %
-                    (resource, self, booking)
+                    (resource, self, booking),
+                    OverBookedWarning
                 )
-
         return resource
 
 
@@ -138,18 +140,57 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     .. versionadded: 0.2.0: Parent-child relation in Tasks
       
-      Tasks can now have child Tasks. But Stalker will check if there will be a
-      cycle if one wants to parent a Task to a child Task of its own.
+      Tasks can now have child Tasks. So you can create complex relations of
+      Tasks to comply with your project needs.
+    
+    A Task needs to be created with a Project instance. It is also valid if no
+    project is supplied but there is a parent Task passed to the parent
+    argument. It is also possible to pass both project and the task.
+    
+    Because it will create an ambiguity, Stalker will raise a RuntimeWarning,
+    if both project and task are given and the owner project of the given task
+    is different then the supplied project instance. But again Stalker will
+    warn the user but will continue to use the task as the parent and will
+    correctly use the project of the given task as the project of the newly
+    created task.
+    
+    The following codes are a couple of examples for creating Task instances::
+      
+      # with a project instance
+      task1 = Task(name='Schedule', project=proj1)
+      
+      # with a parent task
+      task2 = Task(name='Documentation', parent=task1)
+      
+      # or both
+      task3 = Task(name='Test', project=proj1, parent=task1)
+      
+      # this will create a RuntimeWarning
+      task4 = Task(name='Test', project=proj2, parent=task1) # task1 is not a
+                                                             # task of proj2
+      assert task4.project == proj1 # Stalker uses the task1.project for task4
+      
+      # this will also create a RuntimeError
+      task3 = Task(name='Failure 2') # no project no parent, this is an orphan
+                                     # task.
+    
+    The end of a task is calculated by using the duration of the Task itself
+    and the working hours settings of the related Project instance. So the
+    holidays or the vacations of the resources are taken in to account.
     
     A Tasks is called a ``container task`` if it has at least one child Task.
-    And it will be called a ``leaf task`` if it doesn't have any children
-    Tasks.
+    And it is called a ``leaf task`` if it doesn't have any children Tasks. The
+    resources in a container task is meaningless, cause the resources are
+    defined by the child tasks.
     
-    The :attr:`~stalker.core.models.task.Task.start_date` and
-    :attr:`~stalker.core.models.task.Task.end_date` values for a container task
-    is gathered from the child tasks. The start_date is equal to the earliest
-    start_date value of the children tasks, and the end_date is equal to the
-    latest end_date value of the children tasks.
+    The :attr:`~stalker.core.models.task.Task.start` and
+    :attr:`~stalker.core.models.task.Task.end` values for a container task
+    is gathered from the child tasks. The start is equal to the earliest
+    start value of the children tasks, and the end is equal to the
+    latest end value of the children tasks.
+    
+    Stalker will check if there will be a cycle if one wants to parent a Task
+    to a child Task of its own.
     
     The Task class itself is mixed with
     :class:`~stalker.models.mixins.StatusMixin` and
@@ -159,11 +200,11 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     With every release of Stalker, the Stalker Tasks will try to be more
     compliant with TaskJuggler Tasks.
     
-    :param parent: The parent Task of this Task. Every Task in Stalker should
-      be related with a :class:`~stalker.models.project.Project` instance. So
-      if no parent task is desired, at least a Project instance should be
-      passed as the parent of the created Task or the Task will be an orphan
-      task.
+    :param parent: The parent Task or Project of this Task. Every Task in
+      Stalker should be related with a :class:`~stalker.models.project.Project`
+      instance. So if no parent task is desired, at least a Project instance
+      should be passed as the parent of the created Task or the Task will be an
+      orphan task and Stalker will raise a RuntimeError.
     
     :param int priority: It is a number between 0 to 1000 which defines the
       priority of the :class:`~stalker.models.task.Task`. The higher the value
@@ -222,8 +263,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #which the current one is dependent on.
 
     #.. giving information about the dependent tasks. The given list is iterated
-    #and the :attr:`~stalker.models.task.Task.start_date` attribute is set to
-    #the latest found :attr:`~stalker.models.task.Task.end_date` attribute of
+    #and the :attr:`~stalker.models.task.Task.start` attribute is set to
+    #the latest found :attr:`~stalker.models.task.Task.end` attribute of
     #the dependent :class:`~stalker.models.task.Task`\ s.
 
     #.. :type depends: list of :class:`~stalker.models.task.TaskDependencyRelation`
@@ -250,8 +291,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #:class:`~stalker.models.task.Task`\ s as child is to group them. So it
     #is meaningles to let a parent :class:`~stalker.models.task.Task` to have
     #any resource or any effort or any verions. The
-    #:attr:`~stalker.models.task.Task.start_date`,
-    #:attr:`~stalker.models.task.Task.end_date` and
+    #:attr:`~stalker.models.task.Task.start`,
+    #:attr:`~stalker.models.task.Task.end` and
     #:attr:`~stalker.models.task.Task.duration` attributes of a
     #:class:`~stalker.models.task.Task` with child classes will be based on
     #it childrens date attributes.
@@ -267,20 +308,46 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 
     __auto_name__ = False
     __tablename__ = "Tasks"
-    __mapper_args__ = {"polymorphic_identity": "Task"}
-    task_id = Column("id", Integer, ForeignKey("Entities.id"),
+    __mapper_args__ = {'polymorphic_identity': "Task"}
+    task_id = Column("id", Integer, ForeignKey('Entities.id'),
                      primary_key=True)
-
+    
+    project_id = Column('project_id', Integer, ForeignKey('Projects.id'),
+                        nullable=False)
+    _project = relationship(
+        'Project',
+        primaryjoin='Tasks.c.project_id==Projects.c.id',
+        back_populates='tasks',
+        uselist=False,
+    )
+    
+    parent_id = Column('parent_id', Integer, ForeignKey('Tasks.id'))
+    parent = relationship(
+        'Task',
+        remote_side=[task_id],
+        primaryjoin='Tasks.c.parent_id==Tasks.c.id',
+        back_populates='children'
+    )
+    
+    children = relationship(
+      'Task',
+       primaryjoin='Tasks.c.parent_id==Tasks.c.id',
+        back_populates='parent',
+       # single_parent=True
+    )
+    
+    tasks = synonym('children')
+    
     is_milestone = Column(
         Boolean,
         doc="""Specifies if this Task is a milestone.
         
         Milestones doesn't need any duration, any effort and any resources. It
-        is used to create meaningfull dependencies between the critical stages
+        is used to create meaningful dependencies between the critical stages
         of the project.
         """
     )
-
+    
     # UPDATE THIS: is_complete should look to Task.status, but it is may be
     # faster to query in this way, judge later
     is_complete = Column(
@@ -293,22 +360,22 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
         """
     )
-
+    
     depends = relationship(
         "Task",
-        secondary="Task_Tasks",
-        primaryjoin="Tasks.c.id==Task_Tasks.c.task_id",
-        secondaryjoin="Task_Tasks.c.depends_to_task_id==Tasks.c.id",
+        secondary="Task_Dependencies",
+        primaryjoin="Tasks.c.id==Task_Dependencies.c.task_id",
+        secondaryjoin="Task_Dependencies.c.depends_to_task_id==Tasks.c.id",
         backref="dependent_of",
         doc="""A list of :class:`~stalker.models.task.Task`\ s that this one is depending on.
         
         A CircularDependencyError will be raised when the task dependency
-        creates a circlar dependency which means it is not allowed to create
+        creates a circular dependency which means it is not allowed to create
         a dependency for this Task which is depending on another one which in
         some way depends to this one again.
         """
     )
-
+    
     resources = relationship(
         "User",
         secondary="Task_Resources",
@@ -319,26 +386,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""The list of :class:`stalker.models.auth.User`\ s instances assigned to this Task.
         """
     )
-
+    
     _effort = Column(Interval)
     priority = Column(Integer)
-
-    task_of_id = Column(Integer, ForeignKey("TaskableEntities.id"))
-
-    task_of = relationship(
-        "TaskableEntity",
-        primaryjoin="Tasks.c.task_of_id==TaskableEntities.c.id",
-        back_populates="tasks",
-        doc="""An object that this Task is a part of.
-        
-        The assigned object should have an attribute called ``tasks``. Any
-        object which is not inherited from
-        :class:`~stalker.models.entity.TaskableEntity` thus doesn't have a
-        ``tasks`` attribute which is mapped to the Tasks.task_of attribute
-        will raise an AttributeError.
-        """
-    )
-
+    
     bookings = relationship(
         "Booking",
         primaryjoin="Bookings.c.task_id==Tasks.c.id",
@@ -356,30 +407,41 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     )
 
     def __init__(self,
+                 project=None,
+                 parent=None,
                  depends=None,
-                 start_date=None,
-                 end_date=None,
+                 start=None,
+                 end=None,
                  duration=None,
                  effort=None,
                  resources=None,
                  is_milestone=False,
-                 priority=defaults.DEFAULT_TASK_PRIORITY,
-                 task_of=None,
+                 priority=defaults.TASK_PRIORITY,
                  **kwargs):
         # update kwargs with extras
-        kwargs['start_date'] = start_date
-        kwargs['end_date'] = end_date
+        kwargs['start'] = start
+        kwargs['end'] = end
         kwargs['duration'] = duration
         
+        logger.debug('Task kwargs      : %s' % kwargs)
+        logger.debug('Task project arg : %s' % project)
+        logger.debug('Task parent arg  : %s' % parent)
         super(Task, self).__init__(**kwargs)
         
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
         
+        logger.debug('Task kwargs (after super inits) : %s' % kwargs)
+        logger.debug('Task project arg (after inits)  : %s' % project)
+        logger.debug('Task parent arg (after inits)   : %s' % parent)
+        
+        self.parent = parent
+        self._project =  project
+        
         self.bookings = []
         self.versions = []
-
+        
         self.is_milestone = is_milestone
         self.is_complete = False
 
@@ -397,10 +459,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         self.resources = resources
         self._effort = None
         self.effort = effort
-
+        
         self.priority = priority
-
-        self.task_of = task_of
 
     @reconstructor
     def __init_on_load__(self):
@@ -446,26 +506,26 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                             "instance of stalker.models.task.Task")
         
         # check for the circular dependency
-        _check_circular_dependency(depends, self)
-
+        _check_circular_dependency(depends, self, 'depends')
+        
         return depends
 
     def _validate_effort(self, effort):
         """validates the given effort
         """
-
+        
         if not isinstance(effort, datetime.timedelta):
             effort = None
-
+        
         if effort is None:
             # take it from the duration and resources
-
+            
             num_of_resources = len(self.resources)
             if num_of_resources == 0:
                 num_of_resources = 1
-
+            
             effort = self.duration * num_of_resources
-
+        
         return effort
 
     def _effort_getter(self):
@@ -477,12 +537,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """the setter for the effort property
         """
         self._effort = self._validate_effort(effort_in)
-
+        
         # update the duration
         num_of_resources = len(self.resources)
         if num_of_resources == 0:
             num_of_resources = 1
-
+        
         self.duration = self._effort / num_of_resources
 
     effort = synonym(
@@ -528,31 +588,82 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             self.resources = []
         
         return bool(is_milestone)
-
-    @validates("task_of")
-    def _validate_task_of(self, key, task_of):
-        """validates the given task_of value
+    
+    @validates('parent')
+    def _validate_parent(self, key, parent):
+        """validates the given parent value
         """
-        # the object given with the task_of argument should be an instance of
-        # TaskableEntity
+        if parent is not None:
+            # if it is not a Task instance, go mad (cildir!!)
+            if not isinstance(parent, Task):
+                raise TypeError('%s.parent should be an instance of '
+                                'stalker.models.task.Task, not '
+                                'a %s' %  (self.__class__.__name__,
+                                           parent.__class__.__name__))
         
-        if task_of is None:
-            raise TypeError(
-                "'task_of' can not be None, this will produce Tasks without a "
-                "parent, to remove a task from a TaskableEntity, assign the "
-                "task to another TaskableEntity or delete it."
-            )
+            # check for cycle
+            _check_circular_dependency(self, parent, 'children')
         
-        from stalker.models.entity import TaskableEntity
+        return parent
+    
+    @validates('_project')
+    def _validates_project(self, key, project):
+        """validates the given project instance
+        """
+        if project is None:
+            # check if there is a parent defined
+            if self.parent:
+                # use its project as the project
+                
+                # disable autoflush
+                # to prevent prematurely flush the parent
+                autoflush = DBSession.autoflush
+                DBSession.autoflush = False
+                
+                project = self.parent.project
+                
+                # reset autoflush
+                DBSession.autoflush = autoflush
+            else:
+                # no project, no task, go mad again!!!
+                raise TypeError('%s.project should be an instance of '
+                                'stalker.models.project.Project, not %s. Or '
+                                'please supply a stalker.models.task.Task '
+                                'in the parent, so Stalker can use the '
+                                'project of the supplied parent task' %
+                                (self.__class__.__name__,
+                                 project.__class__.__name__))
         
-        if not isinstance(task_of, TaskableEntity):
-            raise TypeError(
-                "'Task.task_of' should be an instance of "
-                "stalker.models.entity.TaskableEntity not %s" % type(task_of)
-            )
-
-        return task_of
-
+        from stalker import Project
+        if not isinstance(project, Project):
+            # go mad again it is not a project instance
+            raise TypeError('%s.project should be an instance of '
+                            'stalker.models.project.Project, not %s' % 
+                            (self.__class__.__name__,
+                             project.__class__.__name__))
+        else:
+            # check if there is a parent
+            if self.parent:
+                # check if given project is matching the parent.project
+                if self.parent._project != project:
+                    # don't go mad again, but warn the user that there is an
+                    # ambiguity!!!
+                    import warnings
+                    
+                    message = 'The supplied parent and the project is not ' \
+                              'matching in %s, Stalker will use the parent ' \
+                              'project (%s) as the parent of this %s' % \
+                              (self,
+                               self.parent._project,
+                               self.__class__.__name__)
+                    
+                    warnings.warn(message, RuntimeWarning)
+                    
+                    # use the parent.project
+                    project = self.parent._project
+        
+        return project
+    
     @validates("priority")
     def _validate_priority(self, key, priority):
         """validates the given priority value
@@ -563,7 +674,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             pass
         
         if not isinstance(priority, int):
-            priority = defaults.DEFAULT_TASK_PRIORITY
+            priority = defaults.TASK_PRIORITY
         
         if priority < 0:
             priority = 0
@@ -572,12 +683,35 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         return priority
     
+    @validates('children')
+    def _validate_children(self, key, child):
+        """validates the given child
+        """
+        # just empty the resources list
+        self.resources = []
+        
+        # extend the start and end dates
+        #if not len(self.children): # it is not a good idea to load the
+        #                           # collection here
+        #    self.start = child.start
+        #    self.end = child.end
+        #else:
+        #    # this is not the first one just extend the start and end
+        #    if child.start < self.start:
+        #        self.start = child.start
+        #    if child.end > self.end:
+        #        self.end = child.end
+        
+        # check for CircularDependency
+        #_check_circular_dependency(self, child, 'children')
+        
+        return child
+    
     @validates("resources")
     def _validate_resources(self, key, resource):
         """validates the given resources value
         """
         from stalker.models.auth import User
-        
         if not isinstance(resource, User):
             raise TypeError("Task.resources should be a list of "
                             "stalker.models.auth.User instances not %s" %
@@ -598,41 +732,39 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         if not isinstance(version, Version):
             raise TypeError("Task.versions should only have "
                             "stalker.models.version.Version instances")
-
+        
         return version
-
+    
     def _duration_getter(self):
         return self._duration
-
+    
     def _duration_setter(self, duration):
         # just call the fset method of the duration property in the super
-
+        
         #------------------------------------------------------------
         # code copied and pasted from ScheduleMixin - Fix it later
         if duration is not None:
             if isinstance(duration, datetime.timedelta):
-                # set the end_date to None
+                # set the end to None
                 # to make it recalculated
-                self._validate_dates(self.start_date, None, duration)
+                self._validate_dates(self.start, None, duration)
             else:
-                self._validate_dates(self.start_date, self.end_date, duration)
+                self._validate_dates(self.start, self.end, duration)
         else:
-            self._validate_dates(self.start_date, self.end_date, duration)
-            #------------------------------------------------------------
+            self._validate_dates(self.start, self.end, duration)
+        #------------------------------------------------------------
         
         # then update the effort
         num_of_resources = len(self.resources)
         if num_of_resources == 0:
             num_of_resources = 1
-
+        
         new_effort_value = self.duration * num_of_resources
-
+        
         # break recursion
         if self.effort != new_effort_value:
             self.effort = new_effort_value
-
-            #return duration
-
+    
     duration = synonym(
         "_duration",
         descriptor=property(
@@ -642,79 +774,126 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""The overridden duration attribute.
         
         It is a datetime.timedelta instance. Showing the difference of the
-        :attr:`~stalker.models.mixins.ScheduleMixin.start_date` and the
-        :attr:`~stalker.models.mixins.ScheduleMixin.end_date`. If edited it
-        changes the :attr:`~stalker.models.mixins.ScheduleMixin.end_date`
+        :attr:`~stalker.models.mixins.ScheduleMixin.start` and the
+        :attr:`~stalker.models.mixins.ScheduleMixin.end`. If edited it
+        changes the :attr:`~stalker.models.mixins.ScheduleMixin.end`
         attribute value.
         """
     )
     
-    @property
-    def project(self):
-        """returns the Task.task_of.project
+    def _start_getter(self):
+        """overridden start getter
         """
-        return self.task_of.project
+        # TODO: do it only once not all the time they ask for it
+        # use children start
+        if self.is_container:
+            self._start = datetime.datetime.max
+            for child in self.children:
+                if child.start < self._start:
+                    self._start = child.start
+        return self._start
+    
+    def _start_setter(self, start_in):
+        """overridden start setter
+        """
+        # update the start only if this is not a container task
+        if self.is_leaf:
+            self._validate_dates(start_in, self.end, self.duration)
+    
+    @declared_attr
+    def start(self):
+        return synonym(
+            '_start',
+            descriptor=property(
+                self._start_getter,
+                self._start_setter,
+                doc="""The overridden start property.
+                
+                The start of the Task can not be changed if it is a container task.
+                Works normally in other case.
+                """
+            )
+        )
+    
+    def _end_getter(self):
+        """overridden end getter
+        """
+        # TODO: do it only once not all the time they ask for it
+        # use children end
+        if self.is_container:
+            self._end = datetime.datetime.min
+            for child in self.children:
+                if child.end > self._end:
+                    self._end = child.end
+        return self._end
+    
+    def _end_setter(self, end_in):
+        """overridden end setter
+        """
+        # update the end only if this is not a container task
+        if self.is_leaf:
+            self._validate_dates(self.start, end_in, self.duration)
+    
+    @declared_attr
+    def end(self):
+        return synonym(
+            '_end',
+            descriptor=property(
+                self._end_getter,
+                self._end_setter,
+                doc="""The overridden end property.
+                
+                The end of the Task can not be changed if it is a container task.
+                Works normally in other cases.
+                """
+            )
+        )
+    
+    def _project_getter(self):
+        return self._project
+    
+    project = synonym(
+        '_project',
+        descriptor=property(
+            _project_getter
+        ),
+        doc="""The owner Project of this task.
+        
+        It is a read-only attribute. It is not possible to change the owner
+        Project of a Task it is defined when the Task is created.
+        """
+    )
+    
+    @property
+    def is_container(self):
+        """Returns True if the Task has children Tasks
+        """
+        return bool(len(self.children))
+    
+    @property
+    def is_leaf(self):
+        """Returns True if the Task has no children Tasks
+        """
+        return not bool(len(self.children))
 
-
-def _check_circular_dependency(task, check_for_task):
+def _check_circular_dependency(task, check_for_task, attr_name):
     """checks the circular dependency in task if it has check_for_task in its
     depends list
-    
-    TODO: !!!WARNING THERE IS NO TEST FOR THIS FUNCTION!!!
     """
-
-    for dependent_task in task.depends:
+    for dependent_task in getattr(task, attr_name): #depends:
         if dependent_task is check_for_task:
             raise CircularDependencyError(
-                "task %s and %s creates a circular dependency" %\
+                'task %s and %s creates a circular dependency' %
                 (task, check_for_task)
             )
         else:
-            _check_circular_dependency(dependent_task, check_for_task)
+            _check_circular_dependency(
+                dependent_task, check_for_task, attr_name
+            )
 
-
-#class TaskDependencyRelation(object):
-#"""Holds information about :class:`~stalker.models.task.Task` dependencies.
-
-#(DEVELOPERS: It could be an association proxy for the Task class)
-
-#A TaskDependencyRelation object basically defines which
-#:class:`~stalker.models.task.Task` is dependent
-#to which other :class:`~stalker.models.task.Task` and what is the lag
-#between the end of the dependent to the start of the dependee.
-
-#A :class:`~stalker.models.task.Task` can not be set dependent to it self.
-#So the the :attr:`~stalker.models.task.TaskDependencyRelation.depends` list
-#can not contain the same value with
-#:attr:`~stalker.models.task.TaskDependencyRelation.task`.
-
-#:param task: The :class:`~stalker.models.task.Task` that is dependent to
-#others.
-
-#:type task: :class:`~stalker.models.task.Task`
-
-#:param depends: A :class:`~stalker.models.task.Task`\ s that the
-#:class:`~stalker.models.task.Task` which is held by the
-#:attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
-#dependening on. The :attr:`~stalker.models.task.Task.start_date` and the
-#:attr:`~stalker.models.task.Task.end_date` attributes of the
-#:class:`~stalker.models.task.Task` is updated if it is before the
-#``end_date`` of the dependent :class:`~stalker.models.task.Task`.
-
-#:type depends: :class:`~stalker.models.task.Task`
-
-#:param lag: The lag between the end of the dependent task to the start of
-#the dependee. It is an instance of timedelta and could be a negative
-#value. The default is 0. So the end of the task is start of the other.
-#"""
-
-#
-    #def __init__(self):
-        #pass
-
-# TASK_TASKS
-Task_Tasks = Table(
-    "Task_Tasks", Base.metadata,
+# TASK_DEPENDENCIES
+Task_Dependencies = Table(
+    "Task_Dependencies", Base.metadata,
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("depends_to_task_id", Integer, ForeignKey("Tasks.id"),
            primary_key=True)
@@ -729,5 +908,5 @@ Task_Resources = Table(
 
 
 # TODO: subscribe to task: Users should be able to subscribe to any task they
-# want so they can be informed about the tickets as if they are a resource for
-# that task.
+#       want so they can be informed about the tickets as if they are a
+#       resource for that task.

@@ -2,6 +2,90 @@
 Stalker Changes
 ===============
 
+0.2.0.a7
+--------
+
+* Changed these default setting value names to corresponding new names:
+  * ``DEFAULT_TASK_DURATION`` -> ``TASK_DURATION``
+  * ``DEFAULT_TASK_PRIORITY`` -> ``TASK_PRIORITY``
+  * ``DEFAULT_VERSION_TAKE_NAME`` -> ``VERSION_TAKE_NAME``
+  * ``DEFAULT_TICKET_LABEL`` -> ``TICKET_LABEL``
+  * ``DEFAULT_ACTIONS`` -> ``ACTIONS``
+  * ``DEFAULT_BG_COLOR`` -> ``BG_COLOR``
+  * ``DEFAULT_FG_COLOR`` -> ``FG_COLOR``
+
+* stalker.conf.defaults:
+  * Added default settings for project working hours (``WORKING_HOURS``,
+    ``DAY_ORDER``, ``DAILY_WORKING_HOURS``)
+  * Added a new variable for setting the task time resolution called
+    ``TIME_RESOLUTION``.
+
+* stalker.models.project.Project:
+  * Removed Project.project_tasks attribute, use Project.tasks directly to get
+    all the Tasks in that project. For root task you can do a quick query::
+      
+      Task.query.filter(Task.project==proj_id).filter(Task.parent==None).all()
+    
+    This will also return the Assets, Sequences and Shots in that project,
+    which are also Tasks.
+  
+  * Users are now assigned to Projects by appending them to the Project.users
+    list. This is done in this way to allow a reduced list of resources to be
+    shown in the Task creation dialogs.
+  
+  * Added a new helper class for Project working hour management, called
+    WorkingHours.
+  
+  * Added a new attribute to Project class called ``working_hours`` which holds
+    stalker.models.project.WorkingHours instances to manage the Project working
+    hours. It will directly be passed to TaskJuggler.
+
+* stalker.models.task.Task:
+  * Removed the Task.task_of attribute, use Task.parent to get the owner of
+    this Task.
+  
+  * Task now has two new attributes called Task.parent and Task.children which
+    allow more complex Task-to-Task relation.
+  
+  * Secondary table name for holding Task to Task dependency relation is
+    renamed from ``Task_Tasks`` to ``Task_Dependencies``.
+  
+  * _check_circular_dependency function is now accepting a third argument which
+    is the name of the attribute to be investigated for circular relationship.
+    It is done in that way to be able to use the same function in searching for
+    circular relations both in parent/child and depender/dependee relations.
+
+* ScheduleMixin:
+  * Added a new attribute to ScheduleMixin for time resolution adjustment.
+    Default value is 1 hour and can be set with
+    stalker.conf.defaults.TIME_RESOLUTION. Any finer time than the resolution
+    is rounded to the closest multiply of the resolution. It is possible to set
+    it from microseconds to years. Although 1 hour is a very reasonable
+    resolution which is also the default resolution for TaskJuggler.
+  * ScheduleMixin now uses datetime.datetime for the start and end attributes.
+  * Renamed the ``start_date`` attribute to ``start``.
+  * Renamed the ``end_date`` attribute to ``end``
+
+* Removed the TaskableEntity.
+
+* Asset, Sequence and Shot classes are now derived from Task class allowing
+  more complex Task relation combined with the new parent/child relation of
+  Tasks. Use Asset.children or Asset.tasks to reach the child tasks of that
+  asset (same with Sequence and Shot classes).
+
+* stalker.models.shot.Shot:
+  * Removed the sequence and introduced sequences attribute in Shot class. Now
+    one shot can be in more than one Sequence. Allowing more complex
+    Shot/Sequence relations..
+  
+  * Shots can now be created without a Sequence instance. The sequence
+    attribute is just used to group the Shots.
+  
+  * Shots now have a new attribute called scenes, holding Scene instances. It
+    is created to group same shots occurring in the same scenes.
+
+* In tests all the Warnings are now properly handled as Warnings.
+
 0.2.0.a6
 --------
 
@@ -651,7 +735,7 @@ Stalker Changes
   :class:`~stalker.core.mixins.ScheduleMixin` doesn't accept
   ``datetime.timedelta`` objects anymore.
 
-* The behavior of :attr:`~stalker.core.mixins.ScheduleMixin.start_date`,
+* The behavior of :attr:`~stalker.core.mixins.ScheduleMixin.start`,
   :attr:`~stalker.core.mixins.ScheduleMixin.due_date` and
   :attr:`~stalker.core.mixins.ScheduleMixin.duration` in
   :class:`~stalker.core.mixins.ScheduleMixin` is updated.
@@ -893,10 +977,10 @@ Stalker Changes
   initializing the references with an empty list no matter what is given.
 
 * Fixed a bug in :class:`~stalker.core.models.Project` where it was always
-  initializing the :attr:`~stalker.core.models.Project.start_date` to
+  initializing the :attr:`~stalker.core.models.Project.start` to
   **datetime.date.today** and the
   :attr:`~stalker.core.models.project.due_date` to 10 days later then the
-  :attr:`~stalker.core.models.project.start_date` no matter what are given.
+  :attr:`~stalker.core.models.project.start` no matter what are given.
 
 * Fixed a bug in :class:`~stalker.core.mixins.ReferenceMixin` where it was not
   initializing the reference attribute correctly.
@@ -925,7 +1009,7 @@ Stalker Changes
   while getting the item.
 
 * Added :class:`stalker.core.models.mixin.ScheduleMixin` which introduces date
-  variables like, start_date, due_date and duration to the mixed in class.
+  variables like, start, due_date and duration to the mixed in class.
 
 * Removed some parts of the :class:`stalker.core.models.project.Project` class
   which are now satisfied by the

@@ -151,7 +151,7 @@ class Permission(Base):
     id = Column(Integer, primary_key=True)
     _access = Column('access', Enum('Allow', 'Deny', name='AccessNames'))
     _action = Column('action',
-                     Enum(*defaults.DEFAULT_ACTIONS,name='ActionNames'))
+                     Enum(*defaults.ACTIONS,name='ActionNames'))
     _class_name = Column('class_name', String)
     
     def __init__(self, access, action, class_name):
@@ -204,10 +204,10 @@ class Permission(Base):
             raise TypeError('Permission.action should be an instance of str '
                             'or unicode not %s' % action.__class__.__name__)
         
-        if action not in defaults.DEFAULT_ACTIONS:
+        if action not in defaults.ACTIONS:
             raise ValueError('Permission.action should be one of the values '
                              'of %s not %s' % 
-                             (defaults.DEFAULT_ACTIONS, action))
+                             (defaults.ACTIONS, action))
         
         return action
     
@@ -408,13 +408,19 @@ class User(Entity, ACLMixin):
     )
     
     groups = relationship(
-        "Group",
-        secondary="User_Groups",
-        back_populates="users",
+        'Group',
+        secondary='User_Groups',
+        back_populates='users',
         doc="""Permission groups that this users is a member of.
         
         Accepts :class:`~stalker.models.auth.Group` object.
         """
+    )
+    
+    projects = relationship(
+        'Project',
+        secondary='Project_Users',
+        back_populates='users'
     )
     
     projects_lead = relationship(
@@ -491,8 +497,6 @@ class User(Entity, ACLMixin):
             groups = []
         self.groups = groups
         
-        self._projects = []
-        
         if projects_lead is None:
             projects_lead = []
         self.projects_lead = projects_lead
@@ -513,8 +517,6 @@ class User(Entity, ACLMixin):
         """initialized the instance variables when the instance created with
         SQLAlchemy
         """
-
-        self._projects = []
         # call the Entity __init_on_load__
         super(User, self).__init_on_load__()
 
@@ -702,7 +704,6 @@ class User(Entity, ACLMixin):
     def _validate_groups(self, key, group):
         """check the given group
         """
-        
         if not isinstance(group, Group):
             raise TypeError(
                 "any group in %s.groups should be an instance of"
@@ -716,32 +717,26 @@ class User(Entity, ACLMixin):
     def _validate_projects_lead(self, key, project):
         """validates the given projects_lead attribute
         """
-        
         from stalker.models.project import Project
-        
         if not isinstance(project, Project):
             raise TypeError(
                 "any element in %s.projects_lead should be a"
                 "stalker.models.project.Project instance not %s" %
                 (self.__class__.__name__, project.__class__.__name__)
             )
-
         return project
-
+    
     @validates("sequences_lead")
     def _validate_sequences_lead(self, key, sequence):
         """validates the given sequences_lead attribute
         """
-        
         from stalker.models.sequence import Sequence
-        
         if not isinstance(sequence, Sequence):
             raise TypeError(
                 "any element in %s.sequences_lead should be an instance of "
                 "stalker.models.sequence.Sequence not %s " %
                 (self.__class__.__name__, sequence.__class__.__name__)
             )
-
         return sequence
 
     @validates("tasks")
@@ -759,31 +754,18 @@ class User(Entity, ACLMixin):
             )
 
         return task
-
-    @property
-    def projects(self):
-        """The list of :class:`~stalker.models.project.Project`\ s those the current user assigned to.
-        
-        returns a list of :class:`~stalker.models.project.Project` objects.
-        It is a read-only attribute. To assign a
-        :class:`~stalker.models.auth.User` to a
-        :class:`~stalker.models.project.Project`, you need to create a new
-        :class:`~stalker.models.task.Task` with the
-        :attr:`~stalker.models.task.Task.resources` is set to this
-        :class:`~stalker.models.auth.User` and assign the
-        :class:`~stalker.models.task.Task` to the
-        :class:`~stalker.models.project.Project` by setting the
-        :attr:`~stalker.models.task.Task.project` attribute of the
-        :class:`~stalker.models.task.Task` to the
-        :class:`~stalker.models.project.Project`.
+    
+    @validates('projects')
+    def _validate_projects(self, key, project):
+        """validates the given project instance
         """
-        
-        # TODO: do it with SQLAlchemy
-        projects = []
-        for task in self.tasks:
-            projects.append(task.task_of.project)
-
-        return list(set(projects))
+        from stalker import Project
+        if not isinstance(project, Project):
+            raise TypeError('%s.projects should a list of '
+                            'stalker.models.project.Project instances, not '
+                            '%s' % (self.__class__.__name__,
+                                    project.__class__.__name__))
+        return project
     
     @property
     def tickets(self):

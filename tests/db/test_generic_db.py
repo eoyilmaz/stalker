@@ -101,14 +101,14 @@ task_status_list = StatusList(
 new_task = Task(
     name="Task 1",
     resources=[new_user1],
-    task_of=new_asset1,
+    parent=new_asset1,
     status_list=task_status_list
 )
 
 new_task = Task(
     name="Task 2",
     resources=[new_user2],
-    task_of=new_asset2,
+    parent=new_asset2,
     status_list=task_status_list
 )
 
@@ -121,4 +121,5 @@ new_task = Task(
 DBSession.add_all([new_project1, new_project2])
 DBSession.commit()
 
-assert new_project1.users == [new_user1]
+# uses are now assigned to projects
+assert new_project1.users == []

@@ -292,17 +292,18 @@ class SequenceTester(unittest.TestCase):
     def test_ScheduleMixin_initialization(self):
         """testing if the ScheduleMixin part is initialized correctly
         """
-        start_date = datetime.date.today() + datetime.timedelta(days=25)
-        end_date = start_date + datetime.timedelta(days=12)
-
-        self.kwargs["start_date"] = start_date
-        self.kwargs["end_date"] = end_date
-
+        start = \
+            datetime.datetime(2013, 3, 22, 15, 0) + datetime.timedelta(days=25)
+        end = start + datetime.timedelta(days=12)
+        
+        self.kwargs["start"] = start
+        self.kwargs["end"] = end
+        
         new_sequence = Sequence(**self.kwargs)
-
-        self.assertEqual(new_sequence.start_date, start_date)
-        self.assertEqual(new_sequence.end_date, end_date)
-        self.assertEqual(new_sequence.duration, end_date - start_date)
+        
+        self.assertEqual(new_sequence.start, start)
+        self.assertEqual(new_sequence.end, end)
+        self.assertEqual(new_sequence.duration, end - start)
 
     def test_TaskableEntity_initialization(self):
         """testing if the TaskableEntity part is initialized correctly
@@ -343,16 +344,16 @@ class SequenceTester(unittest.TestCase):
             status=0,
             status_list=task_status_list,
             project=new_project,
-            task_of=new_sequence,
-            )
+            parent=new_sequence,
+        )
 
         task2 = Task(
             name="Lighting",
             status=0,
             status_list=task_status_list,
             project=new_project,
-            task_of=new_sequence,
-            )
+            parent=new_sequence,
+        )
 
         tasks = [task1, task2]
 
@@ -398,19 +399,19 @@ class SequenceTester(unittest.TestCase):
         #new_sequence = Sequence(**self.kwargs)
 
         #task1 = Task(
-        #name="Modeling",
-        #status=0,
-        #status_list=task_status_list,
-        #project=new_project,
-        #task_of=new_sequence,
+        #   name="Modeling",
+        #   status=0,
+        #   status_list=task_status_list,
+        #   project=new_project,
+        #   parent=new_sequence,
         #)
 
         #task2 = Task(
-        #name="Lighting",
-        #status=0,
-        #status_list=task_status_list,
-        #project=new_project,
-        #task_of=new_sequence,
+        #   name="Lighting",
+        #   status=0,
+        #   status_list=task_status_list,
+        #   project=new_project,
+        #   parent=new_sequence,
         #)
 
         #tasks = [task1, task2]

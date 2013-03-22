@@ -38,39 +38,31 @@ ADMIN_GROUP_NAME = 'admins'
 # the default keyword which is going to be used in password scrambling
 KEY = "stalker_default_key"
 
-DEFAULT_TASK_DURATION = datetime.timedelta(days=10)
-DEFAULT_TASK_PRIORITY = 500
+VERSION_TAKE_NAME = "Main"
 
-DEFAULT_VERSION_TAKE_NAME = "MAIN"
+TICKET_LABEL = "Ticket"
 
-DEFAULT_TICKET_LABEL = "Ticket"
+ACTIONS = ['Add', 'View', 'Edit', 'Delete']
 
-DEFAULT_ACTIONS = ['Add', 'View', 'Edit', 'Delete']
+STATUS_BG_COLOR = 0xffffff
+STATUS_FG_COLOR = 0x000000
 
-DEFAULT_BG_COLOR = 0xffffff
-DEFAULT_FG_COLOR = 0x000000
+# Task Management
+TIME_RESOLUTION = datetime.timedelta(hours=1)
+TASK_DURATION = datetime.timedelta(days=10)
+TASK_PRIORITY = 500
 
-#PC Video (640, 480, 1.0)
-#NTSC (720, 486, 0.91)
-#NTSC 16:9 (720, 486, 1.21)
-#PAL (720, 576, 1.067)
-#PAL 16:9 (720, 576, 1.46)
-#HD 720 (1280, 720, 1.0)
-#HD 1080 (1920, 1080, 1.0)
-#1K Super 35 (1024, 778, 1.0)
-#2K Super 35 (2048, 1556, 1.0)
-#4K Super 35 (4096, 3112, 1.0)
-#A4 Portrait (2480, 3508, 1.0)
-#A4 Landscape (3508, 2480, 1.0)
-#A3 Portrait (3508, 4960, 1.0)
-#A3 Landscape (4960, 3508, 1.0)
-#A2 Portrait (4960, 7016, 1.0)
-#A2 Landscape (7016, 4960, 1.0)
-#50x70cm Poster Portrait (5905, 8268, 1.0)
-#50x70cm Poster Landscape (8268, 5905, 1.0)
-#70x100cm Poster Portrait (8268, 11810, 1.0)
-#70x100cm Poster Landscape (11810, 8268, 1.0)
-#1k Square (1024, 1024, 1.0)
-#2K Square (2048, 2048, 1.0)
-#3K Square (3072, 3072, 1.0)
-#4K Square (4096, 4096, 1.0)
+WORKING_HOURS = {
+  'mon': [[570, 1110]], # 9:30 - 18:30
+  'tue': [[570, 1110]], # 9:30 - 18:30
+  'wed': [[570, 1110]], # 9:30 - 18:30
+  'thu': [[570, 1110]], # 9:30 - 18:30
+  'fri': [[570, 1110]], # 9:30 - 18:30
+  'sat': [], # saturday off
+  'sun': [], # sunday off
+}
+
+DAY_ORDER = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+
+DAILY_WORKING_HOURS = 8
+

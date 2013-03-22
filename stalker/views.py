@@ -19,7 +19,7 @@ import stalker
 from stalker.db.session import DBSession
 from stalker import (User, ImageFormat, Project, Repository, Structure,
                      FilenameTemplate, EntityType, Type, StatusList, Status,
-                     Asset, Shot, Sequence, TaskableEntity, Department, Group,
+                     Asset, Shot, Sequence, Department, Group,
                      Tag, Task)
 
 from stalker.log import logging_level
@@ -212,17 +212,17 @@ def add_project(request):
 
                 # get the dates
                 # TODO: no time zone info here, please add time zone
-                start_date = datetime.datetime.strptime(
-                    request.params['start_date'][:-6],
+                start = datetime.datetime.strptime(
+                    request.params['start'][:-6],
                     "%Y-%m-%dT%H:%M:%S"
                 )
-                end_date = datetime.datetime.strptime(
-                    request.params['end_date'][:-6],
+                end = datetime.datetime.strptime(
+                    request.params['end'][:-6],
                     "%Y-%m-%dT%H:%M:%S"
                 )
 
-                logger.debug('start_date : %s' % start_date)
-                logger.debug('end_date : %s' % end_date)
+                logger.debug('start : %s' % start)
+                logger.debug('end : %s' % end)
 
                 try:
                     new_project = Project(
@@ -236,8 +236,8 @@ def add_project(request):
                         lead=lead,
                         status_list=status_list,
                         status=status_list[0],
-                        start_date=start_date,
-                        end_date=end_date
+                        start=start,
+                        end=end
                     )
                 except (AttributeError, TypeError, ValueError) as e:
                     logger.debug(e.message)
@@ -1568,9 +1568,9 @@ def convert_to_jquery_gantt_task_format(tasks):
                 'code': task.id,
                 'level': 0,
                 'status': 'STATUS_ACTIVE',
-                'start': int(task.start_date.strftime('%s')) * 1000,
+                'start': int(task.start.strftime('%s')) * 1000,
                 'duration': task.duration.days,
-                'end': int(task.end_date.strftime('%s')) * 1000,
+                'end': int(task.end.strftime('%s')) * 1000,
                 'depends': convert_to_depend_index(task, tasks),
                 'description': task.description,
                 'assigs': [
@@ -1625,15 +1625,12 @@ def update_with_jquery_gantt_task_data(json_data):
             task = Task.query.filter(Task.id==task_id).first()
         elif task_id.startswith('tmp_'):
             # create a new Task
-            #
-            # there is a problem here, there is no task_of defined for new
-            # tasks
             task = Task()
         
         # update it
         if task:
             task.name = task_name
-            task.start_date = datetime.date.fromtimestamp(task_start/1000)
+            task.start = datetime.date.fromtimestamp(task_start/1000)
             task.duration = datetime.timedelta(task_duration)
             
             resources = User.query.filter(User.id.in_(task_resource_ids)).all()
@@ -1688,8 +1685,8 @@ def get_tasks(request):
     for task in tasks:
         logger.debug('------------------------------')
         logger.debug('task name: %s' % task.name)
-        logger.debug('start date: %s' % task.start_date)
-        logger.debug('end date: %s' % task.end_date)
+        logger.debug('start date: %s' % task.start)
+        logger.debug('end date: %s' % task.end)
     
     return convert_to_jquery_gantt_task_format(tasks)
 
@@ -1865,17 +1862,17 @@ def add_task(request):
                 
                 # get the dates
                 # TODO: no time zone info here, please add time zone
-                start_date = datetime.datetime.strptime(
-                    request.params['start_date'][:-6],
+                start = datetime.datetime.strptime(
+                    request.params['start'][:-6],
                     "%Y-%m-%dT%H:%M:%S"
                 )
-                end_date = datetime.datetime.strptime(
-                    request.params['end_date'][:-6],
+                end = datetime.datetime.strptime(
+                    request.params['end'][:-6],
                     "%Y-%m-%dT%H:%M:%S"
                 )
                 
-                logger.debug('start_date : %s' % start_date)
-                logger.debug('end_date : %s' % end_date)
+                logger.debug('start : %s' % start)
+                logger.debug('end : %s' % end)
                 
                 # get the dependencies
                 depend_ids = [
@@ -1892,8 +1889,8 @@ def add_task(request):
                         status_list=status_list,
                         status=status,
                         created_by=logged_in_user,
-                        start_date=start_date,
-                        end_date=end_date,
+                        start=start,
+                        end=end,
                         resources=resources,
                         depends=depends
                     )
