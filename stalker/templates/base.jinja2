@@ -64,7 +64,7 @@
     {% block header %}
       <div id='stalker_logo'>
         <a href="/">
-          Stalker <span style='font-size: 12px;'>v{{stalker.__version__}}</span>
+          STALKER <span style='font-size: 12px;'>v{{stalker.__version__}}</span>
         </a>
       </div>
       
@@ -73,10 +73,10 @@
       </div>
       
       <div id='mebar'>
-        <div id='mebutton'></div>
+        <div style='color: #000000' id='mebutton'></div>
       </div>
       
-      <div id='create_menu'>
+      <div id='create_menu' style='color: #000000'>
         +
       </div>
     {% endblock %}
@@ -229,7 +229,7 @@
         var projects_menu_dropDownButton = new DropDownButton({
           id: 'projects_menu_dropDownButton',
           label: 'Projects',
-          style: 'margin-top: 0px; margin-bottom: 0px;',
+          style: 'margin-top: 0px; margin-bottom: 0px; color: #000000',
           dropDown: projects_menu_dropDownMenu
         }, 'projects_menu');
         projects_menu_dropDownButton.startup();
@@ -406,7 +406,7 @@
         // Drop Down Button
         var create_menu_button = new DropDownButton({
           label: '+',
-          style: 'margin-top: 0px; margin-bottom: 0px;',
+          style: 'margin-top: 0px; margin-bottom: 0px; color: #000000',
           dropDown: create_menu_dropDownMenu
         }, 'create_menu');
         create_menu_button.startup();
@@ -449,7 +449,7 @@
         var mebar_dropDownButton = DropDownButton({
           label: '{{ user.name }}',
           dropDown: mebar_tooltipDialog,
-          style: 'margin-top: 0px; margin-bottom: 0px;'
+          style: 'margin-top: 0px; margin-bottom: 0px; color: #000000'
         }, 'mebutton');
         mebar_dropDownButton.startup();
         

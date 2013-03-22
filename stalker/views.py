@@ -1321,6 +1321,10 @@ def get_assets(request):
             'name': asset.name,
             'type': asset.type.name,
             'status': asset.status.name,
+            'user_id': asset.created_by.id,
+            'user_link': '<a href="%s">%s</a>' %
+                         ('view/user/%i' % asset.created_by.id,
+                          asset.created_by.name),
             'user_name': asset.created_by.name,
             'description': asset.description
         }

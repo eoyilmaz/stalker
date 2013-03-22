@@ -8,16 +8,17 @@
                 margin-left: -125px;
                 height: 136px;
                 margin-top: -68px;'>
-      <div class='dijitDialogPaneContentArea' style='background-color: white; height:130px'>
+      <div class='dijitDialogPaneContentArea' style='background-color: #808080; height:100px; color:#ffffff'>
         <form id='login_form_div' style='clear:both'>
-          <h3 style='text-align: center'><b>Login To Stalker</b></h3>
+          <br/>
+          <h3 style='text-align: center; color:#ffffff;'><b>Login To Stalker</b></h3>
           <table>
 
             <tr>
               <td class='label_column'>
                 <label for='e-mail'>e-mail</label>
               </td>
-              <td class='input_column'>
+              <td style='text-align: center; color:#000000;' class='input_column'>
                 <input id='e-mail'>
               </td>
             </tr>
@@ -26,23 +27,28 @@
               <td class='label_column'>
                 <label for='password'>password</label>
               </td>
-              <td class='input_column'>
+              <td style='text-align: center; color:#000000;' class='input_column'>
                 <input id='password' >
               </td>
               <input id='form.submitted' type='hidden'>
             </tr>
+            <tr>
+              <td style='text-align: center; color:#000000;' >
+
+              </td>
+
+              <td style='text-align: right; color:#000000;' >
+                <button id='login_button'></button>
+              </td>
+            </tr>
           </table>
         </form>
-        
         <div id='message'
-             style='position: relative; clear: both; text-align: center'>
+             style='position: relative; clear: both; text-align: center; background-color: #ff0000; color:#ffffff;'>
           <b>{{message}}</b>
         </div>
-        
       </div>
-      <div class='dijitDialogPaneActionBar'>
-        <button id='login_button'></button>
-      </div>
+
     </div>
   </div>
   <script type='text/javascript'>
@@ -56,7 +62,7 @@
         action:'{{request.route_url("login")}}',
         method:'POST'
       }, 'login_form_div');
-      login_form.startup();
+
       
       // Login or Email
       var login_validationTextBox = new ValidationTextBox({
@@ -65,7 +71,7 @@
         type: 'text',
         value: '{{login}}'
       }, 'e-mail');
-      login_validationTextBox.startup();
+
       
       // Password
       var password_validationTextBox = new ValidationTextBox({
@@ -79,14 +85,14 @@
           }
         }
       }, 'password');
-      password_validationTextBox.startup();
+
       
       var form_submitted_textBox = new TextBox({
         name:'form.submitted',
         value:'login',
         type:'hidden'
       }, 'form.submitted');
-      form_submitted_textBox.startup();
+
       
       // Login Button
       var login_button = new Button({
@@ -97,7 +103,12 @@
           login_form.submit()
         }
       }, 'login_button');
+
+      login_validationTextBox.startup();
+      password_validationTextBox.startup();
+      form_submitted_textBox.startup();
       login_button.startup();
+      login_form.startup();
       
     })
   </script>

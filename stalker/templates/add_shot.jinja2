@@ -331,7 +331,11 @@
             additional_data: {
               submitted: 'add'
             },
-            url: '{{ request.route_url('add_shot', project_id=project.id) }}',
+            {% if project %}
+              url: 'add/shot/{{project.id}}',
+            {% else %}
+              url: 'add/shot/' + project_filtering_select.value,
+            {% endif %}
             method: 'POST'
           });
         }

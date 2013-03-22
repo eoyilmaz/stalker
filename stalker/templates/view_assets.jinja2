@@ -12,41 +12,66 @@
         target: '/get/assets/{{ project.id }}'
       });
       
-      var my_store = new ObjectStore({objectStore: asset_memory});
-      
-      /* create a new grid */
-      var asset_data_grid = new DataGrid({
-        store: my_store,
-        structure: [
-          {name: 'Thumbnail',                       width: '100px'},
-          {name: 'Name',        field: 'name',      width: '100px'},
-          {name: 'Type',        field: 'type',      width: '200px'},
-          {name: 'Status',      field: 'status',    width: '150px'},
-          {name: 'Created By',  field: 'user_name', width: '150px'},
-          {name: 'Description', field: 'description', width: 'auto'}
-        ],
-        width: '100%',
-        autoHeight: true,
-        rowSelector: '20px'
-      }, 'assets_data_grid');
-      asset_data_grid.startup();
-      
-      var asset_data_grid_updater = fieldUpdater({
-        'memory': asset_memory,
-        'widget': asset_data_grid
+      var my_store;
+      var asset_data_grid;
+      var asset_data_grid_updater;
+      var add_asset_button;
+
+      asset_memory.query().then(function(data){
+
+        var id;
+        var name;
+        for (var i = 0; i < data.length; i++){
+          id = data[i]['id'];
+          name = data[i]['name'];
+          data[i]['id'] = '<a href=view/asset/' + id + '>' + name + '</a>';
+        }
+
+        my_store.set('objectStore', new Memory({ data: data }));
+        asset_data_grid.set('store', my_store);
+        asset_data_grid.reset();
       });
 
+    my_store =  new ObjectStore({ objectStore:asset_memory });
 
-      var add_asset_button = dialogCaller({
-        label: 'Add',
-        dialog_id: 'add_asset_dialog',
-        content_creator: create_add_asset_dialog,
-        attach_to: 'view_assets_add_asset_button',
-        related_field_updater: asset_data_grid_updater,
-        data_id: '{{ project.id }}'
-      });
-      add_asset_button.startup();        
-      
+    asset_data_grid = new DataGrid({
+      id: 'assets_data_grid',
+      store: my_store,
+      structure: [
+        {name: 'Thumbnail',                         width: '100px'},
+        {name: 'Name',        field: 'id',          width: '100px'},
+        {name: 'Type',        field: 'type',        width: '200px'},
+        {name: 'Status',      field: 'status',      width: '150px'},
+        {name: 'Created By',  field: 'user_link',   width: '150px'},
+        {name: 'Description', field: 'description', width: 'auto'}
+      ],
+      width: '100%',
+      autoHeight: true,
+      rowSelector: '20px'
+    }, 'assets_data_grid');
+
+    console.log("data id " + asset_data_grid.get('store'));
+    asset_data_grid.startup();
+
+
+    asset_data_grid_updater = fieldUpdater({
+      'memory': asset_memory,
+      'widget': asset_data_grid
+    });
+
+    add_asset_button = dialogCaller({
+      label: 'Add',
+      dialog_id: 'add_asset_dialog',
+      content_creator: create_add_asset_dialog,
+      attach_to: 'view_assets_add_asset_button',
+      related_field_updater: asset_data_grid_updater,
+      data_id: '{{ project.id }}'
+    });
+    add_asset_button.startup();
+
+    //asset_data_grid_updater();
+
+
   });
 </script>
 
