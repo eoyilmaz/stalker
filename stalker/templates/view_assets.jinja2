@@ -1,75 +1,118 @@
-<button id='view_assets_add_asset_button'>Add Asset</button>
-<div id='assets_data_grid'></div>
+<div id='view_assets'>
+  <button id='view_assets_add_asset_button'>Add Asset</button>
+  <div id='assets_data_grid'></div>
+</div>
 <script type='text/javascript'>
   require(['dijit/registry',
     'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dojo/store/Memory',
-    'dojo/store/JsonRest', 'stalker/fieldUpdater', 'stalker/dialogCaller',
-    'dojo/domReady!'],
-    function(registry, ObjectStore, DataGrid, Memory, JsonRest, fieldUpdater,
-             dialogCaller){
+    'dijit/form/FilteringSelect', 'dojo/store/JsonRest',
+    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/on', 'dojo/domReady!'],
+    function(registry, ObjectStore, DataGrid, Memory, FilteringSelect,
+             JsonRest, fieldUpdater, dialogCaller, on){
       
-      var asset_memory = new JsonRest({
-        target: '/get/assets/{{ project.id }}'
-      });
-      
+
       var my_store;
-      var asset_data_grid;
-      var asset_data_grid_updater;
-      var add_asset_button;
+      var structure;
 
-      asset_memory.query().then(function(data){
+      var asset_data_grid = new DataGrid({
+        id: 'assets_data_grid',
+        width: '100%',
+        autoHeight: true,
+        singleClickEdit: true,
+        escapeHTMLInData: false,
+        rowSelector: '20px'
+      }, 'assets_data_grid');
 
-        var id;
-        var name;
-        for (var i = 0; i < data.length; i++){
-          id = data[i]['id'];
-          name = data[i]['name'];
-          data[i]['id'] = '<a href=view/asset/' + id + '>' + name + '</a>';
-        }
-
-        my_store.set('objectStore', new Memory({ data: data }));
-        asset_data_grid.set('store', my_store);
-        asset_data_grid.reset();
+      var add_asset_button = dialogCaller({
+        label: 'Add',
+        dialog_id: 'add_asset_dialog',
+        content_creator: create_add_asset_dialog,
+        attach_to: 'view_assets_add_asset_button',
+        related_field_updater: asset_data_grid_updater,
+        data_id: '{{ project.id }}'
       });
 
-    my_store =  new ObjectStore({ objectStore:asset_memory });
+      asset_data_grid.startup();
+      add_asset_button.startup();
 
-    asset_data_grid = new DataGrid({
-      id: 'assets_data_grid',
-      store: my_store,
-      structure: [
-        {name: 'Thumbnail',                         width: '100px'},
-        {name: 'Name',        field: 'id',          width: '100px'},
-        {name: 'Type',        field: 'type',        width: '200px'},
-        {name: 'Status',      field: 'status',      width: '150px'},
-        {name: 'Created By',  field: 'user_link',   width: '150px'},
-        {name: 'Description', field: 'description', width: 'auto'}
-      ],
-      width: '100%',
-      autoHeight: true,
-      rowSelector: '20px'
-    }, 'assets_data_grid');
+      asset_data_grid_updater();
 
-    console.log("data id " + asset_data_grid.get('store'));
-    asset_data_grid.startup();
+      var status_memory;
+      var status_list_memory = new JsonRest({
+        target: 'get/status_lists_for/Asset'
+      });
 
 
-    asset_data_grid_updater = fieldUpdater({
-      'memory': asset_memory,
-      'widget': asset_data_grid
-    });
+      status_list_memory.query().then(function(data){
 
-    add_asset_button = dialogCaller({
-      label: 'Add',
-      dialog_id: 'add_asset_dialog',
-      content_creator: create_add_asset_dialog,
-      attach_to: 'view_assets_add_asset_button',
-      related_field_updater: asset_data_grid_updater,
-      data_id: '{{ project.id }}'
-    });
-    add_asset_button.startup();
+        var status_id = data[0]['id'];
+        status_memory = new JsonRest({
+          target: 'get/statuses_of/'+ status_id
+        });
+        asset_data_grid_updater();
 
-    //asset_data_grid_updater();
+      });
+
+
+
+
+
+
+      function asset_data_grid_updater(){
+
+        var asset_memory = new JsonRest({
+          target: '/get/assets/{{ project.id }}'
+        });
+
+        asset_memory.query().then(function(data){
+
+          function gotoAssetDetail(a_id){
+              console.log(a_id);
+          }
+          for(var i=0;i<data.length;i++ ){
+
+            var assetName = data[i]["name"];
+            var assetLink = '<a href=view/asset/' + data[i]["id"]+ '>' + assetName + '</a>';
+            var userName = data[i]["user_name"];
+            var userLink = '<a href=view/ueser/' + data[i]["user_id"]+ '>' + userName + '</a>';
+
+            data[i]["asset_link"] = assetLink;
+            data[i]["user_link"] = userLink;
+
+          }
+
+
+          my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
+
+          structure = [
+            {name: 'Thumbnail',                         width: '100px'},
+            {name: 'Name',        field: 'asset_link',          width: '100px'},
+            {name: 'Type',        field: 'type',        width: '200px'},
+            {name: 'Status',      field: 'status',      width: '150px', editable: true, type: dojox.grid.cells._Widget,
+              widgetClass: FilteringSelect,
+              widgetProps: {
+                store: status_memory
+              }},
+            {name: 'Created By',  field: 'user_link',     width: '150px'},
+            {name: 'Description', field: 'description', width: 'auto'}
+          ];
+
+          initUI();
+
+      });
+
+    }
+
+    function initUI() {
+      console.log('initUI');
+      asset_data_grid.set('store', my_store );
+      asset_data_grid.set('structure', structure );
+      console.log('end initUI');
+    }
+
+    function gotoAssetDetail(a_id){
+
+    }
 
 
   });

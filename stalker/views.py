@@ -1118,6 +1118,25 @@ def add_asset(request):
     }
 
 @view_config(
+    route_name='view_asset',
+    renderer='view_asset.jinja2'
+)
+def view_asset(request):
+    """runs when viewing an asset
+    """
+
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+    asset_id = request.matchdict['asset_id']
+    asset = Asset.query.filter_by(id=asset_id).first()
+
+    return {
+        'user': logged_in_user,
+        'asset': asset
+    }
+
+@view_config(
     route_name='add_sequence',
     renderer='add_sequence.jinja2',
     permission='Add_Sequence'
