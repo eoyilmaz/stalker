@@ -147,15 +147,15 @@ class VersionTester(unittest.TestCase):
         # create a group of Tasks for the shot
         self.test_task1 = Task(
             name="Task1",
-            task_of=self.test_shot1,
+            parent=self.test_shot1,
             status_list=self.test_task_status_list,
-            )
+        )
 
         # a Link for the source_file
         self.test_source_link = Link(
             name="Link1",
             path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/v001.ma",
-            )
+        )
 
         # a Link for the input file
         self.test_input_link1 = Link(
@@ -383,9 +383,9 @@ class VersionTester(unittest.TestCase):
         """
         new_task = Task(
             name="New Test Task",
-            task_of=self.test_shot1,
+            parent=self.test_shot1,
             status_list=self.test_task_status_list,
-            )
+        )
 
         self.assertIsNot(self.test_version.version_of, new_task)
         self.test_version.version_of = new_task

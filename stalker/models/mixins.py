@@ -6,7 +6,7 @@
 
 import datetime
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Date,
-                        Interval, Unicode)
+                        Interval, DateTime)
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
@@ -369,7 +369,7 @@ class ScheduleMixin(object):
     """Adds schedule info to the mixed in class.
     
     Adds schedule information like ``start``, ``end`` and
-    ``duration``. There are theree parameters to initialize a class with
+    ``duration``. There are there parameters to initialize a class with
     ScheduleMixin, which are, ``start``, ``end`` and ``duration``.
     Only two of them are enough to initialize the class. The preceding order
     for the parameters is as follows::
@@ -381,52 +381,52 @@ class ScheduleMixin(object):
     accordingly. In any other conditions the missing parameter will be
     calculated from the following table:
     
-    +------------+----------+----------+----------------------------------------+
+    +-------+-----+----------+----------------------------------------+
     | start | end | duration | DEFAULTS                               |
-    +============+==========+==========+========================================+
-    |            |          |          | start = datetime.date.today()     |
-    |            |          |          |                                        |
-    |            |          |          | duration = datetime.timedelta(days=10) |
-    |            |          |          |                                        |
-    |            |          |          | end = start + duration       |
-    +------------+----------+----------+----------------------------------------+
-    |     X      |          |          | duration = datetime.timedelta(days=10) |
-    |            |          |          |                                        |
-    |            |          |          | end = start + duration       |
-    +------------+----------+----------+----------------------------------------+
-    |     X      |    X     |          | duration = end - start       |
-    +------------+----------+----------+----------------------------------------+
-    |     X      |          |    X     | end = start + duration       |
-    +------------+----------+----------+----------------------------------------+
-    |     X      |    X     |    X     | duration = end - start       |
-    +------------+----------+----------+----------------------------------------+
-    |            |    X     |    X     | start = end - duration       |
-    +------------+----------+----------+----------------------------------------+
-    |            |    X     |          | duration = datetime.timedelta(days=10) |
-    |            |          |          |                                        |
-    |            |          |          | start = end - duration       |
-    +------------+----------+----------+----------------------------------------+
-    |            |          |    X     | start = datetime.date.today()     |
-    |            |          |          |                                        |
-    |            |          |          | end = start + duration       |
-    +------------+----------+----------+----------------------------------------+
+    +=======+=====+==========+========================================+
+    |       |     |          | start = datetime.datetime.now()        |
+    |       |     |          |                                        |
+    |       |     |          | duration = datetime.timedelta(days=10) |
+    |       |     |          |                                        |
+    |       |     |          | end = start + duration                 |
+    +-------+-----+----------+----------------------------------------+
+    |   X   |     |          | duration = datetime.timedelta(days=10) |
+    |       |     |          |                                        |
+    |       |     |          | end = start + duration                 |
+    +-------+-----+----------+----------------------------------------+
+    |   X   |  X  |          | duration = end - start                 |
+    +-------+-----+----------+----------------------------------------+
+    |   X   |     |    X     | end = start + duration                 |
+    +-------+-----+----------+----------------------------------------+
+    |   X   |  X  |    X     | duration = end - start                 |
+    +-------+-----+----------+----------------------------------------+
+    |       |  X  |    X     | start = end - duration                 |
+    +-------+-----+----------+----------------------------------------+
+    |       |  X  |          | duration = datetime.timedelta(days=10) |
+    |       |     |          |                                        |
+    |       |     |          | start = end - duration                 |
+    +-------+-----+----------+----------------------------------------+
+    |       |     |    X     | start = datetime.datetime.now()        |
+    |       |     |          |                                        |
+    |       |     |          | end = start + duration                 |
+    +-------+-----+----------+----------------------------------------+
       
     The date attributes can be managed with timezones. Follow the Python idioms
     shown in the `documentation of datetime`_
     
     .. _documentation of datetime: http://docs.python.org/library/datetime.html
     
-    :param start: the start date of the entity, should be a datetime.date
+    :param start: the start date of the entity, should be a datetime.datetime
       instance, the start is the pin point for the date calculation. In
       any condition if the start is available then the value will be
       preserved. If start passes the end the end is also changed
       to a date to keep the timedelta between dates. The default value is
-      datetime.date.today()
+      datetime.datetime.now()
     
     :type start: :class:`datetime.datetime`
     
-    :param end: the end of the entity, should be a datetime.date instance, when
-      the start is changed to a date passing the end, then the end is also
+    :param end: the end of the entity, should be a datetime.datetime instance,
+      when the start is changed to a date passing the end, then the end is also
       changed to a later date so the timedelta between the dates is kept.
     
     :type end: :class:`datetime.datetime` or :class:`datetime.timedelta`
@@ -437,6 +437,15 @@ class ScheduleMixin(object):
       initialization rules.
     
     :type duration: :class:`datetime.timedelta`
+    
+    :param resolution: The resolution of the the datetime.datetime object in
+      datetime.timedelta. Uses ``TIME_RESOLUTION`` settings in the
+      :mod:`stalker.conf.defaults` module which defaults to 1 hour. Setting the
+      resolution to 1 minute will overflow, please use 5 minutes as a minimum
+      value (5 minutes is also considered the lowest resolution in
+      TaskJuggler).
+    
+    :type resolution: datetime.timedelta
     """
     
     #    # add this lines for Sphinx
@@ -446,21 +455,23 @@ class ScheduleMixin(object):
                  start=None,
                  end=None,
                  duration=None,
+                 resolution=None,
                  **kwargs):
+        self.resolution = resolution
         self._validate_dates(start, end, duration)
-
+    
     @declared_attr
     def _end(cls):
-        return Column("end", Date)
+        return Column("end", DateTime)
     
     def _end_getter(self):
         """The date that the entity should be delivered.
         
         The end can be set to a datetime.timedelta and in this case it will be
-        calculated as an offset from the start and converted to datetime.date
-        again. Setting the start to a date passing the end will also set the
-        end, so the timedelta between them is preserved, default value is
-        10 days
+        calculated as an offset from the start and converted to
+        datetime.datetime again. Setting the start to a date passing the end
+        will also set the end, so the timedelta between them is preserved,
+        default value is 10 days
         """
         return self._end
 
@@ -479,22 +490,21 @@ class ScheduleMixin(object):
     
     @declared_attr
     def _start(cls):
-        return Column("start", Date)
+        return Column("start", DateTime)
     
     def _start_getter(self):
         """The date that this entity should start.
         
         Also effects the
-        :attr:`~stalker.models.mixins.ScheduleMixin.end` attribute value
-        in certain conditions, if the
-        :attr:`~stalker.models.mixins.ScheduleMixin.start` is set to a
-        time passing the :attr:`~stalker.models.mixins.ScheduleMixin.end`
-        it will also offset the
-        :attr:`~stalker.models.mixins.ScheduleMixin.end` to keep the
-        :attr:`~stalker.models.mixins.ScheduleMixin.duration` value
-        fixed. :attr:`~stalker.models.mixins.ScheduleMixin.start` should be
-        an instance of class:`datetime.date` and the default value is
-        :func:`datetime.date.today()`
+        :attr:`~stalker.models.mixins.ScheduleMixin.end` attribute value in
+        certain conditions, if the
+        :attr:`~stalker.models.mixins.ScheduleMixin.start` is set to a time
+        passing the :attr:`~stalker.models.mixins.ScheduleMixin.end` it will
+        also offset the :attr:`~stalker.models.mixins.ScheduleMixin.end` to
+        keep the :attr:`~stalker.models.mixins.ScheduleMixin.duration` value
+        fixed. :attr:`~stalker.models.mixins.ScheduleMixin.start` should be an
+        instance of class:`datetime.datetime` and the default value is
+        :func:`datetime.datetime.now()`
         """
         return self._start
     
@@ -551,10 +561,10 @@ class ScheduleMixin(object):
     def _validate_dates(self, start, end, duration):
         """updates the date values
         """
-        if not isinstance(start, datetime.date):
+        if not isinstance(start, datetime.datetime):
             start = None
         
-        if not isinstance(end, datetime.date):
+        if not isinstance(end, datetime.datetime):
             end = None
         
         if not isinstance(duration, datetime.timedelta):
@@ -565,7 +575,7 @@ class ScheduleMixin(object):
             # try to calculate the start from end and duration
             if end is None:
                 # set the defaults
-                start = datetime.date.today()
+                start = datetime.datetime.now()
                 
                 if duration is None:
                     # set the defaults
@@ -591,10 +601,77 @@ class ScheduleMixin(object):
                 duration = datetime.timedelta(1)
 
             end = start + duration
-
-        self._start = start
-        self._end = end
+        
+        # round the dates to the resolution
+        self._start = self.round_time(start)
+        self._end = self.round_time(end)
         self._duration = self._end - self._start
+    
+    @declared_attr
+    def _resolution(cls):
+         return Column("resolution", Interval)
+    
+    def _resolution_getter(self):
+        """returns the resolution
+        """
+        return self._resolution
+    
+    def _resolution_setter(self, res_in):
+        """sets the resolution
+        """
+        self._resolution = self._validate_resolution(res_in)
+        logger.debug('self._resolution: %s' % self._resolution)
+        # update date values
+        if self.start and self.end and self.duration:
+            self._validate_dates(
+                self.round_time(self.start),
+                self.round_time(self.end),
+                None
+            )
+    
+    @declared_attr
+    def resolution(cls):
+        return synonym(
+            '_resolution',
+            descriptor=property(
+                cls._resolution_getter,
+                cls._resolution_setter,
+                doc="""The time resolution of this object.
+                
+                Can be set to any value that is representable with
+                datetime.timedelta. The default value is 1 hour. Whenever it is
+                changed the start, end and duration values will be updated.
+                """
+            )
+        )
+    
+    def _validate_resolution(self, resolution):
+        """validates the given resolution value
+        """
+        if resolution is None:
+            resolution = defaults.TIME_RESOLUTION
+        
+        if not isinstance(resolution, datetime.timedelta):
+            raise TypeError('%s.resolution should be an instance of '
+                            'datetime.timedelta not, %s' % 
+                            (self.__class__.__name__,
+                             resolution.__class__.__name__))
+        
+        return resolution
+    
+    def round_time(self, dt):
+        """Round a datetime object to any time laps in seconds.
+        
+        Uses class property resolution as the closest number of seconds to
+        round to, defaults 1 hour.
+        
+        :param dt: datetime.datetime object, defaults now.
+        
+        Author: Thierry Husson 2012
+        """
+        seconds = int(dt.strftime('%s'))
+        ts = self.resolution.total_seconds()
+        return datetime.datetime.fromtimestamp((seconds + ts / 2) // ts * ts)
 
 
 class ProjectMixin(object):

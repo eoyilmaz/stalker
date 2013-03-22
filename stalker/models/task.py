@@ -316,7 +316,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     _project = relationship(
         'Project',
         primaryjoin='Tasks.c.project_id==Projects.c.id',
-        back_populates='tasks'
+        back_populates='tasks',
+        uselist=False,
     )
     
     parent_id = Column('parent_id', Integer, ForeignKey('Tasks.id'))
@@ -361,14 +362,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     depends = relationship(
         "Task",
-        secondary="Task_Tasks",
-        primaryjoin="Tasks.c.id==Task_Tasks.c.task_id",
-        secondaryjoin="Task_Tasks.c.depends_to_task_id==Tasks.c.id",
+        secondary="Task_Dependencies",
+        primaryjoin="Tasks.c.id==Task_Dependencies.c.task_id",
+        secondaryjoin="Task_Dependencies.c.depends_to_task_id==Tasks.c.id",
         backref="dependent_of",
         doc="""A list of :class:`~stalker.models.task.Task`\ s that this one is depending on.
         
         A CircularDependencyError will be raised when the task dependency
-        creates a circlar dependency which means it is not allowed to create
+        creates a circular dependency which means it is not allowed to create
         a dependency for this Task which is depending on another one which in
         some way depends to this one again.
         """
@@ -853,77 +854,24 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
         return not bool(len(self.children))
 
-def _check_circular_dependency(task, check_for_task, multi_attr):
+def _check_circular_dependency(task, check_for_task, attr_name):
     """checks the circular dependency in task if it has check_for_task in its
     depends list
-    
-    TODO: !!!WARNING THERE IS NO TEST FOR THIS FUNCTION!!!
     """
-    for dependent_task in getattr(task, multi_attr): #depends:
+    for dependent_task in getattr(task, attr_name): #depends:
         if dependent_task is check_for_task:
             raise CircularDependencyError(
                 'task %s and %s creates a circular dependency' %
                 (task, check_for_task)
             )
         else:
-            _check_circular_dependency(dependent_task, check_for_task, multi_attr)
+            _check_circular_dependency(
+                dependent_task, check_for_task, attr_name
+            )
 
-#def _check_cycle(task, check_for_task):
-#    """checks if there is a cycle between the parent child relation
-#    """
-#    # TODO: SQLAlchemy is already preventing cycle, we may are slowing things down here!
-#    for child in task.children:
-#        if child is check_for_task:
-#            raise CycleError(
-#                'task %s and %s creates a cycle in parent child relation' %
-#                (task, check_for_task)
-#            )
-#        else:
-#            _check_cycle(child, check_for_task)
-
-#class TaskDependencyRelation(Base):
-#    """Holds information about :class:`~stalker.models.task.Task` dependencies.
-#    
-#    (DEVELOPERS: It could be an association proxy for the Task class)
-#    
-#    A TaskDependencyRelation object basically defines which
-#    :class:`~stalker.models.task.Task` is dependent
-#    to which other :class:`~stalker.models.task.Task`\ s and what is the lag
-#    between the end of the dependee task to the start of the depender task.
-#    
-#    A :class:`~stalker.models.task.Task` can not be set dependent to it self.
-#    So the the :attr:`~stalker.models.task.TaskDependencyRelation.dependees`
-#    list can not contain the same value with
-#    :attr:`~stalker.models.task.TaskDependencyRelation.dependent`.
-#    
-#    :param depender: The :class:`~stalker.models.task.Task` that is dependent
-#      to others.
-#    
-#    :type depender: :class:`~stalker.models.task.Task`
-#    
-#    :param dependee: A :class:`~stalker.models.task.Task`\ s that the
-#    :class:`~stalker.models.task.Task` which is held by the
-#    :attr:`~stakler.core.models.TaskDependencyRelation.task` attribute is
-#    dependening on. The :attr:`~stalker.models.task.Task.start` and the
-#    :attr:`~stalker.models.task.Task.end` attributes of the
-#    :class:`~stalker.models.task.Task` is updated if it is before the
-#    ``end`` of the dependent :class:`~stalker.models.task.Task`.
-#    
-#    :type depends: :class:`~stalker.models.task.Task`
-#    
-#    :param lag: The lag between the end of the dependent task to the start of
-#      the dependee. It is an instance of timedelta and could be a negative
-#      value. The default is 0. So the end of the task is start of the other.
-#    
-#    :type lag: datetime.timedelta
-#    """
-#    
-#    __table__ = 'TaskDependencyRelations'
-
-
-# TASK_TASKS
-Task_Tasks = Table(
-    "Task_Tasks", Base.metadata,
+# TASK_DEPENDENCIES
+Task_Dependencies = Table(
+    "Task_Dependencies", Base.metadata,
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("depends_to_task_id", Integer, ForeignKey("Tasks.id"),
            primary_key=True)
@@ -938,5 +886,5 @@ Task_Resources = Table(
 
 
 # TODO: subscribe to task: Users should be able to subscribe to any task they
-# want so they can be informed about the tickets as if they are a resource for
-# that task.
+#       want so they can be informed about the tickets as if they are a
+#       resource for that task.

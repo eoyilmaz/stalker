@@ -36,18 +36,19 @@ class ScheduleMixinTester(unittest.TestCase):
         """setup the test
         """
         # create mock objects
-        self.start = datetime.date.today()
+        self.start = datetime.datetime.now()
         self.end = self.start + datetime.timedelta(days=20)
         self.duration = datetime.timedelta(days=10)
 
         self.kwargs = {
-            "name": "Test Schedule Mixin",
-            "description": "This is a simple entity object for testing " +
-                           "ScheduleMixin",
-            "start": self.start,
-            "end": self.end,
-            "duration": self.duration,
-            }
+            'name': 'Test Schedule Mixin',
+            'description': 'This is a simple entity object for testing '
+                           'ScheduleMixin',
+            'start': self.start,
+            'end': self.end,
+            'duration': self.duration,
+            'resolution': datetime.timedelta(minutes=30)
+        }
 
         self.mock_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
     
@@ -58,7 +59,7 @@ class ScheduleMixinTester(unittest.TestCase):
     
     def test_start_argument_is_not_a_date_object(self):
         """testing if defaults will be used for the start attribute when
-        the start is given as something other than a datetime.date object
+        the start is given as something other than a datetime.datetime object
         """
         test_values = [1, 1.2, "str", ["a", "date"]]
         
@@ -69,13 +70,14 @@ class ScheduleMixinTester(unittest.TestCase):
 
             self.assertEqual(new_foo_obj.start,
                              new_foo_obj.end - new_foo_obj.duration)
-
-            self.assertEqual(new_foo_obj.end, self.kwargs["end"])
-            self.assertEqual(new_foo_obj.duration, self.kwargs["duration"])
+            
+            # the values are rounded can not check anymore
+            #self.assertEqual(new_foo_obj.end, self.kwargs["end"])
+            #self.assertEqual(new_foo_obj.duration, self.kwargs["duration"])
     
     def test_start_attribute_is_not_a_date_object(self):
         """testing if the defaults will be used when trying to set the
-        start attribute to something other than a datetime.date object
+        start attribute to something other than a datetime.datetime object
         """
         test_values = [1, 1.2, "str", ["a", "date"]]
         
@@ -101,18 +103,21 @@ class ScheduleMixinTester(unittest.TestCase):
         start to today
         """
         self.mock_foo_obj.start = None
-        self.assertEqual(self.mock_foo_obj.start, datetime.date.today())
+        # values are rounded can not check if it is datetime.now anymore
+        #self.assertEqual(self.mock_foo_obj.start, datetime.datetime.now())
+        self.assertIsInstance(self.mock_foo_obj.start, datetime.datetime)
     
     def test_start_attribute_works_properly(self):
         """testing if the start properly is working properly
         """
-        test_value = datetime.date(year=2011, month=1, day=1)
+        test_value = datetime.datetime(year=2011, month=1, day=1)
         self.mock_foo_obj.start = test_value
         self.assertEqual(self.mock_foo_obj.start, test_value)
     
     def test_end_argument_is_not_a_date_object(self):
         """testing if default values will be for the end attribute used when
-        trying to set the due date something other than a datetime.date object
+        trying to set the due date something other than a datetime.datetime
+        object
         """
         test_values = [1, 1.2, "str", ["a", "date"],
                        datetime.timedelta(days=100)]
@@ -127,7 +132,7 @@ class ScheduleMixinTester(unittest.TestCase):
     def test_end_attribute_is_not_a_date_object(self):
         """testing if default values will be used for the end attribute
         when trying to set the end attribute to something other than a
-        datetime.date object
+        datetime.datetime object
         """
         test_values = [1, 1.2, "str", ["a", "date"],
                        datetime.timedelta(days=100)]
@@ -180,7 +185,7 @@ class ScheduleMixinTester(unittest.TestCase):
 
     def test_duration_argument_is_not_an_instance_of_timedelta_no_problem_if_start_and_end_is_present(self):
         """testing if no error will be raised when the duration argument is not
-        an instance of datetime.date class when both of the start and end
+        an instance of datetime.datetime class when both of the start and end
         arguments are present.
         """
         test_values = [1, 1.2, "10", "10 days"]
@@ -194,11 +199,10 @@ class ScheduleMixinTester(unittest.TestCase):
             self.assertEqual(new_foo_obj.duration,
                              new_foo_obj.end - new_foo_obj.start)
 
-    def test_duration_argument_is_not_an_instance_of_date_when_start_argument_is_missing(
-    self):
+    def test_duration_argument_is_not_an_instance_of_date_when_start_argument_is_missing(self):
         """testing if defaults for the duration attribute will be used  when
-        the duration argument is not an instance of datetime.date class when
-        start argument is also missing
+        the duration argument is not an instance of datetime.datetime class
+        when start argument is also missing
         """
         test_values = [1, 1.2, "10", "10 days"]
         self.kwargs.pop("start")
@@ -209,10 +213,9 @@ class ScheduleMixinTester(unittest.TestCase):
             self.assertEqual(new_foo_obj.duration,
                              defaults.TASK_DURATION)
 
-    def test_duration_argument_is_not_an_instance_of_date_when_end_argument_is_missing(
-    self):
+    def test_duration_argument_is_not_an_instance_of_date_when_end_argument_is_missing(self):
         """testing if the defaults for the duration attribute will be used when
-        the duration argument is not an instance of datetime.date class and
+        the duration argument is not an instance of datetime.datetime class and
         when end argument is also missing
         """
         test_values = [1, 1.2, "10", "10 days"]
@@ -227,7 +230,7 @@ class ScheduleMixinTester(unittest.TestCase):
         """testing if the duration attribute is calculated correctly
         """
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
-        new_foo_entity.start = datetime.date.today()
+        new_foo_entity.start = datetime.datetime.now()
         new_foo_entity.end = new_foo_entity.start +\
                                   datetime.timedelta(201)
 
@@ -302,7 +305,7 @@ class ScheduleMixinTester(unittest.TestCase):
     def test_init_all_parameters_skipped(self):
         """testing if the attributes are initialized to:
         
-        start = datetime.date.today()
+        start = datetime.datetime.now()
         duration = stalker.conf.defaults.DEFAULT_TASK_DURATION
         end = start + duration
         """
@@ -310,10 +313,12 @@ class ScheduleMixinTester(unittest.TestCase):
         self.kwargs.pop("start")
         self.kwargs.pop("end")
         self.kwargs.pop("duration")
-
+        
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
-
-        self.assertEqual(new_foo_entity.start, datetime.date.today())
+        
+        # cannot check if it is now
+        #self.assertEqual(new_foo_entity.start, datetime.datetime.now())
+        self.assertIsInstance(new_foo_entity.start, datetime.datetime)
         self.assertEqual(new_foo_entity.duration,
                          defaults.TASK_DURATION)
         self.assertEqual(new_foo_entity.end,
@@ -401,6 +406,92 @@ class ScheduleMixinTester(unittest.TestCase):
         
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         
-        self.assertEqual(new_foo_entity.start, datetime.date.today())
+        # cannot check if it is datetime.now() cause the time is passing and
+        # the datetime instance is rounded by the resolution
+        #self.assertEqual(new_foo_entity.start, datetime.datetime.now())
+        # just check if it is an instance of datetime.datetime.now()
+        self.assertIsInstance(new_foo_entity.start, datetime.datetime)
         self.assertEqual(new_foo_entity.end,
                          new_foo_entity.start + new_foo_entity.duration)
+    
+    def test_resolution_argument_skipped(self):
+        """testing if the resolution attribute will be set to the default value
+        from the defaults.TIME_RESOLUTION if resolution argument is skipped
+        """
+        try:
+            self.kwargs.pop('resolution')
+        except KeyError:
+            pass
+        
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertEqual(new_foo_obj.resolution, defaults.TIME_RESOLUTION)
+    
+    def test_resolution_argument_is_None(self):
+        """testing if the resolution attribute will be set to the default value
+        from the defaults.TIME_RESOLUTION if resolution argument is None
+        """
+        self.kwargs['resolution'] = None
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertEqual(new_foo_obj.resolution, defaults.TIME_RESOLUTION)
+    
+    def test_resolution_attribute_is_set_to_None(self):
+        """testing if the resolution attribute will be set to the default value
+        from the defaults.TIME_RESOLUTION if it is set to None
+        """
+        self.kwargs['resolution'] = datetime.timedelta(minutes=5)
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        # check start conditions
+        self.assertEqual(new_foo_obj.resolution, self.kwargs['resolution'])
+        new_foo_obj.resolution = None
+        self.assertEqual(new_foo_obj.resolution, defaults.TIME_RESOLUTION)
+    
+    def test_resolution_argument_is_not_a_timedelta_instance(self):
+        """testing if a TypeError will be raised when the resolution argument
+        is not a datetime.timedelta instance
+        """
+        self.kwargs['resolution'] = 'not a timedelta instance'
+        self.assertRaises(TypeError, SchedMixFooMixedInClass, **self.kwargs)
+    
+    def test_resolution_attribute_is_not_a_timedelta_instance(self):
+        """testing if a TypeError will be raised when the resolution attribute
+        is not a datetime.timedelta instance
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertRaises(TypeError, setattr, new_foo_obj, 'resolution',
+                          'not a timedelta instance')
+    
+    def test_resolution_argument_is_working_properly(self):
+        """testing if the resolution argument value is passed to resolution
+        attribute correctly
+        """
+        self.kwargs['resolution'] = datetime.timedelta(minutes=5)
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertEqual(new_foo_obj.resolution, self.kwargs['resolution'])
+    
+    def test_resolution_attribute_is_working_properly(self):
+        """testing if the resolution attribute is working properly
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        res = new_foo_obj
+        new_res = datetime.timedelta(hours=1, minutes=30)
+        self.assertNotEqual(res, new_res)
+        new_foo_obj.resolution = new_res
+        self.assertEqual(new_foo_obj.resolution, new_res)
+    
+    def test_start_end_and_duration_values_are_rounded_to_the_defined_resolution_argument(self):
+        """testing if the start and end dates are rounded to the given
+        resolution
+        """
+        self.kwargs['start'] = datetime.datetime(2013,3,22,02,38,55,531)
+        self.kwargs['end'] = datetime.datetime(2013,3,24,16,46,32,102)
+        self.kwargs['resolution'] = datetime.timedelta(minutes=5)
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        # check the start
+        expected_start = datetime.datetime(2013,3,22,02,40)
+        self.assertEqual(new_foo_obj.start, expected_start)
+        # check the end
+        expected_end = datetime.datetime(2013,3,24,16,45)
+        self.assertEqual(new_foo_obj.end, expected_end)
+        # check the duration
+        self.assertEqual(new_foo_obj.duration, expected_end - expected_start)
+    

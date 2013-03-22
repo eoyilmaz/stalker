@@ -343,16 +343,16 @@ class SequenceTester(unittest.TestCase):
             status=0,
             status_list=task_status_list,
             project=new_project,
-            task_of=new_sequence,
-            )
+            parent=new_sequence,
+        )
 
         task2 = Task(
             name="Lighting",
             status=0,
             status_list=task_status_list,
             project=new_project,
-            task_of=new_sequence,
-            )
+            parent=new_sequence,
+        )
 
         tasks = [task1, task2]
 
@@ -398,19 +398,19 @@ class SequenceTester(unittest.TestCase):
         #new_sequence = Sequence(**self.kwargs)
 
         #task1 = Task(
-        #name="Modeling",
-        #status=0,
-        #status_list=task_status_list,
-        #project=new_project,
-        #task_of=new_sequence,
+        #   name="Modeling",
+        #   status=0,
+        #   status_list=task_status_list,
+        #   project=new_project,
+        #   parent=new_sequence,
         #)
 
         #task2 = Task(
-        #name="Lighting",
-        #status=0,
-        #status_list=task_status_list,
-        #project=new_project,
-        #task_of=new_sequence,
+        #   name="Lighting",
+        #   status=0,
+        #   status_list=task_status_list,
+        #   project=new_project,
+        #   parent=new_sequence,
         #)
 
         #tasks = [task1, task2]

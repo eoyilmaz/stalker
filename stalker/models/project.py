@@ -6,7 +6,7 @@
 import copy
 import warnings
 
-from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean
+from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean, PickleType
 from sqlalchemy.orm import relationship, validates
 from stalker import User
 from stalker.conf import defaults
@@ -194,10 +194,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         default value is 25.0.
         """
     )
+    
     is_stereoscopic = Column(
         Boolean,
         doc="""True if the project is a stereoscopic project"""
     )
+    
+    working_hours = Column(PickleType)
     
     def __init__(self,
                  name=None,
@@ -208,7 +211,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
                  image_format=None,
                  fps=25.0,
                  is_stereoscopic=False,
-                 #display_width=1.0,
+                 working_hours=None,
+                 users=None,
                  **kwargs):
         # a projects project should be self
         # initialize the project argument to self
@@ -224,9 +228,12 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         #CodeMixin.__init__(self, **kwargs)
         
         self.lead = lead
-        self._users = []
+        if users is None:
+            users = []
+        self.users = users
         self.repository = repository
         self.structure = structure
+        
         self._sequences = []
         self._assets = []
 
@@ -234,6 +241,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         self.fps = fps
         self.is_stereoscopic = bool(is_stereoscopic)
         self.code = code
+        
+        self.working_hours = working_hours
     
     @validates("fps")
     def _validate_fps(self, key, fps):
@@ -289,9 +298,30 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
                                 "stalker.models.structure.Structure")
         return structure_in
     
-    @validates("is_stereoscopic")
+    @validates('is_stereoscopic')
     def _validate_is_stereoscopic(self, key, is_stereoscopic_in):
         return bool(is_stereoscopic_in)
+    
+    @validates('users')
+    def _validate_users(self, key, user_in):
+        """validates the given users_in value
+        """
+        if not isinstance(user_in, User):
+            raise TypeError('%s.users should be all stalker.models.auth.User '
+                            'instances, not %s' % 
+                            (self.__class__.__name__,
+                             user_in.__class__.__name__))
+        return user_in
+    
+    @validates('working_hours')
+    def _validate_working_hours(self, key, wh):
+        """validates the given working hours value
+        """
+        if wh is None:
+            # use the default one
+            wh = WorkingHours()
+        
+        return wh
     
     @property
     def assets(self):
@@ -490,6 +520,12 @@ class WorkingHours(object):
                 raise ValueError(err % (self.__class__.__name__, value))
         
         return value
+    
+    def __eq__(self, other):
+        """equality test
+        """
+        return isinstance(other, WorkingHours) and \
+               other.working_hours == self.working_hours
     
     def __str__(self):
         # TODO: create a TaskJuggler suitable string representation

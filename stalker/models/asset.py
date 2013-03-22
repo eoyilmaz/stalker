@@ -62,7 +62,6 @@ class Asset(Task, ReferenceMixin, CodeMixin):
         
         # call the mixin init methods
         ReferenceMixin.__init__(self, **kwargs)
-        StatusMixin.__init__(self, **kwargs)
         CodeMixin.__init__(self, **kwargs)
     
     @reconstructor

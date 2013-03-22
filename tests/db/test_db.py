@@ -334,9 +334,9 @@ class DatabaseTester(unittest.TestCase):
         
         class_names = [
             'Asset', 'Group', 'Permission', 'User', 'Department',
-            'SimpleEntity', 'Entity', 'TaskableEntity', 'ImageFormat', 'Link',
-            'Message', 'Note', 'Project', 'Repository', 'Sequence', 'Shot',
-            'Status', 'StatusList', 'Structure', 'Tag', 'Booking', 'Task',
+            'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
+            'Project', 'Repository', 'Sequence', 'Shot', 'Status',
+            'StatusList', 'Structure', 'Tag', 'Booking', 'Task',
             'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
         ]
         
@@ -521,19 +521,19 @@ class DatabaseModelsTester(unittest.TestCase):
         mock_task1 = Task(
             name='test task 1', status=0,
             status_list=task_status_list,
-            task_of=test_asset,
+            parent=test_asset,
         )
         
         mock_task2 = Task(
             name='test task 2', status=0,
             status_list=task_status_list,
-            task_of=test_asset,
+            parent=test_asset,
         )
         
         mock_task3 = Task(
             name='test task 3', status=0,
             status_list=task_status_list,
-            task_of=test_asset,
+            parent=test_asset,
         )
         
         DBSession.add_all([mock_task1, mock_task2, mock_task3])
@@ -656,7 +656,7 @@ class DatabaseModelsTester(unittest.TestCase):
             start=start,
             end=end,
             resources=[user1, user2],
-            task_of=proj1,
+            project=proj1,
             status_list=task_status_list
         )
         
@@ -1301,13 +1301,13 @@ class DatabaseModelsTester(unittest.TestCase):
         
         working_hours = WorkingHours(
             working_hours={
+                'mon': [[570, 720], [780, 1170]],
+                'tue': [[570, 720], [780, 1170]],
+                'wed': [[570, 720], [780, 1170]],
+                'thu': [[570, 720], [780, 1170]],
+                'fri': [[570, 720], [780, 1170]],
+                'sat': [[570, 720], [780, 1170]],
                 'sun': [],
-                'mon': [[9.5*60, 12*60], [13*60, 19.5*60]],
-                'tue': [[9.5*60, 12*60], [13*60, 19.5*60]],
-                'wed': [[9.5*60, 12*60], [13*60, 19.5*60]],
-                'thu': [[9.5*60, 12*60], [13*60, 19.5*60]],
-                'fri': [[9.5*60, 12*60], [13*60, 19.5*60]],
-                'sat': [[9.5*60, 12*60], [13*60, 19.5*60]],
             }
         )
         
@@ -1342,14 +1342,14 @@ class DatabaseModelsTester(unittest.TestCase):
             name="task1",
             status_list=task_status_list,
             status=0,
-            task_of=new_project,
+            project=new_project,
         )
 
         task2 = Task(
             name="task2",
             status_list=task_status_list,
             status=0,
-            task_of=new_project,
+            project=new_project,
         )
         
         DBSession.add_all([task1, task2])
@@ -2176,7 +2176,7 @@ class DatabaseModelsTester(unittest.TestCase):
         test_task = Task(
             name="Test Task",
             resources=[user1, user2, user3],
-            task_of=new_asset,
+            project=new_asset,
             status_list=task_status_list,
             effort=datetime.timedelta(5)
         )
@@ -2352,7 +2352,7 @@ class DatabaseModelsTester(unittest.TestCase):
         # create a task
         test_task = Task(
             name='Modeling',
-            task_of=test_project,
+            project=test_project,
             status_list=StatusList(
                 name='Task Status List',
                 target_entity_type=Task,

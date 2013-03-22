@@ -122,7 +122,7 @@ class TicketTester(unittest.TestCase):
             name="Modeling of Asset 1",
             resources=[self.test_user],
             status_list=self.test_task_status_list,
-            task_of=self.test_asset
+            parent=self.test_asset
         )
         
         # create a Version

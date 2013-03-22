@@ -48,6 +48,7 @@ STATUS_BG_COLOR = 0xffffff
 STATUS_FG_COLOR = 0x000000
 
 # Task Management
+TIME_RESOLUTION = datetime.timedelta(hours=1)
 TASK_DURATION = datetime.timedelta(days=10)
 TASK_PRIORITY = 500
 

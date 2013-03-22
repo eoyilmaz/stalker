@@ -166,28 +166,24 @@ class UserTest(unittest.TestCase):
             name="Test Task 1",
             status_list=self.task_status_list,
             project=self.test_project1,
-            task_of=self.test_project1
         )
 
         self.test_task2 = Task(
             name="Test Task 2",
             status_list=self.task_status_list,
             project=self.test_project1,
-            task_of=self.test_project1
         )
 
         self.test_task3 = Task(
             name="Test Task 3",
             status_list=self.task_status_list,
             project=self.test_project2,
-            task_of=self.test_project1
         )
 
         self.test_task4 = Task(
             name="Test Task 4",
             status_list=self.task_status_list,
             project=self.test_project3,
-            task_of=self.test_project1
         )
         
         DBSession.add_all([
@@ -1010,24 +1006,24 @@ class UserTest(unittest.TestCase):
             resources=[new_user],
             type=modeling_task_type,
             status_list=task_status_list,
-            task_of=new_project1,
-            )
+            project=new_project1,
+        )
 
         task2 = Task(
             name="Shading",
             resources=[new_user],
             type=shading_task_type,
             status_list=task_status_list,
-            task_of=new_project1,
-            )
+            project=new_project1,
+        )
 
         task3 = Task(
             name="Design",
             resources=[new_user],
             type=design_task_type,
             status_list=task_status_list,
-            task_of=new_project2,
-            )
+            project=new_project2,
+        )
 
         # now check the user.projects
         #print new_user.projects
