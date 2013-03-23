@@ -42,23 +42,25 @@
         </td>
       </tr>
       
-      {# START DATE #}
+      {# START #}
       <tr>
         <td class='label_column'>
-          <label for='task_start'>Start Date</label>
+          <label for='task_start_date'>Start Date</label>
         </td>
         <td class='input_column'>
-          <input id='task_start'>
+            <input id='task_start_date'>
+            <input id='task_start_time'>
         </td>
       </tr>
       
-      {# END DATE #}
+      {# END #}
       <tr>
         <td class='label_column'>
-          <label for='task_end'>End Date</label>
+          <label for='task_end_date'>End Date</label>
         </td>
         <td class='input_column'>
-          <input id='task_end'>
+            <input id='task_end_date'>
+            <input id='task_end_time'>
         </td>
       </tr>
       
@@ -135,12 +137,13 @@
     'dijit/form/Button', 'dijit/form/CheckBox', 'dojox/form/MultiComboBox',
     'dojo/store/JsonRest', 'dojo/dom-construct', 'stalker/TagSelect',
     'stalker/Tag', 'dojo/date', 'dojo/date/stamp', 'dojo/date/locale',
-    'dijit/form/DateTextBox', 'dijit/form/NumberTextBox', 'stalker/submitForm',
+    'dijit/form/DateTextBox', 'dijit/form/TimeTextBox',
+    'dijit/form/NumberTextBox', 'stalker/submitForm',
     'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, TextBox,
              FilteringSelect, ComboBox, Button, CheckBox, MultiComboBox,
              JsonRest, domConstruct, TagSelect, Tag, date, stamp, locale,
-             DateTextBox, NumberTextBox, submitForm, fieldUpdater,
+             DateTextBox, TimeTextBox, NumberTextBox, submitForm, fieldUpdater,
              dialogCaller){
       
       // **********************************************************************
@@ -156,7 +159,7 @@
       var task_of = new TextBox({
         name: 'task_of',
         label: 'Task Of',
-        value: '{{ taskable_entity.name }} ({{ taskable_entity.entity_type }})',
+        value: '{{ entity.name }} ({{ entity.entity_type }})',
         disabled: true
       }, 'task_task_of');
       task_of.startup();
@@ -192,8 +195,15 @@
       
       // **********************************************************************
       // Depends
+      var target;
+      {% if entity.entity_type == 'Project' %}
+        target = 'get/tasks/{{ entity.id }}';
+      {% else %}
+        target = 'get/tasks/{{ entity.project.id }}';
+      {% endif %}
+    
       var tasks_jsonRest = new JsonRest({
-        target:'get/project_tasks/{{ taskable_entity.project.id }}'
+        target: target
       });
       
       var depends_tagSelect = new TagSelect({
@@ -227,9 +237,21 @@
             );
           }
         }
-      }, 'task_start');
+      }, 'task_start_date');
       start_dateTextBox.startup();
       
+      // **********************************************************************
+      var start_time_timeTextBox = new TimeTextBox({
+        name: 'start_time',
+        value: 'T09:00:00',
+        constraints: {
+          timePattern: 'HH:mm:ss',
+          clickableIncrement: 'T01:00:00',
+          visibleIncrement: 'T01:00:00',
+          visibleRange: 'T01:00:00'
+        }
+      }, 'task_start_time');
+      start_time_timeTextBox.startup();
       
       
       
@@ -250,10 +272,21 @@
             );
           }
         }
-      }, 'task_end');
+      }, 'task_end_date');
       end_dateTextBox.startup();
       
-      
+      // **********************************************************************
+      var end_time_timeTextBox = new TimeTextBox({
+        name: 'end_time',
+        value: 'T18:00:00',
+        constraints: {
+          timePattern: 'HH:mm:ss',
+          clickableIncrement: 'T01:00:00',
+          visibleIncrement: 'T01:00:00',
+          visibleRange: 'T01:00:00'
+        }
+      }, 'task_end_time');
+      end_time_timeTextBox.startup();
       
       
       // **********************************************************************
@@ -442,12 +475,14 @@
             form: add_task_form,
             additional_data: {
               submitted: 'add',
-              is_milestone: eval(is_milestone_checkBox.get('checked')) ? 1 : 0 ,
-              task_of_id: {{ taskable_entity.id }},
+              is_milestone: eval(is_milestone_checkBox.get('checked')) ? 1 : 0,
+              parent_id: {{ entity.id }},
               start: stamp.toISOString(start_dateTextBox.value),
-              end: stamp.toISOString(end_dateTextBox.value)
+              end: stamp.toISOString(end_dateTextBox.value),
+              start_time: stamp.toISOString(start_time_timeTextBox.value),
+              end_time: stamp.toISOString(end_time_timeTextBox.value)
             },
-            url: '{{ request.route_url('add_task', taskable_entity_id=taskable_entity.id) }}',
+            url: '{{ request.route_url('add_task', entity_id=entity.id) }}',
             method: 'POST'
           });
         }

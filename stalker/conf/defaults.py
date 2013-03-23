@@ -66,3 +66,27 @@ DAY_ORDER = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
 DAILY_WORKING_HOURS = 8
 
+# define the available actions per Status
+TICKET_STATUS_ORDER = ['NEW', 'ACCEPTED', 'ASSIGNED', 'REOPENED', 'CLOSED']
+TICKET_WORKFLOW = {
+    # Current     # Action    # New
+    # Status                  # Status
+    'NEW'      : {'resolve'  : 'CLOSED',
+                  'accept'   : 'ACCEPTED',
+                  'reassign' : 'ASSIGNED',
+    },
+    'ACCEPTED' : {'resolve'  : 'CLOSED',
+                  'accept'   : 'ACCEPTED',
+                  'reassign' : 'ASSIGNED',
+    },
+    'ASSIGNED' : {'resolve'  : 'CLOSED',
+                  'accept'   : 'ACCEPTED',
+                  'reassign' : 'ASSIGNED',
+    },
+    'REOPENED' : {'resolve'  : 'CLOSED',
+                  'accept'   : 'ACCEPTED',
+                  'reassign' : 'ASSIGNED',
+    },
+    "CLOSED"   : {'reopen'   : 'REOPENED'
+    }
+}

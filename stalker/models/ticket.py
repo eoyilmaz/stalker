@@ -8,7 +8,7 @@ import uuid
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import synonym, relationship
 from sqlalchemy.orm.mapper import validates
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, UniqueConstraint
 from sqlalchemy.schema import ForeignKey, Table
 from sqlalchemy.types import Enum
 from stalker.conf import defaults
@@ -24,20 +24,26 @@ logger.setLevel(logging_level)
 class Ticket(Entity, StatusMixin):
     """Tickets are the way of reporting errors or asking for changes in Stalker.
     
-    Although the ticketing system is based on Trac Original Workflow, in
-    Stalker Tickets are always assigned to the owner of the related
-    :class:`~stalker.models.version.Version` files. So there is no need to have
-    a status of ``Assigned`` or an action of ``accept`` nor ``reassign``. There
-    are only two actions (through Ticket methods); ``resolve`` or ``reopen``,
-    and three statuses available ``New``, ``Reopened``, ``Closed``.
+    The Stalker Ticketing system is based on Trac Basic Workflow. For more
+    information please visit `Trac Workflow`_
+    
+    _`Trac Workflow`:: http://trac.edgewall.org/wiki/TracWorkflow
+    
+    Stalker Ticket system is very flexible, to customize the workflow please
+    update the stalker.conf.defaults.TICKET_WORKFLOW dictionary.
+    
+    In the default setup, there are four actions available; ``accept``,
+    ``resolve``, ``reopen``, ``reassign``, and five statuses available ``New``,
+    ``Assigned``, ``Accepted``, ``Reopened``, ``Closed``.
+    
+    :param project: The Project that this Ticket is assigned to. A Ticket in
+        Stalker must be assigned to a Project. ``project`` argument can not be
+        skipped or can not be None.
+    
+    :type project: :class:`~stalker.models.project.Project`
     
     :param str summary: A string which contains the title or a short
         description of this Ticket.
-    
-    :param ticket_for: An instance of :class:`~stalker.models.version.Version`
-        instance that this Ticket is created for.
-    
-    :type ticket_for: :class:`~stalker.models.version.Version`
     
     :param enum priority: The priority of the Ticket which is an enum value.
         Possible values are:
@@ -66,7 +72,7 @@ class Ticket(Entity, StatusMixin):
     :class:`~stalker.models.Ticket.TicketLog` instance showing the previous
     operation.
     
-     Even though Tickets needs statuses they don't need to be supplied a
+    Even though Tickets needs statuses they don't need to be supplied a
     :class:`~stalker.models.status.StatusList` nor
     :class:`~stalker.models.status.Status` for the Tickets. It will be
     automatically filled accordingly. For newly created Tickets the status of
@@ -74,22 +80,39 @@ class Ticket(Entity, StatusMixin):
         
         Status -> Action -> New Status
         
-        NEW -> resolve -> CLOSED
-        REOPENED -> resolve -> CLOSED
-        CLOSED -> reopen -> REOPENED
+        NEW      -> resolve  -> CLOSED
+        NEW      -> accept   -> ACCEPTED
+        NEW      -> reassign -> ASSIGNED
         
-        actions available
-        0-NEW      : resolve:CLOSED
-        1-REOPENED : resolve:CLOSED
-        2-CLOSED   : reopen:REOPENED
+        ASSIGNED -> resolve  -> CLOSED
+        ASSIGNED -> accept   -> ACCEPTED
+        ASSIGNED -> reassign -> ASSIGNED
+        
+        ACCEPTED -> resolve  -> CLOSED
+        ACCEPTED -> accept   -> ACCEPTED
+        ACCEPTED -> reassign -> ASSIGNED
+        
+        REOPENED -> resolve  -> CLOSED
+        REOPENED -> accept   -> ACCEPTED
+        REOPENED -> reassign -> ASSIGNED
+        
+        CLOSED   -> reopen   -> REOPENED
+        
+        actions available:
+        resolve
+        reassign
+        accept
+        reopen
     
     The :attr:`~stalker.models.ticket.Ticket.name` is automatically generated
     by using the ``conf.defaults.DEFAULT_TICKET_LABEL`` attribute and
     :attr:`~stalker.models.ticket.Ticket.ticket_number`\ . So if defaults are
     used the first ticket name will be "Ticket#1" and the second "Ticket#2" and
-    so on.
+    so on. For every project the number will restart from 1.
     
     Use the :meth:`~stalker.models.ticket.Ticket.resolve`,
+    :meth:`~stalker.models.ticket.Ticket.reassign`,
+    :meth:`~stalker.models.ticket.Ticket.accept`,
     :meth:`~stalker.models.ticket.Ticket.reopen` methods to change the status
     of the current Ticket.
     
@@ -101,23 +124,25 @@ class Ticket(Entity, StatusMixin):
     # logs attribute
     __auto_name__ = True
     __tablename__ = "Tickets"
+    __table_args__ = (
+        UniqueConstraint("project_id", 'number'), {}
+    )
     __mapper_args__ = {"polymorphic_identity": "Ticket"}
     
     ticket_id = Column(
         "id", Integer, ForeignKey("Entities.id"), primary_key=True
     )
     
-    ticket_for_id = Column(Integer, ForeignKey('Versions.id'))
-    ticket_for = relationship(
-        "Version",
-        primaryjoin='Ticket.ticket_for_id==Version.version_id',
-        doc="""The :class:`~stalker.models.version.Version` instance that this Ticket is related to
-        """
+    _project_id = Column('project_id', Integer, ForeignKey('Projects.id'))
+    
+    _project = relationship(
+        'Project',
+        primaryjoin='Tickets.c._project_id==Projects.c.id'
     )
     
     _number = Column(
+        'number',
         Integer,
-        unique=True,
         autoincrement=True,
         default=1,
         nullable=False
@@ -132,6 +157,11 @@ class Ticket(Entity, StatusMixin):
         to this one. Can be used to related Tickets to point to a common
         problem. The Ticket itself can not be assigned to this list
         """
+    )
+    
+    links = relationship(
+        'SimpleEntity',
+        secondary='Ticket_SimpleEntities'
     )
     
     comments = synonym('notes',
@@ -167,16 +197,7 @@ class Ticket(Entity, StatusMixin):
         """
     )
     
-    # define the available actions per Status
-    __avialable_actions__ = {
-        # Current     # Action    # New
-        # Status                  # Status
-        "NEW"      : {"resolve" : "CLOSED"},
-        "REOPENED" : {"resolve" : "CLOSED"},
-        "CLOSED"   : {"reopen"  : "REOPENED"}
-    }
-    
-    def __init__(self, ticket_for=None, priority='TRIVIAL', **kwargs):
+    def __init__(self, links=None, priority='TRIVIAL', **kwargs):
         # generate a name
         #kwargs['name'] = "Ticket_" + uuid.uuid4().urn.split(':')[2]
         #logger.debug('name of the newly created Ticket is: %s' % 
@@ -189,20 +210,32 @@ class Ticket(Entity, StatusMixin):
         super(Ticket, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
         
-        self.ticket_for = ticket_for
         #self._number = self._generate_ticket_number()
         self.priority = priority
-      
+        if links is None:
+            links = []
+        self.links = links
+    
     def _number_getter(self):
         """returns the number attribute
         """
         return self._number
     
     number = synonym(
-        "_number",
+        '_number',
         descriptor=property(_number_getter),
         doc="""The automatically generated number for the tickets.
         """
+    )
+    
+    def _project_getter(self):
+        """returns the project attribute
+        """
+        return self._project
+    
+    project = synonym(
+        '_project',
+        descriptor=property(_project_getter)
     )
     
     def _maximum_number(self):
@@ -211,7 +244,9 @@ class Ticket(Entity, StatusMixin):
         :return: integer
         """
         try:
+            from stalker import Project
             max_ticket = Ticket.query\
+                .join(Project, Ticket.project)\
                 .order_by(Ticket.number.desc())\
                 .first()
         except UnboundExecutionError:
@@ -226,21 +261,6 @@ class Ticket(Entity, StatusMixin):
         """
         # TODO: try to make it atomic
         return self._maximum_number() + 1
-    
-    @validates('ticket_for')
-    def _validate_ticket_for(self, key, ticket_for):
-        """validates the given ticket_for value
-        """
-        if ticket_for is None:
-            raise TypeError('%s.ticket_for can not be None, please set it '
-                            'to a stalker.models.version.Version instance' % 
-                            self.__class__.__name__)
-        from stalker.models.version import Version
-        if not isinstance(ticket_for, Version):
-            raise TypeError('%s.ticket_for attribute should be an '
-                'instance of stalker.models.version.Version instance not %s' %
-                (self.__class__.__name__, ticket_for.__class__.__name__))
-        return ticket_for
     
     @validates('related_tickets')
     def _validate_related_tickets(self, key, related_ticket):
@@ -257,33 +277,48 @@ class Ticket(Entity, StatusMixin):
         
         return related_ticket
     
-    def resolve(self, created_by=None):
-        """changes the status of the Ticket if it is New or Reopened to Closed
+    def __action__(self, action, created_by):
+        """updates the ticket status and creates a ticket log according to the
+        Ticket.__available_actions__ dictionary
+        
+        :param str action: The name of the action
+        :param stalker.models.auth.User created_by: The User creating this
+            action
         """
-        if self.status.code == 'NEW' or self.status.code == 'REOPENED':
+        new_status_code = \
+            defaults.TICKET_WORKFLOW[self.status.code].get(action)
+        if new_status_code:
+            # there is an action defined for this status
+            # get the to_status
             from_status = self.status
-            self.status = 2
-            to_status = self.status
+            to_status = self.status_list[new_status_code]
+            self.status = to_status
             
-            # create a log entry
+            # create log entry
             self.logs.append(
-                TicketLog(self, from_status, to_status, 'RESOLVE',
+                TicketLog(self, from_status, to_status, action,
                           created_by=created_by)
             )
+
+    def resolve(self, created_by=None):
+        """resolves the ticket
+        """
+        self.__action__('resolve', created_by)
+    
+    def accept(self, created_by=None):
+        """accepts the ticket
+        """
+        self.__action__('accept', created_by)
+    
+    def reassign(self, created_by=None):
+        """reassigns the ticket
+        """
+        self.__action__('reassign', created_by)
     
     def reopen(self, created_by=None):
-        """changes the status of the Ticket if it is Closed to Reopened
+        """reopens the ticket
         """
-        if self.status.code == 'CLOSED':
-            from_status = self.status
-            self.status = 1
-            to_status = self.status
-            
-            # create a log entry
-            self.logs.append(
-                TicketLog(self, from_status, to_status, 'REOPEN',
-                          created_by=created_by)
-            )
+        self.__action__('reopen', created_by)
     
     def __eq__(self, other):
         """the equality operator
@@ -368,10 +403,19 @@ class TicketLog(SimpleEntity):
         self.to_status = to_status
         self.action = action
 
+
+
 # A secondary Table for Ticket to Ticket relations
 Ticket_Related_Tickets = Table(
     'Ticket_Related_Tickets', Base.metadata,
     Column('ticket_id', Integer, ForeignKey('Tickets.id'), primary_key=True),
     Column('related_ticket_id', Integer, ForeignKey('Tickets.id'), primary_key=True),
     extend_existing=True
+)
+
+# Ticket SimpleEntity Relation, link anything to a ticket
+Ticket_SimpleEntities = Table(
+    'Ticket_SimpleEntities', Base.metadata,
+    Column('ticket_id', Integer, ForeignKey('Tickets.id'), primary_key=True),
+    Column('simple_entity_id', Integer, ForeignKey('SimpleEntities.id'), primary_key=True)
 )

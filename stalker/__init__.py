@@ -170,13 +170,13 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Task
-    config.add_route('add_task', 'add/task/{taskable_entity_id}')
+    config.add_route('add_task', 'add/task/{entity_id}')
     config.add_route('view_task', 'view/task/{task_id}')
     config.add_route('edit_task', 'edit/task/{task_id}')
     config.add_route('edit_tasks', 'edit/tasks')
-    config.add_route('view_tasks', 'view/tasks/{taskable_entity_id}')
+    config.add_route('view_tasks', 'view/tasks/{entity_id}')
     config.add_route('get_tasks',
-                     'get/tasks/{taskable_entity_id}')
+                     'get/tasks/{entity_id}')
     config.add_route('get_project_tasks', 'get/project_tasks/{project_id}')
     
     # *************************************************************************

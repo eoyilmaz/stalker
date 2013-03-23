@@ -1445,6 +1445,16 @@ class TaskTester(unittest.TestCase):
         new_task.parent = new_task2
         self.assertEqual(new_task.parent, new_task2)
     
+    def test_parent_argument_can_also_be_a_Project_instance(self):
+        """testing if the parent argument can also pass a project instance
+        """
+        self.kwargs.pop('project')
+        self.kwargs['parent'] = self.test_project1
+        new_task = Task(**self.kwargs)
+        # check if the parent and the project attributes are the same
+        self.assertEqual(new_task.parent, new_task.project)
+        self.assertEqual(new_task.project, self.test_project1)
+    
     def test_children_attribute_is_empty_list_by_default(self):
         """testing if the children attribute is an empty list by default
         """
@@ -1735,3 +1745,26 @@ class TaskTester(unittest.TestCase):
         # check if it is still the same
         self.assertEqual(task1.start, now + dt(1))
         self.assertEqual(task1.end, now + dt(8)) 
+    
+    def test_level_attribute_is_a_read_only_property(self):
+        """testing if the level attribute is a read only property
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task, 'level', 0)
+    
+    def test_level_attribute_returns_the_hierarchical_level_of_this_task(self):
+        """testing if the level attribute returns the hierarchical level of
+        this task
+        """
+        self.kwargs['name'] = 'T1'
+        test_task1 = Task(**self.kwargs)
+        self.assertEqual(test_task1.level, 1)
+        
+        self.kwargs['name'] = 'T2'
+        test_task2 = Task(**self.kwargs)
+        test_task2.parent = test_task1
+        self.assertEqual(test_task2.level, 2)
+        
+        self.kwargs['name'] = 'T3'
+        test_task3 = Task(**self.kwargs)
+        test_task3.parent = test_task2
+        self.assertEqual(test_task3.level, 3)

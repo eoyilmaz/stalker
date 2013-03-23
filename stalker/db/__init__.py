@@ -177,35 +177,19 @@ def __create_ticket_statuses():
     # create statuses for Tickets
     from stalker import Status, StatusList
     logger.debug("Creating Ticket Statuses")
-    ticket_status1 = Status(
-        name='New',
-        code='NEW',
-        created_by=admin,
-        updated_by=admin
-    )
     
-    ticket_status2 = Status(
-        name='Reopened',
-        code='REOPENED',
-        created_by=admin,
-        updated_by=admin
-    )
-    
-    ticket_status3 = Status(
-        name='Closed',
-        code='CLOSED',
-        created_by=admin,
-        updated_by=admin
-    )
+    ticket_statuses = [
+        Status(
+            name=status_name.title(),
+            code=status_name.upper(),
+            created_by=admin,
+            updated_by=admin
+        ) for status_name in defaults.TICKET_STATUS_ORDER]
     
     ticket_status_list = StatusList(
         name='Ticket Statuses',
         target_entity_type='Ticket',
-        statuses=[
-            ticket_status1,
-            ticket_status2,
-            ticket_status3,
-        ],
+        statuses=ticket_statuses,
         created_by=admin,
         updated_by=admin
     )

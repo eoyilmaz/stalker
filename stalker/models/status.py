@@ -151,7 +151,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
     <Status (Complete, CMPLT)>
     >>> a_status_list["complete"]
     <Status (Complete, CMPLT)>
-    >>> a_status_list["wip"]
+    >>> a_status_list["WIP"]
     <Status (Work in Progress, WIP)>
     
     :param statuses: This is a list of :class:`~stalker.models.status.Status`

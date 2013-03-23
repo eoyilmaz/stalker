@@ -875,6 +875,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """Returns True if the Task has no children Tasks
         """
         return not bool(len(self.children))
+    
+    
+    @property
+    def level(self):
+        """Returns the level of this task. It is a temporary property and will
+        be useless when Stalker has its own implementation of a proper Gantt
+        Chart. Write now it is used by the jQueryGantt.
+        """
+        i=0
+        current = self
+        while current:
+            i+=1
+            current = current.parent
+        return i
 
 def _check_circular_dependency(task, check_for_task, attr_name):
     """checks the circular dependency in task if it has check_for_task in its
