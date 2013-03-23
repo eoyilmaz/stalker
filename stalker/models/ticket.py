@@ -133,11 +133,11 @@ class Ticket(Entity, StatusMixin):
         "id", Integer, ForeignKey("Entities.id"), primary_key=True
     )
     
-    _project_id = Column('project_id', Integer, ForeignKey('Projects.id'))
+    project_id = Column('project_id', Integer, ForeignKey('Projects.id'))
     
     _project = relationship(
         'Project',
-        primaryjoin='Tickets.c._project_id==Projects.c.id'
+        primaryjoin='Tickets.c.project_id==Projects.c.id'
     )
     
     _number = Column(
@@ -249,6 +249,7 @@ class Ticket(Entity, StatusMixin):
                 .join(Project, Ticket.project)\
                 .order_by(Ticket.number.desc())\
                 .first()
+            logger.debug('max_ticket: %s' % max_ticket)
         except UnboundExecutionError:
             max_ticket = None
         
