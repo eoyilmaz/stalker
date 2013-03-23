@@ -25,11 +25,11 @@
             </tr>
             <tr>
                 <td><b>Start Date</b></td>
-                <td id="project_info_start_date"></td>
+                <td id="project_info_start"></td>
             </tr>
             <tr>
                 <td><b>End Date</b></td>
-                <td id="project_info_end_date"></td>
+                <td id="project_info_end"></td>
             </tr>
         </table>
     </div>
@@ -127,37 +127,37 @@
     repository_textBox.startup();
 
     // ********************************************************************
-    // STARTDATE
+    // Start Date
 
-    var startDate_textBox = new InlineEditBox({
+    var start_textBox = new InlineEditBox({
        editor: DateTextBox,
-       editorParams:{id: 'startDate_DateTextBox',
+       editorParams:{id: 'start_DateTextBox',
                     value: new Date(),
                     datePattern: 'dd-mm-yyyy'
                     },
        onChange: function(){
        },
-       value: '{{ project.start_date }}'
-    }, "project_info_start_date");
+       value: '{{ project.start }}'
+    }, "project_info_start");
 
-    startDate_textBox.startup();
+    start_textBox.startup();
 
 
     // ********************************************************************
     // ENDDATE
 
-    var endDate_textBox = new InlineEditBox({
+    var end_textBox = new InlineEditBox({
         editor: DateTextBox,
-        editorParams:{id: 'endDate_DateTextBox',
+        editorParams:{id: 'end_DateTextBox',
                       value: new Date(),
                       datePattern: 'dd-mm-yyyy'
         },
         onChange: function(){
         },
-        value: '{{ project.end_date }}'
-    }, "project_info_end_date");
+        value: '{{ project.end }}'
+    }, "project_info_end");
 
-    endDate_textBox.startup();
+    end_textBox.startup();
 
 
 });

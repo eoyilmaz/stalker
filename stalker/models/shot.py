@@ -6,7 +6,7 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, synonym, reconstructor
-from stalker.models.entity import TaskableEntity
+from stalker.models.task import Task
 from stalker.models.mixins import (StatusMixin, ReferenceMixin, CodeMixin)
 
 from stalker.log import logging_level
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-class Shot(TaskableEntity, ReferenceMixin, StatusMixin, CodeMixin):
+class Shot(Task, ReferenceMixin, StatusMixin, CodeMixin):
     """Manages Shot related data.
 
     .. deprecated:: 0.1.2
@@ -109,7 +109,7 @@ class Shot(TaskableEntity, ReferenceMixin, StatusMixin, CodeMixin):
     __tablename__ = "Shots"
     __mapper_args__ = {"polymorphic_identity": "Shot"}
 
-    shot_id = Column("id", Integer, ForeignKey("TaskableEntities.id"),
+    shot_id = Column("id", Integer, ForeignKey("Tasks.id"),
                      primary_key=True)
     sequence_id = Column(Integer, ForeignKey("Sequences.id"))
     _sequence = relationship(

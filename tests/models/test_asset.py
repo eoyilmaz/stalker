@@ -159,19 +159,19 @@ class AssetTester(unittest.TestCase):
         # tasks
         self.test_data_task1 = Task(
             name="Task1",
-            task_of=self.test_data_test_asset,
+            parent=self.test_data_test_asset,
             status_list=self.test_data_task_status_list
         )
 
         self.test_data_task2 = Task(
             name="Task2",
-            task_of=self.test_data_test_asset,
+            parent=self.test_data_test_asset,
             status_list=self.test_data_task_status_list
         )
 
         self.test_data_task3 = Task(
             name="Task3",
-            task_of=self.test_data_test_asset,
+            parent=self.test_data_test_asset,
             status_list=self.test_data_task_status_list
         )
     
@@ -330,13 +330,13 @@ class AssetTester(unittest.TestCase):
         task1 = Task(
             name="Modeling",
             status_list=task_status_list,
-            task_of=new_asset
+            parent=new_asset
         )
 
         task2 = Task(
             name="Lighting",
             status_list=task_status_list,
-            task_of=new_asset
+            parent=new_asset
         )
 
         tasks = [task1, task2]
@@ -392,23 +392,23 @@ class AssetTester(unittest.TestCase):
         #)
 
         #new_asset = Asset(
-        #name="test asset",
-        #type=character_asset_type,
-        #code="tstasset",
-        #status_list=asset_status_list,
-        #project=new_project,
+        #   name="test asset",
+        #   type=character_asset_type,
+        #   code="tstasset",
+        #   status_list=asset_status_list,
+        #   project=new_project,
         #)
 
         #task1 = Task(
-        #name="Modeling",
-        #status_list=task_status_list,
-        #task_of=new_asset
+        #   name="Modeling",
+        #   status_list=task_status_list,
+        #   parent=new_asset
         #)
 
         #task2 = Task(
-        #name="Lighting",
-        #status_list=task_status_list,
-        #task_of=new_asset
+        #   name="Lighting",
+        #   status_list=task_status_list,
+        #   parent=new_asset
         #)
 
         #self.assertIn(new_asset, new_project.assets)

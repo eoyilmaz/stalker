@@ -212,7 +212,7 @@ Lets enter more information about this new project::
                                product bla bla bla..."""
   new_project.image_format = ImageFormat(name="HD 1080", width=1920, height=1080)
   new_project.fps = 25
-  new_project.end_date = datetime.date(2011, 2, 15)
+  new_project.end = datetime.date(2011, 2, 15)
   new_project.lead = myUser
 
 Lets save all the new data to the database::

@@ -657,16 +657,16 @@ class ShotTester(unittest.TestCase):
             name="Modeling", status=0,
             status_list=task_status_list,
             project=new_project,
-            task_of=new_shot,
-            )
+            parent=new_shot,
+        )
 
         task2 = Task(
             name="Lighting",
             status=0,
             status_list=task_status_list,
             project=new_project,
-            task_of=new_shot,
-            )
+            parent=new_shot,
+        )
 
         tasks = [task1, task2]
 

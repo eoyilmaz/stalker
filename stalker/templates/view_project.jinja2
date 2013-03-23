@@ -24,6 +24,11 @@
         selected: true
       });
       
+      var users_content_pane = new ContentPane({
+        title: 'Users',
+        href: 'view/users/{{ project.id }}'
+      });
+      
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
         href: 'view/tasks/{{ project.id }}'
@@ -46,6 +51,7 @@
 
       project_related_data_tab_container.addChild(name_pane);
       project_related_data_tab_container.addChild(overview_content_pane);
+      project_related_data_tab_container.addChild(users_content_pane);
       project_related_data_tab_container.addChild(tasks_content_pane);
       project_related_data_tab_container.addChild(assets_content_pane);
       project_related_data_tab_container.addChild(shots_content_pane);

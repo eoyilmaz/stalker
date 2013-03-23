@@ -539,66 +539,6 @@ class Entity(SimpleEntity):
         return super(Entity, self).__eq__(other) and \
                isinstance(other, Entity)
 
-
-class TaskableEntity(Entity, ProjectMixin):
-    """Gives the ability to connect to a list of :class:`~stalker.models.task.Task`\ s to the mixed in object.
-    
-    TaskMixin is a variant of :class:`~stalker.models.mixins.ProjectMixin` and
-    lets the mixed object to have :class:`~stalker.model.task.Task` instances
-    to be attached it self. And because :class:`~stalker.models.task.Task`\ s
-    are related to :class:`~stalker.models.project.Project`\ s, it also adds
-    ability to relate the object to a :class:`~stalker.models.project.Project`
-    instance. So every object which is mixed with TaskMixin will have a
-    :attr:`~stalker.models.mixins.TaskMixin.tasks` and a
-    :attr:`~stalker.models.mixins.TaskMixin.project` attribute. Only the
-    ``project`` argument needs to be initialized. See the
-    :class:`~stalker.models.mixins.ProjectMixin` for more detail.
-    
-    TaskMixin by default creates a Task instance and stores it in the
-    :attr:`~stalker.model.entity.TaskableEntity.shadow_task` attribute.
-    This Task instance will be the parent of the Tasks assigned to the
-    TaskableEntity. This is done mainly to have a Task in
-    Gantt Charts showing the Taskable Entity without breaking or bending the
-    object models of Gantt Chart libraries. Tasks assigned to the
-    TaskableEntities will automatically be child of the shadow task of the
-    TaskableEntity.
-    """
-    __auto_name__ = True
-    __tablename__ = "TaskableEntities"
-    __mapper_args__ = {"polymorphic_identity": "TaskableEntity"}
-    taskableEntity_id = Column("id", Integer, ForeignKey("Entities.id"),
-                               primary_key=True)
-    
-    tasks = relationship(
-        "Task",
-        primaryjoin="TaskableEntities.c.id==Tasks.c.task_of_id",
-        #backref="task_of",
-        back_populates="task_of",
-        post_update=True,
-    )
-
-    def __init__(self, tasks=None, **kwargs):
-        super(TaskableEntity, self).__init__(**kwargs)
-        ProjectMixin.__init__(self, **kwargs)
-
-        if tasks is None:
-            tasks = []
-        self.tasks = tasks
-
-    @validates("tasks")
-    def _validate_tasks(self, key, task):
-        """validates the given task value
-        """
-        
-        from stalker.models.task import Task
-        
-        if not isinstance(task, Task):
-            raise TypeError("tasks should be a list of "
-                            "stalker.models.task.Task instances")
-
-        return task
-
-
 # ENTITY_TAGS
 Entity_Tags = Table(
     "Entity_Tags", Base.metadata,

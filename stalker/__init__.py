@@ -8,16 +8,16 @@ Stalker is a Production Asset Management System (ProdAM) designed for animation
 and vfx studios. See docs for more information.
 """
 
-__version__ = '0.2.0.a6'
+__version__ = '0.2.0.a7'
 
 from pyramid.config import Configurator
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from stalker.models.asset import Asset
 from stalker.models.auth import Group, Permission, User
+from stalker.models.asset import Asset
 from stalker.models.department import Department
-from stalker.models.entity import SimpleEntity, Entity, TaskableEntity
+from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message
@@ -170,13 +170,13 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Task
-    config.add_route('add_task', 'add/task/{taskable_entity_id}')
+    config.add_route('add_task', 'add/task/{entity_id}')
     config.add_route('view_task', 'view/task/{task_id}')
     config.add_route('edit_task', 'edit/task/{task_id}')
     config.add_route('edit_tasks', 'edit/tasks')
-    config.add_route('view_tasks', 'view/tasks/{taskable_entity_id}')
+    config.add_route('view_tasks', 'view/tasks/{entity_id}')
     config.add_route('get_tasks',
-                     'get/tasks/{taskable_entity_id}')
+                     'get/tasks/{entity_id}')
     config.add_route('get_project_tasks', 'get/project_tasks/{project_id}')
     
     # *************************************************************************

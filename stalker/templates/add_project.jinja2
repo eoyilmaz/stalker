@@ -25,20 +25,20 @@
        {# START DATE #}
        <tr>
          <td class='label_column'>
-           <label for='project_start_date'>Start Date</label>
+           <label for='project_start'>Start Date</label>
          </td>
          <td class='input_column'>
-           <input id='project_start_date'>
+           <input id='project_start'>
          </td>
         </tr>
 
         {# END DATE #}
         <tr>
             <td class='label_column'>
-                <label for='project_end_date'>End Date</label>
+                <label for='project_end'>End Date</label>
             </td>
             <td class='input_column'>
-                <input id='project_end_date'>
+                <input id='project_end'>
             </td>
         </tr>
 
@@ -188,85 +188,85 @@
 
        // **********************************************************************
        // Start Date
-      var start_date_dateTextBox = new DateTextBox({
-        name: 'start_date',
+      var start_dateTextBox = new DateTextBox({
+        name: 'start',
         label: 'Start Date',
         value: new Date(),// set it today by default
         required: true,
         datePattern: 'dd-mm-yyyy',
         onChange: function(){
+          if (this.focused){
+            update_dates(
+              start_dateTextBox.getValue(),
+              end_dateTextBox.getValue(),
+              null
+              );
+            }
+          }
+      }, 'project_start');
+      start_dateTextBox.startup();
+
+      // **********************************************************************
+      // End Date
+      var end_dateTextBox = new DateTextBox({
+          name: 'end',
+          label: 'End Date',
+          value: new Date(), // set it today by default
+          required: true,
+          datePattern: 'dd-mm-yyyy',
+          onChange: function(){
+              if (this.focused){
+                  update_dates(
+                    start_dateTextBox.getValue(),
+                    end_dateTextBox.getValue(),
+                    null
+                  );
+              }
+          }
+      }, 'project_end');
+      end_dateTextBox.startup();
+
+
+
+
+      // **********************************************************************
+      // Duration
+      var duration_numberTextBox = new NumberTextBox({
+        name: 'duration',
+        label: 'Duration',
+        value: 0,
+        onKeyUp: function(){
             if (this.focused){
                 update_dates(
-                    start_date_dateTextBox.getValue(),
-                    end_date_dateTextBox.getValue(),
-                    null
-                    );
-                }
+                  start_dateTextBox.getValue(),
+                  null,
+                  this.get('value')
+                )
             }
-      }, 'project_start_date');
-      start_date_dateTextBox.startup();
+        }
+      }, 'project_duration');
+      duration_numberTextBox.startup();
 
-        // **********************************************************************
-        // End Date
-        var end_date_dateTextBox = new DateTextBox({
-                                                       name: 'end_date',
-                                                       label: 'End Date',
-                                                       value: new Date(), // set it today by default
-                                                       required: true,
-                                                       datePattern: 'dd-mm-yyyy',
-                                                       onChange: function(){
-                                                           if (this.focused){
-                                                               update_dates(
-                                                                       start_date_dateTextBox.getValue(),
-                                                                       end_date_dateTextBox.getValue(),
-                                                                       null
-                                                               );
-                                                           }
-                                                       }
-                                                   }, 'project_end_date');
-        end_date_dateTextBox.startup();
-
-
-
-
-        // **********************************************************************
-        // Duration
-        var duration_numberTextBox = new NumberTextBox({
-                                                           name: 'duration',
-                                                           label: 'Duration',
-                                                           value: 0,
-                                                           onKeyUp: function(){
-                                                               if (this.focused){
-                                                                   update_dates(
-                                                                           start_date_dateTextBox.getValue(),
-                                                                           null,
-                                                                           this.get('value')
-                                                                   )
-                                                               }
-                                                           }
-                                                       }, 'project_duration');
-        duration_numberTextBox.startup();
-
-        var update_dates = function(start_date, end_date, duration){
-            if (duration == null){
-                // update the duration
-                duration_numberTextBox.set(
-                        'value',
-                        date.difference(start_date, end_date)
-                );
-            } else if (end_date == null) {
-                // update end date
-                end_date_dateTextBox.set(
-                        'value',
-                        date.add(
-                                start_date,
-                                'day',
-                                duration
-                        )
-                );
-            }
-        };
-        //update_dates();
+      var update_dates = function(start, end, duration){
+        if (duration == null){
+          // update the duration
+          duration_numberTextBox.set(
+            'value',
+            date.difference(start, end)
+          );
+        } else if (end == null) {
+          // update end date
+          end_dateTextBox.set(
+            'value',
+            date.add(
+              start,
+              'day',
+              duration
+            )
+          );
+        }
+      };
+      //update_dates();
       
       
       
@@ -546,9 +546,9 @@
             dialog: registry.byId('add_project_dialog'),
             form: add_project_form,
             additional_data: {
-                submitted: 'add',
-                start_date: stamp.toISOString(start_date_dateTextBox.value),
-                end_date: stamp.toISOString(end_date_dateTextBox.value)
+              submitted: 'add',
+              start: stamp.toISOString(start_dateTextBox.value),
+              end: stamp.toISOString(end_dateTextBox.value)
             },
             url: '{{ request.route_url("add_project") }}',
             method: 'POST'

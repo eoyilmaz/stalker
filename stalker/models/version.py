@@ -119,7 +119,7 @@ class Version(Entity, StatusMixin):
     
     def __init__(self,
                  version_of=None,
-                 take_name=defaults.DEFAULT_VERSION_TAKE_NAME,
+                 take_name=defaults.VERSION_TAKE_NAME,
                  #version_number=None,
                  source_file=None,
                  inputs=None,

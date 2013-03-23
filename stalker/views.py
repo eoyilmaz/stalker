@@ -19,13 +19,13 @@ import stalker
 from stalker.db.session import DBSession
 from stalker import (User, ImageFormat, Project, Repository, Structure,
                      FilenameTemplate, EntityType, Type, StatusList, Status,
-                     Asset, Shot, Sequence, TaskableEntity, Department, Group,
-                     Tag, Task)
+                     Asset, Shot, Sequence, Department, Group,
+                     Tag, Task, Entity)
 
-from stalker.log import logging_level
+from stalker import log
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger.setLevel(log.logging_level)
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
@@ -212,17 +212,17 @@ def add_project(request):
 
                 # get the dates
                 # TODO: no time zone info here, please add time zone
-                start_date = datetime.datetime.strptime(
-                    request.params['start_date'][:-6],
+                start = datetime.datetime.strptime(
+                    request.params['start'][:-6],
                     "%Y-%m-%dT%H:%M:%S"
                 )
-                end_date = datetime.datetime.strptime(
-                    request.params['end_date'][:-6],
+                end = datetime.datetime.strptime(
+                    request.params['end'][:-6],
                     "%Y-%m-%dT%H:%M:%S"
                 )
 
-                logger.debug('start_date : %s' % start_date)
-                logger.debug('end_date : %s' % end_date)
+                logger.debug('start : %s' % start)
+                logger.debug('end : %s' % end)
 
                 try:
                     new_project = Project(
@@ -236,8 +236,8 @@ def add_project(request):
                         lead=lead,
                         status_list=status_list,
                         status=status_list[0],
-                        start_date=start_date,
-                        end_date=end_date
+                        start=start,
+                        end=end
                     )
                 except (AttributeError, TypeError, ValueError) as e:
                     logger.debug(e.message)
@@ -1566,11 +1566,11 @@ def convert_to_jquery_gantt_task_format(tasks):
                 'id': task.id,
                 'name': '%s' % task.name,
                 'code': task.id,
-                'level': 0,
+                'level': task.level,
                 'status': 'STATUS_ACTIVE',
-                'start': int(task.start_date.strftime('%s')) * 1000,
+                'start': int(task.start.strftime('%s')) * 1000,
                 'duration': task.duration.days,
-                'end': int(task.end_date.strftime('%s')) * 1000,
+                'end': int(task.end.strftime('%s')) * 1000,
                 'depends': convert_to_depend_index(task, tasks),
                 'description': task.description,
                 'assigs': [
@@ -1625,15 +1625,12 @@ def update_with_jquery_gantt_task_data(json_data):
             task = Task.query.filter(Task.id==task_id).first()
         elif task_id.startswith('tmp_'):
             # create a new Task
-            #
-            # there is a problem here, there is no task_of defined for new
-            # tasks
             task = Task()
         
         # update it
         if task:
             task.name = task_name
-            task.start_date = datetime.date.fromtimestamp(task_start/1000)
+            task.start = datetime.date.fromtimestamp(task_start/1000)
             task.duration = datetime.timedelta(task_duration)
             
             resources = User.query.filter(User.id.in_(task_resource_ids)).all()
@@ -1678,18 +1675,18 @@ def edit_tasks(request):
 def get_tasks(request):
     """returns all the tasks in database related to the given taskable_entity
     """
-    taskable_entity_id = request.matchdict.get('taskable_entity_id')
-    taskable_entity = TaskableEntity.query\
-                        .filter_by(id=taskable_entity_id).first()
-    tasks = None
-    if taskable_entity:
-        tasks = taskable_entity.tasks
+    entity_id = request.matchdict.get('entity_id')
+    entity = Entity.query.filter_by(id=entity_id).first()
+    tasks = []
+    if entity:
+        tasks = entity.tasks
     
-    for task in tasks:
-        logger.debug('------------------------------')
-        logger.debug('task name: %s' % task.name)
-        logger.debug('start date: %s' % task.start_date)
-        logger.debug('end date: %s' % task.end_date)
+    if log.logging_level == logging.DEBUG:
+        for task in tasks:
+            logger.debug('------------------------------')
+            logger.debug('task name: %s' % task.name)
+            logger.debug('start date: %s' % task.start)
+            logger.debug('end date: %s' % task.end)
     
     return convert_to_jquery_gantt_task_format(tasks)
 
@@ -1788,27 +1785,14 @@ def view_project_related_data(request):
 def view_tasks(request):
     """runs when viewing tasks of a TaskableEntity
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
     login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
+    logged_in_user = User.query.filter_by(login=login).first()
     
-    taskable_entity_id = request.matchdict['taskable_entity_id']
-    taskable_entity = TaskableEntity.query\
-        .filter_by(id=taskable_entity_id)\
-        .first()
-    
-    tasks = sorted(taskable_entity.tasks, key=lambda x: x.project.id)
-    
-    # get distinct projects
-    # TODO: again, please update it with a proper database query
-    projects = list(set([task.project for task in tasks]))
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter(Entity.id==entity_id).first()
     
     return {
-        'taskable_entity': taskable_entity,
-        'tasks': tasks,
-        'projects': projects
+        'entity': entity
     }
 
 @view_config(
@@ -1826,8 +1810,7 @@ def add_task(request):
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
         
         if request.params['submitted'] == 'add':
-            
-            if 'task_of_id' in request.params and \
+            if 'parent_id' in request.params and \
                 'name' in request.params and \
                 'description' in request.params and \
                 'is_milestone' in request.params and \
@@ -1835,8 +1818,13 @@ def add_task(request):
                 'status_id' in request.params:
                 
                 # get the taskable entity
-                task_of_id = request.params['task_of_id']
-                taskable_entity = TaskableEntity.query.filter_by(id=task_of_id).first()
+                parent_id = request.params['parent_id']
+                parent = Entity.query.filter_by(id=parent_id).first()
+                kwargs = {}
+                if parent.entity_type == 'Project':
+                    kwargs.update({'project': parent})
+                else:
+                    kwargs.update({'parent': parent})
                 
                 # get the status_list
                 status_list = StatusList.query.filter_by(
@@ -1865,17 +1853,34 @@ def add_task(request):
                 
                 # get the dates
                 # TODO: no time zone info here, please add time zone
-                start_date = datetime.datetime.strptime(
-                    request.params['start_date'][:-6],
+                start = datetime.datetime.strptime(
+                    request.params['start'][:-6],
                     "%Y-%m-%dT%H:%M:%S"
                 )
-                end_date = datetime.datetime.strptime(
-                    request.params['end_date'][:-6],
+                start_time = datetime.datetime.strptime(
+                    request.params['start_time'][:-6],
                     "%Y-%m-%dT%H:%M:%S"
+                )
+                end = datetime.datetime.strptime(
+                    request.params['end'][:-6],
+                    "%Y-%m-%dT%H:%M:%S"
+                )
+                end_time = datetime.datetime.strptime(
+                    request.params['end_time'][:-6],
+                    "%Y-%m-%dT%H:%M:%S"
+                )
+                # update the hour and minute of start from start time
+                start = start.replace(
+                    hour=start_time.hour,
+                    minute=start_time.minute
+                )
+                end = end.replace(
+                    hour=end_time.hour,
+                    minute=end_time.minute
                 )
                 
-                logger.debug('start_date : %s' % start_date)
-                logger.debug('end_date : %s' % end_date)
+                logger.debug('start : %s' % start)
+                logger.debug('end : %s' % end)
                 
                 # get the dependencies
                 depend_ids = [
@@ -1885,21 +1890,20 @@ def add_task(request):
                 depends = Task.query.filter(Task.id.in_(depend_ids)).all()
                 logger.debug('depends: %s' % depends)
                 
+                kwargs.update(dict(
+                    name=request.params['name'],
+                    status_list=status_list,
+                    status=status,
+                    created_by=logged_in_user,
+                    start=start,
+                    end=end,
+                    resources=resources,
+                    depends=depends
+                ))
+                
                 try:
-                    new_task = Task(
-                        name=request.params['name'],
-                        task_of=taskable_entity,
-                        status_list=status_list,
-                        status=status,
-                        created_by=logged_in_user,
-                        start_date=start_date,
-                        end_date=end_date,
-                        resources=resources,
-                        depends=depends
-                    )
-                    
+                    new_task = Task(**kwargs)
                     logger.debug('new_task.status: ' % new_task.status)
-                    
                     DBSession.add(new_task)
                 except (AttributeError, TypeError) as e:
                     logger.debug(e.message)
@@ -1931,11 +1935,11 @@ def add_task(request):
     
     # return the necessary values to prepare the form
     # get the taskable entity
-    te_id = request.matchdict['taskable_entity_id']
-    te = TaskableEntity.query.filter_by(id=te_id).first()
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
     
     return {
-        'taskable_entity': te,
+        'entity': entity,
         'types': Type.query.filter_by(target_entity_type='Task').all(),
         'users': User.query.all(),
         'status_list':

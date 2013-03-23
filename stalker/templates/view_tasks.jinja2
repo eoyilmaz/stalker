@@ -20,7 +20,10 @@
     <span class="ganttButtonSeparator"></span>
     <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual" title="delete"><span class="teamworkIcon">&cent;</span></button>
       &nbsp; &nbsp; &nbsp; &nbsp;
-      {% if taskable_entity %}
+      {% if entity.entity_type != 'User' %}
+      <button id='view_tasks_add_asset_button'>Add Asset</button>
+      <button id='view_tasks_add_sequence_button'>Add Sequence</button>
+      <button id='view_tasks_add_shot_button'>Add Shot</button>
       <button id='view_tasks_add_task_button'>Add Task</button>
       {% endif %}
       <button id='view_tasks_gannt_save_button' onclick="saveGanttOnServer();" class="button first big" title="save">save</button>
@@ -183,11 +186,7 @@
       ge.init($("#workSpace"));
       
       var target;
-      {%  if taskable_entity %}
-        target = '/get/tasks/{{ taskable_entity.id }}';
-      {% else %}
-        target =  '/get/user/{{ user.id }}/tasks';
-      {% endif %}
+        target = '/get/tasks/{{ entity.id }}';
       
       // The Memory
       var tasks_memory = new JsonRest({
@@ -197,8 +196,7 @@
       
       function loadGanttFromServer() {
         tasks_memory.query().then(function(data){
-          // user should not be able to edit data
-          {% if not taskable_entity %}
+          {% if entity.entity_type != 'User' %}
             data = lang.mixin(data,{'canWrite': 0, 'canWriteOnParent': 0});
           {% endif %}
           ge.loadProject(data);
@@ -307,19 +305,48 @@
       
       loadGanttFromServer();
       
-      {% if taskable_entity %}
+      {% if entity.entity_type != 'User' %}
+        var add_asset_button = dialogCaller({
+          label: 'Add Asset',
+          dialog_id: 'add_asset_dialog',
+          content_creator: create_add_asset_dialog,
+          attach_to: 'view_tasks_add_asset_button',
+          related_field_updater: loadGanttFromServer, 
+          data_id: '{{ entity.id }}'
+        });
+        add_asset_button.startup();
+        
+        var add_sequence_button = dialogCaller({
+          label: 'Add Sequence',
+          dialog_id: 'add_sequence_dialog',
+          content_creator: create_add_sequence_dialog,
+          attach_to: 'view_tasks_add_sequence_button',
+          related_field_updater: loadGanttFromServer, 
+          data_id: '{{ entity.id }}'
+        });
+        add_sequence_button.startup();
+ 
+        var add_shot_button = dialogCaller({
+          label: 'Add Shot',
+          dialog_id: 'add_shot_dialog',
+          content_creator: create_add_shot_dialog,
+          attach_to: 'view_tasks_add_shot_button',
+          related_field_updater: loadGanttFromServer, 
+          data_id: '{{ entity.id }}'
+        });
+        add_shot_button.startup();
+        
         var add_task_button = dialogCaller({
           label: 'Add Task',
           dialog_id: 'add_task_dialog',
           content_creator: create_add_task_dialog,
           attach_to: 'view_tasks_add_task_button',
           related_field_updater: loadGanttFromServer, 
-          {% if taskable_entity %}
-          data_id: '{{ taskable_entity.id }}'
-          {% endif %}
+          data_id: '{{ entity.id }}'
         });
         add_task_button.startup();
-      
+        
+     
       // TODO: This should be disabled upon permission not according to the existence of a template variable
       var save_gantt_button = new Button({
         label: 'Save',
