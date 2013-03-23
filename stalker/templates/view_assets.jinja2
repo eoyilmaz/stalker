@@ -49,11 +49,10 @@
         status_memory = new JsonRest({
           target: 'get/statuses_of/'+ status_id
         });
+
         asset_data_grid_updater();
 
       });
-
-
 
 
 
@@ -66,9 +65,6 @@
 
         asset_memory.query().then(function(data){
 
-          function gotoAssetDetail(a_id){
-              console.log(a_id);
-          }
           for(var i=0;i<data.length;i++ ){
 
             var assetName = data[i]["name"];
@@ -86,7 +82,7 @@
 
           structure = [
             {name: 'Thumbnail',                         width: '100px'},
-            {name: 'Name',        field: 'asset_link',          width: '100px'},
+            {name: 'Name',        field: 'asset_link',  width: '100px'},
             {name: 'Type',        field: 'type',        width: '200px'},
             {name: 'Status',      field: 'status',      width: '150px', editable: true, type: dojox.grid.cells._Widget,
               widgetClass: FilteringSelect,
