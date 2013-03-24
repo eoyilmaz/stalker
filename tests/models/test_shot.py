@@ -15,259 +15,301 @@ class ShotTester(unittest.TestCase):
     def setUp(self):
         """setup the test
         """
-        class TestData(object):
-            pass
-
-        self.test_data = TestData()
-
         # statuses
-        self.test_data.status_complete = Status(
+        self.test_status_complete = Status(
             name="Complete",
             code="CMPLT"
         )
-        self.test_data.status_wip = Status(
+        self.test_status_wip = Status(
             name="Work In Progress",
             code="WIP"
         )
-        self.test_data.status_waiting = Status(
+        self.test_status_waiting = Status(
             name="Waiting To Start",
             code="WTS"
         )
         
         # status lists
-        self.test_data.project_status_list = StatusList(
+        self.test_project_status_list = StatusList(
             name="Project Status List",
-            statuses=[self.test_data.status_complete,
-                      self.test_data.status_waiting,
-                      self.test_data.status_wip],
+            statuses=[self.test_status_complete,
+                      self.test_status_waiting,
+                      self.test_status_wip],
             target_entity_type=Project,
         )
 
-        self.test_data.sequence_status_list = StatusList(
+        self.test_sequence_status_list = StatusList(
             name="Project Status List",
-            statuses=[self.test_data.status_complete,
-                      self.test_data.status_waiting,
-                      self.test_data.status_wip],
+            statuses=[self.test_status_complete,
+                      self.test_status_waiting,
+                      self.test_status_wip],
             target_entity_type=Sequence,
         )
 
-        self.test_data.shot_status_list = StatusList(
+        self.test_shot_status_list = StatusList(
             name="Shot Status List",
-            statuses=[self.test_data.status_complete,
-                      self.test_data.status_waiting,
-                      self.test_data.status_wip],
+            statuses=[self.test_status_complete,
+                      self.test_status_waiting,
+                      self.test_status_wip],
             target_entity_type=Shot,
         )
 
-        self.test_data.asset_status_list = StatusList(
+        self.test_asset_status_list = StatusList(
             name="Asset Status List",
-            statuses=[self.test_data.status_complete,
-                      self.test_data.status_waiting,
-                      self.test_data.status_wip],
+            statuses=[self.test_status_complete,
+                      self.test_status_waiting,
+                      self.test_status_wip],
             target_entity_type=Asset,
         )
 
         # types
-        self.test_data.commercial_project_type = Type(
+        self.test_commercial_project_type = Type(
             name="Commercial Project",
             code='comm',
             target_entity_type=Project,
         )
 
-        self.test_data.character_asset_type = Type(
+        self.test_character_asset_type = Type(
             name="Character",
             code='char',
             target_entity_type=Asset,
         )
 
-        self.test_data.repository_type = Type(
+        self.test_repository_type = Type(
             name="Test Repository Type",
             code='test',
             target_entity_type=Repository
         )
 
         # repository
-        self.test_data.repository = Repository(
+        self.test_repository = Repository(
             name="Test Repository",
-            type=self.test_data.repository_type,
+            type=self.test_repository_type,
         )
 
         # project and sequences
-        self.test_data.project1 = Project(
+        self.test_project1 = Project(
             name="Test Project1",
             code='tp1',
-            type=self.test_data.commercial_project_type,
-            status_list=self.test_data.project_status_list,
-            repository=self.test_data.repository,
+            type=self.test_commercial_project_type,
+            status_list=self.test_project_status_list,
+            repository=self.test_repository,
         )
         
-        self.test_data.sequence1 = Sequence(
+        self.test_sequence1 = Sequence(
             name="Test Seq1",
             code='ts1',
-            project=self.test_data.project1,
-            status_list=self.test_data.sequence_status_list,
+            project=self.test_project1,
+            status_list=self.test_sequence_status_list,
         )
 
-        self.test_data.sequence2 = Sequence(
+        self.test_sequence2 = Sequence(
             name="Test Seq2",
             code='ts2',
-            project=self.test_data.project1,
-            status_list=self.test_data.sequence_status_list,
+            project=self.test_project1,
+            status_list=self.test_sequence_status_list,
         )
 
-        self.test_data.sequence3 = Sequence(
+        self.test_sequence3 = Sequence(
             name="Test Seq3",
             code='ts3',
-            project=self.test_data.project1,
-            status_list=self.test_data.sequence_status_list,
+            project=self.test_project1,
+            status_list=self.test_sequence_status_list,
         )
 
-        self.test_data.asset1 = Asset(
+        self.test_asset1 = Asset(
             name="Test Asset1",
             code='ta1',
-            project=self.test_data.project1,
-            status_list=self.test_data.asset_status_list,
-            type=self.test_data.character_asset_type,
+            project=self.test_project1,
+            status_list=self.test_asset_status_list,
+            type=self.test_character_asset_type,
         )
 
-        self.test_data.asset2 = Asset(
+        self.test_asset2 = Asset(
             name="Test Asset2",
             code='ta2',
-            project=self.test_data.project1,
-            status_list=self.test_data.asset_status_list,
-            type=self.test_data.character_asset_type,
+            project=self.test_project1,
+            status_list=self.test_asset_status_list,
+            type=self.test_character_asset_type,
         )
 
-        self.test_data.asset3 = Asset(
+        self.test_asset3 = Asset(
             name="Test Asset3",
             code='ta3',
-            project=self.test_data.project1,
-            status_list=self.test_data.asset_status_list,
-            type=self.test_data.character_asset_type,
+            project=self.test_project1,
+            status_list=self.test_asset_status_list,
+            type=self.test_character_asset_type,
         )
 
-        self.test_data.cut_in_default = 1
-        self.test_data.cut_duration_default = 1
-        self.test_data.cut_out_default = 1
+        self.test_cut_in_default = 1
+        self.test_cut_duration_default = 1
+        self.test_cut_out_default = 1
 
         self.kwargs = {
             "name": "SH123",
             "code": "SH123",
             "description": "This is a test Shot",
-            "sequence": self.test_data.sequence1,
+            "sequence": self.test_sequence1,
             "cut_in": 112,
             "cut_out": 149,
             "cut_duration": 123,
             "status": 0,
-            "status_list": self.test_data.shot_status_list,
-            #"assets": [self.test_data.asset1,
-            #           self.test_data.asset2]
+            "status_list": self.test_shot_status_list,
+            #"assets": [self.test_asset1,
+            #           self.test_asset2]
         }
 
         # create a mock shot object
-        self.test_data.test_shot = Shot(**self.kwargs)
-
+        self.test_shot = Shot(**self.kwargs)
+    
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for Shot
         class
         """
         self.assertTrue(Shot.__auto_name__)
     
-    def test_sequence_argument_is_skipped(self):
-        """testing if a TypeError will be raised when the sequence argument is
+    def test_project_argument_is_skipped(self):
+        """testing if a TypeError will be raised when the project argument is
         skipped
         """
-        self.kwargs.pop("sequence")
+        self.kwargs.pop('project')
         self.assertRaises(TypeError, Shot, **self.kwargs)
-
-    def test_sequence_argument_is_None(self):
-        """testing if a TypeError will be raised when the sequence argument is
+    
+    def test_project_argument_is_None(self):
+        """testing if a TypeError will be raised when the project argument is
         None
         """
-        self.kwargs["sequence"] = None
+        self.kwargs["project"] = None
         self.assertRaises(TypeError, Shot, **self.kwargs)
-
-    def test_sequence_argument_is_not_Sequence_instance(self):
+    
+    def test_project_argument_is_not_Project_instance(self):
         """testing if a TypeError will be raised when the given sequence
-        argument is not an instance of stalker.models.sequence.Sequence
+        argument is not a Project instance
         """
-        test_values = [1, 1.2, "sequence", ["a", "sequence"]]
+        test_values = [1, 1.2, "project", ["a", "project"]]
         for test_value in test_values:
-            self.kwargs["sequence"] = test_value
+            self.kwargs["project"] = test_value
             self.assertRaises(TypeError, Shot, self.kwargs)
-
-    def test_sequence_argument_already_has_a_shot_with_the_same_code(self):
-        """testing if a ValueError will be raised when the given sequence
+    
+    def test_project_argument_already_has_a_shot_with_the_same_code(self):
+        """testing if a ValueError will be raised when the given project
         argument already has a shot with the same code
         """
-        # lets try to assign the shot to the mock_sequence2 which has another
-        # shot with the same code
-        self.kwargs["sequence"] = self.test_data.sequence2
+        # lets try to assign the shot to the sequence2 which has another shot
+        # with the same code
+        self.kwargs['project'] = self.test_project1
         new_shot = Shot(**self.kwargs)
         self.assertRaises(ValueError, Shot, **self.kwargs)
-
+        
         # this should not raise a ValueError
         self.kwargs["code"] = "DifferentCode"
         new_shot2 = Shot(**self.kwargs)
 
-        #def test_sequence_attribute_is_read_only(self):
-        #"""testing if the sequence attribute is read only
-        #"""
-        #self.assertRaises(AttributeError, setattr,self.test_data.test_shot,
-        #"sequence", self.test_data.sequence2)
-
-    def test_sequence_contains_shots(self):
-        """testing if the current shot is going to be added to the sequence in
-        the sequence object, so the Sequence.shots list will contain the
-        current shot
+    def test_project_attribute_is_read_only(self):
+        """testing if the project attribute is read only
         """
-        self.assertIn(self.test_data.test_shot,
-                      self.test_data.test_shot.sequence.shots)
-
-    def test_sequence_argument_works_properly(self):
-        """testing if the sequence argument works properly
+        self.assertRaises(AttributeError, setattr,self.test_shot, "project",
+                          self.test_project2)
+    
+    def test_project_contains_shots(self):
+        """testing if the current shot is going to be added to the Project, so
+        the Project.shots list will contain the current shot
         """
-        self.assertEqual(self.test_data.test_shot.sequence,
-                         self.kwargs["sequence"])
+        self.assertIn(self.test_shot, self.test_shot.project.shots)
+
+    def test_project_argument_is_working_properly(self):
+        """testing if the project argument is working properly
+        """
+        self.assertEqual(self.test_shot.project, self.kwargs["project"])
+    
+    def test_sequences_argument_is_skipped(self):
+        """testing if the sequences attribute will be an empty list when the
+        sequences argument is skipped
+        """
+        self.kwargs.pop('sequences')
+        self.kwargs['code'] = 'DifferentCode'
+        new_shot = Shot(**self.kwargs)
+        self.assertEqual(new_shot.sequences, [])
+    
+    def test_sequences_argument_is_None(self):
+        """testing if the sequences attribute will be an empty list when the
+        sequences argument is set to None
+        """
+        self.kwargs['sequences'] = None
+        self.kwargs['code'] = 'NewCode'
+        new_shot = Shot(**self.kwargs)
+        self.assertEqual(new_shot.sequences, [])
+    
+    def test_sequences_attribute_is_set_to_None(self):
+        """testing if a TypeError will be raised when the sequences attribute
+        is set to None
+        """
+        self.assertRaises(TypeError, setattr, self.test_shot, 'sequences',
+                          None)
+    
+    def test_sequences_argument_is_not_a_list(self):
+        """testing if a TypeError will be raised when the sequences argument is
+        not a list
+        """
+        self.kwargs['sequences'] = 'not a list'
+        self.kwargs['code'] = 'NewCode'
+        self.assertRaises(TypeError, Shot, **self.kwargs)
+    
+    def test_sequences_attribute_is_not_a_list(self):
+        """testing if a TypeError will be raised when the sequences attribute
+        is not a list
+        """
+        self.assertRaises(TypeError, setattr, self.test_shot, 'sequences',
+                          'not a list')
+    
+    def test_sequences_argument_is_not_a_list_of_Sequence_instances(self):
+        """testing if a TypeError will be raised when the sequences argument is
+        not a list of Sequences
+        """
+        self.kwargs['sequences'] = ['not', 1, 'list', 'of', 'sequences']
+        self.kwargs['code'] = 'NewShot'
+        self.assertRaises(TypeError, Shot, **self.kwargs)
+    
+    def test_sequences_attribute_is_not_a_list_of_Sequence_instances(self):
+        """testing if a TypeError will be raised when the sequences attribute
+        is not a list of Sequence instances
+        """
+        self.assertRaises(TypeError, setattr, self.test_shot, 'sequences',
+                          ['not', 1, 'list', 'of', 'sequences'])
+    
+    def test_sequences_argument_is_working_properly(self):
+        """testing if the sequences attribute is working properly
+        """
+        self.kwargs['code'] = 'NewShot'
         
-#    def test_code_argument_is_None(self):
-#        """testing if a TypeError will be raised when the code argument is
-#        None
-#        """
-#        self.kwargs["code"] = None
-#        self.assertRaises(TypeError, Shot, **self.kwargs)
-
-        #def test_code_attribute_is_None(self):
-        #"""testing if a TypeError will be raised when the code argument is
-        #None
-        #"""
-        #self.assertRaises(
-        #TypeError,
-        #setattr,
-        #self.test_data.test_shot,
-        #"code",
-        #None
-        #)
-
-        #def test_code_argument_is_empty_string(self):
-        #"""testing if the code attribute will be set to the same value with the
-        #name when it is set to an empty string
-        #"""
-        #self.kwargs["code"] = ""
-        #self.assertRaises(ValueError, Shot, **self.kwargs)
-
-        #def test_code_attribute_is_empty_string(self):
-        #"""testing if a ValueError will be raised when the code attribute is
-        #empty string
-        #"""
-        #self.assertRaises(
-        #ValueError,
-        #setattr,
-        #self.test_data.test_shot,
-        #"code",
-        #""
-        #)
-
+        seq1 = Sequence(name='seq1', project=self.test_project1)
+        seq2 = Sequence(name='seq2', project=self.test_project1)
+        seq3 = Sequence(name='seq3', project=self.test_project1)
+        
+        seqs = [seq1, seq2, seq3]
+        self.kwargs['sequences'] = seqs
+        new_shot = Shot(**self.kwargs)
+        
+        self.assertItemsEqual(new_shot.sequences, seqs)
+    
+    def test_sequences_attribute_is_working_properly(self):
+        """testing if the sequences attribute is working properly
+        """
+        self.kwargs['code'] = 'NewShot'
+        
+        seq1 = Sequence(name='seq1', project=self.test_project1)
+        seq2 = Sequence(name='seq2', project=self.test_project1)
+        seq3 = Sequence(name='seq3', project=self.test_project1)
+        
+        new_shot = Shot(**self.kwargs)
+        
+        new_shot.sequences = [seq1]
+        new_shot.sequences.append(seq2)
+        new_shot.sequences.append(seq3)
+        
+        seqs = [seq1, seq2, seq3]
+        self.assertItemsEqual(new_shot.sequences, seqs)
+    
     def test_cut_in_argument_is_skipped_defaults_to_default_value(self):
         """testing if the cut_in argument is skipped the cut_in argument will
         be set to the default value
@@ -275,7 +317,7 @@ class ShotTester(unittest.TestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop("cut_in")
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_in, self.test_data.cut_in_default)
+        self.assertEqual(new_shot.cut_in, self.test_cut_in_default)
 
     def test_cut_in_argument_is_set_to_None_defaults_to_default_value(self):
         """testing if the cut_in argument is set to None the cut_in attribute
@@ -284,7 +326,7 @@ class ShotTester(unittest.TestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = None
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_in, self.test_data.cut_in_default)
+        self.assertEqual(new_shot.cut_in, self.test_cut_in_default)
 
     def test_cut_in_argument_is_not_integer(self):
         """testing if a TypeError will be raised when the cut_in argument is
@@ -301,7 +343,7 @@ class ShotTester(unittest.TestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.test_data.test_shot,
+            self.test_shot,
             "cut_in",
             "a string"
         )
@@ -320,10 +362,10 @@ class ShotTester(unittest.TestCase):
         """testing if the cut_out attribute is updated when the cut_in
         attribute is bigger than cut_out attribute
         """
-        self.test_data.test_shot.cut_in = self.test_data.test_shot.cut_out + 10
-        self.assertEqual(self.test_data.test_shot.cut_out,
-                         self.test_data.test_shot.cut_in)
-        self.assertEqual(self.test_data.test_shot.cut_duration, 1)
+        self.test_shot.cut_in = self.test_shot.cut_out + 10
+        self.assertEqual(self.test_shot.cut_out,
+                         self.test_shot.cut_in)
+        self.assertEqual(self.test_shot.cut_duration, 1)
 
     def test_cut_out_argument_is_skipped_defaults_to_default_value(self):
         """testing if the cut_out argument is skipped the cut_out attribute
@@ -349,10 +391,10 @@ class ShotTester(unittest.TestCase):
         """testing if the cut_out attribute is set to None it is going to be
         set to default value
         """
-        self.test_data.test_shot.cut_out = None
-        self.assertEqual(self.test_data.test_shot.cut_out,
-                         self.test_data.test_shot.cut_in +\
-                         self.test_data.test_shot.cut_duration - 1)
+        self.test_shot.cut_out = None
+        self.assertEqual(self.test_shot.cut_out,
+                         self.test_shot.cut_in +\
+                         self.test_shot.cut_duration - 1)
 
     def test_cut_out_argument_is_not_integer(self):
         """testing if a TypeError will be raised when the cut_out argument is
@@ -369,7 +411,7 @@ class ShotTester(unittest.TestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.test_data.test_shot,
+            self.test_shot,
             "cut_out",
             "a string"
         )
@@ -388,10 +430,10 @@ class ShotTester(unittest.TestCase):
         """testing if the cut_out attribute is updated when it is smaller than
         cut_in attribute
         """
-        self.test_data.test_shot.cut_out = self.test_data.test_shot.cut_in - 10
-        self.assertEqual(self.test_data.test_shot.cut_out,
-                         self.test_data.test_shot.cut_in)
-        self.assertEqual(self.test_data.test_shot.cut_duration, 1)
+        self.test_shot.cut_out = self.test_shot.cut_in - 10
+        self.assertEqual(self.test_shot.cut_out,
+                         self.test_shot.cut_in)
+        self.assertEqual(self.test_shot.cut_duration, 1)
 
     def test_cut_duration_argument_is_skipped(self):
         """testing if the cut_duration attribute will be calculated from the
@@ -428,7 +470,7 @@ class ShotTester(unittest.TestCase):
         self.assertRaises(
             TypeError,
             setattr,
-            self.test_data.test_shot,
+            self.test_shot,
             "cut_duration",
             "a string"
         )
@@ -437,53 +479,53 @@ class ShotTester(unittest.TestCase):
         """testing if the cut_duration attribute will be updated when the
         cut_in attribute changed
         """
-        self.test_data.test_shot.cut_in = 1
+        self.test_shot.cut_in = 1
         self.assertEqual(
-            self.test_data.test_shot.cut_duration,
-            self.test_data.test_shot.cut_out - 
-            self.test_data.test_shot.cut_in + 1
+            self.test_shot.cut_duration,
+            self.test_shot.cut_out - 
+            self.test_shot.cut_in + 1
         )
 
     def test_cut_duration_attribute_will_be_updated_when_cut_out_attribute_changed(self):
         """testing if the cut_duration attribute will be updated when the
         cut_out attribute changed
         """
-        self.test_data.test_shot.cut_out = 1000
-        self.assertEqual(self.test_data.test_shot.cut_duration,
-                         self.test_data.test_shot.cut_out -\
-                         self.test_data.test_shot.cut_in + 1)
+        self.test_shot.cut_out = 1000
+        self.assertEqual(self.test_shot.cut_duration,
+                         self.test_shot.cut_out -\
+                         self.test_shot.cut_in + 1)
 
     def test_cut_duration_attribute_changes_cut_out_attribute(self):
         """testing if changes in cut_duration attribute will also affect
         cut_out value.
         """
-        first_cut_out = self.test_data.test_shot.cut_out
-        self.test_data.test_shot.cut_in
-        self.test_data.test_shot.cut_duration = 245
-        self.assertNotEquals(self.test_data.test_shot.cut_out, first_cut_out)
-        self.assertEqual(self.test_data.test_shot.cut_out,
-                         self.test_data.test_shot.cut_in +\
-                         self.test_data.test_shot.cut_duration - 1)
+        first_cut_out = self.test_shot.cut_out
+        self.test_shot.cut_in
+        self.test_shot.cut_duration = 245
+        self.assertNotEquals(self.test_shot.cut_out, first_cut_out)
+        self.assertEqual(self.test_shot.cut_out,
+                         self.test_shot.cut_in +\
+                         self.test_shot.cut_duration - 1)
 
     def test_cut_duration_attribute_is_zero(self):
         """testing if the cut_duration attribute will be set to 1 and the
         cut_out is updated to the same value with cut_in when the cut_duration
         attribute is set to zero
         """
-        self.test_data.test_shot.cut_duration = 0
-        self.assertEqual(self.test_data.test_shot.cut_out,
-                         self.test_data.test_shot.cut_in)
-        self.assertEqual(self.test_data.test_shot.cut_duration, 1)
+        self.test_shot.cut_duration = 0
+        self.assertEqual(self.test_shot.cut_out,
+                         self.test_shot.cut_in)
+        self.assertEqual(self.test_shot.cut_duration, 1)
 
     def test_cut_duration_attribute_is_negative(self):
         """testing if the cut_duration attribute will be set to 1  and the
         cut_out is updated to the same value with cut_in when the cut_duration
         attribute is set to a negative value
         """
-        self.test_data.test_shot.cut_duration = -100
-        self.assertEqual(self.test_data.test_shot.cut_out,
-                         self.test_data.test_shot.cut_in)
-        self.assertEqual(self.test_data.test_shot.cut_duration, 1)
+        self.test_shot.cut_duration = -100
+        self.assertEqual(self.test_shot.cut_out,
+                         self.test_shot.cut_in)
+        self.assertEqual(self.test_shot.cut_duration, 1)
 
     def test_cut_duration_argument_is_zero_and_cut_out_argument_is_skipped(self):
         """testing if the cut_duration attribute will be set to 1 and the
@@ -540,7 +582,7 @@ class ShotTester(unittest.TestCase):
         self.kwargs["code"] = "SH123A"
         new_shot1 = Shot(**self.kwargs)
 
-        self.kwargs["sequence"] = self.test_data.sequence3
+        self.kwargs["sequence"] = self.test_sequence3
         new_shot2 = Shot(**self.kwargs)
         # an entity with the same parameters
         # just set the name to the code too
@@ -561,7 +603,7 @@ class ShotTester(unittest.TestCase):
         self.kwargs["code"] = "SH123A"
         new_shot1 = Shot(**self.kwargs)
 
-        self.kwargs["sequence"] = self.test_data.sequence3
+        self.kwargs["sequence"] = self.test_sequence3
         new_shot2 = Shot(**self.kwargs)
         # an entity with the same parameters
         # just set the name to the code too
@@ -646,7 +688,7 @@ class ShotTester(unittest.TestCase):
             code='comm1',
             status_list=project_status_list,
             type=project_type,
-            repository=self.test_data.repository,
+            repository=self.test_repository,
             )
 
         self.kwargs["code"] = "SH12314"
@@ -676,9 +718,9 @@ class ShotTester(unittest.TestCase):
         """testing the represantation of Shot
         """
         self.assertEqual(
-            self.test_data.test_shot.__repr__(),
-            "<Shot (%s, %s)>" % (self.test_data.test_shot.code,
-                                 self.test_data.test_shot.code)
+            self.test_shot.__repr__(),
+            "<Shot (%s, %s)>" % (self.test_shot.code,
+                                 self.test_shot.code)
         )
 
         #def test_plural_name(self):
@@ -691,136 +733,3 @@ class ShotTester(unittest.TestCase):
         Shot class
         """
         self.assertEqual(Shot.__strictly_typed__, False)
-
-#    def test_assets_argument_is_skipped(self):
-#        """testing if the assets attribute will be an empty list when the
-#        assets argument is skipped
-#        """
-#        self.kwargs["code"] = "SHAnotherShot"
-#        self.kwargs.pop("assets")
-#        new_shot = Shot(**self.kwargs)
-#        self.assertEqual(new_shot.assets, [])
-#
-#
-#    def test_assets_argument_is_None(self):
-#        """testing if the assets attribute will be an empty list when the
-#        assets argument is None
-#        """
-#        self.kwargs["code"] = "SHAnotherShot"
-#        self.kwargs["assets"] = None
-#        new_shot = Shot(**self.kwargs)
-#        self.assertEqual(new_shot.assets, [])
-#
-#
-#    def test_assets_attribute_is_None(self):
-#        """testing if a TypeError will be raised when the assets attribute is
-#        set to None
-#        """
-#
-#        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
-#                          "assets", None)
-#
-#
-#    def test_assets_argument_is_not_a_list(self):
-#        """testing if a TypeError will be raised when the assets argument is
-#        not a list
-#        """
-#        self.kwargs["code"] = "SHAnotherShot"
-#        self.kwargs["assets"] = 1
-#        self.assertRaises(TypeError, Shot, **self.kwargs)
-#
-#
-#    def test_assets_attribute_is_not_a_list(self):
-#        """testing if a TypeError will be raised when the assets attribute is
-#        set to a non list value
-#        """
-#
-#        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
-#                          "assets", 1)
-#
-#
-#    def test_assets_argument_is_not_a_list_of_Asset_instances(self):
-#        """testing if a TypeError will be raised when the assets argument is
-#        a list but not a list of Asset instances
-#        """
-#        self.kwargs["code"] = "SHAnotherShot"
-#        self.kwargs["assets"] = [1, "a string", ["a", "list"]]
-#        self.assertRaises(TypeError, Shot, **self.kwargs)
-#
-#
-#    def test_assets_attribute_is_not_a_list_of_Asset_instances(self):
-#        """testing if a TypeError will be raised when the assets attribute is
-#        set to a list but not a list of Asset instances
-#        """
-#
-#        self.assertRaises(TypeError, setattr, self.test_data.test_shot,
-#                          "assets", [1, "a string", ["a", "list"]])
-#
-#
-#    def test_assets_argument_is_a_list_of_Asset_instances(self):
-#        """testing if the assets shots attribute will contain the current shot
-#        when the assets argument is a list of Asset instances
-#        """
-#
-#        self.kwargs["code"] = "SHAnotherShot"
-#        self.kwargs["assets"] = [self.test_data.asset1, self.test_data.asset2]
-#        new_shot = Shot(**self.kwargs)
-#
-#        self.assertIn(new_shot, self.test_data.asset1.shots)
-#        self.assertIn(new_shot, self.test_data.asset2.shots)
-#
-#
-#    def test_assets_attribute_is_a_list_of_Asset_instances(self):
-#        """testing if the assets shots attribute will contain the current shot
-#        when the assets attribute is set to a list of Asset instances
-#        """
-#
-#        self.kwargs["code"] = "SHAnotherShot"
-#        self.kwargs.pop("assets")
-#        new_shot = Shot(**self.kwargs)
-#        new_shot.assets = [self.test_data.asset1, self.test_data.asset2]
-#
-#        self.assertIn(new_shot, self.test_data.asset1.shots)
-#        self.assertIn(new_shot, self.test_data.asset2.shots)
-#
-#
-#    def test_assets_attribute_will_update_the_Asset_shot_attribute(self):
-#        """testing if the assets attribute will update the Asset.shots
-#        attribute
-#        """
-#
-#        self.kwargs["code"] = "SHAnotherShot"
-#        self.kwargs.pop("assets")
-#        new_shot = Shot(**self.kwargs)
-#
-#        new_shot.assets = [self.test_data.asset1, self.test_data.asset2]
-#
-#        self.assertIn(new_shot, self.test_data.asset1.shots)
-#        self.assertIn(new_shot, self.test_data.asset2.shots)
-#
-#        new_shot.assets = [self.test_data.asset3]
-#
-#        self.assertIn(new_shot, self.test_data.asset3.shots)
-#        self.assertNotIn(new_shot, self.test_data.asset1.shots)
-#        self.assertNotIn(new_shot, self.test_data.asset2.shots)
-#
-#        # now append a new asset
-#        new_shot.assets.append(self.test_data.asset1)
-#        self.assertIn(new_shot, self.test_data.asset1.shots)
-#
-#        # remove one
-#        new_shot.assets.remove(self.test_data.asset3)
-#        self.assertNotIn(new_shot, self.test_data.asset3.shots)
-#
-#        # pop one
-#        new_shot.assets.pop()
-#        self.assertNotIn(new_shot, self.test_data.asset1.shots)
-#
-#        # extend
-#        new_shot.assets.extend([self.test_data.asset1,
-#                                self.test_data.asset2,
-#                                self.test_data.asset3])
-#
-#        self.assertIn(new_shot, self.test_data.asset1.shots)
-#        self.assertIn(new_shot, self.test_data.asset2.shots)
-#        self.assertIn(new_shot, self.test_data.asset3.shots)

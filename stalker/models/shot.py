@@ -16,11 +16,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-class Shot(Task, ReferenceMixin, StatusMixin, CodeMixin):
+class Shot(Task, ReferenceMixin, CodeMixin):
     """Manages Shot related data.
-
+        
     .. deprecated:: 0.1.2
-
+        
        Because most of the shots in different projects are going to have the
        same name, which is a kind of a code like SH001, SH012A etc., and in
        Stalker you can not have two entities with the same name if their types
@@ -28,20 +28,36 @@ class Shot(Task, ReferenceMixin, StatusMixin, CodeMixin):
        different names the :attr:`~stalker.models.shot.Shot.name` attribute of
        the Shot instances are automatically set to a randomly generated
        **uuid4** sequence.
-
+        
     .. versionadded:: 0.1.2
-
+        
        The name of the shot can be freely set without worrying about clashing
        names.
-
+        
     .. versionadded:: 0.2.0
-
+        
        Shot instances now have their own image format. So you can set up
        different resolutions per shot.
-
+    
+    .. versionadded:: 0.2.0
+       
+       Shot instances can now be created with a Project instance only, without
+       needing a Sequence instance. Sequences are now a kind of a grouping
+       attribute for the Shots. And Shots can have more than one Sequence.
+    
+    .. versionadded:: 0.2.0
+       
+       Shots now have a new attribute called ``scenes``, holding
+       :class:`~stalker.models.scene.Scene` instances which is another grouping
+       attribute like ``sequences``. Where Sequences are grouping the Shots
+       according to their temporal position to each other, Scenes are grouping
+       the Shots according to their view to the world, that is shots taking
+       place in the same set configuration can be grouped together by using
+       Scenes.
+    
     Two shots with the same :attr:`~stalker.models.shot.Shot.code` can not be
     assigned to the same :class:`~stalker.models.sequence.Sequence`.
-
+    
     The :attr:`~stalker.models.shot.Shot.cut_out` and
     :attr:`~stalker.models.shot.Shot.cut_duration` attributes effects each
     other. Setting the :attr:`~stalker.models.shot.Shot.cut_out` will change
@@ -58,22 +74,22 @@ class Shot(Task, ReferenceMixin, StatusMixin, CodeMixin):
     :attr:`~stalker.models.shot.Shot.cut_in` +
     :attr:`~stalker.models.shot.Shot.cut_duration`. So the priority of the
     attributes are as follows:
-
+    
       :attr:`~stalker.models.shot.Shot.cut_in` >
       :attr:`~stalker.models.shot.Shot.cut_duration` >
       :attr:`~stalker.models.shot.Shot.cut_out`
-
+    
     For still images (which can be also managed by shots) the
     :attr:`~stalker.models.shot.Shot.cut_in` and
     :attr:`~stalker.models.shot.Shot.cut_out` can be set to the same value
     so the :attr:`~stalker.models.shot.Shot.cut_duration` can be set to zero.
-
+    
     Because Shot is getting its relation to a
     :class:`~stalker.models.project.Project` from the
     passed :class:`~stalker.models.sequence.Sequence`, you can skip the
     ``project`` argument, and if you not the value of the ``project`` argument
     is not going to be used.
-
+    
     :param sequence: The :class:`~stalker.models.sequence.Sequence` that this
       shot belongs to. A shot can only be created with a
       :class:`~stalker.models.sequence.Sequence` instance, so it can not be
@@ -82,25 +98,25 @@ class Shot(Task, ReferenceMixin, StatusMixin, CodeMixin):
       sequence. Also the ``project`` of the
       :class:`~stalker.models.sequence.Sequence` will be used to set the
       ``project`` of the current Shot.
-
+    
     :type sequence: :class:`~stalker.models.sequence.Sequence`
-
+    
     :param integer cut_in: The in frame number that this shot starts. The
       default value is 1. When the ``cut_in`` is bigger then
       ``cut_out``, the :attr:`~stalker.models.shot.Shot.cut_out` attribute is
       set to :attr:`~stalker.models.shot.Shot.cut_in` + 1.
-
+    
     :param integer cut_duration: The duration of this shot in frames. It should
       be zero or a positive integer value (natural number?) or . The default
       value is None.
-
+    
     :param integer cut_out: The out frame number that this shot ends. If it is
       given as a value lower then the ``cut_in`` parameter, then the
       :attr:`~stalker.models.shot.Shot.cut_out` will be set to the same value
       with :attr:`~stalker.models.shot.Shot.cut_in` and the
       :attr:`~stalker.models.shot.Shot.cut_duration` attribute will be set to
       1. Can be skipped. The default value is None.
-
+    
     :param image_format: The image format of this shot. This is an optional
       variable to differentiate the image format per shot. The default value is
       the same with the Project that this Shot belongs to.
@@ -108,7 +124,7 @@ class Shot(Task, ReferenceMixin, StatusMixin, CodeMixin):
     __auto_name__ = True
     __tablename__ = "Shots"
     __mapper_args__ = {"polymorphic_identity": "Shot"}
-
+    
     shot_id = Column("id", Integer, ForeignKey("Tasks.id"),
                      primary_key=True)
     sequence_id = Column(Integer, ForeignKey("Sequences.id"))
@@ -117,7 +133,7 @@ class Shot(Task, ReferenceMixin, StatusMixin, CodeMixin):
         primaryjoin="Shots.c.sequence_id==Sequences.c.id",
         back_populates="shots"
     )
-
+    
     # the cut_duration attribute is not going to be stored in the database,
     # only the cut_in and cut_out will be enough to calculate the cut_duration
     _cut_in = Column(Integer)
@@ -132,25 +148,25 @@ class Shot(Task, ReferenceMixin, StatusMixin, CodeMixin):
                  #assets=None,
                  **kwargs):
         sequence = self._validate_sequence(sequence)
-
+        
         # initialize TaskableMixin
         kwargs['project'] = sequence.project
         kwargs['code'] = code
         #kwargs['name'] = code
-
+        
         super(Shot, self).__init__(**kwargs)
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         CodeMixin.__init__(self, **kwargs)
-
+        
         self.sequence = self._validate_sequence(sequence)
-
+        
         self._cut_in = cut_in
         self._cut_duration = cut_duration
         self._cut_out = cut_out
-
+        
         self._update_cut_info(cut_in, cut_duration, cut_out)
-
+    
     @reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with

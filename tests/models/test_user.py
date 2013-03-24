@@ -7,11 +7,15 @@
 
 import unittest
 import datetime
+import logging
 from stalker import db
 from stalker.conf import defaults
 from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Group, Department, Project, Repository,
                      Sequence, Status, StatusList, Task, Type, User, Version, Ticket)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class UserTest(unittest.TestCase):
     """Tests the user class
@@ -290,7 +294,8 @@ class UserTest(unittest.TestCase):
         
         # tickets for version1
         self.test_ticket1 = Ticket(
-            ticket_for=self.test_version1,
+            project=self.test_project1,
+            links=[self.test_version1],
         )
         DBSession.add(self.test_ticket1)
         # set it to closed
@@ -298,13 +303,15 @@ class UserTest(unittest.TestCase):
         
         # create a new ticket and leave it open
         self.test_ticket2 = Ticket(
-            ticket_for=self.test_version1,
+            project=self.test_project1,
+            links=[self.test_version1],
         )
         DBSession.add(self.test_ticket2)
         
         # create a new ticket and close and then reopen it
         self.test_ticket3 = Ticket(
-            ticket_for=self.test_version1,
+            project=self.test_project1,
+            links=[self.test_version1],
         )
         DBSession.add(self.test_ticket3)
         self.test_ticket3.resolve()
@@ -314,20 +321,23 @@ class UserTest(unittest.TestCase):
         # tickets for version2
         # create a new ticket and leave it open
         self.test_ticket4 = Ticket(
-            ticket_for=self.test_version2,
+            project=self.test_project1,
+            links=[self.test_version2],
         )
         DBSession.add(self.test_ticket4)
         
         # create a new Ticket and close it
         self.test_ticket5 = Ticket(
-            ticket_for=self.test_version2,
+            project=self.test_project1,
+            links=[self.test_version2],
         )
         DBSession.add(self.test_ticket5)
         self.test_ticket5.resolve()
         
         # create a new Ticket and close it
         self.test_ticket6 = Ticket(
-            ticket_for=self.test_version3,
+            project=self.test_project1,
+            links=[self.test_version3],
         )
         DBSession.add(self.test_ticket6)
         self.test_ticket6.resolve()
@@ -336,14 +346,16 @@ class UserTest(unittest.TestCase):
         # tickets for version3
         # create a new ticket and close it
         self.test_ticket7 = Ticket(
-            ticket_for=self.test_version3,
+            project=self.test_project1,
+            links=[self.test_version3],
         )
         DBSession.add(self.test_ticket7)
         self.test_ticket7.resolve()
         
         # create a new ticket and close it
         self.test_ticket8 = Ticket(
-            ticket_for=self.test_version3,
+            project=self.test_project1,
+            links=[self.test_version3],
         )
         DBSession.add(self.test_ticket8)
         self.test_ticket8.resolve()
@@ -352,9 +364,11 @@ class UserTest(unittest.TestCase):
         # tickets for version4
         # create a new ticket and close it
         self.test_ticket9 = Ticket(
-            ticket_for=self.test_version4,
+            project=self.test_project1,
+            links=[self.test_version4],
         )
         DBSession.add(self.test_ticket9)
+        
         self.test_ticket9.resolve()
         
         # no tickets for any other version
@@ -371,7 +385,7 @@ class UserTest(unittest.TestCase):
             ],
             target_entity_type=Sequence
         )
-
+        
         # a couple of sequences
         self.test_sequence1 = Sequence(
             name="Test Seq 1",
@@ -379,7 +393,7 @@ class UserTest(unittest.TestCase):
             project=self.test_project1,
             status_list=self.sequence_status_list
         )
-
+        
         self.test_sequence2 = Sequence(
             name="Test Seq 2",
             code='ts2',
@@ -1344,46 +1358,62 @@ class UserTest(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.test_user,
                           'open_tickets', [])
     
-    def test_tickets_attribute_returns_all_tickets_of_versions_of_tasks_of_this_user(self):
-        """testing if User.tickets returns all the tickets of versions of tasks
-        of this user
+    def test_tickets_attribute_returns_all_tickets_owned_by_this_user(self):
+        """testing if User.tickets returns all the tickets owned by this user
         """
         self.assertEqual(len(self.test_user.tasks), 0)
         
         # there should be no tickets assigned to this user
         self.assertTrue(self.test_user.tickets == [])
         
-        # assign the user as a resource for task1
-        self.test_task1.resources.append(self.test_user)
+        # be careful not all of these are open tickets
+        self.test_ticket1.reassign(self.test_user, self.test_user)
+        self.test_ticket2.reassign(self.test_user, self.test_user)
+        self.test_ticket3.reassign(self.test_user, self.test_user)
+        self.test_ticket4.reassign(self.test_user, self.test_user)
+        self.test_ticket5.reassign(self.test_user, self.test_user)
+        self.test_ticket6.reassign(self.test_user, self.test_user)
+        self.test_ticket7.reassign(self.test_user, self.test_user)
+        self.test_ticket8.reassign(self.test_user, self.test_user)
         
-        # now we should have some open tickets
+        # now we should have some tickets
         self.assertTrue(len(self.test_user.tickets) > 0)
         
         # now check for exact items
         self.assertItemsEqual(
             self.test_user.tickets,
-            [
-                # version1 tickets
-                self.test_ticket1, self.test_ticket2, self.test_ticket3,
-                # version2 tickets
-                self.test_ticket4, self.test_ticket5, self.test_ticket6,
-                # version3 tickets
-                self.test_ticket7, self.test_ticket8
-            ]
+            [self.test_ticket2, self.test_ticket3, self.test_ticket4]
         )
     
 
-    def test_open_tickets_attribute_returns_all_open_tickets_of_versions_of_tasks_of_this_user(self):
-        """testing if User.open_tickets returns all the open tickets of
-        versions of tasks of this user
+    def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(self):
+        """testing if User.open_tickets returns all the open tickets owned by
+        this user
         """
         self.assertEqual(len(self.test_user.tasks), 0)
         
         # there should be no tickets assigned to this user
         self.assertTrue(self.test_user.open_tickets == [])
         
-        # assign the user as a resource for task1
-        self.test_task1.resources.append(self.test_user)
+        # assign the user to some tickets
+        self.test_ticket1.reopen(self.test_user)
+        self.test_ticket2.reopen(self.test_user)
+        self.test_ticket3.reopen(self.test_user)
+        self.test_ticket4.reopen(self.test_user)
+        self.test_ticket5.reopen(self.test_user)
+        self.test_ticket6.reopen(self.test_user)
+        self.test_ticket7.reopen(self.test_user)
+        self.test_ticket8.reopen(self.test_user)
+        
+        # be careful not all of these are open tickets
+        self.test_ticket1.reassign(self.test_user, self.test_user)
+        self.test_ticket2.reassign(self.test_user, self.test_user)
+        self.test_ticket3.reassign(self.test_user, self.test_user)
+        self.test_ticket4.reassign(self.test_user, self.test_user)
+        self.test_ticket5.reassign(self.test_user, self.test_user)
+        self.test_ticket6.reassign(self.test_user, self.test_user)
+        self.test_ticket7.reassign(self.test_user, self.test_user)
+        self.test_ticket8.reassign(self.test_user, self.test_user)
         
         # now we should have some open tickets
         self.assertTrue(len(self.test_user.open_tickets) > 0)
@@ -1392,9 +1422,33 @@ class UserTest(unittest.TestCase):
         self.assertItemsEqual(
             self.test_user.open_tickets,
             [
-                # version1 tickets
-                self.test_ticket2, self.test_ticket3,
-                # version2 tickets
+                self.test_ticket1,
+                self.test_ticket2,
+                self.test_ticket3,
                 self.test_ticket4,
+                self.test_ticket5,
+                self.test_ticket6,
+                self.test_ticket7,
+                self.test_ticket8,
+            ]
+        )
+        
+        # close a couple of them
+        from stalker.models.ticket import (FIXED, CANTFIX, WONTFIX, DUPLICATE,
+                                           WORKSFORME, INVALID)
+        
+        self.test_ticket1.resolve(self.test_user, FIXED)
+        self.test_ticket2.resolve(self.test_user, INVALID)
+        self.test_ticket3.resolve(self.test_user, CANTFIX)
+        
+        # new check again
+        self.assertItemsEqual(
+            self.test_user.open_tickets,
+            [
+                self.test_ticket4,
+                self.test_ticket5,
+                self.test_ticket6,
+                self.test_ticket7,
+                self.test_ticket8
             ]
         )

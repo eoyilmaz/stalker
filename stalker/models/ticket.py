@@ -5,10 +5,11 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 import uuid
+import random
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import synonym, relationship
 from sqlalchemy.orm.mapper import validates
-from sqlalchemy import Column, Integer, UniqueConstraint
+from sqlalchemy import Column, Integer, UniqueConstraint, String
 from sqlalchemy.schema import ForeignKey, Table
 from sqlalchemy.types import Enum
 from stalker.conf import defaults
@@ -20,6 +21,13 @@ from stalker.log import logging_level
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
+FIXED = 'fixed'
+INVALID = 'invalid'
+WONTFIX = 'wontfix'
+DUPLICATE = 'duplicate'
+WORKSFORME = 'worksforme'
+CANTFIX = 'cantfix'
 
 class Ticket(Entity, StatusMixin):
     """Tickets are the way of reporting errors or asking for changes in Stalker.
@@ -124,20 +132,22 @@ class Ticket(Entity, StatusMixin):
     # logs attribute
     __auto_name__ = True
     __tablename__ = "Tickets"
-    __table_args__ = (
-        UniqueConstraint("project_id", 'number'), {}
-    )
+    #__table_args__ = (
+    #    UniqueConstraint("project_id", 'number'), {}
+    #)
     __mapper_args__ = {"polymorphic_identity": "Ticket"}
     
     ticket_id = Column(
         "id", Integer, ForeignKey("Entities.id"), primary_key=True
     )
     
-    project_id = Column('project_id', Integer, ForeignKey('Projects.id'))
+    project_id = Column('project_id', Integer, ForeignKey('Projects.id'),
+                        nullable=False)
     
     _project = relationship(
         'Project',
-        primaryjoin='Tickets.c.project_id==Projects.c.id'
+        primaryjoin='Tickets.c.project_id==Projects.c.id',
+        back_populates='tickets'
     )
     
     _number = Column(
@@ -145,7 +155,8 @@ class Ticket(Entity, StatusMixin):
         Integer,
         autoincrement=True,
         default=1,
-        nullable=False
+        nullable=False,
+        unique=True,
     )
     
     related_tickets = relationship(
@@ -173,13 +184,21 @@ class Ticket(Entity, StatusMixin):
     
     reported_by = synonym('created_by', doc="Shows who created this Ticket")
     
+    owner_id = Column('owner_id', Integer, ForeignKey('Users.id'))
+    owner = relationship(
+        'User',
+        primaryjoin='Tickets.c.owner_id==Users.c.id'
+    )
+    
+    resolution = Column(String(128))
+    
     priority = Column(
         Enum('TRIVIAL', 'MINOR', 'MAJOR', 'CRITICAL', 'BLOCKER',
              name='PriorityType'),
         default='TRIVIAL',
         doc="""The priority of the Ticket which is an enum value.
         Possible values are:
-            
+          
           +--------------+-------------------------------------------------+
           | 0 / TRIVIAL  | defect with little or no impact / cosmetic      |
           |              | enhancement                                     |
@@ -197,12 +216,7 @@ class Ticket(Entity, StatusMixin):
         """
     )
     
-    def __init__(self, links=None, priority='TRIVIAL', **kwargs):
-        # generate a name
-        #kwargs['name'] = "Ticket_" + uuid.uuid4().urn.split(':')[2]
-        #logger.debug('name of the newly created Ticket is: %s' % 
-        #             kwargs['name'])
-        
+    def __init__(self, project=None, links=None, priority='TRIVIAL', **kwargs):
         # just force auto name generation
         self._number = self._generate_ticket_number()
         kwargs['name'] = defaults.TICKET_LABEL + ' #%i' % self.number
@@ -210,7 +224,8 @@ class Ticket(Entity, StatusMixin):
         super(Ticket, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
         
-        #self._number = self._generate_ticket_number()
+        self._project = project
+        
         self.priority = priority
         if links is None:
             links = []
@@ -244,12 +259,10 @@ class Ticket(Entity, StatusMixin):
         :return: integer
         """
         try:
-            from stalker import Project
+            # do your query
             max_ticket = Ticket.query\
-                .join(Project, Ticket.project)\
                 .order_by(Ticket.number.desc())\
                 .first()
-            logger.debug('max_ticket: %s' % max_ticket)
         except UnboundExecutionError:
             max_ticket = None
         
@@ -278,7 +291,24 @@ class Ticket(Entity, StatusMixin):
         
         return related_ticket
     
-    def __action__(self, action, created_by):
+    @validates('_project')
+    def _validate_project(self, key, project):
+        """validates the given project instance
+        """
+        from stalker import Project
+        if project is None or not isinstance(project, Project):
+            raise TypeError('%s.project should be an instance of '
+                            'stalker.models.project.Project, not %s' % 
+                            (self.__class__.__name__,
+                             project.__class__.__name__))
+        
+        return project
+    
+    #Ticket.resolve(User1, 'fixed')
+    #Ticket.__action__('resolve', User1, 'fixed')
+    
+    
+    def __action__(self, action, created_by, action_arg=None):
         """updates the ticket status and creates a ticket log according to the
         Ticket.__available_actions__ dictionary
         
@@ -286,40 +316,65 @@ class Ticket(Entity, StatusMixin):
         :param stalker.models.auth.User created_by: The User creating this
             action
         """
-        new_status_code = \
-            defaults.TICKET_WORKFLOW[self.status.code].get(action)
-        if new_status_code:
+        statuses = defaults.TICKET_WORKFLOW[action].keys()
+        status = self.status.code.lower()
+        if status in statuses:
+            action_data = defaults.TICKET_WORKFLOW[action][status]
+            new_status_code = action_data['new_status']
+            action_name = action_data['action']
+            
             # there is an action defined for this status
             # get the to_status
             from_status = self.status
             to_status = self.status_list[new_status_code]
             self.status = to_status
             
+            # call the action with action_arg
+            func = getattr(self, action_name)
+            func(action_arg)
+            
             # create log entry
             self.logs.append(
                 TicketLog(self, from_status, to_status, action,
                           created_by=created_by)
             )
-
-    def resolve(self, created_by=None):
+    
+    def resolve(self, created_by=None, resolution=''):
         """resolves the ticket
         """
-        self.__action__('resolve', created_by)
+        self.__action__('resolve', created_by, resolution)
     
     def accept(self, created_by=None):
         """accepts the ticket
         """
-        self.__action__('accept', created_by)
+        self.__action__('accept', created_by, created_by)
     
-    def reassign(self, created_by=None):
+    def reassign(self, created_by=None, assign_to=None):
         """reassigns the ticket
         """
-        self.__action__('reassign', created_by)
+        self.__action__('reassign', created_by, assign_to)
     
     def reopen(self, created_by=None):
         """reopens the ticket
         """
         self.__action__('reopen', created_by)
+    
+    # ACTIONS
+    def set_owner(self, *args):
+        """sets owner to the given owner
+        """
+        self.owner = args[0]
+    
+    def set_resolution(self, *args):
+        """sets the resolution
+        """
+        self.resolution = args[0]
+    
+    def del_resolution(self, *args):
+        """deletes the resolution
+        """
+        self.resolution = ''
+        
     
     def __eq__(self, other):
         """the equality operator
@@ -383,7 +438,9 @@ class TicketLog(SimpleEntity):
         primaryjoin='TicketLogs.c.to_status_id==Statuses.c.id'
     )
     
-    action = Column(Enum('RESOLVE', 'REOPEN', name='TicketActions'))
+    action = Column(
+        Enum(*defaults.TICKET_WORKFLOW.keys(), name='TicketActions')
+    )
     
     ticket_id = Column(Integer, ForeignKey('Tickets.id'))
     ticket = relationship(

@@ -12,7 +12,7 @@ import tempfile
 from sqlalchemy.exc import IntegrityError
 
 from stalker.conf import defaults
-from stalker import db
+from stalker import db, Ticket
 from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
                      Link, Note, Project, Repository, Sequence, Shot,
@@ -280,7 +280,8 @@ class DatabaseTester(unittest.TestCase):
         
         self.assertIsInstance(ticket_status_list, StatusList)
         
-        expected_status_names = ['New', 'Reopened', 'Closed']
+        expected_status_names = ['New', 'Reopened', 'Closed', 'Accepted',
+                                 'Assigned']
         for status in ticket_status_list.statuses:
             self.assertTrue(status.name in expected_status_names)
     
@@ -2232,7 +2233,127 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(type_, test_task_DB.type)
         self.assertEqual(updated_by, test_task_DB.updated_by)
         self.assertEqual(versions, test_task_DB.versions)
-
+    
+    def test_persistence_Ticket(self):
+        """testing the persistence of Ticket
+        """
+        
+        repo = Repository(
+            name='Test Repository'
+        )
+        
+        proj_status_list = StatusList(
+            name='Project Statuses',
+            statuses=[
+                Status(name='Work In Progress', code='WIP'),
+                Status(name='On Hold', code='OH'),
+            ],
+            target_entity_type='Project'
+        )
+        
+        proj_structure = Structure(
+            name='Commercials Structure'
+        )
+        
+        proj1 = Project(
+            name='Test Project 1',
+            code='TP1',
+            repository=repo,
+            structure=proj_structure,
+            status_list=proj_status_list
+        )
+        
+        simple_entity = SimpleEntity(
+            name='Test Simple Entity'
+        )
+        
+        entity = Entity(
+            name='Test Entity'
+        )
+        
+        user1 = User(
+            name='user 1',
+            login='user1',
+            email='user1@users.com',
+            password='pass'
+        )
+        user2 = User(
+            name='user 2',
+            login='user2',
+            email='user2@users.com',
+            password='pass'
+        )
+        
+        note1 = Note(content='This is the content of the note 1')
+        note2 = Note(content='This is the content of the note 2')
+        
+        related_ticket1 = Ticket(project=proj1)
+        DBSession.add(related_ticket1)
+        DBSession.commit()
+        
+        related_ticket2 = Ticket(project=proj1)
+        DBSession.add(related_ticket2)
+        DBSession.commit()
+        
+        # create Tickets
+        test_ticket = Ticket(
+            project=proj1,
+            links=[simple_entity, entity],
+            notes=[note1, note2],
+            reported_by=user1,
+            related_tickets=[related_ticket1,
+                             related_ticket2]
+        )
+        
+        test_ticket.reassign(user1, user2)
+        test_ticket.priority = 'MAJOR'
+        
+        DBSession.add(test_ticket)
+        DBSession.commit()
+        
+        comments = test_ticket.comments
+        created_by = test_ticket.created_by
+        date_created = test_ticket.date_created
+        date_updated = test_ticket.date_updated
+        description = test_ticket.description
+        links = test_ticket.links
+        name = test_ticket.name
+        notes = test_ticket.notes
+        number = test_ticket.number
+        owner = test_ticket.owner
+        priority = test_ticket.priority
+        project = test_ticket.project
+        related_tickets = test_ticket.related_tickets
+        reported_by = test_ticket.reported_by
+        resolution = test_ticket.resolution
+        status = test_ticket.status
+        type_ = test_ticket.type
+        updated_by = test_ticket.updated_by
+        
+        del test_ticket
+        
+        # now query it back
+        test_ticket_DB = Ticket.query.filter_by(name=name).first()
+        
+        self.assertEqual(comments, test_ticket_DB.comments)
+        self.assertEqual(created_by, test_ticket_DB.created_by)
+        self.assertEqual(date_created, test_ticket_DB.date_created)
+        self.assertEqual(date_updated, test_ticket_DB.date_updated)
+        self.assertEqual(description, test_ticket_DB.description)
+        self.assertEqual(links, test_ticket_DB.links)
+        self.assertEqual(name, test_ticket_DB.name)
+        self.assertEqual(notes, test_ticket_DB.notes)
+        self.assertEqual(number, test_ticket_DB.number)
+        self.assertEqual(owner, test_ticket_DB.owner)
+        self.assertEqual(priority, test_ticket_DB.priority)
+        self.assertEqual(project, test_ticket_DB.project)
+        self.assertEqual(related_tickets, test_ticket_DB.related_tickets)
+        self.assertEqual(reported_by, test_ticket_DB.reported_by)
+        self.assertEqual(resolution, test_ticket_DB.resolution)
+        self.assertEqual(status, test_ticket_DB.status)
+        self.assertEqual(type_, test_ticket_DB.type)
+        self.assertEqual(updated_by, test_ticket_DB.updated_by)
+    
     def test_persistence_User(self):
         """testing the persistence of User
         """

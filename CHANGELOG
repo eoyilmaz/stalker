@@ -87,9 +87,9 @@ Stalker Changes
 * In tests all the Warnings are now properly handled as Warnings.
 
 * stalker.models.ticket.Ticket:
-  * Tickets are now able to be created without a Version instance. They are not
-    limited with Versions. It is now possible to link any SimpleEntity with a
-    Ticket.
+  * Ticket instances are now tied to Projects and it is now possible to create
+    Tickets without supplying a Version. They are free now.
+  * It is now possible to link any SimpleEntity to a Ticket.
   * The Ticket Workflow is now fully customizable. Use
     stalker.conf.defaults.TICKET_WORKFLOW dictionary to define the workflow and
     stalker.conf.defaults.TICKET_STATUS_ORDER for the order of the ticket

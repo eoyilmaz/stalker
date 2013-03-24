@@ -207,6 +207,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     
     working_hours = Column(PickleType)
     
+    tickets = relationship(
+        'Ticket',
+        primaryjoin='Tickets.c.project_id==Projects.c.id',
+        uselist=True,
+        
+    )
+    
     def __init__(self,
                  name=None,
                  code=None,

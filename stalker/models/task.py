@@ -295,7 +295,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     #:attr:`~stalker.models.task.Task.end` and
     #:attr:`~stalker.models.task.Task.duration` attributes of a
     #:class:`~stalker.models.task.Task` with child classes will be based on
-    #it childrens date attributes.
+    #it children date attributes.
 
     #:type child_tasks: :class:`~stalker.models.task.Task`.
 
@@ -332,8 +332,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     children = relationship(
       'Task',
        primaryjoin='Tasks.c.parent_id==Tasks.c.id',
-        back_populates='parent',
-       # single_parent=True
+       back_populates='parent',
     )
     
     tasks = synonym('children')
@@ -444,33 +443,29 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         self.is_milestone = is_milestone
         self.is_complete = False
-
+        
         if depends is None:
             depends = []
-
+        
         self.depends = depends
-
+        
         if self.is_milestone:
             resources = None
-
+        
         if resources is None:
             resources = []
-
+        
         self.resources = resources
         self._effort = None
         self.effort = effort
         
         self.priority = priority
-
+    
     @reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
         SQLAlchemy
         """
-        # UPDATE THIS
-        self.bookings = []
-        self.versions = []
-
         # call supers __init_on_load__
         super(Task, self).__init_on_load__()
 
@@ -600,7 +595,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                                 'stalker.models.task.Task, not '
                                 'a %s' %  (self.__class__.__name__,
                                            parent.__class__.__name__))
-        
+            
             # check for cycle
             _check_circular_dependency(self, parent, 'children')
         
@@ -625,14 +620,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                 # reset autoflush
                 DBSession.autoflush = autoflush
             else:
-                # no project, no task, go mad again!!!
-                raise TypeError('%s.project should be an instance of '
+                    # no project, no task, go mad again!!!
+                    raise TypeError('%s.project should be an instance of '
                                 'stalker.models.project.Project, not %s. Or '
                                 'please supply a stalker.models.task.Task '
                                 'in the parent, so Stalker can use the '
                                 'project of the supplied parent task' %
-                                (self.__class__.__name__,
-                                 project.__class__.__name__))
+                                    (self.__class__.__name__,
+                                     project.__class__.__name__))
         
         from stalker import Project
         if not isinstance(project, Project):
