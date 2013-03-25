@@ -134,10 +134,6 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         asset_filename = "{{asset.code}}_{{version.take}}_{{task.code}}_v"{{'%03d'|format(version.version)}}{{version.extension}}"
       
       Could be set to an empty string or None, the default value is None.
-    
-    :param str output_path: A Jinja2 template code specifying where to place
-      the outputs of the applied
-      :attr:`~stalker.models.template.FilenameTemplate.target_entity_type`.
       
       It can be None, or an empty string, or it can be skipped.
     
@@ -151,8 +147,6 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
       path = "{{project.code}}/Assets/{{asset.code}}/{{task.type.name}}"
       
       filename = "{{asset.name}}_{{take.name}}_{{asset_type.name}}_v{{version.version_number}}"
-      
-      output_path = "{{version.path}}/Outputs"
       
       # create a type for modeling task
       modeling = Type(
@@ -176,7 +170,6 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
           target_entity_type="Asset",
           path=path,
           filename=filename,
-          output_path=output_path,
       )
       
       # assign this type template to the structure of the project with id=101
@@ -225,25 +218,15 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         doc="""The template code for the file part of the FilenameTemplate."""
     )
     
-    output_path = Column(
-        String,
-        doc="""The output_path of this FilenameTemplate object.
-        
-        Should be a unicode string. None and empty string is also accepted.
-        """
-    )
-    
     def __init__(self,
                  target_entity_type=None,
                  path=None,
                  filename=None,
-                 output_path=None,
                  **kwargs):
         super(FilenameTemplate, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, target_entity_type, **kwargs)
         self.path = path
         self.filename = filename
-        self.output_path = output_path
     
     @validates("path")
     def _validate_path(self, key, path_in):
@@ -275,15 +258,6 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         
         return filename_in
     
-    @validates("output_path")
-    def _validate_output_path(self, key, output_path_in):
-        """validates the given output_path value
-        """
-        if output_path_in is None:
-            output_path_in = ""
-        
-        return output_path_in
-    
     def __eq__(self, other):
         """checks the equality of the given object to this one
         """
@@ -291,5 +265,4 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
                isinstance(other, FilenameTemplate) and\
                self.target_entity_type == other.target_entity_type and\
                self.path == other.path and\
-               self.filename == other.filename and\
-               self.output_path == other.output_path
+               self.filename == other.filename
