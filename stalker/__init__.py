@@ -82,7 +82,7 @@ def main(global_config, **settings):
     config.add_route('edit_project', 'edit/project/{project_id}')
     config.add_route('view_project', 'view/project/{project_id}')
     config.add_route('view_projects', 'view/projects')
-    config.add_route('overview_project', 'overview_project/{project_id}')
+    config.add_route('overview_project', 'overview/project/{project_id}')
     config.add_route('get_projects', 'get/projects')
     
     # *************************************************************************
@@ -144,6 +144,7 @@ def main(global_config, **settings):
     # Assets
     config.add_route('add_asset', 'add/asset/{project_id}')
     config.add_route('view_asset', 'view/asset/{asset_id}')
+    config.add_route('overview_asset', 'overview/asset/{asset_id}')
     config.add_route('edit_asset', 'edit/asset/{asset_id}')
     config.add_route('view_assets', 'view/assets/{project_id}')
     config.add_route('get_assets', 'get/assets/{project_id}')

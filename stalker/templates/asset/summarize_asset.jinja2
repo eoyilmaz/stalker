@@ -1,0 +1,32 @@
+<div id='asset_details_content_pane'>
+
+{# Avatar #}
+<div id='asset_thumbnail' class='asset_thumbnail'>No Avatar</div>
+
+{# Basic Info #}
+<div id='asset_info' class='asset_info'>
+  <h2 style='margin: 0px; text-align: right'>{{ asset.name }}</h2>
+  <table>
+    <tr>
+      <td style='text-align: right'><b>Description : </b></td>
+      <td>&nbsp;</td>
+      <td>({{ asset.description }})</td>
+    </tr>
+    <tr>
+      <td style='text-align: right'><b>Created By : </b></td>
+      <td>&nbsp;</td>
+      <td>({{ asset.created_by.name }})</td>
+    </tr>
+    <tr>
+      <td style='text-align: right'><b>Type : </b></td>
+      <td>&nbsp;</td>
+      <td>({{ asset.type.name }})</td>
+    </tr>
+    <tr>
+      <td style='text-align: right'><b>Status : </b></td>
+      <td>&nbsp;</td>
+      <td>({{ asset.status.name }})</td>
+    </tr>
+  </table>
+</div>
+</div>
