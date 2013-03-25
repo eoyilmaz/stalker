@@ -99,6 +99,11 @@ Stalker Changes
 
 * Removed the ``output_path`` attribute in FilenameTemplate class.
 
+* Grouped the templates for each entity under a directory with the entity name.
+
+* Converted the ``view.py`` to a python module and put the views for each
+  entity to its own python file.
+
 0.2.0.a6
 --------
 

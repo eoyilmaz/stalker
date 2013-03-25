@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
 # 
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
@@ -82,7 +82,7 @@ def main(global_config, **settings):
     config.add_route('edit_project', 'edit/project/{project_id}')
     config.add_route('view_project', 'view/project/{project_id}')
     config.add_route('view_projects', 'view/projects')
-    config.add_route('overview_project', 'overview/project/{project_id}')
+    config.add_route('summarize_project', 'summarize/project/{project_id}')
     config.add_route('get_projects', 'get/projects')
     
     # *************************************************************************
@@ -110,7 +110,7 @@ def main(global_config, **settings):
     config.add_route('view_user', 'view/user/{user_id}')
     config.add_route('get_users', 'get/users')
     
-    config.add_route('overview_user', 'overview/user/{user_id}')
+    config.add_route('summarize_user', 'summarize/user/{user_id}')
     config.add_route('get_user_tasks', 'get/user/{user_id}/tasks')
     config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
     config.add_route('view_user_versions', 'view/user/versions/{user_id}')
@@ -144,7 +144,7 @@ def main(global_config, **settings):
     # Assets
     config.add_route('add_asset', 'add/asset/{project_id}')
     config.add_route('view_asset', 'view/asset/{asset_id}')
-    config.add_route('overview_asset', 'overview/asset/{asset_id}')
+    config.add_route('summarize_asset', 'summarize/asset/{asset_id}')
     config.add_route('edit_asset', 'edit/asset/{asset_id}')
     config.add_route('view_assets', 'view/assets/{project_id}')
     config.add_route('get_assets', 'get/assets/{project_id}')

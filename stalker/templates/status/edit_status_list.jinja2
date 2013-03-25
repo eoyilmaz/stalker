@@ -55,11 +55,11 @@
   require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/SimpleTextarea', 'dijit/form/Button',
-    'dijit/form/FilteringSelect', 'dijit/form/MultiSelect',
+    'dijit/form/FilteringSelect', 'stalker/TagSelect',
     'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
     'stalker/dialogCaller', 'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, TextBox,
-             SimpleTextarea, Button, FilteringSelect, MultiSelect, JsonRest,
+             SimpleTextarea, Button, FilteringSelect, TagSelect, JsonRest,
              submitForm, fieldUpdater, dialogCaller){
       
       // **********************************************************************
@@ -109,10 +109,9 @@
       });
       
       // The Widget
-      var statuses_multiSelect = new MultiSelect({
+      var statuses_multiSelect = new TagSelect({
         name: 'statuses',
-        required: false,
-        style: 'width: 180px; height: 331px'
+        required: false
       }, 'status_list_statuses');
       statuses_multiSelect.startup();
       
