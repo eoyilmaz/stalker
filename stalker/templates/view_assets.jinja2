@@ -6,9 +6,10 @@
   require(['dijit/registry',
     'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dojo/store/Memory',
     'dijit/form/FilteringSelect', 'dojo/store/JsonRest',
-    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/on', 'dojo/domReady!'],
+    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/on', 'dojo/query',
+    'dojo/domReady!'],
     function(registry, ObjectStore, DataGrid, Memory, FilteringSelect,
-             JsonRest, fieldUpdater, dialogCaller, on){
+             JsonRest, fieldUpdater, dialogCaller, on, query){
       
 
       var my_store;
@@ -81,10 +82,11 @@
           for(var i=0;i<data.length;i++ ){
 
             var assetName = data[i]["name"];
-            var assetLink = '<a href=view/asset/' + data[i]["id"]+ '>' + assetName + '</a>';
+{#            var assetLink = '<a href=view/asset/' + data[i]["id"]+ '>' + assetName + '</a>';#}
+            var assetLink = '<a class="DataGridLink" href="#" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';
+
             var userName = data[i]["user_name"];
-            //var userLink = '<a href=view/ueser/' + data[i]["user_id"]+ '>' + userName + '</a>';
-            var userLink = '<a onclick="gotoUserDetail();">' + userName + '</a>';
+            var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
 
             data[i]["asset_link"] = assetLink;
             data[i]["user_link"] = userLink;
@@ -117,6 +119,27 @@
       console.log('initUI');
       asset_data_grid.set('store', my_store );
       asset_data_grid.set('structure', structure );
+
+      // connect links
+      var contentPane = asset_data_grid.getParent();
+
+      // get the Link Elements
+      var dataGridLinks = query('.DataGridLink');
+
+      console.log(dataGridLinks);
+
+      var stalker_href;
+      for (var i=0; i < dataGridLinks.length; i++){
+        stalker_href = dataGridLinks[i].getAttribute('stalker_href');
+        on(dataGridLinks[i], 'click', function(){
+          alert('this is clicked!');
+          contentPane.set('href', stalker_href);
+          contentPane.reset();
+        })
+      }
+
+
+
       console.log('end initUI');
     }
 
