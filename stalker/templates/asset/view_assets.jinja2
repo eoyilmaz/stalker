@@ -128,12 +128,11 @@
 
       console.log(dataGridLinks);
 
-      var stalker_href;
+
       for (var i=0; i < dataGridLinks.length; i++){
-        stalker_href = dataGridLinks[i].getAttribute('stalker_href');
+
         on(dataGridLinks[i], 'click', function(){
-          alert('this is clicked!');
-          contentPane.set('href', stalker_href);
+          contentPane.set('href', this.getAttribute('stalker_href'));
           contentPane.reset();
         })
       }
