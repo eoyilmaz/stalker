@@ -97,6 +97,8 @@ Stalker Changes
 
 * Added a new class called ``Scene`` to manage Shots with another property.
 
+* Removed the ``output_path`` attribute in FilenameTemplate class.
+
 0.2.0.a6
 --------
 

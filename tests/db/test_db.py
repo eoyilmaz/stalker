@@ -929,7 +929,6 @@ class DatabaseModelsTester(unittest.TestCase):
         name = new_type_template.name
         nice_name = new_type_template.nice_name
         notes = new_type_template.notes
-        output_path = new_type_template.output_path
         path = new_type_template.path
         tags = new_type_template.tags
         target_entity_type = new_type_template.target_entity_type
@@ -952,8 +951,6 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(name, new_type_template_DB.name)
         self.assertEqual(nice_name, new_type_template_DB.nice_name)
         self.assertEqual(notes, new_type_template_DB.notes)
-        self.assertEqual(output_path,
-                         new_type_template_DB.output_path)
         self.assertEqual(path, new_type_template_DB.path)
         self.assertEqual(tags, new_type_template_DB.tags)
         self.assertEqual(target_entity_type,
