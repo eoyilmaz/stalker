@@ -21,17 +21,17 @@
       
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
-        href: 'view/user/tasks/{{ user.id }}'
+        href: 'view/tasks/{{ user.id }}'
       });
       
       var assets_content_pane = new ContentPane({
         title: 'Assets',
-        href:'view/user_versions/{{ user.id }}'
+        href:'view/versions/{{ user.id }}'
       });
 
       var tickets_content_pane = new ContentPane({
         title: 'Tickets',
-        content: 'view/user_tickets/{{ user.id }}'
+        content: 'view/tickets/{{ user.id }}'
       });
       
       user_related_data_tab_container.addChild(overview_content_pane);

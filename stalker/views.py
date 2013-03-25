@@ -54,9 +54,7 @@ def log_param(request, param):
 @view_config(route_name='home',
             renderer='templates/base.jinja2')
 @view_config(route_name='me_menu',
-             renderer='templates/me_menu.jinja2')
-@view_config(route_name='user_home',
-             renderer='templates/user_home.jinja2')
+             renderer='templates/auth/me_menu.jinja2')
 def home(request):
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
@@ -68,7 +66,7 @@ def home(request):
     }
 
 @forbidden_view_config(
-    renderer='templates/no_permission.jinja2'
+    renderer='templates/auth/no_permission.jinja2'
 )
 def forbidden(request):
     """runs when user has no permission for the requested page
@@ -76,25 +74,8 @@ def forbidden(request):
     return {}
 
 @view_config(
-    route_name='user_menu',
-    renderer='templates/user_menu.jinja2'
-)
-def user_menu(request):
-    login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
-    return {
-        'stalker': stalker,
-        'user': user,
-    }
-
-@view_config(route_name='create_menu',
-             renderer='templates/create_menu.jinja2')
-def create_menu(request):
-    return {}
-
-@view_config(
     route_name='login',
-    renderer='templates/login.jinja2'
+    renderer='templates/auth/login.jinja2'
 )
 def login(request):
     """the login view
@@ -151,7 +132,7 @@ def logout(request):
 
 @view_config(
     route_name='add_project',
-    renderer='templates/add_project.jinja2',
+    renderer='templates/project/add_project.jinja2',
     permission='Add_Project'
 )
 def add_project(request):
@@ -271,7 +252,7 @@ def add_project(request):
 
 @view_config(
     route_name='view_projects',
-    renderer='templates/view_projects.jinja2',
+    renderer='templates/project/view_projects.jinja2',
     permission='View_Project'
 )
 def view_projects(request):
@@ -285,7 +266,7 @@ def view_projects(request):
 
 @view_config(
     route_name='edit_project',
-    renderer='templates/edit_project.jinja2',
+    renderer='templates/project/edit_project.jinja2',
     permission='Edit_Project'
 )
 def edit_project(request):
@@ -322,7 +303,7 @@ def edit_project(request):
 
 @view_config(
     route_name='add_image_format',
-    renderer='templates/add_image_format.jinja2',
+    renderer='templates/format/add_image_format.jinja2',
     permission='Add_ImageFormat'
 )
 def add_image_format(request):
@@ -356,7 +337,7 @@ def add_image_format(request):
 
 @view_config(
     route_name='edit_image_format',
-    renderer='templates/edit_image_format.jinja2',
+    renderer='templates/format/edit_image_format.jinja2',
     permission='Edit_ImageFormat'
 )
 def edit_image_format(request):
@@ -398,7 +379,7 @@ def edit_image_format(request):
 
 @view_config(
     route_name='edit_structure',
-    renderer='templates/edit_structure.jinja2',
+    renderer='templates/structure/edit_structure.jinja2',
     permission='Edit_Structure'
 )
 def edit_structure(request):
@@ -443,7 +424,7 @@ def edit_structure(request):
 
 @view_config(
     route_name='add_repository',
-    renderer='templates/add_repository.jinja2',
+    renderer='templates/repository/add_repository.jinja2',
     permission='Add_Repository'
 )
 def add_repository(request):
@@ -473,7 +454,7 @@ def add_repository(request):
 
 @view_config(
     route_name='edit_repository',
-    renderer='templates/edit_repository.jinja2',
+    renderer='templates/repository/edit_repository.jinja2',
     permission='Edit_Repository'
 )
 def edit_repository(request):
@@ -520,7 +501,7 @@ def edit_repository(request):
 
 @view_config(
     route_name='add_structure',
-    renderer='templates/add_structure.jinja2',
+    renderer='templates/structure/add_structure.jinja2',
     permission='Add_Structure'
 )
 def add_structure(request):
@@ -570,7 +551,7 @@ def add_structure(request):
 
 @view_config(
     route_name='add_user',
-    renderer='templates/add_user.jinja2',
+    renderer='templates/auth/add_user.jinja2',
     permission='Add_User'
 )
 def add_user(request):
@@ -666,7 +647,7 @@ def add_user(request):
 
 @view_config(
     route_name='edit_user',
-    renderer='templates/edit_user.jinja2',
+    renderer='templates/auth/edit_user.jinja2',
     permission='Edit_User'
 )
 def edit_user(request):
@@ -676,7 +657,7 @@ def edit_user(request):
 
 @view_config(
     route_name='add_filename_template',
-    renderer='templates/add_filename_template.jinja2',
+    renderer='templates/template/add_filename_template.jinja2',
     permission='Add_FilenameTemplate'
 )
 def add_filename_template(request):
@@ -752,7 +733,7 @@ def add_filename_template(request):
 
 @view_config(
     route_name='edit_filename_template',
-    renderer='templates/edit_filename_template.jinja2',
+    renderer='templates/template/edit_filename_template.jinja2',
     permission='Edit_FilenameTemplate'
 )
 def edit_filename_template(request):
@@ -793,12 +774,12 @@ def edit_filename_template(request):
 
 @view_config(
     route_name='add_status',
-    renderer='templates/add_status.jinja2',
+    renderer='templates/status/add_status.jinja2',
     permission='Add_Status'
 )
 @view_config(
     route_name='edit_status',
-    renderer='templates/edit_status.jinja2',
+    renderer='templates/status/edit_status.jinja2',
     permission='Edit_Status'
 )
 def add_edit_status(request):
@@ -871,12 +852,12 @@ def add_edit_status(request):
 
 @view_config(
     route_name='add_status_list',
-    renderer='templates/add_status_list.jinja2',
+    renderer='templates/status/add_status_list.jinja2',
     permission='Add_StatusList'
 )
 @view_config(
     route_name='add_status_list_for',
-    renderer='templates/add_status_list.jinja2',
+    renderer='templates/status/add_status_list.jinja2',
     permission='Add_StatusList'
 )
 def add_status_list(request):
@@ -943,7 +924,7 @@ def add_status_list(request):
 
 @view_config(
     route_name='edit_status_list',
-    renderer='templates/edit_status_list.jinja2',
+    renderer='templates/status/edit_status_list.jinja2',
     permission='Edit_StatusList'
 )
 def edit_status_list(request):
@@ -984,7 +965,7 @@ def edit_status_list(request):
 
 @view_config(
     route_name='add_asset',
-    renderer='add_asset.jinja2',
+    renderer='templates/asset/add_asset.jinja2',
     permission='Add_Asset'
 )
 def add_asset(request):
@@ -1119,7 +1100,7 @@ def add_asset(request):
 
 @view_config(
     route_name='view_asset',
-    renderer='view_asset.jinja2'
+    renderer='templates/asset/view_asset.jinja2'
 )
 def view_asset(request):
     """runs when viewing an asset
@@ -1138,7 +1119,7 @@ def view_asset(request):
 
 @view_config(
     route_name='add_sequence',
-    renderer='add_sequence.jinja2',
+    renderer='templates/sequence/add_sequence.jinja2',
     permission='Add_Sequence'
 )
 def add_sequence(request):
@@ -1212,7 +1193,7 @@ def add_sequence(request):
 
 @view_config(
     route_name='edit_sequence',
-    renderer='templates/edit_sequence.jinja2',
+    renderer='templates/sequence/edit_sequence.jinja2',
     permission='Edit_Sequence'
 )
 def edit_sequence(request):
@@ -1246,7 +1227,7 @@ def edit_sequence(request):
 
 @view_config(
     route_name='add_shot',
-    renderer='add_shot.jinja2',
+    renderer='templates/shot/add_shot.jinja2',
     permission='Add_Shot'
 )
 def add_shot(request):
@@ -1745,22 +1726,22 @@ def get_users(request):
 
 @view_config(
     route_name='view_project',
-    renderer='templates/view_project.jinja2',
+    renderer='templates/project/view_project.jinja2',
     permission='View_Project'
 )
 @view_config(
     route_name='view_assets',
-    renderer='view_assets.jinja2',
+    renderer='templates/asset/view_assets.jinja2',
     permission='View_Asset'
 )
 @view_config(
     route_name='view_shots',
-    renderer='view_shots.jinja2',
+    renderer='templates/shot/view_shots.jinja2',
     permission='View_Shot'
 )
 @view_config(
     route_name='overview_project',
-    renderer='templates/overview_project.jinja2',
+    renderer='templates/project/overview_project.jinja2',
     permission='View_Project'
 )
 def view_project_related_data(request):
@@ -1779,7 +1760,7 @@ def view_project_related_data(request):
 
 @view_config(
     route_name='view_tasks',
-    renderer='view_tasks.jinja2',
+    renderer='templates/task/view_tasks.jinja2',
     permission='View_Task'
 )
 def view_tasks(request):
@@ -1797,7 +1778,7 @@ def view_tasks(request):
 
 @view_config(
     route_name='add_task',
-    renderer='add_task.jinja2',
+    renderer='templates/task/add_task.jinja2',
     permission='Add_Task'
 )
 def add_task(request):
@@ -1948,7 +1929,7 @@ def add_task(request):
 
 @view_config(
     route_name='add_department',
-    renderer='add_department.jinja2',
+    renderer='templates/department/add_department.jinja2',
     permission='Add_Department'
 )
 def add_department(request):
@@ -2010,7 +1991,7 @@ def get_departments(request):
 
 @view_config(
     route_name='add_group',
-    renderer='add_groups.jinja2',
+    renderer='templates/auth/add_groups.jinja2',
     permission='Add_Group'
 )
 def add_group(request):
@@ -2020,11 +2001,11 @@ def add_group(request):
 
 @view_config(
     route_name='overview_user',
-    renderer='overview_user.jinja2'
+    renderer='templates/auth/overview_user.jinja2'
 )
 @view_config(
     route_name='view_user_tasks',
-    renderer='view_tasks.jinja2'
+    renderer='templates/task/view_tasks.jinja2'
 )
 def overview_user(request):
     """runs when over viewing general User info
@@ -2054,3 +2035,18 @@ def get_user_tasks(request):
         tasks = sorted(user.tasks, key=lambda x: x.project.id)
     
     return convert_to_jquery_gantt_task_format(tasks)
+
+
+
+@view_config(
+    route_name='view_user',
+    renderer='templates/auth/view_user.jinja2'
+)
+def view_user(request):
+    
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+    
+    return {
+        'user': user
+    }
