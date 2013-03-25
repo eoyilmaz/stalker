@@ -207,6 +207,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     
     working_hours = Column(PickleType)
     
+    tickets = relationship(
+        'Ticket',
+        primaryjoin='Tickets.c.project_id==Projects.c.id',
+        uselist=True,
+        
+    )
+    
     def __init__(self,
                  name=None,
                  code=None,
@@ -351,20 +358,27 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     def sequences(self):
         """returns the sequences related to this project
         """
-        # use joins over the session.query
+        # sequences are tasks, use self.tasks
         from stalker.models.sequence import Sequence
+
+        sequences = []
+        for task in self.tasks:
+            if isinstance(task, Sequence):
+                sequences.append(task)
+        return sequences
+    
+    @property
+    def shots(self):
+        """returns the shots related to this project
+        """
+        # shots are tasks, use self.tasks
+        from stalker.models.shot import Shot
         
-        if DBSession is not None:
-            return Sequence.query\
-                .join(Sequence.project)\
-                .filter(Project.name == self.name)\
-                .all()
-        else:
-            warnings.warn("There is no database setup, the sequences can not "
-                          "be queried from this state, please use "
-                          "stalker.db.setup() to setup a database",
-                          RuntimeWarning)
-            return []
+        shots = []
+        for task in self.tasks:
+            if isinstance(task, Shot):
+                shots.append(task)
+        return shots
      
     def __eq__(self, other):
         """the equality operator

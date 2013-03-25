@@ -73,7 +73,7 @@ def __init_db__():
     class_names = [
         'Asset', 'Group', 'Permission', 'User', 'Department',
         'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
-        'Project', 'Repository', 'Sequence', 'Shot',
+        'Project', 'Repository', 'Scene', 'Sequence', 'Shot',
         'Status', 'StatusList', 'Structure', 'Tag', 'Booking', 'Task',
         'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
     ]

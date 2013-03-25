@@ -123,25 +123,29 @@ class AssetTester(unittest.TestCase):
         self.test_data_shot1 = Shot(
             code="TestSH001",
             status_list=self.test_data_shot_status_list,
-            sequence=self.test_data_sequence,
+            project=self.test_data_project1,
+            sequences=[self.test_data_sequence],
         )
         
         self.test_data_shot2 = Shot(
             code="TestSH002",
             status_list=self.test_data_shot_status_list,
-            sequence=self.test_data_sequence,
+            project=self.test_data_project1,
+            sequences=[self.test_data_sequence],
         )
 
         self.test_data_shot3 = Shot(
             code="TestSH003",
             status_list=self.test_data_shot_status_list,
-            sequence=self.test_data_sequence,
+            project=self.test_data_project1,
+            sequences=[self.test_data_sequence],
         )
         
         self.test_data_shot4 = Shot(
             code="TestSH004",
             status_list=self.test_data_shot_status_list,
-            sequence=self.test_data_sequence,
+            project=self.test_data_project1,
+            sequences=[self.test_data_sequence],
         )
         
         self.kwargs = {

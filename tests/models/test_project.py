@@ -302,25 +302,29 @@ class ProjectTester(unittest.TestCase):
         # shots
         self.test_shot1 = Shot(
             code="SH001",
-            sequence=self.test_seq6,
+            project=self.test_project,
+            sequences=[self.test_seq6],
             status_list=self.shot_status_list,
         )
 
         self.test_shot2 = Shot(
             code="SH002",
-            sequence=self.test_seq6,
+            project=self.test_project,
+            sequences=[self.test_seq6],
             status_list=self.shot_status_list,
         )
 
         self.test_shot3 = Shot(
             code="SH003",
-            sequence=self.test_seq7,
+            project=self.test_project,
+            sequences=[self.test_seq7],
             status_list=self.shot_status_list,
         )
 
         self.test_shot4 = Shot(
             code="SH004",
-            sequence=self.test_seq7,
+            project=self.test_project,
+            sequences=[self.test_seq7],
             status_list=self.shot_status_list,
         )
 
@@ -673,13 +677,22 @@ class ProjectTester(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.test_project, "assets",
             ["some list"])
     
+    def test_image_format_argument_is_skipped(self):
+        """testing if image_format attribute will be None when the image_format
+        argument is skipped
+        """
+        self.kwargs.pop("image_format")
+        new_project = Project(**self.kwargs)
+        self.assertIsNone(new_project.image_format)
+    
     def test_image_format_argument_is_None(self):
         """testing if nothing is going to happen when the image_format is set
         to None
         """
         self.kwargs["image_format"] = None
         new_project = Project(**self.kwargs)
-
+        self.assertIsNone(new_project.image_format)
+    
     def test_image_format_attribute_is_set_to_None(self):
         """testing if nothing will happen when the image_format attribute is
         set to None

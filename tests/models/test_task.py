@@ -1445,16 +1445,6 @@ class TaskTester(unittest.TestCase):
         new_task.parent = new_task2
         self.assertEqual(new_task.parent, new_task2)
     
-    def test_parent_argument_can_also_be_a_Project_instance(self):
-        """testing if the parent argument can also pass a project instance
-        """
-        self.kwargs.pop('project')
-        self.kwargs['parent'] = self.test_project1
-        new_task = Task(**self.kwargs)
-        # check if the parent and the project attributes are the same
-        self.assertEqual(new_task.parent, new_task.project)
-        self.assertEqual(new_task.project, self.test_project1)
-    
     def test_children_attribute_is_empty_list_by_default(self):
         """testing if the children attribute is an empty list by default
         """

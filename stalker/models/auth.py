@@ -779,13 +779,9 @@ class User(Entity, ACLMixin):
         assigned to the Versions.).
         """
         # do it with sqlalchemy
-        from stalker import Ticket, Version, Task
-        
+        from stalker import Ticket
         return Ticket.query\
-            .join(Ticket.ticket_for)\
-            .join(Version.version_of)\
-            .join(Task.resources)\
-            .filter(User.id==self.id)\
+            .filter(Ticket.owner==self)\
             .all()
     
     @property
@@ -800,13 +796,10 @@ class User(Entity, ACLMixin):
         assigned to the Version and has a status of `Open`.).
         """
         # do it with sqlalchemy
-        from stalker import Ticket, Version, Task, Status
+        from stalker import Ticket, Status
         
         return Ticket.query\
-            .join(Ticket.ticket_for)\
-            .join(Version.version_of)\
-            .join(Task.resources)\
-            .filter(User.id==self.id)\
+            .filter(Ticket.owner==self)\
             .join(Ticket.status)\
             .filter(Status.code!='CLOSED')\
             .all()

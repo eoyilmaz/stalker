@@ -27,6 +27,7 @@ from stalker.models.mixins import (ProjectMixin, ReferenceMixin, ScheduleMixin,
 from stalker.models.note import Note
 from stalker.models.project import Project
 from stalker.models.repository import Repository
+from stalker.models.scene import Scene
 from stalker.models.sequence import Sequence
 from stalker.models.shot import Shot
 from stalker.models.status import Status, StatusList

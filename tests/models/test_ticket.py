@@ -141,7 +141,8 @@ class TicketTester(unittest.TestCase):
         
         # create the Ticket
         self.kwargs = {
-            'ticket_for': self.test_version,
+            'project': self.test_project,
+            'links': [self.test_version],
             'summary': 'This is a test ticket',
             'description': 'This is the long description',
             'priority': 'TRIVIAL',
@@ -195,9 +196,9 @@ class TicketTester(unittest.TestCase):
         # expect no errors
         new_ticket = Ticket(**self.kwargs)
     
-    def test_number_attribute_is_created_per_project(self):
-        """testing if the number attribute is created per project and starts
-        from zero for every project
+    def test_number_attribute_is_not_created_per_project(self):
+        """testing if the number attribute is not created per project and
+        continues to increase for every created ticket
         """
         proj1 = Project(
             name='Test Project 1',
@@ -223,42 +224,42 @@ class TicketTester(unittest.TestCase):
         p1_t1 = Ticket(project=proj1)
         DBSession.add(p1_t1)
         DBSession.commit()
-        self.assertEqual(p1_t1.number, 1)
+        self.assertEqual(p1_t1.number, 2)
         
         p1_t2 = Ticket(project=proj1)
         DBSession.add(p1_t2)
         DBSession.commit()
-        self.assertEqual(p1_t2.number, 2)
+        self.assertEqual(p1_t2.number, 3)
         
         p2_t1 = Ticket(project=proj2)
         DBSession.add(p2_t1)
         DBSession.commit()
-        self.assertEqual(p2_t1.number, 1)
+        self.assertEqual(p2_t1.number, 4)
         
         p1_t3 = Ticket(project=proj1)
         DBSession.add(p1_t3)
         DBSession.commit()
-        self.assertEqual(p1_t3.number, 3)
+        self.assertEqual(p1_t3.number, 5)
         
         p3_t1 = Ticket(project=proj3)
         DBSession.add(p3_t1)
         DBSession.commit()
-        self.assertEqual(p3_t1.number, 1)
+        self.assertEqual(p3_t1.number, 6)
         
         p2_t2 = Ticket(project=proj2)
         DBSession.add(p2_t2)
         DBSession.commit()
-        self.assertEqual(p2_t2.number, 2)
+        self.assertEqual(p2_t2.number, 7)
         
-        p3_t2 = Ticket(project=proj2)
+        p3_t2 = Ticket(project=proj3)
         DBSession.add(p3_t2)
         DBSession.commit()
-        self.assertEqual(p3_t2.number, 2)
+        self.assertEqual(p3_t2.number, 8)
         
         p2_t3 = Ticket(project=proj2)
         DBSession.add(p2_t3)
         DBSession.commit()
-        self.assertEqual(p2_t3, 3)
+        self.assertEqual(p2_t3.number, 9)
     
     def test_number_attribute_is_read_only(self):
         """testing if the number attribute is read-only
@@ -427,7 +428,6 @@ class TicketTester(unittest.TestCase):
     ## STATUSES ##
     
     ## resolve ##
-    
     def test_resolve_method_will_change_the_status_from_New_to_Closed_and_creates_a_log(self):
         """testing if invoking the resolve method will change the status of the
         Ticket from New to Closed
@@ -669,3 +669,42 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.reassign()
         self.assertEqual(self.test_ticket.status, self.status_CLOSED)
     
+    def test_resolve_method_will_set_the_resolution(self):
+        """testing if invoking the resolve method will change the status of the
+        Ticket from New to Closed
+        """
+        self.assertEqual(self.test_ticket.status, self.status_NEW)
+        self.test_ticket.resolve(resolution='fixed')
+        self.assertEqual(self.test_ticket.status, self.status_CLOSED)
+        log = self.test_ticket.logs[-1]
+        self.assertEqual(log.from_status, self.status_NEW)
+        self.assertEqual(log.to_status, self.status_CLOSED)
+        self.assertEqual(log.action, 'resolve')
+        self.assertEqual(self.test_ticket.resolution, 'fixed')
+    
+    def test_reopen_will_clear_resolution(self):
+        """testing if invoking the reopen method will clear the resolution
+        """
+        self.assertEqual(self.test_ticket.status, self.status_NEW)
+        self.test_ticket.resolve(resolution='fixed')
+        self.assertEqual(self.test_ticket.resolution, 'fixed')
+        self.test_ticket.reopen()
+        self.assertEqual(self.test_ticket.resolution, '')
+    
+    def test_reassign_will_set_the_owner(self):
+        """testing if invoking the reassign method will set the owner
+        """
+        self.assertEqual(self.test_ticket.status, self.status_NEW)
+        self.assertNotEqual(self.test_ticket.owner, self.test_user)
+        self.test_ticket.reassign(assign_to=self.test_user)
+        self.assertEqual(self.test_ticket.owner, self.test_user)
+    
+    def test_accept_will_set_the_owner(self):
+        """testing if invoking the accept method will set the owner
+        """
+        self.assertEqual(self.test_ticket.status, self.status_NEW)
+        self.assertNotEqual(self.test_ticket.owner, self.test_user)
+        self.test_ticket.accept(created_by=self.test_user)
+        self.assertEqual(self.test_ticket.owner, self.test_user)
+        
+ 

@@ -18,7 +18,7 @@ from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
                      Link, Note, Project, Repository, Sequence, Shot,
                      Status, StatusList, Structure, Tag, Task, Type,
                      FilenameTemplate, User, Version, Permission, Group,
-                     Booking)
+                     Booking, Ticket, Scene)
 import logging
 from stalker import log
 from stalker.models.project import WorkingHours
@@ -280,7 +280,8 @@ class DatabaseTester(unittest.TestCase):
         
         self.assertIsInstance(ticket_status_list, StatusList)
         
-        expected_status_names = ['New', 'Reopened', 'Closed']
+        expected_status_names = ['New', 'Reopened', 'Closed', 'Accepted',
+                                 'Assigned']
         for status in ticket_status_list.statuses:
             self.assertTrue(status.name in expected_status_names)
     
@@ -335,7 +336,7 @@ class DatabaseTester(unittest.TestCase):
         class_names = [
             'Asset', 'Group', 'Permission', 'User', 'Department',
             'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
-            'Project', 'Repository', 'Sequence', 'Shot', 'Status',
+            'Project', 'Repository', 'Scene', 'Sequence', 'Shot', 'Status',
             'StatusList', 'Structure', 'Tag', 'Booking', 'Task',
             'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
         ]
@@ -377,7 +378,7 @@ class DatabaseTester(unittest.TestCase):
         
         # and we still have correct amount of Permissions
         permissions = Permission.query.all()
-        self.assertEqual(len(permissions), 208)
+        self.assertEqual(len(permissions), 216)
         
         # clean the test
         shutil.rmtree(temp_db_path)
@@ -1493,6 +1494,108 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(updated_by, repo_db.updated_by)
         self.assertEqual(windows_path, repo_db.windows_path)
     
+    def test_persistence_Scene(self):
+        """testing the persistence of Scene
+        """
+        status1 = Status(name="On Hold", code="OH")
+        status2 = Status(name="Work In Progress", code="WIP")
+        status3 = Status(name="Finished", code="FIN")
+        
+        project_status_list = StatusList(
+            name="Project Statuses",
+            statuses=[status1, status2, status3],
+            target_entity_type=Project
+        )
+        
+        shot_status_list = StatusList(
+            name="Shot Statuses",
+            statuses=[status1, status2, status3],
+            target_entity_type=Shot
+        )
+        
+        repo1 = Repository(
+            name="Commercial Repository"
+        )
+        
+        commercial_project_type = Type(
+            name='Commercial Project',
+            code='commproj',
+            target_entity_type=Project
+        )
+        
+        test_project1 = Project(
+            name='Test Project',
+            code='TP',
+            status_list=project_status_list,
+            type=commercial_project_type,
+            repository=repo1,
+        )
+        
+        kwargs = {
+            'name': 'Test Scene',
+            'code': 'TSce',
+            'description': 'this is a test scene',
+            'project': test_project1,
+        }
+        
+        test_scene = Scene(**kwargs)
+
+        # now add the shots
+        shot1 = Shot(
+            code='SH001',
+            project=test_project1,
+            scenes=[test_scene],
+            status_list=shot_status_list
+        )
+        shot2 = Shot(
+            code='SH002',
+            project=test_project1,
+            scenes=[test_scene],
+            status_list=shot_status_list
+        )
+        shot3 = Shot(
+            code='SH003',
+            project=test_project1,
+            scenes=[test_scene],
+            status_list=shot_status_list
+        )
+        
+        DBSession.add(test_scene)
+        DBSession.commit()
+        
+        # store the attributes
+        code = test_scene.code
+        created_by = test_scene.created_by
+        date_created = test_scene.date_created
+        date_updated = test_scene.date_updated
+        description = test_scene.description
+        name = test_scene.name
+        nice_name = test_scene.nice_name
+        notes = test_scene.notes
+        project = test_scene.project
+        shots = test_scene.shots
+        tags = test_scene.tags
+        updated_by = test_scene.updated_by
+        
+        # delete the test_sequence
+        del test_scene
+        
+        test_scene_DB = Scene.query.filter_by(name=kwargs['name']).first()
+        
+        #self.assertEqual(test_sequence, test_sequence_DB)
+        self.assertEqual(code, test_scene_DB.code)
+        self.assertEqual(created_by, test_scene_DB.created_by)
+        self.assertEqual(date_created, test_scene_DB.date_created)
+        self.assertEqual(date_updated, test_scene_DB.date_updated)
+        self.assertEqual(description, test_scene_DB.description)
+        self.assertEqual(name, test_scene_DB.name)
+        self.assertEqual(nice_name, test_scene_DB.nice_name)
+        self.assertEqual(notes, test_scene_DB.notes)
+        self.assertEqual(project, test_scene_DB.project)
+        self.assertEqual(shots, test_scene_DB.shots)
+        self.assertEqual(tags, test_scene_DB.tags)
+        self.assertEqual(updated_by, test_scene_DB.updated_by)
+    
     def test_persistence_Sequence(self):
         """testing the persistence of Sequence
         """
@@ -1529,7 +1632,7 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type=Project
         )
 
-        project1 = Project(
+        test_project1 = Project(
             name='Test Project',
             code='TP',
             status_list=project_status_list,
@@ -1548,30 +1651,30 @@ class DatabaseModelsTester(unittest.TestCase):
             'name': 'Test Sequence',
             'code': 'TS',
             'description': 'this is a test sequence',
-            'project': project1,
+            'project': test_project1,
             'lead': lead,
             'status_list': sequence_status_list,
         }
 
         test_sequence = Sequence(**kwargs)
-
+        
         # now add the shots
         shot1 = Shot(
             code='SH001',
-            sequence=test_sequence,
-            status=0,
+            project=test_project1,
+            sequences=[test_sequence],
             status_list=shot_status_list
         )
         shot2 = Shot(
             code='SH002',
-            sequence=test_sequence,
-            status=0,
+            project=test_project1,
+            sequences=[test_sequence],
             status_list=shot_status_list
         )
         shot3 = Shot(
             code='SH003',
+            project=test_project1,
             sequence=test_sequence,
-            status=0,
             status_list=shot_status_list
         )
         
@@ -1604,8 +1707,8 @@ class DatabaseModelsTester(unittest.TestCase):
         # delete the test_sequence
         del test_sequence
         
-        test_sequence_DB = DBSession.query(Sequence)\
-            .filter_by(name=kwargs['name']).one()
+        test_sequence_DB = Sequence.query\
+            .filter_by(name=kwargs['name']).first()
         
         #self.assertEqual(test_sequence, test_sequence_DB)
         self.assertEqual(code, test_sequence_DB.code)
@@ -1666,7 +1769,7 @@ class DatabaseModelsTester(unittest.TestCase):
             name="Commercial Repository"
         )
         
-        project1 = Project(
+        test_project1 = Project(
             name='Test project',
             code='tp',
             status_list=project_status_list,
@@ -1682,28 +1785,46 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         
         kwargs = {
-            'name': "Test sequence",
-            'code': 'ts',
+            'name': "Test Sequence 1",
+            'code': 'tseq1',
             'description': 'this is a test sequence',
-            'project': project1,
+            'project': test_project1,
             'lead': lead,
             'status_list': sequence_status_list,
         }
         
-        test_sequence = Sequence(**kwargs)
+        test_seq1 = Sequence(**kwargs)
+        
+        kwargs['name'] = 'Test Sequence 2'
+        kwargs['code'] = 'tseq2'
+        test_seq2 = Sequence(**kwargs)
+        
+        test_sce1 = Scene(
+            name='Test Scene 1',
+            code='tsce1',
+            project=test_project1
+        )
+        
+        test_sce2 = Scene(
+            name='Test Scene 2',
+            code='tsce2',
+            project=test_project1
+        )
         
         # now add the shots
         shot_kwargs = {
-            "code": "SH001",
-            "sequence": test_sequence,
-            "status": 0,
-            "status_list": shot_status_list
+            'code': 'SH001',
+            'project': test_project1,
+            'sequences': [test_seq1, test_seq2],
+            'scenes': [test_sce1, test_sce2],
+            'status': 0,
+            'status_list': shot_status_list
         }
         
         test_shot = Shot(**shot_kwargs)
 
         DBSession.add(test_shot)
-        DBSession.add(test_sequence)
+        DBSession.add(test_seq1)
         DBSession.commit()
         
         # store the attributes
@@ -1719,7 +1840,8 @@ class DatabaseModelsTester(unittest.TestCase):
         nice_name = test_shot.nice_name
         notes = test_shot.notes
         references = test_shot.references
-        sequence = test_shot.sequence
+        sequences = test_shot.sequences
+        scenes = test_shot.scenes
         status = test_shot.status
         status_list = test_shot.status_list
         tags = test_shot.tags
@@ -1744,7 +1866,8 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(nice_name, test_shot_DB.nice_name)
         self.assertEqual(notes, test_shot_DB.notes)
         self.assertEqual(references, test_shot_DB.references)
-        self.assertEqual(sequence, test_shot_DB.sequence)
+        self.assertEqual(scenes, test_shot_DB.scenes)
+        self.assertEqual(sequences, test_shot_DB.sequences)
         self.assertEqual(status, test_shot_DB.status)
         self.assertEqual(status_list, test_shot_DB.status_list)
         self.assertEqual(tags, test_shot_DB.tags)
@@ -2232,7 +2355,127 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(type_, test_task_DB.type)
         self.assertEqual(updated_by, test_task_DB.updated_by)
         self.assertEqual(versions, test_task_DB.versions)
-
+    
+    def test_persistence_Ticket(self):
+        """testing the persistence of Ticket
+        """
+        
+        repo = Repository(
+            name='Test Repository'
+        )
+        
+        proj_status_list = StatusList(
+            name='Project Statuses',
+            statuses=[
+                Status(name='Work In Progress', code='WIP'),
+                Status(name='On Hold', code='OH'),
+            ],
+            target_entity_type='Project'
+        )
+        
+        proj_structure = Structure(
+            name='Commercials Structure'
+        )
+        
+        proj1 = Project(
+            name='Test Project 1',
+            code='TP1',
+            repository=repo,
+            structure=proj_structure,
+            status_list=proj_status_list
+        )
+        
+        simple_entity = SimpleEntity(
+            name='Test Simple Entity'
+        )
+        
+        entity = Entity(
+            name='Test Entity'
+        )
+        
+        user1 = User(
+            name='user 1',
+            login='user1',
+            email='user1@users.com',
+            password='pass'
+        )
+        user2 = User(
+            name='user 2',
+            login='user2',
+            email='user2@users.com',
+            password='pass'
+        )
+        
+        note1 = Note(content='This is the content of the note 1')
+        note2 = Note(content='This is the content of the note 2')
+        
+        related_ticket1 = Ticket(project=proj1)
+        DBSession.add(related_ticket1)
+        DBSession.commit()
+        
+        related_ticket2 = Ticket(project=proj1)
+        DBSession.add(related_ticket2)
+        DBSession.commit()
+        
+        # create Tickets
+        test_ticket = Ticket(
+            project=proj1,
+            links=[simple_entity, entity],
+            notes=[note1, note2],
+            reported_by=user1,
+            related_tickets=[related_ticket1,
+                             related_ticket2]
+        )
+        
+        test_ticket.reassign(user1, user2)
+        test_ticket.priority = 'MAJOR'
+        
+        DBSession.add(test_ticket)
+        DBSession.commit()
+        
+        comments = test_ticket.comments
+        created_by = test_ticket.created_by
+        date_created = test_ticket.date_created
+        date_updated = test_ticket.date_updated
+        description = test_ticket.description
+        links = test_ticket.links
+        name = test_ticket.name
+        notes = test_ticket.notes
+        number = test_ticket.number
+        owner = test_ticket.owner
+        priority = test_ticket.priority
+        project = test_ticket.project
+        related_tickets = test_ticket.related_tickets
+        reported_by = test_ticket.reported_by
+        resolution = test_ticket.resolution
+        status = test_ticket.status
+        type_ = test_ticket.type
+        updated_by = test_ticket.updated_by
+        
+        del test_ticket
+        
+        # now query it back
+        test_ticket_DB = Ticket.query.filter_by(name=name).first()
+        
+        self.assertEqual(comments, test_ticket_DB.comments)
+        self.assertEqual(created_by, test_ticket_DB.created_by)
+        self.assertEqual(date_created, test_ticket_DB.date_created)
+        self.assertEqual(date_updated, test_ticket_DB.date_updated)
+        self.assertEqual(description, test_ticket_DB.description)
+        self.assertEqual(links, test_ticket_DB.links)
+        self.assertEqual(name, test_ticket_DB.name)
+        self.assertEqual(notes, test_ticket_DB.notes)
+        self.assertEqual(number, test_ticket_DB.number)
+        self.assertEqual(owner, test_ticket_DB.owner)
+        self.assertEqual(priority, test_ticket_DB.priority)
+        self.assertEqual(project, test_ticket_DB.project)
+        self.assertEqual(related_tickets, test_ticket_DB.related_tickets)
+        self.assertEqual(reported_by, test_ticket_DB.reported_by)
+        self.assertEqual(resolution, test_ticket_DB.resolution)
+        self.assertEqual(status, test_ticket_DB.status)
+        self.assertEqual(type_, test_ticket_DB.type)
+        self.assertEqual(updated_by, test_ticket_DB.updated_by)
+    
     def test_persistence_User(self):
         """testing the persistence of User
         """

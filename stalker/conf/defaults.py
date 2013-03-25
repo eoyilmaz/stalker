@@ -67,26 +67,70 @@ DAY_ORDER = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 DAILY_WORKING_HOURS = 8
 
 # define the available actions per Status
-TICKET_STATUS_ORDER = ['NEW', 'ACCEPTED', 'ASSIGNED', 'REOPENED', 'CLOSED']
+TICKET_STATUS_ORDER = ['new', 'accepted', 'assigned', 'reopened', 'closed']
+TICKET_RESOLUTIONS = [
+    'fixed', 'invalid', 'wontfix', 'duplicate', 'worksforme', 'cantfix'
+]
 TICKET_WORKFLOW = {
-    # Current     # Action    # New
-    # Status                  # Status
-    'NEW'      : {'resolve'  : 'CLOSED',
-                  'accept'   : 'ACCEPTED',
-                  'reassign' : 'ASSIGNED',
+    # Action #OLD STATUS # NEW STATUS
+    'resolve' : {
+        'new': {
+            'new_status': 'closed',
+            'action': 'set_resolution'
+        },
+        'accepted': {
+            'new_status': 'closed',
+            'action': 'set_resolution'
+        },
+        'assigned': {
+            'new_status': 'closed',
+            'action': 'set_resolution'
+        },
+        'reopened': {
+            'new_status': 'closed',
+            'action': 'set_resolution'
+        },
     },
-    'ACCEPTED' : {'resolve'  : 'CLOSED',
-                  'accept'   : 'ACCEPTED',
-                  'reassign' : 'ASSIGNED',
+    'accept' : {
+        'new': {
+            'new_status': 'accepted',
+            'action': 'set_owner'
+        },
+        'accepted': {
+            'new_status': 'accepted',
+            'action': 'set_owner'
+        },
+        'assigned': {
+            'new_status': 'accepted',
+            'action': 'set_owner'
+        },
+        'reopened': {
+            'new_status': 'accepted',
+            'action': 'set_owner'
+        },
     },
-    'ASSIGNED' : {'resolve'  : 'CLOSED',
-                  'accept'   : 'ACCEPTED',
-                  'reassign' : 'ASSIGNED',
+    'reassign': {
+        'new': {
+            'new_status': 'assigned',
+            'action': 'set_owner'
+        },
+        'accepted': {
+            'new_status': 'assigned',
+            'action': 'set_owner'
+        },
+        'assigned': {
+            'new_status': 'assigned',
+            'action': 'set_owner'
+        },
+        'reopened': {
+            'new_status': 'assigned',
+            'action': 'set_owner'
+        },
     },
-    'REOPENED' : {'resolve'  : 'CLOSED',
-                  'accept'   : 'ACCEPTED',
-                  'reassign' : 'ASSIGNED',
-    },
-    "CLOSED"   : {'reopen'   : 'REOPENED'
+    'reopen': {
+        'closed': {
+            'new_status': 'reopened',
+            'action': 'del_resolution'
+        }
     }
 }
