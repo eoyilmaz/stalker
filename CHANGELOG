@@ -81,8 +81,8 @@ Stalker Changes
   * Shots can now be created without a Sequence instance. The sequence
     attribute is just used to group the Shots.
   
-  * Shots now have a new attribute called scenes, holding Scene instances. It
-    is created to group same shots occurring in the same scenes.
+  * Shots now have a new attribute called ``scenes``, holding Scene instances.
+    It is created to group same shots occurring in the same scenes.
 
 * In tests all the Warnings are now properly handled as Warnings.
 
@@ -94,6 +94,8 @@ Stalker Changes
     stalker.conf.defaults.TICKET_WORKFLOW dictionary to define the workflow and
     stalker.conf.defaults.TICKET_STATUS_ORDER for the order of the ticket
     statuses.
+
+* Added a new class called ``Scene`` to manage Shots with another property.
 
 0.2.0.a6
 --------

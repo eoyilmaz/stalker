@@ -11,7 +11,7 @@ from stalker import (Entity, Link, Project, Repository, Sequence, Status,
                      StatusList, Task, Type, User)
 
 class SequenceTester(unittest.TestCase):
-    """Tests Sequence class
+    """Tests stalker.models.sequence.Sequence class
     """
     
     def setUp(self):

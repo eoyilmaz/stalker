@@ -8,31 +8,30 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
 from stalker import User
 from stalker.models.task import Task
-from stalker.models.mixins import (StatusMixin, ScheduleMixin, ReferenceMixin,
-                                   CodeMixin)
+from stalker.models.mixins import (ReferenceMixin, CodeMixin)
 
 from stalker.log import logging_level
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-class Sequence(Task, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
+class Sequence(Task, ReferenceMixin, CodeMixin):
     """Stores data about Sequences.
     
-    Sequences are holders of the :class:`~stalker.models.shot.Shot` objects.
-    They organize the conceptual data with another level of complexity.
+    Sequences are a way of grouping the Shots according to their temporal
+    position to each other.
     
-    The Sequence class updates the
-    :attr:`~stalker.models.project.Project.sequence` attribute in the
-    :class:`~stalker.models.project.Project` class when the Sequence is
-    initialized.
+    Initialization
+    --------------
+    
+    A Sequence instance needs to be initialized with a
+    :class:`~stalker.models.project.Project` instance.
     
     :param lead: The lead of this Sequence. The default value is None.
     
     :type lead: :class:`~stalker.User`
     """
-
-    #    __project_backref_attrname__ = "sequences_ossuruk"
+    
     __project_doc__ = """The :class:`~stalker.models.project.Project` instance that this Sequence belongs to.
     
     A :class:`~stalker.models.sequence.Sequence` can not be created without a
@@ -59,24 +58,21 @@ class Sequence(Task, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
 
     shots = relationship(
         "Shot",
-        primaryjoin="Shots.c.sequence_id==Sequences.c.id",
-        back_populates="_sequence",
+        secondary='Shot_Sequences',
+        back_populates="sequences",
         doc="""The :class:`~stalker.models.shot.Shot`\ s assigned to this Sequence.
         
         It is a list of :class:`~stalker.models.shot.Shot` instances.
         """
     )
 
-    def __init__(self,
-                 lead=None,
-                 **kwargs
-    ):
+    def __init__(self, lead=None, **kwargs):
         super(Sequence, self).__init__(**kwargs)
-
+        
         # call the mixin __init__ methods
         ReferenceMixin.__init__(self, **kwargs)
-        StatusMixin.__init__(self, **kwargs)
-        ScheduleMixin.__init__(self, **kwargs)
+        #StatusMixin.__init__(self, **kwargs)
+        #ScheduleMixin.__init__(self, **kwargs)
         CodeMixin.__init__(self, **kwargs)
         
         self.lead = lead
@@ -86,30 +82,26 @@ class Sequence(Task, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     def _validate_lead(self, key, lead):
         """validates the given lead_in value
         """
-
         if lead is not None:
             if not isinstance(lead, User):
-                raise TypeError("lead should be instance of "
-                                "stalker.models.user.User")
-
+                raise TypeError("%s.lead should be instance of "
+                                "stalker.models.user.User, not %s" % 
+                                (self.__class__.__name__,
+                                 lead.__class__.__name__))
         return lead
 
     @validates("shots")
     def _validate_shots(self, key, shot):
         """validates the given shot value
         """
-        
         from stalker.models.shot import Shot
-        
         if not isinstance(shot, Shot):
-            raise TypeError("every item in the shots list should be an "
-                            "instance of stalker.models.shot.Shot")
-
+            raise TypeError('%s.shots should be all '
+                            'stalker.models.shot.Shot instances, not %s')
         return shot
 
     def __eq__(self, other):
         """the equality operator
         """
-
-        return super(Sequence, self).__eq__(other) and\
-               isinstance(other, Sequence)
+        return isinstance(other, Sequence) and \
+               super(Sequence, self).__eq__(other)

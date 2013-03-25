@@ -4,8 +4,11 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship, synonym, reconstructor
+from sqlalchemy import Column, Integer, ForeignKey, Table
+from sqlalchemy.exc import UnboundExecutionError
+from sqlalchemy.orm import relationship, synonym, reconstructor, validates
+from stalker import ImageFormat
+from stalker.db import Base, DBSession
 from stalker.models.task import Task
 from stalker.models.mixins import (StatusMixin, ReferenceMixin, CodeMixin)
 
@@ -90,16 +93,17 @@ class Shot(Task, ReferenceMixin, CodeMixin):
     ``project`` argument, and if you not the value of the ``project`` argument
     is not going to be used.
     
-    :param sequence: The :class:`~stalker.models.sequence.Sequence` that this
-      shot belongs to. A shot can only be created with a
-      :class:`~stalker.models.sequence.Sequence` instance, so it can not be
-      None. The shot itself will be added to the
-      :attr:`~stalker.models.sequence.Sequence.shots` list of the given
-      sequence. Also the ``project`` of the
-      :class:`~stalker.models.sequence.Sequence` will be used to set the
-      ``project`` of the current Shot.
+    :param project: This is the :class:`~stalker.models.project.Project`
+      instance that this shot belongs to. A Shot can not be created without a
+      Project instance.
     
-    :type sequence: :class:`~stalker.models.sequence.Sequence`
+    :type project: :class:`~stalker.models.project.Project`
+    
+    :param sequences: This is a list of
+      :class:`~stalker.models.sequence.Sequence`\ s that this shot is assigned
+      to. A Shot can be created without having a Sequence instance.
+    
+    :type sequences: list of :class:`~stalker.models.sequence.Sequence`
     
     :param integer cut_in: The in frame number that this shot starts. The
       default value is 1. When the ``cut_in`` is bigger then
@@ -120,18 +124,41 @@ class Shot(Task, ReferenceMixin, CodeMixin):
     :param image_format: The image format of this shot. This is an optional
       variable to differentiate the image format per shot. The default value is
       the same with the Project that this Shot belongs to.
+    
+    :type image_format: :class:`~stalker.models.format.ImageFormat`
     """
     __auto_name__ = True
-    __tablename__ = "Shots"
-    __mapper_args__ = {"polymorphic_identity": "Shot"}
+    __tablename__ = 'Shots'
+    __mapper_args__ = {'polymorphic_identity': 'Shot'}
     
-    shot_id = Column("id", Integer, ForeignKey("Tasks.id"),
+    shot_id = Column('id', Integer, ForeignKey('Tasks.id'),
                      primary_key=True)
-    sequence_id = Column(Integer, ForeignKey("Sequences.id"))
-    _sequence = relationship(
-        "Sequence",
-        primaryjoin="Shots.c.sequence_id==Sequences.c.id",
-        back_populates="shots"
+    
+    sequences = relationship(
+        'Sequence',
+        secondary='Shot_Sequences',
+        primaryjoin='Shots.c.id==Shot_Sequences.c.shot_id',
+        secondaryjoin='Shot_Sequences.c.sequence_id==Sequences.c.id',
+        back_populates='shots'
+    )
+    
+    scenes = relationship(
+        'Scene',
+        secondary='Shot_Scenes',
+        primaryjoin='Shots.c.id==Shot_Scenes.c.shot_id',
+        secondaryjoin='Shot_Scenes.c.scene_id==Scenes.c.id',
+        back_populates='shots'
+    )
+    
+    image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
+    image_format = relationship(
+        "ImageFormat",
+        primaryjoin="Shots.c.image_format_id==ImageFormats.c.id",
+        doc="""The :class:`~stalker.models.format.ImageFormat` of this shot.
+        
+        This value defines the output image format of this shot, should be an
+        instance of :class:`~stalker.models.format.ImageFormat`.
+        """
     )
     
     # the cut_duration attribute is not going to be stored in the database,
@@ -141,25 +168,36 @@ class Shot(Task, ReferenceMixin, CodeMixin):
 
     def __init__(self,
                  code=None,
-                 sequence=None,
+                 project=None,
+                 sequences=None,
+                 scenes=None,
                  cut_in=1,
                  cut_out=None,
                  cut_duration=None,
-                 #assets=None,
+                 image_format=None,
                  **kwargs):
-        sequence = self._validate_sequence(sequence)
         
         # initialize TaskableMixin
-        kwargs['project'] = sequence.project
+        kwargs['project'] = project
         kwargs['code'] = code
-        #kwargs['name'] = code
+        
+        # check for the code and project before ProjectMixin
+        self._check_code_availability(code, project)
         
         super(Shot, self).__init__(**kwargs)
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         CodeMixin.__init__(self, **kwargs)
         
-        self.sequence = self._validate_sequence(sequence)
+        if sequences is None:
+            sequences = []
+        self.sequences = sequences
+        
+        if scenes is None:
+            scenes = []
+        self.scenes = scenes
+        
+        self.image_format = image_format
         
         self._cut_in = cut_in
         self._cut_duration = cut_duration
@@ -174,24 +212,39 @@ class Shot(Task, ReferenceMixin, CodeMixin):
         """
         self._cut_duration = None
         self._update_cut_info(self._cut_in, self._cut_duration, self._cut_out)
-
+        
         # call supers __init_on_load__
         super(Shot, self).__init_on_load__()
-
+    
     def __repr__(self):
         """the representation of the Shot
         """
         return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
-
+    
     def __eq__(self, other):
         """equality operator
         """
-        # __eq__ always returns false but to be safe the code will be added
-        # here
-
         return isinstance(other, Shot) and self.code == other.code and \
-            self.sequence == other.sequence
-
+            self.project == other.project
+    
+    def _check_code_availability(self, code, project):
+        """checks if the given code is available in the given project
+        
+        :param code: the code string
+        :param project: the stalker.models.project.Project instance that this
+          shot is a part of
+        :return: bool
+        """
+        if project and code:
+            # the shots are task instances, use project.tasks
+            for task in project.tasks:
+                if isinstance(task, Shot):
+                    shot = task
+                    if shot.code == code:
+                        raise ValueError("The given project already has a "
+                                         "Shot with a code of %s" % self.code)
+        return True
+    
     def _update_cut_info(self, cut_in, cut_duration, cut_out):
         """updates the cut_in, cut_duration and cut_out attributes
         """
@@ -199,88 +252,93 @@ class Shot(Task, ReferenceMixin, CodeMixin):
         self._cut_in = self._validate_cut_in(cut_in)
         self._cut_duration = self._validate_cut_duration(cut_duration)
         self._cut_out = self._validate_cut_out(cut_out)
-
+        
         if self._cut_in is None:
             self._cut_in = 1
-
+        
         if self._cut_out is not None:
             if self._cut_in > self._cut_out:
                 # just update cut_duration
                 self._cut_duration = 1
                 #else:
                 #self._cut_o
-
+        
         if self._cut_duration is None or self._cut_duration <= 0:
             self._cut_duration = 1
 
         self._cut_out = self._cut_in + self._cut_duration - 1
-
+    
     def _validate_cut_duration(self, cut_duration_in):
         """validates the given cut_duration value
         """
         if cut_duration_in is not None and \
                 not isinstance(cut_duration_in, int):
             raise TypeError("cut_duration should be an instance of int")
-
+        
         return cut_duration_in
-
+    
     def _validate_cut_in(self, cut_in_in):
         """validates the given cut_in_in value
         """
         if cut_in_in is not None:
             if not isinstance(cut_in_in, int):
                 raise TypeError("cut_in should be an instance of int")
-
+        
         return cut_in_in
-
+    
     def _validate_cut_out(self, cut_out_in):
         """validates the given cut_out_in value
         """
         if cut_out_in is not None:
             if not isinstance(cut_out_in, int):
                 raise TypeError("cut_out should be an instance of int")
-
+        
         return cut_out_in
-
-    def _validate_sequence(self, sequence):
-        """validates the given sequence_in value
+    
+    @validates('sequences')
+    def _validate_sequence(self, key, sequence):
+        """validates the given sequence value
         """
         from stalker.models.sequence import Sequence
-
         if not isinstance(sequence, Sequence):
-            raise TypeError("the sequence should be an instance of "
-                            "stalker.models.sequence.Sequence instance")
-
-        for shot in sequence.shots:
-            if self.code == shot.code:
-                raise ValueError("the given sequence already has a shot with "
-                                 "a code %s" % self.code)
-
+            raise TypeError("%s.sequences should all be "
+                            "stalker.models.sequence.Sequence instances, not "
+                            "%s" % (self.__class__.__name__,
+                                    sequence.__class__.__name__))
         return sequence
+    
 
-    def _sequence_getter(self):
-        """The getter for the sequence attribute.
+    @validates('scenes')
+    def _validate_scenes(self, key, scene):
+        """validates the given scene value
         """
-        return self._sequence
-
-    def _sequence_setter(self, sequence):
-        """the setter for the sequence attribute.
+        from stalker.models.scene import Scene
+        if not isinstance(scene, Scene):
+            raise TypeError("%s.scenes should all be "
+                            "stalker.models.scene.Scene instances, not "
+                            "%s" % (self.__class__.__name__,
+                                    scene.__class__.__name__))
+        return scene
+    
+    @validates('image_format')
+    def _validate_image_format(self, key, imf):
+        """validates the given imf value
         """
-        self._sequence = self._validate_sequence(sequence)
-
-    sequence = synonym(
-        "_sequence",
-        descriptor=property(_sequence_getter, _sequence_setter),
-        doc="""The :class:`~stalker.models.sequence.Sequence` instance that
-            this :class:`~stalker.models.shot.Shot` instance belongs to."""
-    )
-
+        if imf is None:
+            # use the projects image format
+            return self.project.image_format
+        
+        if not isinstance(imf, ImageFormat):
+            raise TypeError('%s.image_format should be an instance of '
+                            'stalker.models.format.ImageFormat, not %s' %
+                            (self.__class__.__name__, imf.__class__.__name__))
+        return imf
+    
     def _cut_duration_getter(self):
         return self._cut_duration
 
     def _cut_duration_setter(self, cut_duration_in):
         self._update_cut_info(self._cut_in, cut_duration_in, self._cut_out)
-
     cut_duration = synonym(
         "_cut_duration",
         descriptor=property(_cut_duration_getter, _cut_duration_setter),
@@ -328,3 +386,17 @@ class Shot(Task, ReferenceMixin, CodeMixin):
         :attr:`~stalker.models.shot.Shot.cut_in` +
         :attr:`~stalker.models.shot.Shot.cut_duration`."""
     )
+
+Shot_Sequences = Table(
+    'Shot_Sequences', Base.metadata,
+    Column('shot_id', Integer, ForeignKey('Shots.id'), primary_key=True),
+    Column('sequence_id', Integer, ForeignKey('Sequences.id'),
+           primary_key=True)
+)
+
+Shot_Scenes = Table(
+    'Shot_Scenes', Base.metadata,
+    Column('shot_id', Integer, ForeignKey('Shots.id'), primary_key=True),
+    Column('scene_id', Integer, ForeignKey('Scenes.id'), primary_key=True)
+)
+

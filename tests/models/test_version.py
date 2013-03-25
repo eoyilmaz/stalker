@@ -140,7 +140,8 @@ class VersionTester(unittest.TestCase):
         # create a shot
         self.test_shot1 = Shot(
             code="SH001",
-            sequence=self.test_sequence,
+            project=self.test_project,
+            sequences=[self.test_sequence],
             status_list=self.test_shot_status_list,
         )
 

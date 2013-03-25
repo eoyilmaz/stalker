@@ -26,7 +26,7 @@ define(['dijit/form/Button', 'dijit/MenuItem'],
         //   a new Sequence to a Project then this is the id or a function that
         //   returns the Project.id or if we are editing a data then this is
         //   the id or a function returning the edited data id (ex:
-        //   sequence_id).
+        //   scene_id).
         //   
         //   If the id of the edited data is not yet known you can pass a
         //   function that will return the data id.
