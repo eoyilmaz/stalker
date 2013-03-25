@@ -1131,6 +1131,8 @@ def view_asset(request):
     asset_id = request.matchdict['asset_id']
     asset = Asset.query.filter_by(id=asset_id).first()
 
+    logger.debug('asset_id: %s' % asset_id)
+
     return {
         'user': logged_in_user,
         'asset': asset
