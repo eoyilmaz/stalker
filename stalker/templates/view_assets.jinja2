@@ -20,8 +20,9 @@
         autoHeight: true,
         singleClickEdit: true,
         escapeHTMLInData: false,
-        rowSelector: '20px'
-      }, 'assets_data_grid');
+        rowSelector: '20px',
+        formatterScope: "myFormatters"
+    }, 'assets_data_grid');
 
       var add_asset_button = dialogCaller({
         label: 'Add',
@@ -54,6 +55,17 @@
 
       });
 
+      var myFormatters = {
+
+        gotoUserDetail: function(){
+
+          console.log("gotoUserDetail");
+
+        }
+      };
+
+
+
 
 
 
@@ -65,12 +77,14 @@
 
         asset_memory.query().then(function(data){
 
+
           for(var i=0;i<data.length;i++ ){
 
             var assetName = data[i]["name"];
             var assetLink = '<a href=view/asset/' + data[i]["id"]+ '>' + assetName + '</a>';
             var userName = data[i]["user_name"];
-            var userLink = '<a href=view/ueser/' + data[i]["user_id"]+ '>' + userName + '</a>';
+            //var userLink = '<a href=view/ueser/' + data[i]["user_id"]+ '>' + userName + '</a>';
+            var userLink = '<a onclick="gotoUserDetail();">' + userName + '</a>';
 
             data[i]["asset_link"] = assetLink;
             data[i]["user_link"] = userLink;

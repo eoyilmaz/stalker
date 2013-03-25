@@ -283,8 +283,7 @@
       var imf_filteringSelect = new FilteringSelect({
         name: 'image_format',
         label: 'Image Format',
-        required: true,
-        placeHolder: '{% if not image_formats|length %}{{ 'No Image Format in DB' }}{% else %}{{ 'Select Image Format' }}{% endif %}'
+        required: true
       }, 'project_image_format');
       imf_filteringSelect.startup();
       
@@ -347,8 +346,7 @@
       var repository_filteringSelect = new FilteringSelect({
         name: 'repository',
         label: 'Repository',
-        required: true,
-        placeHolder: '{% if not repositories|length %}{{ 'No Repository in DB' }}{% else %}{{ 'Select A Repository' }}{% endif %}'
+        required: true
       }, 'project_repository');
       repository_filteringSelect.startup();
       
@@ -398,8 +396,7 @@
       var structure_filteringSelect = new FilteringSelect({
         name: 'structure',
         label: 'Structure',
-        required: true,
-        placeHolder: '{% if not structures|length %}{{ 'No Structure in DB' }}{% else %}{{ 'Select A Structure' }}{% endif %}'
+        required: true
       }, 'project_structure');
       structure_filteringSelect.startup();
       
@@ -448,7 +445,6 @@
         name: 'lead',
         label: 'User',
         required: true,
-        placeHolder: '{% if not users|length %}{{ 'No User in DB' }}{% else %}{{ 'Select A User' }}{% endif %}'
       }, 'project_lead');
       lead_filteringSelect.startup();
       
@@ -497,9 +493,7 @@
       var status_list_filteringSelect = new FilteringSelect({
         name: 'status_list',
         label: 'Status List',
-        required: true,
-        placeHolder: '{% if not status_lists|length %}{{ 'No StatusList in DB' }}{% else %}{{ 'Select A StatusList' }}{% endif %}'
-
+        required: true
       }, 'project_status_list');
       status_list_filteringSelect.startup();
       

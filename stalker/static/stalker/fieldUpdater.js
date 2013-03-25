@@ -87,9 +87,10 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                         }
                         // set the data normally
                         widget.set('store', new Memory({data: data}));
+                        console.log('data.length: ' + data.length);
 
                         if (data.length > 0){
-                            if (placeHolder == '' ){
+                            //if (placeHolder == '' ){
                                 if(widget.label){
                                     placeHolder = 'Select a ' + widget.label;
                                 }
@@ -99,9 +100,9 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
 
                                 }
 
-                            }
+                            //}
                             widget.set('placeHolder', placeHolder);
-                            console.log("placeHolder "+placeHolder);
+                            console.log('data.length: ' + data.length + " placeHolder "+placeHolder);
 
                             if(widget.declaredClass == 'dijit.form.FilteringSelect'){
 
@@ -116,7 +117,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                             }
                         }
                         else{
-                            if (placeHolder == '' ){
+                           // if (placeHolder == '' ){
                                 if(widget.label){
                                     placeHolder = 'No ' + widget.label + " in DB.";
                                 }
@@ -126,7 +127,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
 
                                 }
 
-                            }
+                            //}
                             widget.set('placeHolder', placeHolder);
                         }
 
