@@ -135,7 +135,7 @@
           name: 'central_content_pane',
           region: 'center',
           style: 'padding: 0px',
-          href: 'user_home',
+          href: 'view_user/{{ user.id }}',
           executeScripts: true
         }, 'central_content');
         appLayout.addChild(central_content_pane);
@@ -460,7 +460,7 @@
         // load user home by default
         central_content_pane.set(
           'href',
-          'user_home'
+          'view/user/{{ user.id }}'
         );
         central_content_pane.refresh();
     });
