@@ -182,72 +182,46 @@ class FilenameTemplateTester(unittest.TestCase):
         self.assertRaises(TypeError, self.filename_template, "filename",
                           test_value)
     
-    def test_output_path_argument_is_skipped_nothing_happens(self):
-        """testing there will be no problem if the output_path argument is
-        skipped 
-        """
-        self.kwargs.pop("output_path")
-        new_filenameTemplate = FilenameTemplate(**self.kwargs)
-    
-    def test_output_path_argument_is_None_will_set_the_output_path_attribute_to_empty_string(self):
-        """testing if the output_path argument is None will set the
-        output_path attribute to empty string
-        """
-        self.kwargs["output_path"] = None
-        self.kwargs["output_is_relative"] = True
-        new_filenameTemplate = FilenameTemplate(**self.kwargs)
-        self.assertEqual(new_filenameTemplate.output_path, "")
-   
     def test_equality(self):
         """testing the equality of FilenameTemplate objects
         """
-
         new_filenameTemplate1 = FilenameTemplate(**self.kwargs)
-
+        
         new_entity = Entity(**self.kwargs)
-
+        
         self.kwargs["target_entity_type"] = "Entity"
         new_filenameTemplate2 = FilenameTemplate(**self.kwargs)
-
+        
         self.kwargs["path"] = "different path"
         new_filenameTemplate3 = FilenameTemplate(**self.kwargs)
-
+        
         self.kwargs["filename"] = "different filename"
         new_filenameTemplate4 = FilenameTemplate(**self.kwargs)
-
-        self.kwargs["output_path"] = "different output path"
-        new_filenameTemplate5 = FilenameTemplate(**self.kwargs)
-
+        
         self.assertTrue(self.filename_template == new_filenameTemplate1)
         self.assertFalse(self.filename_template == new_entity)
         self.assertFalse(new_filenameTemplate1 == new_filenameTemplate2)
         self.assertFalse(new_filenameTemplate2 == new_filenameTemplate3)
         self.assertFalse(new_filenameTemplate3 == new_filenameTemplate4)
-        self.assertFalse(new_filenameTemplate4 == new_filenameTemplate5)
 
     def test_inequality(self):
         """testing the inequality of FilenameTemplate objects
         """
-
         new_filenameTemplate1 = FilenameTemplate(**self.kwargs)
-
+        
         new_entity = Entity(**self.kwargs)
-
+        
         self.kwargs["target_entity_type"] = "Entity"
         new_filenameTemplate2 = FilenameTemplate(**self.kwargs)
-
+        
         self.kwargs["path"] = "different path"
         new_filenameTemplate3 = FilenameTemplate(**self.kwargs)
-
+        
         self.kwargs["filename"] = "different filename"
         new_filenameTemplate4 = FilenameTemplate(**self.kwargs)
-
-        self.kwargs["output_path"] = "different output path"
-        new_filenameTemplate5 = FilenameTemplate(**self.kwargs)
-
+        
         self.assertFalse(self.filename_template != new_filenameTemplate1)
         self.assertTrue(self.filename_template != new_entity)
         self.assertTrue(new_filenameTemplate1 != new_filenameTemplate2)
         self.assertTrue(new_filenameTemplate2 != new_filenameTemplate3)
         self.assertTrue(new_filenameTemplate3 != new_filenameTemplate4)
-        self.assertTrue(new_filenameTemplate4 != new_filenameTemplate5)
