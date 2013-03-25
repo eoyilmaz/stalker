@@ -523,9 +523,7 @@
         attach_to: 'project_edit_status_list_button',
         related_field_updater: status_list_field_updater,
         data_id: function(){
-          return function(){
-            return 'edit/status_list/' + status_list_filteringSelect.get('value');
-          }
+            return status_list_filteringSelect.get('value');
         }
       });
       edit_status_list_button.startup();

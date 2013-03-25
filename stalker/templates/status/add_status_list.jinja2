@@ -1,4 +1,4 @@
-<div class='dijitDialogPaneContentArea' style='height: 380px'>
+<div class='dijitDialogPaneContentArea'>
   <form id='add_status_list_form'>
     <table style='width: 100%'>
       
@@ -55,11 +55,11 @@
   require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
     'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
     'dijit/form/SimpleTextarea', 'dijit/form/Button',
-    'dijit/form/FilteringSelect', 'dijit/form/MultiSelect',
+    'dijit/form/FilteringSelect', 'stalker/TagSelect',
     'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
     'stalker/dialogCaller', 'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, TextBox,
-             SimpleTextarea, Button, FilteringSelect, MultiSelect, JsonRest,
+             SimpleTextarea, Button, FilteringSelect, TagSelect, JsonRest,
              submitForm, fieldUpdater, dialogCaller){
       
       // **********************************************************************
@@ -67,10 +67,6 @@
       var add_status_list_form = new Form({
         id: 'add_status_list_form'
       }, 'add_status_list_form');
-      add_status_list_form.startup();
-      
-      
-      
       
       // **********************************************************************
       // Name
@@ -80,10 +76,6 @@
         placeHolder: 'Enter a name',
         required: true
       }, 'status_list_name');
-      name_textBox.startup();
-      
-      
-      
       
       // **********************************************************************
       // Target Entity Type
@@ -107,10 +99,6 @@
 {#        value: target_entity_type_store.data[0].id#}
         value: '{% if target_entity_type %}{{ target_entity_type }}{% else %}{% endif %}'
       }, 'status_list_target_entity_type');
-      target_entity_type_select.startup();
-      
-      console.log('target_entity_type: ' + '{{ target_entity_type }}');
-      
       
       
       // **********************************************************************
@@ -122,17 +110,15 @@
       });
     
       // The Widget
-      var statuses_multiSelect = new MultiSelect({
+      var statuses_tagSelect = new TagSelect({
         name: 'statuses',
-        required: false,
-        style: 'width: 180px; height: 331px'
+        required: false
       }, 'status_list_statuses');
-      statuses_multiSelect.startup();
       
       // The Updater
       var statuses_field_updater = fieldUpdater({
         'memory': statuses_memory,
-        'widget': statuses_multiSelect
+        'widget': statuses_tagSelect
       });
       // run the function to fill the data for the first time
       statuses_field_updater({animate: false});
@@ -145,7 +131,7 @@
         attach_to: 'status_list_add_status_button',
         related_field_updater: statuses_field_updater
       });
-      add_status_button.startup();
+      
       
       
       
@@ -165,7 +151,7 @@
           });
         }
       }, 'status_list_add_button');
-      add_button.startup();
+      
       
       
       
@@ -179,8 +165,16 @@
           registry.byId('add_status_list_dialog').destroyRecursive();
         }
       }, 'status_list_cancel_button');
-      cancel_button.startup();
       
+      
+      // Startups
+      target_entity_type_select.startup();
+      name_textBox.startup();
+      statuses_tagSelect.startup();
+      add_status_button.startup();
+      add_button.startup();
+      cancel_button.startup();
+      add_status_list_form.startup();
       
   });
 </script>

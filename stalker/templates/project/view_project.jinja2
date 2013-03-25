@@ -5,22 +5,21 @@
 <script type='text/javascript'>
   require(['dijit/registry', 'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
     function(registry, TabContainer, ContentPane){
-
       
       // **********************************************************************
       // Bottom Part - Complex Data View
       var project_related_data_tab_container = new TabContainer({
         region: 'bottom'
       }, 'project_related_data_tab_container');
-
+      
       var name_pane = new ContentPane({
         title: '{{ project.name }}',
         disabled: true
       });
-
+      
       var overview_content_pane = new ContentPane({
-        title: 'Overview',
-        href: 'overview_project/{{ project.id }}',
+        title: 'Summarize',
+        href: 'summarize/project/{{ project.id }}',
         selected: true
       });
       
@@ -48,7 +47,7 @@
         title: 'Tickets',
         content: 'view/tickets/{{ project.id }}'
       });
-
+      
       project_related_data_tab_container.addChild(name_pane);
       project_related_data_tab_container.addChild(overview_content_pane);
       project_related_data_tab_container.addChild(users_content_pane);
@@ -56,9 +55,9 @@
       project_related_data_tab_container.addChild(assets_content_pane);
       project_related_data_tab_container.addChild(shots_content_pane);
       project_related_data_tab_container.addChild(tickets_content_pane);
-
+      
       project_related_data_tab_container.startup();
-
+      
   });
 </script>
 

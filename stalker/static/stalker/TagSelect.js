@@ -25,6 +25,8 @@ define([
             input_field_widget: null,
             type: 'FilteringSelect',
             
+            selected: [], // pre defined selection list
+            
             button_div: null,
             
             _setNameAttr: function(value){
@@ -91,6 +93,52 @@ define([
                     this.tags[i].destroyRecursive();
                 }
             },
+            
+            
+            // connect the `change` event
+            create_tag: lang.hitch(this, function(){ // to protect `this`
+                
+                var item;
+                var current_label;
+                
+                if (this.type == 'FilteringSelect'){
+                    item = this.input_field_widget.item;
+                    if (item != null){
+                        current_label = item.name;
+                    }
+                } else if (this.type == 'TextBox'){
+                    current_label = this.input_field_widget.value;
+                }
+                
+                if (current_label != null){
+                    if (current_label != ''){
+                        var current_id = this.input_field_widget.value;
+                        
+                        // add a new button to the the tagList
+                        var tag = new Tag({
+                            label: current_label,
+                            value: current_id
+                        }, domConstruct.create('div', null, tag_list_ap));
+                        tag.startup();
+                        
+                        // attach self to the tag
+                        tag.tagSelect = this;
+                        
+                        // add the button as a tag to this widget
+                        this.tags.push(tag);
+                        
+                        // delete the current value from the FilteringSelect
+                        this.input_field_widget.set('value', '');
+                        
+                        // also remove the current value from the store
+                        if (this.store){
+                            this.store.remove(current_id);
+                        } 
+                        
+                    }
+                }
+            }),
+            
             
             // 
             // adds the given value to the store again
@@ -161,54 +209,14 @@ define([
                 var content_box = domGeometry.getContentBox(
                     this.input_field_widget.domNode
                 );
-                tag_list_ap.style.width = String(content_box.w) + 'px';
+                tag_list_ap.style.width = String(content_box.w) + 'px'; 
                 
-                // connect the `change` event
+                on(this.input_field_widget, 'change', this.create_tag);
                 
-                var tag_create_func = lang.hitch(this, function(e){ // to protect `this`
-                    
-                    var item;
-                    var current_label;
-                    
-                    if (this.type == 'FilteringSelect'){
-                        item = this.input_field_widget.item;
-                        if (item != null){
-                            current_label = item.name;
-                        }
-                    } else if (this.type == 'TextBox'){
-                        current_label = this.input_field_widget.value;
-                    }
-                    
-                    if (current_label != null){
-                        if (current_label != ''){
-                            var current_id = this.input_field_widget.value;
-                            
-                            // add a new button to the the tagList
-                            var tag = new Tag({
-                                label: current_label,
-                                value: current_id
-                            }, domConstruct.create('div', null, tag_list_ap));
-                            tag.startup();
-                            
-                            // attach self to the tag
-                            tag.tagSelect = this;
-                            
-                            // add the button as a tag to this widget
-                            this.tags.push(tag);
-                            
-                            // delete the current value from the FilteringSelect
-                            this.input_field_widget.set('value', '');
-                            
-                            // also remove the current value from the store
-                            if (this.store){
-                                this.store.remove(current_id);
-                            }
-                        }
-                    }
-                });
-                
-                on(this.input_field_widget, 'change', tag_create_func);
-//                on(this.input_field_widget, 'keyPress', tag_create_func);
+                // create the tags for the selected list
+                for (var i=0; i < this.selected.length; i++){
+                    // create the items
+                }
             }
     });
 });
