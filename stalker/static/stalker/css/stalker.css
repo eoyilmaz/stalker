@@ -220,3 +220,14 @@ a:hover {
     clear: both;
     left: 204px;
 }
+
+.thumbnail {
+    width: 192px;
+    height: 192px;
+    border: 1px;
+    border-color: black;
+    background-color: #d3d3d3;
+    float: left;
+    text-align: center;
+    vertical-align: middle;
+}
