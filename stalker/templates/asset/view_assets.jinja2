@@ -2,6 +2,7 @@
   <button id='view_assets_add_asset_button'>Add Asset</button>
   <div id='assets_data_grid'></div>
 </div>
+
 <script type='text/javascript'>
   require(['dijit/registry',
     'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dojo/store/Memory',
@@ -36,7 +37,7 @@
       asset_data_grid.startup();
       add_asset_button.startup();
 
-      asset_data_grid_updater();
+      //asset_data_grid_updater();
 
       var status_memory;
       var status_list_memory = new JsonRest({
@@ -106,7 +107,7 @@
       asset_data_grid.set('structure', structure );
 
       // connect links
-      var contentPane = asset_data_grid.getParent();
+      var contentPane = registry.byId('central_content');
 
       // get the Link Elements
       var dataGridLinks = query('.DataGridLink');
@@ -114,7 +115,6 @@
       for (var i=0; i < dataGridLinks.length; i++){
 
         on(dataGridLinks[i], 'click', function(){
-          alert(this.getAttribute('stalker_href') + 'clicked');
           contentPane.set('href', this.getAttribute('stalker_href'));
           contentPane.reset();
         })

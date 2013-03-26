@@ -84,8 +84,12 @@ def add_sequence(request):
                         logger.debug('finished adding Sequence')
             else:
                 logger.debug('there are missing parameters')
-    
+
+
+    project = Project.query.filter_by(id=request.matchdict['project_id']).first()
+
     return {
+        'project': project,
         'projects': Project.query.all(),
         'types': Type.query.filter_by(target_entity_type='Sequence').all(),
         'status_list':

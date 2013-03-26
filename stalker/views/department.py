@@ -78,3 +78,44 @@ def get_departments(request):
         }
         for dep in Department.query.all()
     ]
+
+@view_config(
+    route_name='view_department',
+    renderer='templates/department/view_department.jinja2',
+    permission='View_Department'
+)
+def view_department(request):
+    """runs when viewing a department
+    """
+
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+
+    department_id = request.matchdict['department_id']
+    department = Department.query.filter_by(id=department_id).first()
+
+    return {
+        'user': logged_in_user,
+        'department': department
+    }
+
+@view_config(
+    route_name='summarize_department',
+    renderer='templates/department/summarize_department.jinja2'
+)
+
+def summarize_department(request):
+    """runs when getting general User info
+    """
+    # get the user id
+    department_id = request.matchdict['department_id']
+    department = Department.query.filter_by(id=department_id).first()
+
+    return {
+        'department': department
+    }
+
+
+
+

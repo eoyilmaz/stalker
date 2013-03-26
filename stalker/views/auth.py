@@ -10,7 +10,7 @@ from pyramid.view import view_config, forbidden_view_config
 from sqlalchemy import or_
 
 import stalker
-from stalker import User, Department, Group, Tag, Project
+from stalker import User, Department, Group, Tag, Project, Entity
 from stalker.db import DBSession
 from stalker.views import log_param
 
@@ -140,6 +140,29 @@ def get_users(request):
         for user in User.query.all()
     ]
 
+@view_config(
+    route_name='get_users_byEntity',
+    renderer='json'
+)
+def get_users_byEntity(request):
+    """returns all the Users of a given Entity
+    """
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+    # works for Departments and Projects or any entity that has users attribute
+
+    return [
+        {
+            'id': user.id,
+            'name': user.name,
+            'login': user.login,
+            'tasksCount': '2',
+            'ticketsCount': '2'
+        }
+        for user in entity.users
+    ]
+
 
 @view_config(
     route_name='add_group',
@@ -183,6 +206,21 @@ def view_user(request):
     
     return {
         'user': user
+    }
+
+@view_config(
+    route_name='view_users',
+    renderer='templates/auth/view_users.jinja2'
+)
+def view_users(request):
+    """
+    """
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+    return {
+        'entity': entity
+
     }
 
 

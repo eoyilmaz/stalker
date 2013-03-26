@@ -1,12 +1,29 @@
-{# Complex Info #}
-<div id='user_related_data_tab_container'>
-    {# Tab View #}
+<div id='user_split_container'>
+  <div id='user_summary'>
+      {# Summary View #}
+  </div>
+  <div id='user_related_data_tab_container'>
+      {# Tab View #}
+  </div>
 </div>
-<script type='text/javascript'>
-  require(['dijit/registry', 'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
-    function(registry, TabContainer, ContentPane){
 
-      console.log('user_id : {{ user.id }}');
+<script type='text/javascript'>
+  require(['dijit/registry', 'dijit/layout/SplitContainer',
+    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+    function(registry, SplitContainer, TabContainer, ContentPane){
+
+      var user_SplitContainer = new SplitContainer({
+        region: 'center',
+        orientation: 'vertical',
+        splitter: false
+
+      }, 'user_split_container');
+
+      var summary_content_pane = new ContentPane({
+        title: 'Summarize',
+        href: 'summarize/user/{{ user.id }}',
+        region: 'top'
+      },'user_summary');
 
       // **********************************************************************
       // Bottom Part - Complex Data View
@@ -14,10 +31,6 @@
         region: 'bottom'
       }, 'user_related_data_tab_container');
 
-      var overview_content_pane = new ContentPane({
-        title: 'Summarize',
-        href: 'summarize/user/{{ user.id }}'
-      });
       
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
@@ -33,13 +46,16 @@
         title: 'Tickets',
         content: 'view/tickets/{{ user.id }}'
       });
-      
-      user_related_data_tab_container.addChild(overview_content_pane);
+
       user_related_data_tab_container.addChild(tasks_content_pane);
       user_related_data_tab_container.addChild(assets_content_pane);
       user_related_data_tab_container.addChild(tickets_content_pane);
 
       user_related_data_tab_container.startup();
+
+      user_SplitContainer.addChild(summary_content_pane);
+      user_SplitContainer.addChild(user_related_data_tab_container);
+      user_SplitContainer.startup();
 
   });
 </script>

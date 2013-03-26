@@ -108,7 +108,10 @@ def main(global_config, **settings):
     config.add_route('add_user', 'add/user')
     config.add_route('edit_user', 'edit/user/{user_id}')
     config.add_route('view_user', 'view/user/{user_id}')
+    config.add_route('view_users', 'view/users/{entity_id}')
     config.add_route('get_users', 'get/users')
+    config.add_route('get_users_byEntity', 'get/users_byEntity/{entity_id}')
+
     
     config.add_route('summarize_user', 'summarize/user/{user_id}')
     config.add_route('get_user_tasks', 'get/user/{user_id}/tasks')
@@ -159,7 +162,7 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Sequence
-    config.add_route('add_sequence', 'add/sequence')
+    config.add_route('add_sequence', 'add/sequence/{project_id}')
     config.add_route('view_sequence', 'view/sequence/{sequence_id}')
     config.add_route('edit_sequence', 'edit/sequence/{sequence_id}')
     config.add_route('view_sequences', 'view/sequences/{project_id}')
@@ -181,6 +184,7 @@ def main(global_config, **settings):
     # Department
     config.add_route('add_department', 'add/department')
     config.add_route('edit_department', 'edit/department/{department_id}')
+    config.add_route('summarize_department', 'summarize/department/{department_id}')
     config.add_route('view_department', 'view/department/{department_id}')
     config.add_route('get_departments', 'get/departments')
     
