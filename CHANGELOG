@@ -1,6 +1,14 @@
 ===============
 Stalker Changes
 ===============
+0.2.0.a8
+--------
+
+* TagSelect now can be filled by setting its ``value`` attribute (Ex:
+  TagSelect.set('value', data))
+  
+* Fixed Projects menu in base.jinja2, the link is now updating correctly when a
+  new project is added.
 
 0.2.0.a7
 --------

@@ -296,7 +296,8 @@ GanttMaster.prototype.addTask = function(task, row) {
  * a project contais tasks, resources, roles, and info about permisions
  * @param project
  */
-GanttMaster.prototype.loadProject = function(project) {
+GanttMaster.prototype.loadProject = function(project, Deferred) {
+  var deferred = new Deferred;
   this.beginTransaction();
   this.resources = project.resources;
   this.roles = project.roles;
@@ -317,7 +318,12 @@ GanttMaster.prototype.loadProject = function(project) {
   this.deletedTaskIds=[];
   this.endTransaction();
   var self=this;
-  this.gantt.element.oneTime(200,function(){self.gantt.centerOnToday()});
+  this.gantt.element.oneTime(200,function(){
+      self.gantt.centerOnToday();
+      deferred.resolve('success');
+  });
+  
+  return deferred.promise;
 };
 
 

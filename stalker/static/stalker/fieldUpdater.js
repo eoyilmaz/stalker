@@ -79,7 +79,6 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                         // just call render
                         widget.render();
                     } else {
-
                         try{
                             widget.reset();
                         } catch(err) {
@@ -87,56 +86,41 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                         }
                         // set the data normally
                         widget.set('store', new Memory({data: data}));
-                        console.log('data.length: ' + data.length);
-
+//                        console.log('data.length: ' + data.length);
+                        
                         if (data.length > 0){
-                            //if (placeHolder == '' ){
-                                if(widget.label){
-                                    placeHolder = 'Select a ' + widget.label;
-                                }
-                                else{
-
-                                    placeHolder = 'Select an item from list';
-
-                                }
-
-                            //}
-                            widget.set('placeHolder', placeHolder);
-                            console.log('data.length: ' + data.length + " placeHolder "+placeHolder);
-
-                            if(widget.declaredClass == 'dijit.form.FilteringSelect'){
-
+                            if(widget.label){
+                                placeHolder = 'Select a ' + widget.label;
                             }
                             else{
-
+                                placeHolder = 'Select an item from list';
+                            }
+                            widget.set('placeHolder', placeHolder);
+//                            console.log('data.length: ' + data.length + " placeHolder "+placeHolder);
+                            
+                            if(widget.declaredClass != 'dijit.form.FilteringSelect'){
                                 try{
                                     widget.attr('value', data[0].id);
                                 } catch(err) {
                                     // don't do anything
                                 }
                             }
-                        }
-                        else{
-                           // if (placeHolder == '' ){
-                                if(widget.label){
-                                    placeHolder = 'No ' + widget.label + " in DB.";
-                                }
-                                else{
-
-                                    placeHolder = 'No item in DB';
-
-                                }
-
-                            //}
+                        }else{
+                            if(widget.label){
+                                placeHolder = 'No ' + widget.label + " in DB.";
+                            }else{
+                                placeHolder = 'No item in DB';
+                            }
                             widget.set('placeHolder', placeHolder);
                         }
-
-
+                        if (selected.length){
+                            widget.set('value', selected);
+                        }
                     }
                     
                     if (animate == true){
                         // animate the field to indicate it is updated
-                        console.log("animate");
+//                        console.log("animate");
 
                         var domNode = widget.domNode;
                         var bgColor = domNode.style.backgroundColor;

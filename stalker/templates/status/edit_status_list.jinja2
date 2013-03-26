@@ -1,4 +1,4 @@
-<div class='dijitDialogPaneContentArea' style='height: 380px'>
+<div class='dijitDialogPaneContentArea'>
   <form id='edit_status_list_form'>
     <table style='width: 100%'>
       
@@ -57,122 +57,123 @@
     'dijit/form/SimpleTextarea', 'dijit/form/Button',
     'dijit/form/FilteringSelect', 'stalker/TagSelect',
     'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
-    'stalker/dialogCaller', 'dojo/domReady!'],
+    'stalker/dialogCaller', 'dojo/ready'],
     function(registry, Memory, Form, ValidationTextBox, TextBox,
              SimpleTextarea, Button, FilteringSelect, TagSelect, JsonRest,
-             submitForm, fieldUpdater, dialogCaller){
+             submitForm, fieldUpdater, dialogCaller, ready){
       
-      // **********************************************************************
-      // Form
-      var edit_status_list_form = new Form({
-        id: 'edit_status_list_form'
-      }, 'edit_status_list_form');
-      edit_status_list_form.startup();
+      ready(function(){
+        // **********************************************************************
+        // Form
+        var edit_status_list_form = new Form({
+          id: 'edit_status_list_form'
+        }, 'edit_status_list_form');
+        edit_status_list_form.startup();
+        
+        
+        
+        
+        // **********************************************************************
+        // Name
+        var name_textBox = new ValidationTextBox({
+          name: 'name',
+          label: 'Name',
+          value: '{{ status_list.name }}',
+          placeHolder: 'Enter a name',
+          required: true
+        }, 'status_list_name');
+        name_textBox.startup();
+        
+        
+        
+        
+        // **********************************************************************
+        // Target Entity Type
+        var target_entity_type_select = new TextBox({
+          name: 'target_entity_type',
+          label: 'Target Entity Type',
+          required: false,
+          disabled: true,
+          value: '{{ status_list.target_entity_type }}'
+        }, 'status_list_target_entity_type');
+        target_entity_type_select.startup();
+        
+        
+        
+        
+        // **********************************************************************
+        // Statuses
+        // 
+        // The Memory
+        var statuses_memory = new JsonRest({
+          target: '/get/statuses'
+        });
+        
+        // The Widget
+        var statuses_tagSelect = new TagSelect({
+          name: 'statuses',
+          required: false
+        }, 'status_list_statuses');
+        statuses_tagSelect.startup();
+        
+        // The Updater
+        var statuses_field_updater = fieldUpdater({
+          memory: statuses_memory,
+          widget: statuses_tagSelect,
+          selected: [
+            {% for status in status_list.statuses %}
+              {{ status.id }},
+            {% endfor %}
+          ]
+        });
+        // run the function to fill the data for the first time
+        statuses_field_updater({animate: false});
+        
+        // Add Status Button
+        var add_status_button = dialogCaller({
+          label: 'Add',
+          dialog_id: 'add_status_dialog',
+          content_creator: create_add_status_dialog,
+          attach_to: 'status_list_add_status_button',
+          related_field_updater: statuses_field_updater
+        });
+        add_status_button.startup();
+        
+        
+        
+        
+        // **********************************************************************
+        // Edit Button
+        var edit_button = new Button({
+          label: 'Edit',
+          type: 'button',
+          onClick: function(){
+            submitForm({
+              dialog: registry.byId('edit_status_list_dialog'),
+              form: edit_status_list_form,
+              additional_data: {submitted: 'edit'},
+              url: '{{ request.route_url("edit_status_list", status_list_id=status_list.id) }}',
+              method: 'POST'
+            });
+          }
+        }, 'status_list_edit_button');
+        edit_button.startup();
+        
+        
+        
+        
+        // **********************************************************************
+        // Cancel Button
+        var cancel_button = new Button({
+          label: 'Cancel',
+          type: 'button',
+          onClick: function(){
+            registry.byId('edit_status_list_dialog').destroyRecursive();
+          }
+        }, 'status_list_cancel_button');
+        cancel_button.startup();
       
-      
-      
-      
-      // **********************************************************************
-      // Name
-      var name_textBox = new ValidationTextBox({
-        name: 'name',
-        label: 'Name',
-        value: '{{ status_list.name }}',
-        placeHolder: 'Enter a name',
-        required: true
-      }, 'status_list_name');
-      name_textBox.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // Target Entity Type
-      var target_entity_type_select = new TextBox({
-        name: 'target_entity_type',
-        label: 'Target Entity Type',
-        required: false,
-        disabled: true,
-        value: '{{ status_list.target_entity_type }}'
-      }, 'status_list_target_entity_type');
-      target_entity_type_select.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // Statuses
-      // 
-      // The Memory
-      var statuses_memory = new JsonRest({
-        target: '/get/statuses'
       });
-      
-      // The Widget
-      var statuses_multiSelect = new TagSelect({
-        name: 'statuses',
-        required: false
-      }, 'status_list_statuses');
-      statuses_multiSelect.startup();
-      
-      // The Updater
-      var statuses_field_updater = fieldUpdater({
-        'memory': statuses_memory,
-        'widget': statuses_multiSelect,
-        'selected': [
-          {% for status in status_list.statuses %}
-            {{ status.id }},
-          {% endfor %}
-        ]
-      });
-      // run the function to fill the data for the first time
-      statuses_field_updater({animate: false});
-      
-      // Add Status Button
-      var add_status_button = dialogCaller({
-        label: 'Add',
-        dialog_id: 'add_status_dialog',
-        content_creator: create_add_status_dialog,
-        attach_to: 'status_list_add_status_button',
-        related_field_updater: statuses_field_updater
-      });
-      add_status_button.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // Edit Button
-      var edit_button = new Button({
-        label: 'Edit',
-        type: 'button',
-        onClick: function(){
-          submitForm({
-            dialog: registry.byId('edit_status_list_dialog'),
-            form: edit_status_list_form,
-            additional_data: {submitted: 'edit'},
-            url: '{{ request.route_url("edit_status_list", status_list_id=status_list.id) }}',
-            method: 'POST'
-          });
-        }
-      }, 'status_list_edit_button');
-      edit_button.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // Cancel Button
-      var cancel_button = new Button({
-        label: 'Cancel',
-        type: 'button',
-        onClick: function(){
-          registry.byId('edit_status_list_dialog').destroyRecursive();
-        }
-      }, 'status_list_cancel_button');
-      cancel_button.startup();
-      
-      
   });
 </script>
 

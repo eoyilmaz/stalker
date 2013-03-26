@@ -79,6 +79,7 @@ define(['dijit/form/Button', 'dijit/MenuItem'],
                             related_field_updater
                         );
                         
+                        
                         // show the dialog
                         dialog.show();
                     }

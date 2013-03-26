@@ -20,12 +20,12 @@
     <span class="ganttButtonSeparator"></span>
     <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual" title="delete"><span class="teamworkIcon">&cent;</span></button>
       &nbsp; &nbsp; &nbsp; &nbsp;
-      {% if entity.entity_type != 'User' %}
-      <button id='view_tasks_add_asset_button'>Add Asset</button>
-      <button id='view_tasks_add_sequence_button'>Add Sequence</button>
-      <button id='view_tasks_add_shot_button'>Add Shot</button>
-      <button id='view_tasks_add_task_button'>Add Task</button>
-      {% endif %}
+{#      {% if entity.entity_type != 'User' %}#}
+{#      <button id='view_tasks_add_asset_button'>Add Asset</button>#}
+{#      <button id='view_tasks_add_sequence_button'>Add Sequence</button>#}
+{#      <button id='view_tasks_add_shot_button'>Add Shot</button>#}
+{#      <button id='view_tasks_add_task_button'>Add Task</button>#}
+{#      {% endif %}#}
       <button id='view_tasks_gannt_save_button' onclick="saveGanttOnServer();" class="button first big" title="save">save</button>
     </div></div>
   --></div>
@@ -170,192 +170,193 @@
       position:relative;
       margin:0 5px;
       width:100%;
-      height:100%;">
+      height:94%;">
 </div>
 
 <script type="text/javascript">
   require(['dijit/registry',
            'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dijit/form/Button',
            'stalker/dialogCaller', 'dojo/store/JsonRest', 'dojo/request/xhr',
-           'dojo/_base/lang', 'dojo/domReady!'],
+           'dojo/_base/lang', 'dojo/query', 'dojo/Deferred', 'dojo/ready'],
     function(registry, ObjectStore, DataGrid, Button, dialogCaller, JsonRest,
-             xhr, lang){
+             xhr, lang, query, Deferred, ready){
       
-      $('#gantttemplates').loadTemplates();
-      var ge = new GanttMaster();
-      ge.init($("#workSpace"));
-      
-      var target;
-        target = '/get/tasks/{{ entity.id }}';
-      
-      // The Memory
-      var tasks_memory = new JsonRest({
-        target: target
-      });
-      
-      
-      function loadGanttFromServer() {
-        tasks_memory.query().then(function(data){
-          {% if entity.entity_type != 'User' %}
+      ready(function(){
+        $('#gantttemplates').loadTemplates();
+        var ge = new GanttMaster();
+        ge.init($("#workSpace"));
+        
+        var target;
+          target = '/get/tasks/{{ entity.id }}';
+        
+        // The Memory
+        var tasks_memory = new JsonRest({
+          target: target
+        });
+        
+        function loadGanttFromServer() {
+          tasks_memory.query().then(function(data){
             data = lang.mixin(data,{'canWrite': 0, 'canWriteOnParent': 0});
-          {% endif %}
-          ge.loadProject(data);
-        });
-      }
-      loadGanttFromServer();
-      
-      
-      function saveGanttOnServer() {
-      
-        //this is a simulation: save data to the local storage or to the textarea
-{#        saveInLocalStorage();#}
-        
-        
-        var prj = ge.saveProject();
-        
-        delete prj.resources;
-        delete prj.roles;
-        
-        if (ge.deletedTaskIds.length>0) {
-          if (!confirm("TASK_THAT_WILL_BE_REMOVED\n"+ge.deletedTaskIds.length)) {
-            return;
-          }
-        }
-        
-        var deffered = xhr.post(
-          '/edit/tasks',
-          {
-            method: 'POST',
-            data: {CM:'save_tasks', prj: JSON.stringify(prj)}
-          }
-        );
-        
-        deffered.then(function(){
-          // load the project from server again
-          loadGanttFromServer();
-        }, function(err){
-          alert(err);
-        });
-        
-      }
-      
-      function clearGantt() {
-        ge.reset();
-      }
-      
-      function loadI18n() {
-        GanttMaster.messages = {
-          "CHANGE_OUT_OF_SCOPE":"NO_RIGHTS_FOR_UPDATE_PARENTS_OUT_OF_EDITOR_SCOPE",
-          "START_IS_MILESTONE":"START_IS_MILESTONE",
-          "END_IS_MILESTONE":"END_IS_MILESTONE",
-          "TASK_HAS_CONSTRAINTS":"TASK_HAS_CONSTRAINTS",
-          "GANTT_ERROR_DEPENDS_ON_OPEN_TASK":"GANTT_ERROR_DEPENDS_ON_OPEN_TASK",
-          "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK":"GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK",
-          "TASK_HAS_EXTERNAL_DEPS":"TASK_HAS_EXTERNAL_DEPS",
-          "GANTT_ERROR_LOADING_DATA_TASK_REMOVED":"GANTT_ERROR_LOADING_DATA_TASK_REMOVED",
-          "ERROR_SETTING_DATES":"ERROR_SETTING_DATES",
-          "CIRCULAR_REFERENCE":"CIRCULAR_REFERENCE",
-          "CANNOT_DEPENDS_ON_ANCESTORS":"CANNOT_DEPENDS_ON_ANCESTORS",
-          "CANNOT_DEPENDS_ON_DESCENDANTS":"CANNOT_DEPENDS_ON_DESCENDANTS",
-          "INVALID_DATE_FORMAT":"INVALID_DATE_FORMAT",
-          "TASK_MOVE_INCONSISTENT_LEVEL":"TASK_MOVE_INCONSISTENT_LEVEL",
-      
-          "GANTT_QUARTER_SHORT":"trim.",
-          "GANTT_SEMESTER_SHORT":"sem."
-        };
-      }
-      
-      
-      //-------------------------------------------  Open a black popup for managing resources. This is only an axample of implementation (usually resources come from server) ------------------------------------------------------
-      function openResourceEditor() {
-        var editor = $("<div>");
-        editor.append("<h2>Resource editor</h2>");
-        editor.addClass("resEdit");
-      
-        for (var i in ge.resources) {
-          var res = ge.resources[i];
-          var inp = $("<input type='text'>").attr("pos", i).addClass("resLine").val(res.name);
-          editor.append(inp).append("<br>");
-        }
-      
-        var sv = $("<div>save</div>").css("float", "right").addClass("button").click(function() {
-          $(this).closest(".resEdit").find("input").each(function() {
-            var el = $(this);
-            var pos = el.attr("pos");
-            ge.resources[pos].name = el.val();
+            
+            var promise = ge.loadProject(data, Deferred);
+            promise.then(function(){
+              // now add the context menu to tasks
+              var tasks = query('.taskBox');
+              
+              // TODO: add context menu here
+              
+            });
           });
-          ge.editor.redraw();
-          closeBlackPopup();
-        });
-        editor.append(sv);
-      
-        var ndo = createBlackPage(800, 500).append(editor);
-      }
-      
-      //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
-      function getFile() {
-        $("#gimBaPrj").val(JSON.stringify(ge.saveProject()));
-        $("#gimmeBack").submit();
-        $("#gimBaPrj").val("");
-      
-        /*  var uriContent = "data:text/html;charset=utf-8," + encodeURIComponent(JSON.stringify(prj));
-         console.debug(uriContent);
-         neww=window.open(uriContent,"dl");*/
-      }
-      
-      loadGanttFromServer();
-      
-      {% if entity.entity_type != 'User' %}
-        var add_asset_button = dialogCaller({
-          label: 'Add Asset',
-          dialog_id: 'add_asset_dialog',
-          content_creator: create_add_asset_dialog,
-          attach_to: 'view_tasks_add_asset_button',
-          related_field_updater: loadGanttFromServer, 
-          data_id: '{{ entity.id }}'
-        });
-        add_asset_button.startup();
-        
-        var add_sequence_button = dialogCaller({
-          label: 'Add Sequence',
-          dialog_id: 'add_sequence_dialog',
-          content_creator: create_add_sequence_dialog,
-          attach_to: 'view_tasks_add_sequence_button',
-          related_field_updater: loadGanttFromServer, 
-          data_id: '{{ entity.id }}'
-        });
-        add_sequence_button.startup();
- 
-        var add_shot_button = dialogCaller({
-          label: 'Add Shot',
-          dialog_id: 'add_shot_dialog',
-          content_creator: create_add_shot_dialog,
-          attach_to: 'view_tasks_add_shot_button',
-          related_field_updater: loadGanttFromServer, 
-          data_id: '{{ entity.id }}'
-        });
-        add_shot_button.startup();
-        
-        var add_task_button = dialogCaller({
-          label: 'Add Task',
-          dialog_id: 'add_task_dialog',
-          content_creator: create_add_task_dialog,
-          attach_to: 'view_tasks_add_task_button',
-          related_field_updater: loadGanttFromServer, 
-          data_id: '{{ entity.id }}'
-        });
-        add_task_button.startup();
-        
-     
-      // TODO: This should be disabled upon permission not according to the existence of a template variable
-      var save_gantt_button = new Button({
-        label: 'Save',
-        onClick: function(){
-          saveGanttOnServer();
         }
-      }, 'view_tasks_gannt_save_button')
-      save_gantt_button.startup();
-      {% endif %}
+        
+        loadGanttFromServer();
+        
+        
+        function saveGanttOnServer() {
+        
+          //this is a simulation: save data to the local storage or to the textarea
+{#          saveInLocalStorage();#}
+          
+          
+          var prj = ge.saveProject();
+          
+          delete prj.resources;
+          delete prj.roles;
+          
+          if (ge.deletedTaskIds.length>0) {
+            if (!confirm("TASK_THAT_WILL_BE_REMOVED\n"+ge.deletedTaskIds.length)) {
+              return;
+            }
+          }
+          
+          var deffered = xhr.post(
+            '/edit/tasks',
+            {
+              method: 'POST',
+              data: {CM:'save_tasks', prj: JSON.stringify(prj)}
+            }
+          );
+          
+          deffered.then(function(){
+            // load the project from server again
+            loadGanttFromServer();
+          }, function(err){
+            alert(err);
+          });
+          
+        }
+        
+        function clearGantt() {
+          ge.reset();
+        }
+        
+        function loadI18n() {
+          GanttMaster.messages = {
+            "CHANGE_OUT_OF_SCOPE":"NO_RIGHTS_FOR_UPDATE_PARENTS_OUT_OF_EDITOR_SCOPE",
+            "START_IS_MILESTONE":"START_IS_MILESTONE",
+            "END_IS_MILESTONE":"END_IS_MILESTONE",
+            "TASK_HAS_CONSTRAINTS":"TASK_HAS_CONSTRAINTS",
+            "GANTT_ERROR_DEPENDS_ON_OPEN_TASK":"GANTT_ERROR_DEPENDS_ON_OPEN_TASK",
+            "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK":"GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK",
+            "TASK_HAS_EXTERNAL_DEPS":"TASK_HAS_EXTERNAL_DEPS",
+            "GANTT_ERROR_LOADING_DATA_TASK_REMOVED":"GANTT_ERROR_LOADING_DATA_TASK_REMOVED",
+            "ERROR_SETTING_DATES":"ERROR_SETTING_DATES",
+            "CIRCULAR_REFERENCE":"CIRCULAR_REFERENCE",
+            "CANNOT_DEPENDS_ON_ANCESTORS":"CANNOT_DEPENDS_ON_ANCESTORS",
+            "CANNOT_DEPENDS_ON_DESCENDANTS":"CANNOT_DEPENDS_ON_DESCENDANTS",
+            "INVALID_DATE_FORMAT":"INVALID_DATE_FORMAT",
+            "TASK_MOVE_INCONSISTENT_LEVEL":"TASK_MOVE_INCONSISTENT_LEVEL",
+        
+            "GANTT_QUARTER_SHORT":"trim.",
+            "GANTT_SEMESTER_SHORT":"sem."
+          };
+        }
+        
+        
+        //-------------------------------------------  Open a black popup for managing resources. This is only an axample of implementation (usually resources come from server) ------------------------------------------------------
+        function openResourceEditor() {
+          var editor = $("<div>");
+          editor.append("<h2>Resource editor</h2>");
+          editor.addClass("resEdit");
+        
+          for (var i in ge.resources) {
+            var res = ge.resources[i];
+            var inp = $("<input type='text'>").attr("pos", i).addClass("resLine").val(res.name);
+            editor.append(inp).append("<br>");
+          }
+        
+          var sv = $("<div>save</div>").css("float", "right").addClass("button").click(function() {
+            $(this).closest(".resEdit").find("input").each(function() {
+              var el = $(this);
+              var pos = el.attr("pos");
+              ge.resources[pos].name = el.val();
+            });
+            ge.editor.redraw();
+            closeBlackPopup();
+          });
+          editor.append(sv);
+        
+          var ndo = createBlackPage(800, 500).append(editor);
+        }
+        
+        //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
+        function getFile() {
+          $("#gimBaPrj").val(JSON.stringify(ge.saveProject()));
+          $("#gimmeBack").submit();
+          $("#gimBaPrj").val("");
+        }
+        
+{#        {% if entity.entity_type != 'User' %}#}
+{#          var add_asset_button = dialogCaller({#}
+{#            label: 'Add Asset',#}
+{#            dialog_id: 'add_asset_dialog',#}
+{#            content_creator: create_add_asset_dialog,#}
+{#            attach_to: 'view_tasks_add_asset_button',#}
+{#            related_field_updater: loadGanttFromServer, #}
+{#            data_id: '{{ entity.id }}'#}
+{#          });#}
+{#          add_asset_button.startup();#}
+{#          #}
+{#          var add_sequence_button = dialogCaller({#}
+{#            label: 'Add Sequence',#}
+{#            dialog_id: 'add_sequence_dialog',#}
+{#            content_creator: create_add_sequence_dialog,#}
+{#            attach_to: 'view_tasks_add_sequence_button',#}
+{#            related_field_updater: loadGanttFromServer, #}
+{#            data_id: '{{ entity.id }}'#}
+{#          });#}
+{#          add_sequence_button.startup();#}
+{# #}
+{#          var add_shot_button = dialogCaller({#}
+{#            label: 'Add Shot',#}
+{#            dialog_id: 'add_shot_dialog',#}
+{#            content_creator: create_add_shot_dialog,#}
+{#            attach_to: 'view_tasks_add_shot_button',#}
+{#            related_field_updater: loadGanttFromServer, #}
+{#            data_id: '{{ entity.id }}'#}
+{#          });#}
+{#          add_shot_button.startup();#}
+{#          #}
+{#          var add_task_button = dialogCaller({#}
+{#            label: 'Add Task',#}
+{#            dialog_id: 'add_task_dialog',#}
+{#            content_creator: create_add_task_dialog,#}
+{#            attach_to: 'view_tasks_add_task_button',#}
+{#            related_field_updater: loadGanttFromServer, #}
+{#            data_id: '{{ entity.id }}'#}
+{#          });#}
+{#          add_task_button.startup();#}
+          
+        // TODO: This should be disabled upon permission not according to the existence of a template variable
+        var save_gantt_button = new Button({
+          label: 'Save',
+          onClick: function(){
+            saveGanttOnServer();
+          }
+        }, 'view_tasks_gannt_save_button')
+        save_gantt_button.startup();
+{#        {% endif %}#}
+      });
   });
 </script>
 
@@ -394,3 +395,4 @@
 
   });
 </script>
+

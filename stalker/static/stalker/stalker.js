@@ -1,20 +1,21 @@
 require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
-    'dojo/store/Memory', 'dojox/widget/DialogSimple'],
-    function(registry, lang, xhr, Memory, DialogSimple){
+    'dojo/store/Memory', 'dojox/widget/DialogSimple', 'dojo/ready'],
+    function(registry, lang, xhr, Memory, DialogSimple, ready){
         
         var style = 'width: auto; height: auto; padding: 0px;';
         
         // ********************************************************************
         // PROJECT
         create_add_project_dialog = function (){
-            return new DialogSimple({
-                id: 'add_project_dialog',
-                title: 'Add Project',
-                href: '/add/project',
-                resize: true,
-                style: style,
-                executeScripts: true
-            });
+                return new DialogSimple({
+                    id: 'add_project_dialog',
+                    title: 'Add Project',
+                    href: '/add/project',
+                    resize: true,
+                    style: style,
+                    executeScripts: true
+                });
+            
         };
         
         create_edit_project_dialog = function(project_id){
