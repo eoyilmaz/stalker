@@ -170,6 +170,25 @@ def view_asset(request):
         'asset': asset
     }
 
+@view_config(
+    route_name='summarize_asset',
+    renderer='templates/asset/summarize_asset.jinja2'
+)
+def summarize_asset(request):
+    """runs when viewing an asset
+    """
+
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+    asset_id = request.matchdict['asset_id']
+    asset = Asset.query.filter_by(id=asset_id).first()
+
+    return {
+        'user': logged_in_user,
+        'asset': asset
+    }
+
 
 @view_config(
     route_name='get_assets',

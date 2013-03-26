@@ -21,8 +21,7 @@
         autoHeight: true,
         singleClickEdit: true,
         escapeHTMLInData: false,
-        rowSelector: '20px',
-        formatterScope: "myFormatters"
+        rowSelector: '20px'
     }, 'assets_data_grid');
 
       var add_asset_button = dialogCaller({
@@ -56,19 +55,6 @@
 
       });
 
-      var myFormatters = {
-
-        gotoUserDetail: function(){
-
-          console.log("gotoUserDetail");
-
-        }
-      };
-
-
-
-
-
 
       function asset_data_grid_updater(){
 
@@ -82,7 +68,6 @@
           for(var i=0;i<data.length;i++ ){
 
             var assetName = data[i]["name"];
-{#            var assetLink = '<a href=view/asset/' + data[i]["id"]+ '>' + assetName + '</a>';#}
             var assetLink = '<a class="DataGridLink" href="#" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';
 
             var userName = data[i]["user_name"];
@@ -116,7 +101,7 @@
     }
 
     function initUI() {
-      console.log('initUI');
+
       asset_data_grid.set('store', my_store );
       asset_data_grid.set('structure', structure );
 
@@ -126,26 +111,16 @@
       // get the Link Elements
       var dataGridLinks = query('.DataGridLink');
 
-      console.log(dataGridLinks);
-
-
       for (var i=0; i < dataGridLinks.length; i++){
 
         on(dataGridLinks[i], 'click', function(){
+          alert(this.getAttribute('stalker_href') + 'clicked');
           contentPane.set('href', this.getAttribute('stalker_href'));
           contentPane.reset();
         })
       }
 
-
-
-      console.log('end initUI');
     }
-
-    function gotoAssetDetail(a_id){
-
-    }
-
 
   });
 </script>

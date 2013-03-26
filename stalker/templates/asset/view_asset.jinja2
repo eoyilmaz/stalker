@@ -1,3 +1,6 @@
+<div id='asset_info'>
+  <h2>{{ asset.name }}</h2>
+</div>
 <div id='asset_related_data_tab_container'>
 </div>
 
@@ -5,21 +8,16 @@
   require(['dijit/registry', 'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
           function(registry, TabContainer, ContentPane){
 
-
+            alert('This is running 188');
             // **********************************************************************
             // Bottom Part - Complex Data View
             var asset_related_data_tab_container = new TabContainer({
               region: 'bottom'
             }, 'asset_related_data_tab_container');
 
-            var asset_name_pane = new ContentPane({
-              title: '{{ asset.name }}',
-              disabled: true
-            });
-
-            var overview_content_pane = new ContentPane({
-              title: 'Overview',
-              href: 'overview_asset/{{ asset.id }}',
+            var asset_summary_content_pane = new ContentPane({
+              title: 'Summary',
+              href: 'summarize/asset/{{ asset.id }}',
               selected: true
             });
 
@@ -43,13 +41,13 @@
               href: 'view/versions/{{ asset.id }}'
             });
 
-            asset_related_data_tab_container.addChild(asset_name_pane);
-            asset_related_data_tab_container.addChild(overview_content_pane);
+            asset_related_data_tab_container.addChild(asset_summary_content_pane);
             asset_related_data_tab_container.addChild(asset_users_content_pane);
             asset_related_data_tab_container.addChild(asset_tasks_content_pane);
             asset_related_data_tab_container.addChild(asset_tickets_content_pane);
             asset_related_data_tab_container.addChild(asset_versions_content_pane);
             asset_related_data_tab_container.startup();
+
 
           });
 </script>
