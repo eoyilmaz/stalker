@@ -42,7 +42,9 @@ def add_shot(request):
                 
                 sequence_id = request.params['sequence_id']
                 sequence = Sequence.query.filter_by(id=sequence_id).first()
-                
+
+                project_id = request.matchdict['project_id']
+                project = Project.query.filter_by(id=project_id).first()
                 # get the status_list
                 status_list = StatusList.query.filter_by(
                     id=request.params["status_list_id"]
@@ -65,7 +67,8 @@ def add_shot(request):
                         sequence=sequence,
                         status_list=status_list,
                         status=status,
-                        created_by=logged_in_user
+                        created_by=logged_in_user,
+                        project=project
                     )
                     
                     DBSession.add(new_shot)
@@ -121,7 +124,5 @@ def get_shots(request):
             'status': shot.status.name,
             'user_name': shot.created_by.name
         }
-        for shot in Shot.query\
-            .filter_by(project=project)
-            .all()
+        for shot in Shot.query.filter_by(_project=project).all()
     ]

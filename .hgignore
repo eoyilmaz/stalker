@@ -14,6 +14,9 @@ stalker/static/dojox*/
 stalker/static/dijit*/
 stalker/static/util*/
 stalker/static/jquery*/
+stalker/static/dgrid*/
+stalker/static/put-selector/
+stalker/static/xstyle*/
 stalker/static/jQueryGantt/
 stalker/static/stalker/fonts/*
 stalker/static/stalker/images/*

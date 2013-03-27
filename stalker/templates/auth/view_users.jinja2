@@ -66,13 +66,11 @@
 
             function users_DataGrid_updater(){
 
-              alert('users_DataGrid_updater');
               var user_memory = new JsonRest({
                 target: '/get/users_byEntity/{{ entity.id }}'
               });
 
               user_memory.query().then(function(data){
-                alert('user_memory');
 
                 for(var i=0;i<data.length;i++ ){
 

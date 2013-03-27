@@ -41,8 +41,8 @@ def add_sequence(request):
                'project_id' in request.params and \
                'status_list_id' in request.params and \
                'status_id' in request.params:
-                
-                project_id = request.params['project_id']
+
+                project_id = request.matchdict['project_id']
                 project = Project.query.filter_by(id=project_id).first()
                 
                 # get the status_list

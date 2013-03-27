@@ -9,7 +9,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         create_add_project_dialog = function (){
                 return new DialogSimple({
                     id: 'add_project_dialog',
-                    title: 'Add Project',
+                    title: 'New Project',
                     href: '/add/project',
                     resize: true,
                     style: style,
@@ -34,7 +34,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         create_add_image_format_dialog = function(){
             return new DialogSimple({
                 id: 'add_image_format_dialog',
-                title: 'Add Image Format',
+                title: 'New Image Format',
                 href: '/add/image_format',
                 resize: true,
                 style: style,
@@ -58,7 +58,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         create_add_structure_dialog = function(){
             return new DialogSimple({
                 id: 'add_structure_dialog',
-                title: 'Add Structure',
+                title: 'New Structure',
                 href: '/add/structure',
                 resize: true,
                 style: style,
@@ -79,11 +79,12 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // USER
-        create_add_user_dialog = function(){
+        create_add_user_dialog = function(department_id){
+            department_id = department_id || -1;
             return new DialogSimple({
                 id: 'add_user_dialog',
-                title: 'Add User',
-                href: '/add/user',
+                title: 'New User',
+                href: '/add/user/' + department_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -106,7 +107,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         create_add_filename_template_dialog = function(){
             return new DialogSimple({
                 id: 'add_filename_template_dialog',
-                title: 'Add Filename Template',
+                title: 'New Filename Template',
                 href: '/add/filename_template',
                 resize: true,
                 style: style,
@@ -130,7 +131,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         create_add_repository_dialog = function(){
             return new DialogSimple({
                 id: 'add_repository_dialog',
-                title: 'Add Repository',
+                title: 'New Repository',
                 href: '/add/repository',
                 resize: true,
                 style: style,
@@ -160,7 +161,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             }
             return new DialogSimple({
                 id: 'add_status_list_dialog',
-                title: 'Add Status List',
+                title: 'New Status List',
                 href: href,
                 resize: true,
                 style: style,
@@ -184,7 +185,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         create_add_status_dialog = function(){
             return new DialogSimple({
                 id: 'add_status_dialog',
-                title: 'Add Status',
+                title: 'New Status',
                 href: '/add/status',
                 resize: true,
                 style: style,
@@ -209,7 +210,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             project_id = project_id || -1;
             return new DialogSimple({
                 id: 'add_asset_dialog',
-                title: 'Add Asset',
+                title: 'New Asset',
                 href: '/add/asset/' + project_id,
                 resize: true,
                 style: style,
@@ -223,7 +224,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             project_id = project_id || -1;
             return new DialogSimple({
                 id: 'add_shot_dialog',
-                title: 'Add Shot',
+                title: 'New Shot',
                 href: '/add/shot/' + project_id,
                 resize: true,
                 style: style,
@@ -248,7 +249,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             project_id = project_id || -1;
             return new DialogSimple({
                 id: 'add_sequence_dialog',
-                title: 'Add Sequence',
+                title: 'New Sequence',
                 href: '/add/sequence/' + project_id,
                 resize: true,
                 style: style,
@@ -272,7 +273,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         create_add_task_dialog = function(taskable_entity_id){
             return new DialogSimple({
                 id: 'add_task_dialog',
-                title: 'Add Task',
+                title: 'New Task',
                 href: '/add/task/' + taskable_entity_id,
                 resize: true,
                 style: style,
@@ -296,7 +297,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         create_add_department_dialog = function(){
             return new DialogSimple({
                 id: 'add_department_dialog',
-                title: 'Add Department',
+                title: 'New Department',
                 href: '/add/department',
                 resize: true,
                 style: style,
@@ -320,7 +321,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         create_add_group_dialog = function(){
             return new DialogSimple({
                 id: 'add_group_dialog',
-                title: 'Add Group',
+                title: 'New Group',
                 href: '/add/group',
                 resize: true,
                 style: style,

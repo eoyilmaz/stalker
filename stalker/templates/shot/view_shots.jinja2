@@ -1,4 +1,4 @@
-<button id='view_shots_add_shot_button'>Add Shot</button>
+<button id='view_shots_add_shot_button'>New Shot</button>
 <div id='shots_data_grid'></div>
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
@@ -19,7 +19,7 @@
         structure: [
           {name: 'Thumbnail',                         width: '100px'},
           {name: 'Name',        field: 'name',        width: '100px'},
-          {name: 'Sequence',    field: 'sequence',    width: '200px'},
+{#          {name: 'Sequences',    field: 'sequences',    width: '200px'},#}
           {name: 'Status',      field: 'status',      width: '150px'},
           {name: 'Created By',  field: 'user_name',   width: '150px'}
         ],
@@ -35,14 +35,16 @@
       });
       
       var add_shot_button = dialogCaller({
-        label: 'Add',
+        label: 'New Shot',
         dialog_id: 'add_shot_dialog',
         content_creator: create_add_shot_dialog,
         attach_to: 'view_shots_add_shot_button',
         related_field_updater: shot_data_grid_updater,
         data_id: '{{ project.id }}'
       });
-      add_shot_button.startup();        
+      add_shot_button.startup();
+
+      shot_data_grid_updater();
       
   });
 </script>
