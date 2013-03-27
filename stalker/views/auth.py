@@ -39,18 +39,25 @@ def add_user(request):
                'login' in request.params and \
                'email' in request.params and \
                'password' in request.params:
-                
-                # Departments
+
+                department_id = request.matchdict['department_id']
                 departments = []
-                if 'department_ids' in request.params:
-                    dep_ids = [
-                        int(dep_id)
-                        for dep_id in request.POST.getall('department_ids')
-                    ]
-                    departments = Department.query.filter(
-                                    Department.id.in_(dep_ids)).all()
-                
-                # Groups
+
+                if department_id == '-1':
+                # Departments
+                    if 'department_ids' in request.params:
+                        dep_ids = [
+                            int(dep_id)
+                            for dep_id in request.POST.getall('department_ids')
+                        ]
+                        departments = Department.query.filter(
+                                        Department.id.in_(dep_ids)).all()
+                else:
+                    department = Department.query.filter_by(id=department_id).first()
+                    departments = [department]
+
+
+            # Groups
                 groups = []
                 if 'group_ids' in request.params:
                     grp_ids = [
@@ -110,9 +117,13 @@ def add_user(request):
         logger.debug('submitted is not among parameters')
         for key in request.params.keys():
             logger.debug('request.params[%s]: %s' % (key, request.params[key]))
-    
+
+
+    department = Department.query.filter_by(id=request.matchdict['department_id']).first()
+
     return {
         'user': logged_user,
+        'department': department
     }
 
 

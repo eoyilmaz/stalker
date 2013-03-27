@@ -105,7 +105,7 @@ def main(global_config, **settings):
     
     # ************************************************************************* 
     # User
-    config.add_route('add_user', 'add/user')
+    config.add_route('add_user', 'add/user/{department_id}')
     config.add_route('edit_user', 'edit/user/{user_id}')
     config.add_route('view_user', 'view/user/{user_id}')
     config.add_route('view_users', 'view/users/{entity_id}')

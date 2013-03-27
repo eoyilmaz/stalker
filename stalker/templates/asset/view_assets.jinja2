@@ -1,45 +1,51 @@
 <div id='view_assets'>
-  <button id='view_assets_add_asset_button'>Add Asset</button>
+  <button id='view_assets_add_asset_button'>New Asset</button>
   <div id='assets_data_grid'></div>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry',
-    'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dojo/store/Memory',
-    'dijit/form/FilteringSelect', 'dojo/store/JsonRest',
-    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/on', 'dojo/query',
-    'dojo/domReady!'],
-    function(registry, ObjectStore, DataGrid, Memory, FilteringSelect,
-             JsonRest, fieldUpdater, dialogCaller, on, query){
+  require(["dgrid/List", "dgrid/Grid", 'dojo/store/Memory',"dgrid/Selection",
+    "dgrid/Keyboard", "dgrid/editor", "dijit/form/CheckBox",
+    "dijit/form/TimeTextBox",  "dijit/form/Select","dojo/data/ObjectStore",
+    "dijit/form/FilteringSelect", 'dojo/store/JsonRest',
+    "dojo/query","dgrid/test/data/base", "dojo/domReady!"],
+    function(List, Grid, Memory, Selection, Keyboard, editor, CheckBox, TimeTextBox,
+             Select, ObjectStore, FilteringSelect, JsonRest, query){
       
 
       var my_store;
       var structure;
 
-      var asset_data_grid = new DataGrid({
+
+
+{#      var add_asset_button = dialogCaller({#}
+{#        label: 'New Asset',#}
+{#        dialog_id: 'add_asset_dialog',#}
+{#        content_creator: create_add_asset_dialog,#}
+{#        attach_to: 'view_assets_add_asset_button',#}
+{#        related_field_updater: asset_data_grid_updater,#}
+{#        data_id: '{{ project.id }}'#}
+{#      });#}
+{##}
+{##}
+{#      add_asset_button.startup();#}
+
+      var columns;
+
+      var asset_data_grid = new Grid({
         id: 'assets_data_grid',
         width: '100%',
         autoHeight: true,
         singleClickEdit: true,
         escapeHTMLInData: false,
-        rowSelector: '20px'
-    }, 'assets_data_grid');
+        rowSelector: '20px',
+        selectionMode: "none"
+      }, 'assets_data_grid');
 
-      var add_asset_button = dialogCaller({
-        label: 'Add',
-        dialog_id: 'add_asset_dialog',
-        content_creator: create_add_asset_dialog,
-        attach_to: 'view_assets_add_asset_button',
-        related_field_updater: asset_data_grid_updater,
-        data_id: '{{ project.id }}'
-      });
 
-      asset_data_grid.startup();
-      add_asset_button.startup();
-
-      //asset_data_grid_updater();
 
       var status_memory;
+      var status_store;
       var status_list_memory = new JsonRest({
         target: 'get/status_lists_for/Asset'
       });
@@ -52,12 +58,14 @@
           target: 'get/statuses_of/'+ status_id
         });
 
+        status_store =  new ObjectStore({ objectStore:status_memory });
+
         asset_data_grid_updater();
 
       });
 
-
       function asset_data_grid_updater(){
+
 
         var asset_memory = new JsonRest({
           target: '/get/assets/{{ project.id }}'
@@ -66,61 +74,78 @@
         asset_memory.query().then(function(data){
 
 
-          for(var i=0;i<data.length;i++ ){
-
-            var assetName = data[i]["name"];
-            var assetLink = '<a class="DataGridLink" href="#" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';
-
-            var userName = data[i]["user_name"];
-            var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
-
-            data[i]["asset_link"] = assetLink;
-            data[i]["user_link"] = userLink;
-
-          }
+{#          for(var i=0;i<data.length;i++ ){#}
+{##}
+{#            var assetName = data[i]["name"];#}
+{#            var assetLink = '<a class="DataGridLink" href="#" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';#}
+{##}
+{#            var userName = data[i]["user_name"];#}
+{#            var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';#}
+{##}
+{#            data[i]["asset_link"] = assetLink;#}
+{#            data[i]["user_link"] = userLink;#}
+{##}
+{#          }#}
 
 
           my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
 
-          structure = [
-            {name: 'Thumbnail',                         width: '100px'},
-            {name: 'Name',        field: 'asset_link',  width: '100px'},
-            {name: 'Type',        field: 'type',        width: '200px'},
-            {name: 'Status',      field: 'status',      width: '150px', editable: true, type: dojox.grid.cells._Widget,
-              widgetClass: FilteringSelect,
-              widgetProps: {
-                store: status_memory
-              }},
-            {name: 'Created By',  field: 'user_link',     width: '150px'},
-            {name: 'Description', field: 'description', width: 'auto'}
+          columns = [
+            {field: "id", label: "id"},
+            editor({
+              label: "Select Store",
+              field: "status",
+              editorArgs: {
+                store: status_store,
+                maxHeight: 150,
+                style: "width:120px;"
+              }
+            }, Select, "click"),
+            editor({
+              label: "FilteringSelect Store",
+              field: "type",
+              editorArgs: {
+                store: status_store,
+                maxHeight: 150,
+                value: '',
+                style: "width:120px;"
+              }
+            }, FilteringSelect)
+            // Note that mileage may vary with editOn + widgets with multiple focusable children, e.g. dijit/Editor
           ];
 
-          initUI();
+          asset_data_grid.renderArray(data);
 
-      });
+          asset_data_grid.set('columns', columns );
 
-    }
+        });
 
-    function initUI() {
-
-      asset_data_grid.set('store', my_store );
-      asset_data_grid.set('structure', structure );
-
-      // connect links
-      var contentPane = registry.byId('central_content');
-
-      // get the Link Elements
-      var dataGridLinks = query('.DataGridLink');
-
-      for (var i=0; i < dataGridLinks.length; i++){
-
-        on(dataGridLinks[i], 'click', function(){
-          contentPane.set('href', this.getAttribute('stalker_href'));
-          contentPane.reset();
-        })
       }
 
-    }
+      function initUI() {
+        alert('initUI');
+
+
+{#        // connect links#}
+{#        var contentPane = registry.byId('central_content');#}
+{##}
+{#        // get the Link Elements#}
+{#        var dataGridLinks = query('.DataGridLink');#}
+{##}
+{#        for (var i=0; i < dataGridLinks.length; i++){#}
+{##}
+{#          on(dataGridLinks[i], 'click', function(){#}
+{#            contentPane.set('href', this.getAttribute('stalker_href'));#}
+{#            contentPane.reset();#}
+{#          })#}
+{#        }#}
+
+      }
+
+
+
+
+
 
   });
 </script>
