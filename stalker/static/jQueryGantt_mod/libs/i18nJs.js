@@ -104,7 +104,7 @@
 
   function isHoliday(date) {
     var friIsHoly =false;
-    var satIsHoly =true;
+    var satIsHoly =false;
     var sunIsHoly =true;
 
     pad = function (val) {

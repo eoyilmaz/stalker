@@ -55,7 +55,7 @@ def convert_to_jquery_gantt_task_format(tasks):
         'tasks' : [
             {
                 'id': task.id,
-                'name': '%s' % task.name,
+                'name': '%s (%s)' % (task.name, task.entity_type),
                 'code': task.id,
                 'level': task.level,
                 'status': 'STATUS_ACTIVE',
@@ -152,13 +152,58 @@ def update_with_jquery_gantt_task_data(json_data):
 def edit_tasks(request):
     """edits the given tasks with the given JSON data
     """
-    
     # get the data
     data = request.params['prj']
     if data:
         update_with_jquery_gantt_task_data(data)
-    
     return {}
+
+
+@view_config(
+    route_name='edit_task',
+    renderer='templates/task/edit_task.jinja2'
+)
+def edit_task(request):
+    """runs when editing a task
+    """
+    # get logged in user
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+    
+    task_id = request.matchdict['task_id']
+    task = Task.query.filter(Task.id==task_id).first()
+    
+    logger.debug('code came here 1')
+    if 'submitted' in request.params:
+        logger.debug('code came here 2')
+        logger.debug(request.params['submitted'])
+        if request.params['submitted'] == 'edit':
+            pass
+    
+    return {
+        'task': task
+    }
+
+def depth_first_flatten(task, task_array=None):
+    """Does a depth first flattening on the child tasks of the given taks.
+    :param task: start from this task
+    :param task_array: previous flattened task array
+    :return: list of flat tasks
+    """
+    
+    if task_array is None:
+        task_array = []
+    
+    if task:
+        if task not in task_array:
+            task_array.append(task)
+        # take a tour in children
+        for child_task in task.children:
+            task_array.append(child_task)
+            # recursive call
+            task_array = depth_first_flatten(child_task, task_array)
+    
+    return task_array
 
 
 @view_config(
@@ -167,15 +212,27 @@ def edit_tasks(request):
     permission='View_Task'
 )
 def get_tasks(request):
-    """returns all the tasks in database related to the given taskable_entity
+    """returns all the tasks in database related to the given entity
     """
     entity_id = request.matchdict.get('entity_id')
     entity = Entity.query.filter_by(id=entity_id).first()
+    
     tasks = []
     if entity:
-        tasks = entity.tasks
-    
+        if entity.entity_type == 'Project':
+            project = entity
+            # get the tasks who is a root task
+            root_tasks = Task.query\
+                .filter(Task._project==project)\
+                .filter(Task.parent==None).all()
+            
+            # do a depth first search for child tasks
+            for root_task in root_tasks:
+                logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
+                tasks = depth_first_flatten(root_task)
+         
     if log.logging_level == logging.DEBUG:
+        logger.debug('tasks count: %i' % len(tasks))
         for task in tasks:
             logger.debug('------------------------------')
             logger.debug('task name: %s' % task.name)
@@ -237,6 +294,7 @@ def view_tasks(request):
 def add_task(request):
     """runs when adding a new task
     """
+    
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
     

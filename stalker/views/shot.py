@@ -110,18 +110,18 @@ def get_shots(request):
     """returns all the Shots of the given Project
     """
     project_id = request.matchdict['project_id']
-#    project = Project.query.filter_by(id=project_id).first()
+    project = Project.query.filter_by(id=project_id).first()
     return [
         {
+            'shot': shot,
             'id': shot.id,
             'name': shot.name,
-            'sequence': shot.sequence.name,
+            'project': shot.project,
+            'sequences': shot.sequences,
             'status': shot.status.name,
             'user_name': shot.created_by.name
         }
         for shot in Shot.query\
-            .join(Sequence, Shot.sequence_id==Sequence.id)
-            .join(Project, Sequence.project_id==Project.id)
-            .filter(Project.id==project_id)
+            .filter_by(project=project)
             .all()
     ]

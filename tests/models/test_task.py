@@ -1061,7 +1061,7 @@ class TaskTester(unittest.TestCase):
         test_value = ["a", "dependent", "task", 1, 1.2]
         self.assertRaises(TypeError, setattr, self.test_task, "depends",
                           test_value)
-
+    
     #def test_depends_argument_shifts_the_start_by_traversing_dependency_list(self):
         #"""testing if the depends argument shifts the start attribute by
         #traversing the dependent tasks list and placing the current task after
@@ -1092,12 +1092,6 @@ class TaskTester(unittest.TestCase):
 
         self.assertRaises(CircularDependencyError, setattr, taskA, "depends",
             [taskB])
-        
-        #taskA.depends = [taskB]
-        #DBSession.add_all([taskA, taskB])
-        
-        #self.assertRaises(CircularDependencyError, DBSession.commit)
-        
 
     def test_depends_attribute_doesnt_allow_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
@@ -1124,7 +1118,7 @@ class TaskTester(unittest.TestCase):
 
         self.assertRaises(CircularDependencyError, setattr, taskA, "depends",
             [taskC])
-
+    
     def test_depends_attribute_doesnt_allow_more_deeper_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
         attribute has a deeper circular dependency in dependencies
@@ -1152,7 +1146,58 @@ class TaskTester(unittest.TestCase):
 
         self.assertRaises(CircularDependencyError, setattr, taskA, "depends",
             [taskD])
+    
+    def test_depends_argument_doesnt_allow_one_of_the_parents_of_the_task(self):
+        """testing if a CircularDependencyError will be raised when the depends
+        attribute has one of the parents of this task
+        """
+        # create two new tasks A, B
+        # make A parent to B
+        # and make B dependent to A
+        # and expect a CircularDependencyError
+        self.kwargs["depends"] = None
 
+        taskA = Task(**self.kwargs)
+        taskB = Task(**self.kwargs)
+        taskC = Task(**self.kwargs)
+        
+        taskB.parent = taskA
+        taskA.parent = taskC
+        
+        self.assertIn(taskB, taskA.children)
+        self.assertIn(taskA, taskC.children)
+        
+        self.assertRaises(CircularDependencyError, setattr, taskB, 'depends',
+            [taskA])
+        self.assertRaises(CircularDependencyError, setattr, taskB, 'depends',
+            [taskC])
+    
+    def test_depends_argument_is_working_properly(self):
+        """testing if the depends argument is working properly
+        """
+        self.kwargs['depends'] = None
+        taskA = Task(**self.kwargs)
+        taskB = Task(**self.kwargs)
+        self.kwargs['depends'] = [taskA, taskB]
+        taskC = Task(**self.kwargs)
+        self.assertIn(taskA, taskC.depends)
+        self.assertIn(taskB, taskC.depends)
+        self.assertEqual(len(taskC.depends), 2)
+    
+    def test_depends_attribute_is_working_properly(self):
+        """testing if the depends attribute is working properly
+        """
+        self.kwargs['depends'] = None
+        taskA = Task(**self.kwargs)
+        taskB = Task(**self.kwargs)
+        taskC = Task(**self.kwargs)
+        
+        taskA.depends = [taskB]
+        taskA.depends.append(taskC)
+        
+        self.assertIn(taskB, taskA.depends)
+        self.assertIn(taskC, taskA.depends)
+    
     def test_is_complete_attribute_is_None(self):
         """testing if the is_complete attribute will be False when set to None
         """
@@ -1445,6 +1490,33 @@ class TaskTester(unittest.TestCase):
         new_task.parent = new_task2
         self.assertEqual(new_task.parent, new_task2)
     
+    def test_parent_argument_will_not_allow_a_dependent_task_to_be_parent(self):
+        """testing if a CircularDependencyError will be raised when one of the
+        dependencies assigned also as the parent
+        """
+        self.kwargs['depends'] = None
+        taskA = Task(**self.kwargs)
+        taskB = Task(**self.kwargs)
+        taskC = Task(**self.kwargs)
+        self.kwargs['depends'] = [taskA, taskB, taskC]
+        self.kwargs['parent'] = taskA
+        self.assertRaises(CircularDependencyError, Task, **self.kwargs)
+    
+    def test_parent_attribute_will_not_allow_a_dependent_task_to_be_parent(self):
+        """testing if a CircularDependencyError will be raised when one of the
+        dependent tasks are assigned as the parent
+        """
+        self.kwargs['depends'] = None
+        taskA = Task(**self.kwargs)
+        taskB = Task(**self.kwargs)
+        taskC = Task(**self.kwargs)
+        taskD = Task(**self.kwargs)
+        
+        taskD.depends = [taskA, taskB, taskC]
+        
+        self.assertRaises(CircularDependencyError, setattr, taskD, 'parent',
+                          taskA)
+    
     def test_children_attribute_is_empty_list_by_default(self):
         """testing if the children attribute is an empty list by default
         """
@@ -1515,6 +1587,39 @@ class TaskTester(unittest.TestCase):
         self.assertTrue(task2.is_leaf)
         self.assertTrue(task3.is_leaf)
         self.assertFalse(task1.is_leaf)
+    
+
+    def test_is_root_attribute_is_read_only(self):
+        """testing if the is_root attribute is a read only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task, 'is_root',
+                          True)
+    
+    def test_is_root_attribute_is_working_properly(self):
+        """testing if the is_root attribute is True for a Task without a parent
+        Task and False for Task with a parent Task
+        """
+        self.kwargs['parent'] = self.test_task
+        self.kwargs['name'] = 'Task 1'
+        task1 = Task(**self.kwargs)
+        
+        self.kwargs['name'] = 'Task 2'
+        task2 = Task(**self.kwargs)
+         
+        self.kwargs['name'] = 'Task 3'
+        task3 = Task(**self.kwargs)
+        
+        task2.parent = task1
+        task3.parent = task1
+        
+        # we need to commit the Session
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
+        
+        self.assertFalse(task2.is_root)
+        self.assertFalse(task3.is_root)
+        self.assertFalse(task1.is_root)
+        self.assertTrue(self.test_task)
     
     def test_is_container_attribute_is_read_only(self):
         """testing if the is_container attribute is a read only attribute

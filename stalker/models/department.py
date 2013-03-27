@@ -5,7 +5,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import relationship, validates, synonym
 from stalker.models.auth import User
 from stalker.models.entity import Entity
 
@@ -13,6 +13,7 @@ from stalker.log import logging_level
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
 
 class Department(Entity):
     """The departments that forms the studio itself.
@@ -69,6 +70,8 @@ class Department(Entity):
         back_populates="departments",
         doc="""List of users representing the members of this department.""",
     )
+    
+    users = synonym('members')
 
     def __init__(self, members=None, lead=None, **kwargs):
         super(Department, self).__init__(**kwargs)

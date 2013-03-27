@@ -168,7 +168,14 @@ class DepartmentTester(unittest.TestCase):
         """
         self.assertRaises(TypeError, setattr, self.test_department, "members",
                           None)
-
+    
+    def test_users_attribute_is_a_synonym_for_members(self):
+        """testing if the users attribute is actually a synonym for the members
+        attribute
+        """
+        self.assertEqual(self.test_department.members,
+                         self.test_department.users)
+    
     def test_lead_argument_accepts_only_user_objects(self):
         """testing if lead argument accepts only user objects
         """

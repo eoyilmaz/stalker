@@ -10,6 +10,18 @@ Stalker Changes
 * Fixed Projects menu in base.jinja2, the link is now updating correctly when a
   new project is added.
 
+* Added a new method called ``is_root`` to Task class. It is true for tasks
+  where there are no parents.
+
+* Added a new attribute called ``users`` to the Department class which is a
+  synonym for the ``members`` attribute.
+
+* Task class is now preventing one of the dependents to be set as the parent of
+  a task.
+
+* Task class is now preventing one of the parents to be set as the one of the
+  dependents of a task.
+
 0.2.0.a7
 --------
 

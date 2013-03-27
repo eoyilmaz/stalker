@@ -101,7 +101,7 @@
 
 
   <div class="__template__" type="TASK_EDITOR"><!--
-  <div class="ganttTaskEditor">
+  <div id='stalkerGanttTaskEditor' class="ganttTaskEditor">
   <table width="100%">
     <tr>
       <td>
@@ -177,21 +177,19 @@
   require(['dijit/registry',
            'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dijit/form/Button',
            'stalker/dialogCaller', 'dojo/store/JsonRest', 'dojo/request/xhr',
-           'dojo/_base/lang', 'dojo/query', 'dojo/Deferred', 'dojo/ready'],
+           'dojo/_base/lang', 'dojo/query', 'dojo/Deferred', 'dijit/Menu',
+           'dijit/MenuItem', 'dijit/MenuSeparator', 'dojo/ready'],
     function(registry, ObjectStore, DataGrid, Button, dialogCaller, JsonRest,
-             xhr, lang, query, Deferred, ready){
+             xhr, lang, query, Deferred, Menu, MenuItem, MenuSeparator, ready){
       
       ready(function(){
         $('#gantttemplates').loadTemplates();
         var ge = new GanttMaster();
         ge.init($("#workSpace"));
         
-        var target;
-          target = '/get/tasks/{{ entity.id }}';
-        
         // The Memory
         var tasks_memory = new JsonRest({
-          target: target
+          target: '/get/tasks/{{ entity.id }}'
         });
         
         function loadGanttFromServer() {
@@ -201,10 +199,84 @@
             var promise = ge.loadProject(data, Deferred);
             promise.then(function(){
               // now add the context menu to tasks
-              var tasks = query('.taskBox');
+              var task_box_nodes = query('.taskBox');
               
               // TODO: add context menu here
+              // Standart menu items
+              //
+              // View Summary
+              // ============
+              // Edit
+              // Add Child
+              // Add Booking
+              // ============
+              // Delete
+              // 
               
+              var menu = new Menu({
+                targetNodeIds: ['workSpace'],
+                selector: '.taskBox'
+              });
+              
+              menu.addChild(
+                new MenuItem({
+                  label: 'View Task Summary',
+                  onClick: function(){
+                    var node = this.getParent().currentTarget;
+                    // get task id
+                    var task_id = node.getAttribute('taskid');
+                    alert('task id: ' + task_id);
+                  }
+                })
+              );
+              
+              menu.addChild(new MenuSeparator());
+              
+              menu.addChild(
+                new MenuItem({
+                  label: 'Edit Task',
+                  onClick: function(){
+                    var node = this.getParent().currentTarget;
+                    // get task id
+                    var task_id = node.getAttribute('taskId');
+                    // create and call edit_task dialog
+                    var dialog = dijit.byId('edit_task_dialog');
+                    if (dialog == null){
+                      dialog = create_edit_task_dialog(task_id);
+                    }
+                    
+                    dialog.set(
+                      'related_field_updater',
+                      loadGanttFromServer
+                    );
+                    dialog.show();
+                    
+                  }
+                })
+              );
+              
+              menu.addChild(
+                new MenuItem({
+                  label: 'Add Child Task'
+                })
+              );
+              
+              menu.addChild(
+                new MenuItem({
+                  label: 'Add Booking'
+                })
+              );
+              
+              menu.addChild(new MenuSeparator());
+              
+              menu.addChild(
+                new MenuItem({
+                  label: 'Delete Task'
+                })
+              );
+              
+              menu.startup();
+             
             });
           });
         }

@@ -502,6 +502,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         # check for the circular dependency
         _check_circular_dependency(depends, self, 'depends')
+        _check_circular_dependency(depends, self, 'children')
         
         return depends
 
@@ -598,6 +599,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             
             # check for cycle
             _check_circular_dependency(self, parent, 'children')
+            _check_circular_dependency(self, parent, 'depends')
         
         return parent
     
@@ -624,8 +626,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                     raise TypeError('%s.project should be an instance of '
                                 'stalker.models.project.Project, not %s. Or '
                                 'please supply a stalker.models.task.Task '
-                                'in the parent, so Stalker can use the '
-                                'project of the supplied parent task' %
+                                'with the parent argument, so Stalker can use '
+                                'the project of the supplied parent task' %
                                     (self.__class__.__name__,
                                      project.__class__.__name__))
         
@@ -860,6 +862,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     )
     
     @property
+    def is_root(self):
+        """Returns True if the Task has no parent
+        """
+        return not bool(self.parent)
+    
+    @property
     def is_container(self):
         """Returns True if the Task has children Tasks
         """
@@ -870,7 +878,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """Returns True if the Task has no children Tasks
         """
         return not bool(len(self.children))
-    
     
     @property
     def level(self):
