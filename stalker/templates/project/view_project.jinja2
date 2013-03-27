@@ -1,28 +1,37 @@
-<div id='project_related_data_tab_container'>
+<div id='project_split_container'>
+  <div id='project_summary'>
+      {# Summary View #}
+  </div>
+  <div id='project_related_data_tab_container'>
     {# Tab View #}
+  </div>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
-    function(registry, TabContainer, ContentPane){
-      
+  require(['dijit/registry', 'dijit/layout/SplitContainer',
+    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+    function(registry, SplitContainer, TabContainer, ContentPane){
+
+      var project_SplitContainer = new SplitContainer({
+        region: 'center',
+        orientation: 'vertical',
+        splitter: false
+
+      }, 'project_split_container');
+
+      var summary_content_pane = new ContentPane({
+        title: 'Summarize',
+        href: 'summarize/project/{{ project.id }}',
+        region: 'top'
+      },'project_summary');
+
+
       // **********************************************************************
       // Bottom Part - Complex Data View
       var project_related_data_tab_container = new TabContainer({
         region: 'bottom'
       }, 'project_related_data_tab_container');
-      
-      var name_pane = new ContentPane({
-        title: '{{ project.name }}',
-        disabled: true
-      });
-      
-      var overview_content_pane = new ContentPane({
-        title: 'Summarize',
-        href: 'summarize/project/{{ project.id }}',
-        selected: true
-      });
-      
+
       var users_content_pane = new ContentPane({
         title: 'Users',
         href: 'view/users/{{ project.id }}'
@@ -47,17 +56,19 @@
         title: 'Tickets',
         content: 'view/tickets/{{ project.id }}'
       });
-      
-      project_related_data_tab_container.addChild(name_pane);
-      project_related_data_tab_container.addChild(overview_content_pane);
+
+
+
       project_related_data_tab_container.addChild(users_content_pane);
       project_related_data_tab_container.addChild(tasks_content_pane);
       project_related_data_tab_container.addChild(assets_content_pane);
       project_related_data_tab_container.addChild(shots_content_pane);
       project_related_data_tab_container.addChild(tickets_content_pane);
-      
       project_related_data_tab_container.startup();
 
+      project_SplitContainer.addChild(summary_content_pane);
+      project_SplitContainer.addChild(project_related_data_tab_container);
+      project_SplitContainer.startup();
 {#      project_related_data_tab_container.watch("selectedChildWidget", function(name, oval, nval){#}
 {#        console.log("selected child changed from ", nval.title, " to ", nval.href);#}
 {##}

@@ -244,11 +244,12 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // SEQUENCE
-        create_add_sequence_dialog = function(){
+        create_add_sequence_dialog = function(project_id){
+            project_id = project_id || -1;
             return new DialogSimple({
                 id: 'add_sequence_dialog',
                 title: 'Add Sequence',
-                href: '/add/sequence',
+                href: '/add/sequence/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true

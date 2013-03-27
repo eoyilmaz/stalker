@@ -62,23 +62,16 @@
   <div id='appLayout' class='demoLayout'>
     <div id='header' class='edgePanel' style="overflow: hidden">
     {% block header %}
-      <div id='stalker_logo'>
-        <a href="/">
-          STALKER <span style='font-size: 12px;'>v{{stalker.__version__}}</span>
-        </a>
+      <div id='stalker_logo' style='font-size: 20px; color: #000000'>
+        <a href="/"  style='color: #000000'>STALKER________</a>
       </div>
-      
-      <div id='projects_menu' style='color: #000000'>
-        Projects
+
+      <div id='stalkerMenuBar' style='color: #000000'>
       </div>
-      
       <div id='mebar'>
         <div style='color: #000000' id='mebutton'></div>
       </div>
-      
-      <div id='create_menu' style='color: #000000'>
-        +
-      </div>
+
     {% endblock %}
     </div>
     <div id='central_content' class='centralPanel'>
@@ -91,22 +84,22 @@
 
     <div id='footer' class='edgePanel'>
     {% block footer %}
-      <div class='footer'>&copy; Copyright 2008-2013, Erkan Ozgur Yilmaz.</div>
+      <div class='footer'>&copy; Copyright 2008-2013, Erkan Ozgur Yilmaz.  <span style='font-size: 12px;'>v{{stalker.__version__}}</span></div>
     {% endblock %}
     </div>
   </div>
 
   <script type='text/javascript'>
     require(['dojo/dom', 'dijit/registry', 'dijit/layout/BorderContainer',
-      'dijit/layout/TabContainer', 'dijit/layout/SplitContainer',
-      'dojox/layout/ContentPane', 'dijit/TooltipDialog', 'dijit/popup',
-      'dojo/on', 'dijit/form/DropDownButton', 'dijit/DropDownMenu',
-      'dijit/MenuItem', 'stalker/dialogCaller', 'dojo/store/JsonRest',
-      'dojo/store/Memory', 'dojo/_base/fx', 'dojo/ready'],
-      function(dom, registry, BorderContainer, TabContainer,
-               SplitContainer, ContentPane, TooltipDialog, popup, on,
-               DropDownButton, DropDownMenu, MenuItem, dialogCaller, JsonRest,
-               Memory, fx, ready){
+      'dojox/layout/ContentPane', "dijit/MenuBar", "dijit/MenuBarItem", "dijit/MenuSeparator",
+      "dijit/PopupMenuBarItem", "dijit/PopupMenuItem", "dijit/Menu", "dijit/MenuItem", "dijit/DropDownMenu",
+      'dijit/TooltipDialog','dijit/popup', 'dojo/on', 'dijit/form/DropDownButton',
+      'stalker/dialogCaller', 'dojo/store/JsonRest', 'dojo/store/Memory',
+      'dojo/_base/fx', 'dojo/ready'],
+      function(dom, registry, BorderContainer, ContentPane, MenuBar, MenuBarItem, MenuSeparator,
+               PopupMenuBarItem, PopupMenuItem, Menu, MenuItem, DropDownMenu, TooltipDialog,
+               popup, on, DropDownButton, dialogCaller,
+               JsonRest, Memory, fx, ready){
         
         ready(function(){
           // ******************************************************************
@@ -128,8 +121,7 @@
             executeScripts: true
           }, 'header');
           appLayout.addChild(header_pane);
-          
-          
+
           // ******************************************************************
           // Main Content
           var central_content_pane = new ContentPane({
@@ -140,8 +132,8 @@
             executeScripts: true
           }, 'central_content');
           appLayout.addChild(central_content_pane);
-          
-          
+
+
           // ******************************************************************
           // Footer
           var footer_content_pane = new ContentPane({
@@ -151,288 +143,447 @@
           }, 'footer');
           footer_content_pane.startup();
           appLayout.addChild(footer_content_pane);
-          
-          
+
+
           // ******************************************************************
-          // Projects Menu
-          // DropDownMenu
-          var projects_menu_dropDownMenu = new DropDownMenu({
-            id: 'projects_menu_dropDownMenu',
+          // MenuBar
+          var stalker_MenuBar = new MenuBar({
+
+          },'stalkerMenuBar');
+
+          // ******************************************************************
+          // HOME
+
+          stalker_MenuBar.addChild(new MenuBarItem({
+            label:"HOME ",
+            onClick:function(){
+              appLayout.refresh();
+            }
+          }));
+          // ******************************************************************
+          // STUDIO
+
+          var studio_DropDownMenu = new DropDownMenu({
+
+          });
+
+          studio_DropDownMenu.addChild(new MenuItem({
+            label: "Overview Projects"
+          }));
+
+          studio_DropDownMenu.addChild(new MenuItem({
+            label: "Overview Crew"
+          }));
+
+          studio_DropDownMenu.addChild(
+                  new MenuSeparator({})
+          );
+
+          //------------
+          // SETTINGS
+          var settings_DropDownMenu = new DropDownMenu({
             style: 'display: none;'
           });
-          
+
+          // ------------
+          // Filename Template
+          settings_DropDownMenu.addChild(
+                  dialogCaller({
+                    label:'Filename Tamplate',
+                    dialog_id:'add_filename_template_dialog',
+                    content_creator: create_add_filename_template_dialog,
+                    widget_type: 'MenuItem'
+                  })
+          );
+
+          // ------------
+          // Image Format
+          settings_DropDownMenu.addChild(
+                  dialogCaller({
+                    label:'Image Format',
+                    dialog_id:'add_image_format_dialog',
+                    content_creator: create_add_image_format_dialog,
+                    widget_type: 'MenuItem'
+                  })
+          );
+
+          // -------
+          // Repository
+          settings_DropDownMenu.addChild(
+                  dialogCaller({
+                    label:'Repository',
+                    dialog_id:'add_repository_dialog',
+                    content_creator: create_add_repository_dialog,
+                    widget_type: 'MenuItem'
+                  })
+          );
+
+          // -------
+          // Status
+          settings_DropDownMenu.addChild(
+                  dialogCaller({
+                    label:'Status',
+                    dialog_id:'add_status_dialog',
+                    content_creator: create_add_status_dialog,
+                    widget_type: 'MenuItem'
+                  })
+          );
+
+          // -------
+          // Status List
+          settings_DropDownMenu.addChild(
+                  dialogCaller({
+                    label:'Status List',
+                    dialog_id:'add_status_list_dialog',
+                    content_creator: create_add_status_list_dialog,
+                    widget_type: 'MenuItem'
+                  })
+          );
+
+          // -------
+          // Structure
+          settings_DropDownMenu.addChild(
+                  dialogCaller({
+                    label:'Structure',
+                    dialog_id:'add_structure_dialog',
+                    content_creator: create_add_structure_dialog,
+                    widget_type: 'MenuItem'
+                  })
+          );
+
+          studio_DropDownMenu.addChild(new PopupMenuItem({
+              label: "Add",
+              popup: settings_DropDownMenu
+            })
+          );
+
+          stalker_MenuBar.addChild(new PopupMenuBarItem({
+            label: "STUDIO",
+            popup: studio_DropDownMenu
+          }));
+
           // ******************************************************************
-          // Menu Items
-          {% for project in projects %}
-            projects_menu_dropDownMenu.addChild(
-              new MenuItem({
-                label: '{{ project.name }}',
-                onClick: function(){
-                  central_content_pane.set(
-                    'href',
-                    'view/project/{{ project.id }}'
-                  );
-                  central_content_pane.refresh();
-                }
-              })
+          // PROJECTS
+
+          var projects_DropDownMenu = new DropDownMenu({
+
+          });
+
+          stalker_MenuBar.addChild(new PopupMenuBarItem({
+            label: "PROJECTS",
+            popup: projects_DropDownMenu
+          }));
+
+          // --------
+          // Project Menu
+          var create_project_setting_DropDownMenu = function (pID){
+
+            var project_setting_DropDownMenu = new DropDownMenu({
+
+            });
+
+            // --------
+            // View Project
+            project_setting_DropDownMenu.addChild(
+                    new MenuItem({
+                              label: '-  View',
+                              dataId: pID,
+                              onClick: function(){
+                                central_content_pane.set(
+                                        'href',
+                                        'view/project/' + this.get('dataId')
+                                );
+                                central_content_pane.refresh();
+                              }
+                            })
             );
-          {% endfor %}
-          
-          // Menu Memory
-          var project_memory = new JsonRest({
+
+            project_setting_DropDownMenu.addChild(
+                    new MenuSeparator({})
+            );
+
+            // --------
+            // Asset
+            project_setting_DropDownMenu.addChild(
+                    dialogCaller({
+                      label:'+ Add Asset',
+                      dialog_id:'add_asset_dialog',
+                      content_creator: create_add_asset_dialog,
+                      widget_type: 'MenuItem',
+                      data_id: pID
+
+                    })
+            );
+
+            // --------
+            // Sequence
+            project_setting_DropDownMenu.addChild(
+                    dialogCaller({
+                      label:'+ Add Sequence',
+                      dialog_id:'add_sequence_dialog',
+                      content_creator: create_add_sequence_dialog,
+                      widget_type: 'MenuItem',
+                      data_id: pID
+                    })
+            );
+
+            // ----
+            // Shot
+            project_setting_DropDownMenu.addChild(
+                    dialogCaller({
+                      label:'+ Add Shot',
+                      dialog_id:'add_shot_dialog',
+                      content_creator: create_add_shot_dialog,
+                      widget_type: 'MenuItem',
+                      data_id: pID
+                    })
+            );
+
+            project_setting_DropDownMenu.addChild(
+                    new MenuSeparator({})
+            );
+
+            project_setting_DropDownMenu.addChild(
+                    dialogCaller({
+                      label:'+ Add User',
+                      dialog_id:'add_user_dialog',
+                      content_creator: create_add_user_dialog,
+                      widget_type: 'MenuItem',
+                      data_id: pID
+                    })
+            );
+
+            return project_setting_DropDownMenu;
+
+          }
+
+          // Project Memory
+          var projects_memory = new JsonRest({
             target: '/get/projects'
           });
-          
-          // Menu Updater
-          var projects_menu_updater = function(){
+
+          // Projects Updater
+          var projects_DropDownMenu_updater = function(){
             // delete the current items
-            var items = projects_menu_dropDownMenu.getChildren();
+            var items = projects_DropDownMenu.getChildren();
             for (var i=0; i< items.length; i++){
               items[i].destroyRecursive();
             }
-            
+
             // query new items
-            var result = project_memory.query().then(function(data){
+            var result = projects_memory.query().then(function(data){
               for (var i=0; i < data.length; i++){
-                projects_menu_dropDownMenu.addChild(
-                  new MenuItem({
-                    label: data[i].name,
-                    dataId: data[i].id,
-                    onClick: function(){
-                      central_content_pane.set(
-                        'href',
-                        'view/project/' + this.get('dataId')
-                      );
-                      central_content_pane.refresh();
-                    }
-                  })
+                projects_DropDownMenu.addChild(
+                        new PopupMenuItem({
+                          label: data[i].name,
+                          dataId: data[i].id,
+                          popup: create_project_setting_DropDownMenu(data[i].id)
+
+                        })
                 );
               }
-              
-{#              // animate the Button bg to show it is updated#}
-{#              var domNode = projects_menu_dropDownButton.domNode;#}
-{#              var animatedNode = domNode.children[0];#}
-{#              var bgColor = animatedNode.style.backgroundColor;#}
-{#              #}
-{#              fx.animateProperty({#}
-{#                node: animatedNode,#}
-{#                duration: 500,#}
-{#                properties: {#}
-{#                  backgroundColor: {#}
-{#                    start: "#00ff00",#}
-{#                    end: bgColor#}
-{#                  }#}
-{#                }#}
-{#              }).play();#}
+
+              projects_DropDownMenu.addChild(
+                      new MenuSeparator({})
+              );
+
+              projects_DropDownMenu.addChild(
+                      dialogCaller({
+                        label:'+ Add Project',
+                        dialog_id:'add_project_dialog',
+                        content_creator: create_add_project_dialog,
+                        widget_type: 'MenuItem',
+                        related_field_updater: projects_DropDownMenu_updater
+                      })
+              );
+
+              projects_DropDownMenu.addChild(
+                      new MenuSeparator({})
+              );
+
+              // -----
+              // Asset
+              projects_DropDownMenu.addChild(
+                      dialogCaller({
+                        label:'+ Add Asset',
+                        dialog_id:'add_asset_dialog',
+                        content_creator: create_add_asset_dialog,
+                        widget_type: 'MenuItem'
+
+                      })
+              );
+
+              // --------
+              // Sequence
+              projects_DropDownMenu.addChild(
+                      dialogCaller({
+                        label:'+ Add Sequence',
+                        dialog_id:'add_sequence_dialog',
+                        content_creator: create_add_sequence_dialog,
+                        widget_type: 'MenuItem'
+                      })
+              );
+
+              // ----
+              // Shot
+              projects_DropDownMenu.addChild(
+                      dialogCaller({
+                        label:'+ Add Shot',
+                        dialog_id:'add_shot_dialog',
+                        content_creator: create_add_shot_dialog,
+                        widget_type: 'MenuItem'
+                      })
+              );
+
+
             });
           };
-          
-          // Drop Down Button
-          var projects_menu_dropDownButton = new DropDownButton({
-            id: 'projects_menu_dropDownButton',
-            label: 'Projects',
-            style: 'margin-top: 0px; margin-bottom: 0px; color: #000000',
-            dropDown: projects_menu_dropDownMenu
-          }, 'projects_menu');
-          projects_menu_dropDownButton.startup();
-          
-          
-          
+
+          projects_DropDownMenu_updater();
+
+
           // ******************************************************************
-          // Create Menu
-          // Drop Down Menu
-          var create_menu_dropDownMenu = new DropDownMenu({
-            style: 'display: none;'  
+          // CREW - Departments
+
+          var crew_DropDownMenu = new DropDownMenu({
+
           });
 
-          // **********
-          // Menu Items
-          
-          // -----
-          // Asset
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Asset',
-              dialog_id:'add_asset_dialog',
-              content_creator: create_add_asset_dialog,
-              widget_type: 'MenuItem'
+          stalker_MenuBar.addChild(new PopupMenuBarItem({
+            label: "CREW",
+            popup: crew_DropDownMenu
+          }));
 
-            })
-          );
-          
-          // ----------
-          // Department
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label: 'Department',
-              dialog_id: 'add_department_dialog',
-              content_creator: create_add_department_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-          
-          // ------------
-          // Filename Template
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Filename Tamplate',
-              dialog_id:'add_filename_template_dialog',
-              content_creator: create_add_filename_template_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-          
-          // -----
-          // Group
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label: 'Group',
-              dialog_id: 'add_group_dialog',
-              content_creator: create_add_group_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-          
-          // ------------
-          // Image Format
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Image Format',
-              dialog_id:'add_image_format_dialog',
-              content_creator: create_add_image_format_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-       
-          // -------
-          // Repository
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Repository',
-              dialog_id:'add_repository_dialog',
-              content_creator: create_add_repository_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-          
-          // -------
-          // Project
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Project',
-              dialog_id:'add_project_dialog',
-              content_creator: create_add_project_dialog,
-              widget_type: 'MenuItem',
-              related_field_updater: projects_menu_updater
-            })
-          );
-          
-          // --------
-          // Sequence
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Sequence',
-              dialog_id:'add_sequence_dialog',
-              content_creator: create_add_sequence_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-          
-          // ----
-          // Shot
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Shot',
-              dialog_id:'add_shot_dialog',
-              content_creator: create_add_shot_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-          
-          // -------
-          // Status
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Status',
-              dialog_id:'add_status_dialog',
-              content_creator: create_add_status_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-          
-          // -------
-          // Status List
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Status List',
-              dialog_id:'add_status_list_dialog',
-              content_creator: create_add_status_list_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-          
-          // -------
-          // Structure
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'Structure',
-              dialog_id:'add_structure_dialog',
-              content_creator: create_add_structure_dialog,
-              widget_type: 'MenuItem'
-            })
-          ); 
-          
-{#          // ----#}
-{#          // Task#}
-{#          create_menu_dropDownMenu.addChild(#}
-{#            dialogCaller({#}
-{#              label:'Task',#}
-{#              dialog_id:'add_task_dialog',#}
-{#              content_creator: create_add_task_dialog,#}
-{#              widget_type: 'MenuItem'#}
-{#            })#}
-{#          );#}
-          
-          // -------
-          // User
-          create_menu_dropDownMenu.addChild(
-            dialogCaller({
-              label:'User',
-              dialog_id:'add_user_dialog',
-              content_creator: create_add_user_dialog,
-              widget_type: 'MenuItem'
-            })
-          );
-           
-          // ****************
-          // Drop Down Button
-          var create_menu_button = new DropDownButton({
-            label: '+',
-            style: 'margin-top: 0px; margin-bottom: 0px; color: #000000',
-            dropDown: create_menu_dropDownMenu
-          }, 'create_menu');
-          create_menu_button.startup();
-          
-{#          var create_menu_tooltipDialog = new TooltipDialog({#}
-{#            id: 'create_menu_tooltipDialog',#}
-{#            style: 'width: 250px;',#}
-{#            href: '/create_menu',#}
-{#            executeScripts: true,#}
-{#            onMouseLeave: function(){#}
-{#              popup.close(create_menu_tooltipDialog);#}
-{#            }#}
-{#          });#}
-          
-{#          // attach the TooltipDialog to our create_menu#}
-{#          on(dojo.byId('create_menu'), 'click', function(){#}
-{#            // refresh the create_menu_tooltipDialog content#}
-{#            create_menu_tooltipDialog.refresh();#}
-{#            #}
-{#            popup.open({#}
-{#              popup: create_menu_tooltipDialog,#}
-{#              around: dom.byId('create_menu')#}
-{#            });#}
-{#          });#}
+          // Departments Memory
+          var departments_memory = new JsonRest({
+            target: '/get/departments'
+          });
+
+          // Department Menu
+          var create_department_setting_DropDownMenu = function (pID){
+
+            var department_setting_DropDownMenu = new DropDownMenu({
+
+            });
+
+            // --------
+            // View Project
+            department_setting_DropDownMenu.addChild(
+                    new MenuItem({
+                      label: '-  Users',
+                      dataId: pID,
+                      onClick: function(){
+                        central_content_pane.set(
+                                'href',
+                                'view/department/' + this.get('dataId')
+                        );
+                        central_content_pane.refresh();
+                      }
+                    })
+            );
+
+            department_setting_DropDownMenu.addChild(
+                    new MenuSeparator({})
+            );
+
+            // ----------
+            // ADD USER
+            department_setting_DropDownMenu.addChild(
+                    dialogCaller({
+                      label:'+ Add User',
+                      dialog_id:'add_user_dialog',
+                      content_creator: create_add_user_dialog,
+                      widget_type: 'MenuItem'
+                    })
+            );
+
+            // -----
+            // ADD GROUP
+            department_setting_DropDownMenu.addChild(
+                    dialogCaller({
+                      label: '+ Add Group',
+                      dialog_id: 'add_group_dialog',
+                      content_creator: create_add_group_dialog,
+                      widget_type: 'MenuItem'
+                    })
+            );
+
+            return department_setting_DropDownMenu;
+
+          }
+
+          // Departments Updater
+          var departments_DropDownMenu_updater = function(){
+            // delete the current items
+            var items = crew_DropDownMenu.getChildren();
+            for (var i=0; i< items.length; i++){
+              items[i].destroyRecursive();
+            }
+
+            // query new items
+            var result = departments_memory.query().then(function(data){
+              for (var i=0; i < data.length; i++){
+                crew_DropDownMenu.addChild(
+                        new PopupMenuItem({
+                          label: data[i].name,
+                          dataId: data[i].id,
+                          popup: create_department_setting_DropDownMenu(data[i].id)
+
+                        })
+                );
+              }
+
+              crew_DropDownMenu.addChild(
+                      new MenuSeparator({})
+              );
+
+              // ----------
+              // ADD DEPARTMENT
+              crew_DropDownMenu.addChild(
+                      dialogCaller({
+                        label: '+ Add Department',
+                        dialog_id: 'add_department_dialog',
+                        content_creator: create_add_department_dialog,
+                        widget_type: 'MenuItem',
+                        related_field_updater: departments_DropDownMenu_updater
+                      })
+              );
+
+              crew_DropDownMenu.addChild(
+                      new MenuSeparator({})
+              );
+
+              // ----------
+              // ADD USER
+              crew_DropDownMenu.addChild(
+                      dialogCaller({
+                        label:'+ Add User',
+                        dialog_id:'add_user_dialog',
+                        content_creator: create_add_user_dialog,
+                        widget_type: 'MenuItem'
+                      })
+              );
+
+              // -----
+              // ADD GROUP
+              crew_DropDownMenu.addChild(
+                      dialogCaller({
+                        label: '+ Add Group',
+                        dialog_id: 'add_group_dialog',
+                        content_creator: create_add_group_dialog,
+                        widget_type: 'MenuItem'
+                      })
+              );
+
+
+
+            });
+          };
+
+          departments_DropDownMenu_updater();
+
+
+          stalker_MenuBar.startup();
           
           // ******************************************************************
           // mebar

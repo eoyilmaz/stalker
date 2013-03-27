@@ -1,52 +1,65 @@
-<div id='asset_info'>
-  <h2>{{ asset.name }}</h2>
-</div>
-<div id='asset_related_data_tab_container'>
+<div id='asset_split_container'>
+  <div id='asset_summary'>
+      {# Summary View #}
+  </div>
+  <div id='asset_related_data_tab_container'>
+      {# Tab View #}
+  </div>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
-          function(registry, TabContainer, ContentPane){
+  require(['dijit/registry', 'dijit/layout/SplitContainer',
+    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+          function(registry, SplitContainer, TabContainer, ContentPane){
 
-            alert('This is running 188');
+            var asset_SplitContainer = new SplitContainer({
+              region: 'center',
+              orientation: 'vertical',
+              splitter: false
+
+            }, 'asset_split_container');
+
+            var summary_content_pane = new ContentPane({
+              title: 'Summarize',
+              href: 'summarize/asset/{{ asset.id }}',
+              region: 'top'
+            },'asset_summary');
+
             // **********************************************************************
             // Bottom Part - Complex Data View
             var asset_related_data_tab_container = new TabContainer({
               region: 'bottom'
             }, 'asset_related_data_tab_container');
 
-            var asset_summary_content_pane = new ContentPane({
-              title: 'Summary',
-              href: 'summarize/asset/{{ asset.id }}',
-              selected: true
-            });
-
-            var asset_users_content_pane = new ContentPane({
+            var users_content_pane = new ContentPane({
               title: 'Users',
               href: 'view/users/{{ asset.id }}'
             });
 
-            var asset_tasks_content_pane = new ContentPane({
+            var tasks_content_pane = new ContentPane({
               title: 'Tasks',
               href: 'view/tasks/{{ asset.id }}'
             });
 
-            var asset_tickets_content_pane = new ContentPane({
+            var tickets_content_pane = new ContentPane({
               title: 'Tickets',
               content: 'view/tickets/{{ asset.id }}'
             });
 
-            var asset_versions_content_pane = new ContentPane({
+            var versions_content_pane = new ContentPane({
               title: 'Versions',
               href: 'view/versions/{{ asset.id }}'
             });
 
-            asset_related_data_tab_container.addChild(asset_summary_content_pane);
-            asset_related_data_tab_container.addChild(asset_users_content_pane);
-            asset_related_data_tab_container.addChild(asset_tasks_content_pane);
-            asset_related_data_tab_container.addChild(asset_tickets_content_pane);
-            asset_related_data_tab_container.addChild(asset_versions_content_pane);
+            asset_related_data_tab_container.addChild(users_content_pane);
+            asset_related_data_tab_container.addChild(tasks_content_pane);
+            asset_related_data_tab_container.addChild(tickets_content_pane);
+            asset_related_data_tab_container.addChild(versions_content_pane);
             asset_related_data_tab_container.startup();
+
+            asset_SplitContainer.addChild(summary_content_pane);
+            asset_SplitContainer.addChild(asset_related_data_tab_container);
+            asset_SplitContainer.startup();
 
 
           });
