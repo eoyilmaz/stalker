@@ -39,32 +39,32 @@ GridEditor.prototype.fillEmptyLines = function() {
     var emptyRow = $.JST.createFromTemplate({}, "TASKEMPTYROW");
     //click on empty row create a task and fill above
     var master = this.master;
-    emptyRow.click(function(ev) {
-      master.beginTransaction();
-      var emptyRow = $(this);
-      var lastTask;
-      var start = new Date().getTime();
-      var level = 0;
-      if (master.tasks[0]) {
-        start = master.tasks[0].start;
-        level = master.tasks[0].level + 1;
-      }
-
-      //fill all empty previouses
-      emptyRow.prevAll(".emptyRow").andSelf().each(function() {
-        var ch = factory.build("tmp_fk" + new Date().getTime(), "", "", level, start, 1);
-        var task = master.addTask(ch);
-        lastTask = ch;
-      });
-      master.endTransaction();
-      lastTask.rowElement.click();
-      lastTask.rowElement.find("[name=name]").focus()//focus to "name" input
-              .blur(function() { //if name not inserted -> undo -> remove just added lines
-        var imp = $(this);
-        if (!imp.isValueChanged())
-          master.undo();
-      });
-    });
+//    emptyRow.click(function(ev) {
+//      master.beginTransaction();
+//      var emptyRow = $(this);
+//      var lastTask;
+//      var start = new Date().getTime();
+//      var level = 0;
+//      if (master.tasks[0]) {
+//        start = master.tasks[0].start;
+//        level = master.tasks[0].level + 1;
+//      }
+//
+//      //fill all empty previouses
+//      emptyRow.prevAll(".emptyRow").andSelf().each(function() {
+//        var ch = factory.build("tmp_fk" + new Date().getTime(), "", "", level, start, 1);
+//        var task = master.addTask(ch);
+//        lastTask = ch;
+//      });
+//      master.endTransaction();
+//      lastTask.rowElement.click();
+//      lastTask.rowElement.find("[name=name]").focus()//focus to "name" input
+//              .blur(function() { //if name not inserted -> undo -> remove just added lines
+//        var imp = $(this);
+//        if (!imp.isValueChanged())
+//          master.undo();
+//      });
+//    });
     this.element.append(emptyRow);
   }
 };

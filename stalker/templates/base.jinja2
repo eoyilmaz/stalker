@@ -59,7 +59,7 @@
 </head>
 <body class='claro'>
 {% block body %}
-  <div id='appLayout' class='demoLayout'>
+  <div id='appLayout' class='demoLayout dijitReset'>
     <div id='header' class='edgePanel' style="overflow: hidden">
     {% block header %}
       <div id='stalker_logo' style='font-size: 20px; color: #000000'>
@@ -285,77 +285,77 @@
             // --------
             // View Project
             project_setting_DropDownMenu.addChild(
-                    new MenuItem({
-                              label: '-  View',
-                              dataId: pID,
-                              onClick: function(){
-                                central_content_pane.set(
-                                        'href',
-                                        'view/project/' + this.get('dataId')
-                                );
-                                central_content_pane.refresh();
-                              }
-                            })
+              new MenuItem({
+                  label: '-  View',
+                  dataId: pID,
+                  onClick: function(){
+                    central_content_pane.set(
+                      'href',
+                      'view/project/' + this.get('dataId')
+                    );
+                    central_content_pane.refresh();
+                  }
+                })
             );
 
             project_setting_DropDownMenu.addChild(
-                    new MenuSeparator({})
+              new MenuSeparator({})
             );
 
             // --------
             // Asset
             project_setting_DropDownMenu.addChild(
-                    dialogCaller({
-                      label:'+ Add Asset',
-                      dialog_id:'add_asset_dialog',
-                      content_creator: create_add_asset_dialog,
-                      widget_type: 'MenuItem',
-                      data_id: pID
+              dialogCaller({
+                label:'+ Add Asset',
+                dialog_id:'add_asset_dialog',
+                content_creator: create_add_asset_dialog,
+                widget_type: 'MenuItem',
+                data_id: pID
 
-                    })
+              })
             );
 
             // --------
             // Sequence
             project_setting_DropDownMenu.addChild(
-                    dialogCaller({
-                      label:'+ Add Sequence',
-                      dialog_id:'add_sequence_dialog',
-                      content_creator: create_add_sequence_dialog,
-                      widget_type: 'MenuItem',
-                      data_id: pID
-                    })
+              dialogCaller({
+                label:'+ Add Sequence',
+                dialog_id:'add_sequence_dialog',
+                content_creator: create_add_sequence_dialog,
+                widget_type: 'MenuItem',
+                data_id: pID
+              })
             );
-
+            
             // ----
             // Shot
             project_setting_DropDownMenu.addChild(
-                    dialogCaller({
-                      label:'+ Add Shot',
-                      dialog_id:'add_shot_dialog',
-                      content_creator: create_add_shot_dialog,
-                      widget_type: 'MenuItem',
-                      data_id: pID
-                    })
+              dialogCaller({
+                label:'+ Add Shot',
+                dialog_id:'add_shot_dialog',
+                content_creator: create_add_shot_dialog,
+                widget_type: 'MenuItem',
+                data_id: pID
+              })
+            );
+            
+            project_setting_DropDownMenu.addChild(
+              new MenuSeparator({})
             );
 
             project_setting_DropDownMenu.addChild(
-                    new MenuSeparator({})
+              dialogCaller({
+                label:'+ Add User',
+                dialog_id:'add_user_dialog',
+                content_creator: create_add_user_dialog,
+                widget_type: 'MenuItem',
+                data_id: pID
+              })
             );
-
-            project_setting_DropDownMenu.addChild(
-                    dialogCaller({
-                      label:'+ Add User',
-                      dialog_id:'add_user_dialog',
-                      content_creator: create_add_user_dialog,
-                      widget_type: 'MenuItem',
-                      data_id: pID
-                    })
-            );
-
+            
             return project_setting_DropDownMenu;
 
-          }
+          };
 
           // Project Memory
           var projects_memory = new JsonRest({

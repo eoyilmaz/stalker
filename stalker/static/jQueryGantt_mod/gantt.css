@@ -199,7 +199,7 @@
 .taskBox .layout {
   height:100%;
   color:red;
-  border-radius:2px;
+  border-radius:10px;
   background: #eee; /* Old browsers */
   border:1px solid #bbb;
 }

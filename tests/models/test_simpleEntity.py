@@ -253,7 +253,7 @@ class SimpleEntityTester(unittest.TestCase):
         self.assertFalse(simpleEntity1 != simpleEntity2)
         self.assertTrue(simpleEntity1 != simpleEntity3)
 
-    def test_created_by_argument_instance_of_User(self):
+    def test_created_by_argument_is_not_a_User_instance(self):
         """testing if TypeError is raised when assigned anything other than a
         stalker.models.user.User object to created_by argument
         """
@@ -672,3 +672,61 @@ class SimpleEntityTester(unittest.TestCase):
         DBSession.remove()
         from stalker.db.session import ZopeTransactionExtension
         DBSession.configure(extension=ZopeTransactionExtension)
+    
+    def test_thumbnail_argument_is_skipped(self):
+        """testing if the thumbnail attribute will be None when the thumbnail
+        argument is skipped
+        """
+        try:
+            self.kwargs.pop('thumbnail')
+        except KeyError:
+            pass
+        
+        new_simple_entity = SimpleEntity(**self.kwargs)
+        self.assertIsNone(new_simple_entity.thumbnail)
+    
+    def test_thumbnail_argument_is_None(self):
+        """testing if the thumbnail argument can be None
+        """
+        self.kwargs['thumbnail'] = None
+        new_simple_entity = SimpleEntity(**self.kwargs)
+        self.assertIsNone(new_simple_entity.thumbnail)
+    
+    def test_thumbnail_attribute_is_None(self):
+        """testing if the thumbnail attribute can be set to None
+        """
+        self.test_simple_entity.thumbnail = None
+        self.assertEqual(self.test_simple_entity.thumbnail, None)
+    
+    def test_thumbnail_argument_is_not_a_Link_instance(self):
+        """testing if a TypeError will be raised when the thumbnail argument is
+        not a Link instance
+        """
+        self.kwargs['thumbnail'] = 'not a Link'
+        self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
+    
+    def test_thumbnail_attribute_is_not_a_Link_instance(self):
+        """testing if a TypeError will be raised when the thumbnail attribute
+        is set to something other than a Link instance (and None)
+        """
+        self.assertRaises(TypeError, setattr, self.test_simple_entity,
+                          'thumbnail', 'not a Link')
+    
+    def test_thumbnail_argument_is_working_properly(self):
+        """testing if the thumbnail argument value is passed to the thumbnail
+        attribute correctly
+        """
+        from stalker import Link
+        thumb = Link(path='some path')
+        self.kwargs['thumbnail'] = thumb
+        new_simple_entity = SimpleEntity(**self.kwargs)
+        self.assertEqual(new_simple_entity.thumbnail, thumb)
+    
+    def test_thumbnail_attribute_is_working_properly(self):
+        """testing if the thumbnail attribute is working properly
+        """
+        from stalker import Link
+        thumb = Link(path='some path')
+        self.assertNotEqual(self.test_simple_entity.thumbnail, thumb)
+        self.test_simple_entity.thumbnail = thumb
+        self.assertEqual(self.test_simple_entity.thumbnail, thumb)

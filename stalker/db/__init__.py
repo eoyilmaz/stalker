@@ -150,7 +150,7 @@ def __create_admin__():
             login=defaults.ADMIN_LOGIN,
             password=defaults.ADMIN_PASSWORD,
             email=defaults.ADMIN_EMAIL,   
-            department=admin_department,
+            departments=[admin_department],
             groups=[admins_group]
         )
         

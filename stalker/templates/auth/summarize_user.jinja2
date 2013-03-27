@@ -1,7 +1,13 @@
 <div id='user_details_content_pane'>
 
     {# Avatar #}
-    <div id='user_avatar' class='thumbnail'>No Avatar</div>
+    <div id='user_avatar'
+         class='thumbnail'>
+      {% if not user.thumbnail %}
+      <img src='{{ request.static_url("stalker:static/stalker/images/NoPicture.gif") }}' alt=''
+              style='width:192px; height: 192px'>
+      {% endif %}
+    </div>
 
     {# Basic Info #}
     <div id='user_info' class='user_info'>

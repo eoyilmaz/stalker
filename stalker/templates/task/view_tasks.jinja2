@@ -3,6 +3,8 @@
   <div class="__template__" type="GANTBUTTONS"><!--
   <div class="ganttButtonBar">
     <div class="buttons">
+    
+    {% if entity.entity_type != 'User' %}
     <button onclick="$('#workSpace').trigger('undo.gantt');" class="button textual" title="undo"><span class="teamworkIcon">&#39;</span></button>
     <button onclick="$('#workSpace').trigger('redo.gantt');" class="button textual" title="redo"><span class="teamworkIcon">&middot;</span></button>
     <span class="ganttButtonSeparator"></span>
@@ -14,19 +16,24 @@
     <span class="ganttButtonSeparator"></span>
     <button onclick="$('#workSpace').trigger('moveUpCurrentTask.gantt');" class="button textual" title="move up"><span class="teamworkIcon">k</span></button>
     <button onclick="$('#workSpace').trigger('moveDownCurrentTask.gantt');" class="button textual" title="move down"><span class="teamworkIcon">j</span></button>
+    {% endif %}
     <span class="ganttButtonSeparator"></span>
     <button onclick="$('#workSpace').trigger('zoomMinus.gantt');" class="button textual" title="zoom out"><span class="teamworkIcon">)</span></button>
     <button onclick="$('#workSpace').trigger('zoomPlus.gantt');" class="button textual" title="zoom in"><span class="teamworkIcon">(</span></button>
     <span class="ganttButtonSeparator"></span>
+    {% if entity.entity_type != 'User' %}
     <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual" title="delete"><span class="teamworkIcon">&cent;</span></button>
+    {% endif %}
       &nbsp; &nbsp; &nbsp; &nbsp;
 {#      {% if entity.entity_type != 'User' %}#}
 {#      <button id='view_tasks_add_asset_button'>Add Asset</button>#}
 {#      <button id='view_tasks_add_sequence_button'>Add Sequence</button>#}
 {#      <button id='view_tasks_add_shot_button'>Add Shot</button>#}
-{#      <button id='view_tasks_add_task_button'>Add Task</button>#}
-{#      {% endif %}#}
+
+    {% if entity.entity_type != 'User' %}
+      <button id='view_tasks_add_task_button'>Add Task</button>
       <button id='view_tasks_gannt_save_button' onclick="saveGanttOnServer();" class="button first big" title="save">save</button>
+    {% endif %}
     </div></div>
   --></div>
 
@@ -36,12 +43,12 @@
     <tr style="height:40px">
       <th class="gdfColHeader" style="width:15px;"></th>
       <th class="gdfColHeader" style="width:25px;"></th>
-      <th class="gdfColHeader gdfResizable" style="width:100px;">name</th>
-      <th class="gdfColHeader gdfResizable" style="width:50px;">start</th>
-      <th class="gdfColHeader gdfResizable" style="width:50px;">end</th>
-      <th class="gdfColHeader gdfResizable" style="width:25px;">dur.</th>
-      <th class="gdfColHeader gdfResizable" style="width:50px;">dep.</th>
-      <th class="gdfColHeader gdfResizable" style="width:800px;">assignees</th>
+      <th class="gdfColHeader gdfResizable" style="width:75px;">name</th>
+      <th class="gdfColHeader gdfResizable" style="width:40px;">start</th>
+      <th class="gdfColHeader gdfResizable" style="width:40px;">end</th>
+      <th class="gdfColHeader gdfResizable" style="width:20px;">dur.</th>
+      <th class="gdfColHeader gdfResizable" style="width:40px;">dep.</th>
+      <th class="gdfColHeader gdfResizable" style="width:150px;">assignees</th>
     </tr>
     </thead>
   </table>
@@ -230,6 +237,8 @@
                 })
               );
               
+              {% if entity.entity_type != 'User' %}
+              
               menu.addChild(new MenuSeparator());
               
               menu.addChild(
@@ -261,12 +270,15 @@
                 })
               );
               
+              {% endif %}
+              
               menu.addChild(
                 new MenuItem({
                   label: 'Add Booking'
                 })
               );
               
+              {% if entity.entity_type != 'User' %}
               menu.addChild(new MenuSeparator());
               
               menu.addChild(
@@ -276,6 +288,7 @@
               );
               
               menu.startup();
+              {% endif %}
              
             });
           });
@@ -344,33 +357,6 @@
           };
         }
         
-        
-        //-------------------------------------------  Open a black popup for managing resources. This is only an axample of implementation (usually resources come from server) ------------------------------------------------------
-        function openResourceEditor() {
-          var editor = $("<div>");
-          editor.append("<h2>Resource editor</h2>");
-          editor.addClass("resEdit");
-        
-          for (var i in ge.resources) {
-            var res = ge.resources[i];
-            var inp = $("<input type='text'>").attr("pos", i).addClass("resLine").val(res.name);
-            editor.append(inp).append("<br>");
-          }
-        
-          var sv = $("<div>save</div>").css("float", "right").addClass("button").click(function() {
-            $(this).closest(".resEdit").find("input").each(function() {
-              var el = $(this);
-              var pos = el.attr("pos");
-              ge.resources[pos].name = el.val();
-            });
-            ge.editor.redraw();
-            closeBlackPopup();
-          });
-          editor.append(sv);
-        
-          var ndo = createBlackPage(800, 500).append(editor);
-        }
-        
         //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
         function getFile() {
           $("#gimBaPrj").val(JSON.stringify(ge.saveProject()));
@@ -409,25 +395,26 @@
 {#          });#}
 {#          add_shot_button.startup();#}
 {#          #}
-{#          var add_task_button = dialogCaller({#}
-{#            label: 'Add Task',#}
-{#            dialog_id: 'add_task_dialog',#}
-{#            content_creator: create_add_task_dialog,#}
-{#            attach_to: 'view_tasks_add_task_button',#}
-{#            related_field_updater: loadGanttFromServer, #}
-{#            data_id: '{{ entity.id }}'#}
-{#          });#}
-{#          add_task_button.startup();#}
+        {% if entity.entity_type != 'User' %}
+          var add_task_button = dialogCaller({
+            label: 'Add Task',
+            dialog_id: 'add_task_dialog',
+            content_creator: create_add_task_dialog,
+            attach_to: 'view_tasks_add_task_button',
+            related_field_updater: loadGanttFromServer, 
+            data_id: '{{ entity.id }}'
+          });
+          add_task_button.startup();
           
-        // TODO: This should be disabled upon permission not according to the existence of a template variable
-        var save_gantt_button = new Button({
-          label: 'Save',
-          onClick: function(){
-            saveGanttOnServer();
-          }
-        }, 'view_tasks_gannt_save_button')
-        save_gantt_button.startup();
-{#        {% endif %}#}
+          // TODO: This should be disabled upon permission not according to the existence of a template variable
+          var save_gantt_button = new Button({
+            label: 'Save',
+            onClick: function(){
+              saveGanttOnServer();
+            }
+          }, 'view_tasks_gannt_save_button')
+          save_gantt_button.startup();
+        {% endif %}
       });
   });
 </script>
@@ -444,7 +431,6 @@
         opt.attr("selected", "true");
       resEl.append(opt);
     }
-
 
     var roleEl = assigTr.find("[name=roleId]");
     for (var i in taskAssig.task.master.roles) {
@@ -463,7 +449,6 @@
         });
       });
     }
-
 
   });
 </script>

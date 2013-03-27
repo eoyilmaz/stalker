@@ -12,7 +12,6 @@ from sqlalchemy.orm import relationship, validates, reconstructor
 
 import stalker
 from stalker.db import Base
-from stalker.models.mixins import ProjectMixin
 
 from stalker.log import logging_level
 import logging
@@ -174,6 +173,7 @@ class SimpleEntity(Base):
     type = relationship(
         "Type",
         primaryjoin="SimpleEntity.type_id==Type.type_id_local",
+        post_update=True,
         doc="""The type of the object.
         
         It is an instance of :class:`~stalker.models.type.Type` with a proper
@@ -184,10 +184,23 @@ class SimpleEntity(Base):
     generic_data = relationship(
         'SimpleEntity',
         secondary='SimpleEntity_GenericData',
-        primaryjoin='SimpleEntities.c.id==SimpleEntity_GenericData.c.simple_entity_id',
-        secondaryjoin='SimpleEntity_GenericData.c.other_simple_entity_id==SimpleEntities.c.id',
+        primaryjoin='SimpleEntity.id==SimpleEntity_GenericData.c.simple_entity_id',
+        secondaryjoin='SimpleEntity_GenericData.c.other_simple_entity_id==SimpleEntity.id',
+        post_update=True,
         doc='''This attribute can hold any kind of data which exists in SOM.
         '''
+    )
+    
+    thumbnail_id = Column(
+        'thumbnail_id',
+        Integer,
+        ForeignKey('Links.id', use_alter=True, name='z')
+    )
+    
+    thumbnail = relationship(
+        'Link',
+        primaryjoin='SimpleEntity.thumbnail_id==Link.link_id',
+        post_update=True
     )
     
     __stalker_version__ = Column("stalker_version", String(256))
@@ -201,6 +214,7 @@ class SimpleEntity(Base):
         updated_by=None,
         date_created=None,
         date_updated=None,
+        thumbnail=None,
         **kwargs
     ): # pylint: disable=W0613
         
@@ -222,6 +236,7 @@ class SimpleEntity(Base):
         self.date_created = date_created
         self.date_updated = date_updated
         self.type = type
+        self.thumbnail = thumbnail
         self.__stalker_version__ = stalker.__version__
 
     @reconstructor
@@ -423,7 +438,21 @@ class SimpleEntity(Base):
                             "stalker.models.type.Type not %s" %
                             (self.__class__.__name__, type_in))
         return type_in
-
+    
+    @validates('thumbnail')
+    def _validate_thumbnail(self, key, thumb):
+        """validates the given thumb value
+        """
+        if thumb is not None:
+            from stalker import Link
+            if not isinstance(thumb, Link):
+                raise TypeError('%s.thumbnail should be a '
+                                'stalker.models.link.Link instance, not %s' %
+                                (self.__class__.__name__,
+                                 thumb.__class__.__name__))
+        
+        return thumb
+    
     def __eq__(self, other):
         """the equality operator
         """
