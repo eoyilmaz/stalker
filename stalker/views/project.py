@@ -22,11 +22,11 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='add_project',
-    renderer='templates/project/add_project.jinja2',
-    permission='Add_Project'
+    route_name='create_project',
+    renderer='templates/project/dialog_create_project.jinja2',
+    permission='Create_Project'
 )
-def add_project(request):
+def create_project(request):
     """called when adding a project
     """
     referrer = request.url
@@ -36,7 +36,7 @@ def add_project(request):
     user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             # TODO: remove this later
             for param in ['name',
                           'code',
@@ -144,8 +144,8 @@ def add_project(request):
 
 @view_config(
     route_name='view_projects',
-    renderer='templates/project/view_projects.jinja2',
-    permission='View_Project'
+    renderer='templates/project/content_list_projects.jinja2',
+    permission='Read_Project'
 )
 def view_projects(request):
     """runs when viewing all projects
@@ -157,12 +157,12 @@ def view_projects(request):
 
 
 @view_config(
-    route_name='edit_project',
-    renderer='templates/project/edit_project.jinja2',
-    permission='Edit_Project'
+    route_name='update_project',
+    renderer='templates/project/update_project.jinja2',
+    permission='Update_Project'
 )
-def edit_project(request):
-    """runs when editing a project
+def update_project(request):
+    """runs when updateing a project
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
@@ -170,7 +170,7 @@ def edit_project(request):
     proj_id = request.matchdict['project_id']
     proj = Project.query.filter_by(id=proj_id).first()
     
-    if request.params['submitted'] == 'edit':
+    if request.params['submitted'] == 'update':
         #return HTTPFound(location=came_from)
         login = authenticated_userid(request)
         authenticated_user = User.query.filter_by(login=login).first()
@@ -197,7 +197,7 @@ def edit_project(request):
 @view_config(
     route_name='get_projects',
     renderer='json',
-    permission='View_Project'
+    permission='Read_Project'
 )
 def get_projects(request):
     """returns all the Project instances in the database
@@ -213,23 +213,23 @@ def get_projects(request):
 
 @view_config(
     route_name='view_project',
-    renderer='templates/project/view_project.jinja2',
-    permission='View_Project'
+    renderer='templates/project/page_view_project.jinja2',
+    permission='Read_Project'
 )
 @view_config(
     route_name='view_assets',
-    renderer='templates/asset/view_assets.jinja2',
-    permission='View_Asset'
+    renderer='templates/asset/content_list_assets.jinja2',
+    permission='Read_Asset'
 )
 @view_config(
     route_name='view_shots',
-    renderer='templates/shot/view_shots.jinja2',
-    permission='View_Shot'
+    renderer='templates/shot/content_list_shots.jinja2',
+    permission='Read_Shot'
 )
 @view_config(
     route_name='summarize_project',
-    renderer='templates/project/summarize_project.jinja2',
-    permission='View_Project'
+    renderer='templates/project/content_summarize_project.jinja2',
+    permission='Read_Project'
 )
 def view_project_related_data(request):
     """runs when viewing project related data

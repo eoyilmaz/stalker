@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'>
-  <div id='add_repository_form'>
+  <div id='create_repository_form'>
     <table style='width: 100%'>
       
       {# NAME #}
@@ -53,7 +53,7 @@
   </div>
 </div>
 <div class='dijitDialogPaneActionBar'>
-  <button id='repository_add_button'></button>
+  <button id='repository_submit_button'></button>
   <button id='repository_cancel_button'></button>
 </div>
 <script type='text/javascript'>
@@ -66,10 +66,10 @@
       
       // **********************************************************************
       // Form
-      var add_repository_form = new Form({
-        id: 'add_repository_form'
-      }, 'add_repository_form');
-      add_repository_form.startup();
+      var create_repository_form = new Form({
+        id: 'create_repository_form'
+      }, 'create_repository_form');
+      create_repository_form.startup();
       
       
       
@@ -127,21 +127,21 @@
       
       
       // **********************************************************************
-      // Add Button
-      var add_button = new Button({
+      // Submit Button
+      var submit_button = new Button({
         label: 'OK',
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('add_repository_dialog'),
-            form: add_repository_form,
-            additional_data: {submitted: 'add'},
-            url: '{{ request.route_url('add_repository') }}',
+            dialog: registry.byId('create_repository_dialog'),
+            form: create_repository_form,
+            additional_data: {submitted: 'create'},
+            url: '{{ request.route_url('create_repository') }}',
             method: 'POST'
           });
         }
-      }, 'repository_add_button');
-      add_button.startup();
+      }, 'repository_submit_button');
+      submit_button.startup();
       
       
       
@@ -152,7 +152,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          registry.byId('add_repository_dialog').destroyRecursive();
+          registry.byId('create_repository_dialog').destroyRecursive();
         }
       }, 'repository_cancel_button');
       cancel_button.startup();        

@@ -18,21 +18,21 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='add_department',
-    renderer='templates/department/add_department.jinja2',
-    permission='Add_Department'
+    route_name='create_department',
+    renderer='templates/department/dialog_create_department.jinja2',
+    permission='Create_Department'
 )
-def add_department(request):
-    """called when adding a new Department
+def create_department(request):
+    """called when creating a new Department
     """
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
     
-    logger.debug('called add_department')
+    logger.debug('called new_department')
     
     try:
         logger.debug('submitted: %s' % request.params['submitted'])
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             # get the params and create the Department
             try:
                 name = request.params['name']
@@ -66,7 +66,7 @@ def add_department(request):
 @view_config(
     route_name='get_departments',
     renderer='json',
-    permission='View_Department'
+    permission='Read_Department'
 )
 def get_departments(request):
     """returns all the departments in the database
@@ -81,8 +81,8 @@ def get_departments(request):
 
 @view_config(
     route_name='view_department',
-    renderer='templates/department/view_department.jinja2',
-    permission='View_Department'
+    renderer='templates/department/page_view_department.jinja2',
+    permission='Read_Department'
 )
 def view_department(request):
     """runs when viewing a department
@@ -102,7 +102,7 @@ def view_department(request):
 
 @view_config(
     route_name='summarize_department',
-    renderer='templates/department/summarize_department.jinja2'
+    renderer='templates/department/content_summarize_department.jinja2'
 )
 
 def summarize_department(request):

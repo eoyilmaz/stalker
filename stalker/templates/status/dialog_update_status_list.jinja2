@@ -1,44 +1,44 @@
 <div class='dijitDialogPaneContentArea'>
-  <form id='edit_status_list_form'>
+  <form id='update_status_list_form'>
     <table style='width: 100%'>
       
       {# NAME #}
       <tr>
         <td class='label_column'>
-          <label for='status_list_name'>
+          <label for='update_status_list_name'>
             Name
           </label>
         </td>
         <td class='input_column'>
-          <input id='status_list_name'>
+          <input id='update_status_list_name'>
         </td>
       </tr>
       
       {# TARGET ENTITY TYPE #}
       <tr>
         <td class='label_column'>
-          <label for='status_list_target_entity_type'>
+          <label for='update_status_list_target_entity_type'>
             Target Entity Type
           </label>
         </td>
         <td class='input_column'>
-          <input id='status_list_target_entity_type'>
+          <input id='update_status_list_target_entity_type'>
         </td>
       </tr>
       
       {# STATUSES #}
       <tr>
         <td class='label_column'>
-          <label for='status_list_statuses'>
+          <label for='update_status_list_statuses'>
             Statuses
           </label>
         </td>
         <td class='input_column'>
-          <select id='status_list_statuses'></select>
+          <select id='update_status_list_statuses'></select>
         </td>
         <td class='button_column'>
-          <button id='status_list_add_status_button'>Add</button>
-{#            <button id='status_list_edit_status_button'>Edit</button>#}
+          <button id='update_status_list_create_status_button'>New</button>
+{#            <button id='status_list_update_status_button'>Update</button>#}
         </td>
       </tr>
       
@@ -47,8 +47,8 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='status_list_edit_button'></button>
-  <button id='status_list_cancel_button'></button>
+  <button id='update_status_list_update_button'></button>
+  <button id='update_status_list_cancel_button'></button>
 </div>
 
 <script type='text/javascript'>
@@ -65,10 +65,10 @@
       ready(function(){
         // **********************************************************************
         // Form
-        var edit_status_list_form = new Form({
-          id: 'edit_status_list_form'
-        }, 'edit_status_list_form');
-        edit_status_list_form.startup();
+        var update_status_list_form = new Form({
+          id: 'update_status_list_form'
+        }, 'update_status_list_form');
+        update_status_list_form.startup();
         
         
         
@@ -81,7 +81,7 @@
           value: '{{ status_list.name }}',
           placeHolder: 'Enter a name',
           required: true
-        }, 'status_list_name');
+        }, 'update_status_list_name');
         name_textBox.startup();
         
         
@@ -95,7 +95,7 @@
           required: false,
           disabled: true,
           value: '{{ status_list.target_entity_type }}'
-        }, 'status_list_target_entity_type');
+        }, 'update_status_list_target_entity_type');
         target_entity_type_select.startup();
         
         
@@ -113,7 +113,7 @@
         var statuses_tagSelect = new TagSelect({
           name: 'statuses',
           required: false
-        }, 'status_list_statuses');
+        }, 'update_status_list_statuses');
         statuses_tagSelect.startup();
         
         // The Updater
@@ -129,35 +129,35 @@
         // run the function to fill the data for the first time
         statuses_field_updater({animate: false});
         
-        // Add Status Button
-        var add_status_button = dialogCaller({
-          label: 'Add',
-          dialog_id: 'add_status_dialog',
-          content_creator: create_add_status_dialog,
-          attach_to: 'status_list_add_status_button',
+        // create Status Button
+        var create_status_button = dialogCaller({
+          label: 'New',
+          dialog_id: 'create_status_dialog',
+          content_creator: create_create_status_dialog,
+          attach_to: 'update_status_list_create_status_button',
           related_field_updater: statuses_field_updater
         });
-        add_status_button.startup();
+        create_status_button.startup();
         
         
         
         
         // **********************************************************************
-        // Edit Button
-        var edit_button = new Button({
-          label: 'Edit',
+        // Update Button
+        var update_button = new Button({
+          label: 'Update',
           type: 'button',
           onClick: function(){
             submitForm({
-              dialog: registry.byId('edit_status_list_dialog'),
-              form: edit_status_list_form,
-              additional_data: {submitted: 'edit'},
-              url: '{{ request.route_url("edit_status_list", status_list_id=status_list.id) }}',
+              dialog: registry.byId('update_status_list_dialog'),
+              form: update_status_list_form,
+              additional_data: {submitted: 'update'},
+              url: '{{ request.route_url("update_status_list", status_list_id=status_list.id) }}',
               method: 'POST'
             });
           }
-        }, 'status_list_edit_button');
-        edit_button.startup();
+        }, 'update_status_list_update_button');
+        update_button.startup();
         
         
         
@@ -168,9 +168,9 @@
           label: 'Cancel',
           type: 'button',
           onClick: function(){
-            registry.byId('edit_status_list_dialog').destroyRecursive();
+            registry.byId('update_status_list_dialog').destroyRecursive();
           }
-        }, 'status_list_cancel_button');
+        }, 'update_status_list_cancel_button');
         cancel_button.startup();
       
       });

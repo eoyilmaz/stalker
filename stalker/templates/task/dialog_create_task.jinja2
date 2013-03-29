@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'> 
-  <form id='add_task_form'>
+  <form id='create_task_form'>
     <table style='width: 100%;'>
       
       {# TASK_OF #}
@@ -93,7 +93,7 @@
           <div id='task_resources'></div>
         </td>
 {#        <td class='button_column'>#}
-{#          <button id='task_add_resource_button'>Add</button>#}
+{#          <button id='task_create_resource_button'>Create</button>#}
 {#        </td>#}
       </tr>
       
@@ -106,8 +106,8 @@
           <input id='task_status_list'>
         </td>
         <td class='button_column'>
-          <button id='task_add_status_list_button'>Add</button>
-          <button id='task_edit_status_list_button'>Edit</button>
+          <button id='task_create_status_list_button'>Create</button>
+          <button id='task_update_status_list_button'>Update</button>
         </td>
       </tr>
       
@@ -126,7 +126,7 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='task_add_button'>Add</button>
+  <button id='task_create_button'>Create</button>
   <button id='task_cancel_button'>Cancel</button>
 </div>
 
@@ -148,9 +148,9 @@
       
       // **********************************************************************
       // Form
-      var add_task_form = new Form({
-        id: 'add_task_form'
-      }, 'add_task_form');
+      var create_task_form = new Form({
+        id: 'create_task_form'
+      }, 'create_task_form');
       
       
       
@@ -372,11 +372,11 @@
       });
       
 {#      // Add Button#}
-{#      var add_resource_button = dialogCaller({#}
-{#        label: 'Add',#}
-{#        dialog_id: 'add_user_dialog',#}
-{#        content_creator: create_add_user_dialog,#}
-{#        attach_to: 'task_add_resource_button',#}
+{#      var create_resource_button = dialogCaller({#}
+{#        label: 'create',#}
+{#        dialog_id: 'create_user_dialog',#}
+{#        content_creator: create_create_user_dialog,#}
+{#        attach_to: 'task_create_resource_button',#}
 {#        related_field_updater:#}
 {#        #}
 {#      });#}
@@ -408,28 +408,28 @@
       status_list_field_updater({animate: false});
       
       // Add Status List Button
-      var add_status_list_button = dialogCaller({
+      var create_status_list_button = dialogCaller({
         label: 'New',
-        dialog_id: 'add_status_list_dialog',
-        content_creator: create_add_status_list_dialog,
-        attach_to: 'task_add_status_list_button',
+        dialog_id: 'create_status_list_dialog',
+        content_creator: create_create_status_list_dialog,
+        attach_to: 'task_create_status_list_button',
         related_field_updater: status_list_field_updater,
         data_id: 'Task'
       });
-      add_status_list_button.startup();
+      create_status_list_button.startup();
       
-      // Edit Status List Button
-      var edit_status_list_button = dialogCaller({
-        label: 'Edit',
-        dialog_id: 'edit_status_list_dialog',
-        content_creator: create_edit_status_list_dialog,
-        attach_to: 'task_edit_status_list_button',
+      // Update Status List Button
+      var update_status_list_button = dialogCaller({
+        label: 'Update',
+        dialog_id: 'update_status_list_dialog',
+        content_creator: create_update_status_list_dialog,
+        attach_to: 'task_update_status_list_button',
         related_field_updater: status_list_field_updater,
         data_id: function(){
           return status_list_filtering_select.get('value');
         }
       });
-      edit_status_list_button.startup();
+      update_status_list_button.startup();
       
       
       
@@ -466,15 +466,15 @@
       
       // **********************************************************************
       // Add Button
-      var add_button = new Button({
+      var create_button = new Button({
         label: 'OK',
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('add_task_dialog'),
-            form: add_task_form,
+            dialog: registry.byId('create_task_dialog'),
+            form: create_task_form,
             additional_data: {
-              submitted: 'add',
+              submitted: 'create',
               is_milestone: eval(is_milestone_checkBox.get('checked')) ? 1 : 0,
               parent_id: {{ entity.id }},
               start: stamp.toISOString(start_dateTextBox.value),
@@ -482,12 +482,12 @@
               start_time: stamp.toISOString(start_time_timeTextBox.value),
               end_time: stamp.toISOString(end_time_timeTextBox.value)
             },
-            url: '{{ request.route_url('add_task', entity_id=entity.id) }}',
+            url: '{{ request.route_url('create_task', entity_id=entity.id) }}',
             method: 'POST'
           });
         }
-      }, 'task_add_button');
-      add_button.startup();
+      }, 'task_create_button');
+      create_button.startup();
       
       
       
@@ -498,13 +498,13 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          registry.byId('add_task_dialog').destroyRecursive();
+          registry.byId('create_task_dialog').destroyRecursive();
         }
       }, 'task_cancel_button');
       cancel_button.startup();
    
       
-      add_task_form.startup();
+      create_task_form.startup();
       
   });
 </script>

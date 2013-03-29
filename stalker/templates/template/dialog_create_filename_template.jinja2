@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'>
-  <form id='add_filename_template_form'>
+  <form id='create_filename_template_form'>
     <table style='width: 100%;'>
       
       {# NAME #}
@@ -78,7 +78,7 @@
   </form>
 </div>
 <div class='dijitDialogPaneActionBar'>
-  <button id='filename_template_add_button'></button>
+  <button id='filename_template_submit_button'></button>
   <button id='filename_template_cancel_button'></button>
 </div>
 <script type='text/javascript'>
@@ -91,10 +91,10 @@
       
       // **********************************************************************
       // Form
-      var add_filename_template_form = new Form({
-        id: 'add_filename_template_form'
-      }, 'add_filename_template_form');
-      add_filename_template_form.startup();
+      var create_filename_template_form = new Form({
+        id: 'create_filename_template_form'
+      }, 'create_filename_template_form');
+      create_filename_template_form.startup();
       
       
       
@@ -203,21 +203,21 @@
       
       
       // **********************************************************************
-      // Add Button
-      var add_button = new Button({
+      // Submit Button
+      var submit_button = new Button({
         label: 'OK',
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('add_filename_template_dialog'),
-            form: add_filename_template_form,
-            additional_data: {submitted: 'add'},
-            url: '{{ request.route_url('add_filename_template') }}',
+            dialog: registry.byId('create_filename_template_dialog'),
+            form: create_filename_template_form,
+            additional_data: {submitted: 'create'},
+            url: '{{ request.route_url('create_filename_template') }}',
             method: 'POST'
           });
         }
-      }, 'filename_template_add_button');
-      add_button.startup();
+      }, 'filename_template_submit_button');
+      submit_button.startup();
       
       
       
@@ -227,7 +227,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          registry.byId('add_filename_template_dialog').destroyRecursive();
+          registry.byId('create_filename_template_dialog').destroyRecursive();
         }
       }, 'filename_template_cancel_button');
       cancel_button.startup();        

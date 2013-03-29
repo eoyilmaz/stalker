@@ -1,4 +1,4 @@
-<button id='view_shots_add_shot_button'>New Shot</button>
+<button id='view_shots_create_shot_button'>New Shot</button>
 <div id='shots_data_grid'></div>
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
@@ -34,15 +34,15 @@
         'widget': shot_data_grid
       });
       
-      var add_shot_button = dialogCaller({
+      var create_shot_button = dialogCaller({
         label: 'New Shot',
-        dialog_id: 'add_shot_dialog',
-        content_creator: create_add_shot_dialog,
-        attach_to: 'view_shots_add_shot_button',
+        dialog_id: 'create_shot_dialog',
+        content_creator: create_create_shot_dialog,
+        attach_to: 'view_shots_create_shot_button',
         related_field_updater: shot_data_grid_updater,
         data_id: '{{ project.id }}'
       });
-      add_shot_button.startup();
+      create_shot_button.startup();
 
       shot_data_grid_updater();
       

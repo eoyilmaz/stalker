@@ -37,6 +37,7 @@
   <script src='{{ request.static_url("stalker:static/jQueryGantt_mod/ganttGridEditor.js") }}'></script>
   <script src='{{ request.static_url("stalker:static/jQueryGantt_mod/ganttMaster.js") }}'></script>
 
+
 {# DOJO COMPRESSED #}
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
         href='{{ request.static_url("stalker:static/dijit/themes/claro/claro.css") }}'/>
@@ -190,8 +191,8 @@
           settings_DropDownMenu.addChild(
                   dialogCaller({
                     label:'Filename Tamplate',
-                    dialog_id:'add_filename_template_dialog',
-                    content_creator: create_add_filename_template_dialog,
+                    dialog_id:'create_filename_template_dialog',
+                    content_creator: create_create_filename_template_dialog,
                     widget_type: 'MenuItem'
                   })
           );
@@ -201,8 +202,8 @@
           settings_DropDownMenu.addChild(
                   dialogCaller({
                     label:'Image Format',
-                    dialog_id:'add_image_format_dialog',
-                    content_creator: create_add_image_format_dialog,
+                    dialog_id:'create_image_format_dialog',
+                    content_creator: create_create_image_format_dialog,
                     widget_type: 'MenuItem'
                   })
           );
@@ -212,8 +213,8 @@
           settings_DropDownMenu.addChild(
                   dialogCaller({
                     label:'Repository',
-                    dialog_id:'add_repository_dialog',
-                    content_creator: create_add_repository_dialog,
+                    dialog_id:'create_repository_dialog',
+                    content_creator: create_create_repository_dialog,
                     widget_type: 'MenuItem'
                   })
           );
@@ -223,8 +224,8 @@
           settings_DropDownMenu.addChild(
                   dialogCaller({
                     label:'Status',
-                    dialog_id:'add_status_dialog',
-                    content_creator: create_add_status_dialog,
+                    dialog_id:'create_status_dialog',
+                    content_creator: create_create_status_dialog,
                     widget_type: 'MenuItem'
                   })
           );
@@ -234,8 +235,8 @@
           settings_DropDownMenu.addChild(
                   dialogCaller({
                     label:'Status List',
-                    dialog_id:'add_status_list_dialog',
-                    content_creator: create_add_status_list_dialog,
+                    dialog_id:'create_status_list_dialog',
+                    content_creator: create_create_status_list_dialog,
                     widget_type: 'MenuItem'
                   })
           );
@@ -245,8 +246,8 @@
           settings_DropDownMenu.addChild(
                   dialogCaller({
                     label:'Structure',
-                    dialog_id:'add_structure_dialog',
-                    content_creator: create_add_structure_dialog,
+                    dialog_id:'create_structure_dialog',
+                    content_creator: create_create_structure_dialog,
                     widget_type: 'MenuItem'
                   })
           );
@@ -307,8 +308,8 @@
             project_setting_DropDownMenu.addChild(
                     dialogCaller({
                       label:'+ New Asset',
-                      dialog_id:'add_asset_dialog',
-                      content_creator: create_add_asset_dialog,
+                      dialog_id:'create_asset_dialog',
+                      content_creator: create_create_asset_dialog,
                       widget_type: 'MenuItem',
                       data_id: pID
 
@@ -320,8 +321,8 @@
             project_setting_DropDownMenu.addChild(
                     dialogCaller({
                       label:'+ New Sequence',
-                      dialog_id:'add_sequence_dialog',
-                      content_creator: create_add_sequence_dialog,
+                      dialog_id:'create_sequence_dialog',
+                      content_creator: create_create_sequence_dialog,
                       widget_type: 'MenuItem',
                       data_id: pID
                     })
@@ -332,8 +333,8 @@
             project_setting_DropDownMenu.addChild(
                     dialogCaller({
                       label:'+ New Shot',
-                      dialog_id:'add_shot_dialog',
-                      content_creator: create_add_shot_dialog,
+                      dialog_id:'create_shot_dialog',
+                      content_creator: create_create_shot_dialog,
                       widget_type: 'MenuItem',
                       data_id: pID
                     })
@@ -346,8 +347,8 @@
             project_setting_DropDownMenu.addChild(
                     dialogCaller({
                       label:'+ Add User',
-                      dialog_id:'add_user_dialog',
-                      content_creator: create_add_user_dialog,
+                      dialog_id:'create_user_dialog',
+                      content_creator: create_create_user_dialog,
                       widget_type: 'MenuItem',
                       data_id: pID
                     })
@@ -390,8 +391,8 @@
               projects_DropDownMenu.addChild(
                       dialogCaller({
                         label:'+ New Project',
-                        dialog_id:'add_project_dialog',
-                        content_creator: create_add_project_dialog,
+                        dialog_id:'create_project_dialog',
+                        content_creator: create_create_project_dialog,
                         widget_type: 'MenuItem',
                         related_field_updater: projects_DropDownMenu_updater
                       })
@@ -406,8 +407,8 @@
               projects_DropDownMenu.addChild(
                       dialogCaller({
                         label:'+ New Asset',
-                        dialog_id:'add_asset_dialog',
-                        content_creator: create_add_asset_dialog,
+                        dialog_id:'create_asset_dialog',
+                        content_creator: create_create_asset_dialog,
                         widget_type: 'MenuItem'
 
                       })
@@ -418,8 +419,8 @@
               projects_DropDownMenu.addChild(
                       dialogCaller({
                         label:'+ New Sequence',
-                        dialog_id:'add_sequence_dialog',
-                        content_creator: create_add_sequence_dialog,
+                        dialog_id:'create_sequence_dialog',
+                        content_creator: create_create_sequence_dialog,
                         widget_type: 'MenuItem'
                       })
               );
@@ -429,8 +430,8 @@
               projects_DropDownMenu.addChild(
                       dialogCaller({
                         label:'+ New Shot',
-                        dialog_id:'add_shot_dialog',
-                        content_creator: create_add_shot_dialog,
+                        dialog_id:'create_shot_dialog',
+                        content_creator: create_create_shot_dialog,
                         widget_type: 'MenuItem'
                       })
               );
@@ -491,8 +492,8 @@
             department_setting_DropDownMenu.addChild(
                     dialogCaller({
                       label:'+ New User',
-                      dialog_id:'add_user_dialog',
-                      content_creator: create_add_user_dialog,
+                      dialog_id:'create_user_dialog',
+                      content_creator: create_create_user_dialog,
                       widget_type: 'MenuItem',
                       data_id: dID
                     })
@@ -532,8 +533,8 @@
               crew_DropDownMenu.addChild(
                       dialogCaller({
                         label: '+ New Department',
-                        dialog_id: 'add_department_dialog',
-                        content_creator: create_add_department_dialog,
+                        dialog_id: 'create_department_dialog',
+                        content_creator: create_create_department_dialog,
                         widget_type: 'MenuItem',
                         related_field_updater: departments_DropDownMenu_updater
                       })
@@ -548,8 +549,8 @@
               crew_DropDownMenu.addChild(
                       dialogCaller({
                         label:'+ New User',
-                        dialog_id:'add_user_dialog',
-                        content_creator: create_add_user_dialog,
+                        dialog_id:'create_user_dialog',
+                        content_creator: create_create_user_dialog,
                         widget_type: 'MenuItem',
                         data_id: '-1'
                       })
@@ -560,8 +561,8 @@
               crew_DropDownMenu.addChild(
                       dialogCaller({
                         label: '+ New Group',
-                        dialog_id: 'add_group_dialog',
-                        content_creator: create_add_group_dialog,
+                        dialog_id: 'create_group_dialog',
+                        content_creator: create_create_group_dialog,
                         widget_type: 'MenuItem'
                       })
               );

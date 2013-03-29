@@ -17,11 +17,11 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='add_repository',
-    renderer='templates/repository/add_repository.jinja2',
-    permission='Add_Repository'
+    route_name='create_repository',
+    renderer='templates/repository/dialog_create_repository.jinja2',
+    permission='Create_Repository'
 )
-def add_repository(request):
+def create_repository(request):
     """called when adding a repository
     """
     referrer = request.url
@@ -48,12 +48,12 @@ def add_repository(request):
 
 
 @view_config(
-    route_name='edit_repository',
-    renderer='templates/repository/edit_repository.jinja2',
-    permission='Edit_Repository'
+    route_name='update_repository',
+    renderer='templates/repository/dialog_update_repository.jinja2',
+    permission='Update_Repository'
 )
-def edit_repository(request):
-    """called when editing a repository
+def update_repository(request):
+    """called when updateing a repository
     """
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
@@ -66,7 +66,7 @@ def edit_repository(request):
     if 'submitted' in request.params:
         logger.debug('submitted in request.params')
         logger.debug('submitted: %s ' % request.params['submitted'])
-        if request.params['submitted'] == 'edit':
+        if request.params['submitted'] == 'update':
             if 'name' in request.params and \
                'windows_path' in request.params and \
                'linux_path' in request.params and \
@@ -97,7 +97,7 @@ def edit_repository(request):
 @view_config(
     route_name='get_repositories',
     renderer='json',
-    permission='View_Repository'
+    permission='Read_Repository'
 )
 def get_repositories(request):
     """returns all the repositories in the database

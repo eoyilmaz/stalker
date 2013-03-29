@@ -1,15 +1,15 @@
-<div id='view_assets'>
-  <button id='view_assets_add_asset_button'>New Asset</button>
+<div id='list_assets'>
+  <button id='list_assets_add_asset_button'>New Asset</button>
   <div id='assets_data_grid'></div>
 </div>
 
 <script type='text/javascript'>
-  require(["dgrid/List", "dgrid/Grid", 'dojo/store/Memory',"dgrid/Selection",
+  require(["dgrid/List", "dgrid/OnDemandGrid", 'dojo/store/Memory',"dgrid/Selection",
     "dgrid/Keyboard", "dgrid/editor", "dijit/form/CheckBox",
     "dijit/form/TimeTextBox",  "dijit/form/Select","dojo/data/ObjectStore",
     "dijit/form/FilteringSelect", 'dojo/store/JsonRest',
     "dojo/query","dgrid/test/data/base", "dojo/domReady!"],
-    function(List, Grid, Memory, Selection, Keyboard, editor, CheckBox, TimeTextBox,
+    function(List, OnDemandGrid, Memory, Selection, Keyboard, editor, CheckBox, TimeTextBox,
              Select, ObjectStore, FilteringSelect, JsonRest, query){
       
 
@@ -22,7 +22,7 @@
 {#        label: 'New Asset',#}
 {#        dialog_id: 'add_asset_dialog',#}
 {#        content_creator: create_add_asset_dialog,#}
-{#        attach_to: 'view_assets_add_asset_button',#}
+{#        attach_to: 'list_assets_add_asset_button',#}
 {#        related_field_updater: asset_data_grid_updater,#}
 {#        data_id: '{{ project.id }}'#}
 {#      });#}
@@ -32,7 +32,7 @@
 
       var columns;
 
-      var asset_data_grid = new Grid({
+      var asset_data_grid = new OnDemandGrid({
         id: 'assets_data_grid',
         width: '100%',
         autoHeight: true,
@@ -41,6 +41,8 @@
         rowSelector: '20px',
         selectionMode: "none"
       }, 'assets_data_grid');
+
+
 
 
 
@@ -58,9 +60,14 @@
           target: 'get/statuses_of/'+ status_id
         });
 
-        status_store =  new ObjectStore({ objectStore:status_memory });
+        alert('status_memory '+status_id);
 
-        asset_data_grid_updater();
+        status_memory.query().then(function(data1){
+
+          status_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
+          alert('status_memory');
+          asset_data_grid_updater();
+        });
 
       });
 
@@ -74,49 +81,45 @@
         asset_memory.query().then(function(data){
 
 
-{#          for(var i=0;i<data.length;i++ ){#}
-{##}
-{#            var assetName = data[i]["name"];#}
-{#            var assetLink = '<a class="DataGridLink" href="#" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';#}
-{##}
-{#            var userName = data[i]["user_name"];#}
-{#            var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';#}
-{##}
-{#            data[i]["asset_link"] = assetLink;#}
-{#            data[i]["user_link"] = userLink;#}
-{##}
-{#          }#}
+          for(var i=0;i<data.length;i++ ){
+
+            var assetName = data[i]["name"];
+            var assetLink = '<a class="DataGridLink" href="#" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';
+
+            var userName = data[i]["user_name"];
+            var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
+
+            data[i]["asset_link"] = assetLink;
+            data[i]["user_link"] = userLink;
+
+          }
 
 
           my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
 
           columns = [
-            {field: "id", label: "id"},
+            {field: "", label: "Thumbnail"},
+            {field: "asset_link", label: "Name"},
+
             editor({
-              label: "Select Store",
-              field: "status",
-              editorArgs: {
-                store: status_store,
-                maxHeight: 150,
-                style: "width:120px;"
-              }
-            }, Select, "click"),
-            editor({
-              label: "FilteringSelect Store",
+              label: "Type",
               field: "type",
               editorArgs: {
                 store: status_store,
                 maxHeight: 150,
-                value: '',
                 style: "width:120px;"
               }
-            }, FilteringSelect)
+            }, FilteringSelect),
+            {field: "user_link", label: "Created By"},
+            {field: "description", label: "Description"}
             // Note that mileage may vary with editOn + widgets with multiple focusable children, e.g. dijit/Editor
           ];
 
-          asset_data_grid.renderArray(data);
+
 
           asset_data_grid.set('columns', columns );
+          asset_data_grid.renderArray(data);
+          //asset_data_grid.set('store', my_store );
 
         });
 

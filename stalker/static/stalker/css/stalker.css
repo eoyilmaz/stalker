@@ -237,3 +237,11 @@ a:hover {
     clear: both;
     left: 204px;
 }
+
+.dgrid-no-data,
+.dgrid-loading {
+    color: #aaa;
+    font-size: 3px;
+    padding: 3px;
+    text-align: center;
+}

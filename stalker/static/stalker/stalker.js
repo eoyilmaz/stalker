@@ -6,11 +6,11 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // PROJECT
-        create_add_project_dialog = function (){
+        create_create_project_dialog = function (){
                 return new DialogSimple({
-                    id: 'add_project_dialog',
+                    id: 'create_project_dialog',
                     title: 'New Project',
-                    href: '/add/project',
+                    href: '/create/project',
                     resize: true,
                     style: style,
                     executeScripts: true
@@ -18,11 +18,11 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             
         };
         
-        create_edit_project_dialog = function(project_id){
+        create_update_project_dialog = function(project_id){
             return new DialogSimple({
-                id: 'edit_project_dialog',
-                title: 'Edit Project',
-                href: '/edit/project/' + project_id,
+                id: 'update_project_dialog',
+                title: 'Update Project',
+                href: '/update/project/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -31,22 +31,22 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // IMAGE FORMAT
-        create_add_image_format_dialog = function(){
+        create_create_image_format_dialog = function(){
             return new DialogSimple({
-                id: 'add_image_format_dialog',
+                id: 'create_image_format_dialog',
                 title: 'New Image Format',
-                href: '/add/image_format',
+                href: '/create/image_format',
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_image_format_dialog = function(image_format_id){
+        create_update_image_format_dialog = function(image_format_id){
             return new DialogSimple({
-                id: 'edit_image_format_dialog',
-                title: 'Edit Image Format',
-                href: '/edit/image_format/' + image_format_id,
+                id: 'update_image_format_dialog',
+                title: 'Update Image Format',
+                href: '/update/image_format/' + image_format_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -55,22 +55,22 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // STRUCTURE
-        create_add_structure_dialog = function(){
+        create_create_structure_dialog = function(){
             return new DialogSimple({
-                id: 'add_structure_dialog',
+                id: 'create_structure_dialog',
                 title: 'New Structure',
-                href: '/add/structure',
+                href: '/create/structure',
                 resize: true,
                 style: style,
                 executeScripts: true
             }); 
         };
         
-        create_edit_structure_dialog = function(structure_id){
+        create_update_structure_dialog = function(structure_id){
             return new DialogSimple({
-                id: 'edit_structure_dialog',
-                title: 'Edit Structure',
-                href: '/edit/structure/' + structure_id,
+                id: 'update_structure_dialog',
+                title: 'Update Structure',
+                href: '/update/structure/' + structure_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -79,23 +79,23 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // USER
-        create_add_user_dialog = function(department_id){
+        create_create_user_dialog = function(department_id){
             department_id = department_id || -1;
             return new DialogSimple({
-                id: 'add_user_dialog',
+                id: 'create_user_dialog',
                 title: 'New User',
-                href: '/add/user/' + department_id,
+                href: '/create/user/' + department_id,
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_user_dialog = function(user_id){
+        create_update_user_dialog = function(user_id){
             var myDialog = new DialogSimple({
-                id: 'edit_user_dialog',
-                title: 'Edit User',
-                href: 'edit/user/' + user_id,
+                id: 'update_user_dialog',
+                title: 'Update User',
+                href: 'update/user/' + user_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -104,22 +104,22 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // FILENAME TEMPLATE
-        create_add_filename_template_dialog = function(){
+        create_create_filename_template_dialog = function(){
             return new DialogSimple({
-                id: 'add_filename_template_dialog',
+                id: 'create_filename_template_dialog',
                 title: 'New Filename Template',
-                href: '/add/filename_template',
+                href: '/create/filename_template',
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_filename_template_dialog = function(filename_template_id){
+        create_update_filename_template_dialog = function(filename_template_id){
             var myDialog = new DialogSimple({
-                id: 'edit_filename_template_dialog',
-                title: 'Edit Filename Template',
-                href: 'edit/filename_template/' + filename_template_id,
+                id: 'update_filename_template_dialog',
+                title: 'Update Filename Template',
+                href: 'update/filename_template/' + filename_template_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -128,22 +128,22 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
          
         // ********************************************************************
         // REPOSITORY
-        create_add_repository_dialog = function(){
+        create_create_repository_dialog = function(){
             return new DialogSimple({
-                id: 'add_repository_dialog',
+                id: 'create_repository_dialog',
                 title: 'New Repository',
-                href: '/add/repository',
+                href: '/create/repository',
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_repository_dialog = function(repo_id){
+        create_update_repository_dialog = function(repo_id){
             return new DialogSimple({
-                id: 'edit_repository_dialog',
-                title: 'Edit Repository',
-                href: '/edit/repository/' + repo_id,
+                id: 'update_repository_dialog',
+                title: 'Update Repository',
+                href: '/update/repository/' + repo_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -152,15 +152,15 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // STATUS LIST
-        create_add_status_list_dialog = function(target_entity_type){
+        create_create_status_list_dialog = function(target_entity_type){
             var href;
             if (target_entity_type == null){
-                href = '/add/status_list'
+                href = '/create/status_list'
             } else {
-                href = '/add/status_list/' + target_entity_type
+                href = '/create/status_list/' + target_entity_type
             }
             return new DialogSimple({
-                id: 'add_status_list_dialog',
+                id: 'create_status_list_dialog',
                 title: 'New Status List',
                 href: href,
                 resize: true,
@@ -169,11 +169,11 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             });
         };
         
-        create_edit_status_list_dialog = function(status_list_id){
+        create_update_status_list_dialog = function(status_list_id){
             return new DialogSimple({
-                id: 'edit_status_list_dialog',
-                title: 'Edit Status List',
-                href: '/edit/status_list/' + status_list_id,
+                id: 'update_status_list_dialog',
+                title: 'Update Status List',
+                href: '/update/status_list/' + status_list_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -182,22 +182,22 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // STATUS
-        create_add_status_dialog = function(){
+        create_create_status_dialog = function(){
             return new DialogSimple({
-                id: 'add_status_dialog',
+                id: 'create_status_dialog',
                 title: 'New Status',
-                href: '/add/status',
+                href: '/create/status',
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_status_dialog = function(status_id){
+        create_update_status_dialog = function(status_id){
             return new DialogSimple({
-                id: 'edit_status_dialog',
-                title: 'Edit Status',
-                href: '/edit/status/' + status_id,
+                id: 'update_status_dialog',
+                title: 'Update Status',
+                href: '/update/status/' + status_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -206,12 +206,12 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // ASSET
-        create_add_asset_dialog = function(project_id){
+        create_create_asset_dialog = function(project_id){
             project_id = project_id || -1;
             return new DialogSimple({
-                id: 'add_asset_dialog',
+                id: 'create_asset_dialog',
                 title: 'New Asset',
-                href: '/add/asset/' + project_id,
+                href: '/create/asset/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -220,23 +220,23 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // SHOT
-        create_add_shot_dialog = function(project_id){
+        create_create_shot_dialog = function(project_id){
             project_id = project_id || -1;
             return new DialogSimple({
-                id: 'add_shot_dialog',
+                id: 'create_shot_dialog',
                 title: 'New Shot',
-                href: '/add/shot/' + project_id,
+                href: '/create/shot/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_shot_dialog = function(shot_id){
+        create_update_shot_dialog = function(shot_id){
             return new DialogSimple({
-                id: 'edit_shot_dialog',
-                title: 'Edit Shot',
-                href: '/edit/shot/' + shot_id,
+                id: 'update_shot_dialog',
+                title: 'Update Shot',
+                href: '/update/shot/' + shot_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -245,23 +245,23 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // SEQUENCE
-        create_add_sequence_dialog = function(project_id){
+        create_create_sequence_dialog = function(project_id){
             project_id = project_id || -1;
             return new DialogSimple({
-                id: 'add_sequence_dialog',
+                id: 'create_sequence_dialog',
                 title: 'New Sequence',
-                href: '/add/sequence/' + project_id,
+                href: '/create/sequence/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_sequence_dialog = function(sequence_id){
+        create_update_sequence_dialog = function(sequence_id){
             return new DialogSimple({
-                id: 'edit_sequence_dialog',
-                title: 'Edit Sequence',
-                href: '/edit/sequence/' + sequence_id,
+                id: 'update_sequence_dialog',
+                title: 'Update Sequence',
+                href: '/update/sequence/' + sequence_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -270,22 +270,22 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // TASK
-        create_add_task_dialog = function(taskable_entity_id){
+        create_create_task_dialog = function(taskable_entity_id){
             return new DialogSimple({
-                id: 'add_task_dialog',
+                id: 'create_task_dialog',
                 title: 'New Task',
-                href: '/add/task/' + taskable_entity_id,
+                href: '/create/task/' + taskable_entity_id,
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_task_dialog = function(task_id){
+        create_update_task_dialog = function(task_id){
             return new DialogSimple({
-                id: 'edit_task_dialog',
-                title: 'Edit Task',
-                href: '/edit/task/' + task_id,
+                id: 'update_task_dialog',
+                title: 'Update Task',
+                href: '/update/task/' + task_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -294,22 +294,22 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // DEPARTMENT
-        create_add_department_dialog = function(){
+        create_create_department_dialog = function(){
             return new DialogSimple({
-                id: 'add_department_dialog',
+                id: 'create_department_dialog',
                 title: 'New Department',
-                href: '/add/department',
+                href: '/create/department',
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_department_dialog = function(department_id){
+        create_update_department_dialog = function(department_id){
             return new DialogSimple({
-                id: 'edit_department_dialog',
-                title: 'Edit Department',
-                href: '/edit/department/' + department_id,
+                id: 'update_department_dialog',
+                title: 'Update Department',
+                href: '/update/department/' + department_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -318,22 +318,22 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // GROUPS
-        create_add_group_dialog = function(){
+        create_create_group_dialog = function(){
             return new DialogSimple({
-                id: 'add_group_dialog',
+                id: 'create_group_dialog',
                 title: 'New Group',
-                href: '/add/group',
+                href: '/create/group',
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        create_edit_group_dialog = function(group_id){
+        create_update_group_dialog = function(group_id){
             return new DialogSimple({
-                id: 'edit_group_dialog',
-                title: 'Edit Group',
-                href: '/edit/group/' + group_id,
+                id: 'update_group_dialog',
+                title: 'Update Group',
+                href: '/update/group/' + group_id,
                 resize: true,
                 style: style,
                 executeScripts: true

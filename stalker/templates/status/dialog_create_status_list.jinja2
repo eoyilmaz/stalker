@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'>
-  <form id='add_status_list_form'>
+  <form id='create_status_list_form'>
     <table style='width: 100%'>
       
       {# NAME #}
@@ -37,8 +37,8 @@
           <select id='status_list_statuses'></select>
         </td>
         <td class='button_column'>
-          <button id='status_list_add_status_button'>Add</button>
-{#            <button id='status_list_edit_status_button'>Edit</button>#}
+          <button id='status_list_create_status_button'>New</button>
+{#            <button id='status_list_update_status_button'>Update</button>#}
         </td>
       </tr>
       
@@ -47,7 +47,7 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='status_list_add_button'></button>
+  <button id='status_list_submit_button'></button>
   <button id='status_list_cancel_button'></button>
 </div>
 
@@ -64,9 +64,9 @@
       
       // **********************************************************************
       // Form
-      var add_status_list_form = new Form({
-        id: 'add_status_list_form'
-      }, 'add_status_list_form');
+      var create_status_list_form = new Form({
+        id: 'create_status_list_form'
+      }, 'create_status_list_form');
       
       // **********************************************************************
       // Name
@@ -112,7 +112,18 @@
       // The Widget
       var statuses_tagSelect = new TagSelect({
         name: 'statuses',
-        required: false
+        required: true,
+        onChange: function(){
+          alert('statuses_tagSelect.tags.length' +statuses_tagSelect.tags.length)
+          if( statuses_tagSelect.tags.length > 0 ){
+            submit_button.set('disabled', false);
+          }
+
+          else{
+            submit_button.set('disabled', true);
+          }
+
+        }
       }, 'status_list_statuses');
       
       // The Updater
@@ -123,12 +134,12 @@
       // run the function to fill the data for the first time
       statuses_field_updater({animate: false});
       
-      // Add Status Button
-      var add_status_button = dialogCaller({
+      // New Status Button
+      var create_status_button = dialogCaller({
         label: 'New',
-        dialog_id: 'add_status_dialog',
-        content_creator: create_add_status_dialog,
-        attach_to: 'status_list_add_status_button',
+        dialog_id: 'create_status_dialog',
+        content_creator: create_create_status_dialog,
+        attach_to: 'status_list_create_status_button',
         related_field_updater: statuses_field_updater
       });
       
@@ -137,20 +148,22 @@
       
       
       // **********************************************************************
-      // Add Button
-      var add_button = new Button({
+      // Submit Button
+      var submit_button = new Button({
         label: 'OK',
         type: 'button',
+        disabled: false,
         onClick: function(){
+
           submitForm({
-            dialog: registry.byId('add_status_list_dialog'),
-            form: add_status_list_form,
-            additional_data: {submitted: 'add'},
-            url: '{{ request.route_url('add_status_list') }}',
+            dialog: registry.byId('create_status_list_dialog'),
+            form: create_status_list_form,
+            additional_data: {submitted: 'create'},
+            url: '{{ request.route_url('create_status_list') }}',
             method: 'POST'
           });
         }
-      }, 'status_list_add_button');
+      }, 'status_list_submit_button');
       
       
       
@@ -162,7 +175,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          registry.byId('add_status_list_dialog').destroyRecursive();
+          registry.byId('create_status_list_dialog').destroyRecursive();
         }
       }, 'status_list_cancel_button');
       
@@ -171,10 +184,10 @@
       target_entity_type_select.startup();
       name_textBox.startup();
       statuses_tagSelect.startup();
-      add_status_button.startup();
-      add_button.startup();
+      create_status_button.startup();
+      submit_button.startup();
       cancel_button.startup();
-      add_status_list_form.startup();
+      create_status_list_form.startup();
       
   });
 </script>

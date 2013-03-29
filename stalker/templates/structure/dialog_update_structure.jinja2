@@ -1,45 +1,44 @@
 <div class='dijitDialogPaneContentArea' style='height: 380px'>
-  <form id='add_structure_form'>
+  <form id='update_structure_form'>
     <table style='width: 100%'>
     
     {# Name #}
     <tr>
       <td class='label_column'>
-        <label for='structure_name'>
+        <label for='update_structure_name'>
           Name
         </label>
       </td>
       <td class='input_column'>
-        <input id='structure_name'>
+        <input id='update_structure_name'>
       </td>
     </tr>
     
     {# Custom Template #}
     <tr style='height: 260px'>
       <td class='label_column'>
-        <label for='structure_custom_template'>
+        <label for='update_structure_custom_template'>
           Custom Template
         </label>
       </td>
       <td class='input_column'>
-        <input id='structure_custom_template'>
+        <input id='update_structure_custom_template'>
       </td>
     </tr>
     
     {# Filename Templates #}
     <tr>
       <td class='label_column'>
-        <label for='structure_filename_template'>
+        <label for='update_structure_filename_template'>
           Filename Templates
         </label>
       </td>
       <td class='input_column'>
-        <select id='structure_filename_template'>
-        </select>
+        <select id='update_structure_filename_template'></select>
       </td>
       <td class='button_column'>
-        <button id='structure_add_filename_template_button'>Add</button>
-{#        <button id='structure_edit_filename_template_button'>Edit</button>#}
+        <button id='update_structure_create_filename_template_button'>New</button>
+{#        <button id='structure_update_filename_template_button'>Update</button>#}
       </td>
     </tr>
     </table>
@@ -47,8 +46,8 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='structure_add_button'></button>
-  <button id='structure_cancel_button'></button>
+  <button id='update_structure_submit_button'></button>
+  <button id='update_structure_cancel_button'></button>
 </div>
 
 <script type='text/javascript'>
@@ -63,10 +62,10 @@
       
       // **********************************************************************
       // Form
-      var add_structure_form = new Form({
-        id: 'add_structure_form'
-      }, 'add_structure_form');
-      add_structure_form.startup();
+      var update_structure_form = new Form({
+        id: 'update_structure_form'
+      }, 'update_structure_form');
+      update_structure_form.startup();
       
       
       
@@ -76,9 +75,10 @@
       var name_textBox = new ValidationTextBox({
         name: 'name',
         label: 'Name',
+        value: '{{ structure.name }}',
         placeHolder: 'Enter a name',
         required: true
-      }, 'structure_name');
+      }, 'update_structure_name');
       name_textBox.startup();
       
       
@@ -89,10 +89,11 @@
       var custom_template_simpleTextarea = new SimpleTextarea({
         name: 'custom_template',
         label: 'Custom Template',
+        value: '{{ structure.custom_template }}',
         placeHolder: 'Enter any custom template here',
         required: false,
         style: 'height: 250px; overflow:auto'
-      }, 'structure_custom_template');
+      }, 'update_structure_custom_template');
       custom_template_simpleTextarea.startup();
       
       
@@ -104,49 +105,55 @@
         target: '/get/filename_templates'
       });
       
+      // The Widget
       var filename_template_multi_select = new MultiSelect({
         name: 'filename_templates',
         required: false
-      }, 'structure_filename_template');
+      }, 'update_structure_filename_template');
       filename_template_multi_select.startup();
       
       // The Updater
       var filename_template_field_updater = fieldUpdater({
         'memory': filename_template_memory,
-        'widget': filename_template_multi_select
+        'widget': filename_template_multi_select,
+        'selected': [
+          {% for ft in structure.templates %}
+            {{ ft.id}},
+          {% endfor %}
+        ]
       });
       // run the function to fill the data for the first time
       filename_template_field_updater({animate: false});
       
       // Add Filename Template Button
-      var add_filename_template_button = dialogCaller({
+      var create_filename_template_button = dialogCaller({
         label: 'New',
-        dialog_id: 'add_filename_template_dialog',
-        content_creator: create_add_filename_template_dialog,
-        attach_to: 'structure_add_filename_template_button',
+        dialog_id: 'create_filename_template_dialog',
+        content_creator: create_create_filename_template_dialog,
+        attach_to: 'update_structure_create_filename_template_button',
         related_field_updater: filename_template_field_updater
       });
-      add_filename_template_button.startup();
+      create_filename_template_button.startup();
       
       
       
       
       // **********************************************************************
-      // Add Button
-      var add_button = new Button({
+      // Update Button
+      var submit_button = new Button({
         label: 'OK',
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('add_structure_dialog'),
-            form: add_structure_form,
-            additional_data: {submitted: 'add'},
-            url: '{{ request.route_url('add_structure') }}',
+            dialog: registry.byId('update_structure_dialog'),
+            form: update_structure_form,
+            additional_data: {submitted: 'update'},
+            url: '{{ request.route_url('update_structure', structure_id=structure.id) }}',
             method: 'POST'
           });
         }
-      }, 'structure_add_button');
-      add_button.startup();
+      }, 'update_structure_submit_button');
+      submit_button.startup();
       
       
       
@@ -157,10 +164,10 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = registry.byId('add_structure_dialog');
+          var dialog = registry.byId('update_structure_dialog');
           dialog.destroyRecursive();
         }
-      }, 'structure_cancel_button');
+      }, 'update_structure_cancel_button');
       cancel_button.startup();
       
       

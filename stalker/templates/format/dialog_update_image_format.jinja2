@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'>
-  <form id='edit_image_format_form'>
+  <form id='update_image_format_form'>
     <table style='width: 100%'>
     
       {# NAME #}
@@ -53,7 +53,7 @@
   </form>
 </div>
 <div class='dijitDialogPaneActionBar'>
-  <button id='image_format_edit_button'></button>
+  <button id='image_format_update_button'></button>
   <button id='image_format_cancel_button'></button>
 </div>
 <script type='text/javascript'>
@@ -66,10 +66,10 @@
       
       // **********************************************************************
       // Form
-      var edit_image_format_form = new Form({
-        id: 'edit_image_format_form'
-      }, 'edit_image_format_form');
-      edit_image_format_form.startup();
+      var update_image_format_form = new Form({
+        id: 'update_image_format_form'
+      }, 'update_image_format_form');
+      update_image_format_form.startup();
       
       
       
@@ -128,21 +128,21 @@
       
       
       // **********************************************************************
-      // Edit Button
-      var edit_button = new Button({
-        label: 'Edit',
+      // Update Button
+      var update_button = new Button({
+        label: 'Update',
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('edit_image_format_dialog'),
-            form: edit_image_format_form,
-            additional_data: {submitted: 'edit'},
-            url: '{{ request.route_url('edit_image_format', imf_id=image_format.id) }}',
+            dialog: registry.byId('update_image_format_dialog'),
+            form: update_image_format_form,
+            additional_data: {submitted: 'update'},
+            url: '{{ request.route_url('update_image_format', imf_id=image_format.id) }}',
             method: 'POST'
           });
         }
-      }, 'image_format_edit_button');
-      edit_button.startup();
+      }, 'image_format_update_button');
+      update_button.startup();
       
       
       
@@ -153,7 +153,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          registry.byId('edit_image_format_dialog').destroyRecursive();
+          registry.byId('update_image_format_dialog').destroyRecursive();
         }
       }, 'image_format_cancel_button');
       cancel_button.startup();

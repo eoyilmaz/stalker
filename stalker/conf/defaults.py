@@ -42,7 +42,7 @@ VERSION_TAKE_NAME = "Main"
 
 TICKET_LABEL = "Ticket"
 
-ACTIONS = ['Add', 'View', 'Edit', 'Delete']
+ACTIONS = ['Create', 'Read', 'Update', 'Delete', 'List'] #CRUDL
 
 STATUS_BG_COLOR = 0xffffff
 STATUS_FG_COLOR = 0x000000

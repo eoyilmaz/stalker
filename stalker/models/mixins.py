@@ -835,12 +835,12 @@ class ACLMixin(object):
         
           * Permission.access (Ex: 'Allow' or 'Deny')
           * The Mixed in class name and the object name (Ex: 'User:eoyilmaz')
-          * The Action and the target class name (Ex: 'Add_Project')
+          * The Action and the target class name (Ex: 'Add_Asset')
           
         Thus a list of tuple is returned as follows::
-            
+
           __acl__ = [
-              ('Allow', 'User:eoyilmaz', 'Add_Project'),
+              ('Allow', 'User:eoyilmaz', 'Add_Asset', proj_id),
           ]
             
         For the last example user eoyilmaz can grant access to views requiring

@@ -15,7 +15,9 @@ define([
     return declare('stalker.TagSelect', [_WidgetBase, _TemplatedMixin],
         {
             templateString: template,
-            
+
+            baseClass: 'stalker.tagSelect',
+
             name: null,
             store: null,
             
@@ -92,12 +94,18 @@ define([
             },
             
             isValid: function(){
+                if (this.required){
+                    // check if there are any tags selected
+                    return this.tags.length > 0;
+                }
             },
-            
-            validator: function(){
-            },
-            
-            baseClass: 'stalker.tagSelect',
+
+//            validate: function(){
+//                this.inherited(arguments);
+//                return this.isValid;
+//            },
+//            validator: function(){
+//            },
             
             constructor: function stalker_tagSelect_constructor(args){
                 if (args){

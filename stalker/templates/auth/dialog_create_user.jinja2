@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'>
-  <form id='add_user_form'>
+  <form id='create_user_form'>
     <table style='width: 100%;'>
       
       {# NAME #}
@@ -61,7 +61,7 @@
           <input id='user_departments'>
         </td>
         <td class='button_column'>
-          <button id='user_add_department_button'>Add</button>
+          <button id='user_create_department_button'>New</button>
         </td>
       </tr>
       
@@ -74,7 +74,7 @@
           <input id='user_groups'>
         </td>
         <td class='button_column'>
-          <button id='user_add_group_button'>Add</button>
+          <button id='user_create_group_button'>New</button>
         </td>
       </tr>
       
@@ -93,7 +93,7 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='user_add_button'>Add</button>
+  <button id='user_submit_button'>OK</button>
   <button id='user_cancel_button'>Cancel</button>
 </div>
 
@@ -107,9 +107,9 @@
       
       // **********************************************************************
       // Form
-      var add_user_form = new Form({
-        id: 'add_user_form'
-      }, 'add_user_form');
+      var create_user_form = new Form({
+        id: 'create_user_form'
+      }, 'create_user_form');
       
       
       
@@ -196,7 +196,7 @@
       // **********************************************************************
       // Departments
       var departments_tagSelect;
-      var add_department_button;
+      var create_department_button;
 
       {% if department %}
         departments_tagSelect = new TextBox({
@@ -208,11 +208,11 @@
 
         departments_tagSelect.startup();
 
-        add_department_button = new Button({
+        create_department_button = new Button({
           disabled: true,
           label: 'New'
-        },'user_add_department_button');
-        add_department_button.startup();
+        },'user_create_department_button');
+        create_department_button.startup();
 
       {% else %}
         var departments_jsonRest = new JsonRest({
@@ -232,15 +232,15 @@
         });
         departments_field_updater({animate: false});
 
-        // Add Department Button
-        add_department_button = dialogCaller({
+        // New Department Button
+        create_department_button = dialogCaller({
           label: 'New',
-          dialog_id: 'add_department_dialog',
-          content_creator: create_add_department_dialog,
-          attach_to: 'user_add_department_button',
+          dialog_id: 'create_department_dialog',
+          content_creator: create_create_department_dialog,
+          attach_to: 'user_create_department_button',
           related_field_updater: departments_field_updater
         });
-        add_department_button.startup();
+        create_department_button.startup();
 
       {% endif %}
 
@@ -283,15 +283,15 @@
         widget: groups_tagSelect
       });
       
-      // Add Group Button
-      var add_group_button = dialogCaller({
+      // New Group Button
+      var create_group_button = dialogCaller({
         label: 'New',
-        dialog_id: 'add_group_dialog',
-        content_creator: create_add_group_dialog,
-        attach_to: 'user_add_group_button',
+        dialog_id: 'create_group_dialog',
+        content_creator: create_create_group_dialog,
+        attach_to: 'user_create_group_button',
         related_field_updater: groups_field_updater
-      }, 'user_add_group');
-      add_group_button.startup();
+      }, 'user_create_group');
+      create_group_button.startup();
       
       
       
@@ -308,25 +308,25 @@
       
       
       // **********************************************************************
-      // Add Button
-      var add_button = new Button({
+      // Submit Button
+      var submit_button = new Button({
         label: 'OK',
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('add_user_dialog'),
-            form: add_user_form,
-            additional_data: {submitted: 'add'},
+            dialog: registry.byId('create_user_dialog'),
+            form: create_user_form,
+            additional_data: {submitted: 'create'},
             {% if department %}
-              url: 'add/user/{{department.id}}',
+              url: 'create/user/{{department.id}}',
             {% else %}
-              url: 'add/user/-1',
+              url: 'create/user/-1',
             {% endif %}
             method: 'POST'
           });
         }
-      }, 'user_add_button');
-      add_button.startup();
+      }, 'user_submit_button');
+      submit_button.startup();
       
       // **********************************************************************
       // Cancel Button
@@ -334,12 +334,12 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          registry.byId('add_user_dialog').destroyRecursive();
+          registry.byId('create_user_dialog').destroyRecursive();
         }
       }, 'user_cancel_button');
       cancel_button.startup();
       
-      add_user_form.startup();
+      create_user_form.startup();
       
   });
 </script>

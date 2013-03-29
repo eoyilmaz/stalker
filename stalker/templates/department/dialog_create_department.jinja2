@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'>
-  <form id='add_department_form'>
+  <form id='create_department_form'>
     <table style='width: 100%'>
       
       {# NAME #}
@@ -37,7 +37,7 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='department_add_button'>Add</button>
+  <button id='department_submit_button'>OK</button>
   <button id='department_cancel_button'>Cancel</button>
 </div>
 
@@ -52,10 +52,10 @@
     
     // ************************************************************************
     // Form
-    var add_department_form = new Form({
-      id: 'add_department_form'
-    }, 'add_department_form');
-    add_department_form.startup();
+    var create_department_form = new Form({
+      id: 'create_department_form'
+    }, 'create_department_form');
+    create_department_form.startup();
     
     // ************************************************************************
     // Name
@@ -104,21 +104,21 @@
     tags_tagSelect.startup();
     
     // ************************************************************************
-    // Add Button
-    var add_button = new Button({
+    // Submit Button
+    var submit_button = new Button({
       label: 'OK',
       type: 'button',
       onClick: function(){
         submitForm({
-          dialog: registry.byId('add_department_dialog'),
-          form: add_department_form,
-          additional_data: {submitted: 'add'},
-          url: '{{request.route_url("add_department")}}',
+          dialog: registry.byId('create_department_dialog'),
+          form: create_department_form,
+          additional_data: {submitted: 'create'},
+          url: '{{request.route_url("create_department")}}',
           method: 'POST'
         });
       }
-    }, 'department_add_button');
-    add_button.startup();
+    }, 'department_submit_button');
+    submit_button.startup();
     
     // ************************************************************************
     // Cancel Button
@@ -126,7 +126,7 @@
       label: 'Cancel',
       type: 'button',
       onClick: function(){
-        registry.byId('add_department_dialog').destroyRecursive();
+        registry.byId('create_department_dialog').destroyRecursive();
       }
     }, 'department_cancel_button');
     cancel_button.startup();
