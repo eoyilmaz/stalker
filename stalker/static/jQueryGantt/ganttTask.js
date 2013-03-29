@@ -30,17 +30,17 @@ function TaskFactory() {
   /**
    * Build a new Task
    */
-  this.build = function(id, name, code, level, start, duration) {
+  this.build = function(id, name, code, level, start, duration, bid, effort) {
     // Set at beginning of day
     var adjusted_start = computeStart(start);
     var calculated_end = computeEndByDuration(adjusted_start, duration);
-
-    return new Task(id, name, code, level, adjusted_start, calculated_end, duration);
+    
+    return new Task(id, name, code, level, adjusted_start, calculated_end, duration, bid, effort);
   };
 
 }
 
-function Task(id, name, code, level, start, end, duration) {
+function Task(id, name, code, level, start, end, duration, bid, effort) {
   this.id = id;
   this.name = name;
   this.code = code;
@@ -50,7 +50,10 @@ function Task(id, name, code, level, start, end, duration) {
   this.start = start
   this.duration = duration;
   this.end = end;
-
+  
+  this.bid = bid;
+  this.effort = effort;
+  
   this.startIsMilestone = false;
   this.endIsMilestone = false;
 

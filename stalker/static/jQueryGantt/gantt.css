@@ -236,6 +236,12 @@
   position:absolute;
 }
 
+.taskBox .taskBid{
+  height:5px;
+  position:absolute;
+  top: 20px;
+}
+
 .taskBox .layout.extDep{
   background-image:url(hasExternalDeps.png);
 }
