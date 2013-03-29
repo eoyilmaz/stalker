@@ -40,4 +40,48 @@
       </table>
     </div>
     
+    {#  Charts  #}
+    <div>
+      <div id='project_summary_chart1'
+           style='width: 200px;
+                  height: 200px;
+                  position: absolute;
+                  right: 20px;'></div>
+    </div>
 </div>
+
+<script type="text/javascript">
+  require(['dojox/charting/Chart', 'dojox/charting/themes/Claro',
+    'dojox/charting/plot2d/Pie', 'dojox/charting/action2d/MoveSlice',
+    'dojo/ready'],
+    function(Chart, theme, PiePlot,  MoveSlice, ready){
+      ready(function(){
+        // Create the chart within it's "holding" node
+        var pieChart = new Chart('project_summary_chart1');
+        
+        // Add the only/default plot
+        pieChart.setTheme(theme);
+
+        // Add the only/default plot
+        pieChart.addPlot("default", {
+          type: PiePlot, // our plot2d/Pie module reference as type value
+          radius: 80,
+          fontColor: "black",
+          labelOffset: 0
+        });
+
+        var chartData = [1000, 12000];
+        
+        // Add the series of data
+        pieChart.addSeries('January', chartData);
+        
+        // Create the slice mover
+        var mag = new MoveSlice(pieChart, 'default');
+
+        // Render the chart!
+        pieChart.render();
+        
+      });
+    
+  });
+</script>

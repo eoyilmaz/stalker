@@ -1,7 +1,7 @@
 html, body {
     font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif; 
     *font-size: 75%;
-    background-color: #c0c0c0;
+    /*background-color: #c0c0c0;*/
     font-size: 12px;
     height: 100%;
     margin: 0;
@@ -85,7 +85,7 @@ a:hover {
 }
 
 #header{
-    background-color: #2A2C2E;
+    /*background-color: #2A2C2E;*/
     clear: both;
     color: white;
     float: left;
@@ -100,7 +100,7 @@ a:hover {
     font-size: 16px;
     margin-left: 10px;
     margin-top: 3px;
-    color: white;
+    /*color: white;*/
 }
 
 #stalker_logo a:link {

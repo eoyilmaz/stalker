@@ -327,7 +327,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                      primary_key=True)
     
     project_id = Column('project_id', Integer, ForeignKey('Projects.id'),
-                        nullable=False)
+                        nullable=True)
     _project = relationship(
         'Project',
         primaryjoin='Tasks.c.project_id==Projects.c.id',
@@ -699,7 +699,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         return priority
     
-    @update_task_dates
+    # @update_task_dates
     @validates('children')
     def _validate_children(self, key, child):
         """validates the given child

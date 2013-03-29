@@ -146,16 +146,23 @@
         ge.init($("#workSpace"));
         
         // The Memory
-        var tasks_memory = new JsonRest({
-          target: '/get/tasks/{{ entity.id }}'
-        });
+        var tasks_memory;
+        {% if entity.entity_type != 'User' %}
+          tasks_memory = new JsonRest({
+            target: '/get/tasks/{{ entity.id }}'
+          });
+        {% else %}
+          tasks_memory = new JsonRest({
+            target: '/get/user/{{ entity.id }}/tasks'
+          });
+        {% endif %}
       
         function loadGanttFromServer() {
           tasks_memory.query().then(function(data){
             
-            
-            data = lang.mixin(data,{'canWrite': 1, 'canWriteOnParent': 1});
-            
+            {% if entity.entity_type != 'User' %}
+              data = lang.mixin(data,{'canWrite': 1, 'canWriteOnParent': 1});
+            {% endif %}
             var promise = ge.loadProject(data, Deferred);
             promise.then(function(){
               // now add the context menu to tasks

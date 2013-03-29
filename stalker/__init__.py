@@ -178,7 +178,8 @@ def main(global_config, **settings):
     config.add_route('view_tasks', 'view/tasks/{entity_id}')
     config.add_route('get_tasks',
                      'get/tasks/{entity_id}')
-    config.add_route('get_project_tasks', 'get/project_tasks/{project_id}')
+    config.add_route('get_project_tasks', 'get/project/tasks/{project_id}')
+    config.add_route('get_root_tasks', 'get/root/tasks/{project_id}') # TODO: fix this
     
     # *************************************************************************
     # Department

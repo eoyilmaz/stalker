@@ -226,6 +226,28 @@ def depth_first_flatten(task, task_array=None):
     
     return task_array
 
+@view_config(
+    route_name='get_root_tasks',
+    renderer='json',
+)
+def get_root_tasks(request):
+    """returns all the root tasks in the database related to the given project
+    """
+    project_id = request.matchdict.get('project_id')
+    project = Project.query.filter_by(id=project_id).first()
+    
+    tasks = []
+    
+    root_tasks = Task.query\
+                .filter(Task._project==project)\
+                .filter(Task.parent==None).all()
+    
+    # do a depth first search for child tasks
+    for root_task in root_tasks:
+        logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
+        tasks = depth_first_flatten(root_task)
+
+    return convert_to_jquery_gantt_task_format(tasks) 
 
 @view_config(
     route_name='get_tasks',
@@ -310,7 +332,7 @@ def view_tasks(request):
 def add_dependent_task(request):
     """runs when adding a dependent task
     """
-    
+    pass
 
 
 
