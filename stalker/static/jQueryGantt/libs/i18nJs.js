@@ -89,8 +89,8 @@
   Date.preferAmericanFormat = false;
 
   Date.firstDayOfWeek =1;
+  //Date.defaultFormat = "dd/MM/yyyy HH:mm";
   Date.defaultFormat = "dd/MM/yyyy";
-
 
   Number.decimalSeparator = ".";
   Number.groupingSeparator = ",";
@@ -100,12 +100,12 @@
 
 
   var millisInWorkingDay =36000000;
-  var workingDaysPerWeek =5;
+  var workingDaysPerWeek =7;
 
   function isHoliday(date) {
-    var friIsHoly =false;
-    var satIsHoly =false;
-    var sunIsHoly =true;
+    var friIsHoly = false;
+    var satIsHoly = false;
+    var sunIsHoly = false;
 
     pad = function (val) {
       val = "0" + val;
@@ -131,8 +131,6 @@
     INVALID_DATA:"The data inserted are invalid for the field format.",
     ERROR_ON_FIELD:"Error on field",
     CLOSE_ALL_CONTAINERS:"close all?",
-
-
 
     DO_YOU_CONFIRM:"Do you confirm?"
   };

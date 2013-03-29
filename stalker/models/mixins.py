@@ -813,7 +813,6 @@ class ACLMixin(object):
         secondary_table = create_secondary_table(
             cls.__name__, 'Permission', cls.__tablename__, 'Permissions'
         )
-        #return the relationship
         return relationship('Permission', secondary=secondary_table)
     
     @validates('permissions')
@@ -850,6 +849,7 @@ class ACLMixin(object):
                  self.__class__.__name__ + ':' + self.name,
                  perm.action + '_' + perm.class_name)
                  for perm in self.permissions]
+
 
 class CodeMixin(object):
     """Adds code info to the mixed in class.

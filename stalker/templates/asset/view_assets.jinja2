@@ -9,8 +9,9 @@
     "dijit/form/TimeTextBox",  "dijit/form/Select","dojo/data/ObjectStore",
     "dijit/form/FilteringSelect", 'dojo/store/JsonRest',
     "dojo/query","dgrid/test/data/base", "dojo/domReady!"],
-    function(List, Grid, Memory, Selection, Keyboard, editor, CheckBox, TimeTextBox,
-             Select, ObjectStore, FilteringSelect, JsonRest, query){
+    function(List, Grid, Memory, Selection, Keyboard, editor, CheckBox,
+             TimeTextBox, Select, ObjectStore, FilteringSelect, JsonRest,
+             query){
       
 
       var my_store;
@@ -52,16 +53,16 @@
 
 
       status_list_memory.query().then(function(data){
-
-        var status_id = data[0]['id'];
-        status_memory = new JsonRest({
-          target: 'get/statuses_of/'+ status_id
-        });
-
-        status_store =  new ObjectStore({ objectStore:status_memory });
-
-        asset_data_grid_updater();
-
+        if (data.length){
+          var status_id = data[0]['id'];
+          status_memory = new JsonRest({
+            target: 'get/statuses_of/'+ status_id
+          });
+        
+          status_store =  new ObjectStore({ objectStore:status_memory });
+          
+          asset_data_grid_updater();
+        }
       });
 
       function asset_data_grid_updater(){

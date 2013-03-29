@@ -1863,3 +1863,51 @@ class TaskTester(unittest.TestCase):
         test_task3 = Task(**self.kwargs)
         test_task3.parent = test_task2
         self.assertEqual(test_task3.level, 3)
+    
+    def test__check_circular_dependency_causes_recursion(self):
+        """Bug ID: None
+        
+        Try to create one parent and three child tasks, second and third child
+        are dependent to the first child. This is causing a recursion.
+        """
+        
+        task1 = Task(
+            project=self.test_project1,
+            name='Cekimler',
+            start=datetime.datetime(2013, 4, 1),
+            end=datetime.datetime(2013, 5, 6),
+            status_list=self.test_task_status_list
+        )
+        
+        task2 = Task(
+            parent=task1,
+            name='Supervising Shootings Part1',
+            start=datetime.datetime(2013, 4, 1),
+            end=datetime.datetime(2013, 4, 11),
+            status_list=self.test_task_status_list
+        )
+        
+        task3 = Task(
+            parent=task1,
+            name='Supervising Shootings Part2',
+            depends=[task2],
+            start=datetime.datetime(2013, 4, 12),
+            end=datetime.datetime(2013, 4, 16),
+            status_list=self.test_task_status_list
+        )
+        
+        task4 = Task(
+            parent=task1,
+            name='Supervising Shootings Part3',
+            depends=[task3],
+            start=datetime.datetime(2013, 4, 12),
+            end=datetime.datetime(2013, 4, 17),
+            status_list=self.test_task_status_list
+        )
+        
+        DBSession.add_all([task1, task2, task3, task4])
+        DBSession.commit()
+        
+        # move task4 dependency to task2
+        task4.depends = [task2]
+        DBSession.commit()

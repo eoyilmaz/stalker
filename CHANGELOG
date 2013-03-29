@@ -16,11 +16,12 @@ Stalker Changes
 * Added a new attribute called ``users`` to the Department class which is a
   synonym for the ``members`` attribute.
 
-* Task class is now preventing one of the dependents to be set as the parent of
-  a task.
-
-* Task class is now preventing one of the parents to be set as the one of the
-  dependents of a task.
+* Task:
+  * Task class is now preventing one of the dependents to be set as the parent
+    of a task.
+  * Task class is now preventing one of the parents to be set as the one of the
+    dependents of a task.
+  * Fixed ``autoflush`` bugs in Task class.
 
 * Fixed `admin` users department initialization.
 

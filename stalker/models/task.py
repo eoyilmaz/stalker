@@ -132,6 +132,20 @@ class Booking(Entity, ScheduleMixin):
         return resource
 
 
+def update_task_dates(func):
+    """decorator that updates the date after the function finishes its job
+    """
+    def wrap(*args, **kwargs):
+        # call the function as usual
+        rvalue = func(*args, **kwargs)
+        # update the dates
+        task_class = args[0]
+        args[0]._validate_dates(task_class.start, task_class.end, None)
+        return rvalue
+    # return decorated function
+    return wrap
+
+
 class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
@@ -319,6 +333,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         primaryjoin='Tasks.c.project_id==Projects.c.id',
         back_populates='tasks',
         uselist=False,
+        post_update=True,
     )
     
     parent_id = Column('parent_id', Integer, ForeignKey('Tasks.id'))
@@ -326,13 +341,15 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         'Task',
         remote_side=[task_id],
         primaryjoin='Tasks.c.parent_id==Tasks.c.id',
-        back_populates='children'
+        back_populates='children',
+        post_update=True,
     )
     
     children = relationship(
       'Task',
        primaryjoin='Tasks.c.parent_id==Tasks.c.id',
        back_populates='parent',
+       post_update=True,
     )
     
     tasks = synonym('children')
@@ -642,6 +659,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             # check if there is a parent
             if self.parent:
                 # check if given project is matching the parent.project
+                autoflush = DBSession.autoflush
+                DBSession.autoflush = False
                 if self.parent._project != project:
                     # don't go mad again, but warn the user that there is an
                     # ambiguity!!!
@@ -658,7 +677,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                     
                     # use the parent.project
                     project = self.parent._project
-        
+                DBSession.autoflush = autoflush
         return project
     
     @validates("priority")
@@ -680,27 +699,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         return priority
     
+    @update_task_dates
     @validates('children')
     def _validate_children(self, key, child):
         """validates the given child
         """
         # just empty the resources list
+        # do it without a flush
+        
+        autoflush = DBSession.autoflush
+        DBSession.autoflush = False
+        
         self.resources = []
         
-        # extend the start and end dates
-        #if not len(self.children): # it is not a good idea to load the
-        #                           # collection here
-        #    self.start = child.start
-        #    self.end = child.end
-        #else:
-        #    # this is not the first one just extend the start and end
-        #    if child.start < self.start:
-        #        self.start = child.start
-        #    if child.end > self.end:
-        #        self.end = child.end
-        
-        # check for CircularDependency
-        #_check_circular_dependency(self, child, 'children')
+        DBSession.autoflush = autoflush
         
         return child
     
@@ -784,10 +796,11 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # TODO: do it only once not all the time they ask for it
         # use children start
         if self.is_container:
-            self._start = datetime.datetime.max
+            start = datetime.datetime.max
             for child in self.children:
-                if child.start < self._start:
-                    self._start = child.start
+                if child.start < start:
+                    start = child.start
+            self._validate_dates(start, self._end, self._duration)
         return self._start
     
     def _start_setter(self, start_in):
@@ -795,7 +808,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
         # update the start only if this is not a container task
         if self.is_leaf:
-            self._validate_dates(start_in, self.end, self.duration)
+            self._validate_dates(start_in, self._end, self._duration)
     
     @declared_attr
     def start(self):
@@ -818,10 +831,11 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # TODO: do it only once not all the time they ask for it
         # use children end
         if self.is_container:
-            self._end = datetime.datetime.min
+            end = datetime.datetime.min
             for child in self.children:
-                if child.end > self._end:
-                    self._end = child.end
+                if child.end > end:
+                    end = child.end
+            self._validate_dates(self._start, end, self._duration)
         return self._end
     
     def _end_setter(self, end_in):
@@ -885,7 +899,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         be useless when Stalker has its own implementation of a proper Gantt
         Chart. Write now it is used by the jQueryGantt.
         """
-        i=0
+        i = 0
         current = self
         while current:
             i+=1
@@ -896,7 +910,7 @@ def _check_circular_dependency(task, check_for_task, attr_name):
     """checks the circular dependency in task if it has check_for_task in its
     depends list
     """
-    for dependent_task in getattr(task, attr_name): #depends:
+    for dependent_task in getattr(task, attr_name):
         if dependent_task is check_for_task:
             raise CircularDependencyError(
                 'task %s and %s creates a circular dependency' %

@@ -54,7 +54,7 @@ define([
             style_tag: function tag_style_tag(){
                 var dNode = this.domNode;
                 dNode.children[0].style.borderRadius = '25px';
-                dNode.children[0].style.height = '22px';
+                dNode.children[0].style.height = '16px';
                 
                 // replace the icon to the end
                 domConstruct.place(

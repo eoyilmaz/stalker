@@ -5,25 +5,25 @@
     <div class="buttons">
     
     {% if entity.entity_type != 'User' %}
-    <button onclick="$('#workSpace').trigger('undo.gantt');" class="button textual" title="undo"><span class="teamworkIcon">&#39;</span></button>
-    <button onclick="$('#workSpace').trigger('redo.gantt');" class="button textual" title="redo"><span class="teamworkIcon">&middot;</span></button>
-    <span class="ganttButtonSeparator"></span>
-    <button onclick="$('#workSpace').trigger('addAboveCurrentTask.gantt');" class="button textual" title="insert above"><span class="teamworkIcon">l</span></button>
-    <button onclick="$('#workSpace').trigger('addBelowCurrentTask.gantt');" class="button textual" title="insert below"><span class="teamworkIcon">X</span></button>
-    <span class="ganttButtonSeparator"></span>
-    <button onclick="$('#workSpace').trigger('indentCurrentTask.gantt');" class="button textual" title="indent task"><span class="teamworkIcon">.</span></button>
-    <button onclick="$('#workSpace').trigger('outdentCurrentTask.gantt');" class="button textual" title="unindent task"><span class="teamworkIcon">:</span></button>
-    <span class="ganttButtonSeparator"></span>
-    <button onclick="$('#workSpace').trigger('moveUpCurrentTask.gantt');" class="button textual" title="move up"><span class="teamworkIcon">k</span></button>
-    <button onclick="$('#workSpace').trigger('moveDownCurrentTask.gantt');" class="button textual" title="move down"><span class="teamworkIcon">j</span></button>
+{#    <button onclick="$('#workSpace').trigger('undo.gantt');" class="button textual" title="undo"><span class="teamworkIcon">&#39;</span></button>#}
+{#    <button onclick="$('#workSpace').trigger('redo.gantt');" class="button textual" title="redo"><span class="teamworkIcon">&middot;</span></button>#}
+{#    <span class="ganttButtonSeparator"></span>#}
+{#    <button onclick="$('#workSpace').trigger('addAboveCurrentTask.gantt');" class="button textual" title="insert above"><span class="teamworkIcon">l</span></button>#}
+{#    <button onclick="$('#workSpace').trigger('addBelowCurrentTask.gantt');" class="button textual" title="insert below"><span class="teamworkIcon">X</span></button>#}
+{#    <span class="ganttButtonSeparator"></span>#}
+{#    <button onclick="$('#workSpace').trigger('indentCurrentTask.gantt');" class="button textual" title="indent task"><span class="teamworkIcon">.</span></button>#}
+{#    <button onclick="$('#workSpace').trigger('outdentCurrentTask.gantt');" class="button textual" title="unindent task"><span class="teamworkIcon">:</span></button>#}
+{#    <span class="ganttButtonSeparator"></span>#}
+{#    <button onclick="$('#workSpace').trigger('moveUpCurrentTask.gantt');" class="button textual" title="move up"><span class="teamworkIcon">k</span></button>#}
+{#    <button onclick="$('#workSpace').trigger('moveDownCurrentTask.gantt');" class="button textual" title="move down"><span class="teamworkIcon">j</span></button>#}
     {% endif %}
     <span class="ganttButtonSeparator"></span>
     <button onclick="$('#workSpace').trigger('zoomMinus.gantt');" class="button textual" title="zoom out"><span class="teamworkIcon">)</span></button>
     <button onclick="$('#workSpace').trigger('zoomPlus.gantt');" class="button textual" title="zoom in"><span class="teamworkIcon">(</span></button>
     <span class="ganttButtonSeparator"></span>
-    {% if entity.entity_type != 'User' %}
-    <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual" title="delete"><span class="teamworkIcon">&cent;</span></button>
-    {% endif %}
+{#    {% if entity.entity_type != 'User' %}#}
+{#    <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual" title="delete"><span class="teamworkIcon">&cent;</span></button>#}
+{#    {% endif %}#}
       &nbsp; &nbsp; &nbsp; &nbsp;
 {#      {% if entity.entity_type != 'User' %}#}
 {#      <button id='view_tasks_add_asset_button'>Add Asset</button>#}
@@ -31,24 +31,25 @@
 {#      <button id='view_tasks_add_shot_button'>Add Shot</button>#}
 
     {% if entity.entity_type != 'User' %}
+      <button id='view_tasks_gantt_refresh_button'>Revert To Saved</button>
       <button id='view_tasks_add_task_button'>Add Task</button>
-      <button id='view_tasks_gannt_save_button' onclick="saveGanttOnServer();" class="button first big" title="save">save</button>
+      <button id='view_tasks_gantt_save_button'>Save</button>
     {% endif %}
     </div></div>
   --></div>
 
   <div class="__template__" type="TASKSEDITHEAD"><!--
-  <table class="gdfTable" cellspacing="0" cellpadding="0">
+  <table class="gdfTable" cellspacing="0" cellpadding="0" style='width: 1000px'>
     <thead>
     <tr style="height:40px">
-      <th class="gdfColHeader" style="width:15px;"></th>
-      <th class="gdfColHeader" style="width:25px;"></th>
-      <th class="gdfColHeader gdfResizable" style="width:75px;">name</th>
-      <th class="gdfColHeader gdfResizable" style="width:40px;">start</th>
-      <th class="gdfColHeader gdfResizable" style="width:40px;">end</th>
-      <th class="gdfColHeader gdfResizable" style="width:20px;">dur.</th>
-      <th class="gdfColHeader gdfResizable" style="width:40px;">dep.</th>
-      <th class="gdfColHeader gdfResizable" style="width:150px;">assignees</th>
+      <th class="gdfColHeader gdfResizable" style="width:20px;"></th>
+      <th class="gdfColHeader gdfResizable" style="width:250px;">name</th>
+      <th class="gdfColHeader gdfResizable" style="width:75px;">start</th>
+      <th class="gdfColHeader gdfResizable" style="width:75px;">end</th>
+      <th class="gdfColHeader gdfResizable" style="width:35px;">dur.</th>
+      <th class="gdfColHeader gdfResizable" style="width:60px;">dep.</th>
+      <th class="gdfColHeader gdfResizable" style="width:400px; text-align: left;">resources</th>
+      <th class="gdfColHeader gdfResizable" style="width:785px;"></th>
     </tr>
     </thead>
   </table>
@@ -57,10 +58,7 @@
   <div class="__template__" type="TASKROW"><!--
   <tr taskId="(#=obj.id#)" class="taskEditRow" level="(#=level#)">
     <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
-    <td class="gdfCell" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
-
     <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.level>0?'border-left:2px dotted orange':''#)"></td>
-
     <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="duration" value="(#=obj.duration#)"></td>
@@ -72,12 +70,12 @@
   <div class="__template__" type="TASKEMPTYROW"><!--
   <tr class="taskEditRow emptyRow" >
     <th class="gdfCell" align="right"></th>
-    <td class="gdfCell" align="center"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
+    <td class="gdfCell" align="left"></td>
     <td class="gdfCell"></td>
   </tr>
 --></div>
@@ -85,12 +83,13 @@
   <div class="__template__" type="TASKBAR"><!--
   <div class="taskBox" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
-      <div class="taskStatus" status="(#=obj.status#)"></div>
+{#      <div class="taskStatus" status="(#=obj.status#)"></div>#}
       <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
       <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
 
-      <div class="taskLabel"></div>
-      <div class="milestone end (#=obj.endIsMilestone?'active':''#)" ></div>
+      <div class="taskLabel">(#=obj.name#)</div>
+      <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
+      <div class="taskDepLabel">(#=obj.getAssigsString()#)</div>
     </div>
   </div>
   --></div>
@@ -107,55 +106,7 @@
   --></div>
 
 
-  <div class="__template__" type="TASK_EDITOR"><!--
-  <div id='stalkerGanttTaskEditor' class="ganttTaskEditor">
-  <table width="100%">
-    <tr>
-      <td>
-        <table cellpadding="5">
-          <tr>
-            <td><label for="code">code/short name</label><br><input type="text" name="code" id="code" value="" class="formElements"></td>
-           </tr><tr>
-            <td><label for="name">name</label><br><input type="text" name="name" id="name" value=""  size="35" class="formElements"></td>
-          </tr>
-          <tr></tr>
-            <td>
-              <label for="description">description</label><br>
-              <textarea rows="5" cols="30" id="description" name="description" class="formElements"></textarea>
-            </td>
-          </tr>
-        </table>
-      </td>
-      <td valign="top">
-        <table cellpadding="5">
-          <tr>
-          <td colspan="2"><label for="status">status</label><br><div id="status" class="taskStatus" status=""></div></td>
-          <tr>
-          <td colspan="2"><label for="progress">progress</label><br><input type="text" name="progress" id="progress" value="" size="3" class="formElements"></td>
-          </tr>
-          <tr>
-          <td><label for="start">start</label><br><input type="text" name="start" id="start"  value="" class="date" size="10" class="formElements"><input type="checkbox" id="startIsMilestone"> </td>
-          <td rowspan="2" class="graph" style="padding-left:50px"><label for="duration">dur.</label><br><input type="text" name="duration" id="duration" value=""  size="5" class="formElements"></td>
-        </tr><tr>
-          <td><label for="end">end</label><br><input type="text" name="end" id="end" value="" class="date"  size="10" class="formElements"><input type="checkbox" id="endIsMilestone"></td>
-        </table>
-      </td>
-    </tr>
-    </table>
 
-    <h2>assignments</h2>
-  <table  cellspacing="1" cellpadding="0" width="100%" id="assigsTable">
-    <tr>
-      <th style="width:100px;">name</th>
-      <th style="width:70px;">role</th>
-      <th style="width:30px;">est.wklg.</th>
-      <th style="width:30px;" id="addAssig"><span class="teamworkIcon" style="cursor: pointer">+</span></th>
-    </tr>
-  </table>
-
-  <div style="text-align: right; padding-top: 20px"><button id="saveButton" class="button big">save</button></div>
-  </div>
-  --></div>
 
 
   <div class="__template__" type="ASSIGNMENT_ROW"><!--
@@ -198,10 +149,12 @@
         var tasks_memory = new JsonRest({
           target: '/get/tasks/{{ entity.id }}'
         });
-        
+      
         function loadGanttFromServer() {
           tasks_memory.query().then(function(data){
-            data = lang.mixin(data,{'canWrite': 0, 'canWriteOnParent': 0});
+            
+            
+            data = lang.mixin(data,{'canWrite': 1, 'canWriteOnParent': 1});
             
             var promise = ge.loadProject(data, Deferred);
             promise.then(function(){
@@ -266,7 +219,20 @@
               
               menu.addChild(
                 new MenuItem({
-                  label: 'Add Child Task'
+                  label: 'Add Child Task',
+                  onClick: function(){
+                    var node = this.getParent().currentTarget;
+                    var task_id = node.getAttribute('taskId');
+                    var dialog = dijit.byId('add_task_dialog');
+                    if (dialog == null){
+                      dialog = create_add_task_dialog(task_id);
+                    }
+                    dialog.set(
+                      'related_field_updater',
+                      loadGanttFromServer
+                    );
+                    dialog.show();
+                  }
                 })
               );
               
@@ -324,7 +290,7 @@
           
           deffered.then(function(){
             // load the project from server again
-            loadGanttFromServer();
+            //loadGanttFromServer();
           }, function(err){
             alert(err);
           });
@@ -352,8 +318,8 @@
             "INVALID_DATE_FORMAT":"INVALID_DATE_FORMAT",
             "TASK_MOVE_INCONSISTENT_LEVEL":"TASK_MOVE_INCONSISTENT_LEVEL",
         
-            "GANTT_QUARTER_SHORT":"trim.",
-            "GANTT_SEMESTER_SHORT":"sem."
+            "GANTT_QUARTER_SHORT":"Q",
+            "GANTT_SEMESTER_SHORT":"S"
           };
         }
         
@@ -396,6 +362,14 @@
 {#          add_shot_button.startup();#}
 {#          #}
         {% if entity.entity_type != 'User' %}
+          var revert_gantt_button = new Button({
+            label: 'Revert To Saved',
+            onClick: function(){
+              loadGanttFromServer();
+            }
+          }, 'view_tasks_gantt_refresh_button');
+          revert_gantt_button.startup();
+          
           var add_task_button = dialogCaller({
             label: 'Add Task',
             dialog_id: 'add_task_dialog',
@@ -412,8 +386,9 @@
             onClick: function(){
               saveGanttOnServer();
             }
-          }, 'view_tasks_gannt_save_button')
+          }, 'view_tasks_gantt_save_button')
           save_gantt_button.startup();
+          
         {% endif %}
       });
   });

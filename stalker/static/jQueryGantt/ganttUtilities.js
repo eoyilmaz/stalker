@@ -25,7 +25,7 @@ $.fn.gridify = function(options) {
   this.options = {
     colResizeZoneWidth:10
   };
-
+  
   $.extend(this.options, options);
   $.gridify.init($(this), this.options);
   return this;
@@ -35,22 +35,35 @@ $.gridify = {
   init: function(elems, opt) {
     elems.each(function() {
       var table = $(this);
-
+      
+//      console.log('table                       : ',  table);
+//      console.log('table.width() --- UPPER --- : ' + table.width());
+      
+      
       //----------------------  header management start
       table.find("th.gdfColHeader.gdfResizable:not(.gdfied)").mouseover(function() {
         $(this).addClass("gdfColHeaderOver");
-
+        
       }).bind("mouseout.gdf", function() {
         $(this).removeClass("gdfColHeaderOver");
         if (!$.gridify.columInResize) {
           $("body").removeClass("gdfHResizing");
         }
-
+        
       }).bind("mousemove.gdf", function(e) {
         if (!$.gridify.columInResize) {
           var colHeader = $(this);
           var mousePos = e.pageX - colHeader.offset().left;
-
+          
+//          console.clear();
+//          table.attr('initialWidth', table.width());
+//          colHeader.attr('initialWidth', $(this).width());
+//          console.log('***********************');
+//          console.log('e.pageX                 : ' + e.pageX);
+//          console.log('colHeader.offset().left : ' + colHeader.offset().left);
+//          console.log('mousePos                : ' + mousePos);
+//          console.log('initialWidth            : ' + colHeader.width());
+//          
           if (colHeader.width() - mousePos < opt.colResizeZoneWidth) {
             $("body").addClass("gdfHResizing");
           } else {
@@ -68,9 +81,21 @@ $.gridify = {
           $(document).bind("mousemove.gdf", function(e) {
             //manage resizing
             //console.debug(e.pageX - $.gridify.columInResize.offset().left)
-            $.gridify.columInResize.width(e.pageX - $.gridify.columInResize.offset().left);
-
-
+            
+            var new_width = (e.pageX - $.gridify.columInResize.offset().left);
+            $.gridify.columInResize.width(new_width);
+              
+//            console.log('****************************************');
+//            console.log('table.width()                         : ' + table.width());
+//            console.log('initialWidth                          : ' + colHeader.attr('initialWidth'));
+//            console.log('e.pageX                               : ' + e.pageX);
+//            console.log('$.gridify.columInResize.offset().left : ' + $.gridify.columInResize.offset().left);
+//            console.log('new_width                             : ' + new_width);
+            
+//            table.width(
+//                table.attr('initialWidth') + colHeader.width() - colHeader.attr('initialWidth')
+//            );
+            
             //bind mouse up on body to stop resizing
           }).bind("mouseup.gdf", function() {
             //console.debug("stop resizing");
@@ -95,19 +120,18 @@ $.gridify = {
           cell.empty().append(wrp);
         }
       }).addClass("gdfied");
-      ;
-
+      
     });
   }
 };
 
 $.splittify = {
-  init: function(where, first, second,perc) {
+  init: function(where, first, second, perc) {
 
     perc=perc || 50;
-
+    
     var splitter = $("<div>").addClass("splitterContainer");
-
+    
     var firstBox = $("<div>").addClass("splitElement splitBox1");
     var splitterBar = $("<div>").addClass("splitElement vSplitBar").attr("unselectable", "on").html("|").css("padding-top",where.height()/2+"px");
     var secondBox = $("<div>").addClass("splitElement splitBox2");
@@ -142,7 +166,7 @@ $.splittify = {
         if (pos > 10 && pos < w - 20) {
           sb.css({left:pos});
           firstBox.width(pos);
-          secondBox.css({left:pos + sb.width(),width:w - pos - sb.width()});
+          secondBox.css({left:pos + sb.width(), width:w - pos - sb.width()});
         }
 
         //bind mouse up on body to stop resizing

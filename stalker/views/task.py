@@ -9,6 +9,7 @@ import logging
 from pyramid.httpexceptions import HTTPServerError
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
+import re
 from sqlalchemy.exc import IntegrityError
 import transaction
 
@@ -37,7 +38,7 @@ def convert_to_depend_index(task, tasks):
         except ValueError:
             pass
         else:
-            depends += ", %i" % i
+            depends += ",%i" % (i+1) # depends is 1-based where i is 0-based
     if depends.startswith(','):
         logger.debug('converted to depends: %s' % depends[1:])
         return depends[1:]
@@ -58,7 +59,7 @@ def convert_to_jquery_gantt_task_format(tasks):
                 'name': '%s (%s)' % (task.name, task.entity_type),
                 'code': task.id,
                 'level': task.level,
-                'status': 'STATUS_ACTIVE',
+                'status': 'STATUS_UNDEFINED',
                 'start': int(task.start.strftime('%s')) * 1000,
                 'duration': task.duration.days,
                 'end': int(task.end.strftime('%s')) * 1000,
@@ -77,8 +78,8 @@ def convert_to_jquery_gantt_task_format(tasks):
             'id': resource.id,
             'name': resource.name
         } for resource in User.query.all()],
-        "canWrite": 1,
-        "canWriteOnParent": 1
+        # "canWrite": 0,
+        # "canWriteOnParent": 0
     }
 
 
@@ -92,23 +93,36 @@ def update_with_jquery_gantt_task_data(json_data):
     import json
     data = json.loads(json_data)
     
+    task_name_replace_strs = [
+        ' (Task)', ' (Project)', ' (Asset)', ' (Sequence)', ' (Shot)'
+    ]
+    
     # Updated Tasks
     for task_data in data['tasks']:
+        logger.debug('*********************************************')
         task_id = task_data['id']
-        task_name = task_data['name']
+        task_name = task_data['name'] # just take the part without 
+                                      # the parenthesis
+        for str in task_name_replace_strs:
+            if task_name.endswith(str):
+                task_name = task_name[:-len(str)]
+        
         task_start = task_data['start']
         task_duration = task_data.get('duration', 0)
         task_resource_ids = [resource_data['resourceId']
                              for resource_data in task_data['assigs']]
         task_description = task_data.get('description', '')
         
+        # TODO: update also task parents
+        
         # task_depend_ids : " 2, 3, 5, 6:3, 12" these are the index numbers of
-        # the task in the Gantt chart, be carefull it is not the id of the task
+        # the task in the Gantt chart, be careful it is not the id of the task
         task_depend_ids = []
         if len(task_data.get('depends', [])):
             for index_str in task_data['depends'].split(','):
                 index = int(index_str.split(':')[0])
-                dependent_task_id = data['tasks'][index]['id']
+                logger.debug('index : %s' % index)
+                dependent_task_id = data['tasks'][index-1]['id']
                 task_depend_ids.append(dependent_task_id)
         
         # get the task itself
@@ -121,6 +135,7 @@ def update_with_jquery_gantt_task_data(json_data):
         
         # update it
         if task:
+            logger.debug('task %s' % task)
             task.name = task_name
             task.start = datetime.date.fromtimestamp(task_start/1000)
             task.duration = datetime.timedelta(task_duration)
@@ -131,8 +146,14 @@ def update_with_jquery_gantt_task_data(json_data):
             task.description = task_description
             
             task_depends = Task.query.filter(Task.id.in_(task_depend_ids)).all()
+            
+            logger.debug('task.parent %s' % task.parent)
+            logger.debug('task_depends: %s' % task_depends)
+            
             task.depends = task_depends
             DBSession.add(task)
+    
+    logger.debug('*********************************************')
     
     # Deleted tasks
     deleted_tasks = Task.query.filter(Task.id.in_(data['deletedTaskIds'])).all()
@@ -286,6 +307,13 @@ def view_tasks(request):
     }
 
 
+def add_dependent_task(request):
+    """runs when adding a dependent task
+    """
+    
+
+
+
 @view_config(
     route_name='add_task',
     renderer='templates/task/add_task.jinja2',
@@ -302,22 +330,23 @@ def add_task(request):
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
         
         if request.params['submitted'] == 'add':
-            if 'parent_id' in request.params and \
+            if 'project_id' in request.params and \
                 'name' in request.params and \
                 'description' in request.params and \
                 'is_milestone' in request.params and \
-                'resource_ids' in request.params and \
                 'status_id' in request.params:
+                
+                # get the project
+                project_id = request.params['project_id']
+                project = Project.query.filter_by(id=project_id).first()
                 
                 # get the taskable entity
                 parent_id = request.params['parent_id']
-                parent = Entity.query.filter_by(id=parent_id).first()
-                kwargs = {}
-                if parent.entity_type == 'Project':
-                    kwargs.update({'project': parent})
-                else:
-                    kwargs.update({'parent': parent})
+                parent = Task.query.filter_by(id=parent_id).first()
                 
+                kwargs = {'project': project,
+                          'parent': parent}
+
                 # get the status_list
                 status_list = StatusList.query.filter_by(
                     target_entity_type='Task'
@@ -337,11 +366,13 @@ def add_task(request):
                 logger.debug('status: %s' % status)
                 
                 # get the resources
-                resource_ids = [
-                    int(r_id)
-                    for r_id in request.POST.getall('resource_ids')
-                ]
-                resources = User.query.filter(User.id.in_(resource_ids)).all()
+                resources = []
+                if 'resource_ids' in request.params:
+                    resource_ids = [
+                        int(r_id)
+                        for r_id in request.POST.getall('resource_ids')
+                    ]
+                    resources = User.query.filter(User.id.in_(resource_ids)).all()
                 
                 # get the dates
                 # TODO: no time zone info here, please add time zone
@@ -382,20 +413,20 @@ def add_task(request):
                 depends = Task.query.filter(Task.id.in_(depend_ids)).all()
                 logger.debug('depends: %s' % depends)
                 
-                kwargs.update(dict(
-                    name=request.params['name'],
-                    status_list=status_list,
-                    status=status,
-                    created_by=logged_in_user,
-                    start=start,
-                    end=end,
-                    resources=resources,
-                    depends=depends
-                ))
+                kwargs['name'] = request.params['name']
+                kwargs['status_list'] = status_list
+                kwargs['status'] = status
+                kwargs['created_by'] = logged_in_user
+                kwargs['start'] = start
+                kwargs['end'] = end
+                kwargs['resources'] = resources
+                kwargs['depends'] = depends
                 
                 try:
+                    
                     new_task = Task(**kwargs)
-                    logger.debug('new_task.status: ' % new_task.status)
+                    logger.debug('new_task.name %s' % new_task.name)
+                    logger.debug('new_task.status: %s' % new_task.status)
                     DBSession.add(new_task)
                 except (AttributeError, TypeError) as e:
                     logger.debug(e.message)
@@ -418,25 +449,48 @@ def add_task(request):
                         logger.debug('%s: %s' % (param, request.params[param]))
                     else:
                         logger.debug('%s not in params' % param)
-                get_param('task_of_id')
+                get_param('project_id')
                 get_param('name')
                 get_param('description')
                 get_param('is_milestone')
                 get_param('resource_ids')
                 get_param('status_id')
+                
+                param_list = ['project_id', 'name', 'description',
+                              'is_milestone', 'resource_ids', 'status_id']
+ 
+                params = [param for param in param_list if param not in request.params]
+                
+                return HTTPServerError('There are missing parameters: %s' % params)
     
     # return the necessary values to prepare the form
     # get the taskable entity
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
     
-    return {
-        'entity': entity,
-        'types': Type.query.filter_by(target_entity_type='Task').all(),
-        'users': User.query.all(),
-        'status_list':
-            StatusList.query.filter_by(target_entity_type='Task').first()
-    }
+    return_dict = {}
+    if entity.entity_type == 'Project':
+        logger.debug('entity_type = "Project"')
+        return_dict['project'] = entity
+    else:
+        logger.debug('entity_type = "Task"')
+        return_dict['parent'] = entity
+        return_dict['project'] = entity.project
+    
+    if entity:
+        try:
+            logger.debug('project = %s' % return_dict['project'])
+            logger.debug('parent  = %s' % return_dict['parent'])
+        except KeyError:
+            pass
+    
+    return_dict['types'] = Type.query\
+        .filter_by(target_entity_type='Task').all()
+    return_dict['users'] = User.query.all()
+    return_dict['status_list'] = StatusList.query\
+        .filter_by(target_entity_type='Task').first()
+    
+    return return_dict
 
 
 @view_config(

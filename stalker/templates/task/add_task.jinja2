@@ -2,13 +2,23 @@
   <form id='add_task_form'>
     <table style='width: 100%;'>
       
-      {# TASK_OF #}
+      {# PROJECCT #}
       <tr>
         <td class='label_column'>
-          <label for='task_task_of'>Task Of</label>
+          <label for='task_project'>Project</label>
         </td>
         <td class='input_column'>
-          <input id='task_task_of'>
+          <input id='task_project'>
+        </td>
+      </tr>
+      
+      {# PARENT #}
+      <tr>
+        <td class='label_column'>
+          <label for='task_parent'>Parent</label>
+        </td>
+        <td class='input_column' colspan="2">
+          <input id='task_parent'>
         </td>
       </tr>
       
@@ -126,7 +136,7 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='task_add_button'>Add</button>
+  <button id='task_ok_button'>ok</button>
   <button id='task_cancel_button'>Cancel</button>
 </div>
 
@@ -155,15 +165,39 @@
       
       
       // **********************************************************************
-      // Task Of
-      var task_of = new TextBox({
-        name: 'task_of',
-        label: 'Task Of',
-        value: '{{ entity.name }} ({{ entity.entity_type }})',
-        disabled: true
-      }, 'task_task_of');
-      task_of.startup();
+      // Project
+      var project_textBox = new TextBox({
+        name: 'project_name',
+        label: 'Project',
+        value: '{{ project.name }}',
+        disabled: true,
+        required: true
+      }, 'task_project');
+      project_textBox.startup();
       
+      
+      // **********************************************************************
+      var tasks_jsonRest = new JsonRest({
+        target: 'get/tasks/{{ project.id }}'
+      });
+      
+      {% if parent %}
+        {# Use a TextBox #}
+        var parent_widget = new TextBox({
+          name: 'parent_id',
+          label: 'Parent',
+          value: '{{ parent.name }}',
+          disabled: true
+        }, 'task_parent');
+        parent_widget.startup();
+      {% else %}
+        {# Use a filtering select #}
+        var parent_widget = new FilteringSelect({
+          name: 'parent_id',
+          label: 'Parent',
+          required: false
+        }, 'task_parent');
+      {% endif %}
       
       
       
@@ -195,16 +229,6 @@
       
       // **********************************************************************
       // Depends
-      var target;
-      {% if entity.entity_type == 'Project' %}
-        target = 'get/tasks/{{ entity.id }}';
-      {% else %}
-        target = 'get/tasks/{{ entity.project.id }}';
-      {% endif %}
-    
-      var tasks_jsonRest = new JsonRest({
-        target: target
-      });
       
       var depends_tagSelect = new TagSelect({
         id: 'depends_tagSelect',
@@ -214,7 +238,11 @@
       depends_tagSelect.startup();
       
       var tasks_result = tasks_jsonRest.query().then(function(data){
+        var memory = new Memory({data: data});
         depends_tagSelect.set('store', new Memory({data: data}));
+        {% if not parent %}
+          parent_widget.set('store', memory);
+        {% endif %}
       });
       
       
@@ -465,9 +493,9 @@
       
       
       // **********************************************************************
-      // Add Button
-      var add_button = new Button({
-        label: 'OK',
+      // Ok Button
+      var ok_button = new Button({
+        label: 'Ok',
         type: 'button',
         onClick: function(){
           submitForm({
@@ -475,19 +503,22 @@
             form: add_task_form,
             additional_data: {
               submitted: 'add',
+              project_id: {{ project.id }},
+              {% if parent %}
+                parent_id: {{ parent.id }},
+              {% endif %}
               is_milestone: eval(is_milestone_checkBox.get('checked')) ? 1 : 0,
-              parent_id: {{ entity.id }},
               start: stamp.toISOString(start_dateTextBox.value),
               end: stamp.toISOString(end_dateTextBox.value),
               start_time: stamp.toISOString(start_time_timeTextBox.value),
               end_time: stamp.toISOString(end_time_timeTextBox.value)
             },
-            url: '{{ request.route_url('add_task', entity_id=entity.id) }}',
+            url: '{{ request.route_url('add_task', entity_id=project.id) }}',
             method: 'POST'
           });
         }
-      }, 'task_add_button');
-      add_button.startup();
+      }, 'task_ok_button');
+      ok_button.startup();
       
       
       

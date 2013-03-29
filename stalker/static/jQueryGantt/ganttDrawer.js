@@ -30,7 +30,7 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
 
   //this.zoomLevels = ["d","w","m","q","s","y"];
   this.zoomLevels = ["w","m","q","s","y"];
-
+  
   this.element = this.create(zoom, startmillis, endMillis);
 
 }
@@ -169,7 +169,8 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         date.setFullYear(date.getFullYear() + 1);
       }, function(date) {
         var sem = (Math.floor(date.getMonth() / 6) + 1);
-        tr2.append(createHeadCell(GanttMaster.messages["GANT_SEMESTER_SHORT"] + sem, 1));
+        //tr2.append(createHeadCell(GanttMaster.messages["GANT_SEMESTER_SHORT"] + sem, 1));
+        tr2.append(createHeadCell( 'S' + sem, 1));
         trBody.append(createBodyCell(1, sem == 2));
         date.setMonth(date.getMonth() + 6);
       });
@@ -185,7 +186,8 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         date.setMonth(date.getMonth() + 6);
       }, function(date) {
         var quarter = ( Math.floor(date.getMonth() / 3) + 1);
-        tr2.append(createHeadCell(GanttMaster.messages["GANT_QUARTER_SHORT"] + quarter, 1));
+        //tr2.append(createHeadCell(GanttMaster.messages["GANT_QUARTER_SHORT"] + quarter, 1));
+        tr2.append(createHeadCell('Q' + quarter, 1));
         trBody.append(createBodyCell(1, quarter % 2 == 0));
         date.setMonth(date.getMonth() + 3);
       });
@@ -707,7 +709,7 @@ Ganttalendar.prototype.redrawTasks = function() {
 
 
 Ganttalendar.prototype.refreshGantt = function() {
-  //console.debug("refreshGantt")
+  //console.debug("refreshGantt");
   var par = this.element.parent();
 
   //try to maintain last scroll

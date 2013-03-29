@@ -68,7 +68,7 @@ GanttMaster.prototype.init = function(place) {
   this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
 
   //setup splitter
-  var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 70);
+  var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 50);
   splitter.secondBox.css("overflow-y", "auto").scroll(function() {
     splitter.firstBox.scrollTop(splitter.secondBox.scrollTop());
   });
@@ -204,8 +204,8 @@ GanttMaster.messages = {
   "CANNOT_DEPENDS_ON_ANCESTORS":          "CANNOT_DEPENDS_ON_ANCESTORS",
   "CANNOT_DEPENDS_ON_DESCENDANTS":        "CANNOT_DEPENDS_ON_DESCENDANTS",
   "INVALID_DATE_FORMAT":                  "INVALID_DATE_FORMAT",
-  "GANTT_QUARTER_SHORT": "GANTT_QUARTER_SHORT",
-  "GANTT_SEMESTER_SHORT":"GANTT_SEMESTER_SHORT"
+  "GANTT_QUARTER_SHORT":                  "GANTT_QUARTER_SHORT",
+  "GANTT_SEMESTER_SHORT":                 "GANTT_SEMESTER_SHORT"
 };
 
 
