@@ -169,7 +169,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         date.setFullYear(date.getFullYear() + 1);
       }, function(date) {
         var sem = (Math.floor(date.getMonth() / 6) + 1);
-        //tr2.append(createHeadCell(GanttMaster.messages["GANT_SEMESTER_SHORT"] + sem, 1));
+        //tr2.append(createHeadCell(GanttMaster.messages["GANTT_SEMESTER_SHORT"] + sem, 1));
         tr2.append(createHeadCell( 'S' + sem, 1));
         trBody.append(createBodyCell(1, sem == 2));
         date.setMonth(date.getMonth() + 6);

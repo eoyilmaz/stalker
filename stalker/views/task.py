@@ -245,8 +245,8 @@ def get_root_tasks(request):
     # do a depth first search for child tasks
     for root_task in root_tasks:
         logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
-        tasks = depth_first_flatten(root_task)
-
+        tasks.extend(depth_first_flatten(root_task))
+    
     return convert_to_jquery_gantt_task_format(tasks) 
 
 @view_config(
@@ -272,7 +272,7 @@ def get_tasks(request):
             # do a depth first search for child tasks
             for root_task in root_tasks:
                 logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
-                tasks = depth_first_flatten(root_task)
+                tasks.extend(depth_first_flatten(root_task))
          
     if log.logging_level == logging.DEBUG:
         logger.debug('tasks count: %i' % len(tasks))

@@ -236,6 +236,12 @@
   position:absolute;
 }
 
+.taskBox .taskBid{
+  height:5px;
+  position:absolute;
+  top: 15px;
+}
+
 .taskBox .layout.extDep{
   background-image:url(hasExternalDeps.png);
 }
@@ -247,10 +253,25 @@
   color:black;
   text-align:right;
   padding-right:5px;
+  padding-top: 4px;
   overflow:hidden;
   left:-200px;
   width:195px;
   white-space:nowrap;
+}
+
+
+.taskDepLabel {
+    color: black;
+    height: 20px;
+    left: 100%;
+    overflow: visible;
+    padding-left: 15px;
+    padding-top: 4px;
+    position: absolute;
+    text-align: left;
+    white-space: nowrap;
+    width: 195px;
 }
 
 

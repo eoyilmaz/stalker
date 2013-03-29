@@ -31,3 +31,4 @@ include/*
 local
 *.swp
 stalker.db
+.git/
