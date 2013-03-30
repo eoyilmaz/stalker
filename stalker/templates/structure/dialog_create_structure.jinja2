@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea' style='height: 380px'>
-  <form id='edit_structure_form'>
+  <form id='create_structure_form'>
     <table style='width: 100%'>
     
     {# Name #}
@@ -34,11 +34,12 @@
         </label>
       </td>
       <td class='input_column'>
-        <select id='structure_filename_template'></select>
+        <select id='structure_filename_template'>
+        </select>
       </td>
       <td class='button_column'>
-        <button id='structure_add_filename_template_button'>Add</button>
-{#        <button id='structure_edit_filename_template_button'>Edit</button>#}
+        <button id='structure_create_filename_template_button'>Submit</button>
+{#        <button id='structure_update_filename_template_button'>Update</button>#}
       </td>
     </tr>
     </table>
@@ -46,7 +47,7 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='structure_edit_button'></button>
+  <button id='structure_submit_button'></button>
   <button id='structure_cancel_button'></button>
 </div>
 
@@ -58,14 +59,14 @@
     'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, 
              SimpleTextarea, Button, MultiSelect, JsonRest, submitForm,
-             dialogCaller, fieldUpdater){
+             fieldUpdater, dialogCaller){
       
       // **********************************************************************
       // Form
-      var edit_structure_form = new Form({
-        id: 'edit_structure_form'
-      }, 'edit_structure_form');
-      edit_structure_form.startup();
+      var create_structure_form = new Form({
+        id: 'create_structure_form'
+      }, 'create_structure_form');
+      create_structure_form.startup();
       
       
       
@@ -75,7 +76,6 @@
       var name_textBox = new ValidationTextBox({
         name: 'name',
         label: 'Name',
-        value: '{{ structure.name }}',
         placeHolder: 'Enter a name',
         required: true
       }, 'structure_name');
@@ -89,7 +89,6 @@
       var custom_template_simpleTextarea = new SimpleTextarea({
         name: 'custom_template',
         label: 'Custom Template',
-        value: '{{ structure.custom_template }}',
         placeHolder: 'Enter any custom template here',
         required: false,
         style: 'height: 250px; overflow:auto'
@@ -105,7 +104,6 @@
         target: '/get/filename_templates'
       });
       
-      // The Widget
       var filename_template_multi_select = new MultiSelect({
         name: 'filename_templates',
         required: false
@@ -115,45 +113,40 @@
       // The Updater
       var filename_template_field_updater = fieldUpdater({
         'memory': filename_template_memory,
-        'widget': filename_template_multi_select,
-        'selected': [
-          {% for ft in structure.templates %}
-            {{ ft.id}},
-          {% endfor %}
-        ]
+        'widget': filename_template_multi_select
       });
       // run the function to fill the data for the first time
       filename_template_field_updater({animate: false});
       
-      // Add Filename Template Button
-      var add_filename_template_button = dialogCaller({
-        label: 'Add',
-        dialog_id: 'add_filename_template_dialog',
-        content_creator: create_add_filename_template_dialog,
-        attach_to: 'structure_add_filename_template_button',
+      // New Filename Template Button
+      var create_filename_template_button = dialogCaller({
+        label: 'New',
+        dialog_id: 'create_filename_template_dialog',
+        content_creator: create_create_filename_template_dialog,
+        attach_to: 'structure_create_filename_template_button',
         related_field_updater: filename_template_field_updater
       });
-      add_filename_template_button.startup();
+      create_filename_template_button.startup();
       
       
       
       
       // **********************************************************************
-      // Edit Button
-      var edit_button = new Button({
-        label: 'Edit',
+      // Submit Button
+      var submit_button = new Button({
+        label: 'OK',
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('edit_structure_dialog'),
-            form: edit_structure_form,
-            additional_data: {submitted: 'edit'},
-            url: '{{ request.route_url('edit_structure', structure_id=structure.id) }}',
+            dialog: registry.byId('create_structure_dialog'),
+            form: create_structure_form,
+            additional_data: {submitted: 'create'},
+            url: '{{ request.route_url('create_structure') }}',
             method: 'POST'
           });
         }
-      }, 'structure_edit_button');
-      edit_button.startup();
+      }, 'structure_submit_button');
+      submit_button.startup();
       
       
       
@@ -164,7 +157,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = registry.byId('edit_structure_dialog');
+          var dialog = registry.byId('create_structure_dialog');
           dialog.destroyRecursive();
         }
       }, 'structure_cancel_button');

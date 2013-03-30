@@ -18,12 +18,12 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='edit_structure',
-    renderer='templates/structure/edit_structure.jinja2',
-    permission='Edit_Structure'
+    route_name='update_structure',
+    renderer='templates/structure/dialog_update_structure.jinja2',
+    permission='Update_Structure'
 )
-def edit_structure(request):
-    """called when editing a structure
+def update_structure(request):
+    """called when updateing a structure
     """
     
     login = authenticated_userid(request)
@@ -33,7 +33,7 @@ def edit_structure(request):
     structure = Structure.query.filter_by(id=structure_id).first()
     
     if 'submitted' in request.params:
-        if request.params['submitted'] == 'edit':
+        if request.params['submitted'] == 'update':
             if 'name' in request.params and \
                 'custom_template' in request.params and \
                 'filename_templates' in request.params:
@@ -49,7 +49,7 @@ def edit_structure(request):
                         for ft_id in ft_ids
                     ]
                     
-                    # edit structure
+                    # update structure
                     structure.name = request.params['name']
                     structure.templates = fts
                     structure.custom_template = \
@@ -63,11 +63,11 @@ def edit_structure(request):
 
 
 @view_config(
-    route_name='add_structure',
-    renderer='templates/structure/add_structure.jinja2',
-    permission='Add_Structure'
+    route_name='create_structure',
+    renderer='templates/structure/dialog_create_structure.jinja2',
+    permission='Create_Structure'
 )
-def add_structure(request):
+def create_structure(request):
     """called when adding a structure
     """
     
@@ -76,7 +76,7 @@ def add_structure(request):
     
     if 'submitted' in request.params:
         logger.debug('"submitted" in request.params')
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             logger.debug('Adding a new structure')
             # create and add a new structure
             if 'name' in request.params and \
@@ -116,7 +116,7 @@ def add_structure(request):
 @view_config(
     route_name='get_structures',
     renderer='json',
-    permission='View_Structure'
+    permission='Read_Structure'
 )
 def get_structures(request):
     """returns all the structures in the database

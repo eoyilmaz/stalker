@@ -20,17 +20,17 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='add_status',
-    renderer='templates/status/add_status.jinja2',
-    permission='Add_Status'
+    route_name='create_status',
+    renderer='templates/status/dialog_create_status.jinja2',
+    permission='Create_Status'
 )
 @view_config(
-    route_name='edit_status',
-    renderer='templates/status/edit_status.jinja2',
-    permission='Edit_Status'
+    route_name='update_status',
+    renderer='templates/status/update_status.jinja2',
+    permission='Update_Status'
 )
-def add_edit_status(request):
-    """called when adding or editing a Status
+def create_update_status(request):
+    """called when adding or updateing a Status
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
@@ -39,7 +39,7 @@ def add_edit_status(request):
     user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             logger.debug('adding a new Status')
             # create and add a new Status
             
@@ -79,9 +79,9 @@ def add_edit_status(request):
                 logger.debug(request.params)
             
             # TODO: place a return statement here
-        elif request.params['submitted'] == 'edit':
-            logger.debug('editing a Status')
-            # just edit the given Status
+        elif request.params['submitted'] == 'update':
+            logger.debug('updateing a Status')
+            # just update the given Status
             st_id = request.matchdict['status_id']
             status = Status.query.filter_by(id=st_id).first()
             
@@ -91,7 +91,7 @@ def add_edit_status(request):
                 status.updated_by = user
                 DBSession.add(status)
             
-            logger.debug('finished editing Status')
+            logger.debug('finished updateing Status')
             
             # TODO: place a return statement here
     
@@ -99,23 +99,23 @@ def add_edit_status(request):
 
 
 @view_config(
-    route_name='add_status_list',
-    renderer='templates/status/add_status_list.jinja2',
-    permission='Add_StatusList'
+    route_name='create_status_list',
+    renderer='templates/status/dialog_create_status_list.jinja2',
+    permission='Create_StatusList'
 )
 @view_config(
-    route_name='add_status_list_for',
-    renderer='templates/status/add_status_list.jinja2',
-    permission='Add_StatusList'
+    route_name='create_status_list_for',
+    renderer='templates/status/dialog_create_status_list.jinja2',
+    permission='Create_StatusList'
 )
-def add_status_list(request):
-    """called when adding or editing a StatusList
+def create_status_list(request):
+    """called when adding or updateing a StatusList
     """
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             logger.debug('adding a new StatusList')
             # create and add a new StatusList
             
@@ -171,12 +171,12 @@ def add_status_list(request):
 
 
 @view_config(
-    route_name='edit_status_list',
-    renderer='templates/status/edit_status_list.jinja2',
-    permission='Edit_StatusList'
+    route_name='update_status_list',
+    renderer='templates/status/dialog_update_status_list.jinja2',
+    permission='Update_StatusList'
 )
-def edit_status_list(request):
-    """called when editing a StatusList
+def update_status_list(request):
+    """called when updateing a StatusList
     """
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
@@ -185,9 +185,9 @@ def edit_status_list(request):
     status_list = StatusList.query.filter_by(id=status_list_id).first()
     
     if 'submitted' in request.params:
-        if request.params['submitted'] == 'edit':
-            logger.debug('editing a StatusList')
-            # just edit the given StatusList
+        if request.params['submitted'] == 'update':
+            logger.debug('updateing a StatusList')
+            # just update the given StatusList
             
             # get statuses
             logger.debug("request.params['statuses']: %s" % 
@@ -215,7 +215,7 @@ def edit_status_list(request):
 @view_config(
     route_name='get_statuses',
     renderer='json',
-    permission='View_Status'
+    permission='Read_Status'
 )
 def get_statuses(request):
     """returns all the Statuses in the database
@@ -233,7 +233,7 @@ def get_statuses(request):
 @view_config(
     route_name='get_statuses_of',
     renderer='json',
-    permission='View_Status'
+    permission='Read_Status'
 )
 def get_statuses_of(request):
     """returns the Statuses of given StatusList
@@ -252,7 +252,7 @@ def get_statuses_of(request):
 @view_config(
     route_name='get_status_lists',
     renderer='json',
-    permission='View_StatusList'
+    permission='Read_StatusList'
 )
 def get_status_lists(request):
     """returns all the StatusList instances in the databases
@@ -269,7 +269,7 @@ def get_status_lists(request):
 @view_config(
     route_name='get_status_lists_for',
     renderer='json',
-    permission='View_StatusList'
+    permission='Read_StatusList'
 )
 def get_status_lists_for(request):
     """returns all the StatusList for a specific target_entity_type

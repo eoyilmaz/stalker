@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'> 
-  <form id='add_project_form'>
+  <form id='create_project_form'>
     <table style='width: 100%;'>
       
       {# NAME #}
@@ -61,8 +61,8 @@
           <input id='project_image_format'>
         </td>
         <td class='button_column'>
-          <button id='project_add_image_format_button'>Add</button>
-          <button id='project_edit_image_format_button'>Edit</button>
+          <button id='project_create_image_format_button'>New</button>
+          <button id='project_update_image_format_button'>Update</button>
         </td>
       </tr>
       
@@ -85,8 +85,8 @@
           <input id='project_repository'>
         </td>
         <td class='button_column'>
-          <button id='project_add_repository_button'>Add</button>
-          <button id='project_edit_repository_button'>Edit</button>
+          <button id='project_create_repository_button'>New</button>
+          <button id='project_update_repository_button'>Update</button>
         </td>
       </tr>
       
@@ -99,8 +99,8 @@
           <input id='project_structure'>
         </td>
         <td class='button_column'>
-          <button id='project_add_structure_button'>Add</button>
-          <button id='project_edit_structure_button'>Edit</button>
+          <button id='project_create_structure_button'>New</button>
+          <button id='project_update_structure_button'>Update</button>
         </td>
       </tr>
       
@@ -113,8 +113,8 @@
           <input id='project_lead'>
         </td>
         <td class='button_column'>
-          <button id='project_add_lead_button'>Add</button>
-          <button id='project_edit_lead_button'>Edit</button>
+          <button id='project_create_lead_button'>New</button>
+          <button id='project_update_lead_button'>Update</button>
         </td>
       </tr>
       
@@ -127,8 +127,8 @@
           <input id='project_status_list'>
         </td>
         <td class='button_column'>
-          <button id='project_add_status_list_button'>Add</button>
-          <button id='project_edit_status_list_button'>Edit</button>
+          <button id='project_create_status_list_button'>New</button>
+          <button id='project_update_status_list_button'>Update</button>
         </td>
       </tr>
 
@@ -137,7 +137,7 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='project_add_button'>Add</button>
+  <button id='project_submit_button'>Ok</button>
   <button id='project_cancel_button'>Cancel</button>
 </div>
 
@@ -155,9 +155,9 @@
       ready(function(){
         // ********************************************************************
         // Form
-        var add_project_form = new Form({
-          id: 'add_project_form'
-        }, 'add_project_form');
+        var create_project_form = new Form({
+          id: 'create_project_form'
+        }, 'create_project_form');
         
         
         // ********************************************************************
@@ -295,28 +295,28 @@
         // run the function to fill the data for the first time
         imf_field_updater({animate: false});
         
-        // Add Image Format Button
-        var add_image_format_button = dialogCaller({
+        // New Image Format Button
+        var create_image_format_button = dialogCaller({
           label: 'New',
-          dialog_id: 'add_image_format_dialog',
-          content_creator: create_add_image_format_dialog,
-          attach_to: 'project_add_image_format_button',
+          dialog_id: 'create_image_format_dialog',
+          content_creator: create_create_image_format_dialog,
+          attach_to: 'project_create_image_format_button',
           related_field_updater: imf_field_updater
         });
-        add_image_format_button.startup();
+        create_image_format_button.startup();
         
-        // Edit Image Format Button
-        var edit_image_format_button = dialogCaller({
-          label: 'Edit',
-          dialog_id: 'edit_image_format_dialog',
-          content_creator: create_edit_image_format_dialog,
-          attach_to: 'project_edit_image_format_button',
+        // Update Image Format Button
+        var update_image_format_button = dialogCaller({
+          label: 'Update',
+          dialog_id: 'update_image_format_dialog',
+          content_creator: create_update_image_format_dialog,
+          attach_to: 'project_update_image_format_button',
           related_field_updater: imf_field_updater,
           data_id: function(){
             return imf_filteringSelect.get('value');
           }
         });
-        edit_image_format_button.startup();
+        update_image_format_button.startup();
         
         
         
@@ -357,28 +357,28 @@
         // run the function to fill the data
         repo_field_updater({animate: false});
      
-        // Add Repository Button
-        var add_repository_button = dialogCaller({
+        // New Repository Button
+        var create_repository_button = dialogCaller({
           label: 'New',
-          dialog_id: 'add_repository_dialog',
-          content_creator: create_add_repository_dialog,
-          attach_to: 'project_add_repository_button',
+          dialog_id: 'create_repository_dialog',
+          content_creator: create_create_repository_dialog,
+          attach_to: 'project_create_repository_button',
           related_field_updater: repo_field_updater
         });
-        add_repository_button.startup();
+        create_repository_button.startup();
         
-        // Edit Repository Button
-        var edit_repository_button = dialogCaller({
-          label: 'Edit',
-          dialog_id: 'edit_repository_dialog',
-          content_creator: create_edit_repository_dialog,
-          attach_to: 'project_edit_repository_button',
+        // Update Repository Button
+        var update_repository_button = dialogCaller({
+          label: 'Update',
+          dialog_id: 'update_repository_dialog',
+          content_creator: create_update_repository_dialog,
+          attach_to: 'project_update_repository_button',
           related_field_updater: repo_field_updater,
           data_id: function(){
             return repository_filteringSelect.get('value');
           }
         });
-        edit_repository_button.startup();
+        update_repository_button.startup();
         
         
         
@@ -407,28 +407,28 @@
         // call the updater to fill the field for the first time
         structure_field_updater({animate: false});
         
-        // Add Structure Button
-        var add_structure_button = dialogCaller({
+        // New Structure Button
+        var create_structure_button = dialogCaller({
           label: 'New',
-          dialog_id: 'add_structure_dialog',
-          content_creator: create_add_structure_dialog,
-          attach_to: 'project_add_structure_button',
+          dialog_id: 'create_structure_dialog',
+          content_creator: create_create_structure_dialog,
+          attach_to: 'project_create_structure_button',
           related_field_updater: structure_field_updater
         });
-        add_structure_button.startup();
+        create_structure_button.startup();
         
-        // EDIT STRUCTURE BUTTON
-        var edit_structure_button = dialogCaller({
-          label:'Edit',
-          dialog_id: 'edit_structure_dialog',
-          content_creator: create_edit_structure_dialog,
-          attach_to: 'project_edit_structure_button',
+        // UPDATE STRUCTURE BUTTON
+        var update_structure_button = dialogCaller({
+          label:'Update',
+          dialog_id: 'update_structure_dialog',
+          content_creator: create_update_structure_dialog,
+          attach_to: 'project_update_structure_button',
           related_field_updater: structure_field_updater,
           data_id: function(){
             return structure_filteringSelect.get('value')
           }
         });
-        edit_structure_button.startup();
+        update_structure_button.startup();
         
         
         
@@ -454,28 +454,28 @@
         });
         lead_field_updater({animate: false});
         
-        // Add Lead Button
-        var add_lead_button = dialogCaller({
+        // New Lead Button
+        var create_lead_button = dialogCaller({
           label: 'New',
-          dialog_id: 'add_user_dialog',
-          content_creator: create_add_user_dialog,
-          attach_to: 'project_add_lead_button',
+          dialog_id: 'create_user_dialog',
+          content_creator: create_create_user_dialog,
+          attach_to: 'project_create_lead_button',
           related_field_updater: lead_field_updater
         });
-        add_lead_button.startup();
+        create_lead_button.startup();
         
-        // Edit Lead Button
-        var edit_lead_button = dialogCaller({
-          label: 'Edit',
-          dialog_id: 'edit_user_dialog',
-          content_creator: create_edit_user_dialog,
-          attach_to: 'project_edit_lead_button',
+        // Update Lead Button
+        var update_lead_button = dialogCaller({
+          label: 'Update',
+          dialog_id: 'update_user_dialog',
+          content_creator: create_update_user_dialog,
+          attach_to: 'project_update_lead_button',
           related_field_updater: lead_field_updater,
           data_id: function(){
             return lead_filteringSelect.get('value')
           }
         });
-        edit_lead_button.startup();
+        update_lead_button.startup();
         
         
         
@@ -503,50 +503,50 @@
         });
         status_list_field_updater({animate: false});
         
-        // Add Status List Button
-        var add_status_list_button = dialogCaller({
+        // New Status List Button
+        var create_status_list_button = dialogCaller({
           label: 'New',
-          dialog_id: 'add_status_list_dialog',
-          content_creator: create_add_status_list_dialog,
-          attach_to: 'project_add_status_list_button',
+          dialog_id: 'create_status_list_dialog',
+          content_creator: create_create_status_list_dialog,
+          attach_to: 'project_create_status_list_button',
           related_field_updater: status_list_field_updater,
           data_id: 'Project'
         });
-        add_status_list_button.startup();
+        create_status_list_button.startup();
         
-        // Edit Status List Button
-        var edit_status_list_button = dialogCaller({
-          label: 'Edit',
-          dialog_id: 'edit_status_list_dialog',
-          content_creator: create_edit_status_list_dialog,
-          attach_to: 'project_edit_status_list_button',
+        // Update Status List Button
+        var update_status_list_button = dialogCaller({
+          label: 'Update',
+          dialog_id: 'update_status_list_dialog',
+          content_creator: create_update_status_list_dialog,
+          attach_to: 'project_update_status_list_button',
           related_field_updater: status_list_field_updater,
           data_id: function(){
               return status_list_filteringSelect.get('value');
           }
         });
-        edit_status_list_button.startup();
+        update_status_list_button.startup();
         
         // ********************************************************************
-        // ADD BUTTON
-        var add_button = new Button({
+        // SUBMIT BUTTON
+        var submit_button = new Button({
           label: 'OK',
           type: 'button',
           onClick: function(){
             submitForm({
-              dialog: registry.byId('add_project_dialog'),
-              form: add_project_form,
+              dialog: registry.byId('create_project_dialog'),
+              form: create_project_form,
               additional_data: {
-                submitted: 'add',
+                submitted: 'create',
                 start: stamp.toISOString(start_dateTextBox.value),
                 end: stamp.toISOString(end_dateTextBox.value)
               },
-              url: '{{ request.route_url("add_project") }}',
+              url: '{{ request.route_url("create_project") }}',
               method: 'POST'
             });
           }
-        }, 'project_add_button');
-        add_button.startup();
+        }, 'project_submit_button');
+        submit_button.startup();
         
         // ********************************************************************
         // CANCEL BUTTON
@@ -554,12 +554,12 @@
           label: 'Cancel',
           type: 'button',
           onClick: function(){
-            registry.byId('add_project_dialog').destroyRecursive();
+            registry.byId('create_project_dialog').destroyRecursive();
           }
         }, 'project_cancel_button');
         cancel_button.startup();
         
-        add_project_form.startup();
+        create_project_form.startup();
       
       });
   });

@@ -16,11 +16,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 @view_config(
-    route_name='add_asset',
-    renderer='templates/asset/add_asset.jinja2',
-    permission='Add_Asset'
+    route_name='create_asset',
+    renderer='templates/asset/dialog_create_asset.jinja2',
+    permission='Create_Asset'
 )
-def add_asset(request):
+def create_asset(request):
     """runs when adding a new Asset instance
     """
     login = authenticated_userid(request)
@@ -29,7 +29,7 @@ def add_asset(request):
     if 'submitted' in request.params:
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
         
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             
             if 'name' in request.params and \
                'code' in request.params and \
@@ -153,7 +153,7 @@ def add_asset(request):
 
 @view_config(
     route_name='view_asset',
-    renderer='templates/asset/view_asset.jinja2'
+    renderer='templates/asset/page_view_asset.jinja2'
 )
 def view_asset(request):
     """runs when viewing an asset
@@ -172,7 +172,7 @@ def view_asset(request):
 
 @view_config(
     route_name='summarize_asset',
-    renderer='templates/asset/summarize_asset.jinja2'
+    renderer='templates/asset/content_summarize_asset.jinja2'
 )
 def summarize_asset(request):
     """runs when viewing an asset
@@ -193,7 +193,7 @@ def summarize_asset(request):
 @view_config(
     route_name='get_assets',
     renderer='json',
-    permission='View_Asset'
+    permission='Read_Asset'
 )
 def get_assets(request):
     """returns all the Assets of a given Project

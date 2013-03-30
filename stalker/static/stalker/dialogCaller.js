@@ -62,16 +62,19 @@ define(['dijit/form/Button', 'dijit/MenuItem'],
                     // create the dialog if it doesn't already exists
                     if (dialog_id != null){
                         var dialog = dijit.byId(dialog_id);
-                        if (dialog == null){
-                            // get the data_id
-                            if (data_id != null){
-                                if (typeof(data_id) == 'function') {
-                                    dialog = content_creator(data_id());
-                                } else {
-                                    dialog = content_creator(data_id);
-                                }
+                        if (dialog != null){
+                            dialog.destroyRecursive();
+                        }
+
+                        // get the data_id
+                        if (data_id != null){
+                            if (typeof(data_id) == 'function') {
+                                dialog = content_creator(data_id());
+                            } else {
+                                dialog = content_creator(data_id);
                             }
                         }
+
                         
                         // set the field updater
                         dialog.set(

@@ -1,5 +1,5 @@
 <div id='view_users'>
-  <button id='view_users_add_user_button'>Add User</button>
+  <button id='view_users_create_user_button'>New User</button>
   <div id='users_data_grid'></div>
 </div>
 
@@ -25,17 +25,17 @@
               rowSelector: '20px'
             }, 'users_data_grid');
 
-            var add_user_button = dialogCaller({
-              label: 'Add User',
-              dialog_id: 'add_user_dialog',
-              content_creator: create_add_user_dialog,
-              attach_to: 'view_users_add_user_button',
+            var create_user_button = dialogCaller({
+              label: 'New User',
+              dialog_id: 'create_user_dialog',
+              content_creator: create_create_user_dialog,
+              attach_to: 'view_users_create_user_button',
               related_field_updater: users_DataGrid_updater,
               data_id: '{{ entity.id }}'
             });
 
             users_DataGrid.startup();
-            add_user_button.startup();
+            create_user_button.startup();
 
 
 {#            var user_memory = new Memory({#}

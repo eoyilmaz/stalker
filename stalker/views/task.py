@@ -9,7 +9,6 @@ import logging
 from pyramid.httpexceptions import HTTPServerError
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
-import re
 from sqlalchemy.exc import IntegrityError
 import transaction
 
@@ -167,11 +166,11 @@ def update_with_jquery_gantt_task_data(json_data):
 
 
 @view_config(
-    route_name='edit_tasks',
+    route_name='update_tasks',
     renderer='json'
 )
-def edit_tasks(request):
-    """edits the given tasks with the given JSON data
+def update_tasks(request):
+    """updates the given tasks with the given JSON data
     """
     # get the data
     data = request.params['prj']
@@ -181,11 +180,11 @@ def edit_tasks(request):
 
 
 @view_config(
-    route_name='edit_task',
-    renderer='templates/task/edit_task.jinja2'
+    route_name='update_task',
+    renderer='templates/task/dialog_update_task.jinja2'
 )
-def edit_task(request):
-    """runs when editing a task
+def update_task(request):
+    """runs when updateing a task
     """
     # get logged in user
     login = authenticated_userid(request)
@@ -198,7 +197,7 @@ def edit_task(request):
     if 'submitted' in request.params:
         logger.debug('code came here 2')
         logger.debug(request.params['submitted'])
-        if request.params['submitted'] == 'edit':
+        if request.params['submitted'] == 'update':
             pass
     
     return {
@@ -252,7 +251,7 @@ def get_root_tasks(request):
 @view_config(
     route_name='get_tasks',
     renderer='json',
-    permission='View_Task'
+    permission='Read_Task'
 )
 def get_tasks(request):
     """returns all the tasks in database related to the given entity
@@ -288,7 +287,7 @@ def get_tasks(request):
 @view_config(
     route_name='get_project_tasks',
     renderer='json',
-    permission='View_Task'
+    permission='Read_Task'
 )
 def get_project_tasks(request):
     """returns all the tasks of the given Project instance
@@ -312,8 +311,8 @@ def get_project_tasks(request):
 
 @view_config(
     route_name='view_tasks',
-    renderer='templates/task/view_tasks.jinja2',
-    permission='View_Task'
+    renderer='templates/task/content_list_tasks.jinja2',
+    permission='Read_Task'
 )
 def view_tasks(request):
     """runs when viewing tasks of a TaskableEntity
@@ -337,11 +336,11 @@ def add_dependent_task(request):
 
 
 @view_config(
-    route_name='add_task',
-    renderer='templates/task/add_task.jinja2',
-    permission='Add_Task'
+    route_name='create_task',
+    renderer='templates/task/dialog_create_task.jinja2',
+    permission='Create_Task'
 )
-def add_task(request):
+def create_task(request):
     """runs when adding a new task
     """
     
@@ -351,7 +350,7 @@ def add_task(request):
     if 'submitted' in request.params:
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
         
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             if 'project_id' in request.params and \
                 'name' in request.params and \
                 'description' in request.params and \
@@ -445,7 +444,6 @@ def add_task(request):
                 kwargs['depends'] = depends
                 
                 try:
-                    
                     new_task = Task(**kwargs)
                     logger.debug('new_task.name %s' % new_task.name)
                     logger.debug('new_task.status: %s' % new_task.status)

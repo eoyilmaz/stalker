@@ -20,11 +20,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 @view_config(
-    route_name='add_user',
-    renderer='templates/auth/add_user.jinja2',
-    permission='Add_User'
+    route_name='create_user',
+    renderer='templates/auth/dialog_create_user.jinja2',
+    permission='Create_User'
 )
-def add_user(request):
+def create_user(request):
     """called when adding a User
     """
     login = authenticated_userid(request)
@@ -32,8 +32,8 @@ def add_user(request):
     
     if 'submitted' in request.params:
         logger.debug('submitted in params')
-        if request.params['submitted'] == 'add':
-            logger.debug('submitted value is: add')
+        if request.params['submitted'] == 'create':
+            logger.debug('submitted value is: create')
             # create and add a new user
             if 'name' in request.params and \
                'login' in request.params and \
@@ -98,8 +98,8 @@ def add_user(request):
                 log_param(request, 'email')
                 log_param(request, 'password')
                 
-        #elif request.params['submitted'] == 'edit':
-        #    # just edit the given user
+        #elif request.params['submitted'] == 'update':
+        #    # just update the given user
         #    user_id = request.matchdict['user_id']
         #    user = User.query.filter_by(id=user_id).one()
         #    
@@ -111,7 +111,7 @@ def add_user(request):
         #        # TODO: update the rest later
         #        DBSession.add(user)
         else:
-            logger.debug('submitted value is not add but: %s' %
+            logger.debug('submitted value is not create but: %s' %
                          request.params['submitted'])
     else:
         logger.debug('submitted is not among parameters')
@@ -128,12 +128,12 @@ def add_user(request):
 
 
 @view_config(
-    route_name='edit_user',
-    renderer='templates/auth/edit_user.jinja2',
-    permission='Edit_User'
+    route_name='update_user',
+    renderer='templates/auth/update_user.jinja2',
+    permission='Update_User'
 )
-def edit_user(request):
-    """called when editing a user
+def update_user(request):
+    """called when updating a user
     """
     pass
 
@@ -141,7 +141,7 @@ def edit_user(request):
 @view_config(
     route_name='get_users',
     renderer='json',
-    permission='View_User'
+    permission='Read_User'
 )
 def get_users(request):
     """returns all the users in database
@@ -153,7 +153,8 @@ def get_users(request):
 
 @view_config(
     route_name='get_users_byEntity',
-    renderer='json'
+    renderer='json',
+    permission='Read_User'
 )
 def get_users_byEntity(request):
     """returns all the Users of a given Entity
@@ -176,23 +177,23 @@ def get_users_byEntity(request):
 
 
 @view_config(
-    route_name='add_group',
-    renderer='templates/auth/add_groups.jinja2',
-    permission='Add_Group'
+    route_name='create_group',
+    renderer='templates/auth/create_groups.jinja2',
+    permission='Create_Group'
 )
-def add_group(request):
-    """runs when adding a new Group
+def create_group(request):
+    """runs when creating a new Group
     """
     return {}
 
 
 @view_config(
     route_name='summarize_user',
-    renderer='templates/auth/summarize_user.jinja2'
+    renderer='templates/auth/content_summarize_user.jinja2'
 )
 @view_config(
     route_name='view_user_tasks',
-    renderer='templates/task/view_tasks.jinja2'
+    renderer='templates/task/content_list_tasks.jinja2'
 )
 def summarize_user(request):
     """runs when getting general User info
@@ -208,7 +209,7 @@ def summarize_user(request):
 
 @view_config(
     route_name='view_user',
-    renderer='templates/auth/view_user.jinja2'
+    renderer='templates/auth/page_view_user.jinja2'
 )
 def view_user(request):
     
@@ -221,7 +222,7 @@ def view_user(request):
 
 @view_config(
     route_name='view_users',
-    renderer='templates/auth/view_users.jinja2'
+    renderer='templates/auth/content_list_users.jinja2'
 )
 def view_users(request):
     """

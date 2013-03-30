@@ -20,11 +20,11 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='add_sequence',
-    renderer='templates/sequence/add_sequence.jinja2',
-    permission='Add_Sequence'
+    route_name='create_sequence',
+    renderer='templates/sequence/dialog_create_sequence.jinja2',
+    permission='Create_Sequence'
 )
-def add_sequence(request):
+def create_sequence(request):
     """runs when adding a new sequence
     """
     login = authenticated_userid(request)
@@ -33,7 +33,7 @@ def add_sequence(request):
     if 'submitted' in request.params:
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
         
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             
             if 'name' in request.params and \
                'code' in request.params and \
@@ -98,12 +98,12 @@ def add_sequence(request):
 
 
 @view_config(
-    route_name='edit_sequence',
-    renderer='templates/sequence/edit_sequence.jinja2',
-    permission='Edit_Sequence'
+    route_name='update_sequence',
+    renderer='templates/sequence/update_sequence.jinja2',
+    permission='Update_Sequence'
 )
-def edit_sequence(request):
-    """runs when editing a sequence
+def update_sequence(request):
+    """runs when updateing a sequence
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
@@ -111,7 +111,7 @@ def edit_sequence(request):
     sequence_id = request.matchdict['sequence_id']
     sequence = Sequence.query.filter_by(id=sequence_id).first()
     
-    if request.params['submitted'] == 'edit':
+    if request.params['submitted'] == 'update':
         login = authenticated_userid(request)
         authenticated_user = User.query.filter_by(login=login).first()
         
@@ -134,7 +134,7 @@ def edit_sequence(request):
 @view_config(
     route_name='get_sequences',
     renderer='json',
-    permission='View_Sequence'
+    permission='Read_Sequence'
 )
 def get_sequences(request):
     """returns the related sequences of the given project as a json data

@@ -78,37 +78,37 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Project
-    config.add_route('add_project', 'add/project')
-    config.add_route('edit_project', 'edit/project/{project_id}')
+    config.add_route('create_project', 'create/project')
+    config.add_route('update_project', 'update/project/{project_id}')
     config.add_route('view_project', 'view/project/{project_id}')
-    config.add_route('view_projects', 'view/projects')
+    config.add_route('list_projects', 'list/projects')
     config.add_route('summarize_project', 'summarize/project/{project_id}')
     config.add_route('get_projects', 'get/projects')
     
     # *************************************************************************
     # ImageFormat
-    config.add_route('add_image_format', 'add/image_format')
-    config.add_route('edit_image_format', 'edit/image_format/{imf_id}')
+    config.add_route('create_image_format', 'create/image_format')
+    config.add_route('update_image_format', 'update/image_format/{imf_id}')
     config.add_route('get_image_formats', 'get/image_formats')
     
     # *************************************************************************
     # Repository
-    config.add_route('add_repository', 'add/repository')
-    config.add_route('edit_repository', 'edit/repository/{repository_id}')
+    config.add_route('create_repository', 'create/repository')
+    config.add_route('update_repository', 'update/repository/{repository_id}')
     config.add_route('get_repositories', 'get/repositories')
     
     # ************************************************************************* 
     # Structure
-    config.add_route('add_structure', 'add/structure')
-    config.add_route('edit_structure', 'edit/structure/{structure_id}')
+    config.add_route('create_structure', 'create/structure')
+    config.add_route('update_structure', 'update/structure/{structure_id}')
     config.add_route('get_structures', 'get/structures')
     
     # ************************************************************************* 
     # User
-    config.add_route('add_user', 'add/user/{department_id}')
-    config.add_route('edit_user', 'edit/user/{user_id}')
+    config.add_route('create_user', 'create/user/{department_id}')
+    config.add_route('update_user', 'update/user/{user_id}')
     config.add_route('view_user', 'view/user/{user_id}')
-    config.add_route('view_users', 'view/users/{entity_id}')
+    config.add_route('list_users', 'list/users/{entity_id}')
     config.add_route('get_users', 'get/users')
     config.add_route('get_users_byEntity', 'get/users_byEntity/{entity_id}')
 
@@ -121,61 +121,61 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # FilenameTemplate
-    config.add_route('add_filename_template', 'add/filename_template')
-    config.add_route('edit_filename_template',
-                     'edit/filename_template/{filename_template_id}')
+    config.add_route('create_filename_template', 'create/filename_template')
+    config.add_route('update_filename_template',
+                     'update/filename_template/{filename_template_id}')
     config.add_route('get_filename_templates', 'get/filename_templates')
     
     # ************************************************************************* 
     # StatusList
-    config.add_route('add_status_list', 'add/status_list')
-    config.add_route('add_status_list_for',
-                     'add/status_list/{target_entity_type}')
-    config.add_route('edit_status_list', 'edit/status_list/{status_list_id}')
+    config.add_route('create_status_list', 'create/status_list')
+    config.add_route('create_status_list_for',
+                     'create/status_list/{target_entity_type}')
+    config.add_route('update_status_list', 'update/status_list/{status_list_id}')
     config.add_route('get_status_lists', 'get/status_lists')
     config.add_route('get_status_lists_for',
                      'get/status_lists_for/{target_entity_type}')
     
     # *************************************************************************
     # Status
-    config.add_route('add_status', 'add/status')
-    config.add_route('edit_status', 'edit/status')
+    config.add_route('create_status', 'create/status')
+    config.add_route('update_status', 'update/status')
     config.add_route('get_statuses', 'get/statuses')
     config.add_route('get_statuses_of', 'get/statuses_of/{status_list_id}')
     
     # *************************************************************************
     # Assets
-    config.add_route('add_asset', 'add/asset/{project_id}')
+    config.add_route('create_asset', 'create/asset/{project_id}')
     config.add_route('view_asset', 'view/asset/{asset_id}')
     config.add_route('summarize_asset', 'summarize/asset/{asset_id}')
-    config.add_route('edit_asset', 'edit/asset/{asset_id}')
-    config.add_route('view_assets', 'view/assets/{project_id}')
+    config.add_route('update_asset', 'update/asset/{asset_id}')
+    config.add_route('list_assets', 'list/assets/{project_id}')
     config.add_route('get_assets', 'get/assets/{project_id}')
     
     # *************************************************************************
     # Shots
-    config.add_route('add_shot', 'add/shot/{project_id}')
+    config.add_route('create_shot', 'create/shot/{project_id}')
     config.add_route('view_shot', 'view/shot/{shot_id}')
-    config.add_route('edit_shot', 'edit/shot/{shot_id}')
-    config.add_route('view_shots', 'view/shots/{project_id}')
+    config.add_route('update_shot', 'update/shot/{shot_id}')
+    config.add_route('list_shots', 'list/shots/{project_id}')
     config.add_route('get_shots', 'get/shots/{project_id}')
     
     # *************************************************************************
     # Sequence
-    config.add_route('add_sequence', 'add/sequence/{project_id}')
+    config.add_route('create_sequence', 'create/sequence/{project_id}')
     config.add_route('view_sequence', 'view/sequence/{sequence_id}')
-    config.add_route('edit_sequence', 'edit/sequence/{sequence_id}')
-    config.add_route('view_sequences', 'view/sequences/{project_id}')
+    config.add_route('update_sequence', 'update/sequence/{sequence_id}')
+    config.add_route('list_sequences', 'list/sequences/{project_id}')
     config.add_route('get_sequences',
                      'get/sequences/{project_id}')
     
     # *************************************************************************
     # Task
-    config.add_route('add_task', 'add/task/{entity_id}')
+    config.add_route('create_task', 'create/task/{entity_id}')
     config.add_route('view_task', 'view/task/{task_id}')
-    config.add_route('edit_task', 'edit/task/{task_id}')
-    config.add_route('edit_tasks', 'edit/tasks')
-    config.add_route('view_tasks', 'view/tasks/{entity_id}')
+    config.add_route('update_task', 'update/task/{task_id}')
+    config.add_route('update_tasks', 'update/tasks')
+    config.add_route('list_tasks', 'list/tasks/{entity_id}')
     config.add_route('get_tasks',
                      'get/tasks/{entity_id}')
     config.add_route('get_project_tasks', 'get/project/tasks/{project_id}')
@@ -183,16 +183,16 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Department
-    config.add_route('add_department', 'add/department')
-    config.add_route('edit_department', 'edit/department/{department_id}')
+    config.add_route('create_department', 'create/department')
+    config.add_route('update_department', 'update/department/{department_id}')
     config.add_route('summarize_department', 'summarize/department/{department_id}')
     config.add_route('view_department', 'view/department/{department_id}')
     config.add_route('get_departments', 'get/departments')
     
     # *************************************************************************
     # Group
-    config.add_route('add_group', 'add/group')
-    config.add_route('edit_group', 'edit/group/{group_id}')
+    config.add_route('create_group', 'create/group')
+    config.add_route('update_group', 'update/group/{group_id}')
     config.add_route('view_group', 'view/group/{group_id}')
     config.add_route('get_groups', 'get/groups')
     

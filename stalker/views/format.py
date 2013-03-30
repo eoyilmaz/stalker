@@ -18,12 +18,12 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='edit_image_format',
-    renderer='templates/format/edit_image_format.jinja2',
-    permission='Edit_ImageFormat'
+    route_name='update_image_format',
+    renderer='templates/format/dialog_update_image_format.jinja2',
+    permission='Update_ImageFormat'
 )
-def edit_image_format(request):
-    """called when editing an image format
+def update_image_format(request):
+    """called when updateing an image format
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
@@ -42,7 +42,7 @@ def edit_image_format(request):
             'height' in request.params and \
             'pixel_aspect' in request.params and \
             'submitted' in request.params:
-            if request.params['submitted'] == 'edit':
+            if request.params['submitted'] == 'update':
                 imf.name = request.params['name']
                 imf.width = int(request.params['width'])
                 imf.height = int(request.params['height'])
@@ -63,7 +63,7 @@ def edit_image_format(request):
 @view_config(
     route_name='get_image_formats',
     renderer='json',
-    permission='View_ImageFormat'
+    permission='Read_ImageFormat'
 )
 def get_image_formats(request):
     """returns all the image formats in the database
@@ -81,12 +81,12 @@ def get_image_formats(request):
 
 
 @view_config(
-    route_name='add_image_format',
-    renderer='templates/format/add_image_format.jinja2',
-    permission='Add_ImageFormat'
+    route_name='create_image_format',
+    renderer='templates/format/dialog_create_image_format.jinja2',
+    permission='Create_ImageFormat'
 )
-def add_image_format(request):
-    """called when adding or editing an image format
+def create_image_format(request):
+    """called when adding or updateing an image format
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)

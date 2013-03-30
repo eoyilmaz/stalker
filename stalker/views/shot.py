@@ -20,11 +20,11 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='add_shot',
-    renderer='templates/shot/add_shot.jinja2',
-    permission='Add_Shot'
+    route_name='create_shot',
+    renderer='templates/shot/dialog_create_shot.jinja2',
+    permission='Create_Shot'
 )
-def add_shot(request):
+def create_shot(request):
     """runs when adding a new shot
     """
     login = authenticated_userid(request)
@@ -33,7 +33,7 @@ def add_shot(request):
     if 'submitted' in request.params:
         logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
         
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             if 'name' in request.params and \
                'code' in request.params and  \
                'sequence_id' in request.params and \
@@ -107,7 +107,7 @@ def add_shot(request):
 @view_config(
     route_name='get_shots',
     renderer='json',
-    permission='View_Shot'
+    permission='Read_Shot'
 )
 def get_shots(request):
     """returns all the Shots of the given Project

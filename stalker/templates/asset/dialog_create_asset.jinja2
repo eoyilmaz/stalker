@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'> 
-  <form id='add_asset_form'>
+  <form id='create_asset_form'>
     <table style='width: 100%;'>
       
       {# NAME #}
@@ -61,8 +61,8 @@
           <input id='asset_status_list'>
         </td>
         <td class='button_column'>
-          <button id='asset_add_status_list_button'>Add</button>
-          <button id='asset_edit_status_list_button'>Edit</button>
+          <button id='asset_create_status_list_button'>New</button>
+          <button id='asset_update_status_list_button'>Update</button>
         </td>
       </tr>
       
@@ -81,7 +81,7 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='asset_add_button'>Add</button>
+  <button id='asset_submit_button'>OK</button>
   <button id='asset_cancel_button'>Cancel</button>
 </div>
 
@@ -97,9 +97,9 @@
       
       // ************************************************************************
       // Form
-      var add_asset_form = new Form({
-        id: 'add_asset_form'
-      }, 'add_asset_form');
+      var create_asset_form = new Form({
+        id: 'create_asset_form'
+      }, 'create_asset_form');
       
       
       
@@ -238,29 +238,29 @@
       });
       status_list_field_updater({animate: false});
       
-      // Add Status List Button
-      var add_status_list_button = dialogCaller({
+      // New Status List Button
+      var create_status_list_button = dialogCaller({
         label: 'New',
-        dialog_id: 'add_status_list_dialog',
-        content_creator: create_add_status_list_dialog,
-        attach_to: 'asset_add_status_list_button',
+        dialog_id: 'create_status_list_dialog',
+        content_creator: create_create_status_list_dialog,
+        attach_to: 'asset_create_status_list_button',
         related_field_updater: status_list_field_updater,
         data_id: 'Asset'
       });
-      add_status_list_button.startup();
+      create_status_list_button.startup();
       
-      // Edit Status List Button
-      var edit_status_list_button = dialogCaller({
-        label: 'Edit',
-        dialog_id: 'edit_status_list_dialog',
-        content_creator: create_edit_status_list_dialog,
-        attach_to: 'asset_edit_status_list_button',
+      // Update Status List Button
+      var update_status_list_button = dialogCaller({
+        label: 'Update',
+        dialog_id: 'update_status_list_dialog',
+        content_creator: create_update_status_list_dialog,
+        attach_to: 'asset_update_status_list_button',
         related_field_updater: status_list_field_updater,
         data_id: function(){
           return status_list_filtering_select.get('value')
         }
       });
-      edit_status_list_button.startup();
+      update_status_list_button.startup();
       
       
       
@@ -299,28 +299,28 @@
       
       
       // ************************************************************************
-      // Add Button
-      var add_button = new Button({
+      // Submit Button
+      var submit_button = new Button({
         label: 'OK',
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('add_asset_dialog'),
-            form: add_asset_form,
+            dialog: registry.byId('create_asset_dialog'),
+            form: create_asset_form,
             additional_data: {
-              submitted: 'add',
+              submitted: 'create',
               type_name: type_comboBox.get('value')
             },
             {% if project %}
-              url: 'add/asset/{{project.id}}',
+              url: 'create/asset/{{project.id}}',
             {% else %}
-              url: 'add/asset/' + project_select.value,
+              url: 'create/asset/' + project_select.value,
             {% endif %}
             method: 'POST'
           });
         }
-      }, 'asset_add_button');
-      add_button.startup();
+      }, 'asset_submit_button');
+      submit_button.startup();
       
       
       
@@ -331,12 +331,12 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          registry.byId('add_asset_dialog').destroyRecursive();
+          registry.byId('create_asset_dialog').destroyRecursive();
         }
       }, 'asset_cancel_button');
       cancel_button.startup();
       
-      add_asset_form.startup();
+      create_asset_form.startup();
       
   });
 </script>

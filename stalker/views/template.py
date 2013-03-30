@@ -21,12 +21,12 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='edit_filename_template',
-    renderer='templates/template/edit_filename_template.jinja2',
-    permission='Edit_FilenameTemplate'
+    route_name='update_filename_template',
+    renderer='templates/template/update_filename_template.jinja2',
+    permission='Update_FilenameTemplate'
 )
-def edit_filename_template(request):
-    """called when editing a FilenameTemplate instance
+def update_filename_template(request):
+    """called when updateing a FilenameTemplate instance
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
@@ -35,9 +35,9 @@ def edit_filename_template(request):
     user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
-        if request.params['submitted'] == 'edit':
-            logger.debug('editing a Filename Template')
-            # just edit the given filename_template
+        if request.params['submitted'] == 'update':
+            logger.debug('updateing a Filename Template')
+            # just update the given filename_template
             ft_id = request.matchdict['filename_template_id']
             ft = FilenameTemplate.query.filter_by(id=ft_id).first()
             
@@ -56,18 +56,18 @@ def edit_filename_template(request):
             else:
                 DBSession.flush()
         
-        logger.debug('finished editing FilenameTemplate')
+        logger.debug('finished updateing FilenameTemplate')
  
      
     return {}
 
 
 @view_config(
-    route_name='add_filename_template',
-    renderer='templates/template/add_filename_template.jinja2',
-    permission='Add_FilenameTemplate'
+    route_name='create_filename_template',
+    renderer='templates/template/dialog_create_filename_template.jinja2',
+    permission='Create_FilenameTemplate'
 )
-def add_filename_template(request):
+def create_filename_template(request):
     """called when adding a FilenameTemplate instance
     """
     referrer = request.url
@@ -77,7 +77,7 @@ def add_filename_template(request):
     user = User.query.filter_by(login=login).first()
     
     if 'submitted' in request.params:
-        if request.params['submitted'] == 'add':
+        if request.params['submitted'] == 'create':
             logger.debug('adding a new FilenameTemplate')
             # create and add a new FilenameTemplate
             
@@ -142,7 +142,7 @@ def add_filename_template(request):
 @view_config(
     route_name='get_filename_templates',
     renderer='json',
-    permission='View_FilenameTemplate'
+    permission='Read_FilenameTemplate'
 )
 def get_filename_templates(request):
     """returns all the FilenameTemplates in the database

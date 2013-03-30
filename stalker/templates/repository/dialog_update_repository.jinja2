@@ -1,5 +1,5 @@
 <div class='dijitDialogPaneContentArea'>
-  <div id='edit_repository_form'>
+  <div id='update_repository_form'>
     <table style='width: 100%'>
       
       {# NAME #}
@@ -53,7 +53,7 @@
   </div>
 </div>
 <div class='dijitDialogPaneActionBar'>
-  <button id='repository_edit_button'></button>
+  <button id='repository_update_button'></button>
   <button id='repository_cancel_button'></button>
 </div>
 <script type='text/javascript'>
@@ -64,10 +64,10 @@
     function(registry, Memory, Form, ValidationTextBox, NumberTextBox, TextBox,
              Button, submitForm){
       
-      var edit_repository_form = new Form({
-        id: 'edit_repository_form'
-      }, 'edit_repository_form');
-      edit_repository_form.startup();
+      var update_repository_form = new Form({
+        id: 'update_repository_form'
+      }, 'update_repository_form');
+      update_repository_form.startup();
       
       
       
@@ -129,21 +129,21 @@
       
       
       // **********************************************************************
-      // Edit Button
-      var edit_button = new Button({
-        label: 'Edit',
+      // Update Button
+      var update_button = new Button({
+        label: 'Update',
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('edit_repository_dialog'),
-            form: edit_repository_form,
-            additional_data: {submitted: 'edit'},
-            url: '{{ request.route_url('edit_repository', repository_id=repository.id) }}',
+            dialog: registry.byId('update_repository_dialog'),
+            form: update_repository_form,
+            additional_data: {submitted: 'update'},
+            url: '{{ request.route_url('update_repository', repository_id=repository.id) }}',
             method: 'POST'
           });
         }
-      }, 'repository_edit_button');
-      edit_button.startup();
+      }, 'repository_update_button');
+      update_button.startup();
       
       
       
@@ -154,7 +154,7 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          registry.byId('edit_repository_dialog').destroyRecursive();
+          registry.byId('update_repository_dialog').destroyRecursive();
         }
       }, 'repository_cancel_button');
       cancel_button.startup();        
