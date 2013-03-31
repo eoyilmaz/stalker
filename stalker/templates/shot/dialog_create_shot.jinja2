@@ -207,7 +207,7 @@
       var create_sequence_button = dialogCaller({
         label: 'New',
         dialog_id: 'create_sequence_dialog',
-        content_creator: create_create_sequence_dialog,
+        content_creator: create_sequence_dialog_creator,
         attach_to: 'shot_create_sequence_button',
         related_field_updater: sequence_field_updater,
         data_id: function(){
@@ -220,7 +220,7 @@
       var update_sequence_button = dialogCaller({
         label: 'Update',
         dialog_id: 'update_sequence_dialog',
-        content_creator: create_update_sequence_dialog,
+        content_creator: update_sequence_dialog_creator,
         attach_to: 'shot_update_sequence_button',
         related_field_updater: sequence_field_updater,
         data_id: function(){
@@ -263,7 +263,7 @@
       var create_status_list_button = dialogCaller({
         label: 'New',
         dialog_id: 'create_status_list_dialog',
-        content_creator: create_create_status_list_dialog,
+        content_creator: create_status_list_dialog_creator,
         attach_to: 'shot_create_status_list_button',
         related_field_updater: status_list_field_updater,
         data_id: 'Shot'
@@ -274,7 +274,7 @@
       var update_status_list_button = dialogCaller({
         label: 'Update',
         dialog_id: 'update_status_list_dialog',
-        content_creator: create_update_status_list_dialog,
+        content_creator: update_status_list_dialog_creator,
         attach_to: 'shot_update_status_list_button',
         related_field_updater: status_list_field_updater,
         data_id: function(){

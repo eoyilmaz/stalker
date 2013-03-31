@@ -59,7 +59,6 @@ define([
             
             _setValueAttr: function(value){
                 // create the tags for the `selected` list
-                
                 var tag_value;
                 var tag_label;
                 var result;

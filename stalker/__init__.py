@@ -114,7 +114,6 @@ def main(global_config, **settings):
 
     
     config.add_route('summarize_user', 'summarize/user/{user_id}')
-    config.add_route('get_user_tasks', 'get/user/{user_id}/tasks')
     config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
     config.add_route('view_user_versions', 'view/user/versions/{user_id}')
     config.add_route('view_user_tickets', 'view/user/tickets/{user_id}')
@@ -171,15 +170,35 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Task
-    config.add_route('create_task', 'create/task/{entity_id}')
+    
+    # Dialogs
+    config.add_route('create_task_dialog', 'dialog/create/task')
+    config.add_route('create_child_task_dialog', 'dialog/create/child_task/{task_id}')
+    config.add_route('create_dependent_task_dialog', 'dialog/create/dependent_task/{task_id}')
+    
+    config.add_route('create_task', 'create/task')
+
     config.add_route('view_task', 'view/task/{task_id}')
     config.add_route('update_task', 'update/task/{task_id}')
-    config.add_route('update_tasks', 'update/tasks')
     config.add_route('list_tasks', 'list/tasks/{entity_id}')
-    config.add_route('get_tasks',
-                     'get/tasks/{entity_id}')
+    
+    config.add_route('get_entity_tasks',  'get/entity/tasks/{entity_id}')
+    config.add_route('get_user_tasks',    'get/user/tasks/{user_id}')
     config.add_route('get_project_tasks', 'get/project/tasks/{project_id}')
-    config.add_route('get_root_tasks', 'get/root/tasks/{project_id}') # TODO: fix this
+    config.add_route('get_root_tasks',    'get/root/tasks/{project_id}') # TODO: fix this
+
+    config.add_route('get_gantt_tasks', 'get/gantt/tasks/{entity_id}')
+    config.add_route('update_gantt_tasks', 'update/gantt/tasks')
+    
+    # *************************************************************************
+    # Booking
+    config.add_route('create_booking_dialog', 'dialog/create/booking')
+    config.add_route('update_booking_dialog', 'dialog/update/booking/{booking_id}')
+    
+    config.add_route('create_booking', 'create/booking/{task_id}')
+    
+    config.add_route('get_bookings', 'get/bookings/{task_id}') # returns json
+    config.add_route('list_bookings', 'list/bookings/{task_id}')      # returns response
     
     # *************************************************************************
     # Department

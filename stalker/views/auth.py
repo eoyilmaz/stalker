@@ -221,7 +221,7 @@ def view_user(request):
     }
 
 @view_config(
-    route_name='view_users',
+    route_name='list_users',
     renderer='templates/auth/content_list_users.jinja2'
 )
 def view_users(request):

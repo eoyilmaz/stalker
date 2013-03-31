@@ -75,7 +75,7 @@ GanttMaster.prototype.init = function(place) {
 
 
   //prepend buttons
-  place.before($.JST.createFromTemplate({}, "GANTBUTTONS"));
+//  place.before($.JST.createFromTemplate({}, "GANTBUTTONS"));
 
 
   //bindings

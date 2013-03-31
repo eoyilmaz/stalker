@@ -299,7 +299,7 @@
         var create_image_format_button = dialogCaller({
           label: 'New',
           dialog_id: 'create_image_format_dialog',
-          content_creator: create_create_image_format_dialog,
+          content_creator: create_image_format_dialog_creator,
           attach_to: 'project_create_image_format_button',
           related_field_updater: imf_field_updater
         });
@@ -309,7 +309,7 @@
         var update_image_format_button = dialogCaller({
           label: 'Update',
           dialog_id: 'update_image_format_dialog',
-          content_creator: create_update_image_format_dialog,
+          content_creator: update_image_format_dialog_creator,
           attach_to: 'project_update_image_format_button',
           related_field_updater: imf_field_updater,
           data_id: function(){
@@ -361,7 +361,7 @@
         var create_repository_button = dialogCaller({
           label: 'New',
           dialog_id: 'create_repository_dialog',
-          content_creator: create_create_repository_dialog,
+          content_creator: create_repository_dialog_creator,
           attach_to: 'project_create_repository_button',
           related_field_updater: repo_field_updater
         });
@@ -371,7 +371,7 @@
         var update_repository_button = dialogCaller({
           label: 'Update',
           dialog_id: 'update_repository_dialog',
-          content_creator: create_update_repository_dialog,
+          content_creator: update_repository_dialog_creator,
           attach_to: 'project_update_repository_button',
           related_field_updater: repo_field_updater,
           data_id: function(){
@@ -411,7 +411,7 @@
         var create_structure_button = dialogCaller({
           label: 'New',
           dialog_id: 'create_structure_dialog',
-          content_creator: create_create_structure_dialog,
+          content_creator: create_structure_dialog_creator,
           attach_to: 'project_create_structure_button',
           related_field_updater: structure_field_updater
         });
@@ -421,7 +421,7 @@
         var update_structure_button = dialogCaller({
           label:'Update',
           dialog_id: 'update_structure_dialog',
-          content_creator: create_update_structure_dialog,
+          content_creator: update_structure_dialog_creator,
           attach_to: 'project_update_structure_button',
           related_field_updater: structure_field_updater,
           data_id: function(){
@@ -458,7 +458,7 @@
         var create_lead_button = dialogCaller({
           label: 'New',
           dialog_id: 'create_user_dialog',
-          content_creator: create_create_user_dialog,
+          content_creator: create_user_dialog_creator,
           attach_to: 'project_create_lead_button',
           related_field_updater: lead_field_updater
         });
@@ -468,7 +468,7 @@
         var update_lead_button = dialogCaller({
           label: 'Update',
           dialog_id: 'update_user_dialog',
-          content_creator: create_update_user_dialog,
+          content_creator: update_user_dialog_creator,
           attach_to: 'project_update_lead_button',
           related_field_updater: lead_field_updater,
           data_id: function(){
@@ -507,7 +507,7 @@
         var create_status_list_button = dialogCaller({
           label: 'New',
           dialog_id: 'create_status_list_dialog',
-          content_creator: create_create_status_list_dialog,
+          content_creator: create_status_list_dialog_creator,
           attach_to: 'project_create_status_list_button',
           related_field_updater: status_list_field_updater,
           data_id: 'Project'
@@ -518,7 +518,7 @@
         var update_status_list_button = dialogCaller({
           label: 'Update',
           dialog_id: 'update_status_list_dialog',
-          content_creator: create_update_status_list_dialog,
+          content_creator: update_status_list_dialog_creator,
           attach_to: 'project_update_status_list_button',
           related_field_updater: status_list_field_updater,
           data_id: function(){

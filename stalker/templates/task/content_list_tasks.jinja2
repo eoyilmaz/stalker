@@ -1,54 +1,36 @@
 
+<div style="float: left;">
+  <div style="float: left;">
+    {% if entity.entity_type != 'User' %}
+      <div style="float: left;">
+        <button id='list_tasks_gantt_refresh_button'>Revert To Saved</button>
+        <button id='list_tasks_create_task_button'>Create Task</button>
+        <button id='list_tasks_gantt_save_button'>Save</button>
+      </div>
+      <div style="width: 100px; float: left">&nbsp</div>
+    {% endif %}
+    <div style="float: left;">
+      <button id='list_tasks_zoom_out_button'>Zoom Out</button>
+      <button id='list_tasks_zoom_in_button'>Zoom In</button>
+    </div>
+  </div>
+</div>
+
+
+
+
 <div id="gantEditorTemplates" style="display:none;">
-  <div class="__template__" type="GANTBUTTONS"><!--
-  <div class="ganttButtonBar">
-    <div class="buttons">
-    
-    {% if entity.entity_type != 'User' %}
-{#    <button onclick="$('#workSpace').trigger('undo.gantt');" class="button textual" title="undo"><span class="teamworkIcon">&#39;</span></button>#}
-{#    <button onclick="$('#workSpace').trigger('redo.gantt');" class="button textual" title="redo"><span class="teamworkIcon">&middot;</span></button>#}
-{#    <span class="ganttButtonSeparator"></span>#}
-{#    <button onclick="$('#workSpace').trigger('addAboveCurrentTask.gantt');" class="button textual" title="insert above"><span class="teamworkIcon">l</span></button>#}
-{#    <button onclick="$('#workSpace').trigger('addBelowCurrentTask.gantt');" class="button textual" title="insert below"><span class="teamworkIcon">X</span></button>#}
-{#    <span class="ganttButtonSeparator"></span>#}
-{#    <button onclick="$('#workSpace').trigger('indentCurrentTask.gantt');" class="button textual" title="indent task"><span class="teamworkIcon">.</span></button>#}
-{#    <button onclick="$('#workSpace').trigger('outdentCurrentTask.gantt');" class="button textual" title="unindent task"><span class="teamworkIcon">:</span></button>#}
-{#    <span class="ganttButtonSeparator"></span>#}
-{#    <button onclick="$('#workSpace').trigger('moveUpCurrentTask.gantt');" class="button textual" title="move up"><span class="teamworkIcon">k</span></button>#}
-{#    <button onclick="$('#workSpace').trigger('moveDownCurrentTask.gantt');" class="button textual" title="move down"><span class="teamworkIcon">j</span></button>#}
-    {% endif %}
-    <span class="ganttButtonSeparator"></span>
-    <button onclick="$('#workSpace').trigger('zoomMinus.gantt');" class="button textual" title="zoom out"><span class="teamworkIcon">)</span></button>
-    <button onclick="$('#workSpace').trigger('zoomPlus.gantt');" class="button textual" title="zoom in"><span class="teamworkIcon">(</span></button>
-    <span class="ganttButtonSeparator"></span>
-{#    {% if entity.entity_type != 'User' %}#}
-{#    <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual" title="delete"><span class="teamworkIcon">&cent;</span></button>#}
-{#    {% endif %}#}
-      &nbsp; &nbsp; &nbsp; &nbsp;
-{#      {% if entity.entity_type != 'User' %}#}
-{#      <button id='view_tasks_add_asset_button'>Add Asset</button>#}
-{#      <button id='view_tasks_add_sequence_button'>Add Sequence</button>#}
-{#      <button id='view_tasks_add_shot_button'>Add Shot</button>#}
-
-    {% if entity.entity_type != 'User' %}
-      <button id='view_tasks_gantt_refresh_button'>Revert To Saved</button>
-      <button id='view_tasks_add_task_button'>Add Task</button>
-      <button id='view_tasks_gantt_save_button'>Save</button>
-    {% endif %}
-    </div></div>
-  --></div>
-
-  <div class="__template__" type="TASKSEDITHEAD"><!--
-  <table class="gdfTable" cellspacing="0" cellpadding="0" style='width: 1000px'>
-    <thead>
-    <tr style="height:40px">
-      <th class="gdfColHeader gdfResizable" style="width:20px;"></th>
-      <th class="gdfColHeader gdfResizable" style="width:250px;">name</th>
-      <th class="gdfColHeader gdfResizable" style="width:75px;">start</th>
-      <th class="gdfColHeader gdfResizable" style="width:75px;">end</th>
-      <th class="gdfColHeader gdfResizable" style="width:35px;">dur.</th>
-      <th class="gdfColHeader gdfResizable" style="width:60px;">dep.</th>
-      <th class="gdfColHeader gdfResizable" style="width:400px; text-align: left;">resources</th>
+    <div class="__template__" type="TASKSEDITHEAD"><!--
+    <table class="gdfTable" cellspacing="0" cellpadding="0" style='width: 1000px'>
+      <thead>
+      <tr style="height:40px">
+        <th class="gdfColHeader gdfResizable" style="width:20px;"></th>
+        <th class="gdfColHeader gdfResizable" style="width:250px;">name</th>
+        <th class="gdfColHeader gdfResizable" style="width:75px;">start</th>
+        <th class="gdfColHeader gdfResizable" style="width:75px;">end</th>
+        <th class="gdfColHeader gdfResizable" style="width:35px;">dur.</th>
+        <th class="gdfColHeader gdfResizable" style="width:60px;">dep.</th>
+        <th class="gdfColHeader gdfResizable" style="width:400px; text-align: left;">resources</th>
       <th class="gdfColHeader gdfResizable" style="width:785px;"></th>
     </tr>
     </thead>
@@ -148,16 +130,16 @@
         
         // The Memory
         var tasks_memory;
-        {% if entity.entity_type != 'User' %}
+{#        {% if entity.entity_type != 'User' %}#}
           tasks_memory = new JsonRest({
-            target: '/get/tasks/{{ entity.id }}'
+            target: '{{ request.route_url('get_gantt_tasks', entity_id=entity.id) }}'
           });
-        {% else %}
-          tasks_memory = new JsonRest({
-            target: '/get/user/{{ entity.id }}/tasks'
-          });
-        {% endif %}
-      
+{#        {% else %}#}
+{#          tasks_memory = new JsonRest({#}
+{#            target: '{{ request.route_ulr('get_user_tasks', user_id=entity.id) }}'#}
+{#          });#}
+{#        {% endif %}#}
+        
         function loadGanttFromServer() {
           tasks_memory.query().then(function(data){
             
@@ -170,13 +152,14 @@
               var task_box_nodes = query('.taskBox');
               
               // TODO: add context menu here
-              // Standart menu items
+              // Standard menu items
               //
               // View Summary
               // ============
-              // Edit
-              // Add Child
-              // Add Booking
+              // Update Task
+              // Create Child Task
+              // Create Dependent Task
+              // Create Booking
               // ============
               // Delete
               // 
@@ -204,20 +187,21 @@
               
               menu.addChild(
                 new MenuItem({
-                  label: 'Edit Task',
+                  label: 'Update Task',
                   onClick: function(){
                     var node = this.getParent().currentTarget;
                     // get task id
                     var task_id = node.getAttribute('taskId');
-                    // create and call edit_task dialog
-                    var dialog = dijit.byId('edit_task_dialog');
-                    if (dialog == null){
-                      dialog = create_edit_task_dialog(task_id);
+                    // create and call update_task dialog
+                    var dialog = registry.byId('update_task_dialog');
+                    if (dialog != null){
+                      dialog.destroyRecursive();
                     }
+                    dialog = update_task_dialog_creator(task_id);
                     
                     dialog.set(
                       'related_field_updater',
-                      loadGanttFromServer
+                      saveAndLoadGantt
                     );
                     dialog.show();
                     
@@ -227,17 +211,43 @@
               
               menu.addChild(
                 new MenuItem({
-                  label: 'Add Child Task',
+                  label: 'Create Child Task',
                   onClick: function(){
                     var node = this.getParent().currentTarget;
                     var task_id = node.getAttribute('taskId');
-                    var dialog = dijit.byId('add_task_dialog');
-                    if (dialog == null){
-                      dialog = create_add_task_dialog(task_id);
+                    var dialog = registry.byId('create_task_dialog');
+                    if (dialog != null){
+                      dialog.destroyRecursive();
                     }
+                    dialog = create_child_task_dialog_creator(task_id);
+                    
                     dialog.set(
                       'related_field_updater',
-                      loadGanttFromServer
+                      saveAndLoadGantt
+                    );
+                    dialog.show();
+                  }
+                })
+              );
+              
+              menu.addChild(
+                new MenuItem({
+                  label: 'Create Dependent Task',
+                  onClick: function(){
+                    var node = this.getParent().currentTarget;
+                    
+                    var task_id = node.getAttribute('taskId');
+                    
+                    var dialog = registry.byId('create_task_dialog');
+                    if (dialog != null){
+                      dialog.destroyRecursive();
+                    }
+                    
+                    dialog = create_dependent_task_dialog_creator(task_id);
+                    
+                    dialog.set(
+                      'related_field_updater',
+                      saveAndLoadGantt
                     );
                     dialog.show();
                   }
@@ -248,7 +258,26 @@
               
               menu.addChild(
                 new MenuItem({
-                  label: 'Add Booking'
+                  label: 'Create Booking',
+                  onClick: function(){
+                    var node = this.getParent().currentTarget;
+                    
+                    var task_id = node.getAttribute('taskId');
+                    
+                    var dialog = registry.byId('create_booking_dialog');
+                    if (dialog != null){
+                      dialog.destroyRecursive();
+                    }
+                    
+                    dialog = create_booking_dialog_creator(task_id);
+                    
+                    dialog.set(
+                      'related_field_updater',
+                      saveAndLoadGantt
+                    );
+                    
+                    dialog.show();
+                  }
                 })
               );
               
@@ -284,25 +313,28 @@
           
           if (ge.deletedTaskIds.length>0) {
             if (!confirm("TASK_THAT_WILL_BE_REMOVED\n"+ge.deletedTaskIds.length)) {
+              // cancel the action by returning null
               return;
             }
           }
           
-          var deffered = xhr.post(
-            '/edit/tasks',
+          // xhr.post returns a `promise` use it if needed
+          return xhr.post(
+            '{{ request.route_url('update_gantt_tasks') }}',
             {
               method: 'POST',
               data: {CM:'save_tasks', prj: JSON.stringify(prj)}
             }
           );
-          
-          deffered.then(function(){
-            // load the project from server again
-            //loadGanttFromServer();
-          }, function(err){
-            alert(err);
-          });
-          
+        }
+        
+        function saveAndLoadGantt(){
+          var promise = saveGanttOnServer();
+          if (promise){
+            promise.then(function(){
+              loadGanttFromServer();
+            });
+          }
         }
         
         function clearGantt() {
@@ -339,65 +371,90 @@
         }
         
 {#        {% if entity.entity_type != 'User' %}#}
-{#          var add_asset_button = dialogCaller({#}
-{#            label: 'Add Asset',#}
-{#            dialog_id: 'add_asset_dialog',#}
-{#            content_creator: create_add_asset_dialog,#}
-{#            attach_to: 'view_tasks_add_asset_button',#}
+{#          var create_asset_button = dialogCaller({#}
+{#            label: 'Create Asset',#}
+{#            dialog_id: 'create_asset_dialog',#}
+{#            content_creator: create_asset_dialog_creator,#}
+{#            attach_to: 'list_tasks_create_asset_button',#}
 {#            related_field_updater: loadGanttFromServer, #}
 {#            data_id: '{{ entity.id }}'#}
 {#          });#}
-{#          add_asset_button.startup();#}
+{#          create_asset_button.startup();#}
 {#          #}
-{#          var add_sequence_button = dialogCaller({#}
-{#            label: 'Add Sequence',#}
-{#            dialog_id: 'add_sequence_dialog',#}
-{#            content_creator: create_add_sequence_dialog,#}
-{#            attach_to: 'view_tasks_add_sequence_button',#}
+{#          var create_sequence_button = dialogCaller({#}
+{#            label: 'Create Sequence',#}
+{#            dialog_id: 'create_sequence_dialog',#}
+{#            content_creator: create_sequence_dialog_creator,#}
+{#            attach_to: 'list_tasks_create_sequence_button',#}
 {#            related_field_updater: loadGanttFromServer, #}
 {#            data_id: '{{ entity.id }}'#}
 {#          });#}
-{#          add_sequence_button.startup();#}
+{#          create_sequence_button.startup();#}
 {# #}
-{#          var add_shot_button = dialogCaller({#}
-{#            label: 'Add Shot',#}
-{#            dialog_id: 'add_shot_dialog',#}
-{#            content_creator: create_add_shot_dialog,#}
-{#            attach_to: 'view_tasks_add_shot_button',#}
+{#          var create_shot_button = dialogCaller({#}
+{#            label: 'Create Shot',#}
+{#            dialog_id: 'create_shot_dialog',#}
+{#            content_creator: create_shot_dialog_creator,#}
+{#            attach_to: 'list_tasks_create_shot_button',#}
 {#            related_field_updater: loadGanttFromServer, #}
 {#            data_id: '{{ entity.id }}'#}
 {#          });#}
-{#          add_shot_button.startup();#}
+{#          create_shot_button.startup();#}
 {#          #}
         {% if entity.entity_type != 'User' %}
+          
+          // REVERT TO SAVED
           var revert_gantt_button = new Button({
             label: 'Revert To Saved',
             onClick: function(){
               loadGanttFromServer();
             }
-          }, 'view_tasks_gantt_refresh_button');
+          }, 'list_tasks_gantt_refresh_button');
           revert_gantt_button.startup();
           
-          var add_task_button = dialogCaller({
-            label: 'Add Task',
-            dialog_id: 'add_task_dialog',
-            content_creator: create_add_task_dialog,
-            attach_to: 'view_tasks_add_task_button',
+          // ADD TASK
+          var create_task_button = dialogCaller({
+            label: 'Create Task',
+            dialog_id: 'create_task_dialog',
+            content_creator: create_task_dialog_creator,
+            attach_to: 'list_tasks_create_task_button',
             related_field_updater: loadGanttFromServer, 
             data_id: '{{ entity.id }}'
           });
-          add_task_button.startup();
+          create_task_button.startup();
           
+          // SAVE
           // TODO: This should be disabled upon permission not according to the existence of a template variable
           var save_gantt_button = new Button({
             label: 'Save',
             onClick: function(){
-              saveGanttOnServer();
+              saveGanttOnServer().then(function(){
+                alert('Tasks are saved!!!')
+              });
             }
-          }, 'view_tasks_gantt_save_button')
+          }, 'list_tasks_gantt_save_button');
           save_gantt_button.startup();
+          {% endif %}
           
-        {% endif %}
+          // ZOOM OUT
+          var zoom_out_button = new Button({
+            label: 'Zoom Out',
+            onClick: function(){
+              ge.gantt.zoomGantt(false);
+            }
+          }, 'list_tasks_zoom_out_button');
+          zoom_out_button.startup();
+          
+          // ZOOM IN
+          var zoom_in_button = new Button({
+            label: 'Zoom In',
+            onClick: function(){
+              ge.gantt.zoomGantt(true);
+            }
+          }, 'list_tasks_zoom_in_button');
+          zoom_in_button.startup();
+          
+        
       });
   });
 </script>

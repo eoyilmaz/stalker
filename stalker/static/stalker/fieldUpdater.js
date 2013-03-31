@@ -107,9 +107,9 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                             }
                         }else{
                             if(widget.label){
-                                placeHolder = 'No ' + widget.label + " in DB.";
+                                placeHolder = 'Create New ' + widget.label;
                             }else{
-                                placeHolder = 'No item in DB';
+                                placeHolder = 'Create New';
                             }
                             widget.set('placeHolder', placeHolder);
                         }

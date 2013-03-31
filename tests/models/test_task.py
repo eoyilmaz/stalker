@@ -1147,6 +1147,31 @@ class TaskTester(unittest.TestCase):
         self.assertRaises(CircularDependencyError, setattr, taskA, "depends",
             [taskD])
     
+    def test_depends_argument_cyclic_dependency_bug_2(self):
+        """testing if a CircularDependencyError will be raised in the following
+        case:
+          T1 is parent of T2
+          T3 depends to T1
+          T2 depends to T3
+        """
+        
+        self.kwargs['name'] = 'T1'
+        t1 = Task(**self.kwargs)
+        
+        self.kwargs['name'] = 'T3'
+        t3 = Task(**self.kwargs)
+        
+        t3.depends.append(t1)
+        
+        self.kwargs['name'] = 'T2'
+        self.kwargs['parent'] = t1
+        self.kwargs['depends'] = [t3]
+        
+        # the following should generate the CircularDependencyError
+        self.assertRaises(CircularDependencyError, Task, **self.kwargs)
+        
+        
+    
     def test_depends_argument_doesnt_allow_one_of_the_parents_of_the_task(self):
         """testing if a CircularDependencyError will be raised when the depends
         attribute has one of the parents of this task
@@ -1911,3 +1936,7 @@ class TaskTester(unittest.TestCase):
         # move task4 dependency to task2
         task4.depends = [task2]
         DBSession.commit()
+    
+    def test_bid_argument_is_skipped(self):
+        """testing if the bid attribute will be 0 if the 
+        """

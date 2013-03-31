@@ -34,17 +34,17 @@
       
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
-        href: 'view/tasks/{{ user.id }}'
+        href: 'list/tasks/{{ user.id }}'
       });
       
       var assets_content_pane = new ContentPane({
         title: 'Assets',
-        href:'view/versions/{{ user.id }}'
+        href:'list/versions/{{ user.id }}'
       });
 
       var tickets_content_pane = new ContentPane({
         title: 'Tickets',
-        content: 'view/tickets/{{ user.id }}'
+        content: 'list/tickets/{{ user.id }}'
       });
 
       user_related_data_tab_container.addChild(tasks_content_pane);

@@ -4,16 +4,21 @@
 # This module is part of Stalker and is released under the BSD 2
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 
+
 import datetime
-import logging
-from pyramid.httpexceptions import HTTPServerError
-from pyramid.security import authenticated_userid
+import json
+
 from pyramid.view import view_config
-from sqlalchemy.exc import IntegrityError
+from pyramid.security import authenticated_userid
+from pyramid.httpexceptions import HTTPServerError, HTTPOk
+
+
 import transaction
+from sqlalchemy.exc import IntegrityError
 
 from stalker.db import DBSession
-from stalker import User, Task, Entity, log, Project, StatusList, Status, Type
+from stalker import User, Task, Entity, Project, StatusList, Status
+from stalker.models.task import CircularDependencyError
 
 import logging
 from stalker import log
@@ -51,7 +56,7 @@ def convert_to_jquery_gantt_task_format(tasks):
     :param tasks: List of Stalker Tasks.
     :return: json compatible dictionary
     """
-    return {
+    data = {
         'tasks' : [
             {
                 'id': task.id,
@@ -80,6 +85,16 @@ def convert_to_jquery_gantt_task_format(tasks):
         # "canWrite": 0,
         # "canWriteOnParent": 0
     }
+    
+    logger.debug('loading gantt data:\n%s' % 
+                 json.dumps(data,
+                            sort_keys=False,
+                            indent=4,
+                            separators=(',', ': ')
+                 )
+    )
+    return data
+    
 
 
 def update_with_jquery_gantt_task_data(json_data):
@@ -89,8 +104,16 @@ def update_with_jquery_gantt_task_data(json_data):
     """
     
     logger.debug(json_data)
-    import json
     data = json.loads(json_data)
+    
+    logger.debug('updating tasks with gantt data:\n%s' % 
+                 json.dumps(data,
+                            sort_keys=False,
+                            indent=4,
+                            separators=(',', ': ')
+                 )
+    )
+    
     
     task_name_replace_strs = [
         ' (Task)', ' (Project)', ' (Asset)', ' (Sequence)', ' (Shot)'
@@ -102,9 +125,9 @@ def update_with_jquery_gantt_task_data(json_data):
         task_id = task_data['id']
         task_name = task_data['name'] # just take the part without 
                                       # the parenthesis
-        for str in task_name_replace_strs:
-            if task_name.endswith(str):
-                task_name = task_name[:-len(str)]
+        for rstr in task_name_replace_strs:
+            if task_name.endswith(rstr):
+                task_name = task_name[:-len(rstr)]
         
         task_start = task_data['start']
         task_duration = task_data.get('duration', 0)
@@ -136,7 +159,10 @@ def update_with_jquery_gantt_task_data(json_data):
         if task:
             logger.debug('task %s' % task)
             task.name = task_name
-            task.start = datetime.date.fromtimestamp(task_start/1000)
+            logger.debug('task.start given (raw)  : %s' % task_start)
+            logger.debug('task.start given (calc) : %s' % datetime.datetime.fromtimestamp(task_start/1000))
+            task.start = datetime.datetime.fromtimestamp(task_start/1000)
+            logger.debug('task.start after set    : %s' % task.start)
             task.duration = datetime.timedelta(task_duration)
             
             resources = User.query.filter(User.id.in_(task_resource_ids)).all()
@@ -146,7 +172,7 @@ def update_with_jquery_gantt_task_data(json_data):
             
             task_depends = Task.query.filter(Task.id.in_(task_depend_ids)).all()
             
-            logger.debug('task.parent %s' % task.parent)
+            logger.debug('task.parent : %s' % task.parent)
             logger.debug('task_depends: %s' % task_depends)
             
             task.depends = task_depends
@@ -166,10 +192,10 @@ def update_with_jquery_gantt_task_data(json_data):
 
 
 @view_config(
-    route_name='update_tasks',
+    route_name='update_gantt_tasks',
     renderer='json'
 )
-def update_tasks(request):
+def update_gantt_tasks(request):
     """updates the given tasks with the given JSON data
     """
     # get the data
@@ -184,11 +210,11 @@ def update_tasks(request):
     renderer='templates/task/dialog_update_task.jinja2'
 )
 def update_task(request):
-    """runs when updateing a task
+    """runs when updating a task
     """
     # get logged in user
     login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    # logged_in_user = User.query.filter_by(login=login).first()
     
     task_id = request.matchdict['task_id']
     task = Task.query.filter(Task.id==task_id).first()
@@ -249,12 +275,13 @@ def get_root_tasks(request):
     return convert_to_jquery_gantt_task_format(tasks) 
 
 @view_config(
-    route_name='get_tasks',
+    route_name='get_gantt_tasks',
     renderer='json',
-    permission='Read_Task'
+    permission='List_Task'
 )
-def get_tasks(request):
-    """returns all the tasks in database related to the given entity
+def get_gantt_tasks(request):
+    """returns all the tasks in the database related to the given entity in
+    jQueryGantt compatible json format
     """
     entity_id = request.matchdict.get('entity_id')
     entity = Entity.query.filter_by(id=entity_id).first()
@@ -272,7 +299,13 @@ def get_tasks(request):
             for root_task in root_tasks:
                 logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
                 tasks.extend(depth_first_flatten(root_task))
-         
+        elif entity.entity_type == 'User':
+            user = entity
+            
+            # sort the tasks with the project.id
+            if user is not None:
+                tasks = sorted(user.tasks, key=lambda task: task.project.id)
+    
     if log.logging_level == logging.DEBUG:
         logger.debug('tasks count: %i' % len(tasks))
         for task in tasks:
@@ -287,38 +320,34 @@ def get_tasks(request):
 @view_config(
     route_name='get_project_tasks',
     renderer='json',
-    permission='Read_Task'
+    permission='List_Task'
 )
 def get_project_tasks(request):
-    """returns all the tasks of the given Project instance
+    """returns all the tasks in the database related to the given entity in
+    flat json format
     """
+    # get all the tasks related in the given project
     project_id = request.matchdict.get('project_id')
     project = Project.query.filter_by(id=project_id).first()
-    tasks = None
-    if project:
-        tasks = project.project_tasks
     
     return [
         {
             'id': task.id,
-            'name': '%s (%s in %s)' % (task.name,
-                                       task.task_of.name,
-                                       task.task_of.project.name),
-        }
-        for task in tasks
-    ]
+            'name': '%s (%s)' % (task.name,
+                                       task.entity_type),
+        } for task in Task.query.filter(Task._project==project).all()]
 
 
 @view_config(
-    route_name='view_tasks',
+    route_name='list_tasks',
     renderer='templates/task/content_list_tasks.jinja2',
     permission='Read_Task'
 )
-def view_tasks(request):
+def list_tasks(request):
     """runs when viewing tasks of a TaskableEntity
     """
     login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    # logged_in_user = User.query.filter_by(login=login).first()
     
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter(Entity.id==entity_id).first()
@@ -328,189 +357,215 @@ def view_tasks(request):
     }
 
 
-def add_dependent_task(request):
+
+@view_config(
+    route_name='create_task_dialog',
+    renderer='templates/task/dialog_create_task.jinja2',
+    permission='Create_Task'
+)
+def create_task_dialog(request):
+    """only project information is present
+    """
+    project_id = request.matchdict['project_id']
+    project = Project.query.filter_by(id=project_id).first()
+    
+    return {
+        'project': project
+    }
+
+@view_config(
+    route_name='create_child_task_dialog',
+    renderer='templates/task/dialog_create_task.jinja2',
+    permission='Create_Task'
+)
+def create_child_task_dialog(request):
+    """generates the info from the given parent task
+    """
+    parent_task_id = request.matchdict['task_id']
+    parent_task = Task.query.filter_by(id=parent_task_id).first()
+    
+    project = parent_task.project if parent_task else None
+    
+    return {
+        'project': project,
+        'parent': parent_task,
+    }
+
+
+@view_config(
+    route_name='create_dependent_task_dialog',
+    renderer='templates/task/dialog_create_task.jinja2',
+    permission='Create_Task'
+)
+def create_dependent_task_dialog(request):
     """runs when adding a dependent task
     """
-    pass
+    # get the dependee task
+    depends_to_task_id = request.matchdict['task_id']
+    depends_to_task = Task.query.filter_by(id=depends_to_task_id).first()
+    
+    project = depends_to_task.project if depends_to_task else None
+    
+    return {
+        'project': project,
+        'depends_to': depends_to_task
+    }
 
+
+def get_datetime(request, date_attr, time_attr):
+    """Extracts a datetime object from the given request
+    :param request: the request object
+    :param date_attr: the attribute name
+    :return: datetime.datetime
+    """
+    # TODO: no time zone info here, please add time zone
+    date_part = datetime.datetime.strptime(
+        request.params[date_attr][:-6],
+        "%Y-%m-%dT%H:%M:%S"
+    )
+    time_part = datetime.datetime.strptime(
+        request.params[time_attr][:-6],
+        "%Y-%m-%dT%H:%M:%S"
+    )
+    # update the time values of date_part with time_part
+    return date_part.replace(
+        hour=time_part.hour,
+        minute=time_part.minute,
+        second=time_part.second,
+        microsecond=time_part.microsecond
+    )
 
 
 @view_config(
     route_name='create_task',
-    renderer='templates/task/dialog_create_task.jinja2',
     permission='Create_Task'
 )
 def create_task(request):
     """runs when adding a new task
     """
-    
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
     
-    if 'submitted' in request.params:
-        logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
+    project_id = request.params.get('project_id', None)
+    name = request.params.get('name', None)
+    is_milestone = request.params.get('is_milestone', None)
+    status_id = request.params.get('status_id', None)
+    parent_id = request.params.get('parent_id', None)
+    
+    kwargs = {}
+    
+    if project_id and name and is_milestone and status_id:
         
-        if request.params['submitted'] == 'create':
-            if 'project_id' in request.params and \
-                'name' in request.params and \
-                'description' in request.params and \
-                'is_milestone' in request.params and \
-                'status_id' in request.params:
-                
-                # get the project
-                project_id = request.params['project_id']
-                project = Project.query.filter_by(id=project_id).first()
-                
-                # get the taskable entity
-                parent_id = request.params['parent_id']
-                parent = Task.query.filter_by(id=parent_id).first()
-                
-                kwargs = {'project': project,
-                          'parent': parent}
-
-                # get the status_list
-                status_list = StatusList.query.filter_by(
-                    target_entity_type='Task'
-                ).first()
-                
-                logger.debug('status_list: %s' % status_list)
-                
-                # there should be a status_list
-                if status_list is None:
-                    return HTTPServerError(
-                        detail='No StatusList found'
-                    )
-                
-                status_id = int(request.params['status_id'])
-                logger.debug('status_id: %s' % status_id)
-                status = Status.query.filter_by(id=status_id).first()
-                logger.debug('status: %s' % status)
-                
-                # get the resources
-                resources = []
-                if 'resource_ids' in request.params:
-                    resource_ids = [
-                        int(r_id)
-                        for r_id in request.POST.getall('resource_ids')
-                    ]
-                    resources = User.query.filter(User.id.in_(resource_ids)).all()
-                
-                # get the dates
-                # TODO: no time zone info here, please add time zone
-                start = datetime.datetime.strptime(
-                    request.params['start'][:-6],
-                    "%Y-%m-%dT%H:%M:%S"
-                )
-                start_time = datetime.datetime.strptime(
-                    request.params['start_time'][:-6],
-                    "%Y-%m-%dT%H:%M:%S"
-                )
-                end = datetime.datetime.strptime(
-                    request.params['end'][:-6],
-                    "%Y-%m-%dT%H:%M:%S"
-                )
-                end_time = datetime.datetime.strptime(
-                    request.params['end_time'][:-6],
-                    "%Y-%m-%dT%H:%M:%S"
-                )
-                # update the hour and minute of start from start time
-                start = start.replace(
-                    hour=start_time.hour,
-                    minute=start_time.minute
-                )
-                end = end.replace(
-                    hour=end_time.hour,
-                    minute=end_time.minute
-                )
-                
-                logger.debug('start : %s' % start)
-                logger.debug('end : %s' % end)
-                
-                # get the dependencies
-                depend_ids = [
-                    int(d_id)
-                    for d_id in request.POST.getall('depend_ids')
-                ]
-                depends = Task.query.filter(Task.id.in_(depend_ids)).all()
-                logger.debug('depends: %s' % depends)
-                
-                kwargs['name'] = request.params['name']
-                kwargs['status_list'] = status_list
-                kwargs['status'] = status
-                kwargs['created_by'] = logged_in_user
-                kwargs['start'] = start
-                kwargs['end'] = end
-                kwargs['resources'] = resources
-                kwargs['depends'] = depends
-                
-                try:
-                    new_task = Task(**kwargs)
-                    logger.debug('new_task.name %s' % new_task.name)
-                    logger.debug('new_task.status: %s' % new_task.status)
-                    DBSession.add(new_task)
-                except (AttributeError, TypeError) as e:
-                    logger.debug(e.message)
-                else:
-                    DBSession.add(new_task)
-                    try:
-                        transaction.commit()
-                    except IntegrityError as e:
-                        logger.debug(e.message)
-                        transaction.abort()
-                    else:
-                        logger.debug('flushing the DBSession, no problem here!')
-                        DBSession.flush()
-                        logger.debug('finished adding Task')
-                        #return {}
-            else:
-                logger.debug('there are missing parameters')
-                def get_param(param):
-                    if param in request.params:
-                        logger.debug('%s: %s' % (param, request.params[param]))
-                    else:
-                        logger.debug('%s not in params' % param)
-                get_param('project_id')
-                get_param('name')
-                get_param('description')
-                get_param('is_milestone')
-                get_param('resource_ids')
-                get_param('status_id')
-                
-                param_list = ['project_id', 'name', 'description',
-                              'is_milestone', 'resource_ids', 'status_id']
- 
-                params = [param for param in param_list if param not in request.params]
-                
-                return HTTPServerError('There are missing parameters: %s' % params)
-    
-    # return the necessary values to prepare the form
-    # get the taskable entity
-    entity_id = request.matchdict['entity_id']
-    entity = Entity.query.filter_by(id=entity_id).first()
-    
-    return_dict = {}
-    if entity.entity_type == 'Project':
-        logger.debug('entity_type = "Project"')
-        return_dict['project'] = entity
-    else:
-        logger.debug('entity_type = "Task"')
-        return_dict['parent'] = entity
-        return_dict['project'] = entity.project
-    
-    if entity:
+        # get the project
+        project = Project.query.filter_by(id=project_id).first()
+        kwargs['project'] = project
+        
+        # get the parent if exists
+        parent = None
+        if parent_id:
+            parent = Task.query.filter_by(id=parent_id).first()
+        
+        kwargs['parent'] = parent
+        
+        # get the status_list
+        status_list = StatusList.query.filter_by(
+            target_entity_type='Task'
+        ).first()
+        
+        logger.debug('status_list: %s' % status_list)
+        
+        # there should be a status_list
+        if status_list is None:
+            return HTTPServerError(
+                detail='No StatusList found'
+            )
+        
+        status_id = int(request.params['status_id'])
+        logger.debug('status_id: %s' % status_id)
+        
+        status = Status.query.filter_by(id=status_id).first()
+        logger.debug('status: %s' % status)
+        
+        # get the resources
+        resources = []
+        if 'resource_ids' in request.params:
+            resource_ids = [
+                int(r_id)
+                for r_id in request.POST.getall('resource_ids')
+            ]
+            resources = User.query.filter(User.id.in_(resource_ids)).all()
+        
+        # get the dates
+        start = get_datetime(request, 'start_date', 'start_time')
+        end = get_datetime(request, 'end_date', 'end_time')
+        
+        logger.debug('start : %s' % start)
+        logger.debug('end : %s' % end)
+        
+        # get the dependencies
+        depend_ids = [
+            int(d_id)
+            for d_id in request.POST.getall('depend_ids')
+        ]
+        depends = Task.query.filter(Task.id.in_(depend_ids)).all()
+        logger.debug('depends: %s' % depends)
+        
+        kwargs['name'] = name
+        kwargs['status_list'] = status_list
+        kwargs['status'] = status
+        kwargs['created_by'] = logged_in_user
+        kwargs['start'] = start
+        kwargs['end'] = end
+        kwargs['resources'] = resources
+        kwargs['depends'] = depends
+        
         try:
-            logger.debug('project = %s' % return_dict['project'])
-            logger.debug('parent  = %s' % return_dict['parent'])
-        except KeyError:
-            pass
+            new_task = Task(**kwargs)
+            logger.debug('new_task.name %s' % new_task.name)
+            logger.debug('new_task.status: %s' % new_task.status)
+            DBSession.add(new_task)
+        except (AttributeError, TypeError, CircularDependencyError) as e:
+            logger.debug(e.message)
+            error = HTTPServerError()
+            error.title = str(type(e))
+            error.detail = e.message
+            return error
+        else:
+            DBSession.add(new_task)
+            try:
+                transaction.commit()
+            except IntegrityError as e:
+                logger.debug(e.message)
+                transaction.abort()
+                return HTTPServerError(detail=e.message)
+            else:
+                logger.debug('flushing the DBSession, no problem here!')
+                DBSession.flush()
+                logger.debug('finished adding Task')
+    else:
+        logger.debug('there are missing parameters')
+        def get_param(param):
+            if param in request.params:
+                logger.debug('%s: %s' % (param, request.params[param]))
+            else:
+                logger.debug('%s not in params' % param)
+        get_param('project_id')
+        get_param('name')
+        get_param('description')
+        get_param('is_milestone')
+        get_param('resource_ids')
+        get_param('status_id')
+        
+        param_list = ['project_id', 'name', 'description',
+                      'is_milestone', 'resource_ids', 'status_id']
+ 
+        params = [param for param in param_list if param not in request.params]
+        
+        error = HTTPServerError()
+        error.explanation = 'There are missing parameters: %s' % params
+        return error
     
-    return_dict['types'] = Type.query\
-        .filter_by(target_entity_type='Task').all()
-    return_dict['users'] = User.query.all()
-    return_dict['status_list'] = StatusList.query\
-        .filter_by(target_entity_type='Task').first()
-    
-    return return_dict
+    return HTTPOk(detail='Task created successfully')
 
 
 @view_config(

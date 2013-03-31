@@ -240,7 +240,7 @@
       var create_status_list_button = dialogCaller({
         label: 'New',
         dialog_id: 'create_status_list_dialog',
-        content_creator: create_create_status_list_dialog,
+        content_creator: create_status_list_dialog_creator,
         attach_to: 'sequence_create_status_list_button',
         related_field_updater: status_list_field_updater,
         data_id: 'Sequence'
@@ -251,7 +251,7 @@
       var update_status_list_button = dialogCaller({
         label: 'Update',
         dialog_id: 'update_status_list_dialog',
-        content_creator: create_update_status_list_dialog,
+        content_creator: update_status_list_dialog_creator,
         attach_to: 'sequence_update_status_list_button',
         related_field_updater: status_list_field_updater,
         data_id: function(){

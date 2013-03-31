@@ -149,8 +149,12 @@ def update_task_dates(func):
 class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
-    Tasks are the smallest meaningful part that should be accomplished to
-    complete a :class:`~stalker.models.project.Project`.
+    Tasks are the unit of work that should be accomplished to complete a
+    :class:`~stalker.models.project.Project`.
+    
+    Stalker tries to follow the concepts stated in TaskJuggler_.
+    
+    .. _TaskJuggler : http://www.taskjuggler.org/
     
     .. versionadded: 0.2.0: Parent-child relation in Tasks
       
@@ -187,6 +191,33 @@ class Task(Entity, StatusMixin, ScheduleMixin):
       # this will also create a RuntimeError
       task3 = Task(name='Failure 2') # no project no parent, this is an orphan
                                      # task.
+    
+    The duration of a Task is the direct difference of the start and end date
+    values of one Task, so it is not a value to measure the work done for one
+    task.
+    
+    During the automatic scheduling (with TaskJuggler), the calculation of task
+    duration is effected by the working hours setting of the Project that the
+    task belongs to, the effort that needs to spend for that task and the
+    availability of the resources assigned to the task.
+    
+    Stalker, initially needs three values to fill the Task instance with enough
+    data so it can be passed to TaskJuggler for the auto scheduling process.
+    The table below shows the value groups that can be used while creating a
+    Task.
+    
+    +-----------+-----------+-----------+-----------+-----------+
+    |   start   |    end    | duration  |  effort   | resources |
+    +-----------+-----------+-----------+-----------+-----------+
+    |           |           |           |     +     |     +     |
+    +-----------+-----------+-----------+-----------+-----------+
+    |           |           |           |           |           |
+    +-----------+-----------+-----------+-----------+-----------+
+                                                                    
+                                                                    
+                                                                    
+                                                                    
+                                                                    
     
     The end of a task is calculated by using the duration of the Task itself
     and the working hours settings of the related Project instance. So the
@@ -251,8 +282,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
          {duration} = \\frac{{effort}}{n_{resources}}
       
       And changing the :attr:`~stalker.models.task.Task.duration` will also
-      effect the :attr:`~stalker.models.task.Task.effort` spend. The
-      :attr:`~stalker.models.task.Task.effort` will be calculated with the
+      effect the :attr:`~stalker.models.task.Task.effort` needed to be spend.
+      The :attr:`~stalker.models.task.Task.effort` will be calculated with the
       formula:
       
       .. math::
@@ -260,6 +291,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
          {effort} = {duration} \\times {n_{resources}}
     
     :type effort: datetime.timedelta
+    
+    :param bid: The initial bid for this Task. It can be used to measure how
+      accurate the initial guess was. It will be compared against the total
+      amount of effort spend doing this task. Can be set to None, which will
+      set it to 0.
+    
+    :type bid: datetime.timedelta
     
     :param depends: A list of :class:`~stalker.models.task.Task`\ s that this
       :class:`~stalker.models.task.Task` is depending on. A Task can not depend
@@ -430,6 +468,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  end=None,
                  duration=None,
                  effort=None,
+                 bid=None,
                  resources=None,
                  is_milestone=False,
                  priority=defaults.TASK_PRIORITY,
@@ -483,6 +522,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """initialized the instance variables when the instance created with
         SQLAlchemy
         """
+        # TODO : fix this
+        tmp = self.start # just read the start to update them
         # call supers __init_on_load__
         super(Task, self).__init_on_load__()
 
@@ -520,6 +561,16 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # check for the circular dependency
         _check_circular_dependency(depends, self, 'depends')
         _check_circular_dependency(depends, self, 'children')
+        
+        # check for circular dependency toward the parent, non of the parents
+        # should be depending to the given depends_to_task
+        parent = self.parent
+        while parent:
+            if parent in depends.depends:
+                raise CircularDependencyError('One of the parents of %s is '
+                                              'depending to %s' % 
+                                              (self, depends))
+            parent = parent.parent
         
         return depends
 
@@ -793,7 +844,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def _start_getter(self):
         """overridden start getter
         """
-        # TODO: do it only once not all the time they ask for it
         # use children start
         if self.is_container:
             start = datetime.datetime.max
@@ -806,9 +856,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def _start_setter(self, start_in):
         """overridden start setter
         """
+        # logger.debug('Task.start_setter       : %s' % start_in)
         # update the start only if this is not a container task
         if self.is_leaf:
             self._validate_dates(start_in, self._end, self._duration)
+        
+        # logger.debug('Task.start_setter afterV: %s' % self.start)
     
     @declared_attr
     def start(self):
@@ -905,6 +958,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             i+=1
             current = current.parent
         return i
+    
+    @property
+    def total_effort(self):
+        """The total effort spent for this Task. It is the sum of all the
+        Bookings recorded for this task.
+        """
+        return None
 
 def _check_circular_dependency(task, check_for_task, attr_name):
     """checks the circular dependency in task if it has check_for_task in its
@@ -920,6 +980,8 @@ def _check_circular_dependency(task, check_for_task, attr_name):
             _check_circular_dependency(
                 dependent_task, check_for_task, attr_name
             )
+
+            
 
 # TASK_DEPENDENCIES
 Task_Dependencies = Table(

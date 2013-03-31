@@ -1,0 +1,127 @@
+<div class='dijitDialogPaneContentArea'>
+  <form id='create_booking_form'>
+    <table style='width: 100%'>
+      
+      {# TASK #}
+      <tr>
+        <td class='label_column'>
+          <label for='booking_task'>Task</label>
+        </td>
+        <td class='input_column'>
+          <input id='booking_task'>
+        </td>
+      </tr>
+      
+      {# RESOURCE #}
+      <tr>
+        <td class='label_column'>
+          <label for='booking_resource'>Resource</label>
+        </td>
+        <td class='input_column'>
+          <div id='booking_resource'></div>
+        </td>
+      </tr>
+      
+      {# START #}
+      <tr>
+        <td class='label_column'>
+          <label for='booking_start_date'>Start Date</label>
+        </td>
+        <td class='input_column'>
+            <input id='booking_start_date'>
+            <input id='booking_start_time'>
+        </td>
+      </tr>
+      
+      {# END #}
+      <tr>
+        <td class='label_column'>
+          <label for='booking_end_date'>End Date</label>
+        </td>
+        <td class='input_column'>
+            <input id='booking_end_date'>
+            <input id='booking_end_time'>
+        </td>
+      </tr>
+      
+    </table>
+  </form>
+</div>
+
+<div class='dijitDialogPaneActionBar'>
+  <button id='booking_ok_button'>Ok</button>
+  <button id='booking_cancel_button'>Cancel</button>
+</div>
+
+<script type="text/javascript">
+  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Button',
+    'dojo/store/JsonRest', 'dojo/ready'],
+    function(registry, Memory, Button, JsonRest, ready){
+      
+      ready(function(){
+        
+        // ********************************************************************
+        // Form
+        var create_booking_form = new Form({
+          id: 'create_booking_form'
+        }, 'create_booking_form');
+        
+        
+        
+        // ********************************************************************
+        // Task
+        var task_textBox = new TextBox({
+          name: 'task_name',
+          label: 'Task',
+          value: '{{ task.name }}',
+          disabled: true,
+          required: true
+        }, 'booking_task');
+        task_textBox.startup();
+        
+        
+        
+        // ********************************************************************
+        // Ok Button
+        var ok_button = new Button({
+          label: 'Ok',
+          type: 'button',
+          onClick: function(){
+            submitForm({
+              dialog: registry.byId('create_task_dialog'),
+              form: create_task_form,
+              additional_data: {
+                task_id: {{ task.id }},
+                start_date: stamp.toISOString(start_dateTextBox.value),
+                end_date: stamp.toISOString(end_dateTextBox.value),
+                start_time: stamp.toISOString(start_time_timeTextBox.value),
+                end_time: stamp.toISOString(end_time_timeTextBox.value)
+              },
+              url: '{{ request.route_url('create_booking', task_id=task.id) }}',
+              method: 'POST'
+            });
+          }
+        }, 'task_ok_button');
+        ok_button.startup();
+        
+        
+        
+        
+        // ********************************************************************
+        // Cancel Button
+        var cancel_button = new Button({
+          label: 'Cancel',
+          type: 'button',
+          onClick: function(){
+            var dialog = create_task_form.getParent()
+            dialog.destroyRecursive();
+          }
+        }, 'task_cancel_button');
+        cancel_button.startup();
+   
+        
+        create_booking_form.startup();
+      });
+      
+    });
+</script>

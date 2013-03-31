@@ -37,7 +37,7 @@
       var create_shot_button = dialogCaller({
         label: 'New Shot',
         dialog_id: 'create_shot_dialog',
-        content_creator: create_create_shot_dialog,
+        content_creator: create_shot_dialog_creator,
         attach_to: 'view_shots_create_shot_button',
         related_field_updater: shot_data_grid_updater,
         data_id: '{{ project.id }}'

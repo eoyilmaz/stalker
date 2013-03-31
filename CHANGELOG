@@ -28,6 +28,14 @@ Stalker Changes
 * Added ``thumbnail`` attribute to the SimpleEntity class which is a reference
   to a Link instance, showing the path of the thumbnail.
 
+* Fixed Circular Dependency bug in Task class, where a parent of a newly
+  created task is depending to another task which is set as the dependee for
+  this newly created task (T1 -> T3 -> T2 -> T1 (parent relation) -> T3 -> T2
+  etc.).
+
+* jQueryGantt: Moving any child task will adjust the parent start and end dates
+  so they fit to the children.
+
 0.2.0.a7
 --------
 

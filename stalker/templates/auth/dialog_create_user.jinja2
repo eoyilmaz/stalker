@@ -236,7 +236,7 @@
         create_department_button = dialogCaller({
           label: 'New',
           dialog_id: 'create_department_dialog',
-          content_creator: create_create_department_dialog,
+          content_creator: create_department_dialog_creator,
           attach_to: 'user_create_department_button',
           related_field_updater: departments_field_updater
         });
@@ -287,7 +287,7 @@
       var create_group_button = dialogCaller({
         label: 'New',
         dialog_id: 'create_group_dialog',
-        content_creator: create_create_group_dialog,
+        content_creator: create_group_dialog_creator,
         attach_to: 'user_create_group_button',
         related_field_updater: groups_field_updater
       }, 'user_create_group');

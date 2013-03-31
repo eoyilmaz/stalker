@@ -143,7 +143,7 @@ def create_project(request):
 
 
 @view_config(
-    route_name='view_projects',
+    route_name='list_projects',
     renderer='templates/project/content_list_projects.jinja2',
     permission='Read_Project'
 )
@@ -217,12 +217,12 @@ def get_projects(request):
     permission='Read_Project'
 )
 @view_config(
-    route_name='view_assets',
+    route_name='list_assets',
     renderer='templates/asset/content_list_assets.jinja2',
     permission='Read_Asset'
 )
 @view_config(
-    route_name='view_shots',
+    route_name='list_shots',
     renderer='templates/shot/content_list_shots.jinja2',
     permission='Read_Shot'
 )

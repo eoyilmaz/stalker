@@ -128,7 +128,7 @@
             name: 'central_content_pane',
             region: 'center',
             style: 'padding: 0px',
-            href: 'view_user/{{ user.id }}',
+            href: 'view/user/{{ user.id }}',
             executeScripts: true
           }, 'central_content');
           appLayout.addChild(central_content_pane);
@@ -191,7 +191,7 @@
                   dialogCaller({
                     label:'Filename Tamplate',
                     dialog_id:'create_filename_template_dialog',
-                    content_creator: create_create_filename_template_dialog,
+                    content_creator: create_filename_template_dialog_creator,
                     widget_type: 'MenuItem'
                   })
           );
@@ -202,7 +202,7 @@
                   dialogCaller({
                     label:'Image Format',
                     dialog_id:'create_image_format_dialog',
-                    content_creator: create_create_image_format_dialog,
+                    content_creator: create_image_format_dialog_creator,
                     widget_type: 'MenuItem'
                   })
           );
@@ -213,7 +213,7 @@
                   dialogCaller({
                     label:'Repository',
                     dialog_id:'create_repository_dialog',
-                    content_creator: create_create_repository_dialog,
+                    content_creator: create_repository_dialog_creator,
                     widget_type: 'MenuItem'
                   })
           );
@@ -224,7 +224,7 @@
                   dialogCaller({
                     label:'Status',
                     dialog_id:'create_status_dialog',
-                    content_creator: create_create_status_dialog,
+                    content_creator: create_status_dialog_creator,
                     widget_type: 'MenuItem'
                   })
           );
@@ -235,7 +235,7 @@
                   dialogCaller({
                     label:'Status List',
                     dialog_id:'create_status_list_dialog',
-                    content_creator: create_create_status_list_dialog,
+                    content_creator: create_status_list_dialog_creator,
                     widget_type: 'MenuItem'
                   })
           );
@@ -246,7 +246,7 @@
                   dialogCaller({
                     label:'Structure',
                     dialog_id:'create_structure_dialog',
-                    content_creator: create_create_structure_dialog,
+                    content_creator: create_structure_dialog_creator,
                     widget_type: 'MenuItem'
                   })
           );
@@ -286,7 +286,7 @@
             // View Project
             project_setting_DropDownMenu.addChild(
               new MenuItem({
-                  label: '-  View',
+                  label: 'View',
                   dataId: pID,
                   onClick: function(){
                     central_content_pane.set(
@@ -306,9 +306,9 @@
             // Asset
             project_setting_DropDownMenu.addChild(
               dialogCaller({
-                label:'+ New Asset',
+                label:'New Asset',
                 dialog_id:'create_asset_dialog',
-                content_creator: create_create_asset_dialog,
+                content_creator: create_asset_dialog_creator,
                 widget_type: 'MenuItem',
                 data_id: pID
 
@@ -319,9 +319,9 @@
             // Sequence
             project_setting_DropDownMenu.addChild(
               dialogCaller({
-                label:'+ New Sequence',
+                label:'New Sequence',
                 dialog_id:'create_sequence_dialog',
-                content_creator: create_create_sequence_dialog,
+                content_creator: create_sequence_dialog_creator,
                 widget_type: 'MenuItem',
                 data_id: pID
               })
@@ -331,9 +331,9 @@
             // Shot
             project_setting_DropDownMenu.addChild(
               dialogCaller({
-                label:'+ New Shot',
+                label:'New Shot',
                 dialog_id:'create_shot_dialog',
-                content_creator: create_create_shot_dialog,
+                content_creator: create_shot_dialog_creator,
                 widget_type: 'MenuItem',
                 data_id: pID
               })
@@ -345,9 +345,9 @@
 
             project_setting_DropDownMenu.addChild(
               dialogCaller({
-                label:'+ Add User',
+                label:'Add User',
                 dialog_id:'create_user_dialog',
-                content_creator: create_create_user_dialog,
+                content_creator: create_user_dialog_creator,
                 widget_type: 'MenuItem',
                 data_id: pID
               })
@@ -389,9 +389,9 @@
 
               projects_DropDownMenu.addChild(
                       dialogCaller({
-                        label:'+ New Project',
+                        label:'New Project',
                         dialog_id:'create_project_dialog',
-                        content_creator: create_create_project_dialog,
+                        content_creator: create_project_dialog_creator,
                         widget_type: 'MenuItem',
                         related_field_updater: projects_DropDownMenu_updater
                       })
@@ -405,9 +405,9 @@
               // Asset
               projects_DropDownMenu.addChild(
                       dialogCaller({
-                        label:'+ New Asset',
+                        label:'New Asset',
                         dialog_id:'create_asset_dialog',
-                        content_creator: create_create_asset_dialog,
+                        content_creator: create_asset_dialog_creator,
                         widget_type: 'MenuItem'
 
                       })
@@ -417,9 +417,9 @@
               // Sequence
               projects_DropDownMenu.addChild(
                       dialogCaller({
-                        label:'+ New Sequence',
+                        label:'New Sequence',
                         dialog_id:'create_sequence_dialog',
-                        content_creator: create_create_sequence_dialog,
+                        content_creator: create_sequence_dialog_creator,
                         widget_type: 'MenuItem'
                       })
               );
@@ -428,9 +428,9 @@
               // Shot
               projects_DropDownMenu.addChild(
                       dialogCaller({
-                        label:'+ New Shot',
+                        label:'New Shot',
                         dialog_id:'create_shot_dialog',
-                        content_creator: create_create_shot_dialog,
+                        content_creator: create_shot_dialog_creator,
                         widget_type: 'MenuItem'
                       })
               );
@@ -462,37 +462,35 @@
           // Department Menu
           var create_department_setting_DropDownMenu = function (dID){
 
-            var department_setting_DropDownMenu = new DropDownMenu({
-
-            });
-
+            var department_setting_DropDownMenu = new DropDownMenu();
+            
             // --------
-            // View Project
+            // View Department
             department_setting_DropDownMenu.addChild(
-                    new MenuItem({
-                      label: '-  Users',
-                      dataId: dID,
-                      onClick: function(){
-                        central_content_pane.set(
-                                'href',
-                                'view/department/' + this.get('dataId')
-                        );
-                        central_content_pane.refresh();
-                      }
-                    })
+              new MenuItem({
+                label: 'Users',
+                dataId: dID,
+                onClick: function(){
+                  central_content_pane.set(
+                    'href',
+                    'view/department/' + this.get('dataId')
+                  );
+                  central_content_pane.refresh();
+                }
+              })
             );
 
             department_setting_DropDownMenu.addChild(
-                    new MenuSeparator({})
+              new MenuSeparator({})
             );
 
             // ----------
             // ADD USER
             department_setting_DropDownMenu.addChild(
                     dialogCaller({
-                      label:'+ New User',
+                      label:'New User',
                       dialog_id:'create_user_dialog',
-                      content_creator: create_create_user_dialog,
+                      content_creator: create_user_dialog_creator,
                       widget_type: 'MenuItem',
                       data_id: dID
                     })
@@ -500,70 +498,83 @@
 
             return department_setting_DropDownMenu;
 
-          }
-
+          };
+          
           // Departments Updater
           var departments_DropDownMenu_updater = function(){
             // delete the current items
             var items = crew_DropDownMenu.getChildren();
-            for (var i=0; i< items.length; i++){
+            for (var i=0; i<items.length; i++){
               items[i].destroyRecursive();
             }
-
+            
             // query new items
             var result = departments_memory.query().then(function(data){
               for (var i=0; i < data.length; i++){
                 crew_DropDownMenu.addChild(
-                        new PopupMenuItem({
-                          label: data[i].name,
-                          dataId: data[i].id,
-                          popup: create_department_setting_DropDownMenu(data[i].id)
+                  new PopupMenuItem({
+                    label: data[i].name,
+                    dataId: data[i].id,
+                    popup: create_department_setting_DropDownMenu(data[i].id)
 
-                        })
+                  })
                 );
               }
-
+              
+              // TODO: Create another menu for users with no department
+{#              // Users with no departments#}
+{#              crew_DropDownMenu.addChild(#}
+{#                new PopupMenuItem({#}
+{#                  label: '-- Users With No Department --',#}
+{#                  popup: function(){#}
+{#                    // query all the users with no department#}
+{#                    var no_users_dep_dmenu = new DropDownMenu();#}
+{#                    #}
+{#                  }#}
+{#                })#}
+{#              );#}
+              
               crew_DropDownMenu.addChild(
-                      new MenuSeparator({})
+                new MenuSeparator({})
               );
 
               // ----------
               // ADD DEPARTMENT
               crew_DropDownMenu.addChild(
-                      dialogCaller({
-                        label: '+ New Department',
-                        dialog_id: 'create_department_dialog',
-                        content_creator: create_create_department_dialog,
-                        widget_type: 'MenuItem',
-                        related_field_updater: departments_DropDownMenu_updater
-                      })
+                dialogCaller({
+                  label: 'New Department',
+                  dialog_id: 'create_department_dialog',
+                  content_creator: create_department_dialog_creator,
+                  widget_type: 'MenuItem',
+                  related_field_updater: departments_DropDownMenu_updater
+                })
               );
 
               crew_DropDownMenu.addChild(
-                      new MenuSeparator({})
+                new MenuSeparator({})
               );
 
               // ----------
               // ADD USER
               crew_DropDownMenu.addChild(
-                      dialogCaller({
-                        label:'+ New User',
-                        dialog_id:'create_user_dialog',
-                        content_creator: create_create_user_dialog,
-                        widget_type: 'MenuItem',
-                        data_id: '-1'
-                      })
+                dialogCaller({
+                  label:'New User',
+                  dialog_id:'create_user_dialog',
+                  content_creator: create_user_dialog_creator,
+                  widget_type: 'MenuItem',
+                  data_id: '-1'
+                })
               );
 
               // -----
               // ADD GROUP
               crew_DropDownMenu.addChild(
-                      dialogCaller({
-                        label: '+ New Group',
-                        dialog_id: 'create_group_dialog',
-                        content_creator: create_create_group_dialog,
-                        widget_type: 'MenuItem'
-                      })
+                dialogCaller({
+                  label: 'New Group',
+                  dialog_id: 'create_group_dialog',
+                  content_creator: create_group_dialog_creator,
+                  widget_type: 'MenuItem'
+                })
               );
 
 
