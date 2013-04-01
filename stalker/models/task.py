@@ -70,6 +70,8 @@ class Booking(Entity, ScheduleMixin):
         booking is created for"""
     )
     
+    is_scheduled = Column(Boolean, default=False)
+    
     def __init__(
             self,
             task=None,
@@ -201,6 +203,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     task belongs to, the effort that needs to spend for that task and the
     availability of the resources assigned to the task.
     
+    A good practice for creating a project plan is to supply the parent/child
+    relation, effort, resource and dependency information per task and leave
+    the start and end date calculation to TaskJuggler.
+    
     Stalker, initially needs three values to fill the Task instance with enough
     data so it can be passed to TaskJuggler for the auto scheduling process.
     The table below shows the value groups that can be used while creating a
@@ -211,14 +217,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     +-----------+-----------+-----------+-----------+-----------+
     |           |           |           |     +     |     +     |
     +-----------+-----------+-----------+-----------+-----------+
-    |           |           |           |           |           |
+    |     +     |     +     |           |           |           |
     +-----------+-----------+-----------+-----------+-----------+
-                                                                    
-                                                                    
-                                                                    
-                                                                    
-                                                                    
-    
+    |     +     |           |     +     |           |           |
+    +-----------+-----------+-----------+-----------+-----------+
+    |           |     +     |     +     |           |           |
+    +-----------+-----------+-----------+-----------+-----------+
     
     A Tasks is called a ``container task`` if it has at least one child Task.
     And it is called a ``leaf task`` if it doesn't have any children Tasks. The
@@ -253,16 +257,19 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :param effort: The total effort that needs to be spend to complete this
       :class:`~stalker.models.task.Task`. Can be used to create an initial bid
-      of how long this task will take.
+      of how long this task will take. The unit of effort is hours. This is
+      decided to be in that way to ease the TaskJuggler integration without
+      struggling with the working days conversion to working hours etc.
     
-    :type effort: datetime.timedelta
+    :type effort: int
     
     :param bid: The initial bid for this Task. It can be used to measure how
       accurate the initial guess was. It will be compared against the total
       amount of effort spend doing this task. Can be set to None, which will
-      set copy the effort argument value if there is any or 0.
+      set to the effort argument value if there is one or 0. The unit of bid is
+      again hours as in effort.
     
-    :type bid: datetime.timedelta
+    :type bid: int
     
     :param depends: A list of :class:`~stalker.models.task.Task`\ s that this
       :class:`~stalker.models.task.Task` is depending on. A Task can not depend
@@ -358,7 +365,9 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
     )
     
-    _effort = Column(Interval)
+    effort = Column(Integer)
+    bid = Column(Integer)
+    
     priority = Column(Integer)
     
     bookings = relationship(

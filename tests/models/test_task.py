@@ -128,21 +128,22 @@ class TaskTester(unittest.TestCase):
         )
         
         self.kwargs = {
-            "name": "Modeling",
-            "description": "A Modeling Task",
-            "project": self.test_project1,
-            "priority": 500,
-            "resources": [self.test_user1, self.test_user2],
-            "effort": datetime.timedelta(4),
-            "duration": datetime.timedelta(2),
-            "depends": [self.test_dependent_task1,
+            'name': 'Modeling',
+            'description': 'A Modeling Task',
+            'project': self.test_project1,
+            'priority': 500,
+            'resources': [self.test_user1, self.test_user2],
+            'effort': 40,
+            'bid': 40,
+            'duration': datetime.timedelta(2),
+            'depends': [self.test_dependent_task1,
                         self.test_dependent_task2],
-            "is_complete": False,
-            "bookings": [],
-            "versions": [],
-            "is_milestone": False,
-            "status": 0,
-            "status_list": self.test_task_status_list,
+            'is_complete': False,
+            'bookings': [],
+            'versions': [],
+            'is_milestone': False,
+            'status': 0,
+            'status_list': self.test_task_status_list,
         }
         
         # create a test Task
@@ -885,13 +886,12 @@ class TaskTester(unittest.TestCase):
     #    
     #    self.assertEqual(new_task1.resources, [])
     
-    def test_effort_and_duration_argument_is_skipped(self):
-        """testing if the effort attribute is set to the default value of
-        duration divided by the number of resources
+    def test_effort_argument_is_skipped(self):
+        """testing if the effort attribute will be 0 when the effort argument
+        is skipped
         """
         self.kwargs.pop("effort")
-        self.kwargs.pop("duration")
-
+        
         new_task = Task(**self.kwargs)
 
         self.assertEqual(new_task.duration, defaults.TASK_DURATION)
@@ -909,20 +909,8 @@ class TaskTester(unittest.TestCase):
         self.assertEqual(new_task.duration, self.kwargs["duration"])
         self.assertEqual(new_task.effort, new_task.duration *
                                           len(new_task.resources))
-
-    def test_effort_argument_present_but_duration_is_skipped(self):
-        """testing if the effort argument is present but the duration is
-        skipped the duration attribute is calculated from the
-        effort / len(resources) formula
-        """
-        self.kwargs.pop("duration")
-        new_task = Task(**self.kwargs)
-
-        self.assertEqual(new_task.effort, self.kwargs["effort"])
-        self.assertEqual(new_task.duration, new_task.effort /
-                                            len(new_task.resources))
-
-    def test_effort_and_duration_argument_is_None(self):
+    
+    def test_effort_argument_is_None(self):
         """testing if the effort and duration is None then effort will be
         calculated from the value of duration and count of resources
         """
@@ -932,7 +920,7 @@ class TaskTester(unittest.TestCase):
         self.assertEqual(new_task.duration, defaults.TASK_DURATION)
         self.assertEqual(new_task.effort, new_task.duration *
                                           len(new_task.resources))
-
+    
     def test_effort_attribute_is_set_to_None(self):
         """testing if the effort attribute is set to None then the effort is
         calculated from duration and count of resources

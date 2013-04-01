@@ -447,6 +447,33 @@ class WorkingHours(object):
         self._wh = None
         self.working_hours = self._validate_working_hours(working_hours)
     
+    def __eq__(self, other):
+        """equality test
+        """
+        return isinstance(other, WorkingHours) and \
+               other.working_hours == self.working_hours
+    
+    def __str__(self):
+        return super(object, WorkingHours).__str__(self)
+    
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            return self._wh[defaults.DAY_ORDER[item]]
+        elif isinstance(item, str):
+            return self._wh[item]
+    
+    def __setitem__(self, key, value):
+        self._validate_wh_value(value)
+        if isinstance(key, int):
+            self._wh[defaults.DAY_ORDER[key]] = value
+        elif isinstance(key, str):
+            # check if key is in
+            if key not in defaults.DAY_ORDER:
+                raise KeyError('%s accepts only %s as key, not %s' %
+                               (self.__class__.__name__, defaults.DAY_ORDER,
+                                key))
+            self._wh[key] = value
+    
     def _validate_working_hours(self, wh_in):
         """validates the given working hours
         """
@@ -492,24 +519,6 @@ class WorkingHours(object):
         """
         pass
     
-    def __getitem__(self, item):
-        if isinstance(item, int):
-            return self._wh[defaults.DAY_ORDER[item]]
-        elif isinstance(item, str):
-            return self._wh[item]
-    
-    def __setitem__(self, key, value):
-        self._validate_wh_value(value)
-        if isinstance(key, int):
-            self._wh[defaults.DAY_ORDER[key]] = value
-        elif isinstance(key, str):
-            # check if key is in
-            if key not in defaults.DAY_ORDER:
-                raise KeyError('%s accepts only %s as key, not %s' %
-                               (self.__class__.__name__, defaults.DAY_ORDER,
-                                key))
-            self._wh[key] = value
-    
     def _validate_wh_value(self, value):
         """validates the working hour value
         """
@@ -540,16 +549,15 @@ class WorkingHours(object):
         
         return value
     
-    def __eq__(self, other):
-        """equality test
+    @property
+    def to_tjp(self):
+        """returns TaskJuggler representation of this object
         """
-        return isinstance(other, WorkingHours) and \
-               other.working_hours == self.working_hours
-    
-    def __str__(self):
-        # TODO: create a TaskJuggler suitable string representation
-        return super(object, WorkingHours).__str__(self)
-
+        # render the template
+        from jinja2 import Template
+        
+        template = Template(defaults.TJP_WORKING_HOURS_TEMPLATE)
+        return template.render({'workinghours': self})
 
 # PROJECT_USERS
 Project_Users = Table(

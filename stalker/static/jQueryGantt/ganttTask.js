@@ -44,7 +44,9 @@ function Task(id, name, code, level, start, end, duration, bid, effort) {
   this.code = code;
   this.level = level;
   this.status = "STATUS_UNDEFINED";
-
+  
+  this.parent = null;
+  
   this.start = start;
   this.duration = duration;
   this.end = end;
@@ -54,7 +56,7 @@ function Task(id, name, code, level, start, end, duration, bid, effort) {
   
   this.startIsMilestone = false;
   this.endIsMilestone = false;
-
+  
   this.collapsed = false;
   
   this.rowElement; //row editor html element

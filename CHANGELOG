@@ -1,6 +1,16 @@
 ===============
 Stalker Changes
 ===============
+0.2.0.a9
+--------
+* A new property called ``to_tjp`` added to the SimpleEntity class which needs
+  to be implemented in the child and is going to be used in TaskJuggler
+  integration.
+
+* A new attribute called ``is_scheduled`` added to Task class and it is going
+  to be used in Gantt charts. Where it will lock the class and will not try
+  to snap it to anywhere if it is scheduled.
+
 0.2.0.a8
 --------
 

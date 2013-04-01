@@ -213,3 +213,53 @@ class WorkingHoursTester(unittest.TestCase):
         self.assertEqual(wh.working_hours['sun'], working_hours['sun'])
         self.assertEqual(wh.working_hours['sat'], working_hours['sat'])
     
+    def test_to_tjp_attribute_is_read_only(self):
+        """testing if the to_tjp attribute is read only
+        """
+        wh = WorkingHours()
+        self.assertRaises(AttributeError, setattr, wh, 'to_tjp', 'some value')
+    
+    def test_to_tjp_attribute_is_working_properly(self):
+        """testing if the to_tjp property is working properly
+        """
+        wh = WorkingHours()
+        wh['mon'] = [[570, 1110]]
+        wh['tue'] = [[570, 1110]]
+        wh['wed'] = [[570, 1110]]
+        wh['thu'] = [[570, 1110]]
+        wh['fri'] = [[570, 1110]]
+        wh['sat'] = []
+        wh['sun'] = []
+        
+        expected_tjp = """workinghours mon 09:30 - 18:30
+workinghours tue 09:30 - 18:30
+workinghours wed 09:30 - 18:30
+workinghours thu 09:30 - 18:30
+workinghours fri 09:30 - 18:30
+workinghours sat off
+workinghours sun off"""
+        
+        self.assertEqual(wh.to_tjp, expected_tjp)
+    
+    def test_to_tjp_attribute_is_working_properly_for_multiple_work_hour_ranges(self):
+        """testing if the to_tjp property is working properly
+        """
+        wh = WorkingHours()
+        wh['mon'] = [[570, 720], [820, 1110]]
+        wh['tue'] = [[570, 720], [820, 1110]]
+        wh['wed'] = [[570, 720], [820, 1110]]
+        wh['thu'] = [[570, 720], [820, 1110]]
+        wh['fri'] = [[570, 720], [820, 1110]]
+        wh['sat'] = [[570, 720]]
+        wh['sun'] = []
+        
+        expected_tjp = """workinghours mon 09:30 - 12:00, 13:00 - 18:30
+workinghours tue 09:30 - 12:00, 13:00 - 18:30
+workinghours wed 09:30 - 12:00, 13:00 - 18:30
+workinghours thu 09:30 - 12:00, 13:00 - 18:30
+workinghours fri 09:30 - 12:00, 13:00 - 18:30
+workinghours sat 09:30 - 12:00
+workinghours sun off"""
+        
+        self.assertEqual(wh.to_tjp, expected_tjp)
+ 
