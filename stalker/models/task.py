@@ -163,7 +163,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     A Task needs to be created with a Project instance. It is also valid if no
     project is supplied but there is a parent Task passed to the parent
-    argument. It is also possible to pass both project and the task.
+    argument. It is also possible to pass both project and the parent task.
     
     Because it will create an ambiguity, Stalker will raise a RuntimeWarning,
     if both project and task are given and the owner project of the given task
@@ -219,9 +219,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                                                                     
                                                                     
     
-    The end of a task is calculated by using the duration of the Task itself
-    and the working hours settings of the related Project instance. So the
-    holidays or the vacations of the resources are taken in to account.
     
     A Tasks is called a ``container task`` if it has at least one child Task.
     And it is called a ``leaf task`` if it doesn't have any children Tasks. The
@@ -235,15 +232,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     latest end value of the children tasks.
     
     Stalker will check if there will be a cycle if one wants to parent a Task
-    to a child Task of its own.
-    
-    The Task class itself is mixed with
-    :class:`~stalker.models.mixins.StatusMixin` and
-    :class:`~stalker.models.mixins.ScheduleMixin`. To be able to give the
-    :class:`~stalker.models.task.Task` a *Status* and a *start* and *end* time.
-    
-    With every release of Stalker, the Stalker Tasks will try to be more
-    compliant with TaskJuggler Tasks.
+    to a child Task of its own. 
     
     :param parent: The parent Task or Project of this Task. Every Task in
       Stalker should be related with a :class:`~stalker.models.project.Project`
@@ -264,38 +253,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :param effort: The total effort that needs to be spend to complete this
       :class:`~stalker.models.task.Task`. Can be used to create an initial bid
-      of how long this task will take. The effort is equally divided to the
-      assigned resources. So if the effort is 10 days and 2
-      :attr:`~stalker.models.task.Task.resources` is assigned then the
-      :attr:`~stalker.models.task.Task.duration` of the task is going to be 5
-      days (if both of the resources are free to work). The default value is
-      stalker.conf.defaults.DEFAULT_TASK_DURATION.
-      
-      The effort argument defines the
-      :attr:`~stalker.models.task.Task.duration` of the task. Every resource is
-      counted equally effective and the
-      :attr:`~stalker.models.task.Task.duration` will be calculated by the
-      simple formula:
-      
-      .. math::
-         
-         {duration} = \\frac{{effort}}{n_{resources}}
-      
-      And changing the :attr:`~stalker.models.task.Task.duration` will also
-      effect the :attr:`~stalker.models.task.Task.effort` needed to be spend.
-      The :attr:`~stalker.models.task.Task.effort` will be calculated with the
-      formula:
-      
-      .. math::
-         
-         {effort} = {duration} \\times {n_{resources}}
+      of how long this task will take.
     
     :type effort: datetime.timedelta
     
     :param bid: The initial bid for this Task. It can be used to measure how
       accurate the initial guess was. It will be compared against the total
       amount of effort spend doing this task. Can be set to None, which will
-      set it to 0.
+      set copy the effort argument value if there is any or 0.
     
     :type bid: datetime.timedelta
     
@@ -309,55 +274,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
     """
-    #.. :param depends: A list of
-    #:class:`~stalker.models.task.TaskDependencyRelation` objects. Holds
-    #information about the list of other :class:`~stalker.models.task.Task`\ s
-    #which the current one is dependent on.
-
-    #.. giving information about the dependent tasks. The given list is iterated
-    #and the :attr:`~stalker.models.task.Task.start` attribute is set to
-    #the latest found :attr:`~stalker.models.task.Task.end` attribute of
-    #the dependent :class:`~stalker.models.task.Task`\ s.
-
-    #.. :type depends: list of :class:`~stalker.models.task.TaskDependencyRelation`
-
-
-    #:param parent_task: Another :class:`~stalker.models.task.Task` which is the
-    #parent of the current :class:`~stalker.models.task.Task`.
-
-    #:class:`~stalker.models.task.Task`\ s can be grouped by using parent and
-    #child relation.
-
-    #:type parent_task: :class:`~stalker.models.task.Task`
-
-    #:param sub_tasks: A list of other :class:`~stalker.models.task.Task`\ s
-    #which are the child of the current one. A
-    #:class:`~stalker.models.task.Task` with other child
-    #:class:`~stalker.models.task.Task`\ s:
-
-    #* can not have any resources
-    #* can not have any effort set
-    #* can not have any versions
-
-    #The only reason of a :class:`~stalker.models.task.Task` to have other
-    #:class:`~stalker.models.task.Task`\ s as child is to group them. So it
-    #is meaningles to let a parent :class:`~stalker.models.task.Task` to have
-    #any resource or any effort or any verions. The
-    #:attr:`~stalker.models.task.Task.start`,
-    #:attr:`~stalker.models.task.Task.end` and
-    #:attr:`~stalker.models.task.Task.duration` attributes of a
-    #:class:`~stalker.models.task.Task` with child classes will be based on
-    #it children date attributes.
-
-    #:type child_tasks: :class:`~stalker.models.task.Task`.
-
-    #:param versions: A list of :class:`~stalker.models.version.Version` objects
-    #showing the produced work on the repository. This is the relation between
-    #database and the repository.
-
-    #:type versions: list of :class:`~stalker.models.version.Version`
-    #"""
-
+    
     __auto_name__ = False
     __tablename__ = "Tasks"
     __mapper_args__ = {'polymorphic_identity': "Task"}
@@ -960,7 +877,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         return i
     
     @property
-    def total_effort(self):
+    def total_effort_spent(self):
         """The total effort spent for this Task. It is the sum of all the
         Bookings recorded for this task.
         """

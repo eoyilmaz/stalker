@@ -261,8 +261,20 @@
                   label: 'Create Booking',
                   onClick: function(){
                     var node = this.getParent().currentTarget;
-                    
                     var task_id = node.getAttribute('taskId');
+                    
+                    // check if it is a leaf task
+                    var task = ge.getTask(task_id);
+                    console.log(task);
+                    
+                    if(task.getChildren().length > 0){
+                      // warn the user and return
+                      alert('This is a container Task,\n' +
+                            'You can not enter any bookings for\n' +
+                            'container Tasks!');
+                      return;
+                    }
+                    
                     
                     var dialog = registry.byId('create_booking_dialog');
                     if (dialog != null){

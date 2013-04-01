@@ -192,7 +192,7 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Booking
-    config.add_route('create_booking_dialog', 'dialog/create/booking')
+    config.add_route('create_booking_dialog', 'dialog/create/booking/{task_id}')
     config.add_route('update_booking_dialog', 'dialog/update/booking/{booking_id}')
     
     config.add_route('create_booking', 'create/booking/{task_id}')

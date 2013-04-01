@@ -37,6 +37,16 @@ define([
                 }
             },
             
+            _setStyleAttr: function(value){
+                console.log(
+                    'setting the TagSelect.input_field_widget.style: ', value
+                );
+                if (this.input_field_widget){
+                    console.log('there is an input_field_widget');
+                    this.input_field_widget.set('style', value);
+                }
+            },
+            
             _setStoreAttr: function(value){
                 if (this.input_field_widget){
                     this.input_field_widget.set('store', value);
@@ -97,6 +107,7 @@ define([
                     // check if there are any tags selected
                     return this.tags.length > 0;
                 }
+                return true;
             },
 
 //            validate: function(){

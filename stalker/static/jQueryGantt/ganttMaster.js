@@ -53,23 +53,23 @@ function GanttMaster() {
 
 GanttMaster.prototype.init = function(place) {
   this.element = place;
-
+  
   var self=this;
-
+  
   //load templates
   $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
-
+  
   //create editor
   this.editor = new GridEditor(this);
   this.editor.element.width(place.width() * .9 - 10);
   place.append(this.editor.element);
-
+  
   //create gantt
   this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
-
+  
   //setup splitter
   var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 50);
-  splitter.secondBox.css("overflow-y", "auto").scroll(function() {
+  splitter.secondBox.css("overflow-y", "auto").scroll(function(){
     splitter.firstBox.scrollTop(splitter.secondBox.scrollTop());
   });
 
@@ -391,7 +391,7 @@ GanttMaster.prototype.loadTasks = function(tasks, selectedRow) {
 
 GanttMaster.prototype.getTask = function(taskId) {
   var ret;
-  for (var i=0;i<this.tasks.length;i++) {
+  for(var i=0 ; i<this.tasks.length ; i++) {
     var tsk = this.tasks[i];
     if (tsk.id == taskId) {
       ret = tsk;

@@ -941,7 +941,7 @@ class TaskTester(unittest.TestCase):
         self.assertEqual(self.test_task.effort,
                          self.test_task.duration *
                          len(self.test_task.resources))
-
+    
     def test_effort_argument_is_not_an_instance_of_timedelta(self):
         """testing if effort attribute is calculated from the duration
         attribute when the effort argument is not an instance of timedelta
@@ -968,43 +968,46 @@ class TaskTester(unittest.TestCase):
         test_value = datetime.timedelta(18)
         self.test_task.effort = test_value
         self.assertEqual(self.test_task.effort, test_value)
-
+    
     def test_effort_argument_preceeds_duration_argument(self):
         """testing if the effort argument is preceeds duration argument 
         """
         self.kwargs["effort"] = datetime.timedelta(40)
         self.kwargs["duration"] = datetime.timedelta(2)
-
+        
         new_task = Task(**self.kwargs)
-
+        
         self.assertEqual(new_task.effort, self.kwargs["effort"])
         self.assertEqual(new_task.duration, self.kwargs["effort"] /
                                             len(self.kwargs["resources"]))
-
-    def test_effort_attribute_changes_duration(self):
-        """testing if the effort attribute changes the duration
+    
+    def test_effort_attribute_does_not_change_duration(self):
+        """testing if the effort attribute doesn't change the duration
+        attribute
         """
         test_effort = datetime.timedelta(100)
         test_duration = test_effort / len(self.test_task.resources)
-
+        initial_value = self.test_task.duration
         # be sure it is not already in the current value
         self.assertNotEqual(self.test_task.duration, test_duration)
-
+        
         self.test_task.effort = test_effort
 
-        self.assertEqual(self.test_task.duration, test_duration)
+        self.assertEqual(self.test_task.duration, initial_value)
 
-    def test_duration_attribute_changes_effort(self):
-        """testing if the duration attribute changes the effort attribute value
-        by the effort = duration / len(resources) formula
+    def test_duration_attribute_does_not_change_effort(self):
+        """testing if the duration attribute doesn't change the effort
+        attribute value
         """
         test_duration = datetime.timedelta(100)
         test_effort = test_duration * len(self.test_task.resources)
-
+        
+        initial_value = self.test_task.effort
+        
         # be sure it is not already in the current value
         self.assertNotEqual(self.test_task.effort, test_effort)
         self.test_task.duration = test_duration
-        self.assertEqual(self.test_task.effort, test_effort)
+        self.assertEqual(self.test_task.effort, initial_value)
 
     def test_duration_attribute_will_be_equal_to_effort_if_there_is_no_resources_argument(self):
         """testing if the duration will be equal to the effort if there is no

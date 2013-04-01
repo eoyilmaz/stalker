@@ -17,8 +17,6 @@ stalker/static/jquery*/
 stalker/static/dgrid*/
 stalker/static/put-selector/
 stalker/static/xstyle*/
-stalker/static/stalker/fonts/*
-stalker/static/stalker/images/*
 .coverage
 .DS_Store
 dist/*

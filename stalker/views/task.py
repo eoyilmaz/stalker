@@ -373,6 +373,7 @@ def create_task_dialog(request):
         'project': project
     }
 
+
 @view_config(
     route_name='create_child_task_dialog',
     renderer='templates/task/dialog_create_task.jinja2',

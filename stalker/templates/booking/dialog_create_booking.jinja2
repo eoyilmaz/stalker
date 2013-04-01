@@ -18,7 +18,7 @@
           <label for='booking_resource'>Resource</label>
         </td>
         <td class='input_column'>
-          <div id='booking_resource'></div>
+          <input id='booking_resource'>
         </td>
       </tr>
       
@@ -44,6 +44,16 @@
         </td>
       </tr>
       
+      {# HOURS TO COMPLETE#}
+      <tr>
+        <td class='label_column'>
+          <label for='booking_hours_to_complete'>Hours To Complete</label>
+        </td>
+        <td class='input_column'>
+          <input id='booking_hours_to_complete'>
+        </td>
+      </tr>
+      
     </table>
   </form>
 </div>
@@ -54,9 +64,50 @@
 </div>
 
 <script type="text/javascript">
-  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Button',
-    'dojo/store/JsonRest', 'dojo/ready'],
-    function(registry, Memory, Button, JsonRest, ready){
+  require([
+    'dijit/registry',
+    'dijit/form/Form',
+    'dijit/form/TextBox',
+    'dijit/form/FilteringSelect',
+    'dijit/form/Button',
+    
+    'dijit/form/DateTextBox',
+    'dijit/form/TimeTextBox',
+    'dijit/form/NumberTextBox',
+    
+    'dojo/store/Memory',
+    'dojo/store/JsonRest',
+    
+    'dojo/date',
+    'dojo/date/stamp',
+    'dojo/date/locale',
+    
+    'stalker/submitForm',
+    'stalker/fieldUpdater',
+    
+    'dojo/ready'],
+    function(
+      registry,
+      Form,
+      TextBox,
+      FilteringSelect,
+      Button,
+      
+      DateTextBox,
+      TimeTextBox,
+      NumberTextBox,
+      
+      Memory,
+      JsonRest,
+      
+      date,
+      stamp,
+      locale,
+      
+      submitForm,
+      fieldUpdater,
+      
+      ready){
       
       ready(function(){
         
@@ -79,7 +130,107 @@
         }, 'booking_task');
         task_textBox.startup();
         
+        // ********************************************************************
+        // Resource
+        var resource_memory = new Memory({
+          data: [
+            {% for resource in task.resources %}
+            {
+              name: '{{ resource.name }}',
+              id: {{ resource.id }}
+            },
+            {% endfor %}
+          ]
+        });
         
+        var resource_filteringSelect = new FilteringSelect({
+          name: 'resource_name',
+          label: 'Resource',
+          data: resource_memory,
+          value: '{{ logged_in_user.id }}',
+          required: true
+        }, 'booking_resource');
+        resource_filteringSelect.startup();
+        
+        
+        // ********************************************************************
+        // Start Date
+        
+        // Date
+        var start_dateTextBox = new DateTextBox({
+          name: 'start',
+          label: 'Start Date',
+          value: new Date(),// set it today by default
+          required: true,
+          datePattern: 'dd-mm-yyyy',
+          onChange: function(){
+            if (this.focused){
+              update_dates(
+                start_dateTextBox.getValue(),
+                end_dateTextBox.getValue(),
+                null
+              );
+            }
+          }
+        }, 'booking_start_date');
+        start_dateTextBox.startup();
+        
+        // Time
+        var start_time_timeTextBox = new TimeTextBox({
+          name: 'start_time',
+          value: 'T09:00:00',
+          constraints: {
+            timePattern: 'HH:mm:ss',
+            clickableIncrement: 'T01:00:00',
+            visibleIncrement: 'T01:00:00',
+            visibleRange: 'T01:00:00'
+          }
+        }, 'booking_start_time');
+        start_time_timeTextBox.startup();
+        
+        
+        
+        // ********************************************************************
+        // End Date
+        
+        // Date
+        var end_dateTextBox = new DateTextBox({
+          name: 'end',
+          label: 'End Date',
+          value: new Date(), // set it today by default
+          required: true,
+          datePattern: 'dd-mm-yyyy',
+          onChange: function(){
+            if (this.focused){
+              update_dates(
+                start_dateTextBox.getValue(),
+                end_dateTextBox.getValue(),
+                null
+              );
+            }
+          }
+        }, 'booking_end_date');
+        end_dateTextBox.startup();
+        
+        // Time 
+        var end_time_timeTextBox = new TimeTextBox({
+          name: 'end_time',
+          value: 'T18:00:00',
+          constraints: {
+            timePattern: 'HH:mm:ss',
+            clickableIncrement: 'T01:00:00',
+            visibleIncrement: 'T01:00:00',
+            visibleRange: 'T01:00:00'
+          }
+        }, 'booking_end_time');
+        end_time_timeTextBox.startup();
+        
+        // ********************************************************************
+        // Hours To Complete
+        // calculate the value from the task.effort - task.total_effort_spent
+        var hours_to_complete_numberTextBox = new NumberTextBox({
+          
+        });
         
         // ********************************************************************
         // Ok Button
@@ -88,8 +239,8 @@
           type: 'button',
           onClick: function(){
             submitForm({
-              dialog: registry.byId('create_task_dialog'),
-              form: create_task_form,
+              dialog: registry.byId('create_booking_dialog'),
+              form: create_booking_form,
               additional_data: {
                 task_id: {{ task.id }},
                 start_date: stamp.toISOString(start_dateTextBox.value),
@@ -101,7 +252,7 @@
               method: 'POST'
             });
           }
-        }, 'task_ok_button');
+        }, 'booking_ok_button');
         ok_button.startup();
         
         
@@ -113,10 +264,10 @@
           label: 'Cancel',
           type: 'button',
           onClick: function(){
-            var dialog = create_task_form.getParent()
+            var dialog = create_booking_form.getParent()
             dialog.destroyRecursive();
           }
-        }, 'task_cancel_button');
+        }, 'booking_cancel_button');
         cancel_button.startup();
    
         

@@ -141,20 +141,54 @@
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry',
-    'dojo/store/Memory', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
-    'dijit/form/TextBox', 'dijit/form/FilteringSelect', 'dijit/form/ComboBox',
-    'dijit/form/Button', 'dijit/form/CheckBox', 'dojox/form/MultiComboBox',
-    'dojo/store/JsonRest', 'stalker/TagSelect',
-    'stalker/Tag', 'dojo/date', 'dojo/date/stamp', 'dojo/date/locale',
-    'dijit/form/DateTextBox', 'dijit/form/TimeTextBox',
-    'dijit/form/NumberTextBox', 'stalker/submitForm',
-    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/ready'],
-    function(registry, Memory, Form, ValidationTextBox, TextBox,
-             FilteringSelect, ComboBox, Button, CheckBox, MultiComboBox,
-             JsonRest, TagSelect, Tag, date, stamp, locale,
-             DateTextBox, TimeTextBox, NumberTextBox, submitForm, fieldUpdater,
-             dialogCaller, ready){
+  require([
+    'dijit/registry',
+    'dojo/store/Memory',
+    'dijit/form/Form',
+    'dijit/form/ValidationTextBox',
+    'dijit/form/TextBox',
+    'dijit/form/FilteringSelect',
+    'dijit/form/ComboBox',
+    'dijit/form/Button',
+    'dijit/form/CheckBox',
+    'dojox/form/MultiComboBox',
+    'dojo/store/JsonRest',
+    'stalker/TagSelect',
+    'stalker/Tag',
+    'dojo/date',
+    'dojo/date/stamp',
+    'dojo/date/locale',
+    'dijit/form/DateTextBox',
+    'dijit/form/TimeTextBox',
+    'dijit/form/NumberTextBox',
+    'stalker/submitForm',
+    'stalker/fieldUpdater',
+    'stalker/dialogCaller',
+    'dojo/ready'],
+    function(
+      registry,
+      Memory,
+      Form,
+      ValidationTextBox,
+      TextBox,
+      FilteringSelect,
+      ComboBox,
+      Button,
+      CheckBox,
+      MultiComboBox,
+      JsonRest,
+      TagSelect,
+      Tag,
+      date,
+      stamp,
+      locale,
+      DateTextBox,
+      TimeTextBox,
+      NumberTextBox,
+      submitForm,
+      fieldUpdater,
+      dialogCaller,
+      ready){
       
       ready(function(){
         // ********************************************************************
@@ -172,7 +206,8 @@
           label: 'Project',
           value: '{{ project.name }}',
           disabled: true,
-          required: true
+          required: true,
+{#          style: 'width: 100%'#}
         }, 'task_project');
         project_textBox.startup();
         
@@ -188,7 +223,8 @@
             name: 'parent_id',
             label: 'Parent',
             value: '{{ parent.name }}',
-            disabled: true
+            disabled: true,
+{#            style: 'width: auto'#}
           }, 'task_parent');
           parent_widget.startup();
         {% else %}
@@ -196,7 +232,8 @@
           var parent_widget = new FilteringSelect({
             name: 'parent_id',
             label: 'Parent',
-            required: false
+            required: false,
+{#            style: 'width: 100%'#}
           }, 'task_parent');
         {% endif %}
         
@@ -209,7 +246,8 @@
           label: 'Name',
           value: '',
           placeHolder: 'Enter a name',
-          required: true
+          required: true,
+{#          style: 'width: 100%'#}
         }, 'task_name');
         name_textBox.startup();
         
@@ -221,7 +259,8 @@
         var description_textBox = new TextBox({
           name: 'description',
           label: 'Description',
-          placeHolder: 'Enter description'
+          placeHolder: 'Enter description',
+{#          style: 'width: 100%'#}
         }, 'task_description');
         description_textBox.startup();
         
@@ -234,7 +273,8 @@
         var depends_tagSelect = new TagSelect({
           id: 'depends_tagSelect',
           name: 'depend_ids',
-          required: false
+          required: false,
+{#          style: 'width: 100%'#}
         }, "task_depends");
         depends_tagSelect.startup();
         
@@ -257,6 +297,8 @@
         
         // ********************************************************************
         // Start Date
+        
+        // Date
         var start_dateTextBox = new DateTextBox({
           name: 'start',
           label: 'Start Date',
@@ -275,7 +317,7 @@
         }, 'task_start_date');
         start_dateTextBox.startup();
         
-        // ********************************************************************
+        // Time
         var start_time_timeTextBox = new TimeTextBox({
           name: 'start_time',
           value: 'T09:00:00',
@@ -292,6 +334,8 @@
         
         // ********************************************************************
         // End Date
+        
+        // Date
         var end_dateTextBox = new DateTextBox({
           name: 'end',
           label: 'End Date',
@@ -310,7 +354,7 @@
         }, 'task_end_date');
         end_dateTextBox.startup();
         
-        // ********************************************************************
+        // Time
         var end_time_timeTextBox = new TimeTextBox({
           name: 'end_time',
           value: 'T18:00:00',
@@ -338,7 +382,8 @@
                 this.get('value')
               )
             }
-          }
+          },
+{#          style: 'width: 100%'#}
         }, 'task_duration');
         duration_numberTextBox.startup();
         
@@ -397,7 +442,8 @@
         var resources_tagSelect = new TagSelect({
           id: 'resources_tagSelect',
           name: 'resource_ids',
-          required: true
+          required: true,
+{#          style: 'width: 100%'#}
         }, 'task_resources');
         resources_tagSelect.startup();
         
@@ -431,7 +477,8 @@
           required: true,
           onChange: function(){
             status_updater({animate: true});
-          }
+          },
+{#          style: 'width: 100%'#}
         }, 'task_status_list');
         status_list_filtering_select.startup();
         
@@ -481,7 +528,8 @@
         var status_filtering_select = new FilteringSelect({
           name: 'status_id',
           required: true,
-          store: status_memory
+          store: status_memory,
+{#          style: 'width: 100%'#}
         }, 'task_status');
         status_filtering_select.startup();
         

@@ -320,7 +320,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'create_booking_dialog',
                 title: 'New Booking',
-                href: '/create/booking/' + task_id,
+                href: 'dialog/create/booking/' + task_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -331,7 +331,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'update_booking_dialog',
                 title: 'Update Booking',
-                href: '/update/booking/' + booking_id,
+                href: 'dialog/update/booking/' + booking_id,
                 resize: true,
                 style: style,
                 executeScripts: true
