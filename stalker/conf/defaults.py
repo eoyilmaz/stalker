@@ -138,10 +138,18 @@ TICKET_WORKFLOW = {
 TJP_WORKING_HOURS_TEMPLATE = """{% macro wh(wh, day)
 -%}{%
     if wh[day]|length
-    %}workinghours {{day}} {{"%02d"|format(wh[day][0][0]//60)}}:{{"%02d"|format(wh[day][0][0]%60)}} - {{"%02d"|format(wh[day][0][1]//60)}}:{{"%02d"|format(wh[day][0][1]%60)}}{%
+        %}workinghours {{day}} {%
+        for part in wh[day]
+            %}{%
+            if loop.index != 1
+                %}, {%
+            endif
+            %}{{"%02d"|format(part[0]//60)}}:{{"%02d"|format(part[0]%60)}} - {{"%02d"|format(part[1]//60)}}:{{"%02d"|format(part[1]%60)}}{%
+        endfor
+        %}{%
     else
-    %}workinghours {{day}} off{%
-     endif %}{%-
+        %}workinghours {{day}} off{%
+    endif %}{%-
 endmacro
 %}{{wh(workinghours, 'mon')}}
 {{wh(workinghours, 'tue')}}
