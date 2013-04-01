@@ -6,6 +6,7 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates, synonym
+from stalker.conf import defaults
 from stalker.models.auth import User
 from stalker.models.entity import Entity
 
@@ -82,6 +83,12 @@ class Department(Entity):
         self.members = members
         self.lead = lead
     
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Department, self).__eq__(other) and\
+               isinstance(other, Department) 
+    
     @validates("members")
     def _validate_members(self, key, member):
         """validates the given member attribute
@@ -109,9 +116,10 @@ class Department(Entity):
                                  lead.__class__.__name__))
         return lead
 
-    def __eq__(self, other):
-        """the equality operator
+    @property
+    def to_tjp(self):
+        """outputs a TaskJuggler compatible string
         """
-
-        return super(Department, self).__eq__(other) and\
-               isinstance(other, Department)
+        from jinja2 import Template
+        temp = Template(defaults.TJP_DEPARTMENT_TEMPLATE)
+        return temp.render({'department': self})

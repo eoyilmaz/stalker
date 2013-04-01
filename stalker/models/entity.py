@@ -456,6 +456,12 @@ class SimpleEntity(Base):
         return thumb
     
     @property
+    def tjp_id(self):
+        """returns TaskJuggler compatible id
+        """
+        return "%s_%s" % (self.__class__.__name__, self.id)
+    
+    @property
     def to_tjp(self):
         """renders a TaskJuggler compliant string used for TaskJuggler
         integration. Needs to be overridden in inherited classes.

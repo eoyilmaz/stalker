@@ -1240,8 +1240,6 @@ class UserTest(unittest.TestCase):
     def test_equality_operator(self):
         """testing equality of two users
         """
-        #same_user = User(**self.kwargs)
-        
         self.kwargs.update({
             "name": "Generic User",
             "description": "this is a different user",
@@ -1252,14 +1250,11 @@ class UserTest(unittest.TestCase):
         
         new_user = User(**self.kwargs)
         
-        #self.assertTrue(self.test_user == same_user)
         self.assertFalse(self.test_user == new_user)
 
     def test_inequality_operator(self):
         """testing inequality of two users
         """
-        #same_user = User(**self.kwargs)
-
         self.kwargs.update({
             "name": "Generic User",
             "description": "this is a different user",
@@ -1270,56 +1265,8 @@ class UserTest(unittest.TestCase):
 
         new_user = User(**self.kwargs)
 
-        #self.assertFalse(self.test_user != same_user)
         self.assertTrue(self.test_user != new_user)
-
-#    def test_initials_argument_is_skipped(self):
-#        """testing if a TypeError will be raised when the initials argument is
-#        skipped
-#        """
-#        self.kwargs.pop('initials')
-#        self.assertRaises(TypeError, User, **self.kwargs)
-#    
-#    def test_initials_argument_is_an_empty_string(self):
-#        """testing if a ValueError will be raised when the initials argument is
-#        an empty string
-#        """
-#        self.kwargs['initials'] = ''
-#        self.assertRaises(ValueError, User, **self.kwargs)
-#    
-#    def test_initials_attribute_is_set_to_string(self):
-#        """testing if a ValueError will be raised when the initials attribute
-#        is set to an empty string
-#        """
-#        self.assertRaises(ValueError, setattr, self.test_user, 'initials', '')
-#    
-#    def test_initials_argument_is_not_a_string(self):
-#        """testing if a TypeError will be raised when the initials argument is
-#        not a string
-#        """
-#        self.kwargs['initials'] = 1
-#        self.assertRaises(TypeError, User, **self.kwargs)
-#    
-#    def test_initials_attribute_is_not_set_to_a_string(self):
-#        """testing if a TypeError will be raised when the initials attribute is
-#        set to a value other than a string
-#        """
-#        self.assertRaises(TypeError, setattr, self.test_user, 'initials', 1)
-#    
-#    def test_initials_argument_working_properly(self):
-#        """testing the initials argument is working properly
-#        """
-#        self.kwargs["initials"] = "eoy"
-#        new_user = User(**self.kwargs)
-#        self.assertEqual(new_user.initials, self.kwargs["initials"])
-#    
-#    def test_initials_attribute_is_working_properly(self):
-#        """testing if initials attribute working properly
-#        """
-#        test_value = "eoy"
-#        self.test_user.initials = test_value
-#        self.assertEqual(self.test_user.initials, test_value)
-
+    
     def test___repr__(self):
         """testing the representation
         """
@@ -1329,12 +1276,6 @@ class UserTest(unittest.TestCase):
                 self.test_user.name,
                 self.test_user.login)
         )
-    
-    #def test_plural_name(self):
-        #"""testing the plural name of User class
-        #"""
-
-        #self.assertTrue(User.plural_name, "Users")
     
     def test_tickets_attribute_is_an_empty_list_by_default(self):
         """testing if the User.tickets is an empty list by default
@@ -1452,3 +1393,14 @@ class UserTest(unittest.TestCase):
                 self.test_ticket8
             ]
         )
+    
+    def test_tjp_id_is_working_properly(self):
+        """testing if the tjp_id is working properly
+        """
+        self.assertEqual(self.test_user.tjp_id, 'User_%s' % self.test_user.id)
+    
+    def test_to_tjp_is_working_properly(self):
+        """testing if the to_tjp property is working properly
+        """
+        expected_tjp = 'resource eoyilmaz "Erkan Ozgur Yilmaz"'
+        self.assertEqual(self.test_user.to_tjp, expected_tjp)

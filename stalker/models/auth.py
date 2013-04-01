@@ -615,28 +615,6 @@ class User(Entity, ACLMixin):
 
         return email_in
 
-#    @validates("initials")
-#    def _validate_initials(self, key, initials):
-#        """validates the given initials
-#        """
-#        
-#        if initials is None:
-#            raise TypeError('%s.initials can not be None' %
-#                             self.__class__.__name__)
-#        
-#        if not isinstance(initials, str):
-#            raise TypeError('%s.initials should be a string not %s' %
-#                            (self.__class__.__name__,
-#                             initials.__class__.__name__))
-#        
-#        if initials == '':
-#            raise ValueError('%s.initials can not be an empty string' %
-#                             self.__class__.__name__)
-#        
-#        initials = initials.lower()
-#        
-#        return initials
-
     @validates("last_login")
     def _validate_last_login(self, key, last_login_in):
         """validates the given last_login argument
@@ -803,6 +781,14 @@ class User(Entity, ACLMixin):
             .join(Ticket.status)\
             .filter(Status.code!='CLOSED')\
             .all()
+    
+    @property
+    def to_tjp(self):
+        """outputs a TaskJuggler formatted string
+        """
+        from jinja2 import Template
+        temp = Template(defaults.TJP_USER_TEMPLATE)
+        return temp.render({'user': self})
  
 # USER_PERMISSIONGROUPS
 User_Groups = Table(
