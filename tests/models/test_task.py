@@ -135,6 +135,7 @@ class TaskTester(unittest.TestCase):
             'resources': [self.test_user1, self.test_user2],
             'effort': 40,
             'bid': 40,
+            'length': 20,
             'duration': datetime.timedelta(2),
             'depends': [self.test_dependent_task1,
                         self.test_dependent_task2],
@@ -846,7 +847,7 @@ class TaskTester(unittest.TestCase):
         new_task.resources.remove(new_user2)
         self.assertNotIn(new_task, new_user2.tasks)
     
-    #def testing_resources_attribute_will_be_an_empty_list_for_a_container_Task(self):
+#def testing_resources_attribute_will_be_an_empty_list_for_a_container_Task(self):
     #    """testing if the resources attribute will be an empty list for a
     #    container Task
     #    """
@@ -865,7 +866,7 @@ class TaskTester(unittest.TestCase):
     #    
     #    self.assertEqual(new_task1.children, [])
     
-    #def testing_resources_attribute_will_still_append_data_to_itself_for_a_container_Task(self):
+#def testing_resources_attribute_will_still_append_data_to_itself_for_a_container_Task(self):
     #    """testing if the resources attribute will not append any data to
     #    itself for a container Task
     #    """
@@ -886,127 +887,117 @@ class TaskTester(unittest.TestCase):
     #    
     #    self.assertEqual(new_task1.resources, [])
     
-    def test_effort_argument_is_skipped(self):
-        """testing if the effort attribute will be 0 when the effort argument
+    def test_effort_argument_skipped(self):
+        """testing if the effort attribute will be None if the effort argument
         is skipped
         """
         self.kwargs.pop("effort")
-        
         new_task = Task(**self.kwargs)
-
-        self.assertEqual(new_task.duration, defaults.TASK_DURATION)
-        self.assertEqual(new_task.effort, defaults.TASK_DURATION *
-                                          len(new_task.resources))
-
-    def test_effort_argument_skipped_but_duration_is_present(self):
-        """testing if the effort argument is skipped but the duration is
-        present the effort attribute is calculated from the
-        duration * len(resources) formula
-        """
-        self.kwargs.pop("effort")
-        new_task = Task(**self.kwargs)
-
-        self.assertEqual(new_task.duration, self.kwargs["duration"])
-        self.assertEqual(new_task.effort, new_task.duration *
-                                          len(new_task.resources))
+        self.assertIsNone(new_task.effort)
     
     def test_effort_argument_is_None(self):
-        """testing if the effort and duration is None then effort will be
-        calculated from the value of duration and count of resources
+        """testing if the effort attribute will be None if the effort argument
+        is None
         """
         self.kwargs["effort"] = None
-        self.kwargs["duration"] = None
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.duration, defaults.TASK_DURATION)
-        self.assertEqual(new_task.effort, new_task.duration *
-                                          len(new_task.resources))
+        self.assertIsNone(new_task.effort)
     
     def test_effort_attribute_is_set_to_None(self):
-        """testing if the effort attribute is set to None then the effort is
-        calculated from duration and count of resources
+        """testing if the effort attribute will be None if it is set to None
         """
         self.test_task.effort = None
-        self.assertEqual(self.test_task.effort,
-                         self.test_task.duration *
-                         len(self.test_task.resources))
+        self.assertIsNone(self.test_task.effort)
     
-    def test_effort_argument_is_not_an_instance_of_timedelta(self):
-        """testing if effort attribute is calculated from the duration
-        attribute when the effort argument is not an instance of timedelta
+    def test_effort_argument_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the effort is not an
+        integer
         """
-        self.kwargs["effort"] = "not a timedelta"
-        new_task = Task(**self.kwargs)
-        self.assertIsInstance(new_task.effort, datetime.timedelta)
-        self.assertEqual(new_task.effort, new_task.duration *
-                                          len(new_task.resources))
+        self.kwargs["effort"] = "not an integer"
+        self.assertRaises(TypeError, Task, **self.kwargs)
 
-    def test_effort_attribute_is_not_an_instance_of_timedelta(self):
-        """testing if effort attribute is calculated from the duration
-        attribute when it is set to something else then a timedelta instance.
+    def test_effort_attribute_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the effort attribute is
+        not set to an integer
         """
-        self.test_task.effort = "not a timedelta"
-        self.assertIsInstance(self.test_task.effort, datetime.timedelta)
-        self.assertEqual(self.test_task.effort,
-                         self.test_task.duration *
-                         len(self.test_task.resources))
-
+        self.assertRaises(TypeError, setattr, self.test_task, 'effort',
+                          'not an integer')
+    
     def test_effort_attribute_is_working_properly(self):
         """testing if the effort attribute is working properly
         """
-        test_value = datetime.timedelta(18)
+        test_value = 18
         self.test_task.effort = test_value
         self.assertEqual(self.test_task.effort, test_value)
-    
-    def test_effort_argument_preceeds_duration_argument(self):
-        """testing if the effort argument is preceeds duration argument 
-        """
-        self.kwargs["effort"] = datetime.timedelta(40)
-        self.kwargs["duration"] = datetime.timedelta(2)
-        
-        new_task = Task(**self.kwargs)
-        
-        self.assertEqual(new_task.effort, self.kwargs["effort"])
-        self.assertEqual(new_task.duration, self.kwargs["effort"] /
-                                            len(self.kwargs["resources"]))
     
     def test_effort_attribute_does_not_change_duration(self):
         """testing if the effort attribute doesn't change the duration
         attribute
         """
-        test_effort = datetime.timedelta(100)
-        test_duration = test_effort / len(self.test_task.resources)
+        test_effort = 100
+        test_duration = datetime.timedelta(10)
         initial_value = self.test_task.duration
         # be sure it is not already in the current value
         self.assertNotEqual(self.test_task.duration, test_duration)
-        
         self.test_task.effort = test_effort
-
         self.assertEqual(self.test_task.duration, initial_value)
 
     def test_duration_attribute_does_not_change_effort(self):
         """testing if the duration attribute doesn't change the effort
         attribute value
         """
-        test_duration = datetime.timedelta(100)
-        test_effort = test_duration * len(self.test_task.resources)
-        
+        test_duration = datetime.timedelta(10)
+        test_effort = 102
         initial_value = self.test_task.effort
         
         # be sure it is not already in the current value
         self.assertNotEqual(self.test_task.effort, test_effort)
         self.test_task.duration = test_duration
         self.assertEqual(self.test_task.effort, initial_value)
-
-    def test_duration_attribute_will_be_equal_to_effort_if_there_is_no_resources_argument(self):
-        """testing if the duration will be equal to the effort if there is no
-        resource assigned
+    
+    def test_length_argument_skipped(self):
+        """testing if the length attribute will be None if the effort argument
+        is skipped
         """
-        self.kwargs.pop("resources")
+        self.kwargs.pop("length")
         new_task = Task(**self.kwargs)
+        self.assertIsNone(new_task.length)
+    
+    def test_length_argument_is_None(self):
+        """testing if the length attribute will be None if the effort argument
+        is None
+        """
+        self.kwargs["length"] = None
+        new_task = Task(**self.kwargs)
+        self.assertIsNone(new_task.length)
+    
+    def test_length_attribute_is_set_to_None(self):
+        """testing if the length attribute will be None if it is set to None
+        """
+        self.test_task.length = None
+        self.assertIsNone(self.test_task.length)
+    
+    def test_length_argument_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the length is not an
+        integer
+        """
+        self.kwargs["length"] = "not an integer"
+        self.assertRaises(TypeError, Task, **self.kwargs)
 
-        self.assertEqual(new_task.effort, self.kwargs["effort"])
-        self.assertEqual(new_task.effort, new_task.duration)
-
+    def test_length_attribute_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the length attribute is
+        not set to an integer
+        """
+        self.assertRaises(TypeError, setattr, self.test_task, 'length',
+                          'not an integer')
+    
+    def test_length_attribute_is_working_properly(self):
+        """testing if the length attribute is working properly
+        """
+        test_value = 18
+        self.test_task.length = test_value
+        self.assertEqual(self.test_task.length, test_value)    
+    
     def test_depends_argument_is_skipped_depends_attribute_is_empty_list(self):
         """testing if the depends attribute is an empty list when the depends
         argument is skipped
@@ -1929,5 +1920,228 @@ class TaskTester(unittest.TestCase):
         DBSession.commit()
     
     def test_bid_argument_is_skipped(self):
-        """testing if the bid attribute will be 0 if the 
+        """testing if the bid attribute value will be equal to effort attribute
+        value if the bid argument is skipped
         """
+        self.kwargs['effort'] = 155
+        self.kwargs.pop('bid')
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.effort, self.kwargs['effort'])
+        self.assertEqual(new_task.bid, new_task.effort)
+    
+    def test_bid_argument_is_None(self):
+        """testing if the bid attribute value will be equal to effort attribute
+        value if the bid argument is None
+        """
+        self.kwargs['bid'] = None
+        self.kwargs['effort'] = 1342
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.effort, self.kwargs['effort'])
+        self.assertEqual(new_task.bid, new_task.effort)
+    
+    def test_bid_attribute_is_set_to_None(self):
+        """testing if the bid attribute can be set to None
+        """
+        self.test_task.bid = None
+        self.assertIsNone(self.test_task.bid)
+    
+    def test_bid_argument_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the bid argument is not
+        an integer
+        """
+        self.kwargs['bid'] = 'not an integer'
+        self.assertRaises(TypeError, Task, **self.kwargs)
+    
+    def test_bid_attribute_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the bid attribute is set
+        to a value which is not an integer
+        """
+        self.assertRaises(TypeError, setattr, self.test_task, 'bid',
+                          'not an integer')
+    
+    def test_bid_argument_is_working_properly(self):
+        """testing if the bid argument is working properly
+        """
+        self.kwargs['bid'] = 23423
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.bid, self.kwargs['bid'])
+    
+    def test_bid_attribute_is_working_properly(self):
+        """testing if the bid attribute is working properly
+        """
+        test_value = 23423
+        self.test_task.bid = test_value
+        self.assertEqual(self.test_task.bid, test_value)
+    
+    def test_tjp_id_is_a_read_only_attribute(self):
+        """testing if the tjp_id attribute is a read only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task, 'tjp_id',
+                          'some value')
+    
+    def test_tjp_abs_id_is_a_read_only_attribute(self):
+        """testing if the tjp_abs_id attribute is a read only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task,
+                          'tjp_abs_id', 'some_value')
+    
+    def test_tjp_id_attribute_is_working_properly_for_a_root_task(self):
+        """testing if the tjp_id is working properly for a root task
+        """
+        self.kwargs['parent'] = None
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.tjp_id, 'Task_%s' % new_task.id)
+    
+    def test_tjp_id_attribute_is_working_properly_for_a_leaf_task(self):
+        """testing if the tjp_id is working properly for a leaf task
+        """
+        self.kwargs['parent'] = self.test_task
+        self.kwargs['depends'] = None
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.tjp_id, 'Task_%s' % new_task.id)
+    
+    def test_tjp_abs_id_attribute_is_working_properly_for_a_root_task(self):
+        """testing if the tjp_abs_id is working properly for a root task
+        """
+        self.kwargs['parent'] = None
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.tjp_abs_id,
+                         'Project_%s.Task_%s' % (self.kwargs['project'].id,
+                                                 new_task.id))
+    
+    def test_tjp_abs_id_attribute_is_working_properly_for_a_leaf_task(self):
+        """testing if the tjp_abs_id is working properly for a leaf task
+        """
+        self.kwargs['parent'] = None
+        
+        t1 = Task(**self.kwargs)
+        t2 = Task(**self.kwargs)
+        t3 = Task(**self.kwargs)
+        
+        t2.parent = t1
+        t3.parent = t2
+        
+        t1.id = 100
+        t2.id = 200
+        t3.id = 300
+        
+        self.assertEqual(
+            t3.tjp_abs_id,
+            'Project_%s.Task_%s.Task_%s.Task_%s' % (
+                self.kwargs['project'].id,
+                t1.id, t2.id, t3.id
+            )
+        )
+    
+    def test_to_tjp_attribute_is_working_properly_for_a_root_task(self):
+        """testing if the to_tjp attribute is working properly for a root task
+        """
+        self.kwargs['parent'] = None
+        self.kwargs['effort'] = 10
+        self.kwargs['length'] = 102
+        self.kwargs['duration'] = 1000
+        self.kwargs['depends'] = []
+        self.kwargs['resources'] = [self.test_user1, self.test_user2]
+        self.test_user1.id = 5648
+        self.test_user2.id = 7999
+        
+        dep_t1 = Task(**self.kwargs)
+        dep_t2 = Task(**self.kwargs)
+        
+        dep_t1.id = 6484
+        dep_t2.id = 6485
+        
+        self.kwargs['project'].id = 14875
+        
+        self.kwargs['depends'] = [dep_t1, dep_t2]
+        self.kwargs['name'] = 'Modeling'
+        t1 = Task(**self.kwargs)
+        t1.id = 10221
+        
+        expected_tjp = """task Task_10221 "Modeling" {
+    effort 10h
+    allocate User_5648, User_7999
+    depends Project_14875.Task_6484, Project_14875.Task_6485
+}"""
+        self.assertEqual(t1.to_tjp, expected_tjp)
+        
+    
+    def test_to_tjp_attribute_is_working_properly_for_a_leaf_task(self):
+        """testing if the to_tjp attribute is working properly for a leaf task
+        """
+        self.kwargs['parent'] = self.test_task
+        
+        dep_task1 = Task(**self.kwargs)
+        dep_task1.id = 23423
+        
+        dep_task2 = Task(**self.kwargs)
+        dep_task2.id = 23424
+        
+        self.kwargs['name'] = 'Modeling'
+        self.kwargs['effort'] = 1003
+        self.kwargs['depends'] = [dep_task1, dep_task2]
+        
+        self.test_user1.name = 'Test User 1'
+        self.test_user1.login = 'testuser1'
+        self.test_user1.id = 1231
+        
+        self.test_user2.name = 'Test User 2'
+        self.test_user2.login = 'testuser2'
+        self.test_user2.id = 1232
+        
+        self.kwargs['resources'] = [self.test_user1, self.test_user2]
+        
+        new_task = Task(**self.kwargs)
+        new_task.id = 234234
+        expected_tjp = """task Task_234234 "Modeling" {
+    effort 1003h
+    allocate testuser1, testuser2
+    depends Task_23423, Task_23424
+}"""
+        self.assertEqual(new_task.to_tjp, expected_tjp)
+    
+    def test_to_tjp_attribute_is_working_properly_for_a_container_task(self):
+        """testing if the to_tjp attribute is working properly for a container
+        task
+        """
+        self.kwargs['parent'] = None
+        
+        t1 = Task(**self.kwargs)
+        t1.id = 5648
+        
+        self.kwargs['parent'] = self.t1
+        
+        dep_task1 = Task(**self.kwargs)
+        dep_task1.id = 23423
+        
+        dep_task2 = Task(**self.kwargs)
+        dep_task2.id = 23424
+        
+        self.kwargs['name'] = 'Modeling'
+        self.kwargs['effort'] = 1003
+        self.kwargs['depends'] = [dep_task1, dep_task2]
+        
+        self.test_user1.name = 'Test User 1'
+        self.test_user1.login = 'testuser1'
+        self.test_user1.id = 1231
+        
+        self.test_user2.name = 'Test User 2'
+        self.test_user2.login = 'testuser2'
+        self.test_user2.id = 1232
+        
+        self.kwargs['resources'] = [self.test_user1, self.test_user2]
+        
+        t2 = Task(**self.kwargs)
+        t2.id = 5679
+        
+        expected_tjp = """task Task_5648 {
+task Task_5679 "Modeling" {
+    effort 1003h
+    allocate testuser1, testuser2
+    depends Task_23423, Task_23424
+}
+}"""
+        self.assertEqual(t1.to_tjp, expected_tjp)
+
+    
+

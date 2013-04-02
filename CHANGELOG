@@ -11,6 +11,20 @@ Stalker Changes
   to be used in Gantt charts. Where it will lock the class and will not try
   to snap it to anywhere if it is scheduled.
 
+* Changed the ``resolution`` attribute name to ``timing_resolution`` to comply
+  with TaskJuggler.
+
+* ScheduleMixin:
+  * Updated ScheduleMixin class documentation.
+  * There are two new read-only attributes called ``computed_start`` and
+    ``computed_end``. These attributes will be used in storing of the values
+    calculated by TaskJuggler, and will be used in Gantt Charts if available.
+
+* Task:
+  * Arranged the TaskJuggler workflow.
+  * The task will use the effort > length > duration attributes in `to_tjp`
+    property.
+
 0.2.0.a8
 --------
 

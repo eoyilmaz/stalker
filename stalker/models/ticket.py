@@ -366,12 +366,12 @@ class Ticket(Entity, StatusMixin):
         self.owner = args[0]
     
     def set_resolution(self, *args):
-        """sets the resolution
+        """sets the timing_resolution
         """
         self.resolution = args[0]
     
     def del_resolution(self, *args):
-        """deletes the resolution
+        """deletes the timing_resolution
         """
         self.resolution = ''
         

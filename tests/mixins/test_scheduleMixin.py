@@ -47,7 +47,7 @@ class ScheduleMixinTester(unittest.TestCase):
             'start': self.start,
             'end': self.end,
             'duration': self.duration,
-            'resolution': datetime.timedelta(minutes=30)
+            'timing_resolution': datetime.timedelta(minutes=30)
         }
 
         self.mock_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
@@ -417,76 +417,76 @@ class ScheduleMixinTester(unittest.TestCase):
                          new_foo_entity.start + new_foo_entity.duration)
     
     def test_resolution_argument_skipped(self):
-        """testing if the resolution attribute will be set to the default value
-        from the defaults.TIME_RESOLUTION if resolution argument is skipped
+        """testing if the timing_resolution attribute will be set to the default value
+        from the defaults.TIMING_RESOLUTION if timing_resolution argument is skipped
         """
         try:
-            self.kwargs.pop('resolution')
+            self.kwargs.pop('timing_resolution')
         except KeyError:
             pass
         
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(new_foo_obj.resolution, defaults.TIME_RESOLUTION)
+        self.assertEqual(new_foo_obj.timing_resolution, defaults.TIMING_RESOLUTION)
     
     def test_resolution_argument_is_None(self):
-        """testing if the resolution attribute will be set to the default value
-        from the defaults.TIME_RESOLUTION if resolution argument is None
+        """testing if the timing_resolution attribute will be set to the default value
+        from the defaults.TIMING_RESOLUTION if timing_resolution argument is None
         """
-        self.kwargs['resolution'] = None
+        self.kwargs['timing_resolution'] = None
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(new_foo_obj.resolution, defaults.TIME_RESOLUTION)
+        self.assertEqual(new_foo_obj.timing_resolution, defaults.TIMING_RESOLUTION)
     
     def test_resolution_attribute_is_set_to_None(self):
-        """testing if the resolution attribute will be set to the default value
-        from the defaults.TIME_RESOLUTION if it is set to None
+        """testing if the timing_resolution attribute will be set to the default value
+        from the defaults.TIMING_RESOLUTION if it is set to None
         """
-        self.kwargs['resolution'] = datetime.timedelta(minutes=5)
+        self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         # check start conditions
-        self.assertEqual(new_foo_obj.resolution, self.kwargs['resolution'])
-        new_foo_obj.resolution = None
-        self.assertEqual(new_foo_obj.resolution, defaults.TIME_RESOLUTION)
+        self.assertEqual(new_foo_obj.timing_resolution, self.kwargs['timing_resolution'])
+        new_foo_obj.timing_resolution = None
+        self.assertEqual(new_foo_obj.timing_resolution, defaults.TIMING_RESOLUTION)
     
     def test_resolution_argument_is_not_a_timedelta_instance(self):
-        """testing if a TypeError will be raised when the resolution argument
+        """testing if a TypeError will be raised when the timing_resolution argument
         is not a datetime.timedelta instance
         """
-        self.kwargs['resolution'] = 'not a timedelta instance'
+        self.kwargs['timing_resolution'] = 'not a timedelta instance'
         self.assertRaises(TypeError, SchedMixFooMixedInClass, **self.kwargs)
     
     def test_resolution_attribute_is_not_a_timedelta_instance(self):
-        """testing if a TypeError will be raised when the resolution attribute
+        """testing if a TypeError will be raised when the timing_resolution attribute
         is not a datetime.timedelta instance
         """
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_foo_obj, 'resolution',
+        self.assertRaises(TypeError, setattr, new_foo_obj, 'timing_resolution',
                           'not a timedelta instance')
     
     def test_resolution_argument_is_working_properly(self):
-        """testing if the resolution argument value is passed to resolution
+        """testing if the timing_resolution argument value is passed to timing_resolution
         attribute correctly
         """
-        self.kwargs['resolution'] = datetime.timedelta(minutes=5)
+        self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(new_foo_obj.resolution, self.kwargs['resolution'])
+        self.assertEqual(new_foo_obj.timing_resolution, self.kwargs['timing_resolution'])
     
     def test_resolution_attribute_is_working_properly(self):
-        """testing if the resolution attribute is working properly
+        """testing if the timing_resolution attribute is working properly
         """
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         res = new_foo_obj
         new_res = datetime.timedelta(hours=1, minutes=30)
         self.assertNotEqual(res, new_res)
-        new_foo_obj.resolution = new_res
-        self.assertEqual(new_foo_obj.resolution, new_res)
+        new_foo_obj.timing_resolution = new_res
+        self.assertEqual(new_foo_obj.timing_resolution, new_res)
     
     def test_start_end_and_duration_values_are_rounded_to_the_defined_resolution_argument(self):
         """testing if the start and end dates are rounded to the given
-        resolution
+        timing_resolution
         """
         self.kwargs['start'] = datetime.datetime(2013,3,22,02,38,55,531)
         self.kwargs['end'] = datetime.datetime(2013,3,24,16,46,32,102)
-        self.kwargs['resolution'] = datetime.timedelta(minutes=5)
+        self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         # check the start
         expected_start = datetime.datetime(2013,3,22,02,40)
@@ -496,4 +496,33 @@ class ScheduleMixinTester(unittest.TestCase):
         self.assertEqual(new_foo_obj.end, expected_end)
         # check the duration
         self.assertEqual(new_foo_obj.duration, expected_end - expected_start)
+    
+    def test_computed_start_attribute_is_read_only(self):
+        """testing if the computed_start attribute is a read-only attribute
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertRaises(AttributeError, setattr, new_foo_obj,
+                          'computed_start', datetime.datetime.now())
+    
+    def test_computed_start_is_None_for_a_non_scheduled_class(self):
+        """testing if the computed_start attribute is None for a non scheduled
+        class
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertIsNone(new_foo_obj.computed_start, None)
+    
+    def test_computed_end_attribute_is_read_only(self):
+        """testing if the computed_end attribute is a read-only attribute
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertRaises(AttributeError, setattr, new_foo_obj, 'computed_end',
+                          datetime.datetime.now())
+    
+    def test_computed_end_is_None_for_a_non_scheduled_class(self):
+        """testing if the computed_end attribute is None for a non scheduled
+        class
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertIsNone(new_foo_obj.computed_end, None)
+    
     

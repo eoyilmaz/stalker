@@ -267,7 +267,7 @@ class DepartmentTester(unittest.TestCase):
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
         """
-        expected_tjp = """resource Department_None "Test Department" { 
+        expected_tjp = """resource Department_None "Test Department" {
     resource user1 "User1"
     resource user2 "User2"
     resource user3 "User3"

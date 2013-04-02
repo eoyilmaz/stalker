@@ -327,9 +327,9 @@ class ImageFormatTest(unittest.TestCase):
         self.assertEqual(an_image_format.pixel_aspect, default_value)
 
     def test_print_resolution_omit(self):
-        """testing the print resolution against being omited
+        """testing the print timing_resolution against being omited
         """
-        # the print resolution can be ommited
+        # the print timing_resolution can be ommited
         self.kwargs.pop("print_resolution")
         an_image_format = ImageFormat(**self.kwargs)
 
@@ -342,7 +342,7 @@ class ImageFormatTest(unittest.TestCase):
         """testing if a TypeError will be raised when the print_resolution
         argument is not an integer or float
         """
-        # the print resolution should be initialized with an integer or a float
+        # the print timing_resolution should be initialized with an integer or a float
         self.kwargs["print_resolution"] = "300.0"
 
         self.assertRaises(TypeError, ImageFormat, **self.kwargs)
@@ -359,7 +359,7 @@ class ImageFormatTest(unittest.TestCase):
         """
         self.kwargs["print_resolution"] = 0
 
-        # the print resolution can not be zero
+        # the print timing_resolution can not be zero
         self.assertRaises(ValueError, ImageFormat, **self.kwargs)
 
     def test_print_resolution_attribute_zero(self):
@@ -374,7 +374,7 @@ class ImageFormatTest(unittest.TestCase):
         """testing if a ValueError will be raised when the print_resolution
         argument is negative
         """
-        # the print resolution can not be negative
+        # the print timing_resolution can not be negative
         self.kwargs["print_resolution"] = -300
         self.assertRaises(ValueError, ImageFormat, **self.kwargs)
 
