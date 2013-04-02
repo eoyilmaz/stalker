@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
 from sqlalchemy.ext.declarative import declared_attr
@@ -21,6 +33,7 @@ from stalker.log import logging_level
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
 
 class Booking(Entity, ScheduleMixin):
     """Holds information about the time spend on a specific
@@ -70,8 +83,6 @@ class Booking(Entity, ScheduleMixin):
         booking is created for"""
     )
     
-    is_scheduled = Column(Boolean, default=False)
-    
     def __init__(
             self,
             task=None,
@@ -116,9 +127,13 @@ class Booking(Entity, ScheduleMixin):
                              resource.__class__.__name__))
         
         # check for overbooking
+        logger.debug('resource.bookings: %s' % resource.bookings)
         for booking in resource.bookings:
-            logger.debug('booking.start: %s' % booking.start)
-            logger.debug('self.start: %s' % self.start)
+            logger.debug('booking       : %s' % booking)
+            logger.debug('booking.start : %s' % booking.start)
+            logger.debug('booking.end   : %s' % booking.end)
+            logger.debug('self.start    : %s' % self.start)
+            logger.debug('self.end      : %s' % self.end)
             
             if booking.start == self.start or\
                booking.end == self.end or \
@@ -873,6 +888,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             i+=1
             current = current.parent
         return i
+    
+    @property
+    def is_scheduled(self):
+        """A predicate which returns True if this task has both a
+        computed_start and computed_end values
+        """
+        return self.computed_start and self.computed_end
     
     @property
     def total_effort_spent(self):

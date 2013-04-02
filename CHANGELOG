@@ -25,6 +25,12 @@ Stalker Changes
   * The task will use the effort > length > duration attributes in `to_tjp`
     property.
 
+* Changed the license of Stalker from BSD-2 to LGPL 2.1. Any version previous
+  to 0.2.0.a9 will be still BSD-2 and any version from and including 0.2.0.a9
+  will be distributed under LGPL 2.1 license.
+
+* Started designing the TaskJugglerScheduler.
+
 0.2.0.a8
 --------
 

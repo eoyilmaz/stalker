@@ -378,7 +378,7 @@ class DatabaseTester(unittest.TestCase):
         
         # and we still have correct amount of Permissions
         permissions = Permission.query.all()
-        self.assertEqual(len(permissions), 216)
+        self.assertEqual(len(permissions), 270)
         
         # clean the test
         shutil.rmtree(temp_db_path)
@@ -1346,13 +1346,17 @@ class DatabaseModelsTester(unittest.TestCase):
             status=0,
             project=new_project,
         )
-
+        
         task2 = Task(
             name="task2",
             status_list=task_status_list,
             status=0,
             project=new_project,
         )
+        
+        new_project._computed_start = datetime.datetime.now()
+        new_project._computed_end = datetime.datetime.now() \
+                                    + datetime.timedelta(10)
         
         DBSession.add_all([task1, task2])
         DBSession.commit()
@@ -1364,7 +1368,6 @@ class DatabaseModelsTester(unittest.TestCase):
         date_created = new_project.date_created
         date_updated = new_project.date_updated
         description = new_project.description
-        #display_width = new_project.display_width
         end = new_project.end
         duration = new_project.duration
         fps = new_project.fps
@@ -1387,6 +1390,10 @@ class DatabaseModelsTester(unittest.TestCase):
         updated_by = new_project.updated_by
         users = new_project.users
         working_hours = new_project.working_hours
+        computed_start = new_project.computed_start
+        computed_end = new_project.computed_end
+        daily_working_hours = new_project.daily_working_hours
+        timing_resolution = new_project.timing_resolution
         
         # delete the project
         del new_project
@@ -1400,7 +1407,11 @@ class DatabaseModelsTester(unittest.TestCase):
         #self.assertEqual(new_project, new_project_DB)
         self.assertEqual(assets, new_project_DB.assets)
         self.assertEqual(code, new_project_DB.code)
+        self.assertEqual(computed_start, new_project_DB.computed_start)
+        self.assertEqual(computed_end, new_project_DB.computed_end)
         self.assertEqual(created_by, new_project_DB.created_by)
+        self.assertEqual(daily_working_hours,
+                         new_project_DB.daily_working_hours)
         self.assertEqual(date_created, new_project_DB.date_created)
         self.assertEqual(date_updated, new_project_DB.date_updated)
         self.assertEqual(description, new_project_DB.description)
@@ -1423,8 +1434,9 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(structure, new_project_DB.structure)
         self.assertEqual(tags, new_project_DB.tags)
         self.assertEqual(tasks, new_project_DB.tasks)
+        self.assertEqual(timing_resolution, new_project_DB.timing_resolution)
         self.assertEqual(type, new_project_DB.type)
-        self.assertEqual(updated_by, updated_by)
+        self.assertEqual(updated_by, new_project_DB.updated_by)
         self.assertEqual(users, new_project_DB.users)
         self.assertEqual(working_hours, new_project_DB.working_hours)
     
@@ -2302,8 +2314,14 @@ class DatabaseModelsTester(unittest.TestCase):
             resources=[user1, user2, user3],
             parent=new_asset,
             status_list=task_status_list,
-            effort=datetime.timedelta(5)
+            effort=5,
+            length=15,
+            bid=52
         )
+        
+        test_task._computed_start = datetime.datetime.now()
+        test_task._computed_end = datetime.datetime.now() \
+                                 + datetime.timedelta(10)
         
         DBSession.add(test_task)
         DBSession.commit()
@@ -2326,6 +2344,9 @@ class DatabaseModelsTester(unittest.TestCase):
         type_ = test_task.type
         updated_by = test_task.updated_by
         versions = test_task.versions
+        computed_start = test_task.computed_start
+        computed_end = test_task.computed_end
+        timing_resolution = test_task.timing_resolution
         
         del test_task
         
@@ -2336,6 +2357,8 @@ class DatabaseModelsTester(unittest.TestCase):
         
         self.assertEqual(bookings, test_task_DB.bookings)
         self.assertEqual(created_by, test_task_DB.created_by)
+        self.assertEqual(computed_start, test_task_DB.computed_start)
+        self.assertEqual(computed_end, test_task_DB.computed_end)
         self.assertEqual(date_created, test_task_DB.date_created)
         self.assertEqual(date_updated, test_task_DB.date_updated)
         self.assertEqual(effort, test_task_DB.effort)
@@ -2349,6 +2372,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(status, test_task_DB.status)
         self.assertEqual(status_list, test_task_DB.status_list)
         self.assertEqual(tags, test_task_DB.tags)
+        self.assertEqual(timing_resolution, test_task_DB.timing_resolution)
         self.assertEqual(type_, test_task_DB.type)
         self.assertEqual(updated_by, test_task_DB.updated_by)
         self.assertEqual(versions, test_task_DB.versions)

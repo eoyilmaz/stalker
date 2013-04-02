@@ -18,7 +18,7 @@ class PermissionTester(unittest.TestCase):
         """
         self.kwargs = {
             'access': 'Allow',
-            'action': 'Add',
+            'action': 'Create',
             'class_name': 'Project'
         }
         
@@ -80,7 +80,7 @@ class PermissionTester(unittest.TestCase):
         """testing if a ValueError will be raised when the action argument is
         not in the list of defaults.DEFAULT_ACTIONS
         """
-        self.kwargs['action'] = 'Create'
+        self.kwargs['action'] = 'Add'
         self.assertRaises(ValueError, Permission, **self.kwargs)
     
     def test_action_argument_is_setting_the_argument_attribute(self):

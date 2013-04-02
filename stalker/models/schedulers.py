@@ -16,5 +16,26 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import logging
-logging_level = logging.DEBUG
+
+class SchedulerBase(object):
+    """This is the base class for schedulers.
+    
+    All the schedulers should be derived from this class.
+    """
+    pass
+
+
+class TaskJugglerScheduler(SchedulerBase):
+    """This is the main scheduler for Stalker right now.
+    
+    Integrates Stalker and TaskJuggler together by using TaskJugglerScheduler
+    to solve the scheduling problem.
+    
+    TaskJugglerScheduler needs a list of
+    :class:`~stalker.models.project.Project` instances to work with. TJS will
+    combine them in to one .tjp file and then solve them and restore the task
+    computed_start and computed_end dates. Combining all the Projects in one
+    tjp file has a very nice side effect, projects using the same resources
+    will respect their allocations to the resource.
+    """
+    pass

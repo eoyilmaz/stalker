@@ -337,7 +337,7 @@ class BookingTester(unittest.TestCase):
         # booking2        
         self.kwargs["name"] = "booking2"
         self.kwargs["duration"] = datetime.timedelta(10)
-
+        
         import warnings
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
@@ -358,16 +358,16 @@ class BookingTester(unittest.TestCase):
         self.kwargs["name"] = "booking1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
-                                    datetime.timedelta(2),
+                                    datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
-
+        
         booking1 = Booking(**self.kwargs)
-
+        
         # booking2
         self.kwargs["name"] = "booking2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(10)
-
+        
         import warnings
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')

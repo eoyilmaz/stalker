@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Date,
@@ -532,18 +544,14 @@ class ScheduleMixin(object):
                 )
         )
     
-    @property
-    def duration(self):
-        """Duration of the entity.
-        
-        It is a datetime.timedelta instance. Showing the difference of the
-        :attr:`.start` and the :attr:`.end`. If edited it changes the
-        :attr:`.end` attribute value.
-        """
+    @declared_attr
+    def _duration(cls):
+        return Column('duration', Interval)
+    
+    def _duration_getter(self):
         return self._duration
     
-    @duration.setter
-    def duration(self, duration_in):
+    def _duration_setter(self, duration_in):
         if duration_in is not None:
             if isinstance(duration_in, datetime.timedelta):
                 # set the end to None
@@ -554,6 +562,22 @@ class ScheduleMixin(object):
         else:
             self._validate_dates(self.start, self.end, duration_in)
     
+    @declared_attr
+    def duration(self):
+        return synonym(
+            '_duration',
+            descriptor=property(
+                self._duration_getter,
+                self._duration_setter,
+                doc="""Duration of the entity.
+                
+It is a datetime.timedelta instance. Showing the difference of the
+:attr:`.start` and the :attr:`.end`. If edited it changes the :attr:`.end`
+attribute value."""
+            )
+            
+        )    
+   
     def _validate_dates(self, start, end, duration):
         """updates the date values
         """

@@ -2070,6 +2070,9 @@ class TaskTester(unittest.TestCase):
         """testing if the to_tjp attribute is working properly for a leaf task
         """
         self.kwargs['parent'] = self.test_task
+        self.kwargs['depends'] = []
+        
+        self.test_task.id = 987879
         
         dep_task1 = Task(**self.kwargs)
         dep_task1.id = 23423
@@ -2091,12 +2094,14 @@ class TaskTester(unittest.TestCase):
         
         self.kwargs['resources'] = [self.test_user1, self.test_user2]
         
+        self.kwargs['project'].id = 8898
+        
         new_task = Task(**self.kwargs)
         new_task.id = 234234
         expected_tjp = """task Task_234234 "Modeling" {
     effort 1003h
-    allocate testuser1, testuser2
-    depends Task_23423, Task_23424
+    allocate User_1231, User_1232
+    depends Project_8898.Task_987879.Task_23423, Project_8898.Task_987879.Task_23424
 }"""
         self.assertEqual(new_task.to_tjp, expected_tjp)
     
@@ -2104,18 +2109,22 @@ class TaskTester(unittest.TestCase):
         """testing if the to_tjp attribute is working properly for a container
         task
         """
+        self.kwargs['project'].id = 87987
         self.kwargs['parent'] = None
+        self.kwargs['depends'] = []
         
         t1 = Task(**self.kwargs)
         t1.id = 5648
         
-        self.kwargs['parent'] = self.t1
+        self.kwargs['parent'] = t1
         
         dep_task1 = Task(**self.kwargs)
         dep_task1.id = 23423
+        dep_task1.depends = []
         
         dep_task2 = Task(**self.kwargs)
         dep_task2.id = 23424
+        dep_task1.depends = []
         
         self.kwargs['name'] = 'Modeling'
         self.kwargs['effort'] = 1003
@@ -2134,14 +2143,47 @@ class TaskTester(unittest.TestCase):
         t2 = Task(**self.kwargs)
         t2.id = 5679
         
-        expected_tjp = """task Task_5648 {
+        expected_tjp = '''task Task_5648 "Modeling" {
+task Task_23423 "Modeling" {
+    effort 40h
+    allocate User_1231, User_1232
+}
+task Task_23424 "Modeling" {
+    effort 40h
+    allocate User_1231, User_1232
+}
 task Task_5679 "Modeling" {
     effort 1003h
-    allocate testuser1, testuser2
-    depends Task_23423, Task_23424
+    allocate User_1231, User_1232
+    depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
 }
-}"""
+}'''
         self.assertEqual(t1.to_tjp, expected_tjp)
-
     
+    def test_is_scheduled_is_a_read_only_attribute(self):
+        """testing if the is_scheduled is a read-only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task,
+                          'is_scheduled', True)
+    
+    def test_is_scheduled_is_true_if_the_computed_start_and_computed_end_is_not_None(self):
+        """testing if the is_scheduled attribute value is True if the
+        computed_start and computed_end has both valid values
+        """
+        self.test_task._computed_start = datetime.datetime.now()
+        self.test_task._computed_end = datetime.datetime.now() \
+                                       + datetime.timedelta(10)
+        self.assertTrue(self.test_task.is_scheduled)
+    
+    def test_is_scheduled_is_false_if_one_of_computed_start_and_computed_end_is_None(self):
+        """testing if the is_scheduled attribute value is False if one of the
+        computed_start and computed_end values is None
+        """
+        self.test_task._computed_start = None
+        self.test_task._computed_end = datetime.datetime.now()
+        self.assertFalse(self.test_task.is_scheduled)
+        
+        self.test_task._computed_start = datetime.datetime.now()
+        self.test_task._computed_end = None
+        self.assertFalse(self.test_task.is_scheduled)
 

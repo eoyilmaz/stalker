@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 import copy
 import warnings
 
@@ -115,6 +127,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
       instance showing the working hours settings for that project. This data
       is stored as a PickleType in the database.
     
+    :param int daily_working_hours: An integer specifying the daily working
+    hours for this project. It is another critical value attribute which
+    TaskJuggler uses mainly converting working day values to working hours
+    (1d = 10h kind of thing).
+    
     :param users: A list of :class:`~stalker.models.auth.User`\ s holding the
       users in this project. This will create a reduced or grouped list of
       studio workers and will make it easier to define the resources for a Task
@@ -207,6 +224,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     
     working_hours = Column(PickleType)
     
+    daily_working_hours = Column(Integer)
+    
     tickets = relationship(
         'Ticket',
         primaryjoin='Tickets.c.project_id==Projects.c.id',
@@ -224,6 +243,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
                  fps=25.0,
                  is_stereoscopic=False,
                  working_hours=None,
+                 daily_working_hours=None,
                  users=None,
                  **kwargs):
         # a projects project should be self
@@ -255,6 +275,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         self.code = code
         
         self.working_hours = working_hours
+        self.daily_working_hours = daily_working_hours
+    
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Project, self).__eq__(other) and\
+               isinstance(other, Project)
     
     @validates("fps")
     def _validate_fps(self, key, fps):
@@ -332,8 +359,31 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         if wh is None:
             # use the default one
             wh = WorkingHours()
-        
         return wh
+    
+    @validates('daily_working_hours')
+    def _validate_daily_working_hours(self, key, dwh):
+        """validates the given daily working hours value
+        """
+        if dwh is None:
+            dwh = defaults.DAILY_WORKING_HOURS
+        else:
+            if not isinstance(dwh, int):
+                raise TypeError('%s.daily_working_hours should be an integer, '
+                                'not %s' % 
+                                (self.__class__.__name__,
+                                 dwh.__class__.__name__))
+        return dwh
+    
+    @property
+    def root_tasks(self):
+        """returns a list of Tasks which have no parent
+        """
+        from stalker.models.task import Task
+        return Task.query\
+            .filter(Task._project==self)\
+            .filter(Task.parent==None)\
+            .all()
     
     @property
     def assets(self):
@@ -379,12 +429,16 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
             if isinstance(task, Shot):
                 shots.append(task)
         return shots
-     
-    def __eq__(self, other):
-        """the equality operator
+    
+    @property
+    def to_tjp(self):
+        """returns a TaskJuggler compatible string representing this project
         """
-        return super(Project, self).__eq__(other) and\
-               isinstance(other, Project)
+        from jinja2 import Template
+        import datetime
+        temp = Template(defaults.TJP_PROJECT_TEMPLATE)
+        
+        return temp.render({'project': self, 'datetime': datetime})
 
 
 class WorkingHours(object):

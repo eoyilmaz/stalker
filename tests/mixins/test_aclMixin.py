@@ -47,7 +47,7 @@ class ACLMixinTester(unittest.TestCase):
         # create permissions
         self.test_perm1 = Permission(
             access='Allow',
-            action='Add',
+            action='Create',
             class_name='Something'
         )
         self.test_instance = TestClassForACL()
@@ -81,5 +81,5 @@ class ACLMixinTester(unittest.TestCase):
         """
         self.assertEqual(
             self.test_instance.__acl__,
-            [('Allow', 'TestClassForACL:Test', 'Add_Something')]
+            [('Allow', 'TestClassForACL:Test', 'Create_Something')]
         )

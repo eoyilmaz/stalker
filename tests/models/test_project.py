@@ -10,6 +10,7 @@ import unittest
 from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
                      Sequence, Shot, Status, StatusList, Structure, Task, Type,
                      User, db)
+from stalker.conf import defaults
 from stalker.db.session import DBSession, ZopeTransactionExtension
 
 import logging
@@ -426,7 +427,7 @@ class ProjectTester(unittest.TestCase):
             resources=[self.test_user3],
             status_list=self.task_status_list,
         )
-
+        
         # for sequence4
         self.test_task4 = Task(
             name="Test Task 4",
@@ -513,7 +514,7 @@ class ProjectTester(unittest.TestCase):
             parent=self.test_shot2,
             resources=[self.test_user9, self.test_user10],
             status_list=self.task_status_list,
-            )
+        )
 
         # for shot3 of sequence7
         self.test_task16 = Task(
@@ -1111,7 +1112,38 @@ class ProjectTester(unittest.TestCase):
         self.assertIn(self.test_shot2, self.test_project.tasks)
         self.assertIn(self.test_shot3, self.test_project.tasks)
         self.assertIn(self.test_shot4, self.test_project.tasks)
+    
+
+    def test_root_tasks_attribute_returns_the_Tasks_instances_with_no_parent_in_this_project(self):
+        """testing if the root_tasks attribute returns a list of Task instances
+        related to this Project instance and has no parent.
+        """
+        # test if we are going to get all the Tasks for project.tasks
+        root_tasks = self.test_project.root_tasks
+        self.assertEqual(len(root_tasks), 19)
+        self.assertIn(self.test_task1, root_tasks)
+        self.assertIn(self.test_task2, root_tasks)
+        self.assertIn(self.test_task3, root_tasks)
         
+        # assets, sequences and shots are also Tasks
+        self.assertIn(self.test_seq1, root_tasks)
+        self.assertIn(self.test_seq2, root_tasks)
+        self.assertIn(self.test_seq3, root_tasks)
+        self.assertIn(self.test_seq4, root_tasks)
+        self.assertIn(self.test_seq5, root_tasks)
+        self.assertIn(self.test_seq6, root_tasks)
+        self.assertIn(self.test_seq7, root_tasks)
+        
+        self.assertIn(self.test_asset1, root_tasks)
+        self.assertIn(self.test_asset2, root_tasks)
+        self.assertIn(self.test_asset3, root_tasks)
+        self.assertIn(self.test_asset4, root_tasks)
+        self.assertIn(self.test_asset5, root_tasks)
+        
+        self.assertIn(self.test_shot1, root_tasks)
+        self.assertIn(self.test_shot2, root_tasks)
+        self.assertIn(self.test_shot3, root_tasks)
+        self.assertIn(self.test_shot4, root_tasks)
     
     def test_users_argument_is_skipped(self):
         """testing if the users attribute will be an empty list when the users
@@ -1202,3 +1234,93 @@ class ProjectTester(unittest.TestCase):
         self.test_project.working_horus = None
         self.assertEqual(self.test_project.working_hours, WorkingHours())
     
+    def test_daily_working_hours_argument_is_skipped(self):
+        """testing if the daily_working_hours attribute will be equal to the
+        default settings when the daily_working_hours argument is skipped
+        """
+        try:
+            self.kwargs.pop('daily_working_hours')
+        except KeyError:
+            pass
+        new_project = Project(**self.kwargs)
+        self.assertEqual(new_project.daily_working_hours,
+                         defaults.DAILY_WORKING_HOURS)
+    
+    def test_daily_working_hours_argument_is_None(self):
+        """testing if the daily_working_hours attribute will be equal to the
+        default settings value when the daily_working_hours argument is None
+        """
+        self.kwargs['daily_working_hours'] = None
+        new_project = Project(**self.kwargs)
+        self.assertEqual(new_project.daily_working_hours,
+                         defaults.DAILY_WORKING_HOURS)
+    
+    def test_daily_working_hours_attribute_is_None(self):
+        """testing if the daily_working_hours attribute will be equal to the
+        default settings value when it is set to None
+        """
+        self.test_project.daily_working_hours = None
+        self.assertEqual(self.test_project.daily_working_hours,
+                         defaults.DAILY_WORKING_HOURS)
+    
+    def test_daily_working_hours_argument_is_not_integer(self):
+        """testing if a TypeError will be raised when the daily_working_hours
+        argument is not an integer
+        """
+        self.kwargs['daily_working_hours'] = 'not an integer'
+        self.assertRaises(TypeError, Project, **self.kwargs)
+    
+    def test_daily_working_hours_attribute_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the daily_working hours
+        attribute is set to a value other than an integer
+        """
+        self.assertRaises(TypeError, setattr, self.test_project,
+                          'daily_working_hours', 'not an intger')
+    
+    def test_daily_working_hours_argument_is_working_fine(self):
+        """testing if the daily working hours argument value is correctly
+        passed to daily_working_hours attribute
+        """
+        self.kwargs['daily_working_hours'] = 12
+        new_project = Project(**self.kwargs)
+        self.assertEqual(new_project.daily_working_hours, 12)
+    
+    def test_daily_working_hours_attribute_is_working_properly(self):
+        """testing if the daily_working_hours attribute is working properly
+        """
+        self.test_project.daily_working_hours = 23
+        self.assertEqual(self.test_project.daily_working_hours, 23)
+    
+    def test_tjp_id_is_working_properly(self):
+        """testing if the tjp_id attribute is working properly
+        """
+        self.test_project.id = 654654
+        self.assertEqual(self.test_project.tjp_id, 'Project_654654')
+    
+    def test_to_tjp_is_working_properly(self):
+        """testing if the to_tjp attribute is working properly
+        """
+        from jinja2 import Template
+        expected_tjp_temp = Template("""project Project_41 "Test Project" {{start}} {{end}} {
+    60min
+    now {{now}}
+    dailyworkinghours {{dwh}}
+    weekstartsmonday
+    workinghours mon 09:30 - 18:30
+    workinghours tue 09:30 - 18:30
+    workinghours wed 09:30 - 18:30
+    workinghours thu 09:30 - 18:30
+    workinghours fri 09:30 - 18:30
+    workinghours sat off
+    workinghours sun off
+    timeformat "%Y-%m-%d"
+    scenario plan "Plan"
+    trackingscenario plan
+}""")
+        expected_tjp = expected_tjp_temp.render({
+            'start' : self.test_project.start.date(),
+            'end'   : self.test_project.end.date(),
+            'now'   : datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
+            'dwh'   : self.test_project.daily_working_hours
+        })
+        self.assertEqual(self.test_project.to_tjp, expected_tjp)

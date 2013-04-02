@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
 
@@ -137,15 +149,12 @@ TICKET_WORKFLOW = {
     }
 }
 
-TJP_WORKING_HOURS_TEMPLATE = """{% macro wh(wh, day)
--%}
-{%- if wh[day]|length -%}
-    workinghours {{day}} {% for part in wh[day] %}
+TJP_WORKING_HOURS_TEMPLATE = """{% macro wh(wh, day) -%}
+{%- if wh[day]|length %}    workinghours {{day}} {% for part in wh[day] -%}
         {%- if loop.index != 1%}, {% endif -%}
         {{"%02d"|format(part[0]//60)}}:{{"%02d"|format(part[0]%60)}} - {{"%02d"|format(part[1]//60)}}:{{"%02d"|format(part[1]%60)}}
-        {%- endfor %}
-{%- else -%}
-    workinghours {{day}} off
+        {%- endfor -%}
+{%- else %}    workinghours {{day}} off
 {%- endif -%}
 {%- endmacro -%}
 {{wh(workinghours, 'mon')}}
@@ -156,12 +165,12 @@ TJP_WORKING_HOURS_TEMPLATE = """{% macro wh(wh, day)
 {{wh(workinghours, 'sat')}}
 {{wh(workinghours, 'sun')}}"""
 
-TJP_PROJECT_TEMPLATE = """project {{ project.code }} "{{ project.name }}" {{ project.start }} {{ project.end }} {
-    {{ project.timingresolution }}
-    now {{ now }}
+TJP_PROJECT_TEMPLATE = """project {{ project.tjp_id }} "{{ project.name }}" {{ project.start.date() }} {{ project.end.date() }} {
+    {{ '%i'|format(project.timing_resolution.total_seconds()//60|int) }}min
+    now {{ datetime.datetime.now().strftime('%Y-%m-%d-%H:%M') }}
     dailyworkinghours {{ project.daily_working_hours }}
     weekstartsmonday
-    {{ project.working_hours.to_tjp }}
+{{ project.working_hours.to_tjp }}
     timeformat "%Y-%m-%d"
     scenario plan "Plan"
     trackingscenario plan
@@ -170,18 +179,20 @@ TJP_PROJECT_TEMPLATE = """project {{ project.code }} "{{ project.name }}" {{ pro
 
 TJP_TASK_TEMPLATE = """task {{task.tjp_id}} "{{task.name}}" {
 {%- if task.is_container -%}
-    {%- for child_task in task.children -%}
-        {{ child_task.to_tjp }}
-    {%- endfor -%}
+    {%- for child_task in task.children %}
+{{ child_task.to_tjp }}
+    {%- endfor %}
 {%- else %}
     effort {{task.effort}}h
     allocate {% for resource in task.resources -%}
         {%-if loop.index != 1 %}, {% endif %}{{resource.tjp_id}}
     {%- endfor %}
+    {%- if task.depends %}
     depends {% for depends in task.depends %}
         {%- if loop.index != 1 %}, {% endif %}{{depends.tjp_abs_id}}
-    {%- endfor %}
-{% endif -%}
+    {%- endfor -%}
+    {%- endif -%}
+{% endif %}
 }
 """
 
@@ -212,7 +223,7 @@ resource resources "Resources" {
 
 {# tasks #}
 task {{project.code}} "{{project.name}}"{
-    {% for task in project.tasks %}
+    {% for task in project.root_tasks %}
     {{task.tjp}}
     {% endfor %}
 }

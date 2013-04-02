@@ -231,13 +231,13 @@ class WorkingHoursTester(unittest.TestCase):
         wh['sat'] = []
         wh['sun'] = []
         
-        expected_tjp = """workinghours mon 09:30 - 18:30
-workinghours tue 09:30 - 18:30
-workinghours wed 09:30 - 18:30
-workinghours thu 09:30 - 18:30
-workinghours fri 09:30 - 18:30
-workinghours sat off
-workinghours sun off"""
+        expected_tjp = """    workinghours mon 09:30 - 18:30
+    workinghours tue 09:30 - 18:30
+    workinghours wed 09:30 - 18:30
+    workinghours thu 09:30 - 18:30
+    workinghours fri 09:30 - 18:30
+    workinghours sat off
+    workinghours sun off"""
         
         self.assertEqual(wh.to_tjp, expected_tjp)
     
@@ -253,13 +253,13 @@ workinghours sun off"""
         wh['sat'] = [[570, 720]]
         wh['sun'] = []
         
-        expected_tjp = """workinghours mon 09:30 - 12:00, 13:00 - 18:30
-workinghours tue 09:30 - 12:00, 13:00 - 18:30
-workinghours wed 09:30 - 12:00, 13:00 - 18:30
-workinghours thu 09:30 - 12:00, 13:00 - 18:30
-workinghours fri 09:30 - 12:00, 13:00 - 18:30
-workinghours sat 09:30 - 12:00
-workinghours sun off"""
+        expected_tjp = """    workinghours mon 09:30 - 12:00, 13:00 - 18:30
+    workinghours tue 09:30 - 12:00, 13:00 - 18:30
+    workinghours wed 09:30 - 12:00, 13:00 - 18:30
+    workinghours thu 09:30 - 12:00, 13:00 - 18:30
+    workinghours fri 09:30 - 12:00, 13:00 - 18:30
+    workinghours sat 09:30 - 12:00
+    workinghours sun off"""
         
         self.assertEqual(wh.to_tjp, expected_tjp)
  
