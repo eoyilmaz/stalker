@@ -1,11 +1,26 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates, synonym
+from stalker.conf import defaults
 from stalker.models.auth import User
 from stalker.models.entity import Entity
 
@@ -82,6 +97,12 @@ class Department(Entity):
         self.members = members
         self.lead = lead
     
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Department, self).__eq__(other) and\
+               isinstance(other, Department) 
+    
     @validates("members")
     def _validate_members(self, key, member):
         """validates the given member attribute
@@ -109,9 +130,10 @@ class Department(Entity):
                                  lead.__class__.__name__))
         return lead
 
-    def __eq__(self, other):
-        """the equality operator
+    @property
+    def to_tjp(self):
+        """outputs a TaskJuggler compatible string
         """
-
-        return super(Department, self).__eq__(other) and\
-               isinstance(other, Department)
+        from jinja2 import Template
+        temp = Template(defaults.TJP_DEPARTMENT_TEMPLATE)
+        return temp.render({'department': self})

@@ -683,7 +683,7 @@ class TicketTester(unittest.TestCase):
         self.assertEqual(self.test_ticket.resolution, 'fixed')
     
     def test_reopen_will_clear_resolution(self):
-        """testing if invoking the reopen method will clear the resolution
+        """testing if invoking the reopen method will clear the timing_resolution
         """
         self.assertEqual(self.test_ticket.status, self.status_NEW)
         self.test_ticket.resolve(resolution='fixed')

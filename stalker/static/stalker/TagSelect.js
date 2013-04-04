@@ -1,3 +1,23 @@
+// Stalker a Production Asset Management System
+// Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+//
+// This file is part of Stalker.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation;
+// version 2.1 of the License.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+//
+//
 // stalker.TagSelect
 // 
 // A customized widget for Tag creation
@@ -72,6 +92,10 @@ define([
                 var tag_value;
                 var tag_label;
                 var result;
+                
+                // remove all previous tags
+                this.reset();
+                
                 for (var i=0; i < value.length; i++){
                     if (this.store){
                         // get the labels of the selected ids
@@ -130,10 +154,13 @@ define([
             
             reset: function stalker_tagSelect_reset(){
                 this.inherited(arguments);
-                this.input_field_widget.reset();
+                if (this.input_field_widget != null){
+                    this.input_field_widget.reset();
+                }
                 for (var i=0; i < this.tags.length; i++){
                     this.tags[i].destroyRecursive();
                 }
+                this.tags = [];
             },
             
             

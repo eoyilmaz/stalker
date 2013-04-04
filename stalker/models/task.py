@@ -1,14 +1,28 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
 from sqlalchemy.ext.declarative import declared_attr
 import warnings
-from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, Interval
-from sqlalchemy.orm import relationship, validates, synonym, reconstructor, backref
+from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, Enum
+from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 from stalker import User
 from stalker.conf import defaults
 from stalker.db import DBSession
@@ -21,6 +35,7 @@ from stalker.log import logging_level
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
 
 class Booking(Entity, ScheduleMixin):
     """Holds information about the time spend on a specific
@@ -114,16 +129,18 @@ class Booking(Entity, ScheduleMixin):
                              resource.__class__.__name__))
         
         # check for overbooking
+        logger.debug('resource.bookings: %s' % resource.bookings)
         for booking in resource.bookings:
-            logger.debug('booking.start: %s' % booking.start)
-            logger.debug('self.start: %s' % self.start)
+            logger.debug('booking       : %s' % booking)
+            logger.debug('booking.start : %s' % booking.start)
+            logger.debug('booking.end   : %s' % booking.end)
+            logger.debug('self.start    : %s' % self.start)
+            logger.debug('self.end      : %s' % self.end)
             
             if booking.start == self.start or\
                booking.end == self.end or \
-               (self.end > booking.start and
-                self.end < booking.end) or \
-               (self.start > booking.start and
-                self.start < booking.end):
+               booking.start < self.end < booking.end or \
+               booking.start < self.start < booking.end:
                 warnings.warn(
                     "The resource %s is overly booked with %s and %s" %
                     (resource, self, booking),
@@ -149,6 +166,9 @@ def update_task_dates(func):
 class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
+    Introduction
+    ------------
+    
     Tasks are the unit of work that should be accomplished to complete a
     :class:`~stalker.models.project.Project`.
     
@@ -160,6 +180,9 @@ class Task(Entity, StatusMixin, ScheduleMixin):
       
       Tasks can now have child Tasks. So you can create complex relations of
       Tasks to comply with your project needs.
+    
+    Initialization
+    --------------
     
     A Task needs to be created with a Project instance. It is also valid if no
     project is supplied but there is a parent Task passed to the parent
@@ -192,47 +215,66 @@ class Task(Entity, StatusMixin, ScheduleMixin):
       task3 = Task(name='Failure 2') # no project no parent, this is an orphan
                                      # task.
     
-    The duration of a Task is the direct difference of the start and end date
-    values of one Task, so it is not a value to measure the work done for one
-    task.
+    Scheduling
+    ----------
     
-    During the automatic scheduling (with TaskJuggler), the calculation of task
-    duration is effected by the working hours setting of the Project that the
-    task belongs to, the effort that needs to spend for that task and the
+    Stalker uses TaskJuggler for task scheduling. After defining all the tasks,
+    Stalker will convert them to a single tjp file along with the recorded
+    :class:`~stalker.models.task.Booking`\ s and let TaskJuggler to solve the
+    scheduling problem.
+    
+    During the scheduling (with TaskJuggler), the calculation of task duration
+    is effected by the working hours setting of the Project that the task
+    belongs to, the effort that needs to spend for that task and the
     availability of the resources assigned to the task.
     
-    Stalker, initially needs three values to fill the Task instance with enough
-    data so it can be passed to TaskJuggler for the auto scheduling process.
-    The table below shows the value groups that can be used while creating a
-    Task.
+    A good practice for creating a project plan is to supply the parent/child
+    and dependency relation between tasks and the effort and resource
+    information per task and leave the start and end date calculation to
+    TaskJuggler. It is also possible to use the ``length`` or ``duration``
+    values.
     
-    +-----------+-----------+-----------+-----------+-----------+
-    |   start   |    end    | duration  |  effort   | resources |
-    +-----------+-----------+-----------+-----------+-----------+
-    |           |           |           |     +     |     +     |
-    +-----------+-----------+-----------+-----------+-----------+
-    |           |           |           |           |           |
-    +-----------+-----------+-----------+-----------+-----------+
-                                                                    
-                                                                    
-                                                                    
-                                                                    
-                                                                    
+    Attributes precedence is as follows:
+      
+      effort > length > duration
     
+    So according to that, Stalker will opt to use effort and resources if all
+    of the values are supplied and length and resources if no effort is given
+    and the duration and the resources if both effort and length is None.
     
-    A Tasks is called a ``container task`` if it has at least one child Task.
-    And it is called a ``leaf task`` if it doesn't have any children Tasks. The
-    resources in a container task is meaningless, cause the resources are
-    defined by the child tasks.
+    To convert a Task instance to a TaskJuggler compatible string use the
+    :attr:`.to_tjp`` attribute. It will try to create a good representation of
+    the Task by using the resources, effort, length and duration values (the
+    start and end will not be used unless it is a milestone).
     
-    The :attr:`~stalker.core.models.task.Task.start` and
-    :attr:`~stalker.core.models.task.Task.end` values for a container task
-    is gathered from the child tasks. The start is equal to the earliest
-    start value of the children tasks, and the end is equal to the
-    latest end value of the children tasks.
+    To prevent the complex math (not so complex but I don't want to code it
+    where TaskJuggler is already doing it) behind and the data loose, the unit
+    of effort and length is hours.
+    
+    Task/Task Relation
+    --------------------
+    
+    A Task is called a ``container task`` if it has at least one child Task.
+    And it is called a ``leaf task`` if it doesn't have any children Tasks.
+    Task which doesn't have a parent called ``root_task``.
+    
+    The resources in a container task is meaningless, cause the resources are
+    defined by the child tasks (Dev Note: this can still be used to populate
+    the resource information to the children tasks as in TaskJuggler).
+    
+    Although the values are not very important after TaskJuggler schedules a
+    task, the :attr:`~.start` and :attr:`~.end` values for a container
+    task is gathered from the child tasks. The start is equal to the earliest
+    start value of the children tasks, and the end is equal to the latest end
+    value of the children tasks. Of course, these values are going to be
+    ignored by the TaskJuggler, but for interactive gantt charts these are good
+    toys attributes to play with.
     
     Stalker will check if there will be a cycle if one wants to parent a Task
-    to a child Task of its own. 
+    to a child Task of its own.
+    
+    In Gantt Charts the ``computed_start`` and ``computed_end`` attributes will
+    be used if they are not None.
     
     :param parent: The parent Task or Project of this Task. Every Task in
       Stalker should be related with a :class:`~stalker.models.project.Project`
@@ -251,18 +293,21 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :type resources: list of :class:`~stalker.User`
     
-    :param effort: The total effort that needs to be spend to complete this
+    :param int effort: The total effort that needs to be spend to complete this
       :class:`~stalker.models.task.Task`. Can be used to create an initial bid
-      of how long this task will take.
+      of how long this task will take. The unit of effort is hours. This is
+      decided to be in that way to ease the TaskJuggler integration without
+      struggling with the working days conversion to working hours etc.
     
-    :type effort: datetime.timedelta
+    :param int length: The length of this task measured in working hours.
     
     :param bid: The initial bid for this Task. It can be used to measure how
       accurate the initial guess was. It will be compared against the total
       amount of effort spend doing this task. Can be set to None, which will
-      set copy the effort argument value if there is any or 0.
+      set to the effort argument value if there is one or 0. The unit of bid is
+      again hours as in effort.
     
-    :type bid: datetime.timedelta
+    :type bid: int
     
     :param depends: A list of :class:`~stalker.models.task.Task`\ s that this
       :class:`~stalker.models.task.Task` is depending on. A Task can not depend
@@ -358,7 +403,27 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
     )
     
-    _effort = Column(Interval)
+    effort = Column(
+        Integer,
+        doc="""The total effort that needs to be spend to complete this
+        :class:`~stalker.models.task.Task`. Can be used to create an initial
+        bid of how long this task will take. The unit of effort is hours. This
+        is decided to be in that way to ease the TaskJuggler integration
+        without struggling with the working days conversion to working hours
+        etc."""
+    )
+    
+    length = Column(
+        Integer,
+        doc="""The length of this Task measured in working hours. It is an
+        integer value."""
+    )
+    
+    bid = Column(
+        Integer,
+        doc="""The initial bid of this Task. It measured in working hours."""
+    )
+    
     priority = Column(Integer)
     
     bookings = relationship(
@@ -376,19 +441,30 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""A list of :class:`~stalker.models.version.Version` instances showing the files created for this task.
         """
     )
-
+    
+    schedule_using = Column(Enum(*defaults.TASK_SCHEDULE_FLAGS,
+                                name='TaskScheduleUsing'),
+                           default=defaults.TASK_SCHEDULE_FLAGS[0])
+    
+    schedule_constraint = Column(Enum(*defaults.TASK_SCHEDULE_CONSTRAINTS,
+                                      name='TaskScheduleConstraint'),
+                                 default=defaults.TASK_SCHEDULE_CONSTRAINTS[0])
+    
     def __init__(self,
                  project=None,
                  parent=None,
                  depends=None,
                  start=None,
                  end=None,
-                 duration=None,
                  effort=None,
+                 length=None,
+                 duration=None,
                  bid=None,
                  resources=None,
                  is_milestone=False,
                  priority=defaults.TASK_PRIORITY,
+                 schedule_using='EFFORT',
+                 schedule_constraint='NONE',
                  **kwargs):
         # update kwargs with extras
         kwargs['start'] = start
@@ -428,11 +504,16 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         if resources is None:
             resources = []
         
-        self.resources = resources
-        self._effort = None
+        self.resources = resources 
         self.effort = effort
+        self.length = length
         
+        if bid is None:
+            bid = self.effort
+        self.bid = bid
         self.priority = priority
+        self.schedule_using = schedule_using
+        self.schedule_constraint = schedule_constraint
     
     @reconstructor
     def __init_on_load__(self):
@@ -490,77 +571,36 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             parent = parent.parent
         
         return depends
-
-    def _validate_effort(self, effort):
+    
+    @validates('effort')
+    def _validate_effort(self, key, effort):
         """validates the given effort
         """
-        
-        if not isinstance(effort, datetime.timedelta):
-            effort = None
-        
-        if effort is None:
-            # take it from the duration and resources
-            
-            num_of_resources = len(self.resources)
-            if num_of_resources == 0:
-                num_of_resources = 1
-            
-            effort = self.duration * num_of_resources
+        if effort is not None:
+            if not isinstance(effort, int):
+                raise TypeError('%s.effort should be an integer showing the '
+                                'amount of work in working hours that needs to '
+                                'be spend to complete this %s, not %s' % (
+                    self.__class__.__name__,
+                    self.__class__.__name__,
+                    effort.__class__.__name__
+                ))
         
         return effort
-
-    def _effort_getter(self):
-        """the getter for the effort property
+    
+    @validates('length')
+    def _validate_length(self, key, length):
+        """validates the given length
         """
-        return self._effort
-
-    def _effort_setter(self, effort_in):
-        """the setter for the effort property
-        """
-        self._effort = self._validate_effort(effort_in)
-        
-        # update the duration
-        num_of_resources = len(self.resources)
-        if num_of_resources == 0:
-            num_of_resources = 1
-        
-        self.duration = self._effort / num_of_resources
-
-    effort = synonym(
-        "_effort",
-        descriptor=property(
-            fget=_effort_getter,
-            fset=_effort_setter
-        ),
-        doc="""The total effort that needs to be spend to complete this Task.
-        
-        Can be used to create an initial bid of how long this task going to
-        take. The effort is equally divided to the assigned resources. So if
-        the effort is 10 days and 2 resources is assigned then the
-        :attr:`~stalker.models.task.Task.duration` of the task is going to be 5
-        days (if both of the resources are free to work). The default value is
-        stalker.conf.defaults.DEFAULT_TASK_DURATION.
-      
-        The effort defines the :attr:`~stalker.models.task.Task.duration` of
-        the task. Every resource is counted equally effective and the
-        :attr:`~stalker.models.task.Task.duration` will be calculated by the
-        simple formula:
-        
-        .. math::
-           
-           {duration} = \\frac{{effort}}{n_{resources}}
-        
-        And changing the :attr:`~stalker.models.task.Task.duration` will also
-        effect the :attr:`~stalker.models.task.Task.effort` spend. The
-        :attr:`~stalker.models.task.Task.effort` will be calculated with the
-        formula:
-           
-        .. math::
-           
-           {effort} = {duration} \\times {n_{resources}}
-        """
-    )
-
+        if length is not None:
+            if not isinstance(length, int):
+                raise TypeError('%s.length should be an integer showing the '
+                                'length of this %s in working hours, not %s' %
+                                (self.__class__.__name__,
+                                 self.__class__.__name__,
+                                 length.__class__.__name__))
+        return length
+    
     @validates("is_milestone")
     def _validate_is_milestone(self, key, is_milestone):
         """validates the given milestone value
@@ -667,7 +707,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         return priority
     
-    # @update_task_dates
     @validates('children')
     def _validate_children(self, key, child):
         """validates the given child
@@ -712,51 +751,16 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         return version
     
-    def _duration_getter(self):
-        return self._duration
-    
-    def _duration_setter(self, duration):
-        # just call the fset method of the duration property in the super
-        
-        #------------------------------------------------------------
-        # code copied and pasted from ScheduleMixin - Fix it later
-        if duration is not None:
-            if isinstance(duration, datetime.timedelta):
-                # set the end to None
-                # to make it recalculated
-                self._validate_dates(self.start, None, duration)
-            else:
-                self._validate_dates(self.start, self.end, duration)
-        else:
-            self._validate_dates(self.start, self.end, duration)
-        #------------------------------------------------------------
-        
-        # then update the effort
-        num_of_resources = len(self.resources)
-        if num_of_resources == 0:
-            num_of_resources = 1
-        
-        new_effort_value = self.duration * num_of_resources
-        
-        # break recursion
-        if self.effort != new_effort_value:
-            self.effort = new_effort_value
-    
-    duration = synonym(
-        "_duration",
-        descriptor=property(
-            _duration_getter,
-            _duration_setter
-        ),
-        doc="""The overridden duration attribute.
-        
-        It is a datetime.timedelta instance. Showing the difference of the
-        :attr:`~stalker.models.mixins.ScheduleMixin.start` and the
-        :attr:`~stalker.models.mixins.ScheduleMixin.end`. If edited it
-        changes the :attr:`~stalker.models.mixins.ScheduleMixin.end`
-        attribute value.
+    @validates('bid')
+    def _validate_bid(self, key, bid):
+        """validates the given bid value
         """
-    )
+        if bid is not None:
+            if not isinstance(bid, int):
+                raise(TypeError, '%s.bid should be an integer, not %s' % 
+                                 (self.__class__.__name__,
+                                  bid.__class__.__name__))
+        return bid
     
     def _start_getter(self):
         """overridden start getter
@@ -864,6 +868,26 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         return not bool(len(self.children))
     
     @property
+    def tjp_abs_id(self):
+        """returns the calculated absolute id of this task
+        """
+        abs_id = ''
+        if self.parent:
+            abs_id = self.parent.tjp_abs_id
+        else:
+            abs_id = self.project.tjp_id
+        
+        return abs_id + '.' + self.tjp_id
+    
+    @property
+    def to_tjp(self):
+        """TaskJuggler representation of this task
+        """
+        from jinja2 import Template
+        temp = Template(defaults.TJP_TASK_TEMPLATE)
+        return temp.render({'task': self})
+    
+    @property
     def level(self):
         """Returns the level of this task. It is a temporary property and will
         be useless when Stalker has its own implementation of a proper Gantt
@@ -875,6 +899,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             i+=1
             current = current.parent
         return i
+    
+    @property
+    def is_scheduled(self):
+        """A predicate which returns True if this task has both a
+        computed_start and computed_end values
+        """
+        return self.computed_start and self.computed_end
     
     @property
     def total_effort_spent(self):

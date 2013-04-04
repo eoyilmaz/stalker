@@ -1,15 +1,29 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Date,
                         Interval, DateTime)
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import synonym, relationship, validates
+from sqlalchemy.orm import synonym, relationship, validates, descriptor_props
 from stalker.conf import defaults
 from stalker.db import Base
 from stalker.db.session import DBSession
@@ -368,18 +382,20 @@ class StatusMixin(object):
 class ScheduleMixin(object):
     """Adds schedule info to the mixed in class.
     
-    Adds schedule information like ``start``, ``end`` and
-    ``duration``. There are there parameters to initialize a class with
-    ScheduleMixin, which are, ``start``, ``end`` and ``duration``.
-    Only two of them are enough to initialize the class. The preceding order
-    for the parameters is as follows::
-      
+    Adds schedule information like ``start``, ``end`` and ``duration``. These
+    attributes will be used in TaskJuggler. Because ``effort`` is only
+    meaningful if there are some ``resources`` this attribute has been left
+    special for :class:`~stalker.models.task.Task` class. The ``length`` has
+    not been implemented because of its rare use.
+    
+    The preceding order for the attributes is as follows::
+    
       start > end > duration
     
-    So if all of the parameters are given only the ``start`` and the
-    ``end`` will be used and the ``duration`` will be calculated
-    accordingly. In any other conditions the missing parameter will be
-    calculated from the following table:
+    So if all of the parameters are given only the ``start`` and the ``end``
+    will be used and the ``duration`` will be calculated accordingly. In any
+    other conditions the missing parameter will be calculated from the
+    following table:
     
     +-------+-----+----------+----------------------------------------+
     | start | end | duration | DEFAULTS                               |
@@ -409,8 +425,18 @@ class ScheduleMixin(object):
     |       |     |    X     | start = datetime.datetime.now()        |
     |       |     |          |                                        |
     |       |     |          | end = start + duration                 |
-    +-------+-----+----------+----------------------------------------+
-      
+    +-------+-----+----------+----------------------------------------+    
+    
+    Only the ``start``, ``end`` will be stored. The ``duration`` attribute is
+    the direct difference of the the ``start`` and ``end`` attributes, so there
+    is no need to store it. But if will be used in calculation of the start and
+    end values.
+    
+    The start and end attributes have a ``computed`` companion. Which are the
+    return values from TaskJuggler. so for start there is the
+    ``computed_start`` and for end there is the ``computed_end`` attributes.
+    These values are going to be used in Gantt Charts.
+    
     The date attributes can be managed with timezones. Follow the Python idioms
     shown in the `documentation of datetime`_
     
@@ -438,14 +464,13 @@ class ScheduleMixin(object):
     
     :type duration: :class:`datetime.timedelta`
     
-    :param resolution: The resolution of the the datetime.datetime object in
-      datetime.timedelta. Uses ``TIME_RESOLUTION`` settings in the
+    :param timing_resolution: The timing_resolution of the datetime.datetime
+      object in datetime.timedelta. Uses ``TIMING_RESOLUTION`` settings in the
       :mod:`stalker.conf.defaults` module which defaults to 1 hour. Setting the
-      resolution to 1 minute will overflow, please use 5 minutes as a minimum
-      value (5 minutes is also considered the lowest resolution in
-      TaskJuggler).
+      timing_resolution to less then 5 minutes is not suggested because it is a
+      limit for TaskJuggler.
     
-    :type resolution: datetime.timedelta
+    :type timing_resolution: datetime.timedelta
     """
     
     #    # add this lines for Sphinx
@@ -455,9 +480,9 @@ class ScheduleMixin(object):
                  start=None,
                  end=None,
                  duration=None,
-                 resolution=None,
+                 timing_resolution=None,
                  **kwargs):
-        self.resolution = resolution
+        self.timing_resolution = timing_resolution
         self._validate_dates(start, end, duration)
     
     @declared_attr
@@ -474,7 +499,7 @@ class ScheduleMixin(object):
         default value is 10 days
         """
         return self._end
-
+    
     def _end_setter(self, end_in):
         self._validate_dates(self.start, end_in, self.duration)
     
@@ -523,17 +548,9 @@ class ScheduleMixin(object):
     
     @declared_attr
     def _duration(cls):
-        return Column("duration", Interval)
+        return Column('duration', Interval)
     
     def _duration_getter(self):
-        """Duration of the entity.
-        
-        It is a datetime.timedelta instance. Showing the difference of the
-        :attr:`~stalker.models.mixins.ScheduleMixin.start` and the
-        :attr:`~stalker.models.mixins.ScheduleMixin.end`. If edited it
-        changes the :attr:`~stalker.models.mixins.ScheduleMixin.end`
-        attribute value.
-        """
         return self._duration
     
     def _duration_setter(self, duration_in):
@@ -543,21 +560,26 @@ class ScheduleMixin(object):
                 # to make it recalculated
                 self._validate_dates(self.start, None, duration_in)
             else:
-                self._validate_dates(self.start, self.end,
-                                     duration_in)
+                self._validate_dates(self.start, self.end, duration_in)
         else:
             self._validate_dates(self.start, self.end, duration_in)
     
     @declared_attr
-    def duration(cls):
+    def duration(self):
         return synonym(
-            "_duration",
+            '_duration',
             descriptor=property(
-                cls._duration_getter,
-                cls._duration_setter
+                self._duration_getter,
+                self._duration_setter,
+                doc="""Duration of the entity.
+                
+It is a datetime.timedelta instance. Showing the difference of the
+:attr:`.start` and the :attr:`.end`. If edited it changes the :attr:`.end`
+attribute value."""
             )
-        )
-    
+            
+        )    
+   
     def _validate_dates(self, start, end, duration):
         """updates the date values
         """
@@ -585,16 +607,16 @@ class ScheduleMixin(object):
             else:
                 if duration is None:
                     duration = defaults.TASK_DURATION
-                    
+                
                 start = end - duration
         
         # check end
         if end is None:
             if duration is None:
                 duration = defaults.TASK_DURATION
-
+        
             end = start + duration
-
+        
         if end < start:
             # check duration
             if duration < datetime.timedelta(1):
@@ -602,25 +624,25 @@ class ScheduleMixin(object):
 
             end = start + duration
         
-        # round the dates to the resolution
+        # round the dates to the timing_resolution
         self._start = self.round_time(start)
         self._end = self.round_time(end)
         self._duration = self._end - self._start
     
     @declared_attr
-    def _resolution(cls):
-         return Column("resolution", Interval)
+    def _timing_resolution(cls):
+         return Column("timing_resolution", Interval)
     
-    def _resolution_getter(self):
-        """returns the resolution
+    def _timing_resolution_getter(self):
+        """returns the timing_resolution
         """
-        return self._resolution
+        return self._timing_resolution
     
-    def _resolution_setter(self, res_in):
-        """sets the resolution
+    def _timing_resolution_setter(self, res_in):
+        """sets the timing_resolution
         """
-        self._resolution = self._validate_resolution(res_in)
-        logger.debug('self._resolution: %s' % self._resolution)
+        self._timing_resolution = self._validate_timing_resolution(res_in)
+        logger.debug('self._timing_resolution: %s' % self._timing_resolution)
         # update date values
         if self.start and self.end and self.duration:
             self._validate_dates(
@@ -630,13 +652,13 @@ class ScheduleMixin(object):
             )
     
     @declared_attr
-    def resolution(cls):
+    def timing_resolution(cls):
         return synonym(
-            '_resolution',
+            '_timing_resolution',
             descriptor=property(
-                cls._resolution_getter,
-                cls._resolution_setter,
-                doc="""The time resolution of this object.
+                cls._timing_resolution_getter,
+                cls._timing_resolution_setter,
+                doc="""The timing_resolution of this object.
                 
                 Can be set to any value that is representable with
                 datetime.timedelta. The default value is 1 hour. Whenever it is
@@ -645,33 +667,82 @@ class ScheduleMixin(object):
             )
         )
     
-    def _validate_resolution(self, resolution):
-        """validates the given resolution value
+    def _validate_timing_resolution(self, timing_resolution):
+        """validates the given timing_resolution value
         """
-        if resolution is None:
-            resolution = defaults.TIME_RESOLUTION
+        if timing_resolution is None:
+            timing_resolution = defaults.TIMING_RESOLUTION
         
-        if not isinstance(resolution, datetime.timedelta):
-            raise TypeError('%s.resolution should be an instance of '
+        if not isinstance(timing_resolution, datetime.timedelta):
+            raise TypeError('%s.timing_resolution should be an instance of '
                             'datetime.timedelta not, %s' % 
                             (self.__class__.__name__,
-                             resolution.__class__.__name__))
+                             timing_resolution.__class__.__name__))
         
-        return resolution
+        return timing_resolution
+    
+    @declared_attr
+    def _computed_start(cls):
+        return Column('computed_start', DateTime)
+    
+    def _computed_start_getter(self):
+        return self._computed_start
+    
+    @declared_attr
+    def computed_start(cls):
+        return synonym(
+            '_computed_start',
+            descriptor=property(
+                cls._computed_start_getter,
+                doc="""The TaskJuggler computed start datetime instance.
+                """
+            )
+        )
+    
+    @declared_attr
+    def _computed_end(cls):
+        return Column('computed_end', DateTime)
+    
+
+    def _computed_end_getter(self):
+        return self._computed_end
+    
+    @declared_attr
+    def computed_end(cls):
+        return synonym(
+            '_computed_end',
+            descriptor=property(
+                cls._computed_end_getter,
+                doc="""The TaskJuggler computed end datetime instance.
+                """
+            )
+        )
+    
+    @property
+    def computed_duration(self):
+        """returns the computed_duration as the difference of computed_start
+        and computed_end if there are computed_start and computed_end otherwise
+        returns None
+        """
+        return self.computed_end - self.computed_start \
+            if self.computed_end and self.computed_start else None
     
     def round_time(self, dt):
         """Round a datetime object to any time laps in seconds.
         
-        Uses class property resolution as the closest number of seconds to
-        round to, defaults 1 hour.
+        Uses class property timing_resolution as the closest number of seconds
+        to round to, defaults 1 hour.
         
         :param dt: datetime.datetime object, defaults now.
         
-        Author: Thierry Husson 2012
+        Based on Thierry Husson's answer in `Stackoverflow`_
+        
+        _`Stackoverflow` : http://stackoverflow.com/a/10854034/1431079
         """
-        seconds = int(dt.strftime('%s'))
-        ts = self.resolution.total_seconds()
-        return datetime.datetime.fromtimestamp((seconds + ts / 2) // ts * ts)
+        ts = self.timing_resolution.total_seconds()
+        return datetime.datetime.fromtimestamp(
+            (int(dt.strftime('%s')) + ts * 0.5) // ts * ts
+        )
 
 
 class ProjectMixin(object):

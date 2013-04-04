@@ -1,8 +1,22 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
 import re
@@ -251,6 +265,17 @@ class SimpleEntity(Base):
         """
         return "<%s (%s)>" % (self.name, self.entity_type)
     
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return isinstance(other, SimpleEntity) and\
+               self.name == other.name
+
+    def __ne__(self, other):
+        """the inequality operator
+        """
+        return not self.__eq__(other)
+    
     @validates("description")
     def _validate_description(self, key, description_in):
         """validates the given description_in value
@@ -362,17 +387,9 @@ class SimpleEntity(Base):
         from stalker.models.auth import User
 
         if updated_by_in is None:
-            # disable autoflush for a minute
-#            from stalker.db import DBSession
-#            autoflush = DBSession.autoflush
-#            DBSession.autoflush = False
-            
             # set it to what created_by attribute has
             updated_by_in = self.created_by
-            
-#            # restore autoflush
-#            DBSession.autoflush = autoflush
-
+        
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
                 raise TypeError("%s.updated_by should be an instance of"
@@ -422,9 +439,9 @@ class SimpleEntity(Base):
         """validates the given type value
         """
         from stalker.models.type import Type
-
+        
         raise_error = False
-
+        
         if not self.__strictly_typed__:
             if type_in is not None:
                 if not isinstance(type_in, Type):
@@ -432,7 +449,7 @@ class SimpleEntity(Base):
         else:
             if not isinstance(type_in, Type):
                 raise_error = True
-
+        
         if raise_error:
             raise TypeError("%s.type must be an instance of "
                             "stalker.models.type.Type not %s" %
@@ -450,19 +467,21 @@ class SimpleEntity(Base):
                                 'stalker.models.link.Link instance, not %s' %
                                 (self.__class__.__name__,
                                  thumb.__class__.__name__))
-        
         return thumb
     
-    def __eq__(self, other):
-        """the equality operator
+    @property
+    def tjp_id(self):
+        """returns TaskJuggler compatible id
         """
-        return isinstance(other, SimpleEntity) and\
-               self.name == other.name
-
-    def __ne__(self, other):
-        """the inequality operator
+        return "%s_%s" % (self.__class__.__name__, self.id)
+    
+    @property
+    def to_tjp(self):
+        """renders a TaskJuggler compliant string used for TaskJuggler
+        integration. Needs to be overridden in inherited classes.
         """
-        return not self.__eq__(other)
+        raise NotImplementedError('This property is not implemented in %s' %
+                                  self.__class__.__name__)
 
 
 class Entity(SimpleEntity):

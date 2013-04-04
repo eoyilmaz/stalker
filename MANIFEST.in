@@ -1,11 +1,15 @@
 include *.txt *.ini *.cfg *.rst
-recursive-include stalker *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml
+recursive-include stalker *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml *.jinja2
 
-include README                                                                  
-include INSTALL                                                                 
-include MANIFEST.in                                                             
-include LICENSE                                                                 
-include doTests                                                                 
-recursive-include docs *                                                        
-recursive-include tests *                                                       
+include CHANGELOG
+include TODO
+include README
+include INSTALL
+include MANIFEST.in
+include COPYING
+include doTests
+include development.ini
+include production.ini
+recursive-include docs *
+recursive-include tests *
 recursive-include examples *

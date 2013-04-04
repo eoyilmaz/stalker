@@ -1,8 +1,22 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2013, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 import re
 import base64
 import datetime
@@ -615,28 +629,6 @@ class User(Entity, ACLMixin):
 
         return email_in
 
-#    @validates("initials")
-#    def _validate_initials(self, key, initials):
-#        """validates the given initials
-#        """
-#        
-#        if initials is None:
-#            raise TypeError('%s.initials can not be None' %
-#                             self.__class__.__name__)
-#        
-#        if not isinstance(initials, str):
-#            raise TypeError('%s.initials should be a string not %s' %
-#                            (self.__class__.__name__,
-#                             initials.__class__.__name__))
-#        
-#        if initials == '':
-#            raise ValueError('%s.initials can not be an empty string' %
-#                             self.__class__.__name__)
-#        
-#        initials = initials.lower()
-#        
-#        return initials
-
     @validates("last_login")
     def _validate_last_login(self, key, last_login_in):
         """validates the given last_login argument
@@ -803,6 +795,14 @@ class User(Entity, ACLMixin):
             .join(Ticket.status)\
             .filter(Status.code!='CLOSED')\
             .all()
+    
+    @property
+    def to_tjp(self):
+        """outputs a TaskJuggler formatted string
+        """
+        from jinja2 import Template
+        temp = Template(defaults.TJP_USER_TEMPLATE)
+        return temp.render({'user': self})
  
 # USER_PERMISSIONGROUPS
 User_Groups = Table(

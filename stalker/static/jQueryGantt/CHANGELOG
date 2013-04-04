@@ -1,0 +1,8 @@
+====================
+StalkerGantt Changes
+====================
+
+0.0.1.a1
+--------
+* Added a new attribute ``parent`` to Task class. It will be used to properly
+  implement the parent child relation of Tasks.

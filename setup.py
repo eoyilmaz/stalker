@@ -27,7 +27,7 @@ setup(name='stalker',
       classifiers=[
         "Programming Language :: Python",
         "Framework :: Pylons",
-        "License :: OSI Approved :: BSD License",
+        "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
         "Operating System :: OS Independent",
         "Development Status :: 1 - Planning",
         "Intended Audience :: Developers",
