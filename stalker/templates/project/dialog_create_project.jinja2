@@ -121,14 +121,13 @@
       {# STATUS LIST #}
       <tr>
         <td class='label_column'>
-          <label for='project_status_list'>Status List</label>
+          <label for='project_status'>Status</label>
         </td>
         <td class='input_column'>
-          <input id='project_status_list'>
+          <input id='project_status'>
         </td>
         <td class='button_column'>
-          <button id='project_create_status_list_button'>New</button>
-          <button id='project_update_status_list_button'>Update</button>
+          <button id='project_add_status_button'>Add Status</button>
         </td>
       </tr>
 
@@ -416,6 +415,7 @@
           related_field_updater: structure_field_updater
         });
         create_structure_button.startup();
+
         
         // UPDATE STRUCTURE BUTTON
         var update_structure_button = dialogCaller({
@@ -476,57 +476,67 @@
           }
         });
         update_lead_button.startup();
-        
-        
-        
-        
+
         // ********************************************************************
         // Status List
         //
         // The Memory
-        var status_list_memory = new JsonRest({
-          target: 'get/status_lists_for/Project'
+        var status_memory = new JsonRest({
+          target: 'get/statuses_for/Project'
         });
-        
+
         // The Field
-        var status_list_filteringSelect = new FilteringSelect({
-          name: 'status_list',
-          label: 'Status List',
+        var status_filteringSelect = new FilteringSelect({
+          name: 'status',
+          label: 'Status',
           required: true
-        }, 'project_status_list');
-        status_list_filteringSelect.startup();
-        
+        }, 'project_status');
+        status_filteringSelect.startup();
+
+        var update_button_function = function(data){
+
+          if(data.length>0){
+
+            add_status_button.set('onClick', function(){
+
+                var dialog = dijit.byId('update_status_list_dialog');
+
+                if (dialog != null){
+                  dialog.destroyRecursive();
+                }
+                dialog = update_status_list_dialog_creator('Project');
+                // set the field updater
+                dialog.set( 'related_field_updater', status_field_updater );
+                // show the dialog
+                dialog.show();
+            });
+
+            status_field_updater.set('callBack', function(){});
+
+          }
+        };
+
         // The Updater
-        var status_list_field_updater = fieldUpdater({
-          'memory': status_list_memory,
-          'widget': status_list_filteringSelect
+        var status_field_updater = fieldUpdater({
+          'memory': status_memory,
+          'widget': status_filteringSelect,
+          'callBack': update_button_function
         });
-        status_list_field_updater({animate: false});
-        
-        // New Status List Button
-        var create_status_list_button = dialogCaller({
-          label: 'New',
+
+
+        var add_status_button = dialogCaller({
+          label: 'Add Status',
           dialog_id: 'create_status_list_dialog',
           content_creator: create_status_list_dialog_creator,
-          attach_to: 'project_create_status_list_button',
-          related_field_updater: status_list_field_updater,
+          attach_to: 'project_add_status_button',
+          related_field_updater: status_field_updater,
           data_id: 'Project'
         });
-        create_status_list_button.startup();
-        
-        // Update Status List Button
-        var update_status_list_button = dialogCaller({
-          label: 'Update',
-          dialog_id: 'update_status_list_dialog',
-          content_creator: update_status_list_dialog_creator,
-          attach_to: 'project_update_status_list_button',
-          related_field_updater: status_list_field_updater,
-          data_id: function(){
-              return status_list_filteringSelect.get('value');
-          }
-        });
-        update_status_list_button.startup();
-        
+
+        add_status_button.startup();
+
+        status_field_updater({animate: true});
+
         // ********************************************************************
         // SUBMIT BUTTON
         var submit_button = new Button({

@@ -22,20 +22,27 @@
             var summary_content_pane = new ContentPane({
               title: 'Summarize',
               href: 'summarize/department/{{ department.id }}',
-              region: 'top'
+              region: 'top',
+              style: 'padding: 0;'
             },'department_summary');
 
             // **********************************************************************
             // Bottom Part - Complex Data View
+
+            var department_related_data_tab_container = new TabContainer({
+              region: 'bottom',
+              style: 'background-color: #662d91;'
+            },department_related_data_tab_container);
+
             var users_content_pane = new ContentPane({
               title: 'Users',
               href: 'list/users/{{ department.id }}'
             });
 
-
+            department_related_data_tab_container.addChild(users_content_pane);
 
             department_SplitContainer.addChild(summary_content_pane);
-            department_SplitContainer.addChild(users_content_pane);
+            department_SplitContainer.addChild(department_related_data_tab_container);
             department_SplitContainer.startup();
 
           });

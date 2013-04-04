@@ -245,3 +245,11 @@ a:hover {
     padding: 3px;
     text-align: center;
 }
+
+.page_title {
+    color: #ffffff;
+    font-size: 22px;
+    text-align: center;
+    height: 4px;
+
+}

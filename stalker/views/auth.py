@@ -175,6 +175,26 @@ def get_users_byEntity(request):
         for user in entity.users
     ]
 
+@view_config(
+    route_name='append_user',
+    renderer='templates/auth/dialog_append_user.jinja2',
+    permission='List_User'
+)
+def append_user(request):
+    """returns all the Users of a given Entity
+    """
+
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+
+    project_id = request.matchdict['project_id']
+    project = Project.query.filter_by(id=project_id).first()
+
+    return {
+            'user': logged_user,
+            'project': project
+        }
+
 
 @view_config(
     route_name='create_group',

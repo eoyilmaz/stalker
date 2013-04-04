@@ -55,7 +55,8 @@ define(['dijit/form/Button', 'dijit/MenuItem'],
             if (widget_type == 'MenuItem'){
                 WidgetClass = MenuItem;
             }
-            
+
+
             var widget = new WidgetClass({
                 label: label,
                 onClick: function(){

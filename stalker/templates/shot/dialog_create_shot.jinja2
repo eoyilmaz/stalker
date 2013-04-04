@@ -47,18 +47,18 @@
       </tr>
       
       {# STATUS LIST #}
-      <tr>
-        <td class='label_column'>
-          <label for='shot_status_list'>Status List</label>
-        </td>
-        <td class='input_column'>
-          <input id='shot_status_list'>
-        </td>
-        <td class='button_column'>
-          <button id='shot_create_status_list_button'>New</button>
-          <button id='shot_update_status_list_button'>Update</button>
-        </td>
-      </tr>
+{#      <tr>#}
+{#        <td class='label_column'>#}
+{#          <label for='shot_status_list'>Status List</label>#}
+{#        </td>#}
+{#        <td class='input_column'>#}
+{#          <input id='shot_status_list'>#}
+{#        </td>#}
+{#        <td class='button_column'>#}
+{#          <button id='shot_create_status_list_button'>New</button>#}
+{#          <button id='shot_update_status_list_button'>Update</button>#}
+{#        </td>#}
+{#      </tr>#}
       
       {# STATUS #}
       <tr>
@@ -67,6 +67,9 @@
         </td>
         <td class='input_column'>
           <input id='shot_status'>
+        </td>
+        <td class='button_column'>
+          <button id='shot_add_status_button'>Add Status</button>
         </td>
       </tr>
 
@@ -234,55 +237,55 @@
       
       
       // **********************************************************************
-      // Status_List
-      //
-      // The Memory
-      var status_list_memory = new JsonRest({
-        target: 'get/status_lists_for/Shot'
-      });
-      
-      // The Field
-      var status_list_filtering_select = new FilteringSelect({
-        name: 'status_list_id',
-        label: 'Status List',
-        required: true,
-        onChange: function(){
-          status_updater({animate: true});
-        }
-      }, 'shot_status_list');
-      status_list_filtering_select.startup();
-      
-      // The Updater
-      var status_list_field_updater = fieldUpdater({
-        'memory': status_list_memory,
-        'widget': status_list_filtering_select
-      });
-      status_list_field_updater({animate: false});
-      
-      // New Status List Button
-      var create_status_list_button = dialogCaller({
-        label: 'New',
-        dialog_id: 'create_status_list_dialog',
-        content_creator: create_status_list_dialog_creator,
-        attach_to: 'shot_create_status_list_button',
-        related_field_updater: status_list_field_updater,
-        data_id: 'Shot'
-      });
-      create_status_list_button.startup();
-      
-      // Update Status List Button
-      var update_status_list_button = dialogCaller({
-        label: 'Update',
-        dialog_id: 'update_status_list_dialog',
-        content_creator: update_status_list_dialog_creator,
-        attach_to: 'shot_update_status_list_button',
-        related_field_updater: status_list_field_updater,
-        data_id: function(){
-          return status_list_filtering_select.get('value');
-        }
-      });
-      update_status_list_button.startup();
-      
+{#      // Status_List#}
+{#      //#}
+{#      // The Memory#}
+{#      var status_list_memory = new JsonRest({#}
+{#        target: 'get/status_lists_for/Shot'#}
+{#      });#}
+{#      #}
+{#      // The Field#}
+{#      var status_list_filtering_select = new FilteringSelect({#}
+{#        name: 'status_list_id',#}
+{#        label: 'Status List',#}
+{#        required: true,#}
+{#        onChange: function(){#}
+{#          status_updater({animate: true});#}
+{#        }#}
+{#      }, 'shot_status_list');#}
+{#      status_list_filtering_select.startup();#}
+{#      #}
+{#      // The Updater#}
+{#      var status_list_field_updater = fieldUpdater({#}
+{#        'memory': status_list_memory,#}
+{#        'widget': status_list_filtering_select#}
+{#      });#}
+{#      status_list_field_updater({animate: false});#}
+{#      #}
+{#      // New Status List Button#}
+{#      var create_status_list_button = dialogCaller({#}
+{#        label: 'New',#}
+{#        dialog_id: 'create_status_list_dialog',#}
+{#        content_creator: create_status_list_dialog_creator,#}
+{#        attach_to: 'shot_create_status_list_button',#}
+{#        related_field_updater: status_list_field_updater,#}
+{#        data_id: 'Shot'#}
+{#      });#}
+{#      create_status_list_button.startup();#}
+{#      #}
+{#      // Update Status List Button#}
+{#      var update_status_list_button = dialogCaller({#}
+{#        label: 'Update',#}
+{#        dialog_id: 'update_status_list_dialog',#}
+{#        content_creator: update_status_list_dialog_creator,#}
+{#        attach_to: 'shot_update_status_list_button',#}
+{#        related_field_updater: status_list_field_updater,#}
+{#        data_id: function(){#}
+{#          return status_list_filtering_select.get('value');#}
+{#        }#}
+{#      });#}
+{#      update_status_list_button.startup();#}
+{#      #}
       
       
       
@@ -291,31 +294,57 @@
       //
       // The Memory
       var status_memory = new JsonRest({
-        target: 'get/statuses_of/'
+        target: 'get/statuses_for/Shot'
       });
       
       // The Field
       var status_filtering_select = new FilteringSelect({
         name: 'status_id',
         label: 'Status',
-        required: true,
-        store: status_memory,
-        disabled: true
+        required: true
       }, 'shot_status');
       status_filtering_select.startup();
-      
+
+      var update_button_function = function(data){
+
+        if(data.length>0){
+
+          shot_add_status_button.set('onClick', function(){
+
+            var dialog = dijit.byId('update_status_list_dialog');
+
+            if (dialog != null){
+              dialog.destroyRecursive();
+            }
+            dialog = update_status_list_dialog_creator('Shot');
+            // set the field updater
+            dialog.set( 'related_field_updater', status_field_updater );
+            // show the dialog
+            dialog.show();
+          });
+
+          status_field_updater.set('callBack', function(){});
+
+        }
+      };
       // The Updater
-      var status_updater = fieldUpdater({
-        memory: status_memory,
-        query_data: function(){
-          status_filtering_select.set('disabled', false);
-          var widget = registry.byId('shot_status_list');
-          return widget.get('value');
-        },
-        widget: status_filtering_select
+      var status_field_updater = fieldUpdater({
+        'memory': status_memory,
+        'widget': status_filtering_select,
+        'callBack': update_button_function
       });
-      // don't call the updater now, the status_list may not been set yet!!!
-      
+
+      var shot_add_status_button = dialogCaller({
+        label: 'Add Status',
+        dialog_id: 'create_status_list_dialog',
+        content_creator: create_status_list_dialog_creator,
+        attach_to: 'shot_add_status_button',
+        related_field_updater: status_field_updater,
+        data_id: 'Shot'
+      });
+
+      shot_add_status_button.startup();
+      status_field_updater({animate: true});
       
       
       

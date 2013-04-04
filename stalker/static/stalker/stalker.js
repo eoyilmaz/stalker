@@ -101,6 +101,17 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
                 executeScripts: true
             });
         };
+
+        append_user_dialog_creator = function(entity_id){
+            return new DialogSimple({
+                id: 'append_user_dialog',
+                title: 'Append User',
+                href: 'append/user/' + entity_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
         
         // ********************************************************************
         // FILENAME TEMPLATE
@@ -169,11 +180,11 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             });
         };
         
-        update_status_list_dialog_creator = function(status_list_id){
+        update_status_list_dialog_creator = function(status_list_type){
             return new DialogSimple({
                 id: 'update_status_list_dialog',
                 title: 'Update Status List',
-                href: '/update/status_list/' + status_list_id,
+                href: '/update/status_list/' + status_list_type,
                 resize: true,
                 style: style,
                 executeScripts: true

@@ -1,14 +1,82 @@
-<div id='data_container'>
-  {% for project in projects %}
-    {{ project.name}}<br>
-  {% endfor %}
+<div id='view_projects'>
+  <div id='projects_data_grid'></div>
 </div>
+
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/_base/xhr', 'dijit/layout/SplitContainer',
-           'dijit/layout/TabContainer', 'dijit/layout/ContentPane',
-           'dojo/domReady!'],
-    function(registry, xhr, SplitContainer, TabContainer, ContentPane){
-      
-  });
+  require(['dijit/registry',
+    'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dojo/store/Memory',
+    'dijit/form/FilteringSelect', 'dojo/store/JsonRest',
+    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/on', 'dojo/query',
+    'dojo/ready'],
+          function(registry, ObjectStore, DataGrid, Memory, FilteringSelect,
+                   JsonRest, fieldUpdater, dialogCaller, on, query, ready){
+
+            ready(function(){
+
+              var projects_DataGrid = new DataGrid({
+                id: 'projects_data_grid',
+                width: '100%',
+                autoHeight: true,
+                singleClickEdit: true,
+                escapeHTMLInData: false,
+                rowSelector: '20px'
+              }, 'projects_data_grid');
+
+              projects_DataGrid.startup();
+
+
+              function projects_DataGrid_updater(){
+
+                var user_memory = new JsonRest({
+                  target: '/get/projects_byEntity/{{ entity.id }}'
+                });
+
+                user_memory.query().then(function(data){
+                  for(var i=0;i<data.length;i++ ){
+                    var userName = data[i]["name"];
+                    var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['id'] + '">' + userName + '</a>';
+
+                    data[i]["user_link"] = userLink;
+                  }
+
+                  var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
+
+                  var structure = [
+                    {name: 'Thumbnail',                           width: '100px'},
+                    {name: 'Name',         field: 'user_link',    width: '100px'},
+                    {name: 'Login Name',   field: 'login',        width: '200px'},
+                    {name: 'Tasks',        field: 'tasksCount',   width: '150px'},
+                    {name: 'Open Tickets', field: 'ticketsCount', width: 'auto'}
+                  ];
+
+                  projects_DataGrid.set('store', my_store );
+                  projects_DataGrid.set('structure', structure );
+
+                  initUI();
+
+                });
+
+              }
+
+              function initUI(){
+                // connect links
+                var contentPane = registry.byId('central_content');
+
+                // get the Link Elements
+                var dataGridLinks = query('.DataGridLink');
+
+                for (var i=0; i < dataGridLinks.length; i++){
+
+                  on(dataGridLinks[i], 'click', function(){
+                    contentPane.set('href', this.getAttribute('stalker_href'));
+                    contentPane.reset();
+                  })
+                }
+              }
+
+              projects_DataGrid_updater();
+
+            });
+          });
 </script>
 

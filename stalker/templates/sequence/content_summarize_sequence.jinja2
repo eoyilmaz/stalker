@@ -1,0 +1,32 @@
+<div id='sequence_details_content_pane'>
+  <div style="background-color: #ed008c " class="page_title"></div>
+    {# Avatar #}
+  <div id='sequence_thumbnail' class='thumbnail'>No Avatar</div>
+
+    {# Basic Info #}
+  <div id='sequence_info' class='sequence_info'>
+    <h2 style='margin: 0px; text-align: left'>{{ sequence.name }}</h2>
+    <table>
+      <tr>
+        <td style='text-align: right'><b>Description : </b></td>
+        <td>&nbsp;</td>
+        <td>{{ sequence.description }}</td>
+      </tr>
+      <tr>
+        <td style='text-align: right'><b>Created By : </b></td>
+        <td>&nbsp;</td>
+        <td>{{ sequence.created_by.name }}</td>
+      </tr>
+      <tr>
+        <td style='text-align: right'><b>Type : </b></td>
+        <td>&nbsp;</td>
+        <td>{{ sequence.type.name }}</td>
+      </tr>
+      <tr>
+        <td style='text-align: right'><b>Status : </b></td>
+        <td>&nbsp;</td>
+        <td>{{ sequence.status.name }}</td>
+      </tr>
+    </table>
+  </div>
+</div>

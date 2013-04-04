@@ -1,0 +1,68 @@
+<div style="margin: 0" id='sequence_split_container'>
+  <div id='sequence_summary'>
+      {# Summary View #}
+  </div>
+  <div id='sequence_related_data_tab_container'>
+      {# Tab View #}
+  </div>
+</div>
+
+<script type='text/javascript'>
+  require(['dijit/registry', 'dijit/layout/SplitContainer',
+    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+          function(registry, SplitContainer, TabContainer, ContentPane){
+
+            var sequence_SplitContainer = new SplitContainer({
+              region: 'center',
+              orientation: 'vertical',
+              splitter: false
+
+            }, 'sequence_split_container');
+
+            var summary_content_pane = new ContentPane({
+              title: 'Summarize',
+              href: 'summarize/sequence/{{ sequence.id }}',
+              region: 'top',
+              style: 'padding: 0;'
+            },'sequence_summary');
+
+            // **********************************************************************
+            // Bottom Part - Complex Data View
+            var sequence_related_data_tab_container = new TabContainer({
+              region: 'bottom',
+              style: 'background-color: #ed008c'
+            }, 'sequence_related_data_tab_container');
+
+            var users_content_pane = new ContentPane({
+              title: 'Users',
+              href: 'list/users/{{ sequence.id }}'
+            });
+
+            var tasks_content_pane = new ContentPane({
+              title: 'Tasks',
+              href: 'list/tasks/{{ sequence.id }}'
+            });
+
+            var tickets_content_pane = new ContentPane({
+              title: 'Tickets',
+              content: 'list/tickets/{{ sequence.id }}'
+            });
+
+            var versions_content_pane = new ContentPane({
+              title: 'Versions',
+              href: 'list/versions/{{ sequence.id }}'
+            });
+
+            sequence_related_data_tab_container.addChild(users_content_pane);
+            sequence_related_data_tab_container.addChild(tasks_content_pane);
+            sequence_related_data_tab_container.addChild(tickets_content_pane);
+            sequence_related_data_tab_container.addChild(versions_content_pane);
+            sequence_related_data_tab_container.startup();
+
+            sequence_SplitContainer.addChild(summary_content_pane);
+            sequence_SplitContainer.addChild(sequence_related_data_tab_container);
+            sequence_SplitContainer.startup();
+
+
+          });
+</script>

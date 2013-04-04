@@ -22,14 +22,16 @@
       var summary_content_pane = new ContentPane({
         title: 'Summarize',
         href: 'summarize/project/{{ project.id }}',
-        region: 'top'
+        region: 'top',
+        style: 'padding: 0;'
       },'project_summary');
 
 
       // **********************************************************************
       // Bottom Part - Complex Data View
       var project_related_data_tab_container = new TabContainer({
-        region: 'bottom'
+        region: 'bottom',
+        style: 'background-color: #39b54a;'
       }, 'project_related_data_tab_container');
 
       var users_content_pane = new ContentPane({
@@ -51,6 +53,11 @@
         title: 'Shots',
         href: 'list/shots/{{ project.id }}'
       });
+
+      var sequences_content_pane = new ContentPane({
+        title: 'Sequences',
+        href: 'list/sequences/{{ project.id }}'
+      });
       
       var tickets_content_pane = new ContentPane({
         title: 'Tickets',
@@ -63,6 +70,7 @@
       project_related_data_tab_container.addChild(tasks_content_pane);
       project_related_data_tab_container.addChild(assets_content_pane);
       project_related_data_tab_container.addChild(shots_content_pane);
+      project_related_data_tab_container.addChild(sequences_content_pane);
       project_related_data_tab_container.addChild(tickets_content_pane);
       project_related_data_tab_container.startup();
 

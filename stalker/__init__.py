@@ -111,7 +111,7 @@ def main(global_config, **settings):
     config.add_route('list_users', 'list/users/{entity_id}')
     config.add_route('get_users', 'get/users')
     config.add_route('get_users_byEntity', 'get/users_byEntity/{entity_id}')
-
+    config.add_route('append_user', 'append/user/{project_id}')
     
     config.add_route('summarize_user', 'summarize/user/{user_id}')
     config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
@@ -130,7 +130,7 @@ def main(global_config, **settings):
     config.add_route('create_status_list', 'create/status_list')
     config.add_route('create_status_list_for',
                      'create/status_list/{target_entity_type}')
-    config.add_route('update_status_list', 'update/status_list/{status_list_id}')
+    config.add_route('update_status_list', 'update/status_list/{target_entity_type}')
     config.add_route('get_status_lists', 'get/status_lists')
     config.add_route('get_status_lists_for',
                      'get/status_lists_for/{target_entity_type}')
@@ -140,6 +140,7 @@ def main(global_config, **settings):
     config.add_route('create_status', 'create/status')
     config.add_route('update_status', 'update/status')
     config.add_route('get_statuses', 'get/statuses')
+    config.add_route('get_statuses_for', 'get/statuses_for/{target_entity_type}')
     config.add_route('get_statuses_of', 'get/statuses_of/{status_list_id}')
     
     # *************************************************************************
@@ -155,6 +156,7 @@ def main(global_config, **settings):
     # Shots
     config.add_route('create_shot', 'create/shot/{project_id}')
     config.add_route('view_shot', 'view/shot/{shot_id}')
+    config.add_route('summarize_shot', 'summarize/shot/{shot_id}')
     config.add_route('update_shot', 'update/shot/{shot_id}')
     config.add_route('list_shots', 'list/shots/{project_id}')
     config.add_route('get_shots', 'get/shots/{project_id}')
@@ -163,6 +165,7 @@ def main(global_config, **settings):
     # Sequence
     config.add_route('create_sequence', 'create/sequence/{project_id}')
     config.add_route('view_sequence', 'view/sequence/{sequence_id}')
+    config.add_route('summarize_sequence', 'summarize/sequence/{sequence_id}')
     config.add_route('update_sequence', 'update/sequence/{sequence_id}')
     config.add_route('list_sequences', 'list/sequences/{project_id}')
     config.add_route('get_sequences',

@@ -37,7 +37,6 @@ def create_shot(request):
             if 'name' in request.params and \
                'code' in request.params and  \
                'sequence_id' in request.params and \
-               'status_list_id' in request.params and \
                'status_id' in request.params:
                 
                 sequence_id = request.params['sequence_id']
@@ -47,7 +46,7 @@ def create_shot(request):
                 project = Project.query.filter_by(id=project_id).first()
                 # get the status_list
                 status_list = StatusList.query.filter_by(
-                    id=request.params["status_list_id"]
+                    target_entity_type='Shot'
                 ).first()
                 
                 # there should be a status_list
@@ -103,6 +102,43 @@ def create_shot(request):
             StatusList.query.filter_by(target_entity_type='Shot').first()
     }
 
+@view_config(
+    route_name='view_shot',
+    renderer='templates/shot/page_view_shot.jinja2'
+)
+def view_shot(request):
+    """runs when viewing an shot
+    """
+
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+    shot_id = request.matchdict['shot_id']
+    shot = Shot.query.filter_by(id=shot_id).first()
+
+    return {
+        'user': logged_in_user,
+        'shot': shot
+    }
+
+@view_config(
+    route_name='summarize_shot',
+    renderer='templates/shot/content_summarize_shot.jinja2'
+)
+def summarize_shot(request):
+    """runs when viewing an shot
+    """
+
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+    shot_id = request.matchdict['shot_id']
+    shot = Shot.query.filter_by(id=shot_id).first()
+
+    return {
+        'user': logged_in_user,
+        'shot': shot
+    }
 
 @view_config(
     route_name='get_shots',
@@ -116,13 +152,11 @@ def get_shots(request):
     project = Project.query.filter_by(id=project_id).first()
     return [
         {
-            'shot': shot,
             'id': shot.id,
             'name': shot.name,
-            'project': shot.project,
-            'sequences': shot.sequences,
             'status': shot.status.name,
+            'user_id': shot.created_by.id,
             'user_name': shot.created_by.name
         }
-        for shot in Shot.query.filter_by(_project=project).all()
+        for shot in Shot.query.filter_by(project_id=project_id).all()
     ]

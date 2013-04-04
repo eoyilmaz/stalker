@@ -1,4 +1,4 @@
-<div id='user_split_container'>
+<div style="margin-top: 0" id='user_split_container'>
   <div id='user_summary'>
       {# Summary View #}
   </div>
@@ -22,13 +22,15 @@
       var summary_content_pane = new ContentPane({
         title: 'Summarize',
         href: 'summarize/user/{{ user.id }}',
-        region: 'top'
+        region: 'top',
+        style: 'padding: 0;'
       },'user_summary');
 
       // **********************************************************************
       // Bottom Part - Complex Data View
       var user_related_data_tab_container = new TabContainer({
-        region: 'bottom'
+        region: 'bottom',
+        style: 'background-color: #00aef0;'
       }, 'user_related_data_tab_container');
 
       

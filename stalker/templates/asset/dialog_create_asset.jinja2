@@ -53,19 +53,19 @@
       </tr>
       
       {# STATUS LIST#}
-      <tr>
-        <td class='label_column'>
-          <label for='asset_status_list'>Status List</label>
-        </td>
-        <td class='input_column'>
-          <input id='asset_status_list'>
-        </td>
-        <td class='button_column'>
-          <button id='asset_create_status_list_button'>New</button>
-          <button id='asset_update_status_list_button'>Update</button>
-        </td>
-      </tr>
-      
+{#      <tr>#}
+{#        <td class='label_column'>#}
+{#          <label for='asset_status_list'>Status List</label>#}
+{#        </td>#}
+{#        <td class='input_column'>#}
+{#          <input id='asset_status_list'>#}
+{#        </td>#}
+{#        <td class='button_column'>#}
+{#          <button id='asset_create_status_list_button'>New</button>#}
+{#          <button id='asset_update_status_list_button'>Update</button>#}
+{#        </td>#}
+{#      </tr>#}
+{#      #}
       {# STATUS #}
       <tr>
         <td class='label_column'>
@@ -73,6 +73,9 @@
         </td>
         <td class='input_column'> 
           <input id='asset_status'>
+        </td>
+        <td class='button_column'>
+          <button id='asset_add_status_button'>Add Status</button>
         </td>
       </tr>
       
@@ -213,87 +216,113 @@
       
       
       // ************************************************************************
-      // Status List
-      //
-      // The Memory
-      var status_list_memory = new JsonRest({
-        target: 'get/status_lists_for/Asset'
-      });
-      
-      // The Field
-      var status_list_filtering_select = new FilteringSelect({
-        name: 'status_list_id',
-        label: 'Status List',
-        required: true,
-        onChange: function(){
-          status_updater({animate: true});
-        }
-      }, 'asset_status_list');
-      status_list_filtering_select.startup();
-      
-      // The Updater
-      var status_list_field_updater = fieldUpdater({
-        'memory': status_list_memory,
-        'widget': status_list_filtering_select
-      });
-      status_list_field_updater({animate: false});
-      
-      // New Status List Button
-      var create_status_list_button = dialogCaller({
-        label: 'New',
-        dialog_id: 'create_status_list_dialog',
-        content_creator: create_status_list_dialog_creator,
-        attach_to: 'asset_create_status_list_button',
-        related_field_updater: status_list_field_updater,
-        data_id: 'Asset'
-      });
-      create_status_list_button.startup();
-      
-      // Update Status List Button
-      var update_status_list_button = dialogCaller({
-        label: 'Update',
-        dialog_id: 'update_status_list_dialog',
-        content_creator: update_status_list_dialog_creator,
-        attach_to: 'asset_update_status_list_button',
-        related_field_updater: status_list_field_updater,
-        data_id: function(){
-          return status_list_filtering_select.get('value')
-        }
-      });
-      update_status_list_button.startup();
-      
-      
-      
+{#      // Status List#}
+{#      //#}
+{#      // The Memory#}
+{#      var status_list_memory = new JsonRest({#}
+{#        target: 'get/status_lists_for/Asset'#}
+{#      });#}
+{#      #}
+{#      // The Field#}
+{#      var status_list_filtering_select = new FilteringSelect({#}
+{#        name: 'status_list_id',#}
+{#        label: 'Status List',#}
+{#        required: true,#}
+{#        onChange: function(){#}
+{#          status_updater({animate: true});#}
+{#        }#}
+{#      }, 'asset_status_list');#}
+{#      status_list_filtering_select.startup();#}
+{#      #}
+{#      // The Updater#}
+{#      var status_list_field_updater = fieldUpdater({#}
+{#        'memory': status_list_memory,#}
+{#        'widget': status_list_filtering_select#}
+{#      });#}
+{#      status_list_field_updater({animate: false});#}
+{#      #}
+{#      // New Status List Button#}
+{#      var create_status_list_button = dialogCaller({#}
+{#        label: 'New',#}
+{#        dialog_id: 'create_status_list_dialog',#}
+{#        content_creator: create_status_list_dialog_creator,#}
+{#        attach_to: 'asset_create_status_list_button',#}
+{#        related_field_updater: status_list_field_updater,#}
+{#        data_id: 'Asset'#}
+{#      });#}
+{#      create_status_list_button.startup();#}
+{#      #}
+{#      // Update Status List Button#}
+{#      var update_status_list_button = dialogCaller({#}
+{#        label: 'Update',#}
+{#        dialog_id: 'update_status_list_dialog',#}
+{#        content_creator: update_status_list_dialog_creator,#}
+{#        attach_to: 'asset_update_status_list_button',#}
+{#        related_field_updater: status_list_field_updater,#}
+{#        data_id: function(){#}
+{#          return status_list_filtering_select.get('value')#}
+{#        }#}
+{#      });#}
+{#      update_status_list_button.startup();#}
       
       // ************************************************************************
       // Status 
       // 
       // The Memory
       var status_memory = new JsonRest({
-        target: 'get/statuses_of/{{ status_list.id }}'
+        target: 'get/statuses_for/Asset'
       });
       
       // The Field
       var status_filtering_select = new FilteringSelect({
         name: 'status_id',
-        required: true,
-        store: status_memory,
-        disabled:true,
-        placeHolder: 'Select A Status'
+        label: 'Status',
+        required: true
       }, 'asset_status');
       status_filtering_select.startup();
 
+      var update_button_function = function(data){
+
+        if(data.length>0){
+
+          asset_add_status_button.set('onClick', function(){
+
+            var dialog = dijit.byId('update_status_list_dialog');
+
+            if (dialog != null){
+              dialog.destroyRecursive();
+            }
+            dialog = update_status_list_dialog_creator('Asset');
+            // set the field updater
+            dialog.set( 'related_field_updater', status_field_updater );
+            // show the dialog
+            dialog.show();
+          });
+
+          status_field_updater.set('callBack', function(){});
+
+        }
+      };
 
       // The Updater
-      var status_updater = fieldUpdater({
-        memory: status_memory,
-        query_data: function(){
-          status_filtering_select.set('disabled', false);
-          var widget = registry.byId('asset_status_list');
-          return widget.get('value');
-        },
-        widget: status_filtering_select
+      var status_field_updater = fieldUpdater({
+        'memory': status_memory,
+        'widget': status_filtering_select,
+        'callBack': update_button_function
       });
+
+
+      var asset_add_status_button = dialogCaller({
+        label: 'Add Status',
+        dialog_id: 'create_status_list_dialog',
+        content_creator: create_status_list_dialog_creator,
+        attach_to: 'asset_add_status_button',
+        related_field_updater: status_field_updater,
+        data_id: 'Asset'
+      });
+
+      asset_add_status_button.startup();
+      status_field_updater({animate: true});
       
       
       

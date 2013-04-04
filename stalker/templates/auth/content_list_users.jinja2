@@ -1,5 +1,5 @@
 <div id='view_users'>
-  <button id='view_users_create_user_button'>New User</button>
+  <button id='view_users_append_user_button'>Append User</button>
   <div id='users_data_grid'></div>
 </div>
 
@@ -13,8 +13,6 @@
                JsonRest, fieldUpdater, dialogCaller, on, query, ready){
         
         ready(function(){
-          var my_store;
-          var structure;
           
           var users_DataGrid = new DataGrid({
             id: 'users_data_grid',
@@ -25,45 +23,21 @@
             rowSelector: '20px'
           }, 'users_data_grid');
           
-          var create_user_button = dialogCaller({
-            label: 'New User',
-            dialog_id: 'create_user_dialog',
-            content_creator: create_user_dialog_creator,
-            attach_to: 'view_users_create_user_button',
+          var append_user_button = dialogCaller({
+            label: 'Append User',
+            dialog_id: 'append_user_dialog',
+            content_creator: append_user_dialog_creator,
+            attach_to: 'view_users_append_user_button',
             related_field_updater: users_DataGrid_updater,
             data_id: '{{ entity.id }}'
           });
 
           users_DataGrid.startup();
-          create_user_button.startup();
+          append_user_button.startup();
           
-          
-{#          var user_memory = new Memory({#}
-{#            data: [#}
-{#              {% for user in users %}#}
-{#                {#}
-{#                  user_link: '<a class="DataGridLink" href="#" stalker_href="view/user/' + '{{ user.id }}' + '">' + '{{ user.name }}' + '</a>',#}
-{#                  #}
-{#                  login: '{{ user.login }}',#}
-{#                  tasksCount: '{{ user.tasks|count }}',#}
-{#                  ticketsCount: '{{ user.open_tickets|count }}'#}
-{#                },#}
-{#              {% endfor %}#}
-{#            ]#}
-{#          });#}
-{#          #}
-{#          my_store =  new ObjectStore({ objectStore:user_memory });#}
-{#          #}
-{#          structure = [#}
-{#            {name: 'Thumbnail',                           width: '100px'},#}
-{#            {name: 'Name',         field: 'user_link',    width: '100px'},#}
-{#            {name: 'Login Name',   field: 'login',        width: '200px'},#}
-{#            {name: 'Tasks',        field: 'tasksCount',   width: '150px'},#}
-{#            {name: 'Open Tickets', field: 'ticketsCount', width: 'auto'}#}
-{#          ];#}
+
             
-            
-            function users_DataGrid_updater(){
+          function users_DataGrid_updater(){
               
               var user_memory = new JsonRest({
                 target: '/get/users_byEntity/{{ entity.id }}'
@@ -77,27 +51,26 @@
                   data[i]["user_link"] = userLink;
                 }
                 
-                my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
-                
-                structure = [
+                var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
+
+                var structure = [
                   {name: 'Thumbnail',                           width: '100px'},
                   {name: 'Name',         field: 'user_link',    width: '100px'},
                   {name: 'Login Name',   field: 'login',        width: '200px'},
                   {name: 'Tasks',        field: 'tasksCount',   width: '150px'},
                   {name: 'Open Tickets', field: 'ticketsCount', width: 'auto'}
                 ];
-                
+
+                users_DataGrid.set('store', my_store );
+                users_DataGrid.set('structure', structure );
+
                 initUI();
                 
               });
               
             }
 
-            function initUI(){
-              
-              users_DataGrid.set('store', my_store );
-              users_DataGrid.set('structure', structure );
-              
+          function initUI(){
               // connect links
               var contentPane = registry.byId('central_content');
               

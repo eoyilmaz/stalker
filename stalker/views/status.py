@@ -176,17 +176,17 @@ def create_status_list(request):
     permission='Update_StatusList'
 )
 def update_status_list(request):
-    """called when updateing a StatusList
+    """called when updating a StatusList
     """
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
     
-    status_list_id = request.matchdict['status_list_id']
-    status_list = StatusList.query.filter_by(id=status_list_id).first()
+    status_list_type = request.matchdict['target_entity_type']
+    status_list = StatusList.query.filter_by(target_entity_type=status_list_type).first()
     
     if 'submitted' in request.params:
         if request.params['submitted'] == 'update':
-            logger.debug('updateing a StatusList')
+            logger.debug('updating a StatusList')
             # just update the given StatusList
             
             # get statuses
@@ -208,7 +208,7 @@ def update_status_list(request):
             DBSession.add(status_list)
     
     return {
-        'status_list': status_list,
+        'status_list': status_list
     }
 
 
@@ -248,6 +248,24 @@ def get_statuses_of(request):
         for status in status_list.statuses
     ]
 
+@view_config(
+    route_name='get_statuses_for',
+    renderer='json',
+    permission='Read_Status'
+)
+def get_statuses_for(request):
+    """returns the Statuses of given StatusList
+    """
+    status_list_type = request.matchdict['target_entity_type']
+    status_list = StatusList.query.filter_by(target_entity_type=status_list_type).first()
+
+    return [
+        {
+            'id': status.id,
+            'name': status.name + " (" + status.code+ ")"
+        }
+        for status in status_list.statuses
+    ] if status_list else []
 
 @view_config(
     route_name='get_status_lists',

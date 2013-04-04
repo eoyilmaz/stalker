@@ -20,6 +20,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
         var fieldUpdater = function(kwargs){
             var memory = kwargs.memory;
             var widget = kwargs.widget;
+            var callBackFunction = kwargs.callBack || function(arg){};
             var query_data = kwargs.query_data || null;
             var selected = kwargs.selected || [];
             var placeHolder = kwargs.placeHolder || '';
@@ -48,7 +49,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                     query = memory.query();
                 }
                 
-                var result = query.then(function(data){
+                return query.then(function(data){
 
                     // if the widget is a MultiSelect
                     if (widget.declaredClass == "dijit.form.MultiSelect"){
@@ -86,7 +87,8 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                         }
                         // set the data normally
                         widget.set('store', new Memory({data: data}));
-//                        console.log('data.length: ' + data.length);
+
+                        //console.log('data.length: '+ widget.label + ' : ' + data.length);
                         
                         if (data.length > 0){
                             if(widget.label){
@@ -135,6 +137,8 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                             }
                         }).play();
                     }
+
+                    callBackFunction(data);
                 });
             };
         };

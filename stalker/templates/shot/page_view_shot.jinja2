@@ -1,0 +1,68 @@
+<div style="margin: 0" id='shot_split_container'>
+  <div id='shot_summary'>
+      {# Summary View #}
+  </div>
+  <div id='shot_related_data_tab_container'>
+      {# Tab View #}
+  </div>
+</div>
+
+<script type='text/javascript'>
+  require(['dijit/registry', 'dijit/layout/SplitContainer',
+    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+          function(registry, SplitContainer, TabContainer, ContentPane){
+
+            var shot_SplitContainer = new SplitContainer({
+              region: 'center',
+              orientation: 'vertical',
+              splitter: false
+
+            }, 'shot_split_container');
+
+            var summary_content_pane = new ContentPane({
+              title: 'Summarize',
+              href: 'summarize/shot/{{ shot.id }}',
+              region: 'top',
+              style: 'padding: 0;'
+            },'shot_summary');
+
+            // **********************************************************************
+            // Bottom Part - Complex Data View
+            var shot_related_data_tab_container = new TabContainer({
+              region: 'bottom',
+              style: 'background-color: #fff200'
+            }, 'shot_related_data_tab_container');
+
+            var users_content_pane = new ContentPane({
+              title: 'Users',
+              href: 'list/users/{{ shot.id }}'
+            });
+
+            var tasks_content_pane = new ContentPane({
+              title: 'Tasks',
+              href: 'list/tasks/{{ shot.id }}'
+            });
+
+            var tickets_content_pane = new ContentPane({
+              title: 'Tickets',
+              content: 'list/tickets/{{ shot.id }}'
+            });
+
+            var versions_content_pane = new ContentPane({
+              title: 'Versions',
+              href: 'list/versions/{{ shot.id }}'
+            });
+
+            shot_related_data_tab_container.addChild(users_content_pane);
+            shot_related_data_tab_container.addChild(tasks_content_pane);
+            shot_related_data_tab_container.addChild(tickets_content_pane);
+            shot_related_data_tab_container.addChild(versions_content_pane);
+            shot_related_data_tab_container.startup();
+
+            shot_SplitContainer.addChild(summary_content_pane);
+            shot_SplitContainer.addChild(shot_related_data_tab_container);
+            shot_SplitContainer.startup();
+
+
+          });
+</script>

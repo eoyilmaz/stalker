@@ -13,9 +13,6 @@
                    JsonRest, fieldUpdater, dialogCaller, on, query){
 
 
-            var my_store;
-            var structure;
-
             var asset_data_grid = new DataGrid({
               id: 'assets_data_grid',
               width: '100%',
@@ -39,21 +36,12 @@
 
             //asset_data_grid_updater();
 
-            var status_memory;
-            var status_list_memory = new JsonRest({
-              target: 'get/status_lists_for/Asset'
+            var status_memory = new JsonRest({
+              target: 'get/statuses_for/Asset'
             });
 
-
-            status_list_memory.query().then(function(data){
-
-              var status_id = data[0]['id'];
-              status_memory = new JsonRest({
-                target: 'get/statuses_of/'+ status_id
-              });
-
+            status_memory.query().then(function(data){
               asset_data_grid_updater();
-
             });
 
 
@@ -64,7 +52,6 @@
               });
 
               asset_memory.query().then(function(data){
-
 
                 for(var i=0;i<data.length;i++ ){
 
@@ -80,13 +67,13 @@
                 }
 
 
-                my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
+                var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
 
-                structure = [
+                var structure = [
                   {name: 'Thumbnail',                         width: '100px'},
                   {name: 'Name',        field: 'asset_link',  width: '100px'},
                   {name: 'Type',        field: 'type',        width: '200px'},
-                  {name: 'Status',      field: 'status',      width: '150px', editable: true, type: dojox.grid.cells._Widget,
+                  {name: 'Status',      field: 'status',      width: '150px', editable: true,
                     widgetClass: FilteringSelect,
                     widgetProps: {
                       store: status_memory
@@ -94,6 +81,10 @@
                   {name: 'Created By',  field: 'user_link',     width: '150px'},
                   {name: 'Description', field: 'description', width: 'auto'}
                 ];
+
+                asset_data_grid.set('store', my_store );
+                asset_data_grid.set('structure', structure );
+
 
                 initUI();
 
@@ -103,8 +94,6 @@
 
             function initUI() {
 
-              asset_data_grid.set('store', my_store );
-              asset_data_grid.set('structure', structure );
 
               // connect links
               var contentPane = registry.byId('central_content');

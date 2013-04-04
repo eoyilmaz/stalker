@@ -74,11 +74,18 @@
         name: 'name',
         label: 'Name',
         placeHolder: 'Enter a name',
-        required: true
+        required: true,
+        {% if target_entity_type %}
+          disabled: true,
+          value: 'StatusListFor{{ target_entity_type }}'
+        {% else %}
+          disabled: false
+        {% endif %}
       }, 'status_list_name');
       
       // **********************************************************************
       // Target Entity Type
+
       var target_entity_type_store = new Memory({
         data: [
           {% for entity_type in entity_types %}
@@ -89,17 +96,21 @@
           {% endfor %}
         ]
       });
-      
+
       var target_entity_type_select = new FilteringSelect({
         name: 'target_entity_type',
         label: 'Target Entity Type',
         required: true,
         placeHolder: 'Select A Target Entity Type',
         store: target_entity_type_store,
-{#        value: target_entity_type_store.data[0].id#}
-        value: '{% if target_entity_type %}{{ target_entity_type }}{% else %}{% endif %}'
+        {% if target_entity_type %}
+          disabled: true,
+          value: '{{ target_entity_type }}'
+        {% else %}
+          disabled: false
+        {% endif %}
       }, 'status_list_target_entity_type');
-      
+
       
       // **********************************************************************
       // Statuses
@@ -112,19 +123,8 @@
       // The Widget
       var statuses_tagSelect = new TagSelect({
         name: 'statuses',
-        required: true,
-        onChange: function(){
-          alert('statuses_tagSelect.tags.length' +statuses_tagSelect.tags.length)
-          if( statuses_tagSelect.tags.length > 0 ){
-            submit_button.set('disabled', false);
-          }
-
-          else{
-            submit_button.set('disabled', true);
-          }
-
-        }
-      }, 'status_list_statuses');
+        required: true
+     }, 'status_list_statuses');
       
       // The Updater
       var statuses_field_updater = fieldUpdater({
@@ -154,8 +154,9 @@
         type: 'button',
         disabled: false,
         onClick: function(){
-
-          submitForm({
+          name_textBox.set('disabled', false);
+          target_entity_type_select.set('disabled', false);
+         submitForm({
             dialog: registry.byId('create_status_list_dialog'),
             form: create_status_list_form,
             additional_data: {submitted: 'create'},
@@ -164,10 +165,7 @@
           });
         }
       }, 'status_list_submit_button');
-      
-      
-      
-      
+
       
       // **********************************************************************
       // Cancel Button

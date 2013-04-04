@@ -38,8 +38,6 @@ def create_sequence(request):
             if 'name' in request.params and \
                'code' in request.params and \
                'description' in request.params and \
-               'project_id' in request.params and \
-               'status_list_id' in request.params and \
                'status_id' in request.params:
 
                 project_id = request.matchdict['project_id']
@@ -47,7 +45,7 @@ def create_sequence(request):
                 
                 # get the status_list
                 status_list = StatusList.query.filter_by(
-                    id=int(request.params['status_list_id'])
+                    target_entity_type='Sequence'
                 ).first()
                 
                 # there should be a status_list
@@ -130,7 +128,43 @@ def update_sequence(request):
                             .all(),
     }
 
+@view_config(
+    route_name='view_sequence',
+    renderer='templates/sequence/page_view_sequence.jinja2'
+)
+def view_sequence(request):
+    """runs when viewing an sequence
+    """
 
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+    sequence_id = request.matchdict['sequence_id']
+    sequence = Sequence.query.filter_by(id=sequence_id).first()
+
+    return {
+        'user': logged_in_user,
+        'sequence': sequence
+    }
+
+@view_config(
+    route_name='summarize_sequence',
+    renderer='templates/sequence/content_summarize_sequence.jinja2'
+)
+def summarize_sequence(request):
+    """runs when viewing an sequence
+    """
+
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+    sequence_id = request.matchdict['sequence_id']
+    sequence = Sequence.query.filter_by(id=sequence_id).first()
+
+    return {
+        'user': logged_in_user,
+        'sequence': sequence
+    }
 @view_config(
     route_name='get_sequences',
     renderer='json',
@@ -142,6 +176,12 @@ def get_sequences(request):
     project_id = request.matchdict['project_id']
     project = Project.query.filter_by(id=project_id).first()
     return [
-            {'id': sequence.id, 'name': sequence.name}
+            {
+                'id': sequence.id,
+                'name': sequence.name,
+                'status': sequence.status.name,
+                'user_id': sequence.created_by.id,
+                'user_name': sequence.created_by.name
+            }
             for sequence in project.sequences
     ]

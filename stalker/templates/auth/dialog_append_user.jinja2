@@ -1,91 +1,96 @@
-<div class='dijitDialogPaneContentArea'>
+<div class='dijitDialogPaneContentArea' style='height: 380px;width: 380px'>
+  <form id='append_user_form'>
+    <table style='width: 100%'>
+      <tr>
+        <td class='input_column'>
+          <select id='all_users_list'>
+          </select>
+        </td>
+        <td class='input_column'>
+          <select id='project_users_list' >
+          </select>
+        </td>
+      </tr>
+    </table>
+  </form>
 
 </div>
 
-<div class='dijitDialogPaneActionBar'>
-  <button id='user_add_button'>Add</button>
-  <button id='user_cancel_button'>Cancel</button>
-</div>
+{#<div class='dijitDialogPaneActionBar'>#}
+{#  <button id='user_append_button'>Append</button>#}
+{#  <button id='user_cancel_button'>Cancel</button>#}
+{#</div>#}
 
 <script type="text/javascript">
-  require(["dgrid/List", "dgrid/OnDemandGrid", "dgrid/Selection",
-    "dgrid/Keyboard", "dgrid/editor", "dijit/form/CheckBox",
-    "dijit/form/TimeTextBox",  "dijit/form/Select","dojo/data/ObjectStore",
-    "dijit/form/FilteringSelect", "dojo/_base/declare", "dgrid/test/data/base",
-    "dojo/domReady!"],
-          function(List, Grid, Selection, Keyboard, editor, CheckBox,
-                   TimeTextBox, Select, ObjectStore, FilteringSelect,
-                   declare){
+  require(['dijit/registry',
+           'dojo/store/Memory',
+           'dijit/form/Form',
+           'dijit/form/Button',
+           'dijit/form/MultiSelect',
+           'dojo/store/JsonRest',
+           'stalker/submitForm',
+           'stalker/dialogCaller',
+           'stalker/fieldUpdater',
+           'dojo/domReady!'
+  ],
+          function(registry,
+                   Memory,
+                   Form,
+                   Button,
+                   MultiSelect,
+                   JsonRest,
+                   submitForm,
+                   dialogCaller,
+                   fieldUpdater)
+          {
+            // **********************************************************************
+            // Form
+            var append_user_form = new Form({
+              id: 'append_user_form'
+            }, 'append_user_form');
+            append_user_form.startup();
 
-            stateStore = new ObjectStore({
-              objectStore:testStateStore,
-              labelProperty: "name"
+            // **********************************************************************
+            // All User List
+            var all_users_memory = new JsonRest({
+              target: '/get/users'
             });
 
-            var columns = [
-              {field: "id", label: "id"},
-              editor({
-                label: "CheckBox",
-                field: "bool2",
-                editorArgs: {
-                  value: "checked"
-                }
-              }, CheckBox),
-              editor({label: "Time", field: "date2", editorArgs: {
-                timePattern: "HH:mm:ss",
-                clickableIncrement: "T00:15:00",
-                visibleIncrement: "T00:15:00",
-                visibleRange: "T01:00:00"}}, TimeTextBox),
-              editor({
-                label: "Select Options",
-                field: "bool",
-                get: function(item){
-                  // return as string to match option in list
-                  return "" + item.bool;
-                },
-                set: function(item){
-                  // convert back to boolean from string
-                  return item.bool == "true";
-                },
-                editorArgs: {
-                  style: "width:75px;",
-                  options: [
-                    {value: "true", label: "true"},
-                    {value: "false", label: "false"}
-                  ]
-                }
-              }, Select, "dblclick"),
-              editor({
-                label: "Select Store",
-                field: "state",
-                editorArgs: {
-                  store: stateStore,
-                  maxHeight: 150,
-                  style: "width:120px;"
-                }
-              }, Select, "click"),
-              editor({
-                label: "FilteringSelect Store",
-                field: "state2",
-                editorArgs: {
-                  store: stateStore,
-                  maxHeight: 150,
-                  style: "width:120px;"
-                }
-              }, FilteringSelect)
-              // Note that mileage may vary with editOn + widgets with multiple focusable children, e.g. dijit/Editor
-            ];
+            var all_users_multi_select = new MultiSelect({
+              name: 'all_users',
+              required: false,
+              style: 'height: 150px; width: 200px'
+            }, 'all_users_list');
+            all_users_multi_select.startup();
 
-
-            window.grid = new (declare([Grid, Selection, Keyboard]))({
-              store: testTypesStore,
-              columns: columns,
-              selectionMode: "none"
-            }, "grid");
-
-            grid.on("dgrid-datachange", function(evt){
-              console.log("data changed: ", evt.oldValue, " -> ", evt.value);
-              console.log("cell: ", evt.cell, evt.cell.row.id);
+            // The Updater
+            var all_users_field_updater = fieldUpdater({
+              'memory': all_users_memory,
+              'widget': all_users_multi_select
             });
-          });
+            // run the function to fill the data for the first time
+            all_users_field_updater({animate: false});
+
+            // **********************************************************************
+            // Project User List
+            var project_users_memory = new JsonRest({
+              target: '/get/users_byEntity/{{ project.id }}'
+            });
+
+            var project_users_multi_select = new MultiSelect({
+              name: 'project_users',
+              required: false,
+              style: 'height: 150px; width: 200px'
+            }, 'project_users_list');
+            project_users_multi_select.startup();
+
+            // The Updater
+            var project_users_field_updater = fieldUpdater({
+              'memory': project_users_memory,
+              'widget': project_users_multi_select
+            });
+            // run the function to fill the data for the first time
+            project_users_field_updater({animate: false});
+
+           });
 </script>

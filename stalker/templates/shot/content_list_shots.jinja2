@@ -1,51 +1,106 @@
-<button id='view_shots_create_shot_button'>New Shot</button>
-<div id='shots_data_grid'></div>
+<div id='list_shots'>
+  <button id='list_shots_create_shot_button'>New Shot</button>
+  <div id='shots_data_grid'></div>
+</div>
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
     'dojo/store/Memory', 'dojo/store/JsonRest', 'stalker/fieldUpdater',
-    'stalker/dialogCaller', 'dojo/domReady!'],
+    'stalker/dialogCaller', 'dojo/on', 'dojo/query','dojo/domReady!'],
     function(registry, ObjectStore, DataGrid, Memory, JsonRest, fieldUpdater,
-             dialogCaller){
-      
-      var shot_memory = new JsonRest({
-        target: '/get/shots/{{ project.id }}'
-      });
-      
-      var my_store = new ObjectStore({objectStore: shot_memory});
-      
-      /* create a new grid */
-      var shot_data_grid = new DataGrid({
-        store: my_store,
-        structure: [
-          {name: 'Thumbnail',                         width: '100px'},
-          {name: 'Name',        field: 'name',        width: '100px'},
-{#          {name: 'Sequences',    field: 'sequences',    width: '200px'},#}
-          {name: 'Status',      field: 'status',      width: '150px'},
-          {name: 'Created By',  field: 'user_name',   width: '150px'}
-        ],
+             dialogCaller, on, query){
+
+      var shots_data_grid = new DataGrid({
+        id: 'shots_data_grid',
         width: '100%',
         autoHeight: true,
+        singleClickEdit: true,
+        escapeHTMLInData: false,
         rowSelector: '20px'
       }, 'shots_data_grid');
-      shot_data_grid.startup();
-      
-      var shot_data_grid_updater = fieldUpdater({
-        'memory': shot_memory,
-        'widget': shot_data_grid
-      });
-      
+
       var create_shot_button = dialogCaller({
         label: 'New Shot',
         dialog_id: 'create_shot_dialog',
         content_creator: create_shot_dialog_creator,
-        attach_to: 'view_shots_create_shot_button',
+        attach_to: 'list_shots_create_shot_button',
         related_field_updater: shot_data_grid_updater,
         data_id: '{{ project.id }}'
       });
+
+      shots_data_grid.startup();
       create_shot_button.startup();
 
-      shot_data_grid_updater();
-      
+      //asset_data_grid_updater();
+
+      var status_memory = new JsonRest({
+        target: 'get/statuses_for/Shot'
+      });
+
+      status_memory.query().then(function(data){
+        shot_data_grid_updater();
+      });
+
+
+      function shot_data_grid_updater(){
+
+        var shot_memory = new JsonRest({
+          target: '/get/shots/{{ project.id }}'
+        });
+
+        shot_memory.query().then(function(data){
+
+          for(var i=0;i<data.length;i++ ){
+
+            var shotName = data[i]["name"];
+            var shotLink = '<a class="DataGridLink" href="#" stalker_href="view/shot/' + data[i]['id'] + '">' + shotName + '</a>';
+
+            var userName = data[i]["user_name"];
+            var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
+
+            data[i]["shot_link"] = shotLink;
+            data[i]["user_link"] = userLink;
+
+          }
+
+
+          var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
+
+          var structure = [
+            {name: 'Thumbnail',                         width: '100px'},
+            {name: 'Name',        field: 'shot_link',  width: '100px'},
+            {name: 'Status',      field: 'status',      width: '150px'},
+            {name: 'Created By',  field: 'user_link',     width: '150px'}
+          ];
+
+          shots_data_grid.set('store', my_store );
+          shots_data_grid.set('structure', structure );
+
+          initUI();
+        });
+
+
+
+      }
+
+      function initUI() {
+
+
+        // connect links
+        var contentPane = registry.byId('central_content');
+
+        // get the Link Elements
+        var dataGridLinks = query('.DataGridLink');
+
+        for (var i=0; i < dataGridLinks.length; i++){
+
+          on(dataGridLinks[i], 'click', function(){
+            contentPane.set('href', this.getAttribute('stalker_href'));
+            contentPane.reset();
+          })
+        }
+
+      }
+
   });
 </script>
 

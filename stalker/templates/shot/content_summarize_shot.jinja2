@@ -1,0 +1,32 @@
+<div id='shot_details_content_pane'>
+  <div style="background-color: #fff200 " class="page_title"></div>
+    {# Avatar #}
+  <div id='shot_thumbnail' class='thumbnail'>No Avatar</div>
+
+    {# Basic Info #}
+  <div id='shot_info' class='shot_info'>
+    <h2 style='margin: 0px; text-align: left'>{{ shot.name }}</h2>
+    <table>
+      <tr>
+        <td style='text-align: right'><b>Description : </b></td>
+        <td>&nbsp;</td>
+        <td>{{ shot.description }}</td>
+      </tr>
+      <tr>
+        <td style='text-align: right'><b>Created By : </b></td>
+        <td>&nbsp;</td>
+        <td>{{ shot.created_by.name }}</td>
+      </tr>
+      <tr>
+        <td style='text-align: right'><b>Type : </b></td>
+        <td>&nbsp;</td>
+        <td>{{ shot.type.name }}</td>
+      </tr>
+      <tr>
+        <td style='text-align: right'><b>Status : </b></td>
+        <td>&nbsp;</td>
+        <td>{{ shot.status.name }}</td>
+      </tr>
+    </table>
+  </div>
+</div>

@@ -78,6 +78,7 @@
         var name_textBox = new ValidationTextBox({
           name: 'name',
           label: 'Name',
+          disabled: true,
           value: '{{ status_list.name }}',
           placeHolder: 'Enter a name',
           required: true
@@ -145,14 +146,19 @@
         // **********************************************************************
         // Update Button
         var update_button = new Button({
-          label: 'Update',
+          label: 'OK',
           type: 'button',
           onClick: function(){
+
+            name_textBox.set('disabled', false);
+            target_entity_type_select.set('disabled', false);
+
             submitForm({
               dialog: registry.byId('update_status_list_dialog'),
               form: update_status_list_form,
               additional_data: {submitted: 'update'},
-              url: '{{ request.route_url("update_status_list", status_list_id=status_list.id) }}',
+              url: 'update/status_list/{{status_list.target_entity_type}}',
+{#              url: '{{ request.route_url("update_status_list", target_entity_type=status_list.type) }}',#}
               method: 'POST'
             });
           }

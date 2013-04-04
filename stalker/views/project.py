@@ -12,8 +12,8 @@ from sqlalchemy.exc import IntegrityError
 
 import transaction
 from stalker.db import DBSession
-from stalker import (User, ImageFormat, Repository, Structure, StatusList,
-                     Project)
+from stalker import (User, ImageFormat, Repository, Structure, Status,
+                     StatusList, Project)
 
 import logging
 from stalker import log
@@ -44,7 +44,7 @@ def create_project(request):
                           'repository',
                           'structure',
                           'lead',
-                          'status_list']:
+                          'status']:
                 if param not in request.params:
                     logger.debug('%s is not in parameters' % param)
  
@@ -54,7 +54,7 @@ def create_project(request):
                 'repository' in request.params and \
                 'structure' in request.params and \
                 'lead' in request.params and \
-                'status_list' in request.params:
+                'status' in request.params:
                 #login = request.params['login']
                 # so create the project
                 
@@ -76,11 +76,14 @@ def create_project(request):
                 lead = User.query.filter_by(id=lead_id).first()
                 
                 logger.debug('project.lead = %s' % lead)
-                
+
+                # status
+                status_id = int(request.params['status'])
+                status = Status.query.filter_by(id=status_id).first()
+
                 # status list
-                status_list_id = int(request.params['status_list'])
                 status_list = StatusList.query\
-                    .filter_by(id=status_list_id).first()
+                    .filter_by(target_entity_type='Project').first()
 
                 # get the dates
                 # TODO: no time zone info here, please add time zone
@@ -107,7 +110,7 @@ def create_project(request):
                         structure=structure,
                         lead=lead,
                         status_list=status_list,
-                        status=status_list[0],
+                        status=status,
                         start=start,
                         end=end
                     )
@@ -225,6 +228,11 @@ def get_projects(request):
     route_name='list_shots',
     renderer='templates/shot/content_list_shots.jinja2',
     permission='Read_Shot'
+)
+@view_config(
+    route_name='list_sequences',
+    renderer='templates/sequence/content_list_sequences.jinja2',
+    permission='Read_Sequence'
 )
 @view_config(
     route_name='summarize_project',

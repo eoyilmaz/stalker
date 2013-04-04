@@ -35,7 +35,6 @@ def create_asset(request):
                'code' in request.params and \
                'description' in request.params and \
                'type_name' in request.params and \
-               'status_list_id' in request.params and \
                'status_id' in request.params:
                 
                 logger.debug('request.params["name"]: %s' %
@@ -48,8 +47,6 @@ def create_asset(request):
                 #              request.params['project_id'])
                 logger.debug('request.params["type_name"]: %s' %
                              request.params['type_name'])
-                logger.debug('request.params["status_list_id"]: %s' %
-                             request.params['status_list_id'])
                 logger.debug('request.params["status_id"]: %s' %
                              request.params['status_id'])
                 
@@ -86,9 +83,7 @@ def create_asset(request):
                     )
                 
                 status_id = int(request.params['status_id'])
-                logger.debug('status_id: %s' % status_id)
                 status = Status.query.filter_by(id=status_id).first()
-                logger.debug('status: %s' % status)
                 
 #                logger.debug('status: %s' % status)
 #                logger.debug('status_list: %s' % status_list)
@@ -137,7 +132,6 @@ def create_asset(request):
                 get_param('description')
                 get_param('project_id')
                 get_param('type_name')
-                get_param('status_list_id')
                 get_param('status_id')
 
     project = Project.query.filter_by(id=request.matchdict['project_id']).first()
@@ -146,8 +140,7 @@ def create_asset(request):
         'project': project,
         'projects': Project.query.all(),
         'types': Type.query.filter_by(target_entity_type='Asset').all(),
-        'status_list':
-            StatusList.query.filter_by(target_entity_type='Asset').first()
+
     }
 
 
@@ -206,9 +199,6 @@ def get_assets(request):
             'type': asset.type.name,
             'status': asset.status.name,
             'user_id': asset.created_by.id,
-            'user_link': '<a href="%s">%s</a>' %
-                         ('view/user/%i' % asset.created_by.id,
-                          asset.created_by.name),
             'user_name': asset.created_by.name,
             'description': asset.description
         }
