@@ -81,7 +81,7 @@ class DatabaseTester(unittest.TestCase):
             #"created_by": admin,
             "password": "password",
         }
-
+        
         newUser = User(**kwargs)
         DBSession.add(newUser)
         DBSession.commit()

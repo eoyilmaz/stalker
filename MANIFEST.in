@@ -6,7 +6,7 @@ include TODO
 include README
 include INSTALL
 include MANIFEST.in
-include LICENSE
+include COPYING
 include doTests
 include development.ini
 include production.ini

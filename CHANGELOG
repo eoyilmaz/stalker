@@ -19,7 +19,8 @@ Stalker Changes
   * There are two new read-only attributes called ``computed_start`` and
     ``computed_end``. These attributes will be used in storing of the values
     calculated by TaskJuggler, and will be used in Gantt Charts if available.
-
+  * Added ``computed_duration``.
+  
 * Task:
   * Arranged the TaskJuggler workflow.
   * The task will use the effort > length > duration attributes in `to_tjp`

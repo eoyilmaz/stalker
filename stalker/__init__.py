@@ -2,6 +2,10 @@
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
+# This file is part of Stalker.
+# 
+# This file is part of Stalker.
+# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
@@ -184,7 +188,7 @@ def main(global_config, **settings):
     # Task
     
     # Dialogs
-    config.add_route('create_task_dialog', 'dialog/create/task')
+    config.add_route('create_task_dialog', 'dialog/create/task/{project_id}')
     config.add_route('create_child_task_dialog', 'dialog/create/child_task/{task_id}')
     config.add_route('create_dependent_task_dialog', 'dialog/create/dependent_task/{task_id}')
     

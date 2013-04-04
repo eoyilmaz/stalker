@@ -2,6 +2,8 @@
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
+# This file is part of Stalker.
+# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
@@ -715,6 +717,15 @@ attribute value."""
                 """
             )
         )
+    
+    @property
+    def computed_duration(self):
+        """returns the computed_duration as the difference of computed_start
+        and computed_end if there are computed_start and computed_end otherwise
+        returns None
+        """
+        return self.computed_end - self.computed_start \
+            if self.computed_end and self.computed_start else None
     
     def round_time(self, dt):
         """Round a datetime object to any time laps in seconds.

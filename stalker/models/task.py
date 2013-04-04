@@ -2,6 +2,8 @@
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
+# This file is part of Stalker.
+# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
@@ -19,8 +21,8 @@
 import datetime
 from sqlalchemy.ext.declarative import declared_attr
 import warnings
-from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, Interval
-from sqlalchemy.orm import relationship, validates, synonym, reconstructor, backref
+from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, Enum
+from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 from stalker import User
 from stalker.conf import defaults
 from stalker.db import DBSession
@@ -137,10 +139,8 @@ class Booking(Entity, ScheduleMixin):
             
             if booking.start == self.start or\
                booking.end == self.end or \
-               (self.end > booking.start and
-                self.end < booking.end) or \
-               (self.start > booking.start and
-                self.start < booking.end):
+               booking.start < self.end < booking.end or \
+               booking.start < self.start < booking.end:
                 warnings.warn(
                     "The resource %s is overly booked with %s and %s" %
                     (resource, self, booking),
@@ -441,7 +441,15 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""A list of :class:`~stalker.models.version.Version` instances showing the files created for this task.
         """
     )
-
+    
+    schedule_using = Column(Enum(*defaults.TASK_SCHEDULE_FLAGS,
+                                name='TaskScheduleUsing'),
+                           default=defaults.TASK_SCHEDULE_FLAGS[0])
+    
+    schedule_constraint = Column(Enum(*defaults.TASK_SCHEDULE_CONSTRAINTS,
+                                      name='TaskScheduleConstraint'),
+                                 default=defaults.TASK_SCHEDULE_CONSTRAINTS[0])
+    
     def __init__(self,
                  project=None,
                  parent=None,
@@ -455,6 +463,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  resources=None,
                  is_milestone=False,
                  priority=defaults.TASK_PRIORITY,
+                 schedule_using='EFFORT',
+                 schedule_constraint='NONE',
                  **kwargs):
         # update kwargs with extras
         kwargs['start'] = start
@@ -501,8 +511,9 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         if bid is None:
             bid = self.effort
         self.bid = bid
-        
         self.priority = priority
+        self.schedule_using = schedule_using
+        self.schedule_constraint = schedule_constraint
     
     @reconstructor
     def __init_on_load__(self):

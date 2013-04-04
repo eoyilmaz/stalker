@@ -2,6 +2,8 @@
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
+# This file is part of Stalker.
+# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
@@ -21,7 +23,7 @@ import random
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import synonym, relationship
 from sqlalchemy.orm.mapper import validates
-from sqlalchemy import Column, Integer, UniqueConstraint, String
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.schema import ForeignKey, Table
 from sqlalchemy.types import Enum
 from stalker.conf import defaults
@@ -34,12 +36,14 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
+# RESOLUTIONS
 FIXED = 'fixed'
 INVALID = 'invalid'
 WONTFIX = 'wontfix'
 DUPLICATE = 'duplicate'
 WORKSFORME = 'worksforme'
 CANTFIX = 'cantfix'
+
 
 class Ticket(Entity, StatusMixin):
     """Tickets are the way of reporting errors or asking for changes in Stalker.

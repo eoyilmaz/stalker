@@ -17,7 +17,6 @@ from stalker.models.entity import SimpleEntity
 class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
     """a class which derives from another which has and __init__ already
     """
-
     __tablename__ = "SchedMixFooMixedInClasses"
     __mapper_args__ = {"polymorphic_identity": "SchedMixFooMixedInClass"}
     schedMixFooMixedInClass_id = Column("id", Integer,
@@ -525,4 +524,46 @@ class ScheduleMixinTester(unittest.TestCase):
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         self.assertIsNone(new_foo_obj.computed_end, None)
     
+    def test_computed_duration_attribute_is_None_if_there_is_no_computed_start_and_no_computed_end(self):
+        """testing if the computed_start attribute is None if there is no
+        computed_start and no computed_end
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        new_foo_obj._computed_start = None
+        new_foo_obj._computed_end = None
+        self.assertIsNone(new_foo_obj.computed_duration)
     
+    def test_computed_duration_attribute_is_None_if_there_is_computed_start_but_no_computed_end(self):
+        """testing if the computed_start attribute is None if there is
+        computed_start but no computed_end
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        new_foo_obj._computed_start = datetime.datetime.now()
+        new_foo_obj._computed_end = None
+        self.assertIsNone(new_foo_obj.computed_duration)
+    
+    def test_computed_duration_attribute_is_None_if_there_is_no_computed_start_but_computed_end(self):
+        """testing if the computed_start attribute is None if there is no
+        computed_start but computed_end
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        new_foo_obj._computed_start = None
+        new_foo_obj._computed_end = datetime.datetime.now()
+        self.assertIsNone(new_foo_obj.computed_duration)
+    
+    def test_computed_duration_attribute_is_calculated_correctly_when_there_are_both_computed_start_and_computed_end(self):
+        """testing if the computed_duration is calculated correctly when there
+        are both computed_start and computed_end values
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        new_foo_obj._computed_start = datetime.datetime.now()
+        new_foo_obj._computed_end =  new_foo_obj._computed_start + \
+                                    datetime.timedelta(12)
+        self.assertEqual(new_foo_obj.computed_duration, datetime.timedelta(12))
+    
+    def test_computed_duration_is_read_only(self):
+        """testing if the computed_duration attribute is read-only
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertRaises(AttributeError, setattr, new_foo_obj,
+                          'computed_duration', datetime.timedelta(10))

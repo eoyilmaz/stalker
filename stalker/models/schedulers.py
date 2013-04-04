@@ -2,6 +2,8 @@
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
+# This file is part of Stalker.
+# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
@@ -15,6 +17,8 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+import subprocess
+import tempfile
 
 
 class SchedulerBase(object):
@@ -22,7 +26,14 @@ class SchedulerBase(object):
     
     All the schedulers should be derived from this class.
     """
-    pass
+    def __init__(self, projects=None):
+        self.projects = projects if projects else []
+    
+    def schedule(self):
+        """the main scheduling function should be implemented in the
+        derivatives
+        """
+        raise NotImplementedError
 
 
 class TaskJugglerScheduler(SchedulerBase):
@@ -38,4 +49,19 @@ class TaskJugglerScheduler(SchedulerBase):
     tjp file has a very nice side effect, projects using the same resources
     will respect their allocations to the resource.
     """
-    pass
+    
+    
+    def schedule(self):
+        """does the scheduling
+        """
+        # create a tjp file
+        tjp_file_path = tempfile.mktemp() + ".tjp"
+        
+        # fill it with data
+        
+        # pass it to tj3
+        # wait it to complete
+        # read back the csv file
+
+
+
