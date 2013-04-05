@@ -224,7 +224,7 @@ project Project_30 "Test Project 1" 2013-04-04 - 2013-05-04 {
 
 # resources
 resource resources "Resources" {
-    resource User_3 "Admin"
+    resource User_3 "admin"
     resource User_14 "User1"
     resource User_16 "User2"
     resource User_17 "User3"

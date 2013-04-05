@@ -1,6 +1,7 @@
 ===============
 Stalker Changes
 ===============
+
 0.2.0.a9
 --------
 * A new property called ``to_tjp`` added to the SimpleEntity class which needs

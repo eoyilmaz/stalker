@@ -17,11 +17,13 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
-import datetime
 
 import os
 import subprocess
 import tempfile
+import datetime
+import csv
+
 from jinja2 import Template
 
 import stalker
@@ -140,7 +142,6 @@ class TaskJugglerScheduler(SchedulerBase):
         """
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
         
-        import csv
         lines = None
         with open(self.csv_file_full_path, 'r') as self.csv_file:
             csv_content = csv.reader(self.csv_file, delimiter=';')
