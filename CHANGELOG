@@ -30,7 +30,11 @@ Stalker Changes
   to 0.2.0.a9 will be still BSD-2 and any version from and including 0.2.0.a9
   will be distributed under LGPL 2.1 license.
 
-* Started designing the TaskJugglerScheduler.
+* Added new types of classes called Schedulers which are going to be used in
+  scheduling the tasks.
+
+* Added TaskJugglerScheduler, it uses the given project and schedules its
+  tasks.
 
 0.2.0.a8
 --------

@@ -18,6 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 import copy
+import datetime
 import warnings
 
 from sqlalchemy import (Column, Integer, ForeignKey, Float, Boolean,
@@ -278,6 +279,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         
         self.working_hours = working_hours
         self.daily_working_hours = daily_working_hours
+        
+        self.now = datetime.datetime.now()
     
     def __eq__(self, other):
         """the equality operator
@@ -440,7 +443,14 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         import datetime
         temp = Template(defaults.TJP_PROJECT_TEMPLATE)
         
-        return temp.render({'project': self, 'datetime': datetime})
+        if not self.now:
+            self.now = datetime.datetime.now()
+        
+        return temp.render({
+            'project': self,
+            'datetime': datetime,
+            'now': self.round_time(self.now).strftime('%Y-%m-%d-%H:%M')
+        })
 
 
 class WorkingHours(object):

@@ -17,9 +17,23 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+import datetime
+
+import os
 import subprocess
 import tempfile
+from jinja2 import Template
 
+import stalker
+from stalker import log, Entity
+from stalker import Department, User
+from stalker.conf import defaults
+
+import logging
+from stalker.db import DBSession
+
+logger = logging.getLogger(__name__)
+logger.setLevel(log.logging_level)
 
 class SchedulerBase(object):
     """This is the base class for schedulers.
@@ -50,18 +64,137 @@ class TaskJugglerScheduler(SchedulerBase):
     will respect their allocations to the resource.
     """
     
+    def __init__(self, projects=None):
+        super(TaskJugglerScheduler, self).__init__(projects)
+        
+        self.tjp_content = ''
+        
+        self.temp_file_full_path = None
+        self.temp_file_path = None
+        self.temp_file_name = None
+        
+        self.tjp_file_full_path = None
+        self.tjp_file = None
+
+        self.csv_file_full_path = None
+        self.csv_file = None
+    
+    def _create_tjp_file(self):
+        """creates the tjp file
+        """
+        self.temp_file_full_path = tempfile.mktemp(prefix='Stalker_')
+        self.temp_file_name = os.path.basename(self.temp_file_full_path)
+        self.tjp_file_full_path =  self.temp_file_full_path + ".tjp"
+        self.csv_file_full_path =  self.temp_file_full_path + ".csv"
+        self.tjp_file = open(self.tjp_file_full_path, 'w+')
+    
+    def _create_tjp_file_content(self):
+        """creates the tjp file content
+        """
+        template = Template(defaults.TJP_MAIN_TEMPLATE)
+        
+        self.tjp_content = template.render({
+            'stalker': stalker,
+            'project': self.projects[0],
+            'departments': Department.query.all(),
+            'users': User.query.all(),
+            'csv_file_name': self.temp_file_name,
+            'csv_file_full_path': self.temp_file_full_path
+        })
+    
+    def _fill_tjp_file(self):
+        """fills the tjp file with content
+        """
+        self.tjp_file.write(self.tjp_content)
+        self.tjp_file.close()
+    
+    def _delete_tjp_file(self):
+        """deletes the temp tjp file
+        """
+        # close the file
+        self.tjp_file.close()
+        
+        # remove the file
+        try:
+            os.remove(self.tjp_file_full_path)
+        except OSError:
+            pass
+    
+    def _delete_csv_file(self):
+        """deletes the temp csv file
+        """
+        try:
+            os.remove(self.csv_file_full_path)
+        except OSError:
+            pass
+    
+    def _clean_up(self):
+        """removes the temp files
+        """
+        self._delete_tjp_file()
+        self._delete_csv_file()
+    
+    def _parse_csv_file(self):
+        """parses back the csv file and fills the tasks with computes_start and
+        computed end values
+        """
+        logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
+        
+        import csv
+        lines = None
+        with open(self.csv_file_full_path, 'r') as self.csv_file:
+            csv_content = csv.reader(self.csv_file, delimiter=';')
+            lines = [line for line in csv_content]
+            lines.pop(0)
+            for data in lines:
+                id_line = data[0]
+                start_date = datetime.datetime.strptime(data[1],
+                                                        "%Y-%m-%d-%H:%M")
+                end_date = datetime.datetime.strptime(data[2],
+                                                        "%Y-%m-%d-%H:%M")
+                entity_id = int(id_line.split('.')[-1].split('_')[-1])
+                entity = Entity.query.filter(Entity.id==entity_id).first()
+                if entity:
+                    entity._computed_start = start_date
+                    entity._computed_end = end_date
+        
+        DBSession.commit()
+        
+        logger.debug('TaskJuggler csv output: %s ' % lines)
+        
+        # now get all the entities in the csv file and change their
+        # computed_start and computed_end values
+        
+        
     
     def schedule(self):
         """does the scheduling
         """
         # create a tjp file
-        tjp_file_path = tempfile.mktemp() + ".tjp"
+        self._create_tjp_file()
+        
+        # create tjp file content
+        self._create_tjp_file_content()
         
         # fill it with data
+        self._fill_tjp_file()
+        
+        logger.debug('tjp_file_full_path: %s' % self.tjp_file_full_path)
         
         # pass it to tj3
+        proc = subprocess.Popen(
+            [defaults.TJ_COMMAND,
+             self.tjp_file_full_path],
+            stderr=subprocess.PIPE
+        )
         # wait it to complete
+        proc.wait()
+        logger.debug('tj3 return code: %s' % proc.returncode)
+        logger.debug('tj3 output: %s' % proc.stderr.readlines())
         # read back the csv file
-
+        self._parse_csv_file()
+        
+        # remove the tjp file
+        self._clean_up()
 
 

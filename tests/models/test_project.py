@@ -1301,8 +1301,8 @@ class ProjectTester(unittest.TestCase):
         """testing if the to_tjp attribute is working properly
         """
         from jinja2 import Template
-        expected_tjp_temp = Template("""project Project_41 "Test Project" {{start}} {{end}} {
-    60min
+        expected_tjp_temp = Template("""project Project_41 "Test Project" {{start}} - {{end}} {
+    timingresolution 60min
     now {{now}}
     dailyworkinghours {{dwh}}
     weekstartsmonday
@@ -1320,7 +1320,8 @@ class ProjectTester(unittest.TestCase):
         expected_tjp = expected_tjp_temp.render({
             'start' : self.test_project.start.date(),
             'end'   : self.test_project.end.date(),
-            'now'   : datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
+            'now'   : self.test_project.round_time(datetime.datetime.now())
+                        .strftime('%Y-%m-%d-%H:%M'),
             'dwh'   : self.test_project.daily_working_hours
         })
         self.assertEqual(self.test_project.to_tjp, expected_tjp)

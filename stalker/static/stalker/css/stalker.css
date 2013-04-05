@@ -118,10 +118,13 @@ a:hover {
 #stalker_logo{
     float: left;
     clear: both;
-    font-size: 16px;
+    /*font-size: 16px;*/
     margin-left: 10px;
     margin-top: 3px;
     /*color: white;*/
+    font-size: 20px;
+    color: #ff0000;
+    margin-right: 50px;
 }
 
 #stalker_logo a:link {

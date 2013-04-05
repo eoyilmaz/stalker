@@ -2187,3 +2187,14 @@ task Task_5679 "Modeling" {
         self.test_task._computed_end = None
         self.assertFalse(self.test_task.is_scheduled)
 
+    def test_schedule_using_is_EFFORT_by_dafault(self):
+        """testing if the schedule_using is EFFORT by default
+        """
+        self.assertEqual(self.test_task.schedule_using, 'EFFORT')
+    
+    def test_schedule_constraint_is_NONE_by_default(self):
+        """testing if the schedule_constraint attribute is None by default
+        """
+        self.assertEqual(self.test_task.schedule_constraint, 'NONE')
+    
+    
