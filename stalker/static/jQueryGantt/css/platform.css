@@ -178,7 +178,7 @@ h4 {
 
 TH, .tableHeader {
   font-weight: normal;
-  color: #FFFFFF;
+  /*color: #FFFFFF;*/
   border: none;
   background-color: #dedede;
   padding:2px
@@ -324,7 +324,7 @@ select {
   height: 25px;
   mmmargin-left: -20px;
   mmmposition: absolute;
-  background: url("alert.gif") no-repeat;
+  background: url("../images/alert.gif") no-repeat;
 }
 
 

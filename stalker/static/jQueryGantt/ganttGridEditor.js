@@ -21,7 +21,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 function GridEditor(master) {
-  this.master = master; // is the a GantEditor instance
+  this.master = master; // is the a GanttEditor instance
   var gridEditor = $.JST.createFromTemplate({}, "TASKSEDITHEAD");
   gridEditor.gridify();
   this.element = gridEditor;
@@ -94,7 +94,12 @@ GridEditor.prototype.refreshTaskRow = function(task) {
   row.find("[name=duration]").val(task.duration);
   row.find("[name=start]").val(new Date(task.start).format()).updateOldValue(); // called on dates only because for other field is called on focus event
   row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
-  row.find("[name=depends]").val(task.depends);
+  
+  var dep_string = '';
+  for (var i; i<task.getDepends().length; i++){
+    dep_string = '' + task.depends[i] + ', ';
+  }
+  row.find("[name=depends]").val(dep_string);
   row.find(".taskResources").html(task.getResourcesString());
 
   //profiler.stop();
@@ -207,9 +212,7 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
       self.master.beginTransaction();
 
       if (field == "depends") {
-
-        var oldDeps = task.depends;
-        task.depends = el.val();
+        task.setDepends(el.val()); // set the depends with the depends_string
         // update links
         var linkOK = self.master.updateLinks(task);
         if (linkOK) {

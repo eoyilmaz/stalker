@@ -81,7 +81,7 @@ def convert_to_jquery_gantt_task_format(tasks):
                 'start': int(task.start.strftime('%s')) * 1000,
                 'duration': task.duration.days,
                 'end': int(task.end.strftime('%s')) * 1000,
-                'depends_ids': [dep.id for dep in task.depends],#convert_to_depend_index(task, tasks),
+                'depend_ids': [dep.id for dep in task.depends],#convert_to_depend_index(task, tasks),
                 'description': task.description,
                 'resources': [
                     {
@@ -158,21 +158,17 @@ def update_with_jquery_gantt_task_data(json_data):
         # --------
         # task depend_ids are now real Stalker task id, no need to convert it
         # to something else
-        # task_depend_ids : " 2, 3, 5, 6:3, 12" these are the ids of the task
-        task_depend_ids = []
-        if len(task_data.get('depends', [])):
-            for index_str in task_data['depends'].split(','):
-                dependent_task_id = int(index_str.split(':')[0])
-                logger.debug('index : %s' % dependent_task_id)
-                task_depend_ids.append(dependent_task_id)
+        task_depend_ids = task_data.get('depend_ids', [])
         
         # get the task itself
         if not isinstance(task_id, basestring): 
             # update task
             task = Task.query.filter(Task.id==task_id).first()
-        elif task_id.startswith('tmp_'):
-            # create a new Task
-            task = Task()
+        # The following will not happen anymore, no tasks are created out of
+        # Stalker
+        #elif task_id.startswith('tmp_'):
+        #    # create a new Task
+        #    task = Task()
         
         # update it
         if task:

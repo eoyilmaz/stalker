@@ -55,7 +55,6 @@ function Task(kwargs) {
   this.child_ids = [];
   this.parent_id = kwargs['parent_id'] || null;
   this.parent = kwargs['parent'] || null;
-  this.depends_string = kwargs['depends_string'] || null;
   this.depend_ids = kwargs['depend_ids'] || [];
   this.depends = null;
     
@@ -117,277 +116,271 @@ Task.prototype.createResource = function (kwargs) {
 
 //<%---------- SET PERIOD ---------------------- --%>
 Task.prototype.setPeriod = function (start, end) {
-  //console.debug("setPeriod ",this.name,new Date(start),new Date(end));
-  //var profilerSetPer = new Profiler("gt_setPeriodJS");
+    //console.debug("setPeriod ",this.name,new Date(start),new Date(end));
+    //var profilerSetPer = new Profiler("gt_setPeriodJS");
 
-  if (start instanceof Date) {
-    start = start.getTime();
-  }
+    if (start instanceof Date) {
+        start = start.getTime();
+    }
 
-  if (end instanceof Date) {
-    end = end.getTime();
-  }
+    if (end instanceof Date) {
+        end = end.getTime();
+    }
 
-  var originalPeriod = {
-    start: this.start,
-    end:  this.end,
-    duration: this.duration
-  };
+    var originalPeriod = {
+        start: this.start,
+        end:  this.end,
+        duration: this.duration
+    };
 
-  //console.debug("setStart",date,date instanceof Date);
-  var wantedStartMillis = start;
-  
-  
-  //set a legal start
-  start = computeStart(start);
+    //console.debug("setStart",date,date instanceof Date);
+    var wantedStartMillis = start;
+    
+    
+    //set a legal start
+    start = computeStart(start);
 
-  //cannot start after end
-  if (start > end) {
-    start = end;
-  }
-  
-  //if depends -> start is set to max end + lag of superior
-  var sups = this.getSuperiors();
-  if (sups && sups.length > 0) {
-    var supEnd = 0;
-    for (var i=0 ; i<sups.length ; i++) {
-      var link = sups[i];
-      supEnd = Math.max(supEnd, incrementDateByWorkingDays(link.from.end, link.lag));
+    //cannot start after end
+    if (start > end) {
+        start = end;
     }
     
-    //if changed by depends move it
-    if (computeStart(supEnd) != start) {
-      return this.moveTo(supEnd + 1, false);
-    }
-  }
-  
-  var somethingChanged = false;
-  
-  //move date to closest day
-  var date = new Date(start);
-  
-  if (this.start != start || this.start != wantedStartMillis) {
-    this.start = start;
-    somethingChanged = true;
-  }
-  
-  //set end
-  var wantedEndMillis = end;
-  
-  end = computeEnd(end);
-  
-  if (this.end != end || this.end != wantedEndMillis) {
-    this.end = end;
-    somethingChanged = true;
-  }
-  
-  this.duration = recomputeDuration(this.start, this.end);
-  
-  //external dependencies: exit with error
-  if (this.hasExternalDep) {
-    this.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + this.name, this);
-    return false;
-  }
-  
-  var todoOk = true;
-  
-  // if it has any children then set the start and end from children
-  //loops children to get boundaries
-  var children = this.getChildren();
-  
-  if (children.length > 0){
-    var bs = Infinity;
-    var be = 0;
-    var child;
-    for (var i=0 ; i<children.length ; i++) {
-      child = children[i];
-      be = Math.max(be, child.end);
-      bs = Math.min(bs, child.start);
+    //if depends -> start is set to max end + lag of superior
+    var sups = this.getSuperiors();
+    if (sups && sups.length > 0){
+        var supEnd = 0;
+        var link;
+        for (var i=0 ; i<sups.length ; i++) {
+            link = sups[i];
+            supEnd = Math.max(supEnd, incrementDateByWorkingDays(link.from.end, link.lag));
+        }
+        
+        //if changed by depends move it
+        if (computeStart(supEnd) != start) {
+            return this.moveTo(supEnd + 1, false);
+        }
     }
     
-    this.end = be;
-    this.start = bs;
+    var somethingChanged = false;
+    
+    //move date to closest day
+    var date = new Date(start);
+    
+    if (this.start != start || this.start != wantedStartMillis) {
+        this.start = start;
+        somethingChanged = true;
+    }
+    
+    //set end
+    var wantedEndMillis = end;
+    
+    end = computeEnd(end);
+    
+    if (this.end != end || this.end != wantedEndMillis) {
+        this.end = end;
+        somethingChanged = true;
+    }
     
     this.duration = recomputeDuration(this.start, this.end);
-  } else {
-      //nothing changed exit
-      if (!somethingChanged){
-          return true;
-      }
-  }
-
-  //check global boundaries
-  if (this.start < this.master.minEditableDate || this.end > this.master.maxEditableDate) {
-    this.master.setErrorOnTransaction(GanttMaster.messages["CHANGE_OUT_OF_SCOPE"], this);
-    todoOk = false;
-  }
-
-  //console.debug("set period: somethingChanged",this);
-  if (todoOk && !updateTree(this)) {
-    todoOk = false;
-  }
-  
-  if (todoOk) {
-    //and now propagate to inferiors
-    var infs = this.getInferiors();
-    if (infs && infs.length > 0) {
-//      var link;
-      for (var i=0 ; i<infs.length ; i++) {
-        var link = infs[i];
-        todoOk = link.to.moveTo(end, false); //this is not the right date but moveTo checks start
-        if (!todoOk)
-          break;
-      }
+    
+    //external dependencies: exit with error
+    if (this.hasExternalDep) {
+        this.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + this.name, this);
+        return false;
     }
-  }
-  
-  return todoOk;
+    
+    var todoOk = true;
+    
+    // if it has any children then set the start and end from children
+    //loops children to get boundaries
+    var children = this.getChildren();
+    
+    if (children.length > 0){
+        var bs = Infinity;
+        var be = 0;
+        var child;
+        for (var i=0 ; i<children.length ; i++) {
+            child = children[i];
+            be = Math.max(be, child.end);
+            bs = Math.min(bs, child.start);
+        }
+        
+        this.end = be;
+        this.start = bs;
+        
+        this.duration = recomputeDuration(this.start, this.end);
+    } else {
+        //nothing changed exit
+        if (!somethingChanged){
+            return true;
+        }
+    }
+
+    //check global boundaries
+    if (this.start < this.master.minEditableDate || this.end > this.master.maxEditableDate) {
+        this.master.setErrorOnTransaction(GanttMaster.messages["CHANGE_OUT_OF_SCOPE"], this);
+        todoOk = false;
+    }
+
+    //console.debug("set period: somethingChanged",this);
+    if (todoOk && !updateTree(this)) {
+        todoOk = false;
+    }
+    
+    if (todoOk) {
+        //and now propagate to inferiors
+        var infs = this.getInferiors();
+        if (infs && infs.length > 0) {
+            var link;
+            for (var i=0 ; i<infs.length ; i++) {
+                link = infs[i];
+                todoOk = link.to.moveTo(end, false); //this is not the right date but moveTo checks start
+                if (!todoOk)
+                    break;
+            }
+        }
+    }
+    return todoOk;
 };
 
 
 //<%---------- MOVE TO ---------------------- --%>
 Task.prototype.moveTo = function (start, ignoreMilestones) {
-  //console.debug("moveTo ",this,start,ignoreMilestones);
-  //var profiler = new Profiler("gt_task_moveTo");
+    //console.debug("moveTo ",this,start,ignoreMilestones);
+    //var profiler = new Profiler("gt_task_moveTo");
 
-  if (start instanceof Date) {
-    start = start.getTime();
-  }
-
-  var originalPeriod = {
-    start:this.start,
-    end:this.end
-  };
-
-  var wantedStartMillis = start;
-
-  //set a legal start
-  start = computeStart(start);
-
-  //if start is milestone cannot be move
-  if (!ignoreMilestones && this.startIsMilestone && start != this.start) {
-    //notify error
-    this.master.setErrorOnTransaction(GanttMaster.messages["START_IS_MILESTONE"], this);
-    return false;
-  } else if (this.hasExternalDep) {
-    //notify error
-    this.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"], this);
-    return false;
-  }
-
-  //if depends start is set to max end + lag of superior
-  var sups = this.getSuperiors();
-  if (sups && sups.length > 0) {
-    var supEnd = 0;
-    var link;
-    for (var i=0;i<sups.length;i++) {
-      link = sups[i];
-      supEnd = Math.max(supEnd, incrementDateByWorkingDays(link.from.end, link.lag));
-    }
-    start = supEnd + 1;
-  }
-  //set a legal start
-  start = computeStart(start);
-
-  var end = computeEndByDuration(start, this.duration);
-
-  if (this.start != start || this.start != wantedStartMillis) {
-    //in case of end is milestone it never changes, but recompute duration
-    if (!ignoreMilestones && this.endIsMilestone) {
-      end = this.end;
-      this.duration = recomputeDuration(start, end);
-    }
-    this.start = start;
-    this.end = end;
-    //profiler.stop();
-
-    //check global boundaries
-    if (this.start < this.master.minEditableDate || this.end > this.master.maxEditableDate) {
-      this.master.setErrorOnTransaction(GanttMaster.messages["CHANGE_OUT_OF_SCOPE"], this);
-      return false;
+    if (start instanceof Date) {
+        start = start.getTime();
     }
 
-    
-    var panDelta = originalPeriod.start - this.start;
-    //console.debug("panDelta",panDelta);
-    //loops children to shift them
-    var children = this.getChildren();
-    for (var i=0;i < children.length ; i++) {
-      ch = children[i];
-      if (!ch.moveTo(ch.start - panDelta, false)) {
+    var originalPeriod = {
+        start:this.start,
+        end:this.end
+    };
+
+    var wantedStartMillis = start;
+
+    //set a legal start
+    start = computeStart(start);
+
+    //if start is milestone cannot be move
+    if (!ignoreMilestones && this.startIsMilestone && start != this.start) {
+        //notify error
+        this.master.setErrorOnTransaction(GanttMaster.messages["START_IS_MILESTONE"], this);
         return false;
-      }
+    } else if (this.hasExternalDep) {
+        //notify error
+        this.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"], this);
+        return false;
     }
-    
-    
-    //console.debug("set period: somethingChanged",this);
-    if (!updateTree(this)) {
-      return false;
-    }
-    
-    
-    //and now propagate to inferiors
-    var infs = this.getInferiors();
-    if (infs && infs.length > 0) {
-      for (var i=0;i<infs.length;i++) {
-        var link = infs[i];
-        
-        //this is not the right date but moveTo checks start
-        if (!link.to.moveTo(end, false)) {
-          return false;
+
+    //if depends start is set to max end + lag of superior
+    var sups = this.getSuperiors();
+    if (sups && sups.length > 0) {
+        var supEnd = 0;
+        var link;
+        for (var i=0;i<sups.length;i++) {
+            link = sups[i];
+            supEnd = Math.max(supEnd, incrementDateByWorkingDays(link.from.end, link.lag));
         }
-      }
+        start = supEnd + 1;
+    }
+    //set a legal start
+    start = computeStart(start);
+
+    var end = computeEndByDuration(start, this.duration);
+
+    if (this.start != start || this.start != wantedStartMillis) {
+        //in case of end is milestone it never changes, but recompute duration
+        if (!ignoreMilestones && this.endIsMilestone) {
+            end = this.end;
+            this.duration = recomputeDuration(start, end);
+        }
+        this.start = start;
+        this.end = end;
+        //profiler.stop();
+        
+        //check global boundaries
+        if (this.start < this.master.minEditableDate || this.end > this.master.maxEditableDate) {
+            this.master.setErrorOnTransaction(GanttMaster.messages["CHANGE_OUT_OF_SCOPE"], this);
+            return false;
+        }
+        
+        var panDelta = originalPeriod.start - this.start;
+        //console.debug("panDelta",panDelta);
+        //loops children to shift them
+        var children = this.getChildren();
+        for (var i=0;i < children.length ; i++) {
+            ch = children[i];
+            if (!ch.moveTo(ch.start - panDelta, false)) {
+                return false;
+            }
+        }
+        
+        //console.debug("set period: somethingChanged",this);
+        if (!updateTree(this)) {
+            return false;
+        }
+        
+        //and now propagate to inferiors
+        var infs = this.getInferiors();
+        if (infs && infs.length > 0) {
+            for (var i=0;i<infs.length;i++) {
+                var link = infs[i];
+                
+                //this is not the right date but moveTo checks start
+                if (!link.to.moveTo(end, false)) {
+                    return false;
+                }
+            }
+        }
     }
 
-  }
-
-  return true;
+    return true;
 };
 
 
 function updateTree(task) {
-  //console.debug("updateTree ",task);
-  var error;
-
-  //try to enlarge parent
-  var p = task.getParent();
-  
-  //no parent:exit
-  if (!p)
-    return true;
-  
-  var newStart = p.start;
-  var newEnd = p.end;
-
-  if (p.start > task.start) {
-    if (p.startIsMilestone) {
-      task.master.setErrorOnTransaction(GanttMaster.messages["START_IS_MILESTONE"] + "\n" + p.name, task);
-      return false;
-    } else if (p.depends) {
-      task.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_CONSTRAINTS"] + "\n" + p.name, task);
-      return false;
+    //console.debug("updateTree ",task);
+    var error;
+    
+    //try to enlarge parent
+    var p = task.getParent();
+    
+    //no parent:exit
+    if (!p)
+        return true;
+    
+    var newStart = p.start;
+    var newEnd = p.end;
+    
+    if (p.start > task.start) {
+        if (p.startIsMilestone) {
+            task.master.setErrorOnTransaction(GanttMaster.messages["START_IS_MILESTONE"] + "\n" + p.name, task);
+            return false;
+        } else if (p.depends.length > 0) {
+            task.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_CONSTRAINTS"] + "\n" + p.name, task);
+            return false;
+        }
+        newStart = task.start;
     }
     
-    newStart = task.start;
-  }
-  
-  if (p.end < task.end) {
-    if (p.endIsMilestone) {
-      task.master.setErrorOnTransaction(GanttMaster.messages["END_IS_MILESTONE"] + "\n" + p.name, task);
-      return false;
+    if (p.end < task.end) {
+        if (p.endIsMilestone) {
+            task.master.setErrorOnTransaction(GanttMaster.messages["END_IS_MILESTONE"] + "\n" + p.name, task);
+            return false;
+        }
+        newEnd = task.end;
     }
-
-    newEnd = task.end;
-  }
-  
-  //propagate updates if needed
-  if (p.hasExternalDep) {
-    task.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + p.name, task);
-    return false;
-  }
-  
-  // always propagate parent
-  return p.setPeriod(newStart, newEnd);
+    
+    //propagate updates if needed
+    if (p.hasExternalDep) {
+        task.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + p.name, task);
+        return false;
+    }
+    
+    // always propagate parent
+    return p.setPeriod(newStart, newEnd);
 }
 
 //<%---------- CHANGE STATUS ---------------------- --%>
@@ -640,21 +633,63 @@ Task.prototype.getDescendant = function() {
 };
 
 Task.prototype.getDepends = function() {
-    if (this.depends==null && this.depend_ids.length > 0){
-      // find the tasks
-      var dep_id;
-      var dep;
-      var dep_index;
-      for(var i=0; i<this.depend_ids.length; i++){
-        dep_id = this.depends.ids[i];
-        dep_index = this.master.task_ids.indexOf(dep_id);
-        
-        if (dep_index != -1){
-          dep = this.master.tasks[dep_index];
-          this.depends.append(dep);
+    if (this.depends==null){
+        this.depends = [];
+        if (this.depend_ids.length > 0){
+            // find the tasks
+            var dep_id;
+            var dep;
+            var dep_index;
+            for(var i=0; i<this.depend_ids.length; i++){
+                dep_id = this.depend_ids[i];
+                dep_index = this.master.task_ids.indexOf(dep_id);
+                
+                if (dep_index != -1){
+                  dep = this.master.tasks[dep_index];
+                  this.depends.push(dep);
+                  // also update depends_string
+                }
+            }
         }
-      }
     }
+    return this.depends;
+};
+
+Task.prototype.setDepends = function(depends){
+    // if this is not an array but a string parse it as depends string
+    var dependent_task;
+    if (typeof(depends) == 'string'){
+        // parse it as depends string
+        this.depends_string = depends;
+        this.depends = [];
+        this.depend_ids = [];
+        var deps = this.depends_string.split(',');
+        var dep_id;
+        var depend_index;
+        for (var i; i<deps.length; i++){
+            dep_id = deps[i].split(':')[0].trim(); // don't care about the lag
+            depend_index = this.master.task_ids.indexOf(dep);
+            if (depend_index != -1){
+                dependent_task = this.master.tasks[depend_index];
+                this.depends.push(dependent_task);
+                this.depend_ids.push(dependent_task.id);
+            }
+        }
+    } else if(depends instanceof Task) {
+        // just set it to the depends list
+        this.depends = [depends];
+        this.depend_ids = [depends.id];
+    } else if(depends instanceof Array) {
+        // should be an array
+        for (var i; i<depends.length ; i++){
+            dependent_task = depends[i];
+            if (dependent_task instanceof Task){
+                this.depends.push(dependent_task);
+                this.depend_ids.push(dependent_task.id);
+            }
+        }
+    }
+    // somebody should tell GanttMaster to update the links after this.
 };
 
 

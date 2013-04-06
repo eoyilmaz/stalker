@@ -98,6 +98,20 @@
   </div>
   --></div>
 
+  <div class="__template__" type="PARENTTASKBAR"><!--
+  <div class="parentTaskBox" taskId="(#=obj.id#)" >
+    <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
+      <div class="leftPin">&nbsp</div>
+      <div class="rightPin">&nbsp</div>
+      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
+      <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
+      <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
+      <div class="taskLabel">(#=obj.name#)</div>
+      <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
+      <div class="taskDepLabel">(#=obj.getResourcesString()#)</div>
+    </div>
+  </div>
+  --></div>
 
 </div>
 

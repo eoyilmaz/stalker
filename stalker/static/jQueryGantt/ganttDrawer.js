@@ -321,9 +321,15 @@ Ganttalendar.prototype.drawTask = function (task) {
   editorRow = task.rowElement;
   var top = editorRow.position().top+self.master.editor.element.parent().scrollTop();
   var x = Math.round((task.start - self.startMillis) * self.fx);
-  var taskBox = $.JST.createFromTemplate(task, "TASKBAR");
-
-
+  
+  var taskBox;
+  if (task.children.length == 0){
+    // if it is a leaf task draw a TASKBAR
+    taskBox = $.JST.createFromTemplate(task, "TASKBAR");
+  } else {
+    // draw a PARENTTASKBAR
+    taskBox = $.JST.createFromTemplate(task, "PARENTTASKBAR");
+  }
 
   //save row element on task
   task.ganttElement = taskBox;
@@ -362,20 +368,19 @@ Ganttalendar.prototype.drawTask = function (task) {
 
   }
 
-  taskBox.dblclick(function() {
-    self.master.showTaskEditor($(this).closest("[taskId]").attr("taskId"));
+  //taskBox.dblclick(function() {
+  //  self.master.showTaskEditor($(this).closest("[taskId]").attr("taskId"));
 
-  }).mousedown(function() {
-    var task_id = $(this).attr("taskId");
-    console.log('task_id: ', task_id);
-    var task = self.master.getTask(task_id);
-    console.log('task: ', task);
-    task.rowElement.click();
-  });
+  //}).mousedown(function() {
+  //  var task_id = $(this).attr("taskId");
+  //  //console.log('task_id: ', task_id);
+  //  var task = self.master.getTask(task_id);
+  //  //console.log('task: ', task);
+  //  task.rowElement.click();
+  //});
 
   //panning only in no depends
-  if (!task.depends && this.master.canWrite) {
-
+  if (task.depends.length == 0 && this.master.canWrite) {
     taskBox.css("position", "absolute").draggable({
       axis:'x',
       drag:function (event, ui) {
@@ -667,7 +672,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
 
   var rectFrom = buildRect(from);
   var rectTo = buildRect(to);
-
+  
   // Dispatch to the correct renderer
   if (type == 'start-to-start') {
     this.element.find(".ganttLinks").append(
@@ -682,18 +687,18 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
 
 
 Ganttalendar.prototype.redrawLinks = function() {
-  //console.debug("redrawLinks ");
-  var self = this;
-  this.element.stopTime("ganttlnksredr");
-  this.element.oneTime(60, "ganttlnksredr", function() {
-    //var prof=new Profiler("gd_drawLink_real");
-    self.element.find(".ganttLinks").empty();
-    for (var i=0;i<self.master.links.length;i++) {
-      var link = self.master.links[i];
-      self.drawLink(link.from, link.to);
-    }
-    //prof.stop();
-  });
+    //console.debug("redrawLinks ");
+    var self = this;
+    this.element.stopTime("ganttlnksredr");
+    this.element.oneTime(60, "ganttlnksredr", function() {
+        //var prof=new Profiler("gd_drawLink_real");
+        self.element.find(".ganttLinks").empty();
+        for (var i=0;i<self.master.links.length;i++) {
+            var link = self.master.links[i];
+            self.drawLink(link.from, link.to);
+        }
+        //prof.stop();
+    });
 };
 
 

@@ -189,6 +189,7 @@
   z-index:10;
 }
 
+/*TASK BOX*/
 .taskBox{
   position:absolute;
   height:15px;
@@ -217,7 +218,7 @@
   top:0px;
   position:absolute;
   width:16px;
-  background: url(milestone.png) no-repeat;
+  background: url('../images/milestone.png') no-repeat;
   height:16px;
   display:none;
 }
@@ -238,15 +239,91 @@
 }
 
 .taskBox .taskBid{
+  height: 7px;
+  position: absolute;
+  border-radius: 3px;
+  top: 9px;
+}
+
+.taskBox .layout.extDep{
+  background-image:url('../images/hasExternalDeps.png');
+}
+
+/*PARENT TASK BOX*/
+.parentTaskBox{
+  position: absolute;
+  height: 6px;
+  margin-top: 2px;
+  z-index: 100;
+}
+
+.parentTaskBox .layout {
+  height:100%;
+  background: black;
+}
+
+.parentTaskBox .layout .leftPin {
+    top: 3px;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: url('../images/parentTaskBoxLeftPin.png') no-repeat;
+}
+
+.parentTaskBox .layout .rightPin {
+    top: 3px;
+    right: 0px;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: url('../images/parentTaskBoxRightPin.png') no-repeat;
+}
+
+.parentTaskBox .taskStatus {
+    left:5px;
+    top:4px;
+    position:absolute;
+    width:10px;
+    height:10px;
+}
+
+.parentTaskBox .layout .milestone{
+  top:0px;
+  position:absolute;
+  width:16px;
+  background: url('../images/milestone.png') no-repeat;
+  height:16px;
+  display:none;
+}
+.parentTaskBox .layout .milestone.end{
+  right:0;
+}
+.parentTaskBox .layout .milestone.active{
+  display:block;
+}
+
+.parentTaskBox.hasChild .layout{
+  /*border:2px solid black;*/
+}
+
+.parentTaskBox .taskProgress{
+  height:3px;
+  position:absolute;
+}
+
+.parentTaskBox .taskBid{
   height:7px;
   position:absolute;
   border-radius: 3px;
   top: 9px;
 }
 
-.taskBox .layout.extDep{
-  background-image:url(hasExternalDeps.png);
+.parentTaskBox .layout.extDep{
+  background-image:url('../images/hasExternalDeps.png');
 }
+
+
+
 
 
 .taskLabel{

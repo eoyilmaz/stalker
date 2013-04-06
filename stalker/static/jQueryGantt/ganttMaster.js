@@ -21,154 +21,153 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 function GanttMaster() {
-  this.tasks = [];
-  this.task_ids = []; // lookup table for quick task access
-  
-  this.deletedTaskIds=[];
-  this.links = [];
-  
-  this.editor; //element for editor
-  this.gantt; //element for gantt
-  
-  this.element;
+    this.tasks = [];
+    this.task_ids = []; // lookup table for quick task access
+    
+    this.deletedTaskIds=[];
+    this.links = [];
+    
+    this.editor; //element for editor
+    this.gantt; //element for gantt
+    
+    this.element;
 
-
-  this.resources; //list of resources
-  this.resource_ids; //lookup table for quick resource access
-  
-  this.minEditableDate = 0;
-  this.maxEditableDate = Infinity;
-  
-  this.canWriteOnParent=true;
-  this.canWrite=true;
-  
-  this.firstDayOfWeek = Date.firstDayOfWeek;
-  
-  this.currentTask; // task currently selected;
-  
-  this.__currentTransaction;  // a transaction object holds previous state during changes
-  this.__undoStack = [];
-  this.__redoStack = [];
-  
-  var self = this;
+    this.resources; //list of resources
+    this.resource_ids; //lookup table for quick resource access
+    
+    this.minEditableDate = 0;
+    this.maxEditableDate = Infinity;
+    
+    this.canWriteOnParent=true;
+    this.canWrite=true;
+    
+    this.firstDayOfWeek = Date.firstDayOfWeek;
+    
+    this.currentTask; // task currently selected;
+    
+    this.__currentTransaction;  // a transaction object holds previous state during changes
+    this.__undoStack = [];
+    this.__redoStack = [];
+    
+    var self = this;
 }
 
 GanttMaster.prototype.init = function(place) {
-  this.element = place;
-  
-  var self=this;
-  
-  //load templates
-  $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
-  
-  //create editor
-  this.editor = new GridEditor(this);
-  this.editor.element.width(place.width() * .9 - 10);
-  place.append(this.editor.element);
-  
-  //create gantt
-  this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
-  
-  //setup splitter
-  var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 50);
-  splitter.secondBox.css("overflow-y", "auto").scroll(function(){
-    splitter.firstBox.scrollTop(splitter.secondBox.scrollTop());
-  });
+    this.element = place;
+    
+    var self=this;
+    
+    //load templates
+    $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
+    
+    //create editor
+    this.editor = new GridEditor(this);
+    this.editor.element.width(place.width() * .9 - 10);
+    place.append(this.editor.element);
+    
+    //create gantt
+    this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
+    
+    //setup splitter
+    var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 50);
+    splitter.secondBox.css("overflow-y", "auto").scroll(function(){
+        splitter.firstBox.scrollTop(splitter.secondBox.scrollTop());
+    });
 
-  //bindings
-  place.bind("refreshTasks.gantt", function() {
-    self.redrawTasks();
-  }).bind("refreshTask.gantt", function(e, task) {
-    self.drawTask(task);
-  }).bind("zoomPlus.gantt", function() {
-    self.gantt.zoomGantt(true);
-  }).bind("zoomMinus.gantt", function() {
-    self.gantt.zoomGantt(false);
-  });
+    //bindings
+    place.bind("refreshTasks.gantt", function() {
+        self.redrawTasks();
+    }).bind("refreshTask.gantt", function(e, task) {
+        self.drawTask(task);
+    }).bind("zoomPlus.gantt", function() {
+        self.gantt.zoomGantt(true);
+    }).bind("zoomMinus.gantt", function() {
+        self.gantt.zoomGantt(false);
+    });
 };
 
 GanttMaster.messages = {
-  "CHANGE_OUT_OF_SCOPE":                  "NO_RIGHTS_FOR_UPDATE_PARENTS_OUT_OF_EDITOR_SCOPE",
-  "START_IS_MILESTONE":                   "START_IS_MILESTONE",
-  "END_IS_MILESTONE":                     "END_IS_MILESTONE",
-  "TASK_HAS_CONSTRAINTS":                 "TASK_HAS_CONSTRAINTS",
-  "GANTT_ERROR_DEPENDS_ON_OPEN_TASK":     "GANTT_ERROR_DEPENDS_ON_OPEN_TASK",
-  "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK":"GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK",
-  "TASK_HAS_EXTERNAL_DEPS":               "TASK_HAS_EXTERNAL_DEPS",
-  "GANTT_ERROR_LOADING_DATA_TASK_REMOVED":"GANTT_ERROR_LOADING_DATA_TASK_REMOVED",
-  "CIRCULAR_REFERENCE":                   "CIRCULAR_REFERENCE",
-  "ERROR_SETTING_DATES":                  "ERROR_SETTING_DATES",
-  "CANNOT_DEPENDS_ON_ANCESTORS":          "CANNOT_DEPENDS_ON_ANCESTORS",
-  "CANNOT_DEPENDS_ON_DESCENDANTS":        "CANNOT_DEPENDS_ON_DESCENDANTS",
-  "INVALID_DATE_FORMAT":                  "INVALID_DATE_FORMAT",
-  "GANTT_QUARTER_SHORT":                  "GANTT_QUARTER_SHORT",
-  "GANTT_SEMESTER_SHORT":                 "GANTT_SEMESTER_SHORT"
+    "CHANGE_OUT_OF_SCOPE":                  "NO_RIGHTS_FOR_UPDATE_PARENTS_OUT_OF_EDITOR_SCOPE",
+    "START_IS_MILESTONE":                   "START_IS_MILESTONE",
+    "END_IS_MILESTONE":                     "END_IS_MILESTONE",
+    "TASK_HAS_CONSTRAINTS":                 "TASK_HAS_CONSTRAINTS",
+    "GANTT_ERROR_DEPENDS_ON_OPEN_TASK":     "GANTT_ERROR_DEPENDS_ON_OPEN_TASK",
+    "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK":"GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK",
+    "TASK_HAS_EXTERNAL_DEPS":               "TASK_HAS_EXTERNAL_DEPS",
+    "GANTT_ERROR_LOADING_DATA_TASK_REMOVED":"GANTT_ERROR_LOADING_DATA_TASK_REMOVED",
+    "CIRCULAR_REFERENCE":                   "CIRCULAR_REFERENCE",
+    "ERROR_SETTING_DATES":                  "ERROR_SETTING_DATES",
+    "CANNOT_DEPENDS_ON_ANCESTORS":          "CANNOT_DEPENDS_ON_ANCESTORS",
+    "CANNOT_DEPENDS_ON_DESCENDANTS":        "CANNOT_DEPENDS_ON_DESCENDANTS",
+    "INVALID_DATE_FORMAT":                  "INVALID_DATE_FORMAT",
+    "GANTT_QUARTER_SHORT":                  "GANTT_QUARTER_SHORT",
+    "GANTT_SEMESTER_SHORT":                 "GANTT_SEMESTER_SHORT"
 };
 
 
 GanttMaster.prototype.createTask = function (kwargs) {
-  var factory = new TaskFactory();
-  return factory.build(kwargs);
+    var factory = new TaskFactory();
+    return factory.build(kwargs);
 };
 
 
 GanttMaster.prototype.createResource = function(kwargs){
-  return new Resource(kwargs);
+    return new Resource(kwargs);
 };
 
 
 //update depends strings
-GanttMaster.prototype.updateDependsStrings = function() {
+GanttMaster.prototype.updateDepends = function() {
   //remove all deps
   for (var i=0 ; i<this.tasks.length ; i++) {
-    this.tasks[i].depends_string = "";
+      this.tasks[i].depends = [];
   }
-
+  
   for (var i=0 ; i<this.links.length ; i++) {
-    var link = this.links[i];
-    var dep = link.to.depends_string;
-    link.to.depends_string = link.to.depends_string + (link.to.depends_string == "" ? "" : ",") + (link.from.getRow() + 1) + (link.lag ? ":" + link.lag : "");
+      var link = this.links[i];
+      link.to.depends.push(link.from.id);
+      //link.to.depends_string = link.to.depends_string + (link.to.depends_string == "" ? "" : ",") + (link.from.getRow() + 1) + (link.lag ? ":" + link.lag : "");
   }
   
 };
 
 //------------------------------------  ADD TASK --------------------------------------------
 GanttMaster.prototype.addTask = function(task, parent) {
-  //console.debug("master.addTask",task,row,this);
-  task.master = this; // in order to access controller from task
-  
-  //add task in collection
-  this.tasks.push(task);
-  this.task_ids.push(task.id);
-  
-  //recompute depends string
-  this.updateDependsStrings();
+    //console.debug("master.addTask",task,row,this);
+    task.master = this; // in order to access controller from task
+    
+    //add task in collection
+    this.tasks.push(task);
+    this.task_ids.push(task.id);
+    
+    //recompute depends string
+    this.updateDepends();
 
-  //add Link collection in memory
-  var linkLoops = !this.updateLinks(task);
-  
-  //set the status according to parent
-  if (task.getParent())
-    task.status=task.getParent().status;
-  else
-    task.status="STATUS_ACTIVE";
-  
-  var ret = task;
-  if (linkLoops || !task.setPeriod(task.start, task.end)) {
-    //remove task from in-memory collection
-    //console.debug("removing task from memory",task);
-    var task_index = this.task_ids.indexOf(task.id);
-    this.tasks.splice(task_index, 1);
-    this.task_ids.splice(task_index, 1);
-    ret = undefined;
-  } else {
-    // TODO: don't update the editor yet, we need to have all the tasks
-    //append task to editor
-    this.editor.addTask(task, row);
-    //append task to gantt
-    this.gantt.addTask(task);
-  }
-  return ret;
+    //add Link collection in memory
+    var linkLoops = !this.updateLinks(task);
+    
+    //set the status according to parent
+    if (task.getParent())
+        task.status=task.getParent().status;
+    else
+        task.status="STATUS_ACTIVE";
+    
+    var ret = task;
+    if (linkLoops || !task.setPeriod(task.start, task.end)) {
+        //remove task from in-memory collection
+        //console.debug("removing task from memory",task);
+        var task_index = this.task_ids.indexOf(task.id);
+        this.tasks.splice(task_index, 1);
+        this.task_ids.splice(task_index, 1);
+        ret = undefined;
+    } else {
+        // TODO: don't update the editor yet, we need to have all the tasks
+        //append task to editor
+        this.editor.addTask(task, row);
+        //append task to gantt
+        this.gantt.addTask(task);
+    }
+    return ret;
 };
 
 
@@ -177,476 +176,457 @@ GanttMaster.prototype.addTask = function(task, parent) {
  * @param project
  */
 GanttMaster.prototype.loadProject = function(project, Deferred) {
-  var deferred = new Deferred;
-  this.beginTransaction();
-  this.resources = project.resources;
-  this.resource_ids = [];
-  for (var i=0; i<this.resources.length; i++){
-      this.resource_ids.push(this.resources[i].id);
-  }
-  
-  this.canWrite = project.canWrite;
-  this.canWriteOnParent = project.canWriteOnParent;
-  
-  if (project.minEditableDate)
-    this.minEditableDate = computeStart(project.minEditableDate);
-  else
-    this.minEditableDate =-Infinity;
+    var deferred = new Deferred;
+    this.beginTransaction();
+    this.resources = project.resources;
+    this.resource_ids = [];
+    for (var i=0; i<this.resources.length; i++){
+        this.resource_ids.push(this.resources[i].id);
+    }
+    
+    this.canWrite = project.canWrite;
+    this.canWriteOnParent = project.canWriteOnParent;
+    
+    if (project.minEditableDate)
+        this.minEditableDate = computeStart(project.minEditableDate);
+    else
+        this.minEditableDate =-Infinity;
 
-  if (project.maxEditableDate)
-    this.maxEditableDate = computeEnd(project.maxEditableDate);
-  else
-    this.maxEditableDate = Infinity;
-  
-  this.loadTasks(project.tasks);
-  this.deletedTaskIds=[];
-  this.endTransaction();
-  var self=this;
-  this.gantt.element.oneTime(200,function(){
-      self.gantt.centerOnToday();
-      deferred.resolve('success');
-  });
-  
-  return deferred.promise;
+    if (project.maxEditableDate)
+        this.maxEditableDate = computeEnd(project.maxEditableDate);
+    else
+        this.maxEditableDate = Infinity;
+    
+    this.loadTasks(project.tasks);
+    this.deletedTaskIds=[];
+    this.endTransaction();
+    var self=this;
+    this.gantt.element.oneTime(200,function(){
+        self.gantt.centerOnToday();
+        deferred.resolve('success');
+    });
+    
+    return deferred.promise;
 };
 
 
 GanttMaster.prototype.loadTasks = function(tasks) {
-  var factory = new TaskFactory();
-  //reset
-  this.reset();
-  
-  var task;
-  for (var i=0 ; i<tasks.length ; i++){
-    task = tasks[i];
-    if (!(task instanceof Task)){
-      var t = factory.build({
-          id: task.id,
-          name: task.name,
-          code: task.code,
-          parent_id: task.parent_id,
-          start: task.start,
-          duration: task.duration,
-          bid: task.bid,
-          effort: task.effort,
-          length: task.length,
-          is_scheduled: task.is_scheduled,
-          resources: task.resources
-      });
-      
-      // TODO: do it properly
-      for (var key in task) {
-        if (key!="end" && key!="start")
-          t[key] = task[key]; //copy all properties
-      }
-      task = t;
-    }
-    task.master = this; // in order to access controller from task
+    var factory = new TaskFactory();
+    //reset
+    this.reset();
     
-    /*//replace if already exists
-    var pos = -1;
-    for (var i=0;i<this.tasks.length;i++) {
-      if (task.id == this.tasks[i].id) {
-        pos = i;
-        break;
-      }
-    }*/
+    var task;
+    for (var i=0 ; i<tasks.length ; i++){
+        task = tasks[i];
+        if (!(task instanceof Task)){
+            var t = factory.build({
+                id: task.id,
+                name: task.name,
+                code: task.code,
+                status: task.status,
+                parent_id: task.parent_id,
+                depend_ids: task.depend_ids,
+                start: task.start,
+                duration: task.duration,
+                bid: task.bid,
+                effort: task.effort,
+                length: task.length,
+                is_scheduled: task.is_scheduled,
+                is_milestone: task.is_milestone,
+                resources: task.resources
+            });
+            
+            // TODO: do it properly
+            for (var key in task) {
+                if (key!="end" && key!="start")
+                    t[key] = task[key]; //copy all properties
+            }
+            task = t;
+        }
+        task.master = this; // in order to access controller from task
+        
+        /*//replace if already exists
+        var pos = -1;
+        for (var i=0;i<this.tasks.length;i++) {
+          if (task.id == this.tasks[i].id) {
+            pos = i;
+            break;
+          }
+        }*/
 
-    this.tasks.push(task);  //append task at the end
-    this.task_ids.push(task.id); //lookup table for task ids
-  }
-  
-  // find root tasks
-  var root_tasks = [];
-  for (var i=0; i<this.tasks.length; i++){
-    // just find root tasks
-    // also register parents
-//    console.log('parent_id: ', this.tasks[i].parent_id);
-    if(this.tasks[i].getParent() == null){
-      root_tasks.push(this.tasks[i]);
+        this.tasks.push(task);  //append task at the end
+        this.task_ids.push(task.id); //lookup table for task ids
     }
-  }
-  
-  
-  var loop_through_child = function(task, children){
-    if(children==null){
-      children=[]
+    
+    // find root tasks
+    var root_tasks = [];
+    for (var i=0; i<this.tasks.length; i++){
+        // just find root tasks
+        // also register parents
+        if(this.tasks[i].getParent() == null){
+            root_tasks.push(this.tasks[i]);
+        }
+        // also fill the task.depends
+        task.getDepends();
     }
-    children.push(task);
-    var current_task_children = task.getChildren();
-    for (var n=0; n<current_task_children.length; n++){
-      children = loop_through_child(current_task_children[n], children);
+    
+    
+    var loop_through_child = function(task, children){
+        if(children==null){
+            children=[]
+        }
+        children.push(task);
+        var current_task_children = task.getChildren();
+        for (var n=0; n<current_task_children.length; n++){
+            children = loop_through_child(current_task_children[n], children);
+        }
+        return children;
+    };
+    
+    
+    var sorted_task_list = [];
+    // now go from root to shild
+    for (var i=0; i<root_tasks.length; i++){
+        sorted_task_list = loop_through_child(root_tasks[i], sorted_task_list);
     }
-    return children;
-  };
-  
-  
-  var sorted_task_list = [];
-  // now go from root to shild
-  for (var i=0; i<root_tasks.length; i++){
-    sorted_task_list = loop_through_child(root_tasks[i], sorted_task_list);
-  }
-  
-//  console.log('this.tasks   :', this.tasks);
-//  console.log('root_tasks   :', root_tasks);
-//  console.log('sorted_tasks :', sorted_task_list);
-  
-  // update tasks
-  this.tasks = sorted_task_list;
-  // update the lookup table
-  this.task_ids = [];
-  for (var i=0; i<this.tasks.length; i++){
-    this.task_ids.push(this.tasks[i].id);
-  }
     
-  //var prof=new Profiler("gm_loadTasks_addTaskLoop");
-  for (var i=0 ; i<this.tasks.length ; i++) {
-    var task = this.tasks[i];
+    // update tasks
+    this.tasks = sorted_task_list;
+    // update the lookup table
+    this.task_ids = [];
+    for (var i=0; i<this.tasks.length; i++){
+        this.task_ids.push(this.tasks[i].id);
+    }
     
-    //add Link collection in memory
-    var linkLoops = !this.updateLinks(task);
-    
-    if (linkLoops || !task.setPeriod(task.start, task.end)) {
-      alert(GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED + "\n" + task.name + "\n" +
-            (linkLoops?GanttMaster.messages.CIRCULAR_REFERENCE:GanttMaster.messages.ERROR_SETTING_DATES));
+    //var prof=new Profiler("gm_loadTasks_addTaskLoop");
+    for (var i=0 ; i<this.tasks.length ; i++) {
+        var task = this.tasks[i];
+        
+        //add Link collection in memory
+        var linkLoops = !this.updateLinks(task);
+        
+        if (linkLoops || !task.setPeriod(task.start, task.end)) {
+            alert(GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED + "\n" + task.name + "\n" +
+                  (linkLoops?GanttMaster.messages.CIRCULAR_REFERENCE:GanttMaster.messages.ERROR_SETTING_DATES));
 
-      //remove task from in-memory collection
-      var task_index = this.task_ids.indexOf(task.id);
-      this.tasks.splice(task_index, 1);
-      this.task_ids.splice(task_index, 1);
-    } else {
-      //append task to editor
-      this.editor.addTask(task);
-      //append task to gantt
-      this.gantt.addTask(task);
+            //remove task from in-memory collection
+            var task_index = this.task_ids.indexOf(task.id);
+            this.tasks.splice(task_index, 1);
+            this.task_ids.splice(task_index, 1);
+        } else {
+            //append task to editor
+            this.editor.addTask(task);
+            //append task to gantt
+            this.gantt.addTask(task);
+        }
     }
-  }
 
-  this.editor.fillEmptyLines();
-  //prof.stop();
+    this.editor.fillEmptyLines();
+    //prof.stop();
 };
 
 
 GanttMaster.prototype.getTask = function(taskId) {
-  //var ret;
-  //for(var i=0 ; i<this.tasks.length ; i++) {
-  //  var tsk = this.tasks[i];
-  //  if (tsk.id == taskId) {
-  //    ret = tsk;
-  //    break;
-  //  }
-  //}
-  //return ret;
-  if (typeof(taskId) == 'string'){
-      taskId = parseInt(taskId);
-  }
-  console.log("taskId : ", taskId);
-  var task_index = this.task_ids.indexOf(taskId);
-  console.log('task_index : ', task_index);
-  console.log('tasks    : ', this.tasks);
-  console.log('task_ids : ', this.task_ids);
-  return this.tasks[task_index];
+    //var ret;
+    //for(var i=0 ; i<this.tasks.length ; i++) {
+    //  var tsk = this.tasks[i];
+    //  if (tsk.id == taskId) {
+    //    ret = tsk;
+    //    break;
+    //  }
+    //}
+    //return ret;
+    if (typeof(taskId) == 'string'){
+        taskId = parseInt(taskId);
+    }
+    var task_index = this.task_ids.indexOf(taskId);
+    return this.tasks[task_index];
 };
 
 
 GanttMaster.prototype.getResource = function(resId) {
-  //var ret;
-  //for (var i=0;i<this.resources.length;i++) {
-  //  var res = this.resources[i];
-  //  if (res.id == resId) {
-  //    ret = res;
-  //    break;
-  //  }
-  //}
-  //return ret;
-  var resource_index = this.resource_ids.indexOf(resId);
-  return this.resources[resource_index];
+    var resource_index = this.resource_ids.indexOf(resId);
+    return this.resources[resource_index];
 };
 
 
 GanttMaster.prototype.changeTaskDates = function(task, start, end) {
-  return task.setPeriod(start, end);
+    return task.setPeriod(start, end);
 };
 
 
 GanttMaster.prototype.moveTask = function(task, newStart) {
-  return task.moveTo(newStart, true);
+    return task.moveTo(newStart, true);
 };
 
 
 GanttMaster.prototype.taskIsChanged = function() {
-  //console.debug("taskIsChanged");
-  var master=this;
-
-  //refresh is executed only once every 50ms
-  this.element.stopTime("gnnttaskIsChanged");
-  //var profilerext = new Profiler("gm_taskIsChangedRequest");
-  this.element.oneTime(50, "gnnttaskIsChanged", function() {
-    //console.debug("task Is Changed real call to redraw");
-    //var profiler = new Profiler("gm_taskIsChangedReal");
-    master.editor.redraw();
-    master.gantt.refreshGantt();
-    //profiler.stop();
-  });
-  //profilerext.stop();
+    //console.debug("taskIsChanged");
+    var master=this;
+    
+    //refresh is executed only once every 50ms
+    this.element.stopTime("gnnttaskIsChanged");
+    //var profilerext = new Profiler("gm_taskIsChangedRequest");
+    this.element.oneTime(50, "gnnttaskIsChanged", function() {
+        //console.debug("task Is Changed real call to redraw");
+        //var profiler = new Profiler("gm_taskIsChangedReal");
+        master.editor.redraw();
+        master.gantt.refreshGantt();
+        //profiler.stop();
+    });
+    //profilerext.stop();
 };
 
 
 GanttMaster.prototype.redraw = function() {
-  this.editor.redraw();
-  this.gantt.refreshGantt();
+    this.editor.redraw();
+    this.gantt.refreshGantt();
 };
 
 GanttMaster.prototype.reset = function() {
-  this.tasks = [];
-  this.links = [];
-  this.deletedTaskIds=[];
-  this.__undoStack = [];
-  this.__redoStack = [];
-  delete this.currentTask;
+    this.tasks = [];
+    this.links = [];
+    this.deletedTaskIds=[];
+    this.__undoStack = [];
+    this.__redoStack = [];
+    delete this.currentTask;
 
-  this.editor.reset();
-  this.gantt.reset();
+    this.editor.reset();
+    this.gantt.reset();
 };
 
 
 GanttMaster.prototype.showTaskEditor = function(taskId) {
-  var task = this.getTask(taskId);
-  task.rowElement.find(".edit").click();
+    var task = this.getTask(taskId);
+    task.rowElement.find(".edit").click();
 };
 
 GanttMaster.prototype.saveProject = function() {
-  return this.saveGantt(false);
+    return this.saveGantt(false);
 };
 
 GanttMaster.prototype.saveGantt = function(forTransaction) {
-  //var prof = new Profiler("gm_saveGantt");
-  var saved = [];
-  for (var i=0 ; i<this.tasks.length ; i++) {
-    var task = this.tasks[i];
-    var cloned = task.clone();
-    delete cloned.master;
-    delete cloned.rowElement;
-    delete cloned.ganttElement;
-    delete cloned.children;
-    delete cloned.resources;
+    //var prof = new Profiler("gm_saveGantt");
+    var saved = [];
+    for (var i=0 ; i<this.tasks.length ; i++) {
+        var task = this.tasks[i];
+        var cloned = task.clone();
+        delete cloned.master;
+        delete cloned.rowElement;
+        delete cloned.ganttElement;
+        
+        delete cloned.children;
+        //delete cloned.resources;
+        delete cloned.depends;
+        delete cloned.parent;
+        
+        saved.push(cloned);
+    }
     
-    saved.push(cloned);
-  }
-  
-  var ret = {tasks:saved};
-  
-  ret.deletedTaskIds=this.deletedTaskIds;  //this must be consistent with transactions and undo
-  
-  if (!forTransaction) {
-    ret.resources = this.resources;
-    ret.canWrite = this.canWrite;
-    ret.canWriteOnParent = this.canWriteOnParent;
-  }
-  
-  //prof.stop();
-  return ret;
+    var ret = {tasks:saved};
+    
+    ret.deletedTaskIds=this.deletedTaskIds;  //this must be consistent with transactions and undo
+    
+    if (!forTransaction) {
+        ret.resources = this.resources;
+        ret.canWrite = this.canWrite;
+        ret.canWriteOnParent = this.canWriteOnParent;
+    }
+    
+    //prof.stop();
+    return ret;
 };
 
 
 GanttMaster.prototype.updateLinks = function(task) {
-  //console.debug("updateLinks");
-  //var prof= new Profiler("gm_updateLinks");
-  
-  // defines isLoop function
-  function isLoop(task, target, visited) {
-    if (target == task) {
-      return true;
-    }
+    //console.debug("updateLinks");
+    //var prof= new Profiler("gm_updateLinks");
     
-    var sups = task.getSuperiors();
-    var loop = false;
-    for (var i=0;i<sups.length;i++) {
-      var supLink = sups[i];
-      if (supLink.from == target) {
-        loop = true;
-        break;
-      } else {
-        if (visited.indexOf(supLink.from) <= 0) {
-          visited.push(supLink.from);
-          if (isLoop(supLink.from, target, visited)) {
-            loop = true;
-            break;
-          }
+    // defines isLoop function
+    function isLoop(task, target, visited) {
+        if (target == task) {
+            return true;
         }
-      }
-    }
-    return loop;
-  }
-
-  //remove my depends
-  this.links = this.links.filter(function(link) {
-    return link.to != task;
-  });
-
-  var todoOk = true;
-  // just update the depends list
-  if (task.getDepends()) {
-    //cannot depend from an ancestor
-    var parents = task.getParents();
-    //cannot depend from descendants
-    var descendants=task.getDescendant();
-    
-    var deps = task.depends;
-    var newDepsString = "";
-    
-    var visited = [];
-    for (var j=0; j<deps.length ; j++) {
-      var dep = deps[j]; // in the form of row(lag) e.g. 2:3,3:4,5
-      var par = deps[j];//dep.split(":");
-      var lag = 0;
-      
-      var sup_index = this.task_ids.indexOf(par);
-      var sup = this.tasks[sup_index];
-      
-      if (sup) {
-        if (parents && parents.indexOf(sup) >= 0) {
-          this.setErrorOnTransaction(task.name + "\n"+GanttMaster.messages.CANNOT_DEPENDS_ON_ANCESTORS+"\n" + sup.name);
-          todoOk = false;
-
-        } else if (descendants && descendants.indexOf(sup) >= 0) {
-          this.setErrorOnTransaction(task.name + "\n"+GanttMaster.messages.CANNOT_DEPENDS_ON_DESCENDANTS+"\n" + sup.name);
-          todoOk = false;
-
-        } else if (isLoop(sup, task, visited)) {
-          todoOk = false;
-          this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE+"\n" + task.name + " -> " + sup.name);
-        } else {
-          this.links.push(new Link(sup, task, lag));
-          newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;
+        
+        var sups = task.getSuperiors();
+        var loop = false;
+        for (var i=0 ; i<sups.length ; i++){
+            var supLink = sups[i];
+            if (supLink.from == target){
+                loop = true;
+                break;
+            } else {
+                if (visited.indexOf(supLink.from) <= 0){
+                    visited.push(supLink.from);
+                    if (isLoop(supLink.from, target, visited)){
+                        loop = true;
+                        break;
+                    }
+                }
+            }
         }
-      }
+        return loop;
     }
+    
+    //remove my depends
+    this.links = this.links.filter(function(link) {
+        return link.to != task;
+    });
+    
+    var todoOk = true;
+    // just update the depends list
+    if (task.getDepends()) {
+        //cannot depend from an ancestor
+        var parents = task.getParents();
+        //cannot depend from descendants
+        var descendants=task.getDescendant();
+        
+        var deps = task.depends;
+        var newDepsString = "";
+        
+        var visited = [];
+        for (var j=0; j<deps.length ; j++) {
+            var dep = deps[j];
+            var lag = 0;
+            
+            var sup_index = this.task_ids.indexOf(dep.id);
+            var sup = this.tasks[sup_index];
+            if (sup) {
+                if (parents && parents.indexOf(sup) >= 0) {
+                    this.setErrorOnTransaction(task.name + "\n" + GanttMaster.messages.CANNOT_DEPENDS_ON_ANCESTORS+"\n" + sup.name);
+                    todoOk = false;
+                } else if (descendants && descendants.indexOf(sup) >= 0) {
+                    this.setErrorOnTransaction(task.name + "\n"+GanttMaster.messages.CANNOT_DEPENDS_ON_DESCENDANTS+"\n" + sup.name);
+                    todoOk = false;
+                } else if (isLoop(sup, task, visited)) {
+                    todoOk = false;
+                    this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE+"\n" + task.name + " -> " + sup.name);
+                } else {
+                    this.links.push(new Link(sup, task, lag));
+                    newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;
+                }
+            }
+        }
 
-    if (todoOk) {
-      task.depends_string = newDepsString;
+        if (todoOk) {
+            task.depends_string = newDepsString;
+        }
+
     }
-
-  }
-
-  //prof.stop();
-
-  return todoOk;
+    //prof.stop();
+    return todoOk;
 };
 
 
 //<%----------------------------- TRANSACTION MANAGEMENT ---------------------------------%>
 GanttMaster.prototype.beginTransaction = function() {
-  if (!this.__currentTransaction) {
-    this.__currentTransaction = {
-      snapshot:JSON.stringify(this.saveGantt(true)),
-      errors:[]
-    };
-  } else {
-    console.error("Cannot open twice a transaction");
-  }
-  return this.__currentTransaction;
+    if (!this.__currentTransaction) {
+        this.__currentTransaction = {
+            snapshot:JSON.stringify(this.saveGantt(true)),
+            errors:[]
+        };
+    } else {
+        console.error("Cannot open twice a transaction");
+    }
+    return this.__currentTransaction;
 };
 
 
 GanttMaster.prototype.endTransaction = function() {
-  if (!this.__currentTransaction) {
-    console.error("Transaction never started.");
-    return true;
-  }
-
-  var ret = true;
-
-  //no error -> commit
-  if (this.__currentTransaction.errors.length <= 0) {
-    //console.debug("committing transaction");
-
-    //put snapshot in undo
-    this.__undoStack.push(this.__currentTransaction.snapshot);
-    //clear redo stack
-    this.__redoStack = [];
-
-    //shrink gantt bundaries
-    this.gantt.originalStartMillis = Infinity;
-    this.gantt.originalEndMillis = -Infinity;
-    for (var i=0;i<this.tasks.length;i++) {
-      var task = this.tasks[i];
-      if (this.gantt.originalStartMillis > task.start)
-        this.gantt.originalStartMillis = task.start;
-      if (this.gantt.originalEndMillis < task.end)
-        this.gantt.originalEndMillis = task.end;
-
+    if (!this.__currentTransaction) {
+        console.error("Transaction never started.");
+        return true;
     }
-    this.taskIsChanged(); //enqueue for gantt refresh
 
+    var ret = true;
 
-    //error -> rollback
-  } else {
-    ret = false;
-    //console.debug("rolling-back transaction");
-    //try to restore changed tasks
-    var oldTasks = JSON.parse(this.__currentTransaction.snapshot);
-    this.deletedTaskIds=oldTasks.deletedTaskIds;
-    this.loadTasks(oldTasks.tasks);
-    this.redraw();
+    //no error -> commit
+    if (this.__currentTransaction.errors.length <= 0) {
+        //console.debug("committing transaction");
 
-    //compose error message
-    var msg = "";
-    for (var i=0;i<this.__currentTransaction.errors.length;i++) {
-      var err = this.__currentTransaction.errors[i];
-      msg = msg + err.msg + "\n\n";
+        //put snapshot in undo
+        this.__undoStack.push(this.__currentTransaction.snapshot);
+        //clear redo stack
+        this.__redoStack = [];
+
+        //shrink gantt bundaries
+        this.gantt.originalStartMillis = Infinity;
+        this.gantt.originalEndMillis = -Infinity;
+        for (var i=0;i<this.tasks.length;i++) {
+            var task = this.tasks[i];
+            if (this.gantt.originalStartMillis > task.start)
+                this.gantt.originalStartMillis = task.start;
+            if (this.gantt.originalEndMillis < task.end)
+                this.gantt.originalEndMillis = task.end;
+        }
+        this.taskIsChanged(); //enqueue for gantt refresh
+        //error -> rollback
+    } else {
+        ret = false;
+        //console.debug("rolling-back transaction");
+        //try to restore changed tasks
+        var oldTasks = JSON.parse(this.__currentTransaction.snapshot);
+        this.deletedTaskIds=oldTasks.deletedTaskIds;
+        this.loadTasks(oldTasks.tasks);
+        this.redraw();
+
+        //compose error message
+        var msg = "";
+        for (var i=0;i<this.__currentTransaction.errors.length;i++) {
+            var err = this.__currentTransaction.errors[i];
+            msg = msg + err.msg + "\n\n";
+        }
+        alert(msg);
     }
-    alert(msg);
-  }
-  //reset transaction
-  this.__currentTransaction = undefined;
+    //reset transaction
+    this.__currentTransaction = undefined;
 
-  return ret;
+    return ret;
 };
 
 //this function notify an error to a transaction -> transaction will rollback
 GanttMaster.prototype.setErrorOnTransaction = function(errorMessage, task) {
-  if (this.__currentTransaction) {
-    this.__currentTransaction.errors.push({msg:errorMessage,task:task});
-  } else {
-    console.error(errorMessage);
-  }
+    if (this.__currentTransaction) {
+        this.__currentTransaction.errors.push({msg:errorMessage,task:task});
+    } else {
+        console.error(errorMessage);
+    }
 };
 
 // inhibit undo-redo
 GanttMaster.prototype.checkpoint= function() {
-  this.__undoStack = [];
-  this.__redoStack = [];
+    this.__undoStack = [];
+    this.__redoStack = [];
 };
 
 //----------------------------- UNDO/REDO MANAGEMENT ---------------------------------%>
 
 GanttMaster.prototype.undo = function() {
-  //console.debug("undo before:",undoStack,redoStack);
-  if (this.__undoStack.length > 0) {
-    var his = this.__undoStack.pop();
-    this.__redoStack.push(JSON.stringify(this.saveGantt()));
+    //console.debug("undo before:",undoStack,redoStack);
+    if (this.__undoStack.length > 0) {
+        var his = this.__undoStack.pop();
+        this.__redoStack.push(JSON.stringify(this.saveGantt()));
 
-    var oldTasks = JSON.parse(his);
-    this.deletedTaskIds=oldTasks.deletedTaskIds;
-    this.loadTasks(oldTasks.tasks);
-    //console.debug(oldTasks,oldTasks.deletedTaskIds)
-    this.redraw();
-    //console.debug("undo after:",undoStack,redoStack);
-  }
+        var oldTasks = JSON.parse(his);
+        this.deletedTaskIds=oldTasks.deletedTaskIds;
+        this.loadTasks(oldTasks.tasks);
+        //console.debug(oldTasks,oldTasks.deletedTaskIds)
+        this.redraw();
+        //console.debug("undo after:",undoStack,redoStack);
+    }
 };
 
 GanttMaster.prototype.redo = function() {
-  //console.debug("redo before:",undoStack,redoStack);
-  if (this.__redoStack.length > 0) {
-    var his = this.__redoStack.pop();
-    this.__undoStack.push(JSON.stringify(this.saveGantt()));
+    //console.debug("redo before:",undoStack,redoStack);
+    if (this.__redoStack.length > 0) {
+        var his = this.__redoStack.pop();
+        this.__undoStack.push(JSON.stringify(this.saveGantt()));
 
-    var oldTasks = JSON.parse(his);
-    this.deletedTaskIds=oldTasks.deletedTaskIds;
-    this.loadTasks(oldTasks.tasks);
-    this.redraw();
-    //console.debug("redo after:",undoStack,redoStack);
-  }
+        var oldTasks = JSON.parse(his);
+        this.deletedTaskIds=oldTasks.deletedTaskIds;
+        this.loadTasks(oldTasks.tasks);
+        this.redraw();
+        //console.debug("redo after:",undoStack,redoStack);
+    }
 };
 
