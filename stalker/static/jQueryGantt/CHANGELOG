@@ -1,6 +1,28 @@
 ====================
 StalkerGantt Changes
 ====================
+0.1.0.a1
+--------
+* Changed the data structure quite a bit.
+* No `level` nor `rowId`, it is all related to the `Task.id`, `Task.parent_id`
+  now, which far much better, because what you are viewing generally is a group
+  of tasks which are not related to each other directly (tasks of a user from
+  different branches), so putting a `level` will place them under the wrong
+  task most of the time.
+* There are new attributes like `bid`, `effort`, `length`, `children`,
+  `depends_string`, `depends_ids`, `depends`, `parent_id`, `parent`,
+  `is_scheduled`, `is_milestone`, `resources`, `resource_ids` in Task class.
+* New attributes in GanttMaster for quick look up of tasks. Instead of
+  looping through the GanttMaster.tasks list again and again to find one task
+  with desired id, there is new attributes like GanttMaster.task_ids and
+  GanttMaster.resource_ids for quick look up of the indexes. So finding a task
+  becomes straight forward::
+    
+    index = GanttMaster.task_ids.index_of(desired_task_id)
+    task = GanttMaster.tasks[index]
+    # no need to tour around
+* Removed all the editors windows, will use the custom coded Dojo UI to
+  manipulate the Tasks.
 
 0.0.1.a1
 --------
