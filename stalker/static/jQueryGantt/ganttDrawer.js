@@ -28,8 +28,8 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.minGanttSize = minGanttSize;
   this.includeToday=true; //when true today is always visible. If false boundaries comes from tasks periods
 
-  //this.zoomLevels = ["d","w","m","q","s","y"];
-  this.zoomLevels = ["w","m","q","s","y"];
+  this.zoomLevels = ["d","w","m","q","s","y"];
+  //this.zoomLevels = ["w","m","q","s","y"];
   
   this.element = this.create(zoom, startmillis, endMillis);
 
@@ -366,7 +366,10 @@ Ganttalendar.prototype.drawTask = function (task) {
     self.master.showTaskEditor($(this).closest("[taskId]").attr("taskId"));
 
   }).mousedown(function() {
-    var task = self.master.getTask($(this).attr("taskId"));
+    var task_id = $(this).attr("taskId");
+    console.log('task_id: ', task_id);
+    var task = self.master.getTask(task_id);
+    console.log('task: ', task);
     task.rowElement.click();
   });
 

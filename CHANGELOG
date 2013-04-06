@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.0.a10
+---------
+
+* jQueryGantt is now using the Task ids coming from Stalker instead of the
+  ridiculous rowId.
+
 0.2.0.a9
 --------
 * A new property called ``to_tjp`` added to the SimpleEntity class which needs

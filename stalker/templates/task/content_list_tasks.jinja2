@@ -43,6 +43,7 @@
       <thead>
       <tr style="height:40px">
         <th class="gdfColHeader gdfResizable" style="width:20px;"></th>
+        <th class="gdfColHeader gdfResizable" style="width:20px;">id</th>
         <th class="gdfColHeader gdfResizable" style="width:250px;">name</th>
         <th class="gdfColHeader gdfResizable" style="width:75px;">start</th>
         <th class="gdfColHeader gdfResizable" style="width:75px;">end</th>
@@ -56,20 +57,22 @@
   --></div>
 
   <div class="__template__" type="TASKROW"><!--
-  <tr taskId="(#=obj.id#)" class="taskEditRow" level="(#=level#)">
+  <tr taskId="(#=obj.id#)" class="taskEditRow" >
     <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
-    <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.level>0?'border-left:2px dotted orange':''#)"></td>
+    <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
+    <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.getParents().length>0?'border-left:2px dotted orange':''#)"></td>
     <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="duration" value="(#=obj.duration#)"></td>
     <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depends#)" (#=obj.hasExternalDep?"readonly":""#)></td>
-    <td class="gdfCell taskAssigs">(#=obj.getAssigsString()#)</td>
+    <td class="gdfCell taskAssigs">(#=obj.getResourcesString()#)</td>
   </tr>
 --></div>
 
   <div class="__template__" type="TASKEMPTYROW"><!--
   <tr class="taskEditRow emptyRow" >
     <th class="gdfCell" align="right"></th>
+    <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
@@ -90,34 +93,12 @@
 
       <div class="taskLabel">(#=obj.name#)</div>
       <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
-      <div class="taskDepLabel">(#=obj.getAssigsString()#)</div>
+      <div class="taskDepLabel">(#=obj.getResourcesString()#)</div>
     </div>
   </div>
   --></div>
 
 
-  <div class="__template__" type="CHANGE_STATUS"><!--
-    <div class="taskStatusBox">
-      <div class="taskStatus cvcColorSquare" status="STATUS_ACTIVE" title="active"></div>
-      <div class="taskStatus cvcColorSquare" status="STATUS_DONE" title="completed"></div>
-      <div class="taskStatus cvcColorSquare" status="STATUS_FAILED" title="failed"></div>
-      <div class="taskStatus cvcColorSquare" status="STATUS_SUSPENDED" title="suspended"></div>
-      <div class="taskStatus cvcColorSquare" status="STATUS_UNDEFINED" title="undefined"></div>
-    </div>
-  --></div>
-
-
-
-
-
-  <div class="__template__" type="ASSIGNMENT_ROW"><!--
-  <tr taskId="(#=obj.task.id#)" assigId="(#=obj.assig.id#)" class="assigEditRow" >
-    <td ><select name="resourceId"  class="formElements" (#=obj.assig.id.indexOf("tmp_")==0?"":"disabled"#) ></select></td>
-    <td ><select type="select" name="roleId"  class="formElements"></select></td>
-    <td ><input type="text" name="effort" value="(#=getMillisInHoursMinutes(obj.assig.effort)#)" size="5" class="formElements"></td>
-    <td align="center"><span class="teamworkIcon delAssig" style="cursor: pointer">d</span></td>
-  </tr>
-  --></div>
 </div>
 
 
@@ -488,38 +469,3 @@
       });
   });
 </script>
-
-<script type="text/javascript">
-  $.JST.loadDecorator("ASSIGNMENT_ROW", function(assigTr, taskAssig) {
-    
-    var resEl = assigTr.find("[name=resourceId]");
-    for (var i in taskAssig.task.master.resources) {
-      var res = taskAssig.task.master.resources[i];
-      var opt = $("<option>");
-      opt.val(res.id).html(res.name);
-      if (taskAssig.assig.resourceId == res.id)
-        opt.attr("selected", "true");
-      resEl.append(opt);
-    }
-
-    var roleEl = assigTr.find("[name=roleId]");
-    for (var i in taskAssig.task.master.roles) {
-      var role = taskAssig.task.master.roles[i];
-      var optr = $("<option>");
-      optr.val(role.id).html(role.name);
-      if (taskAssig.assig.roleId == role.id)
-        optr.attr("selected", "true");
-      roleEl.append(optr);
-    }
-
-    if (taskAssig.task.master.canWrite) {
-      assigTr.find(".delAssig").click(function() {
-        var tr = $(this).closest("[assigId]").fadeOut(200, function() {
-          $(this).remove();
-        });
-      });
-    }
-
-  });
-</script>
-

@@ -76,17 +76,16 @@ def convert_to_jquery_gantt_task_format(tasks):
                 'id': task.id,
                 'name': '%s (%s)' % (task.name, task.entity_type),
                 'code': task.id,
-                'level': task.level,
+                'parent_id': task.parent.id if task.parent else None,
                 'status': 'STATUS_UNDEFINED',
                 'start': int(task.start.strftime('%s')) * 1000,
                 'duration': task.duration.days,
                 'end': int(task.end.strftime('%s')) * 1000,
-                'depends': convert_to_depend_index(task, tasks),
+                'depends_ids': [dep.id for dep in task.depends],#convert_to_depend_index(task, tasks),
                 'description': task.description,
-                'assigs': [
+                'resources': [
                     {
-                        'resourceId': resource.id,
-                        'id': resource.id
+                        'id': resource.id,
                     } for resource in task.resources
                 ]
             }
@@ -145,20 +144,26 @@ def update_with_jquery_gantt_task_data(json_data):
         
         task_start = task_data['start']
         task_duration = task_data.get('duration', 0)
-        task_resource_ids = [resource_data['resourceId']
-                             for resource_data in task_data['assigs']]
+        task_resource_ids = [resource_data['id']
+                             for resource_data in task_data['resources']]
         task_description = task_data.get('description', '')
         
-        # TODO: update also task parents
+        # no need to update parent, it will only be possible by using
+        # Stalker's own task edit UI
+        # 
+        #task_parent = task_data.get('parent_id', '')
         
-        # task_depend_ids : " 2, 3, 5, 6:3, 12" these are the index numbers of
-        # the task in the Gantt chart, be careful it is not the id of the task
+        # --------
+        # Updated:
+        # --------
+        # task depend_ids are now real Stalker task id, no need to convert it
+        # to something else
+        # task_depend_ids : " 2, 3, 5, 6:3, 12" these are the ids of the task
         task_depend_ids = []
         if len(task_data.get('depends', [])):
             for index_str in task_data['depends'].split(','):
-                index = int(index_str.split(':')[0])
-                logger.debug('index : %s' % index)
-                dependent_task_id = data['tasks'][index-1]['id']
+                dependent_task_id = int(index_str.split(':')[0])
+                logger.debug('index : %s' % dependent_task_id)
                 task_depend_ids.append(dependent_task_id)
         
         # get the task itself

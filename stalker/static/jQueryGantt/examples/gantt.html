@@ -38,14 +38,14 @@
 <div id="taZone" style="display:none;">
   <textarea rows="8" cols="150" id="ta">
     {"tasks":[
-    {"id":-1,"name":"Gantt editor","code":"","level":0,"status":"STATUS_ACTIVE","start":1346623200000,"duration":16,"end":1348523999999,"startIsMilestone":true,"endIsMilestone":false,"assigs":[]},
-    {"id":-2,"name":"coding","code":"","level":1,"status":"STATUS_ACTIVE","start":1346623200000,"duration":10,"end":1347659999999,"startIsMilestone":false,"endIsMilestone":false,"assigs":[],"description":"","progress":0},
-    {"id":-3,"name":"gant part","code":"","level":2,"status":"STATUS_ACTIVE","start":1346623200000,"duration":2,"end":1346795999999,"startIsMilestone":false,"endIsMilestone":false,"assigs":[],"depends":""},
-    {"id":-4,"name":"editor part","code":"","level":2,"status":"STATUS_SUSPENDED","start":1346796000000,"duration":4,"end":1347314399999,"startIsMilestone":false,"endIsMilestone":false,"assigs":[],"depends":"3"},
-    {"id":-5,"name":"testing","code":"","level":1,"status":"STATUS_SUSPENDED","start":1347832800000,"duration":6,"end":1348523999999,"startIsMilestone":false,"endIsMilestone":false,"assigs":[],"depends":"2:5","description":"","progress":0},
-    {"id":-6,"name":"test on safari","code":"","level":2,"status":"STATUS_SUSPENDED","start":1347832800000,"duration":2,"end":1348005599999,"startIsMilestone":false,"endIsMilestone":false,"assigs":[],"depends":""},
-    {"id":-7,"name":"test on ie","code":"","level":2,"status":"STATUS_SUSPENDED","start":1348005600000,"duration":3,"end":1348264799999,"startIsMilestone":false,"endIsMilestone":false,"assigs":[],"depends":"6"},
-    {"id":-8,"name":"test on chrome","code":"","level":2,"status":"STATUS_SUSPENDED","start":1348005600000,"duration":2,"end":1348178399999,"startIsMilestone":false,"endIsMilestone":false,"assigs":[],"depends":"6"}
+    {"id":-1,"name":"Gantt editor","code":"","level":0,"status":"STATUS_ACTIVE","start":1346623200000,"duration":16,"end":1348523999999,"startIsMilestone":true,"endIsMilestone":false,"resources":[]},
+    {"id":-2,"name":"coding","code":"","level":1,"status":"STATUS_ACTIVE","start":1346623200000,"duration":10,"end":1347659999999,"startIsMilestone":false,"endIsMilestone":false,"resources":[],"description":"","progress":0},
+    {"id":-3,"name":"gant part","code":"","level":2,"status":"STATUS_ACTIVE","start":1346623200000,"duration":2,"end":1346795999999,"startIsMilestone":false,"endIsMilestone":false,"resources":[],"depends":""},
+    {"id":-4,"name":"editor part","code":"","level":2,"status":"STATUS_SUSPENDED","start":1346796000000,"duration":4,"end":1347314399999,"startIsMilestone":false,"endIsMilestone":false,"resources":[],"depends":"3"},
+    {"id":-5,"name":"testing","code":"","level":1,"status":"STATUS_SUSPENDED","start":1347832800000,"duration":6,"end":1348523999999,"startIsMilestone":false,"endIsMilestone":false,"resources":[],"depends":"2:5","description":"","progress":0},
+    {"id":-6,"name":"test on safari","code":"","level":2,"status":"STATUS_SUSPENDED","start":1347832800000,"duration":2,"end":1348005599999,"startIsMilestone":false,"endIsMilestone":false,"resources":[],"depends":""},
+    {"id":-7,"name":"test on ie","code":"","level":2,"status":"STATUS_SUSPENDED","start":1348005600000,"duration":3,"end":1348264799999,"startIsMilestone":false,"endIsMilestone":false,"resources":[],"depends":"6"},
+    {"id":-8,"name":"test on chrome","code":"","level":2,"status":"STATUS_SUSPENDED","start":1348005600000,"duration":2,"end":1348178399999,"startIsMilestone":false,"endIsMilestone":false,"resources":[],"depends":"6"}
     ],"selectedRow":0,"deletedTaskIds":[],"canWrite":true,"canWriteOnParent":true }
   </textarea>
   <button onclick="loadGanttFromServer();">load</button>
@@ -401,7 +401,7 @@ function saveInLocalStorage() {
     <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="duration" value="(#=obj.duration#)"></td>
     <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depends#)" (#=obj.hasExternalDep?"readonly":""#)></td>
-    <td class="gdfCell taskAssigs">(#=obj.getAssigsString()#)</td>
+    <td class="gdfCell taskResources">(#=obj.getResourcesString()#)</td>
   </tr>
   --></div>
 
@@ -481,7 +481,7 @@ function saveInLocalStorage() {
     </table>
 
     <h2>assignments</h2>
-  <table  cellspacing="1" cellpadding="0" width="100%" id="assigsTable">
+  <table  cellspacing="1" cellpadding="0" width="100%" id="resourcesTable">
     <tr>
       <th style="width:100px;">name</th>
       <th style="width:70px;">role</th>
@@ -505,41 +505,30 @@ function saveInLocalStorage() {
   --></div>
 
 </div>
-<script type="text/javascript">
-  $.JST.loadDecorator("ASSIGNMENT_ROW", function(assigTr, taskAssig) {
-
-    var resEl = assigTr.find("[name=resourceId]");
-    for (var i in taskAssig.task.master.resources) {
-      var res = taskAssig.task.master.resources[i];
-      var opt = $("<option>");
-      opt.val(res.id).html(res.name);
-      if (taskAssig.assig.resourceId == res.id)
-        opt.attr("selected", "true");
-      resEl.append(opt);
-    }
-
-
-    var roleEl = assigTr.find("[name=roleId]");
-    for (var i in taskAssig.task.master.roles) {
-      var role = taskAssig.task.master.roles[i];
-      var optr = $("<option>");
-      optr.val(role.id).html(role.name);
-      if (taskAssig.assig.roleId == role.id)
-        optr.attr("selected", "true");
-      roleEl.append(optr);
-    }
-
-    if (taskAssig.task.master.canWrite) {
-      assigTr.find(".delAssig").click(function() {
-        var tr = $(this).closest("[assigId]").fadeOut(200, function() {
-          $(this).remove();
-        });
-      });
-    }
-
-
-  });
-</script>
+<!--<script type="text/javascript">-->
+  <!--$.JST.loadDecorator("ASSIGNMENT_ROW", function(assigTr, taskAssig) {-->
+<!---->
+    <!--var resEl = assigTr.find("[name=id]");-->
+    <!--for (var i in taskAssig.task.master.resources) {-->
+      <!--var res = taskAssig.task.master.resources[i];-->
+      <!--var opt = $("<option>");-->
+      <!--opt.val(res.id).html(res.name);-->
+      <!--if (taskAssig.assig.resourceId == res.id)-->
+        <!--opt.attr("selected", "true");-->
+      <!--resEl.append(opt);-->
+    <!--}-->
+    <!---->
+    <!--if (taskAssig.task.master.canWrite) {-->
+      <!--assigTr.find(".delResources").click(function() {-->
+        <!--var tr = $(this).closest("[assigId]").fadeOut(200, function() {-->
+          <!--$(this).remove();-->
+        <!--});-->
+      <!--});-->
+    <!--}-->
+<!---->
+<!---->
+  <!--});-->
+<!-- </script> -->
 
 
 

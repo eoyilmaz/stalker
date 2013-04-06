@@ -167,7 +167,7 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
         )
         DBSession.add(self.test_task_status_list)
         
-        # create tasks
+        # create two tasks with the same resources
         self.test_task1 = Task(
             name='Task1',
             project=self.test_proj1,
@@ -176,6 +176,16 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
             status_list=self.test_task_status_list
         )
         DBSession.add(self.test_task1)
+        
+        self.test_task2 = Task(
+            name='Task2',
+            project=self.test_proj1,
+            resources=[self.test_user1, self.test_user2],
+            effort=60,
+            status_list=self.test_task_status_list
+        )
+        DBSession.add(self.test_task2)
+        
         DBSession.commit()
     
     def test_tjp_file_is_created(self):
@@ -224,7 +234,7 @@ project Project_30 "Test Project 1" 2013-04-04 - 2013-05-04 {
 
 # resources
 resource resources "Resources" {
-    resource User_3 "admin"
+    resource User_3 "Admin"
     resource User_14 "User1"
     resource User_16 "User2"
     resource User_17 "User3"
@@ -238,6 +248,11 @@ task Project_30 "Test Project 1"{
     
     task Task_31 "Task1" {
     effort 50h
+    allocate User_14, User_16
+}
+    
+    task Task_32 "Task2" {
+    effort 60h
     allocate User_14, User_16
 }
     
@@ -279,17 +294,26 @@ taskreport breakdown "{{csv_path}}"{
         
         self.assertEqual(
             self.test_proj1.computed_end,
-            datetime.datetime(2013, 4, 8, 17, 0)
+            datetime.datetime(2013, 4, 12, 11, 0)
         )
         
         self.assertEqual(
             self.test_task1.computed_start,
-            datetime.datetime(2013, 4, 4, 10, 0)
+            datetime.datetime(2013, 4, 9, 13, 0)
         )
         self.assertEqual(
             self.test_task1.computed_end,
-            datetime.datetime(2013, 4, 8, 17, 0)
+            datetime.datetime(2013, 4, 12, 11, 0)
         )
         
+        self.assertEqual(
+            self.test_task2.computed_start,
+            datetime.datetime(2013, 4, 4, 10, 0)
+        )
+        
+        self.assertEqual(
+            self.test_task2.computed_end,
+            datetime.datetime(2013, 4, 9, 13, 0)
+        )
     
         

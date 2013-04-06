@@ -24,7 +24,7 @@ Stalker is a Production Asset Management System (ProdAM) designed for animation
 and vfx studios. See docs for more information.
 """
 
-__version__ = '0.2.0.a9'
+__version__ = '0.2.0.a10'
 
 from pyramid.config import Configurator
 from pyramid.authentication import AuthTktAuthenticationPolicy

@@ -88,7 +88,6 @@ class TaskJugglerScheduler(SchedulerBase):
         self.temp_file_name = os.path.basename(self.temp_file_full_path)
         self.tjp_file_full_path =  self.temp_file_full_path + ".tjp"
         self.csv_file_full_path =  self.temp_file_full_path + ".csv"
-        self.tjp_file = open(self.tjp_file_full_path, 'w+')
     
     def _create_tjp_file_content(self):
         """creates the tjp file content
@@ -107,16 +106,12 @@ class TaskJugglerScheduler(SchedulerBase):
     def _fill_tjp_file(self):
         """fills the tjp file with content
         """
-        self.tjp_file.write(self.tjp_content)
-        self.tjp_file.close()
+        with open(self.tjp_file_full_path, 'w+') as self.tjp_file:
+            self.tjp_file.write(self.tjp_content)
     
     def _delete_tjp_file(self):
         """deletes the temp tjp file
         """
-        # close the file
-        self.tjp_file.close()
-        
-        # remove the file
         try:
             os.remove(self.tjp_file_full_path)
         except OSError:
@@ -142,31 +137,23 @@ class TaskJugglerScheduler(SchedulerBase):
         """
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
         
-        lines = None
         with open(self.csv_file_full_path, 'r') as self.csv_file:
             csv_content = csv.reader(self.csv_file, delimiter=';')
             lines = [line for line in csv_content]
             lines.pop(0)
             for data in lines:
                 id_line = data[0]
-                start_date = datetime.datetime.strptime(data[1],
-                                                        "%Y-%m-%d-%H:%M")
-                end_date = datetime.datetime.strptime(data[2],
-                                                        "%Y-%m-%d-%H:%M")
                 entity_id = int(id_line.split('.')[-1].split('_')[-1])
                 entity = Entity.query.filter(Entity.id==entity_id).first()
                 if entity:
+                    start_date = datetime.datetime.strptime(data[1],
+                                                            "%Y-%m-%d-%H:%M")
+                    end_date = datetime.datetime.strptime(data[2],
+                                                            "%Y-%m-%d-%H:%M")
                     entity._computed_start = start_date
                     entity._computed_end = end_date
         
         DBSession.commit()
-        
-        logger.debug('TaskJuggler csv output: %s ' % lines)
-        
-        # now get all the entities in the csv file and change their
-        # computed_start and computed_end values
-        
-        
     
     def schedule(self):
         """does the scheduling

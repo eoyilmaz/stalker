@@ -182,57 +182,54 @@ $.splittify = {
   }
 };
 
-
-
-
 //<%------------------------------------------------------------------------  UTILITIES ---------------------------------------------------------------%>
-  function computeStart(start) { // TODO: Update this to support hours
-    console.log('computeStart running');
-    var d = new Date(start+3600000*12);
-    d.setHours(0, 0, 0, 0);
-    //move to the next working day if the start is a holiday
-    while (isHoliday(d)) {
-      d.setDate(d.getDate() + 1);
-    }
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
+function computeStart(start) { // TODO: Update this to support hours
+  //console.log('computeStart running');
+  var d = new Date(start+3600000*12);
+  d.setHours(0, 0, 0, 0);
+  //move to the next working day if the start is a holiday
+  while (isHoliday(d)) {
+    d.setDate(d.getDate() + 1);
   }
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
 
-  function computeEnd(end) { // TODO: Update this to support hours
-    console.log('computeEnd running');
-    var d = new Date(end-3600000*12);
-    d.setHours(23, 59, 59, 999);
-    //move to next working day
-    while (isHoliday(d)) {
-      d.setDate(d.getDate() + 1);
-    }
-    d.setHours(23, 59, 59, 999);
-    return d.getTime();
+function computeEnd(end) { // TODO: Update this to support hours
+  //console.log('computeEnd running');
+  var d = new Date(end-3600000*12);
+  d.setHours(23, 59, 59, 999);
+  //move to next working day
+  while (isHoliday(d)) {
+    d.setDate(d.getDate() + 1);
   }
+  d.setHours(23, 59, 59, 999);
+  return d.getTime();
+}
 
-  function computeEndByDuration(start, duration) {
-    var d = new Date(start);
-    //console.debug("computeEndByDuration start ",d,duration)
-    var q = duration - 1;
-    while (q > 0) {
-      d.setDate(d.getDate() + 1);
-      if (!isHoliday(d))
-        q--;
-    }
-    d.setHours(23, 59, 59, 999);
-    return d.getTime();
+function computeEndByDuration(start, duration) {
+  var d = new Date(start);
+  //console.debug("computeEndByDuration start ",d,duration)
+  var q = duration - 1;
+  while (q > 0) {
+    d.setDate(d.getDate() + 1);
+    if (!isHoliday(d))
+      q--;
   }
+  d.setHours(23, 59, 59, 999);
+  return d.getTime();
+}
 
-  function incrementDateByWorkingDays(date, days) {
-    var d = new Date(date);
-    d.incrementDateByWorkingDays(days);
-    return d.getTime();
-  }
+function incrementDateByWorkingDays(date, days) {
+  var d = new Date(date);
+  d.incrementDateByWorkingDays(days);
+  return d.getTime();
+}
 
 function recomputeDuration(start, end) {
    //console.debug("recomputeDuration");
    return new Date(start).distanceInWorkingDays(new Date(end));
- }
+}
 
 
 
@@ -246,7 +243,7 @@ if (!Array.prototype.filter){
     var len = this.length;
     if (typeof fun != "function")
       throw new TypeError();
-
+    
     var res = new Array();
     var thisp = arguments[1];
     for (var i = 0; i < len; i++)
