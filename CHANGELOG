@@ -5,8 +5,17 @@ Stalker Changes
 0.2.0.a10
 ---------
 
-* jQueryGantt is now using the Task ids coming from Stalker instead of the
-  ridiculous rowId.
+* jQueryGantt:
+  * jQueryGantt is now using the Task ids coming from Stalker instead of the
+    ridiculous rowId.
+  * Fixed a lot of issues related with the new data structure, it seems
+    everything is working properly right now.
+  * Parent Tasks displayed differently than the leaf tasks (on paar with the
+    other gantt charts).
+  * Gantt chart in User Detail page is now showing the parent tasks of the
+    tasks of the user.
+  * Now there are two different context menus for container/parent tasks and
+    leaf tasks.
 
 0.2.0.a9
 --------

@@ -314,12 +314,30 @@ def get_gantt_tasks(request):
             for root_task in root_tasks:
                 logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
                 tasks.extend(depth_first_flatten(root_task))
+        
         elif entity.entity_type == 'User':
             user = entity
             
             # sort the tasks with the project.id
             if user is not None:
                 tasks = sorted(user.tasks, key=lambda task: task.project.id)
+                
+                user_tasks_with_parents = []
+                for task in tasks:
+                    user_tasks_with_parents.append(task)
+                    parent = task.parent
+                    while parent:
+                        # just add unique parents
+                        #if parent not in user_tasks_with_parents:
+                        user_tasks_with_parents.append(parent)
+                        parent = parent.parent
+                
+                
+                logger.debug('user_task_with_parents: %s' % user_tasks_with_parents)
+                logger.debug('tasks                 : %s' % tasks)
+                tasks = list(set(user_tasks_with_parents))
+    
+    tasks.sort(key=lambda x: x.start)
     
     if log.logging_level == logging.DEBUG:
         logger.debug('tasks count: %i' % len(tasks))
@@ -599,5 +617,17 @@ def get_user_tasks(request):
     tasks = []
     if user is not None:
         tasks = sorted(user.tasks, key=lambda x: x.project.id)
+        # add also all the parents
+        user_tasks_with_parents = []
+        for task in tasks:
+            user_tasks_with_parents.append(task)
+            current_parent = task.parent
+            while current_parent:
+                user_tasks_with_parents.append(current_parent)
+                current_parent = current_parent.parent
+        
+        logger.debug('user_task_with_parents: %s' % user_tasks_with_parents)
+        logger.debug('tasks                 : %s' % tasks)
+        tasks = user_tasks_with_parents
     
     return convert_to_jquery_gantt_task_format(tasks)

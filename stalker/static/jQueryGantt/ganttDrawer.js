@@ -63,56 +63,38 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
     var end = new Date(endMillis);
 
 
-    //reset hours
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+     //reset hours
     if (zoomLevel == "d") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
-      //reset day of week
+       
     } else if (zoomLevel == "w") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
+      //reset day of week
       start.setFirstDayOfThisWeek();
       end.setFirstDayOfThisWeek();
       end.setDate(end.getDate() + 6);
-
-      //reset day of month
     } else if (zoomLevel == "m") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
+      //reset day of month
       start.setDate(1);
       end.setDate(1);
       end.setMonth(end.getMonth() + 1);
       end.setDate(end.getDate() - 1);
-
-      //reset to quarter
     } else if (zoomLevel == "q") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
+      //reset to quarter
       start.setDate(1);
       start.setMonth(Math.floor(start.getMonth() / 3) * 3);
       end.setDate(1);
       end.setMonth(Math.floor(end.getMonth() / 3) * 3 + 3);
       end.setDate(end.getDate() - 1);
-
-      //reset to semester
     } else if (zoomLevel == "s") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
+      //reset to semester
       start.setDate(1);
-
       start.setMonth(Math.floor(start.getMonth() / 6) * 6);
       end.setDate(1);
       end.setMonth(Math.floor(end.getMonth() / 6) * 6 + 6);
       end.setDate(end.getDate() - 1);
-
-      //reset to year - > gen
     } else if (zoomLevel == "y") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
+      //reset to year - > gen
       start.setDate(1);
       start.setMonth(0);
 
@@ -161,8 +143,9 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
     //this is computed by hand in order to optimize cell size
     var computedTableWidth;
 
-    // year
+    
     if (zoom == "y") {
+      // year
       computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 180)) * 100); //180gg = 1 sem = 100px
       iterate(function(date) {
         tr1.append(createHeadCell(date.format("yyyy"), 2));
@@ -174,9 +157,9 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         trBody.append(createBodyCell(1, sem == 2));
         date.setMonth(date.getMonth() + 6);
       });
-
-      //semester
+    
     } else if (zoom == "s") {
+      //semester
       computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 90)) * 100); //90gg = 1 quarter = 100px
       iterate(function(date) {
         var end = new Date(date.getTime());
@@ -191,9 +174,9 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         trBody.append(createBodyCell(1, quarter % 2 == 0));
         date.setMonth(date.getMonth() + 3);
       });
-
-      //quarter
+    
     } else if (zoom == "q") {
+      //quarter
       computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 30)) * 300); //1 month= 300px
       iterate(function(date) {
         var end = new Date(date.getTime());
@@ -207,9 +190,8 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         trBody.append(createBodyCell(1, date.getMonth() % 3 == 2));
         date.setMonth(date.getMonth() + 1);
       });
-
-      //month
     } else if (zoom == "m") {
+      //month
       computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 1)) * 20); //1 day= 20px
       iterate(function(date) {
         var sm = date.getTime();
@@ -223,9 +205,8 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         trBody.append(createBodyCell(1, nd.getDate() == 1, isHoliday(date) ? "holy" : null));
         date.setDate(date.getDate() + 1);
       });
-
-      //week
     } else if (zoom == "w") {
+      //week
       computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 30); //1 day= 30px
       iterate(function(date) {
         var end = new Date(date.getTime());
@@ -237,9 +218,8 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
         date.setDate(date.getDate() + 1);
       });
-
-      //days
     } else if (zoom == "d") {
+      //days
       computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 200); //1 day= 200px
       iterate(function(date) {
         tr1.append(createHeadCell(date.format("EEEE d MMMM yyyy"), 4, isHoliday(date) ? "holyH" : null));
@@ -256,11 +236,11 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
     //set a minimal width
     computedTableWidth = Math.max(computedTableWidth, self.minGanttSize);
-
+    
     var table = $("<table cellspacing=0 cellpadding=0>");
     table.append(tr1).append(tr2).append(trBody).addClass("ganttTable").css({width:computedTableWidth});
     table.height(self.master.editor.element.height());
-
+    
     var box = $("<div>");
     box.addClass("gantt unselectable").attr("unselectable","true").css({position:"relative",width:computedTableWidth});
     box.append(table);
@@ -274,21 +254,20 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
     var links = $("<div>");
     links.addClass("ganttLinks").css({position:"absolute",top:0,width:computedTableWidth,height:"100%"});
     box.append(links);
-
-
+    
     //compute scalefactor fx
     self.fx = computedTableWidth / (endPeriod - startPeriod);
-
+    
     // drawTodayLine
     if (new Date().getTime() > self.startMillis && new Date().getTime() < self.endMillis) {
       var x = Math.round(((new Date().getTime()) - self.startMillis) * self.fx);
       var today = $("<div>").addClass("ganttToday").css("left", x);
       box.append(today);
     }
-
+    
     return box;
   }
-
+  
   //if include today synch extremes
   if (this.includeToday){
     var today=new Date().getTime();
@@ -319,28 +298,28 @@ Ganttalendar.prototype.drawTask = function (task) {
   //var prof = new Profiler("ganttDrawTask");
   //var editorRow = self.master.editor.element.find("tr[taskId=" + task.id + "]");
   editorRow = task.rowElement;
-  var top = editorRow.position().top+self.master.editor.element.parent().scrollTop();
+  var top = editorRow.position().top + self.master.editor.element.parent().scrollTop();
   var x = Math.round((task.start - self.startMillis) * self.fx);
   
   var taskBox;
-  if (task.children.length == 0){
+  if (!task.isParent()){
     // if it is a leaf task draw a TASKBAR
     taskBox = $.JST.createFromTemplate(task, "TASKBAR");
   } else {
     // draw a PARENTTASKBAR
     taskBox = $.JST.createFromTemplate(task, "PARENTTASKBAR");
   }
-
+  
   //save row element on task
   task.ganttElement = taskBox;
 
   //if I'm parent
-  if (task.isParent())
-    taskBox.addClass("hasChild");
-
-
+  //if (task.isParent())
+  //  taskBox.addClass("hasChild");
+  
+  
   taskBox.css({top:top,left:x,width:Math.round((task.end - task.start) * self.fx)});
-
+  
   if (this.master.canWrite) {
     taskBox.resizable({
       handles: 'e' + ( task.depends ? "" : ",w"), //if depends cannot move start
@@ -560,8 +539,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     }
 
     //arrow
-    var arr = $("<img src='linkArrow.png'>").css({
-      position: 'absolute',
+    var arr = $("<div class='linkArrow'></div>").css({
       top: rectTo.top + rectTo.height / 2 - 5,
       left: rectTo.left - 5
     });
@@ -659,11 +637,11 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     }
 
     //arrow
-    var arr = $("<img src='linkArrow.png'>").css({
-      position: 'absolute',
+    var arr = $("<div class='linkArrow'></div>").css({
       top: rectTo.top + rectTo.height / 2 - 5,
       left: rectTo.left - 5
     });
+    
 
     ndo.append(arr);
 

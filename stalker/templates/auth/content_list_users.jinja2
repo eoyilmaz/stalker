@@ -54,10 +54,8 @@
           users_DataGrid.startup();
           append_user_button.startup();
           
-
-            
+          
           function users_DataGrid_updater(){
-              
               var user_memory = new JsonRest({
                 target: '/get/users_byEntity/{{ entity.id }}'
               });
@@ -65,9 +63,7 @@
               user_memory.query().then(function(data){
                 for(var i=0;i<data.length;i++ ){
                   var userName = data[i]["name"];
-                  var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['id'] + '">' + userName + '</a>';
-                  
-                  data[i]["user_link"] = userLink;
+                  data[i]["user_link"]  = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['id'] + '">' + userName + '</a>';
                 }
                 
                 var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });

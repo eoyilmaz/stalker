@@ -1,6 +1,13 @@
 ====================
 StalkerGantt Changes
 ====================
+0.1.0.a2
+--------
+* Fixed a lot of issues related with the new data structure, it seems
+  everything is working properly right now.
+* Parent Tasks displayed differently than the leaf tasks (on paar with the
+  other gantt charts).
+
 0.1.0.a1
 --------
 * Changed the data structure quite a bit.
