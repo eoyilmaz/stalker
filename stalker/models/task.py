@@ -21,7 +21,8 @@
 import datetime
 from sqlalchemy.ext.declarative import declared_attr
 import warnings
-from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, Enum
+from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
+                        String)
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 from stalker import User
 from stalker.conf import defaults
@@ -404,7 +405,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     )
     
     effort = Column(
-        Integer,
+        String,
         doc="""The total effort that needs to be spend to complete this
         :class:`~stalker.models.task.Task`. Can be used to create an initial
         bid of how long this task will take. The unit of effort is hours. This
@@ -414,13 +415,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     )
     
     length = Column(
-        Integer,
+        String,
         doc="""The length of this Task measured in working hours. It is an
         integer value."""
     )
     
     bid = Column(
-        Integer,
+        String,
         doc="""The initial bid of this Task. It measured in working hours."""
     )
     
@@ -442,8 +443,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
     )
     
-    schedule_using = Column(Enum(*defaults.TASK_SCHEDULE_FLAGS,
-                                name='TaskScheduleUsing'),
+    schedule_flag = Column(Enum(*defaults.TASK_SCHEDULE_FLAGS,
+                                name='TaskScheduleFlag'),
                            default=defaults.TASK_SCHEDULE_FLAGS[0])
     
     schedule_constraint = Column(Enum(*defaults.TASK_SCHEDULE_CONSTRAINTS,
@@ -512,7 +513,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             bid = self.effort
         self.bid = bid
         self.priority = priority
-        self.schedule_using = schedule_using
+        self.schedule_flag = schedule_using
         self.schedule_constraint = schedule_constraint
     
     @reconstructor

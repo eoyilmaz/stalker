@@ -21,7 +21,7 @@
   <form id='create_task_form'>
     <table style='width: 100%;'>
       
-      {# PROJECCT #}
+      {# PROJECT #}
       <tr>
         <td class='label_column'>
           <label for='task_project'>Project</label>
@@ -71,12 +71,39 @@
         </td>
       </tr>
       
+      {# SCHEDULE USING / EFFORT / LENGTH / DURATION #}
+      <tr>
+        <td class='label_column'>
+          <label for='task_schedule_flag'>Schedule Flag</label>
+        </td>
+        <td class='input_column'>
+          <input id='task_schedule_flag'>
+          <input id='task_schedule_day'>
+          <div style='
+            float: left;
+            margin-left: 1px;
+            margin-top: 3px;
+            text-align: left;
+            width: 34px;
+          '>Days</div>
+          <input id='task_schedule_hour'>
+          <div style='
+            float: left;
+            margin-left: 1px;
+            margin-top: 3px;
+            text-align: left;
+            width: 34px;
+          '>Hours</div>
+        </td>
+      </tr>
+      
       {# START #}
       <tr>
         <td class='label_column'>
           <label for='task_start_date'>Start Date</label>
         </td>
         <td class='input_column'>
+            <input id='task_start_constraint'>
             <input id='task_start_date'>
             <input id='task_start_time'>
         </td>
@@ -88,18 +115,9 @@
           <label for='task_end_date'>End Date</label>
         </td>
         <td class='input_column'>
+            <input id='task_end_constraint'>
             <input id='task_end_date'>
             <input id='task_end_time'>
-        </td>
-      </tr>
-      
-      {# DURATION #}
-      <tr>
-        <td class='label_column'>
-          <label for='task_duration'>Duration</label>
-        </td>
-        <td class='input_column'>
-          <input id="task_duration">
         </td>
       </tr>
       
@@ -311,11 +329,66 @@
           {% endif %}
         });
         
+        // ********************************************************************
+        // Schedule Flag : EFFORT / LENGTH / DURATION
+        var schedule_flag = new FilteringSelect({
+          name: 'schedule_flag',
+          label: 'Schedule Flag',
+          store: new Memory({
+            data: [
+              {% for flag in schedule_flags %}
+              {
+                name: '{{ flag }}',
+                id: '{{ loop.index0 }}'
+              },
+              {% endfor %}
+            ]
+          }),
+          required: true,
+          style: 'width: 88px; float: left; margin-right: 3px'
+        }, 'task_schedule_flag');
+        // select the first one
+        schedule_flag.set('value', 0);
         
+        // Schedule Day
+        var schedule_day = new NumberTextBox({
+          name: 'schedule_day',
+          value: 0,
+          style: 'width: 30px; text-align: right; float: left;'
+        }, 'task_schedule_day')
+        schedule_day.startup();
         
+        // Schedule Hour
+        var schedule_hour = new NumberTextBox({
+          name: 'schedule_hour',
+          value: 0,
+          style: 'width: 30px; text-align: right; float: left;'
+        }, 'task_schedule_hour');
+        schedule_hour.startup();
         
         // ********************************************************************
         // Start Date
+        // CheckBox
+        var start_constraint_checkBox = new CheckBox({
+          id: 'start_constraint',
+          name: 'start_constraint',
+          value: 'checked',
+          checked: false,
+          onChange: function(new_value){
+            // enable the start date and start hour fields if checked
+            if (new_value){
+              start_dateTextBox.set('disabled', false);
+              start_time_timeTextBox.set('disabled', false);
+            } else {
+              start_dateTextBox.set('disabled', true);
+              start_time_timeTextBox.set('disabled', true);
+            }
+            // TODO: if both of the start_constraint and end_constraint checked
+            //       also change the schedule_using to DURATION and set the
+            //       duration to the correct value
+          }
+        }, 'task_start_constraint');
+        start_constraint_checkBox.startup();
         
         // Date
         var start_dateTextBox = new DateTextBox({
@@ -323,6 +396,8 @@
           label: 'Start Date',
           value: new Date(),// set it today by default
           required: true,
+          disabled: true,
+          style: 'width: 90px;',
           datePattern: 'dd-mm-yyyy',
           onChange: function(){
             if (this.focused){
@@ -340,6 +415,8 @@
         var start_time_timeTextBox = new TimeTextBox({
           name: 'start_time',
           value: 'T09:00:00',
+          disabled: true,
+          style: 'width: 75px;',
           constraints: {
             timePattern: 'HH:mm:ss',
             clickableIncrement: 'T01:00:00',
@@ -353,14 +430,37 @@
         
         // ********************************************************************
         // End Date
-        
+        // Checkbox
+        var end_constraint_checkBox = new CheckBox({
+          id: 'end_constraint',
+          name: 'end_constraint',
+          value: 'checked',
+          checked: false,
+          onChange: function(new_value){
+            // enable the end date and end hour fields if checked
+            if (new_value){
+              end_dateTextBox.set('disabled', false);
+              end_time_timeTextBox.set('disabled', false);
+            } else {
+              end_dateTextBox.set('disabled', true);
+              end_time_timeTextBox.set('disabled', true);
+            }
+            // TODO: if both of the start_constraint and end_constraint checked
+            //       also change the schedule_using to DURATION and set the
+            //       duration to the correct value
+          }
+        }, 'task_end_constraint');
+        end_constraint_checkBox.startup();
+ 
         // Date
         var end_dateTextBox = new DateTextBox({
           name: 'end',
           label: 'End Date',
           value: new Date(), // set it today by default
           required: true,
+          disabled: true,
           datePattern: 'dd-mm-yyyy',
+          style: 'width: 90px;',
           onChange: function(){
             if (this.focused){
               update_dates(
@@ -377,6 +477,8 @@
         var end_time_timeTextBox = new TimeTextBox({
           name: 'end_time',
           value: 'T18:00:00',
+          disabled: true,
+          style: 'width: 75px;',
           constraints: {
             timePattern: 'HH:mm:ss',
             clickableIncrement: 'T01:00:00',

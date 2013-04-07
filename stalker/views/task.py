@@ -29,6 +29,7 @@ from pyramid.httpexceptions import HTTPServerError, HTTPOk
 
 import transaction
 from sqlalchemy.exc import IntegrityError
+from stalker.conf import defaults
 
 from stalker.db import DBSession
 from stalker import User, Task, Entity, Project, StatusList, Status
@@ -403,7 +404,8 @@ def create_task_dialog(request):
     project = Project.query.filter_by(id=project_id).first()
     
     return {
-        'project': project
+        'project': project,
+        'schedule_flags': defaults.TASK_SCHEDULE_FLAGS
     }
 
 
@@ -423,6 +425,7 @@ def create_child_task_dialog(request):
     return {
         'project': project,
         'parent': parent_task,
+        'schedule_flags': defaults.TASK_SCHEDULE_FLAGS
     }
 
 
@@ -442,7 +445,8 @@ def create_dependent_task_dialog(request):
     
     return {
         'project': project,
-        'depends_to': depends_to_task
+        'depends_to': depends_to_task,
+        'schedule_flags': defaults.TASK_SCHEDULE_FLAGS
     }
 
 

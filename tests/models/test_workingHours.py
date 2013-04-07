@@ -263,3 +263,24 @@ class WorkingHoursTester(unittest.TestCase):
         
         self.assertEqual(wh.to_tjp, expected_tjp)
  
+    def test_weekly_working_hours_attribute_is_read_only(self):
+        """testing if the weekly_working_hours is a read-only attribute
+        """
+        wh = WorkingHours()
+        self.assertRaises(AttributeError, setattr, wh, 'weekly_working_hours',
+                          232)
+    
+    def test_weekly_working_hours_attribute_is_working_properly(self):
+        """testing if the weekly_working_hours attribute is working properly
+        """
+        wh = WorkingHours()
+        wh['mon'] = [[570, 720], [780, 1110]] # 480
+        wh['tue'] = [[570, 720], [780, 1110]] # 480
+        wh['wed'] = [[570, 720], [780, 1110]] # 480
+        wh['thu'] = [[570, 720], [780, 1110]] # 480
+        wh['fri'] = [[570, 720], [780, 1110]] # 480
+        wh['sat'] = [[570, 720]]              # 150
+        wh['sun'] = []                        # 0
+        
+        expected_value = 42.5
+        self.assertEqual(wh.weekly_working_hours, expected_value)

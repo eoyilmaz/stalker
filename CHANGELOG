@@ -17,6 +17,12 @@ Stalker Changes
   * Now there are two different context menus for container/parent tasks and
     leaf tasks.
 
+* Added new attribute to WorkingHours class called ``weekly_working_hours``,
+  which calculates the weekly working hours based on the working hours defined
+  in the instance.
+
+* Updated the Create Task Dialog to reflect the TaskJuggler integration.
+
 0.2.0.a9
 --------
 * A new property called ``to_tjp`` added to the SimpleEntity class which needs

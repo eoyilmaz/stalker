@@ -624,6 +624,19 @@ class WorkingHours(object):
         
         template = Template(defaults.TJP_WORKING_HOURS_TEMPLATE)
         return template.render({'workinghours': self})
+    
+    @property
+    def weekly_working_hours(self):
+        """returns the total working hours in a week
+        """
+        weekly_working_hours = 0
+        for i in range(0, 7):
+            for start, end in self[i]:
+                weekly_working_hours += (end - start)
+        return weekly_working_hours / 60.0
+
+
+
 
 # PROJECT_USERS
 Project_Users = Table(
