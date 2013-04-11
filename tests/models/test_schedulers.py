@@ -173,8 +173,8 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
             project=self.test_proj1,
             resources=[self.test_user1, self.test_user2],
             schedule_model=0,
-            schedule_timing_day=0,
-            schedule_timing_hour=50,
+            schedule_timing=50,
+            schedule_unit='h',
             status_list=self.test_task_status_list
         )
         DBSession.add(self.test_task1)
@@ -184,7 +184,8 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
             project=self.test_proj1,
             resources=[self.test_user1, self.test_user2],
             schedule_model=0,
-            schedule_timing_hour=60,
+            schedule_timing=60,
+            schedule_unit='h',
             status_list=self.test_task_status_list
         )
         DBSession.add(self.test_task2)
@@ -238,7 +239,7 @@ project Project_30 "Test Project 1" 2013-04-04 - 2013-05-04 {
 
 # resources
 resource resources "Resources" {
-    resource User_3 "admin"
+    resource User_3 "Admin"
     resource User_14 "User1"
     resource User_16 "User2"
     resource User_17 "User3"
@@ -251,12 +252,12 @@ resource resources "Resources" {
 task Project_30 "Test Project 1"{
     
     task Task_31 "Task1" {
-    effort 50h
+    effort 50.0h
     allocate User_14, User_16
 }
     
     task Task_32 "Task2" {
-    effort 60h
+    effort 60.0h
     allocate User_14, User_16
 }
     

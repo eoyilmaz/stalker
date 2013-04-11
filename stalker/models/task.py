@@ -22,7 +22,7 @@ import datetime
 from sqlalchemy.ext.declarative import declared_attr
 import warnings
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
-                        String, DateTime)
+                        String, DateTime, Float)
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 from stalker import User
 from stalker.conf import defaults
@@ -285,17 +285,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :type resources: list of :class:`~stalker.User`
     
-    :param int bid_day: The day value of the initial bid for this Task. It can
-      be used in measuring how accurate the initial guess was. It will be
-      compared against the total amount of effort spend doing this task. Can be
-      set to None, which will be set to the schedule_timing_day argument value
-      if there is one or 0.
+    :param int bid_timing: The initial bid for this Task. It can be used in
+      measuring how accurate the initial guess was. It will be compared against
+      the total amount of effort spend doing this task. Can be set to None,
+      which will be set to the schedule_timing_day argument value if there is
+      one or 0.
     
-    :param int bid_hour: The hour value of the initial bid for this Task. It
-      can be used in measuring how accurate the initial guess was. It will be
-      compared against the total amount of effort spend doing this task. Can be
-      set to None, which will be set to the schedule_timing_day argument value
-      if there is one or 0.
+    :param str bid_unit: The unit of the bid value for this Task. Should be one
+      of the 'min', 'h', 'd', 'w', 'm', 'y'.
         
     :param depends: A list of :class:`~stalker.models.task.Task`\ s that this
       :class:`~stalker.models.task.Task` is depending on. A Task can not depend
@@ -304,9 +301,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :type depends: list of :class:`~stalker.models.task.Task`
     
-    :param int schedule_timing_day: The day value of the schedule timing.
+    :param int schedule_timing: The value of the schedule timing.
     
-    :param int schedule_timing_hour: The hour value of the schedule timing.
+    :param str schedule_unit: The unit value of the schedule timing. Should be
+      one of 'min', 'h', 'd', 'w', 'm', 'y'.
     
     :param int schedule_constraint: The schedule constraint. It is the index
       of the schedule constraints value in
@@ -422,29 +420,32 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     computed_start = Column(DateTime)
     computed_end = Column(DateTime)
     
-    bid_day = Column(
-        String, nullable=True,
-        doc="""The day value of the initial bid of this Task. It is an integer
+    bid_timing = Column(
+        Float, nullable=True, default=0,
+        doc="""The value of the initial bid of this Task. It is an integer or
+        a float.
         """
     )
     
-    bid_hour = Column(
-        String, nullable=True,
-        doc="""The hour value of the initial bid of this Task. It is an integer
+    bid_unit = Column(
+        Enum(*defaults.DATETIME_UNITS, name='TaskBidUnit'),
+        nullable=True,
+        doc="""The unit of the initial bid of this Task. It is a string value.
+        And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
         """
     )
     
-    schedule_timing_day = Column(
-        Integer, nullable=True, default=0,
-        doc="""It is the day value of the schedule timing. It is an integer
-        value.
+    schedule_timing = Column(
+        Float, nullable=True, default=0,
+        doc="""It is the value of the schedule timing. It is a float value.
         """
     )
     
-    schedule_timing_hour = Column(
-        Integer, nullable=True, default=0,
-        doc="""It is the hour value of the schedule timing. It is an integer
-        value.
+    schedule_unit = Column(
+        Enum(*defaults.DATETIME_UNITS, name='TaskScheduleUnit'),
+        nullable=False, default='h',
+        doc="""It is the unit of the schedule timing. It is a string value. And
+        should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
         """
     )
     
@@ -460,12 +461,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  start=None,
                  end=None,
                  duration=None,
-                 bid_day=None,
-                 bid_hour=None,
-                 schedule_timing_day=0,
-                 schedule_timing_hour=0,
+                 schedule_timing=0,
+                 schedule_unit='h',
                  schedule_model=0,
                  schedule_constraint=0,
+                 bid_timing=None,
+                 bid_unit=None,
                  is_milestone=False,
                  priority=defaults.TASK_PRIORITY,
                  **kwargs):
@@ -484,9 +485,9 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
         
-        logger.debug('Task kwargs (after super inits) : %s' % kwargs)
-        logger.debug('Task project arg (after inits)  : %s' % project)
-        logger.debug('Task parent arg (after inits)   : %s' % parent)
+        logger.debug('Task kwargs (after super init) : %s' % kwargs)
+        logger.debug('Task project arg (after init)  : %s' % project)
+        logger.debug('Task parent arg (after init)   : %s' % parent)
         
         self.parent = parent
         self._project =  project
@@ -510,19 +511,19 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         self.resources = resources 
         
-        self.schedule_timing_day = schedule_timing_day
-        self.schedule_timing_hour = schedule_timing_hour
+        self.schedule_timing = schedule_timing
+        self.schedule_unit = schedule_unit
         self.schedule_model = schedule_model
         self.schedule_constraint = schedule_constraint
          
-        if bid_day is None:
-            bid_day = self.schedule_timing_day
+        if bid_timing is None:
+            bid_timing = self.schedule_timing
         
-        if bid_hour is None:
-            bid_hour = self.schedule_timing_hour
+        if bid_unit is None:
+            bid_unit = self.schedule_unit
             
-        self.bid_day = bid_day
-        self.bid_hour = bid_hour
+        self.bid_timing = bid_timing
+        self.bid_unit = bid_unit
         self.priority = priority
    
     @reconstructor
@@ -582,52 +583,46 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         return depends
     
-    @validates('schedule_timing_day')
-    def _validate_schedule_timing_day(self, key, schedule_timing_day):
-        """validates the given schedule_timing_day
+    @validates('schedule_timing')
+    def _validate_schedule_timing(self, key, schedule_timing):
+        """validates the given schedule_timing
         """
-        if schedule_timing_day is None:
-            schedule_timing_day = 0
+        if schedule_timing is None:
+            schedule_timing = 0
         
-        if not isinstance(schedule_timing_day, int):
+        if not isinstance(schedule_timing, (int, float)):
             raise TypeError(
-                '%s.schedule_timing_day should be an integer showing the '
-                'day value of the timing of this %s, not %s' % (
+                '%s.schedule_timing should be an integer or float number'
+                'showing the value of the timing of this %s, not %s' % (
                     self.__class__.__name__, self.__class__.__name__,
-                    schedule_timing_day.__class__.__name__)
+                    schedule_timing.__class__.__name__)
             )
-        return schedule_timing_day
-
-
-    @validates('schedule_timing_hour')
-    def _validate_schedule_timing_hour(self, key, schedule_timing_hour):
-        """validates the given schedule_timing_hour
-        """
-        if schedule_timing_hour is None:
-            schedule_timing_hour = 0
-        
-        if not isinstance(schedule_timing_hour, int):
-            raise TypeError(
-                '%s.schedule_timing_hour should be an integer showing the '
-                'hour value of the timing of this %s, not %s' % (
-                    self.__class__.__name__, self.__class__.__name__,
-                    schedule_timing_hour.__class__.__name__)
-            )
-        return schedule_timing_hour
+        return schedule_timing
     
-    #@validates('length')
-    #def _validate_length(self, key, length):
-    #    """validates the given length
-    #    """
-    #    if length is not None:
-    #        if not isinstance(length, str):
-    #            raise TypeError('%s.length should be a string showing the '
-    #                            'length of this %s (in "10d 5h" format), not '
-    #                            '%s' %
-    #                            (self.__class__.__name__,
-    #                             self.__class__.__name__,
-    #                             length.__class__.__name__))
-    #    return length
+    @validates('schedule_unit')
+    def _validate_schedule_unit(self, key, schedule_unit):
+        """validates the given schedule_unit
+        """
+        if schedule_unit is None:
+            schedule_unit = 'h'
+        
+        if not isinstance(schedule_unit, (str, unicode)):
+            raise TypeError(
+                '%s.schedule_unit should be a string value one of %s showing '
+                'the unit of the schedule timing of this %s, not %s' % (
+                self.__class__.__name__, defaults.DATETIME_UNITS,
+                self.__class__.__name__, schedule_unit.__class__.__name__)
+            )
+        
+        if schedule_unit not in defaults.DATETIME_UNITS:
+            raise ValueError(
+                '%s.schedule_unit should be a string value one of %s showing '
+                'the unit of the schedule timing of this %s, not %s' % (
+                self.__class__.__name__, defaults.DATETIME_UNITS,
+                self.__class__.__name__, schedule_unit.__class__.__name__)
+            )
+        
+        return schedule_unit
     
     @validates("is_milestone")
     def _validate_is_milestone(self, key, is_milestone):
@@ -779,33 +774,41 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         return version
     
-    @validates('bid_day')
-    def _validate_bid_day(self, key, bid_day):
-        """validates the given bid_day value
+    @validates('bid_timing')
+    def _validate_bid_timing(self, key, bid_timing):
+        """validates the given bid_timing value
         """
-        if bid_day is not None:
-            if not isinstance(bid_day, int):
-                raise TypeError('%s.bid_day should be an integer showing the '
-                                'day value of the initial bid for this %s, '
-                                'not %s' % 
-                                (self.__class__.__name__,
-                                 self.__class__.__name__,
-                                 bid_day.__class__.__name__))
-        return bid_day
+        if bid_timing is not None:
+            if not isinstance(bid_timing, (int, float)):
+                raise TypeError(
+                    '%s.bid_timing should be an integer or float showing the '
+                    'value of the initial bid for this %s, not %s' % 
+                    (self.__class__.__name__, self.__class__.__name__,
+                     bid_timing.__class__.__name__))
+        return bid_timing
     
-    @validates('bid_hour')
-    def _validate_bid_hour(self, key, bid_hour):
-        """validates the given bid_hour value
+    @validates('bid_unit')
+    def _validate_bid_unit(self, key, bid_unit):
+        """validates the given bid_unit value
         """
-        if bid_hour is not None:
-            if not isinstance(bid_hour, int ):
-                raise TypeError('%s.bid_hour should be an integer showing the '
-                                'day value of the initial bid for this %s, '
-                                'not %s' % 
-                                (self.__class__.__name__,
-                                 self.__class__.__name__,
-                                 bid_hour.__class__.__name__))
-        return bid_hour
+        if bid_unit is None:
+            bid_unit = 'h'
+        
+        if not isinstance(bid_unit, (str, unicode)):
+            raise TypeError(
+                '%s.bid_unit should be a string value one of %s showing '
+            'the unit of the bid timing of this %s, not %s' % (
+            self.__class__.__name__, defaults.DATETIME_UNITS,
+            self.__class__.__name__, bid_unit.__class__.__name__))
+        
+        if bid_unit not in defaults.DATETIME_UNITS:
+            raise ValueError(
+                    '%s.bid_unit should be a string value one of %s showing '
+                'the unit of the bid timing of this %s, not %s' % (
+                self.__class__.__name__, defaults.DATETIME_UNITS,
+                self.__class__.__name__, bid_unit.__class__.__name__))
+        
+        return bid_unit
     
     def _validate_start(self, start_in):
         """validates the given start value

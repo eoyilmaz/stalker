@@ -151,6 +151,7 @@ TICKET_WORKFLOW = {
     }
 }
 
+DATETIME_UNITS = ['min', 'h', 'd', 'w', 'm', 'y']
 TASK_SCHEDULE_MODELS = ['EFFORT', 'LENGTH', 'DURATION']
 TASK_SCHEDULE_CONSTRAINTS = ['NONE', 'START', 'END', 'BOTH']
 
@@ -188,7 +189,7 @@ TJP_TASK_TEMPLATE = """task {{task.tjp_id}} "{{task.name}}" {
 {{ child_task.to_tjp }}
     {%- endfor %}
 {%- else %}
-    {{defaults.TASK_SCHEDULE_MODELS[task.schedule_model].lower()}} {{task.schedule_timing_day}}d {{task.schedule_timing_hour}}h
+    {{defaults.TASK_SCHEDULE_MODELS[task.schedule_model].lower()}} {{task.schedule_timing}}{{task.schedule_unit}}
     allocate {% for resource in task.resources -%}
         {%-if loop.index != 1 %}, {% endif %}{{resource.tjp_id}}
     {%- endfor %}

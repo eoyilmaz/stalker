@@ -1669,7 +1669,8 @@ class DatabaseModelsTester(unittest.TestCase):
             'lead': lead,
             'status_list': sequence_status_list,
             'schedule_model': 'EFFORT',
-            'schedule_timing': '50d'
+            'schedule_timing': 50,
+            'schedule_unit': 'd'
         }
 
         test_sequence = Sequence(**kwargs)
@@ -1719,8 +1720,8 @@ class DatabaseModelsTester(unittest.TestCase):
         tasks = test_sequence.tasks
         updated_by = test_sequence.updated_by
         schedule_model = test_sequence.schedule_model
-        schedule_timing_day = test_sequence.schedule_timing_day
-        schedule_timing_hour = test_sequence.schedule_timing_hour
+        schedule_timing = test_sequence.schedule_timing
+        schedule_unit = test_sequence.schedule_unit
         
         # delete the test_sequence
         del test_sequence
@@ -1750,10 +1751,10 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(tasks, test_sequence_DB.tasks)
         self.assertEqual(updated_by, test_sequence_DB.updated_by)
         self.assertEqual(schedule_model, test_sequence_DB.schedule_model)
-        self.assertEqual(schedule_timing_day,
-                         test_sequence_DB.schedule_timing_day)
-        self.assertEqual(schedule_timing_hour,
-                         test_sequence_DB.schedule_timing_hour)
+        self.assertEqual(schedule_timing,
+                         test_sequence_DB.schedule_timing)
+        self.assertEqual(schedule_unit,
+                         test_sequence_DB.schedule_unit)
     
     def test_persistence_Shot(self):
         """testing the persistence of Shot
@@ -2361,8 +2362,8 @@ class DatabaseModelsTester(unittest.TestCase):
         computed_start = test_task.computed_start
         computed_end = test_task.computed_end
         schedule_model = test_task.schedule_model
-        schedule_timing_day = test_task.schedule_timing_day
-        schedule_timing_hour = test_task.schedule_timing_hour
+        schedule_timing = test_task.schedule_timing
+        schedule_unit = test_task.schedule_unit
         
         del test_task
         
@@ -2393,9 +2394,8 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(updated_by, test_task_DB.updated_by)
         self.assertEqual(versions, test_task_DB.versions)
         self.assertEqual(schedule_model, test_task_DB.schedule_model)
-        self.assertEqual(schedule_timing_day, test_task_DB.schedule_timing_day)
-        self.assertEqual(schedule_timing_hour,
-                         test_task_DB.schedule_timing_hour)
+        self.assertEqual(schedule_timing, test_task_DB.schedule_timing)
+        self.assertEqual(schedule_unit, test_task_DB.schedule_unit)
     
     def test_persistence_Ticket(self):
         """testing the persistence of Ticket

@@ -66,14 +66,14 @@ function Task(kwargs) {
     
     this.is_scheduled = kwargs['is_scheduled'] || false;
     this.schedule_model = kwargs['schedule_model'] || 'EFFORT';
-    this.schedule_timing_day = kwargs['schedule_timing_day'] || 10;
-    this.schedule_timing_hour = kwargs['schedule_timing_hour'] || 0;
+    this.schedule_timing = kwargs['schedule_timing'] || 10;
+    this.schedule_unit = kwargs['schedule_unit'] || 'h';
     this.schedule_constraint = kwargs['schedule_constraint'] || 0;
     
-    console.log('schedule_model       : ', this.schedule_model);
-    console.log('schedule_timing_day  : ', this.schedule_timing_day);
-    console.log('schedule_timing_hour : ', this.schedule_timing_hour);
-    console.log('schedule_constraint  : ', this.schedule_constraint);
+    console.log('schedule_model      : ', this.schedule_model);
+    console.log('schedule_timing     : ', this.schedule_timing);
+    console.log('schedule_unit       : ', this.schedule_unit);
+    console.log('schedule_constraint : ', this.schedule_constraint);
     
     this.is_milestone = false;
     this.startIsMilestone = false;

@@ -6,7 +6,6 @@
 
 import datetime
 import unittest
-#from sqlalchemy import Column, ForeignKey
 from stalker.exceptions import CircularDependencyError
 
 from stalker.conf import defaults
@@ -133,10 +132,10 @@ class TaskTester(unittest.TestCase):
             'project': self.test_project1,
             'priority': 500,
             'resources': [self.test_user1, self.test_user2],
-            'bid_day': 4,
-            'bid_hour': 3,
-            'schedule_timing_day': 1,
-            'schedule_timing_hour': 40,
+            'bid_timing': 4,
+            'bid_unit': 'd',
+            'schedule_timing': 1,
+            'schedule_unit': 'd',
             'start': datetime.datetime(2013, 4, 8, 13, 0),
             'end': datetime.datetime(2013, 4, 8, 18, 0),
             'depends': [self.test_dependent_task1,
@@ -889,93 +888,107 @@ class TaskTester(unittest.TestCase):
     #    
     #    self.assertEqual(new_task1.resources, [])
     
-    def test_schedule_timing_day_argument_skipped(self):
-        """testing if the schedule_timing_day attribute will be 0 if the
-        schedule_timing_day argument is skipped
+    def test_schedule_timing_argument_skipped(self):
+        """testing if the schedule_timing attribute will be 0 if the
+        schedule_timing argument is skipped
         """
-        self.kwargs.pop("schedule_timing_day")
+        self.kwargs.pop("schedule_timing")
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing_day, 0)
+        self.assertEqual(new_task.schedule_timing, 0)
     
-    def test_schedule_timing_day_argument_is_None(self):
-        """testing if the schedule_timing_day attribute will be 0 if the
-        schedule_timing_day argument is None
+    def test_schedule_timing_argument_is_None(self):
+        """testing if the schedule_timing attribute will be 0 if the
+        schedule_timing argument is None
         """
-        self.kwargs["schedule_timing_day"] = None
+        self.kwargs["schedule_timing"] = None
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing_day, 0)
+        self.assertEqual(new_task.schedule_timing, 0)
     
-    def test_schedule_timing_day_attribute_is_set_to_None(self):
-        """testing if the schedule_timing_day attribute will be 0 if it is set
+    def test_schedule_timing_attribute_is_set_to_None(self):
+        """testing if the schedule_timing attribute will be 0 if it is set
         to None
         """
-        self.test_task.schedule_timing_day = None
-        self.assertEqual(self.test_task.schedule_timing_day, 0)
+        self.test_task.schedule_timing = None
+        self.assertEqual(self.test_task.schedule_timing, 0)
     
-    def test_schedule_timing_day_argument_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the schedule_timing_day
-        is not an integer
+    def test_schedule_timing_argument_is_not_an_integer_or_float(self):
+        """testing if a TypeError will be raised when the schedule_timing
+        is not an integer or float
         """
-        self.kwargs["schedule_timing_day"] = '10d'
+        self.kwargs["schedule_timing"] = '10d'
         self.assertRaises(TypeError, Task, **self.kwargs)
 
-    def test_schedule_timing_day_attribute_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the schedule_timing_day
-        attribute is not set to an integer
+    def test_schedule_timing_attribute_is_not_an_integer_or_float(self):
+        """testing if a TypeError will be raised when the schedule_timing
+        attribute is not set to an integer or float
         """
         self.assertRaises(TypeError, setattr, self.test_task,
-                          'schedule_timing_day', '10d')
+                          'schedule_timing', '10d')
     
-    def test_schedule_timing_day_attribute_is_working_properly(self):
-        """testing if the schedule_timing_day attribute is working properly
+    def test_schedule_timing_attribute_is_working_properly(self):
+        """testing if the schedule_timing attribute is working properly
         """
         test_value = 18
-        self.test_task.schedule_timing_day = test_value
-        self.assertEqual(self.test_task.schedule_timing_day, test_value)
+        self.test_task.schedule_timing = test_value
+        self.assertEqual(self.test_task.schedule_timing, test_value)
     
-    def test_schedule_timing_hour_argument_skipped(self):
-        """testing if the schedule_timing_hour attribute will be 0 if the
-        schedule_timing_hour argument is skipped
+    def test_schedule_unit_argument_skipped(self):
+        """testing if the schedule_unit attribute will be 'h' if the
+        schedule_unit argument is skipped
         """
-        self.kwargs.pop("schedule_timing_hour")
+        self.kwargs.pop("schedule_unit")
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing_hour, 0)
+        self.assertEqual(new_task.schedule_unit, 'h')
     
-    def test_schedule_timing_hour_argument_is_None(self):
-        """testing if the schedule_timing_hour attribute will be 0 if the
-        schedule_timing_hour argument is None
+    def test_schedule_unit_argument_is_None(self):
+        """testing if the schedule_unit attribute will be 'h' if the
+        schedule_unit argument is None
         """
-        self.kwargs["schedule_timing_hour"] = None
+        self.kwargs["schedule_unit"] = None
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing_hour, 0)
+        self.assertEqual(new_task.schedule_unit, 'h')
     
-    def test_schedule_timing_hour_attribute_is_set_to_None(self):
-        """testing if the schedule_timing_hour attribute will be 0 if it is set
-        to None
+    def test_schedule_unit_attribute_is_set_to_None(self):
+        """testing if the schedule_unit attribute will be 'h' if it is set to
+        None
         """
-        self.test_task.schedule_timing_hour = None
-        self.assertEqual(self.test_task.schedule_timing_hour, 0)
+        self.test_task.schedule_unit = None
+        self.assertEqual(self.test_task.schedule_unit, 'h')
     
-    def test_schedule_timing_hour_argument_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the schedule_timing_hour
-        is not an integer
+    def test_schedule_unit_argument_is_not_a_string(self):
+        """testing if a TypeError will be raised when the schedule_unit is not
+        an integer
         """
-        self.kwargs["schedule_timing_hour"] = '10d'
+        self.kwargs["schedule_unit"] = 10
         self.assertRaises(TypeError, Task, **self.kwargs)
     
-    def test_schedule_timing_hour_attribute_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the schedule_timing_hour
-        attribute is not set to an integer
+    def test_schedule_unit_attribute_is_not_a_string(self):
+        """testing if a TypeError will be raised when the schedule_unit
+        attribute is not set to a string
         """
-        self.assertRaises(TypeError, setattr, self.test_task,
-                          'schedule_timing_hour', '10d')
+        self.assertRaises(TypeError, setattr, self.test_task, 'schedule_unit',
+                          23)
     
-    def test_schedule_timing_hour_attribute_is_working_properly(self):
-        """testing if the schedule_timing_hour attribute is working properly
+    def test_schedule_unit_attribute_is_working_properly(self):
+        """testing if the schedule_unit attribute is working properly
         """
-        test_value = 18
-        self.test_task.schedule_timing_hour = test_value
-        self.assertEqual(self.test_task.schedule_timing_hour, test_value)
+        test_value = 'w'
+        self.test_task.schedule_unit = test_value
+        self.assertEqual(self.test_task.schedule_unit, test_value)
+    
+    def test_schedule_unit_argument_value_is_not_in_defaults_DATETIME_UNITS(self):
+        """testing if a ValueError will be raised when the schedule_unit value
+        is not in defaults.DATETIME_UNITS list
+        """
+        self.kwargs['schedule_unit'] = 'os'
+        self.assertRaises(ValueError, Task, **self.kwargs)
+    
+    def test_schedule_unit_attribute_value_is_not_in_defaults_DATETIME_UNITS(self):
+        """testing if a ValueError will be raised when it is set to a value
+        which is not in defaults.DATETIME_UNITS list
+        """
+        self.assertRaises(ValueError, setattr, self.test_task, 'schedule_unit',
+                          'so')
     
 #    def test_length_argument_skipped(self):
 #        """testing if the length attribute will be None if the effort argument
@@ -1769,8 +1782,8 @@ class TaskTester(unittest.TestCase):
         """
         
         # remove effort and duration. Why?
-        self.kwargs.pop('schedule_timing_day')
-        self.kwargs.pop('schedule_timing_hour')
+        self.kwargs.pop('schedule_timing')
+        self.kwargs.pop('schedule_unit')
         
         now = datetime.datetime(2013, 3, 22, 15, 0)
         dt = datetime.timedelta
@@ -1781,16 +1794,14 @@ class TaskTester(unittest.TestCase):
         self.kwargs['end'] = now + dt(3)
         task1 = Task(**self.kwargs)
         
-        logger.debug('now                        : %s' % now)
-        logger.debug('now + dt(3)                : %s' % (now + dt(3)))
-        logger.debug('now + dt(3) - now          : %s' % (now + dt(3) - now))
-        logger.debug('task1.start                : %s' % task1.start)
-        logger.debug('task1.end                  : %s' % task1.end)
-        logger.debug('task1.schedule_timing_day  : %s' %
-                     task1.schedule_timing_day)
-        logger.debug('task1.schedule_timing_hour : %s' %
-                     task1.schedule_timing_hour)
-        logger.debug('task1.is_leaf              : %s' % task1.is_leaf)
+        logger.debug('now                   : %s' % now)
+        logger.debug('now + dt(3)           : %s' % (now + dt(3)))
+        logger.debug('now + dt(3) - now     : %s' % (now + dt(3) - now))
+        logger.debug('task1.start           : %s' % task1.start)
+        logger.debug('task1.end             : %s' % task1.end)
+        logger.debug('task1.schedule_timing : %s' % task1.schedule_timing)
+        logger.debug('task1.schedule_unit   : %s' % task1.schedule_unit)
+        logger.debug('task1.is_leaf         : %s' % task1.is_leaf)
         
         # task2
         self.kwargs['name'] = 'Task2'
@@ -1828,8 +1839,8 @@ class TaskTester(unittest.TestCase):
         """
         
         # remove effort and duration
-        self.kwargs.pop('schedule_timing_day')
-        self.kwargs.pop('schedule_timing_hour')
+        self.kwargs.pop('schedule_timing')
+        self.kwargs.pop('schedule_unit')
         
         now = datetime.datetime(2013, 3, 22, 15, 0)
         dt = datetime.timedelta
@@ -1943,118 +1954,130 @@ class TaskTester(unittest.TestCase):
         task4.depends = [task2]
         DBSession.commit()
     
-    def test_bid_day_argument_is_skipped(self):
-        """testing if the bid_day attribute value will be equal to
-        schedule_timing_day attribute value if the bid_day argument is skipped
+    def test_bid_timing_argument_is_skipped(self):
+        """testing if the bid_timing attribute value will be equal to
+        schedule_timing attribute value if the bid_timing argument is skipped
         """
-        self.kwargs['schedule_timing_day'] = 155
-        self.kwargs.pop('bid_day')
+        self.kwargs['schedule_timing'] = 155
+        self.kwargs.pop('bid_timing')
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing_day,
-                         self.kwargs['schedule_timing_day'])
-        self.assertEqual(new_task.bid_day,
-                         new_task.schedule_timing_day)
+        self.assertEqual(new_task.schedule_timing,
+                         self.kwargs['schedule_timing'])
+        self.assertEqual(new_task.bid_timing,
+                         new_task.schedule_timing)
     
-    def test_bid_day_argument_is_None(self):
-        """testing if the bid_day attribute value will be equal to
-        schedule_timing_day attribute value if the bid_day argument is None
+    def test_bid_timing_argument_is_None(self):
+        """testing if the bid_timing attribute value will be equal to
+        schedule_timing attribute value if the bid_timing argument is None
         """
-        self.kwargs['bid_day'] = None
-        self.kwargs['schedule_timing_day'] = 1342
+        self.kwargs['bid_timing'] = None
+        self.kwargs['schedule_timing'] = 1342
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing_day,
-                         self.kwargs['schedule_timing_day'])
-        self.assertEqual(new_task.bid_day, new_task.schedule_timing_day)
+        self.assertEqual(new_task.schedule_timing,
+                         self.kwargs['schedule_timing'])
+        self.assertEqual(new_task.bid_timing, new_task.schedule_timing)
     
-    def test_bid_day_attribute_is_set_to_None(self):
-        """testing if the bid_day attribute can be set to None
+    def test_bid_timing_attribute_is_set_to_None(self):
+        """testing if the bid_timing attribute can be set to None
         """
-        self.test_task.bid_day = None
-        self.assertIsNone(self.test_task.bid_day)
+        self.test_task.bid_timing = None
+        self.assertIsNone(self.test_task.bid_timing)
     
-    def test_bid_day_argument_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the bid_day argument is
-        not an integer
+    def test_bid_timing_argument_is_not_an_integer_or_float(self):
+        """testing if a TypeError will be raised when the bid_timing argument
+        is not an integer or float
         """
-        self.kwargs['bid_day'] = '10d'
+        self.kwargs['bid_timing'] = '10d'
         self.assertRaises(TypeError, Task, **self.kwargs)
     
-    def test_bid_day_attribute_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the bid_day attribute is
-        set to a value which is not an integer
+    def test_bid_timing_attribute_is_not_an_integer_or_float(self):
+        """testing if a TypeError will be raised when the bid_timing attribute
+        is set to a value which is not an integer or float
         """
-        self.assertRaises(TypeError, setattr, self.test_task, 'bid_day', '10d')
+        self.assertRaises(TypeError, setattr, self.test_task, 'bid_timing',
+                          '10d')
     
-    def test_bid_day_argument_is_working_properly(self):
-        """testing if the bid_day argument is working properly
+    def test_bid_timing_argument_is_working_properly(self):
+        """testing if the bid_timing argument is working properly
         """
-        self.kwargs['bid_day'] = 23
+        self.kwargs['bid_timing'] = 23
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.bid_day, self.kwargs['bid_day'])
+        self.assertEqual(new_task.bid_timing, self.kwargs['bid_timing'])
     
-    def test_bid_day_attribute_is_working_properly(self):
-        """testing if the bid_day attribute is working properly
+    def test_bid_timing_attribute_is_working_properly(self):
+        """testing if the bid_timning attribute is working properly
         """
         test_value = 23
-        self.test_task.bid_day = test_value
-        self.assertEqual(self.test_task.bid_day, test_value)
+        self.test_task.bid_timing = test_value
+        self.assertEqual(self.test_task.bid_timing, test_value)
     
-    def test_bid_hour_argument_is_skipped(self):
-        """testing if the bid_hour attribute value will be equal to
-        schedule_timing_hour attribute value if the bid_hour argument is
-        skipped
+    def test_bid_unit_argument_is_skipped(self):
+        """testing if the bid_unit attribute value will be equal to
+        schedule_unit attribute value if the bid_unit argument is skipped
         """
-        self.kwargs['schedule_timing_hour'] = 155
-        self.kwargs.pop('bid_hour')
+        self.kwargs['schedule_unit'] = 'd'
+        self.kwargs.pop('bid_unit')
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing_hour,
-                         self.kwargs['schedule_timing_hour'])
-        self.assertEqual(new_task.bid_hour,
-                         new_task.schedule_timing_hour)
+        self.assertEqual(new_task.schedule_unit,
+                         self.kwargs['schedule_unit'])
+        self.assertEqual(new_task.bid_unit, new_task.schedule_unit)
     
-    def test_bid_hour_argument_is_None(self):
-        """testing if the bid_hour attribute value will be equal to
-        schedule_timing_hour attribute value if the bid_hour argument is None
+    def test_bid_unit_argument_is_None(self):
+        """testing if the bid_unit attribute value will be equal to
+        schedule_unit attribute value if the bid_unit argument is None
         """
-        self.kwargs['bid_hour'] = None
-        self.kwargs['schedule_timing_hour'] = 1342
+        self.kwargs['bid_unit'] = None
+        self.kwargs['schedule_unit'] = 'min'
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing_hour,
-                         self.kwargs['schedule_timing_hour'])
-        self.assertEqual(new_task.bid_hour, new_task.schedule_timing_hour)
+        self.assertEqual(new_task.schedule_unit, self.kwargs['schedule_unit'])
+        self.assertEqual(new_task.bid_unit, new_task.schedule_unit)
     
-    def test_bid_hour_attribute_is_set_to_None(self):
-        """testing if the bid_hour attribute can be set to None
+    def test_bid_unit_attribute_is_set_to_None(self):
+        """testing if the bid_unit attribute can be set to default value of 'h'
         """
-        self.test_task.bid_hour = None
-        self.assertIsNone(self.test_task.bid_hour)
+        self.test_task.bid_unit = None
+        self.assertEqual(self.test_task.bid_unit, 'h')
     
-    def test_bid_hour_argument_is_not_an_integer(self):
+    def test_bid_unit_argument_is_not_a_string_or_unicode(self):
         """testing if a TypeError will be raised when the bid_hour argument is
-        not an integer
+        not a strign or unicode
         """
-        self.kwargs['bid_hour'] = '10'
+        self.kwargs['bid_unit'] = 10
         self.assertRaises(TypeError, Task, **self.kwargs)
     
-    def test_bid_hour_attribute_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the bid_hour attribute is
+    def test_bid_unit_attribute_is_not_a_string_or_unicode(self):
+        """testing if a TypeError will be raised when the bid_unit attribute is
         set to a value which is not an integer
         """
-        self.assertRaises(TypeError, setattr, self.test_task, 'bid_hour', '10')
+        self.assertRaises(TypeError, setattr, self.test_task, 'bid_unit', 10)
     
     def test_bid_hour_argument_is_working_properly(self):
         """testing if the bid_hour argument is working properly
         """
-        self.kwargs['bid_hour'] = 234
+        self.kwargs['bid_unit'] = 'h'
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.bid_hour, self.kwargs['bid_hour'])
+        self.assertEqual(new_task.bid_unit, self.kwargs['bid_unit'])
     
-    def test_bid_hour_attribute_is_working_properly(self):
-        """testing if the bid_hour attribute is working properly
+    def test_bid_unit_attribute_is_working_properly(self):
+        """testing if the bid_unit attribute is working properly
         """
-        test_value = 234
-        self.test_task.bid_hour = test_value
-        self.assertEqual(self.test_task.bid_hour, test_value)
+        test_value = 'h'
+        self.test_task.bid_unit = test_value
+        self.assertEqual(self.test_task.bid_unit, test_value)
+    
+    def test_bid_unit_argument_value_not_in_defaults_DATETIME_UNITS(self):
+        """testing if a ValueError will be raised when the given unit value is
+        not in the defaults.DATETIME_UNITS
+        """
+        self.kwargs['bid_unit'] = 'os'
+        self.assertRaises(ValueError, Task, **self.kwargs)
+    
+    def test_bid_unit_attribute_value_not_in_defaults_DATETIME_UNITS(self):
+        """testing if a ValueError will be raised when the bid_unit value is
+        set to a value which is not in defaults.DATETIME_UNITS.
+        """
+        self.assertRaises(ValueError, setattr, self.test_task, 'bid_unit',
+                          'sys')
     
     def test_tjp_id_is_a_read_only_attribute(self):
         """testing if the tjp_id attribute is a read only attribute
@@ -2120,8 +2143,8 @@ class TaskTester(unittest.TestCase):
         """testing if the to_tjp attribute is working properly for a root task
         """
         self.kwargs['parent'] = None
-        self.kwargs['schedule_timing_day'] = 10
-        self.kwargs['schedule_timing_hour'] = 0
+        self.kwargs['schedule_timing'] = 10
+        self.kwargs['schedule_unit'] = 'd'
         self.kwargs['schedule_model'] = 0
         self.kwargs['depends'] = []
         self.kwargs['resources'] = [self.test_user1, self.test_user2]
@@ -2164,8 +2187,8 @@ class TaskTester(unittest.TestCase):
         dep_task2.id = 23424
         
         self.kwargs['name'] = 'Modeling'
-        self.kwargs['schedule_timing_day'] = 0
-        self.kwargs['schedule_timing_hour'] = 1003
+        self.kwargs['schedule_timing'] = 1003
+        self.kwargs['schedule_unit'] = 'h'
         self.kwargs['schedule_model'] = 0
         self.kwargs['depends'] = [dep_task1, dep_task2]
         
@@ -2212,8 +2235,8 @@ class TaskTester(unittest.TestCase):
         dep_task1.depends = []
         
         self.kwargs['name'] = 'Modeling'
-        self.kwargs['schedule_timing_day'] = 1
-        self.kwargs['schedule_timing_hour'] = 1003
+        self.kwargs['schedule_timing'] = 1
+        self.kwargs['schedule_unit'] = 'd'
         self.kwargs['schedule_model'] = 0
         self.kwargs['depends'] = [dep_task1, dep_task2]
         
@@ -2232,15 +2255,15 @@ class TaskTester(unittest.TestCase):
         
         expected_tjp = '''task Task_5648 "Modeling" {
 task Task_23423 "Modeling" {
-    effort 1d 40h
+    effort 1d
     allocate User_1231, User_1232
 }
 task Task_23424 "Modeling" {
-    effort 1d 40h
+    effort 1d
     allocate User_1231, User_1232
 }
 task Task_5679 "Modeling" {
-    effort 1d 1003h
+    effort 1d
     allocate User_1231, User_1232
     depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
 }
