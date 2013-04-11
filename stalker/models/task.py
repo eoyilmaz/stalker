@@ -22,7 +22,7 @@ import datetime
 from sqlalchemy.ext.declarative import declared_attr
 import warnings
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
-                        String)
+                        String, DateTime)
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 from stalker import User
 from stalker.conf import defaults
@@ -233,24 +233,15 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     and dependency relation between tasks and the effort and resource
     information per task and leave the start and end date calculation to
     TaskJuggler. It is also possible to use the ``length`` or ``duration``
-    values.
+    values (set :attr:`.schedule_model` to 'EFFORT', 'LENGTH' or 'DURATION' to
+    get the desired scheduling model).
     
-    Attributes precedence is as follows:
-      
-      effort > length > duration
-    
-    So according to that, Stalker will opt to use effort and resources if all
-    of the values are supplied and length and resources if no effort is given
-    and the duration and the resources if both effort and length is None.
+    The default scheduling model for Stalker tasks is 'EFFORT'.
     
     To convert a Task instance to a TaskJuggler compatible string use the
     :attr:`.to_tjp`` attribute. It will try to create a good representation of
-    the Task by using the resources, effort, length and duration values (the
-    start and end will not be used unless it is a milestone).
-    
-    To prevent the complex math (not so complex but I don't want to code it
-    where TaskJuggler is already doing it) behind and the data loose, the unit
-    of effort and length is hours.
+    the Task by using the resources, schedule model, schedule timing and
+    schedule constraints.
     
     Task/Task Relation
     --------------------
@@ -269,13 +260,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     start value of the children tasks, and the end is equal to the latest end
     value of the children tasks. Of course, these values are going to be
     ignored by the TaskJuggler, but for interactive gantt charts these are good
-    toys attributes to play with.
+    toy attributes to play with.
     
     Stalker will check if there will be a cycle if one wants to parent a Task
-    to a child Task of its own.
+    to a child Task of its own or the dependency relation creates a cycle.
     
     In Gantt Charts the ``computed_start`` and ``computed_end`` attributes will
-    be used if they are not None.
+    be used if the task :attr:`.is_scheduled`.
     
     :param parent: The parent Task or Project of this Task. Every Task in
       Stalker should be related with a :class:`~stalker.models.project.Project`
@@ -294,22 +285,18 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :type resources: list of :class:`~stalker.User`
     
-    :param int effort: The total effort that needs to be spend to complete this
-      :class:`~stalker.models.task.Task`. Can be used to create an initial bid
-      of how long this task will take. The unit of effort is hours. This is
-      decided to be in that way to ease the TaskJuggler integration without
-      struggling with the working days conversion to working hours etc.
+    :param int bid_day: The day value of the initial bid for this Task. It can
+      be used in measuring how accurate the initial guess was. It will be
+      compared against the total amount of effort spend doing this task. Can be
+      set to None, which will be set to the schedule_timing_day argument value
+      if there is one or 0.
     
-    :param int length: The length of this task measured in working hours.
-    
-    :param bid: The initial bid for this Task. It can be used to measure how
-      accurate the initial guess was. It will be compared against the total
-      amount of effort spend doing this task. Can be set to None, which will
-      set to the effort argument value if there is one or 0. The unit of bid is
-      again hours as in effort.
-    
-    :type bid: int
-    
+    :param int bid_hour: The hour value of the initial bid for this Task. It
+      can be used in measuring how accurate the initial guess was. It will be
+      compared against the total amount of effort spend doing this task. Can be
+      set to None, which will be set to the schedule_timing_day argument value
+      if there is one or 0.
+        
     :param depends: A list of :class:`~stalker.models.task.Task`\ s that this
       :class:`~stalker.models.task.Task` is depending on. A Task can not depend
       to itself or any other Task which are already depending to this one in
@@ -317,10 +304,17 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :type depends: list of :class:`~stalker.models.task.Task`
     
+    :param int schedule_timing_day: The day value of the schedule timing.
+    
+    :param int schedule_timing_hour: The hour value of the schedule timing.
+    
+    :param int schedule_constraint: The schedule constraint. It is the index
+      of the schedule constraints value in
+      stalker.conf.defaults.TASK_SCHEDULE_CONSTRAINTS.
+    
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
     """
-    
     __auto_name__ = False
     __tablename__ = "Tasks"
     __mapper_args__ = {'polymorphic_identity': "Task"}
@@ -404,27 +398,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
     )
     
-    effort = Column(
-        String,
-        doc="""The total effort that needs to be spend to complete this
-        :class:`~stalker.models.task.Task`. Can be used to create an initial
-        bid of how long this task will take. The unit of effort is hours. This
-        is decided to be in that way to ease the TaskJuggler integration
-        without struggling with the working days conversion to working hours
-        etc."""
-    )
-    
-    length = Column(
-        String,
-        doc="""The length of this Task measured in working hours. It is an
-        integer value."""
-    )
-    
-    bid = Column(
-        String,
-        doc="""The initial bid of this Task. It measured in working hours."""
-    )
-    
     priority = Column(Integer)
     
     bookings = relationship(
@@ -443,30 +416,60 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
     )
     
-    schedule_flag = Column(Enum(*defaults.TASK_SCHEDULE_FLAGS,
-                                name='TaskScheduleFlag'),
-                           default=defaults.TASK_SCHEDULE_FLAGS[0])
+    #_start = Column('start', DateTime)
+    #_end = Column('end', DateTime)
     
-    schedule_constraint = Column(Enum(*defaults.TASK_SCHEDULE_CONSTRAINTS,
-                                      name='TaskScheduleConstraint'),
-                                 default=defaults.TASK_SCHEDULE_CONSTRAINTS[0])
+    computed_start = Column(DateTime)
+    computed_end = Column(DateTime)
+    
+    bid_day = Column(
+        String, nullable=True,
+        doc="""The day value of the initial bid of this Task. It is an integer
+        """
+    )
+    
+    bid_hour = Column(
+        String, nullable=True,
+        doc="""The hour value of the initial bid of this Task. It is an integer
+        """
+    )
+    
+    schedule_timing_day = Column(
+        Integer, nullable=True, default=0,
+        doc="""It is the day value of the schedule timing. It is an integer
+        value.
+        """
+    )
+    
+    schedule_timing_hour = Column(
+        Integer, nullable=True, default=0,
+        doc="""It is the hour value of the schedule timing. It is an integer
+        value.
+        """
+    )
+    
+    schedule_model = Column(Integer, default=0, nullable=False)
+    
+    schedule_constraint = Column(Integer, default=0, nullable=False)
     
     def __init__(self,
                  project=None,
                  parent=None,
                  depends=None,
+                 resources=None,
                  start=None,
                  end=None,
-                 effort=None,
-                 length=None,
                  duration=None,
-                 bid=None,
-                 resources=None,
+                 bid_day=None,
+                 bid_hour=None,
+                 schedule_timing_day=0,
+                 schedule_timing_hour=0,
+                 schedule_model=0,
+                 schedule_constraint=0,
                  is_milestone=False,
                  priority=defaults.TASK_PRIORITY,
-                 schedule_using='EFFORT',
-                 schedule_constraint='NONE',
                  **kwargs):
+        
         # update kwargs with extras
         kwargs['start'] = start
         kwargs['end'] = end
@@ -506,16 +509,22 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             resources = []
         
         self.resources = resources 
-        self.effort = effort
-        self.length = length
         
-        if bid is None:
-            bid = self.effort
-        self.bid = bid
-        self.priority = priority
-        self.schedule_flag = schedule_using
+        self.schedule_timing_day = schedule_timing_day
+        self.schedule_timing_hour = schedule_timing_hour
+        self.schedule_model = schedule_model
         self.schedule_constraint = schedule_constraint
-    
+         
+        if bid_day is None:
+            bid_day = self.schedule_timing_day
+        
+        if bid_hour is None:
+            bid_hour = self.schedule_timing_hour
+            
+        self.bid_day = bid_day
+        self.bid_hour = bid_hour
+        self.priority = priority
+   
     @reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
@@ -573,34 +582,52 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         return depends
     
-    @validates('effort')
-    def _validate_effort(self, key, effort):
-        """validates the given effort
+    @validates('schedule_timing_day')
+    def _validate_schedule_timing_day(self, key, schedule_timing_day):
+        """validates the given schedule_timing_day
         """
-        if effort is not None:
-            if not isinstance(effort, int):
-                raise TypeError('%s.effort should be an integer showing the '
-                                'amount of work in working hours that needs to '
-                                'be spend to complete this %s, not %s' % (
-                    self.__class__.__name__,
-                    self.__class__.__name__,
-                    effort.__class__.__name__
-                ))
+        if schedule_timing_day is None:
+            schedule_timing_day = 0
         
-        return effort
-    
-    @validates('length')
-    def _validate_length(self, key, length):
-        """validates the given length
+        if not isinstance(schedule_timing_day, int):
+            raise TypeError(
+                '%s.schedule_timing_day should be an integer showing the '
+                'day value of the timing of this %s, not %s' % (
+                    self.__class__.__name__, self.__class__.__name__,
+                    schedule_timing_day.__class__.__name__)
+            )
+        return schedule_timing_day
+
+
+    @validates('schedule_timing_hour')
+    def _validate_schedule_timing_hour(self, key, schedule_timing_hour):
+        """validates the given schedule_timing_hour
         """
-        if length is not None:
-            if not isinstance(length, int):
-                raise TypeError('%s.length should be an integer showing the '
-                                'length of this %s in working hours, not %s' %
-                                (self.__class__.__name__,
-                                 self.__class__.__name__,
-                                 length.__class__.__name__))
-        return length
+        if schedule_timing_hour is None:
+            schedule_timing_hour = 0
+        
+        if not isinstance(schedule_timing_hour, int):
+            raise TypeError(
+                '%s.schedule_timing_hour should be an integer showing the '
+                'hour value of the timing of this %s, not %s' % (
+                    self.__class__.__name__, self.__class__.__name__,
+                    schedule_timing_hour.__class__.__name__)
+            )
+        return schedule_timing_hour
+    
+    #@validates('length')
+    #def _validate_length(self, key, length):
+    #    """validates the given length
+    #    """
+    #    if length is not None:
+    #        if not isinstance(length, str):
+    #            raise TypeError('%s.length should be a string showing the '
+    #                            'length of this %s (in "10d 5h" format), not '
+    #                            '%s' %
+    #                            (self.__class__.__name__,
+    #                             self.__class__.__name__,
+    #                             length.__class__.__name__))
+    #    return length
     
     @validates("is_milestone")
     def _validate_is_milestone(self, key, is_milestone):
@@ -752,16 +779,45 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         return version
     
-    @validates('bid')
-    def _validate_bid(self, key, bid):
-        """validates the given bid value
+    @validates('bid_day')
+    def _validate_bid_day(self, key, bid_day):
+        """validates the given bid_day value
         """
-        if bid is not None:
-            if not isinstance(bid, int):
-                raise(TypeError, '%s.bid should be an integer, not %s' % 
-                                 (self.__class__.__name__,
-                                  bid.__class__.__name__))
-        return bid
+        if bid_day is not None:
+            if not isinstance(bid_day, int):
+                raise TypeError('%s.bid_day should be an integer showing the '
+                                'day value of the initial bid for this %s, '
+                                'not %s' % 
+                                (self.__class__.__name__,
+                                 self.__class__.__name__,
+                                 bid_day.__class__.__name__))
+        return bid_day
+    
+    @validates('bid_hour')
+    def _validate_bid_hour(self, key, bid_hour):
+        """validates the given bid_hour value
+        """
+        if bid_hour is not None:
+            if not isinstance(bid_hour, int ):
+                raise TypeError('%s.bid_hour should be an integer showing the '
+                                'day value of the initial bid for this %s, '
+                                'not %s' % 
+                                (self.__class__.__name__,
+                                 self.__class__.__name__,
+                                 bid_hour.__class__.__name__))
+        return bid_hour
+    
+    def _validate_start(self, start_in):
+        """validates the given start value
+        """
+        if start_in is None:
+            start_in = self.project.round_time(datetime.datetime.now())
+        elif not isinstance(start_in, datetime.datetime):
+            raise TypeError('%s.start should be an instance of '
+                            'datetime.datetime, not %s' % 
+                            (self.__class__.__name__,
+                             start_in.__class__.__name__))
+        return start_in
     
     def _start_getter(self):
         """overridden start getter
@@ -886,7 +942,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
         from jinja2 import Template
         temp = Template(defaults.TJP_TASK_TEMPLATE)
-        return temp.render({'task': self})
+        return temp.render({'task': self,
+                            'defaults': defaults})
     
     @property
     def level(self):
@@ -914,6 +971,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         Bookings recorded for this task.
         """
         return None
+    
+    @property
+    def computed_duration(self):
+        """it is the direct difference of computed_start and computed_end
+        """
+        return self.computed_end - self.computed_start \
+            if self.computed_end and self.computed_start else None
 
 def _check_circular_dependency(task, check_for_task, attr_name):
     """checks the circular dependency in task if it has check_for_task in its

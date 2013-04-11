@@ -71,9 +71,10 @@
   <div class="taskBox" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
 {#      <div class="taskStatus" status="(#=obj.status#)"></div>#}
-      <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
       <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
+      <div class="taskScheduleModel" style="position: absolute; text-align: center; width: 100%;">(#=obj.schedule_model[0]#): (#=obj.schedule_timing#)</div>
       <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
+      <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
       <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
       <div class="taskLabel">(#=obj.name#)</div>
       <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
@@ -105,8 +106,8 @@
   <div style="float: left;">
     {% if entity.entity_type != 'User' %}
       <div style="float: left;">
-        <button id='list_tasks_gantt_refresh_button'>Revert To Saved</button>
         <button id='list_tasks_create_task_button'>Create Task</button>
+        <button id='list_tasks_gantt_reload_button'>Reload</button>
         <button id='list_tasks_gantt_save_button'>Save</button>
       </div>
       <div style="width: 100px; float: left"></div>
@@ -473,15 +474,6 @@
 {#          #}
         {% if entity.entity_type != 'User' %}
           
-          // REVERT TO SAVED
-          var revert_gantt_button = new Button({
-            label: 'Revert To Saved',
-            onClick: function(){
-              loadGanttFromServer();
-            }
-          }, 'list_tasks_gantt_refresh_button');
-          revert_gantt_button.startup();
-          
           // ADD TASK
           var create_task_button = dialogCaller({
             label: 'Create Task',
@@ -491,7 +483,16 @@
             related_field_updater: loadGanttFromServer, 
             data_id: '{{ entity.id }}'
           });
-          create_task_button.startup();
+          create_task_button.startup();          
+          
+          // REVERT TO SAVED
+          var reload_gantt_button = new Button({
+            label: 'Reload',
+            onClick: function(){
+              loadGanttFromServer();
+            }
+          }, 'list_tasks_gantt_reload_button');
+          reload_gantt_button.startup();
           
           // SAVE
           // TODO: This should be disabled upon permission not according to the existence of a template variable

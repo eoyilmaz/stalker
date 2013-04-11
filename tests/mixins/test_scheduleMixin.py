@@ -495,27 +495,13 @@ class ScheduleMixinTester(unittest.TestCase):
         self.assertEqual(new_foo_obj.end, expected_end)
         # check the duration
         self.assertEqual(new_foo_obj.duration, expected_end - expected_start)
-    
-    def test_computed_start_attribute_is_read_only(self):
-        """testing if the computed_start attribute is a read-only attribute
-        """
-        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        self.assertRaises(AttributeError, setattr, new_foo_obj,
-                          'computed_start', datetime.datetime.now())
-    
+   
     def test_computed_start_is_None_for_a_non_scheduled_class(self):
         """testing if the computed_start attribute is None for a non scheduled
         class
         """
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         self.assertIsNone(new_foo_obj.computed_start, None)
-    
-    def test_computed_end_attribute_is_read_only(self):
-        """testing if the computed_end attribute is a read-only attribute
-        """
-        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        self.assertRaises(AttributeError, setattr, new_foo_obj, 'computed_end',
-                          datetime.datetime.now())
     
     def test_computed_end_is_None_for_a_non_scheduled_class(self):
         """testing if the computed_end attribute is None for a non scheduled
@@ -529,8 +515,8 @@ class ScheduleMixinTester(unittest.TestCase):
         computed_start and no computed_end
         """
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        new_foo_obj._computed_start = None
-        new_foo_obj._computed_end = None
+        new_foo_obj.computed_start = None
+        new_foo_obj.computed_end = None
         self.assertIsNone(new_foo_obj.computed_duration)
     
     def test_computed_duration_attribute_is_None_if_there_is_computed_start_but_no_computed_end(self):
@@ -538,8 +524,8 @@ class ScheduleMixinTester(unittest.TestCase):
         computed_start but no computed_end
         """
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        new_foo_obj._computed_start = datetime.datetime.now()
-        new_foo_obj._computed_end = None
+        new_foo_obj.computed_start = datetime.datetime.now()
+        new_foo_obj.computed_end = None
         self.assertIsNone(new_foo_obj.computed_duration)
     
     def test_computed_duration_attribute_is_None_if_there_is_no_computed_start_but_computed_end(self):
@@ -547,8 +533,8 @@ class ScheduleMixinTester(unittest.TestCase):
         computed_start but computed_end
         """
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        new_foo_obj._computed_start = None
-        new_foo_obj._computed_end = datetime.datetime.now()
+        new_foo_obj.computed_start = None
+        new_foo_obj.computed_end = datetime.datetime.now()
         self.assertIsNone(new_foo_obj.computed_duration)
     
     def test_computed_duration_attribute_is_calculated_correctly_when_there_are_both_computed_start_and_computed_end(self):
@@ -556,8 +542,8 @@ class ScheduleMixinTester(unittest.TestCase):
         are both computed_start and computed_end values
         """
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        new_foo_obj._computed_start = datetime.datetime.now()
-        new_foo_obj._computed_end =  new_foo_obj._computed_start + \
+        new_foo_obj.computed_start = datetime.datetime.now()
+        new_foo_obj.computed_end =  new_foo_obj.computed_start + \
                                     datetime.timedelta(12)
         self.assertEqual(new_foo_obj.computed_duration, datetime.timedelta(12))
     

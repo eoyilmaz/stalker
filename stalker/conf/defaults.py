@@ -151,8 +151,8 @@ TICKET_WORKFLOW = {
     }
 }
 
-TASK_SCHEDULE_FLAGS = ['EFFORT', 'LENGTH', 'DURATION']
-TASK_SCHEDULE_CONSTRAINTS = ['NONE', 'START', 'END']
+TASK_SCHEDULE_MODELS = ['EFFORT', 'LENGTH', 'DURATION']
+TASK_SCHEDULE_CONSTRAINTS = ['NONE', 'START', 'END', 'BOTH']
 
 TJP_WORKING_HOURS_TEMPLATE = """{% macro wh(wh, day) -%}
 {%- if wh[day]|length %}    workinghours {{day}} {% for part in wh[day] -%}
@@ -188,7 +188,7 @@ TJP_TASK_TEMPLATE = """task {{task.tjp_id}} "{{task.name}}" {
 {{ child_task.to_tjp }}
     {%- endfor %}
 {%- else %}
-    effort {{task.effort}}h
+    {{defaults.TASK_SCHEDULE_MODELS[task.schedule_model].lower()}} {{task.schedule_timing_day}}d {{task.schedule_timing_hour}}h
     allocate {% for resource in task.resources -%}
         {%-if loop.index != 1 %}, {% endif %}{{resource.tjp_id}}
     {%- endfor %}

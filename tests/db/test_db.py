@@ -548,7 +548,9 @@ class DatabaseModelsTester(unittest.TestCase):
         created_by = test_asset.created_by
         date_created = test_asset.date_created
         date_updated = test_asset.date_updated
+        duration = test_asset.duration
         description = test_asset.description
+        end = test_asset.end
         name = test_asset.name
         nice_name = test_asset.nice_name
         notes = test_asset.notes
@@ -556,6 +558,7 @@ class DatabaseModelsTester(unittest.TestCase):
         references = test_asset.references
         status = test_asset.status
         status_list = test_asset.status_list
+        start = test_asset.start
         tags = test_asset.tags
         children = test_asset.children
         type = test_asset.type
@@ -573,6 +576,8 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(date_created, test_asset_DB.date_created)
         self.assertEqual(date_updated, test_asset_DB.date_updated)
         self.assertEqual(description, test_asset_DB.description)
+        self.assertEqual(duration, test_asset_DB.duration)
+        self.assertEqual(end, test_asset_DB.end)
         self.assertEqual(name, test_asset_DB.name)
         self.assertEqual(nice_name, test_asset_DB.nice_name)
         self.assertEqual(notes, test_asset_DB.notes)
@@ -1663,6 +1668,8 @@ class DatabaseModelsTester(unittest.TestCase):
             'project': test_project1,
             'lead': lead,
             'status_list': sequence_status_list,
+            'schedule_model': 'EFFORT',
+            'schedule_timing': '50d'
         }
 
         test_sequence = Sequence(**kwargs)
@@ -1697,7 +1704,6 @@ class DatabaseModelsTester(unittest.TestCase):
         date_updated = test_sequence.date_updated
         description = test_sequence.description
         end = test_sequence.end
-        duration = test_sequence.duration
         lead = test_sequence.lead
         name = test_sequence.name
         nice_name = test_sequence.nice_name
@@ -1712,6 +1718,9 @@ class DatabaseModelsTester(unittest.TestCase):
         children = test_sequence.children
         tasks = test_sequence.tasks
         updated_by = test_sequence.updated_by
+        schedule_model = test_sequence.schedule_model
+        schedule_timing_day = test_sequence.schedule_timing_day
+        schedule_timing_hour = test_sequence.schedule_timing_hour
         
         # delete the test_sequence
         del test_sequence
@@ -1726,7 +1735,6 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(date_updated, test_sequence_DB.date_updated)
         self.assertEqual(description, test_sequence_DB.description)
         self.assertEqual(end, test_sequence_DB.end)
-        self.assertEqual(duration, test_sequence_DB.duration)
         self.assertEqual(lead, test_sequence_DB.lead)
         self.assertEqual(name, test_sequence_DB.name)
         self.assertEqual(nice_name, test_sequence_DB.nice_name)
@@ -1741,6 +1749,11 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(children, test_sequence_DB.children)
         self.assertEqual(tasks, test_sequence_DB.tasks)
         self.assertEqual(updated_by, test_sequence_DB.updated_by)
+        self.assertEqual(schedule_model, test_sequence_DB.schedule_model)
+        self.assertEqual(schedule_timing_day,
+                         test_sequence_DB.schedule_timing_day)
+        self.assertEqual(schedule_timing_hour,
+                         test_sequence_DB.schedule_timing_hour)
     
     def test_persistence_Shot(self):
         """testing the persistence of Shot
@@ -1767,7 +1780,7 @@ class DatabaseModelsTester(unittest.TestCase):
             statuses=[status1, status2, status3],
             target_entity_type=Shot
         )
-
+        
         commercial_project_type = Type(
             name='Commercial Project',
             code='commproj',
@@ -2314,13 +2327,13 @@ class DatabaseModelsTester(unittest.TestCase):
             resources=[user1, user2, user3],
             parent=new_asset,
             status_list=task_status_list,
-            effort=5,
-            length=15,
-            bid=52
+            effort='5h',
+            length='15h',
+            bid='52h'
         )
         
-        test_task._computed_start = datetime.datetime.now()
-        test_task._computed_end = datetime.datetime.now() \
+        test_task.computed_start = datetime.datetime.now()
+        test_task.computed_end = datetime.datetime.now() \
                                  + datetime.timedelta(10)
         
         DBSession.add(test_task)
@@ -2330,7 +2343,8 @@ class DatabaseModelsTester(unittest.TestCase):
         created_by = test_task.created_by
         date_created = test_task.date_created
         date_updated = test_task.date_updated
-        effort = test_task.effort
+        duration = test_task.duration
+        end = test_task.end
         is_complete = test_task.is_complete
         is_milestone = test_task.is_milestone
         name = test_task.name
@@ -2346,7 +2360,9 @@ class DatabaseModelsTester(unittest.TestCase):
         versions = test_task.versions
         computed_start = test_task.computed_start
         computed_end = test_task.computed_end
-        timing_resolution = test_task.timing_resolution
+        schedule_model = test_task.schedule_model
+        schedule_timing_day = test_task.schedule_timing_day
+        schedule_timing_hour = test_task.schedule_timing_hour
         
         del test_task
         
@@ -2361,7 +2377,8 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(computed_end, test_task_DB.computed_end)
         self.assertEqual(date_created, test_task_DB.date_created)
         self.assertEqual(date_updated, test_task_DB.date_updated)
-        self.assertEqual(effort, test_task_DB.effort)
+        self.assertEqual(duration, test_task_DB.duration)
+        self.assertEqual(end, test_task_DB.end)
         self.assertEqual(is_complete, test_task_DB.is_complete)
         self.assertEqual(is_milestone, test_task_DB.is_milestone)
         self.assertEqual(name, test_task_DB.name)
@@ -2372,10 +2389,13 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(status, test_task_DB.status)
         self.assertEqual(status_list, test_task_DB.status_list)
         self.assertEqual(tags, test_task_DB.tags)
-        self.assertEqual(timing_resolution, test_task_DB.timing_resolution)
         self.assertEqual(type_, test_task_DB.type)
         self.assertEqual(updated_by, test_task_DB.updated_by)
         self.assertEqual(versions, test_task_DB.versions)
+        self.assertEqual(schedule_model, test_task_DB.schedule_model)
+        self.assertEqual(schedule_timing_day, test_task_DB.schedule_timing_day)
+        self.assertEqual(schedule_timing_hour,
+                         test_task_DB.schedule_timing_hour)
     
     def test_persistence_Ticket(self):
         """testing the persistence of Ticket

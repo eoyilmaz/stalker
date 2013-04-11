@@ -150,8 +150,8 @@ class TaskJugglerScheduler(SchedulerBase):
                                                             "%Y-%m-%d-%H:%M")
                     end_date = datetime.datetime.strptime(data[2],
                                                             "%Y-%m-%d-%H:%M")
-                    entity._computed_start = start_date
-                    entity._computed_end = end_date
+                    entity.computed_start = start_date
+                    entity.computed_end = end_date
         
         DBSession.commit()
     
@@ -177,6 +177,10 @@ class TaskJugglerScheduler(SchedulerBase):
         )
         # wait it to complete
         proc.wait()
+        
+        if proc.returncode:
+            raise RuntimeError(proc.stderr.readlines())
+        
         logger.debug('tj3 return code: %s' % proc.returncode)
         logger.debug('tj3 output: %s' % proc.stderr.readlines())
         # read back the csv file

@@ -227,7 +227,7 @@ GanttMaster.prototype.loadTasks = function(tasks) {
                 parent_id: task.parent_id,
                 depend_ids: task.depend_ids,
                 start: task.start,
-                duration: task.duration,
+                end: task.end,
                 bid: task.bid,
                 effort: task.effort,
                 length: task.length,

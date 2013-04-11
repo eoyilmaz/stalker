@@ -77,18 +77,24 @@ def convert_to_jquery_gantt_task_format(tasks):
                 'id': task.id,
                 'name': '%s (%s)' % (task.name, task.entity_type),
                 'code': task.id,
-                'parent_id': task.parent.id if task.parent else None,
-                'status': 'STATUS_UNDEFINED',
-                'start': int(task.start.strftime('%s')) * 1000,
-                'duration': task.duration.days,
-                'end': int(task.end.strftime('%s')) * 1000,
-                'depend_ids': [dep.id for dep in task.depends],#convert_to_depend_index(task, tasks),
                 'description': task.description,
+                'status': 'STATUS_UNDEFINED',
+                'project_id': task.project.id,
+                'parent_id': task.parent.id if task.parent else None,
+                'depend_ids': [dep.id for dep in task.depends],
                 'resources': [
                     {
                         'id': resource.id,
                     } for resource in task.resources
-                ]
+                ],
+                'start': int(task.start.strftime('%s')) * 1000,
+                'end': int(task.end.strftime('%s')) * 1000,
+                'is_scheduled': task.is_scheduled,
+                'schedule_timing': task.schedule_timing,
+                'schedule_model': task.schedule_model,
+                'schedule_constraint': task.schedule_constraint,
+                'computed_start': int(task.computed_start.strftime('%s')) * 1000 if task.computed_start else None,
+                'computed_end': int(task.computed_end.strftime('%s')) * 1000 if task.computed_end else None,
             }
             for task in tasks
         ],
@@ -222,28 +228,22 @@ def update_gantt_tasks(request):
 
 
 @view_config(
-    route_name='update_task',
-    renderer='templates/task/dialog_update_task.jinja2'
+    route_name='update_task_dialog',
+    renderer='templates/task/dialog_create_task.jinja2'
 )
-def update_task(request):
+def update_task_dialog(request):
     """runs when updating a task
     """
-    # get logged in user
-    login = authenticated_userid(request)
-    # logged_in_user = User.query.filter_by(login=login).first()
     
     task_id = request.matchdict['task_id']
     task = Task.query.filter(Task.id==task_id).first()
     
-    logger.debug('code came here 1')
-    if 'submitted' in request.params:
-        logger.debug('code came here 2')
-        logger.debug(request.params['submitted'])
-        if request.params['submitted'] == 'update':
-            pass
-    
     return {
-        'task': task
+        'project': task.project,
+        'task': task,
+        'parent': task.parent,
+        'schedule_models': defaults.TASK_SCHEDULE_MODELS,
+        'mode': 'UPDATE'
     }
 
 def depth_first_flatten(task, task_array=None):
@@ -405,7 +405,8 @@ def create_task_dialog(request):
     
     return {
         'project': project,
-        'schedule_flags': defaults.TASK_SCHEDULE_FLAGS
+        'schedule_models': defaults.TASK_SCHEDULE_MODELS,
+        'mode': 'CREATE'
     }
 
 
@@ -425,7 +426,7 @@ def create_child_task_dialog(request):
     return {
         'project': project,
         'parent': parent_task,
-        'schedule_flags': defaults.TASK_SCHEDULE_FLAGS
+        'schedule_models': defaults.TASK_SCHEDULE_MODELS
     }
 
 
@@ -446,7 +447,7 @@ def create_dependent_task_dialog(request):
     return {
         'project': project,
         'depends_to': depends_to_task,
-        'schedule_flags': defaults.TASK_SCHEDULE_FLAGS
+        'schedule_models': defaults.TASK_SCHEDULE_MODELS
     }
 
 
@@ -484,11 +485,15 @@ def create_task(request):
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
     
+    # params
     project_id = request.params.get('project_id', None)
+    parent_id = request.params.get('parent_id', None)
     name = request.params.get('name', None)
+    description = request.params.get('description', '')
     is_milestone = request.params.get('is_milestone', None)
     status_id = request.params.get('status_id', None)
-    parent_id = request.params.get('parent_id', None)
+    schedule_model = request.params.get('schedule_model') # there should be one
+    schedule_timing = request.params.get('schedule_timing', '0d 0h')
     
     kwargs = {}
     
@@ -549,11 +554,16 @@ def create_task(request):
         logger.debug('depends: %s' % depends)
         
         kwargs['name'] = name
+        kwargs['description'] = description
         kwargs['status_list'] = status_list
         kwargs['status'] = status
         kwargs['created_by'] = logged_in_user
+        
         kwargs['start'] = start
         kwargs['end'] = end
+        
+        kwargs['schedule_timing'] = schedule_timing
+        
         kwargs['resources'] = resources
         kwargs['depends'] = depends
         

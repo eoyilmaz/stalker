@@ -71,14 +71,26 @@
         </td>
       </tr>
       
+      {# RESOURCES #}
+      <tr>
+        <td class='label_column'>
+          <label for='task_resources'>Resources</label>
+        </td>
+        <td class='input_column'>
+          <div id='task_resources'></div>
+        </td>
+      </tr>
+      
+      {# CONSTRAINS #}
+      
       {# SCHEDULE USING / EFFORT / LENGTH / DURATION #}
       <tr>
         <td class='label_column'>
-          <label for='task_schedule_flag'>Schedule Flag</label>
+          <label for='task_schedule_model'>Schedule Model</label>
         </td>
         <td class='input_column'>
-          <input id='task_schedule_flag'>
-          <input id='task_schedule_day'>
+          <input id='task_schedule_model'>
+          <div id='task_schedule_day'></div>
           <div style='
             float: left;
             margin-left: 1px;
@@ -86,7 +98,7 @@
             text-align: left;
             width: 34px;
           '>Days</div>
-          <input id='task_schedule_hour'>
+          <div id='task_schedule_hour'></div>
           <div style='
             float: left;
             margin-left: 1px;
@@ -100,24 +112,24 @@
       {# START #}
       <tr>
         <td class='label_column'>
-          <label for='task_start_date'>Start Date</label>
+          <label for='task_start_constraint'>Start Date</label>
         </td>
         <td class='input_column'>
             <input id='task_start_constraint'>
-            <input id='task_start_date'>
-            <input id='task_start_time'>
+            <div id='task_start_date'></div>
+            <div id='task_start_time'></div>
         </td>
       </tr>
       
       {# END #}
       <tr>
         <td class='label_column'>
-          <label for='task_end_date'>End Date</label>
+          <label for='task_end_constraint'>End Date</label>
         </td>
         <td class='input_column'>
             <input id='task_end_constraint'>
-            <input id='task_end_date'>
-            <input id='task_end_time'>
+            <div id='task_end_date'></div>
+            <div id='task_end_time'></div>
         </td>
       </tr>
       
@@ -129,19 +141,6 @@
         <td class='input_column'>
           <input id="task_is_milestone" type="checkbox">
         </td>
-      </tr>
-      
-      {# RESOURCES #}
-      <tr>
-        <td class='label_column'>
-          <label for='task_resources'>Resources</label>
-        </td>
-        <td class='input_column'>
-          <div id='task_resources'></div>
-        </td>
-{#        <td class='button_column'>#}
-{#          <button id='task_create_resource_button'>Create</button>#}
-{#        </td>#}
       </tr>
       
       {# STATUS LIST #}
@@ -180,48 +179,53 @@
 <script type='text/javascript'>
   require([
     'dijit/registry',
-    'dojo/store/Memory',
+    
     'dijit/form/Form',
     'dijit/form/ValidationTextBox',
     'dijit/form/TextBox',
     'dijit/form/FilteringSelect',
-    'dijit/form/ComboBox',
     'dijit/form/Button',
     'dijit/form/CheckBox',
-    'dojox/form/MultiComboBox',
+    'dijit/form/DateTextBox',
+    'dijit/form/TimeTextBox',
+    'dijit/form/NumberSpinner',
+    
+    'dojo/store/Memory',
     'dojo/store/JsonRest',
-    'stalker/TagSelect',
-    'stalker/Tag',
+    
     'dojo/date',
     'dojo/date/stamp',
     'dojo/date/locale',
-    'dijit/form/DateTextBox',
-    'dijit/form/TimeTextBox',
-    'dijit/form/NumberTextBox',
+    
+    'stalker/Tag', 
+    'stalker/TagSelect',
     'stalker/submitForm',
     'stalker/fieldUpdater',
     'stalker/dialogCaller',
     'dojo/ready'],
     function(
       registry,
-      Memory,
+      
       Form,
       ValidationTextBox,
       TextBox,
       FilteringSelect,
-      ComboBox,
       Button,
       CheckBox,
-      MultiComboBox,
+      DateTextBox,
+      TimeTextBox,
+      NumberSpinner,
+      
+      Memory,
       JsonRest,
-      TagSelect,
-      Tag,
+      
+      
       date,
       stamp,
       locale,
-      DateTextBox,
-      TimeTextBox,
-      NumberTextBox,
+
+      Tag,
+      TagSelect,
       submitForm,
       fieldUpdater,
       dialogCaller,
@@ -231,7 +235,11 @@
         // ********************************************************************
         // Form
         var create_task_form = new Form({
-          id: 'create_task_form'
+          {% if mode == 'CREATE' %}
+            id: 'create_task_form',
+          {% elif mode == 'UPDATE' %}
+            id: 'update_task_form'
+          {% endif %}
         }, 'create_task_form');
         
         
@@ -254,9 +262,10 @@
           target: '{{ request.route_url('get_project_tasks', project_id=project.id) }}'
         });
         
+        var parent_widget;
         {% if parent %}
           {# Use a TextBox #}
-          var parent_widget = new TextBox({
+          parent_widget = new TextBox({
             name: 'parent_id',
             label: 'Parent',
             value: '{{ parent.name }}',
@@ -266,7 +275,7 @@
           parent_widget.startup();
         {% else %}
           {# Use a filtering select #}
-          var parent_widget = new FilteringSelect({
+          parent_widget = new FilteringSelect({
             name: 'parent_id',
             label: 'Parent',
             required: false,
@@ -281,9 +290,13 @@
         var name_textBox = new ValidationTextBox({
           name: 'name',
           label: 'Name',
-          value: '',
           placeHolder: 'Enter a name',
           required: true,
+          value: {% if mode == 'CREATE' %}
+            '',
+          {% elif mode == 'UPDATE' %}
+            '{{ task.name }}'
+          {% endif %}
 {#          style: 'width: 100%'#}
         }, 'task_name');
         name_textBox.startup();
@@ -297,6 +310,11 @@
           name: 'description',
           label: 'Description',
           placeHolder: 'Enter description',
+          value: {% if mode == 'CREATE' %}
+            '',
+          {% elif mode == 'UPDATE' %}
+              '{{ task.description }}'
+          {% endif %}
 {#          style: 'width: 100%'#}
         }, 'task_description');
         description_textBox.startup();
@@ -319,9 +337,17 @@
           var memory = new Memory({data: data});
           depends_tagSelect.set('store', new Memory({data: data}));
           
-          {% if depends_to %}
-            // set the depends value
-            depends_tagSelect.set('value', [{{ depends_to.id }}]);
+          {% if mode == 'UPDATE' %}
+            depends_tasSelect.set('value', [
+              {% for depend_task in task.depends %}
+                {{ depend_task.id }},
+              {% endfor %}
+            ]);
+          {% else %}
+            {% if depends_to %}
+              // set the depends value
+              depends_tagSelect.set('value', [{{ depends_to.id }}]);
+            {% endif %}
           {% endif %}
           
           {% if not parent %}
@@ -330,15 +356,15 @@
         });
         
         // ********************************************************************
-        // Schedule Flag : EFFORT / LENGTH / DURATION
-        var schedule_flag = new FilteringSelect({
-          name: 'schedule_flag',
-          label: 'Schedule Flag',
+        // Schedule Model : EFFORT / LENGTH / DURATION
+        var schedule_model = new FilteringSelect({
+          name: 'schedule_model',
+          label: 'Schedule Model',
           store: new Memory({
             data: [
-              {% for flag in schedule_flags %}
+              {% for model in schedule_models %}
               {
-                name: '{{ flag }}',
+                name: '{{ model }}',
                 id: '{{ loop.index0 }}'
               },
               {% endfor %}
@@ -346,25 +372,32 @@
           }),
           required: true,
           style: 'width: 88px; float: left; margin-right: 3px'
-        }, 'task_schedule_flag');
+        }, 'task_schedule_model');
         // select the first one
-        schedule_flag.set('value', 0);
+        {% if mode == 'CREATE' %}
+          schedule_model.set('value', 0);
+        {% elif mode == 'UPDATE' %}
+            schedule_model.set('value', {{ task.schedule_model }});
+          {% endif %}
+        {% endif %}
         
         // Schedule Day
-        var schedule_day = new NumberTextBox({
+        var schedule_day_numberSpinner = new NumberSpinner({
           name: 'schedule_day',
-          value: 0,
-          style: 'width: 30px; text-align: right; float: left;'
-        }, 'task_schedule_day')
-        schedule_day.startup();
+          value: {% if task %}{{ task.schedule_timing_day }}{% else %}0{% endif %},
+          constraints:{ min: 0 },
+          style: 'width: 50px; text-align: right; float: left;'
+        }, 'task_schedule_day');
+        schedule_day_numberSpinner.startup();
         
         // Schedule Hour
-        var schedule_hour = new NumberTextBox({
+        var schedule_hour_numberSpinner = new NumberSpinner({
           name: 'schedule_hour',
-          value: 0,
-          style: 'width: 30px; text-align: right; float: left;'
+          value: {% if task %}{{ task.schedule_timing_hour }}{% else %}0{% endif %},
+          constraints:{ min: 0 },
+          style: 'width: 50px; text-align: right; float: left;'
         }, 'task_schedule_hour');
-        schedule_hour.startup();
+        schedule_hour_numberSpinner.startup();
         
         // ********************************************************************
         // Start Date
@@ -373,53 +406,62 @@
           id: 'start_constraint',
           name: 'start_constraint',
           value: 'checked',
-          checked: false,
-          onChange: function(new_value){
-            // enable the start date and start hour fields if checked
-            if (new_value){
-              start_dateTextBox.set('disabled', false);
-              start_time_timeTextBox.set('disabled', false);
-            } else {
-              start_dateTextBox.set('disabled', true);
-              start_time_timeTextBox.set('disabled', true);
-            }
-            // TODO: if both of the start_constraint and end_constraint checked
-            //       also change the schedule_using to DURATION and set the
-            //       duration to the correct value
-          }
+          checked: false
+          //onChange: function(new_value){
+          //  // enable the start date and start hour fields if checked
+          //  if (new_value){
+          //    start_dateTextBox.set('disabled', false);
+          //    start_time_timeTextBox.set('disabled', false);
+          //  } else {
+          //    start_dateTextBox.set('disabled', true);
+          //    start_time_timeTextBox.set('disabled', true);
+          //  }
+          //  // TODO: if both of the start_constraint and end_constraint checked
+          //  //       also change the schedule_using to DURATION and set the
+          //  //       duration to the correct value
+          //}
         }, 'task_start_constraint');
         start_constraint_checkBox.startup();
+        
+        {% if mode == 'UPDATE' %}
+          {% if task.schedule_constraint == 1 or task.schedule_constraint == 3 %}
+            start_constraint_checkBox.set('checked', true);
+          {% endif %}
+        {% endif %}
+        
         
         // Date
         var start_dateTextBox = new DateTextBox({
           name: 'start',
           label: 'Start Date',
-          value: new Date(),// set it today by default
+          value: new Date({% if task %}{{ task.start.strftime('%s')*1000 }}{% endif %}),// set it today by default
           required: true,
           disabled: true,
-          style: 'width: 90px;',
           datePattern: 'dd-mm-yyyy',
-          onChange: function(){
-            if (this.focused){
-              update_dates(
-                start_dateTextBox.getValue(),
-                end_dateTextBox.getValue(),
-                null
-              );
-            }
-          }
+          style: 'width: 90px;'
+          //onChange: function(){
+          //  if (this.focused){
+          //    update_dates(
+          //      start_dateTextBox.getValue(),
+          //      end_dateTextBox.getValue(),
+          //      null
+          //    );
+          //  }
+          //}
         }, 'task_start_date');
         start_dateTextBox.startup();
+        
+        
         
         // Time
         var start_time_timeTextBox = new TimeTextBox({
           name: 'start_time',
-          value: 'T09:00:00',
+          value: {% if task %} 'T{{ '%02d'|format(task.start.time) }}:00:00'{% else %}'T09:00:00'{% endif %},
           disabled: true,
           style: 'width: 75px;',
           constraints: {
             timePattern: 'HH:mm:ss',
-            clickableIncrement: 'T01:00:00',
+            clickableIncrement: 'T01:00:00', // TODO: set it to project.time_resolution
             visibleIncrement: 'T01:00:00',
             visibleRange: 'T01:00:00'
           }
@@ -451,32 +493,48 @@
           }
         }, 'task_end_constraint');
         end_constraint_checkBox.startup();
- 
+        
+        {% if mode == 'UPDATE' %}
+          {% if task.schedule_constraint == 2 or task.schedule_constraint == 3 %}
+            end_constraint_checkBox.set('checked', true);
+          {% endif %}
+        {% endif %}
+        
+        
+        
         // Date
         var end_dateTextBox = new DateTextBox({
           name: 'end',
           label: 'End Date',
-          value: new Date(), // set it today by default
+          value: {% if mode=='CREATE' %}
+            new Date(), // set it to now by default
+          {% elif mode=='UPDATE' %}{
+            new Date({{ task.end.strftime('%s')|int * 1000 }}),
+          {% endif %}
           required: true,
           disabled: true,
           datePattern: 'dd-mm-yyyy',
-          style: 'width: 90px;',
-          onChange: function(){
-            if (this.focused){
-              update_dates(
-                start_dateTextBox.getValue(),
-                end_dateTextBox.getValue(),
-                null
-              );
-            }
-          }
+          style: 'width: 90px;'
+          //onChange: function(){
+          //  if (this.focused){
+          //    update_dates(
+          //      start_dateTextBox.getValue(),
+          //      end_dateTextBox.getValue(),
+          //      null
+          //    );
+          //  }
+          //}
         }, 'task_end_date');
         end_dateTextBox.startup();
         
         // Time
         var end_time_timeTextBox = new TimeTextBox({
           name: 'end_time',
-          value: 'T18:00:00',
+          value: {% if mode == 'CREATE' -%}
+            'T18:00:00',
+          {% elif mode == 'UPDATE' %}
+            'T{{ '%02d'|format(task.end.hour) }}:00:00',
+          {% endif %}
           disabled: true,
           style: 'width: 75px;',
           constraints: {
@@ -488,45 +546,25 @@
         }, 'task_end_time');
         end_time_timeTextBox.startup();
         
-        
-        // ********************************************************************
-        // Duration
-        var duration_numberTextBox = new NumberTextBox({
-          name: 'duration',
-          label: 'Duration',
-          value: 0,
-          onKeyUp: function(){
-            if (this.focused){
-              update_dates(
-                start_dateTextBox.getValue(),
-                null,
-                this.get('value')
-              )
-            }
-          },
-{#          style: 'width: 100%'#}
-        }, 'task_duration');
-        duration_numberTextBox.startup();
-        
-        var update_dates = function(start, end, duration){
-          if (duration == null){
-             // update the duration
-            duration_numberTextBox.set(
-              'value',
-              date.difference(start, end)
-            );
-          } else if (end == null) {
-             // update end date
-            end_dateTextBox.set(
-              'value',
-              date.add(
-                start,
-                'day',
-                duration
-              )
-            );
-          }
-        };
+        //var update_dates = function(start, end, duration){
+        //  if (duration == null){
+        //     // update the duration
+        //    duration_numberTextBox.set(
+        //      'value',
+        //      date.difference(start, end)
+        //    );
+        //  } else if (end == null) {
+        //     // update end date
+        //    end_dateTextBox.set(
+        //      'value',
+        //      date.add(
+        //        start,
+        //        'day',
+        //        duration
+        //      )
+        //    );
+        //  }
+        //};
         //update_dates();
         
         
@@ -539,7 +577,15 @@
           name: 'is_milestone',
           label: 'Is Milestone',
           value: 'checked',
+          {% if mode=='CREATE'%}
           checked: false,
+          {% elif mode=='UPDATE' %}
+            {% if task.is_milestone %}
+              checked: true,
+            {% else %}
+              checked: false,
+            {% endif %}
+          {% endif %}
           onChange: function(new_value){
             // disable the resources field if checked
             if (new_value){
@@ -571,6 +617,16 @@
         var result = users_jsonRest.query().then(function(data){
           var user_memory = new Memory({data: data});
           resources_tagSelect.set('store', user_memory);
+          
+          {% if mode == 'UPDATE' %}
+          // set the selection
+          resources_tagSelect.set('selected', [
+            {% for resource in task.resources %}
+              {{ resource.id }},
+            {% endif %}
+          ]);
+          {% endif %}
+          
         });
         
 {#        // Create Button#}
@@ -665,7 +721,11 @@
         });
         // don't call the updater now, the status_list may not been set yet!!!
         
-        
+        {% if mode == 'UPDATE' %}
+          status_updater({
+            selected: {{ task.status.id }}
+          });
+        {% endif %}
         
         
         // ********************************************************************
@@ -674,6 +734,18 @@
           label: 'Ok',
           type: 'button',
           onClick: function(){
+            
+            var schedule_timing = '';
+            if (schedule_day_numberSpinner.value > 0){
+              schedule_timing += schedule_day_numberSpinner.value + 'd';
+            }
+            if (schedule_hour_numberSpinner.value > 0){
+              if (schdele_timing.length){
+                schedule_timing += ' ';
+              }
+              schedule_timing += schedule_hour_numberSpinner.value + 'h';
+            }
+            
             submitForm({
               dialog: registry.byId('create_task_dialog'),
               form: create_task_form,
@@ -683,6 +755,7 @@
                   parent_id: {{ parent.id }},
                 {% endif %}
                 is_milestone: eval(is_milestone_checkBox.get('checked')) ? 1 : 0,
+                schedule_timing: schedule_timing,
                 start_date: stamp.toISOString(start_dateTextBox.value),
                 end_date: stamp.toISOString(end_dateTextBox.value),
                 start_time: stamp.toISOString(start_time_timeTextBox.value),

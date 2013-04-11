@@ -172,7 +172,9 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
             name='Task1',
             project=self.test_proj1,
             resources=[self.test_user1, self.test_user2],
-            effort=50,
+            schedule_model=0,
+            schedule_timing_day=0,
+            schedule_timing_hour=50,
             status_list=self.test_task_status_list
         )
         DBSession.add(self.test_task1)
@@ -181,11 +183,11 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
             name='Task2',
             project=self.test_proj1,
             resources=[self.test_user1, self.test_user2],
-            effort=60,
+            schedule_model=0,
+            schedule_timing_hour=60,
             status_list=self.test_task_status_list
         )
         DBSession.add(self.test_task2)
-        
         DBSession.commit()
     
     def test_tjp_file_is_created(self):
@@ -196,6 +198,8 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
         tjp_sched.projects = [self.test_proj1]
         
         tjp_sched._create_tjp_file()
+        tjp_sched._create_tjp_file_content()
+        tjp_sched._fill_tjp_file()
         
         # check
         self.assertTrue(os.path.exists(tjp_sched.tjp_file_full_path))
@@ -234,7 +238,7 @@ project Project_30 "Test Project 1" 2013-04-04 - 2013-05-04 {
 
 # resources
 resource resources "Resources" {
-    resource User_3 "Admin"
+    resource User_3 "admin"
     resource User_14 "User1"
     resource User_16 "User2"
     resource User_17 "User3"
@@ -286,7 +290,7 @@ taskreport breakdown "{{csv_path}}"{
         tjp_sched.projects = [self.test_proj1]
         tjp_sched.schedule()
         
-        # check the task and project timings are all adjusted
+        # check if the task and project timings are all adjusted
         self.assertEqual(
             self.test_proj1.computed_start,
             datetime.datetime(2013, 4, 4, 10, 0)

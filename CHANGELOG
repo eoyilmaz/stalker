@@ -23,6 +23,10 @@ Stalker Changes
 
 * Updated the Create Task Dialog to reflect the TaskJuggler integration.
 
+* Task class now has a new attribute called ``schedule_timing`` which is
+  replacing the ``effort``, ``length`` and ``duration`` attributes. Together
+  with the ``schedule_model`` attribute it will be used in scheduling the Task.
+
 0.2.0.a9
 --------
 * A new property called ``to_tjp`` added to the SimpleEntity class which needs

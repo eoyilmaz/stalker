@@ -45,44 +45,54 @@ function TaskFactory() {
 }
 
 function Task(kwargs) {
-  this.id = kwargs['id'] || null;
-  this.name = kwargs['name'] || null;
-  this.code = kwargs['code'] || null;
-  //this.level = kwargs['level'] || null;
-  this.status = "STATUS_UNDEFINED";
-  
-  this.children = [];
-  this.child_ids = [];
-  this.parent_id = kwargs['parent_id'] || null;
-  this.parent = kwargs['parent'] || null;
-  this.depend_ids = kwargs['depend_ids'] || [];
-  this.depends = null;
+    this.id = kwargs['id'] || null;
+    this.name = kwargs['name'] || null;
+    this.code = kwargs['code'] || null;
     
-  this.start = kwargs['start'] || null;
-  this.duration = kwargs['duration'] || null;
-  this.end = kwargs['end'] || null;
-  
-  this.bid = kwargs['bid'] || null;
-  this.effort = kwargs['effort'] || null;
-  this.length = kwargs['length'] || null;
-  
-  this.is_scheduled = kwargs['is_scheduled'] || false;
-  
-  this.is_milestone = false;
-  this.startIsMilestone = false;
-  this.endIsMilestone = false;
-  
-  this.collapsed = false;
-  
-  this.rowElement; //row editor html element
-  this.ganttElement; //gantt html element
-  this.master;
-  
-  this.resources = kwargs['resources'] || [];
-  this.resource_ids = [];
-  for (var i=0; i<this.resources.length; i++){
-    this.resource_ids.push(this.resources[i].id);
-  }
+    this.status = "STATUS_UNDEFINED";
+
+    this.project_id = null;
+    
+    this.children = [];
+    this.child_ids = [];
+    this.parent_id = kwargs['parent_id'] || null;
+    this.parent = kwargs['parent'] || null;
+    this.depend_ids = kwargs['depend_ids'] || [];
+    this.depends = null;
+      
+    this.start = kwargs['start'] || null;
+    this.duration = kwargs['duration'] || null;
+    this.end = kwargs['end'] || null;
+    
+    this.is_scheduled = kwargs['is_scheduled'] || false;
+    this.schedule_model = kwargs['schedule_model'] || 'EFFORT';
+    this.schedule_timing_day = kwargs['schedule_timing_day'] || 10;
+    this.schedule_timing_hour = kwargs['schedule_timing_hour'] || 0;
+    this.schedule_constraint = kwargs['schedule_constraint'] || 0;
+    
+    console.log('schedule_model       : ', this.schedule_model);
+    console.log('schedule_timing_day  : ', this.schedule_timing_day);
+    console.log('schedule_timing_hour : ', this.schedule_timing_hour);
+    console.log('schedule_constraint  : ', this.schedule_constraint);
+    
+    this.is_milestone = false;
+    this.startIsMilestone = false;
+    this.endIsMilestone = false;
+    
+    this.collapsed = false;
+    
+    this.rowElement; //row editor html element
+    this.ganttElement; //gantt html element
+    this.master;
+    
+    this.resources = kwargs['resources'] || [];
+    this.resource_ids = [];
+    for (var i=0; i<this.resources.length; i++){
+      this.resource_ids.push(this.resources[i].id);
+    }
+    
+    // update the duration according to the schedule_timing value
+    this.update_duration_from_schedule_timing();
 }
 
 Task.prototype.clone = function () {
@@ -706,33 +716,39 @@ Task.prototype.getSuperiors = function() {
 
 
 Task.prototype.getInferiors = function() {
-  var ret = [];
-  var task = this;
-  if (this.master) {
-    ret = this.master.links.filter(function(link) {
-      return link.from == task;
-    });
-  }
-  return ret;
+    var ret = [];
+    var task = this;
+    if (this.master) {
+      ret = this.master.links.filter(function(link) {
+        return link.from == task;
+      });
+    }
+    return ret;
 };
 
 
 Task.prototype.isNew = function(){
-  return (this.id + "").indexOf("tmp_")==0;
+    return (this.id + "").indexOf("tmp_")==0;
 };
+
+Task.prototype.update_duration_from_schedule_timing = function(){
+    // updates the duration from schedule_timing
+    
+};
+
 
 
 //<%------------------------------------------------------------------------  LINKS OBJECT ---------------------------------------------------------------%>
 function Link(taskFrom, taskTo, lagInWorkingDays) {
-  this.from = taskFrom;
-  this.to = taskTo;
-  this.lag = lagInWorkingDays;
+    this.from = taskFrom;
+    this.to = taskTo;
+    this.lag = lagInWorkingDays;
 }
 
 
 //<%------------------------------------------------------------------------  RESOURCE ---------------------------------------------------------------%>
 function Resource(kwargs) {
-  this.id = kwargs['id'] || null;
-  this.name = kwargs['name'] || (this.id || '');
+    this.id = kwargs['id'] || null;
+    this.name = kwargs['name'] || (this.id || '');
 }
 
