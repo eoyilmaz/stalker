@@ -1,13 +1,29 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import copy
 import unittest
-from stalker.conf import defaults
 from stalker.models.project import WorkingHours
+
+from stalker import config
+defaults = config.Config()
 
 class WorkingHoursTester(unittest.TestCase):
     """tests the stalker.models.project.WorkingHours class
@@ -18,14 +34,14 @@ class WorkingHoursTester(unittest.TestCase):
         default.
         """
         wh = WorkingHours()
-        self.assertEqual(wh.working_hours, defaults.WORKING_HOURS)
+        self.assertEqual(wh.working_hours, defaults.working_hours)
     
     def test_working_hours_argument_is_None(self):
         """testing if a WorkingHours is created with the default settings if
         the working_hours argument is None
         """
         wh = WorkingHours(working_hours=None)
-        self.assertEqual(wh.working_hours, defaults.WORKING_HOURS)
+        self.assertEqual(wh.working_hours, defaults.working_hours)
     
     def test_working_hours_argument_is_not_a_dictionary(self):
         """testing if a TypeError will be raised when the working_hours
@@ -62,13 +78,13 @@ class WorkingHoursTester(unittest.TestCase):
         """testing if a ValueError will be raised when the range of the time
         values are not correct in the working_hours argument
         """
-        wh = copy.copy(defaults.WORKING_HOURS)
+        wh = copy.copy(defaults.working_hours)
         wh['sun'] = [[-10, 1000]]
         
         self.assertRaises(ValueError, WorkingHours,
                           working_hours=wh)
         
-        wh = copy.copy(defaults.WORKING_HOURS)
+        wh = copy.copy(defaults.working_hours)
         wh['sat'] = [[900, 1080], [1090, 1500]]
         self.assertRaises(ValueError, WorkingHours,
                           working_hours=wh)
@@ -77,13 +93,13 @@ class WorkingHoursTester(unittest.TestCase):
         """testing if a ValueError will be raised if the range of the time
         values are not correct when setting the working_hours attr
         """
-        wh = copy.copy(defaults.WORKING_HOURS)
+        wh = copy.copy(defaults.working_hours)
         wh['sun'] = [[-10, 1000]]
         
         wh_ins = WorkingHours()
         self.assertRaises(ValueError, setattr, wh_ins, 'working_hours', wh)
         
-        wh = copy.copy(defaults.WORKING_HOURS)
+        wh = copy.copy(defaults.working_hours)
         wh['sat'] = [[900, 1080], [1090, 1500]]
         self.assertRaises(ValueError, setattr, wh_ins, 'working_hours', wh)
     
@@ -96,11 +112,11 @@ class WorkingHoursTester(unittest.TestCase):
             'sun': [[900, 1080]]
         }
         wh = WorkingHours(working_hours=working_hours)
-        self.assertEqual(wh['mon'], defaults.WORKING_HOURS['mon'])
-        self.assertEqual(wh['tue'], defaults.WORKING_HOURS['tue'])
-        self.assertEqual(wh['wed'], defaults.WORKING_HOURS['wed'])
-        self.assertEqual(wh['thu'], defaults.WORKING_HOURS['thu'])
-        self.assertEqual(wh['fri'], defaults.WORKING_HOURS['fri'])
+        self.assertEqual(wh['mon'], defaults.working_hours['mon'])
+        self.assertEqual(wh['tue'], defaults.working_hours['tue'])
+        self.assertEqual(wh['wed'], defaults.working_hours['wed'])
+        self.assertEqual(wh['thu'], defaults.working_hours['thu'])
+        self.assertEqual(wh['fri'], defaults.working_hours['fri'])
     
 
     def test_working_hours_attribute_value_is_not_complete(self):
@@ -113,17 +129,17 @@ class WorkingHoursTester(unittest.TestCase):
         }
         wh = WorkingHours()
         wh.working_hours = working_hours
-        self.assertEqual(wh['mon'], defaults.WORKING_HOURS['mon'])
-        self.assertEqual(wh['tue'], defaults.WORKING_HOURS['tue'])
-        self.assertEqual(wh['wed'], defaults.WORKING_HOURS['wed'])
-        self.assertEqual(wh['thu'], defaults.WORKING_HOURS['thu'])
-        self.assertEqual(wh['fri'], defaults.WORKING_HOURS['fri'])
+        self.assertEqual(wh['mon'], defaults.working_hours['mon'])
+        self.assertEqual(wh['tue'], defaults.working_hours['tue'])
+        self.assertEqual(wh['wed'], defaults.working_hours['wed'])
+        self.assertEqual(wh['thu'], defaults.working_hours['thu'])
+        self.assertEqual(wh['fri'], defaults.working_hours['fri'])
          
     def test_working_hours_can_be_indexed_with_day_number(self):
         """testing if the working hours for a day can be reached by an index
         """
         wh = WorkingHours()
-        self.assertEqual(wh[0], defaults.WORKING_HOURS['sun'])
+        self.assertEqual(wh[0], defaults.working_hours['sun'])
         wh[0] = [[540, 1080]]
     
     def test_working_hours_day_0_is_sunday(self):
@@ -138,7 +154,7 @@ class WorkingHoursTester(unittest.TestCase):
         the short date name as the index
         """
         wh = WorkingHours()
-        self.assertEqual(wh['sun'], defaults.WORKING_HOURS['sun'])
+        self.assertEqual(wh['sun'], defaults.working_hours['sun'])
         wh['sun'] = [[540, 1080]]
     
     def test___setitem__checks_the_given_data(self):
@@ -193,7 +209,7 @@ class WorkingHoursTester(unittest.TestCase):
     def test_working_hours_argument_is_working_properly(self):
         """testing if the working_hours argument is working properly
         """
-        working_hours = copy.copy(defaults.WORKING_HOURS)
+        working_hours = copy.copy(defaults.working_hours)
         working_hours['sun'] = [[540, 1000]]
         working_hours['sat'] = [[500, 800], [900, 1440]]
         wh = WorkingHours(working_hours=working_hours)
@@ -204,7 +220,7 @@ class WorkingHoursTester(unittest.TestCase):
     def test_working_hours_attribute_is_working_properly(self):
         """testing if the working_hours attribute is working properly
         """
-        working_hours = copy.copy(defaults.WORKING_HOURS)
+        working_hours = copy.copy(defaults.working_hours)
         working_hours['sun'] = [[540, 1000]]
         working_hours['sat'] = [[500, 800], [900, 1440]]
         wh = WorkingHours()
@@ -232,14 +248,14 @@ class WorkingHoursTester(unittest.TestCase):
         wh['sun'] = []
         
         expected_tjp = """    workinghours mon 09:30 - 18:30
-    workinghours tue 09:30 - 18:30
-    workinghours wed 09:30 - 18:30
-    workinghours thu 09:30 - 18:30
-    workinghours fri 09:30 - 18:30
-    workinghours sat off
-    workinghours sun off"""
+            workinghours tue 09:30 - 18:30
+            workinghours wed 09:30 - 18:30
+            workinghours thu 09:30 - 18:30
+            workinghours fri 09:30 - 18:30
+            workinghours sat off
+            workinghours sun off"""
         
-        self.assertEqual(wh.to_tjp, expected_tjp)
+        self.assertMultiLineEqual(wh.to_tjp, expected_tjp)
     
     def test_to_tjp_attribute_is_working_properly_for_multiple_work_hour_ranges(self):
         """testing if the to_tjp property is working properly
@@ -254,14 +270,14 @@ class WorkingHoursTester(unittest.TestCase):
         wh['sun'] = []
         
         expected_tjp = """    workinghours mon 09:30 - 12:00, 13:00 - 18:30
-    workinghours tue 09:30 - 12:00, 13:00 - 18:30
-    workinghours wed 09:30 - 12:00, 13:00 - 18:30
-    workinghours thu 09:30 - 12:00, 13:00 - 18:30
-    workinghours fri 09:30 - 12:00, 13:00 - 18:30
-    workinghours sat 09:30 - 12:00
-    workinghours sun off"""
+            workinghours tue 09:30 - 12:00, 13:00 - 18:30
+            workinghours wed 09:30 - 12:00, 13:00 - 18:30
+            workinghours thu 09:30 - 12:00, 13:00 - 18:30
+            workinghours fri 09:30 - 12:00, 13:00 - 18:30
+            workinghours sat 09:30 - 12:00
+            workinghours sun off"""
         
-        self.assertEqual(wh.to_tjp, expected_tjp)
+        self.assertMultiLineEqual(wh.to_tjp, expected_tjp)
  
     def test_weekly_working_hours_attribute_is_read_only(self):
         """testing if the weekly_working_hours is a read-only attribute

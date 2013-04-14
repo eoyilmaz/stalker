@@ -20,7 +20,9 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates, synonym
-from stalker.conf import defaults
+
+from stalker import defaults
+
 from stalker.models.auth import User
 from stalker.models.entity import Entity
 
@@ -135,5 +137,5 @@ class Department(Entity):
         """outputs a TaskJuggler compatible string
         """
         from jinja2 import Template
-        temp = Template(defaults.TJP_DEPARTMENT_TEMPLATE)
+        temp = Template(defaults.tjp_department_template)
         return temp.render({'department': self})

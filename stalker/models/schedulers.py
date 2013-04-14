@@ -29,7 +29,7 @@ from jinja2 import Template
 import stalker
 from stalker import log, Entity
 from stalker import Department, User
-from stalker.conf import defaults
+from stalker import defaults
 
 import logging
 from stalker.db import DBSession
@@ -92,7 +92,7 @@ class TaskJugglerScheduler(SchedulerBase):
     def _create_tjp_file_content(self):
         """creates the tjp file content
         """
-        template = Template(defaults.TJP_MAIN_TEMPLATE)
+        template = Template(defaults.tjp_main_template)
         
         self.tjp_content = template.render({
             'stalker': stalker,
@@ -171,7 +171,7 @@ class TaskJugglerScheduler(SchedulerBase):
         
         # pass it to tj3
         proc = subprocess.Popen(
-            [defaults.TJ_COMMAND,
+            [defaults.tj_command,
              self.tjp_file_full_path],
             stderr=subprocess.PIPE
         )

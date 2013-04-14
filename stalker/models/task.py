@@ -25,7 +25,9 @@ from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         String, DateTime, Float)
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 from stalker import User
-from stalker.conf import defaults
+
+from stalker import defaults
+
 from stalker.db import DBSession
 from stalker.db.declarative import Base
 from stalker.exceptions import OverBookedWarning, CircularDependencyError
@@ -308,7 +310,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     :param int schedule_constraint: The schedule constraint. It is the index
       of the schedule constraints value in
-      stalker.conf.defaults.TASK_SCHEDULE_CONSTRAINTS.
+      :class:`stalker.config.Config.task_schedule_constraints`.
     
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
@@ -428,7 +430,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     )
     
     bid_unit = Column(
-        Enum(*defaults.DATETIME_UNITS, name='TaskBidUnit'),
+        Enum(*defaults.datetime_units, name='TaskBidUnit'),
         nullable=True,
         doc="""The unit of the initial bid of this Task. It is a string value.
         And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
@@ -442,14 +444,17 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     )
     
     schedule_unit = Column(
-        Enum(*defaults.DATETIME_UNITS, name='TaskScheduleUnit'),
+        Enum(*defaults.datetime_units, name='TaskScheduleUnit'),
         nullable=False, default='h',
         doc="""It is the unit of the schedule timing. It is a string value. And
         should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
         """
     )
     
-    schedule_model = Column(Integer, default=0, nullable=False)
+    schedule_model = Column(
+        Enum(*defaults.task_schedule_models, name='TaskScheduleModels'),
+        default=0, nullable=False
+    )
     
     schedule_constraint = Column(Integer, default=0, nullable=False)
     
@@ -463,12 +468,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  duration=None,
                  schedule_timing=0,
                  schedule_unit='h',
-                 schedule_model=0,
+                 schedule_model=None,
                  schedule_constraint=0,
                  bid_timing=None,
                  bid_unit=None,
                  is_milestone=False,
-                 priority=defaults.TASK_PRIORITY,
+                 priority=defaults.task_priority,
                  **kwargs):
         
         # update kwargs with extras
@@ -513,7 +518,11 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         self.schedule_timing = schedule_timing
         self.schedule_unit = schedule_unit
+        
+        if not schedule_model:
+            schedule_model = defaults.task_schedule_models[0]
         self.schedule_model = schedule_model
+        
         self.schedule_constraint = schedule_constraint
          
         if bid_timing is None:
@@ -610,15 +619,15 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             raise TypeError(
                 '%s.schedule_unit should be a string value one of %s showing '
                 'the unit of the schedule timing of this %s, not %s' % (
-                self.__class__.__name__, defaults.DATETIME_UNITS,
+                self.__class__.__name__, defaults.datetime_units,
                 self.__class__.__name__, schedule_unit.__class__.__name__)
             )
         
-        if schedule_unit not in defaults.DATETIME_UNITS:
+        if schedule_unit not in defaults.datetime_units:
             raise ValueError(
                 '%s.schedule_unit should be a string value one of %s showing '
                 'the unit of the schedule timing of this %s, not %s' % (
-                self.__class__.__name__, defaults.DATETIME_UNITS,
+                self.__class__.__name__, defaults.datetime_units,
                 self.__class__.__name__, schedule_unit.__class__.__name__)
             )
         
@@ -721,7 +730,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             pass
         
         if not isinstance(priority, int):
-            priority = defaults.TASK_PRIORITY
+            priority = defaults.task_priority
         
         if priority < 0:
             priority = 0
@@ -798,14 +807,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             raise TypeError(
                 '%s.bid_unit should be a string value one of %s showing '
             'the unit of the bid timing of this %s, not %s' % (
-            self.__class__.__name__, defaults.DATETIME_UNITS,
+            self.__class__.__name__, defaults.datetime_units,
             self.__class__.__name__, bid_unit.__class__.__name__))
         
-        if bid_unit not in defaults.DATETIME_UNITS:
+        if bid_unit not in defaults.datetime_units:
             raise ValueError(
                     '%s.bid_unit should be a string value one of %s showing '
                 'the unit of the bid timing of this %s, not %s' % (
-                self.__class__.__name__, defaults.DATETIME_UNITS,
+                self.__class__.__name__, defaults.datetime_units,
                 self.__class__.__name__, bid_unit.__class__.__name__))
         
         return bid_unit
@@ -944,9 +953,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """TaskJuggler representation of this task
         """
         from jinja2 import Template
-        temp = Template(defaults.TJP_TASK_TEMPLATE)
-        return temp.render({'task': self,
-                            'defaults': defaults})
+        temp = Template(defaults.tjp_task_template)
+        return temp.render({'task': self})
     
     @property
     def level(self):

@@ -24,7 +24,9 @@ from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Date,
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates, descriptor_props
-from stalker.conf import defaults
+
+from stalker import defaults
+
 from stalker.db import Base
 from stalker.db.session import DBSession
 
@@ -459,16 +461,16 @@ class ScheduleMixin(object):
     
     :param duration: The duration of the entity. It is a
       :class:`datetime.timedelta` instance. The default value is read from
-      the :mod:`~stalker.conf.defaults` module. See the table above for the
+      the :class:`~stalker.config.Config` class. See the table above for the
       initialization rules.
     
     :type duration: :class:`datetime.timedelta`
     
     :param timing_resolution: The timing_resolution of the datetime.datetime
-      object in datetime.timedelta. Uses ``TIMING_RESOLUTION`` settings in the
-      :mod:`stalker.conf.defaults` module which defaults to 1 hour. Setting the
-      timing_resolution to less then 5 minutes is not suggested because it is a
-      limit for TaskJuggler.
+      object in datetime.timedelta. Uses ``timing_resolution`` settings in the
+      :class:`stalker.config.Config` class which defaults to 1 hour. Setting
+      the timing_resolution to less then 5 minutes is not suggested because it
+      is a limit for TaskJuggler.
     
     :type timing_resolution: datetime.timedelta
     """
@@ -601,19 +603,19 @@ attribute value."""
                 
                 if duration is None:
                     # set the defaults
-                    duration = defaults.TASK_DURATION
+                    duration = defaults.task_duration
                 
                 end = start + duration
             else:
                 if duration is None:
-                    duration = defaults.TASK_DURATION
+                    duration = defaults.task_duration
                 
                 start = end - duration
         
         # check end
         if end is None:
             if duration is None:
-                duration = defaults.TASK_DURATION
+                duration = defaults.task_duration
         
             end = start + duration
         
@@ -671,7 +673,7 @@ attribute value."""
         """validates the given timing_resolution value
         """
         if timing_resolution is None:
-            timing_resolution = defaults.TIMING_RESOLUTION
+            timing_resolution = defaults.timing_resolution
         
         if not isinstance(timing_resolution, datetime.timedelta):
             raise TypeError('%s.timing_resolution should be an instance of '

@@ -72,7 +72,7 @@
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
 {#      <div class="taskStatus" status="(#=obj.status#)"></div>#}
       <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
-      <div class="taskScheduleModel" style="position: absolute; text-align: center; width: 100%;">(#=obj.schedule_model[0]#): (#=obj.schedule_timing#)</div>
+      <div class="taskScheduleModel" style="position: absolute; text-align: center; width: 100%;">(#=obj.schedule_model#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div>
       <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
       <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
       <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
@@ -474,7 +474,7 @@
 {#          #}
         {% if entity.entity_type != 'User' %}
           
-          // ADD TASK
+          // CREATE TASK
           var create_task_button = dialogCaller({
             label: 'Create Task',
             dialog_id: 'create_task_dialog',

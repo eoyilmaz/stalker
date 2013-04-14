@@ -1,8 +1,22 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import os
 import shutil
@@ -11,7 +25,8 @@ import unittest
 import tempfile
 from sqlalchemy.exc import IntegrityError
 
-from stalker.conf import defaults
+from stalker import defaults
+
 from stalker import db
 from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
@@ -48,9 +63,9 @@ class DatabaseTester(unittest.TestCase):
         """
         # just set the default admin creation to true
         # some tests are relying on that
-        defaults.AUTO_CREATE_ADMIN = True
-        defaults.ADMIN_NAME = "admin"
-        defaults.ADMIN_PASSWORD = "admin"
+        defaults.auto_create_admin = True
+        defaults.admin_name = "admin"
+        defaults.admin_password = "admin"
         
         self.TEST_DATABASE_URI = "sqlite:///:memory:"
         
@@ -72,8 +87,6 @@ class DatabaseTester(unittest.TestCase):
         
         # try to persist a user and get it back
         # create a new user
-        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
-        
         kwargs = {
             "name": "Erkan Ozgur Yilmaz",
             "login": "eoyilmaz",
@@ -114,8 +127,6 @@ class DatabaseTester(unittest.TestCase):
 #        self.assertTrue(os.path.exists(self.TEST_DATABASE_FILE))
 #        
 #        # create a new user
-#        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
-#        
 #        kwargs = {
 #            "name": "Erkan Ozgur Yilmaz",
 #            "login": "eoyilmaz",
@@ -147,22 +158,21 @@ class DatabaseTester(unittest.TestCase):
         """testing if a default admin is created
         """
         # set default admin creation to True
-        defaults.AUTO_CREATE_ADMIN = True
+        defaults.auto_create_admin = True
         
         db.setup()
         
         # check if there is an admin
-        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
-        admin_DB = User.query.filter(User.name==defaults.ADMIN_NAME).first()
+        admin_DB = User.query.filter(User.name==defaults.admin_name).first()
         
-        self.assertEqual(admin_DB.name, defaults.ADMIN_NAME)
+        self.assertEqual(admin_DB.name, defaults.admin_name)
 
     def test_default_admin_for_already_created_databases(self):
         """testing if no extra admin is going to be created for already setup
         databases
         """
         # set default admin creation to True
-        defaults.AUTO_CREATE_ADMIN = True
+        defaults.auto_create_admin = True
         
         db.setup({
             "sqlalchemy.url": self.TEST_DATABASE_URI
@@ -180,7 +190,7 @@ class DatabaseTester(unittest.TestCase):
         # and get how many admin is created, (it is imipossible to create
         # second one because the tables.simpleEntity.c.nam.unique=True
         
-        admins = User.query.filter_by(name=defaults.ADMIN_NAME).all()
+        admins = User.query.filter_by(name=defaults.admin_name).all()
         
         self.assertTrue(len(admins) == 1)
     
@@ -207,24 +217,25 @@ class DatabaseTester(unittest.TestCase):
 #            )
 
     def test_no_default_admin_creation(self):
-        """testing if there is no user if default.AUTO_CREATE_ADMIN is False
+        """testing if there is no user if stalker.config.Conf.auto_create_admin
+        is False
         """
         # turn down auto admin creation
-        defaults.AUTO_CREATE_ADMIN = False
+        defaults.auto_create_admin = False
         
         # setup the db
         db.setup()
         
         # check if there is a use with name admin
         self.assertTrue(
-            User.query.filter_by(name=defaults.ADMIN_NAME).first()
+            User.query.filter_by(name=defaults.admin_name).first()
             is None
         )
 
         # check if there is a admins department
         self.assertTrue(
             Department.query
-            .filter_by(name=defaults.ADMIN_DEPARTMENT_NAME)
+            .filter_by(name=defaults.admin_department_name)
             .first() is None
         )
 
@@ -232,7 +243,6 @@ class DatabaseTester(unittest.TestCase):
         """testing if there can be non-unique names for different entity types
         """
         db.setup()
-        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
 
         # try to create a user and an entity with same name
         # expect Nothing
@@ -305,7 +315,7 @@ class DatabaseTester(unittest.TestCase):
         
         logger.debug("%s" % permissions_DB)
         
-        actions = defaults.ACTIONS
+        actions = defaults.actions
         
         for action in permissions_DB:
             self.assertIn(action.action, actions)
@@ -345,14 +355,14 @@ class DatabaseTester(unittest.TestCase):
         
         self.assertEqual(
             len(permission_DB),
-            len(class_names) * len(defaults.ACTIONS) * 2
+            len(class_names) * len(defaults.actions) * 2
         )
         
         from pyramid.security import Allow, Deny
         
         for permission in permission_DB:
             self.assertIn(permission.access, [Allow, Deny])
-            self.assertIn(permission.action,  defaults.ACTIONS)
+            self.assertIn(permission.action,  defaults.actions)
             self.assertIn(permission.class_name, class_names)
             logger.debug('permission.access: %s' % permission.access)
             logger.debug('permission.action: %s' % permission.action)
@@ -966,10 +976,6 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_ImageFormat(self):
         """testing the persistence of ImageFormat
         """
-        
-        ## get the admin
-        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
-        
         # create a new ImageFormat object and try to read it back
         kwargs = {
             "name": "HD",
@@ -1033,9 +1039,6 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_Link(self):
         """testing the persistence of Link
         """
-        
-        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
-        
         # create a link Type
         sound_link_type = Type(
             name='Sound',
@@ -1448,9 +1451,6 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_Repository(self):
         """testing the persistence of Repository
         """
-        ## get the admin
-        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
-        
         # create a new Repository object and try to read it back
         kwargs = {
             "name": "Movie-Repo",
@@ -1668,7 +1668,7 @@ class DatabaseModelsTester(unittest.TestCase):
             'project': test_project1,
             'lead': lead,
             'status_list': sequence_status_list,
-            'schedule_model': 'EFFORT',
+            'schedule_model': 'effort',
             'schedule_timing': 50,
             'schedule_unit': 'd'
         }
@@ -2071,9 +2071,6 @@ class DatabaseModelsTester(unittest.TestCase):
     def test_persistence_Structure(self):
         """testing the persistence of Structure
         """
-        
-        #admin = auth.authenticate(defaults.ADMIN_NAME, defaults.ADMIN_PASSWORD)
-        
         # create pipeline steps for character
         modeling_tType = Type(
             name='Modeling',

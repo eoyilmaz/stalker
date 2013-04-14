@@ -495,7 +495,7 @@
           }
         });
         update_lead_button.startup();
-
+        
         // ********************************************************************
         // Status List
         //
@@ -511,9 +511,9 @@
           required: true
         }, 'project_status');
         status_filteringSelect.startup();
-
+        
         var update_button_function = function(data){
-
+          
           if(data.length>0){
 
             add_status_button.set('onClick', function(){
@@ -529,7 +529,7 @@
                 // show the dialog
                 dialog.show();
             });
-
+            
             status_field_updater.set('callBack', function(){});
 
           }
@@ -557,7 +557,7 @@
         status_field_updater({animate: true});
 
         // ********************************************************************
-        // SUBMIT BUTTON
+        // Ok Button
         var submit_button = new Button({
           label: 'OK',
           type: 'button',
@@ -578,7 +578,7 @@
         submit_button.startup();
         
         // ********************************************************************
-        // CANCEL BUTTON
+        // Cancel Button
         var cancel_button = new Button({
           label: 'Cancel',
           type: 'button',

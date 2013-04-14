@@ -37,8 +37,8 @@ function TaskFactory() {
     var adjusted_start = computeStart(start);
     var calculated_end = computeEndByDuration(adjusted_start, duration);
     
-    kwargs['start'] = adjusted_start
-    kwargs['end'] = calculated_end
+    kwargs['start'] = adjusted_start;
+    kwargs['end'] = calculated_end;
     
     return new Task(kwargs);
   };
@@ -64,12 +64,21 @@ function Task(kwargs) {
     this.duration = kwargs['duration'] || null;
     this.end = kwargs['end'] || null;
     
+    this.bid_timing = kwargs['bid_timing'] || 0;
+    this.bid_unit = kwargs['bid_unit'] || 'h';
+    
     this.is_scheduled = kwargs['is_scheduled'] || false;
-    this.schedule_model = kwargs['schedule_model'] || 'EFFORT';
+    // schedule model:
+    //   0: Effort
+    //   1: Length
+    //   2: Duration
+    
+    this.schedule_model = kwargs['schedule_model'];
     this.schedule_timing = kwargs['schedule_timing'] || 10;
     this.schedule_unit = kwargs['schedule_unit'] || 'h';
     this.schedule_constraint = kwargs['schedule_constraint'] || 0;
     
+    console.log('kwargs["schedule_model"] :', kwargs['schedule_model']);
     console.log('schedule_model      : ', this.schedule_model);
     console.log('schedule_timing     : ', this.schedule_timing);
     console.log('schedule_unit       : ', this.schedule_unit);

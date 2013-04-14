@@ -226,14 +226,18 @@ GanttMaster.prototype.loadTasks = function(tasks) {
                 status: task.status,
                 parent_id: task.parent_id,
                 depend_ids: task.depend_ids,
+                resources: task.resources,
                 start: task.start,
+                duration: task.duration,
                 end: task.end,
-                bid: task.bid,
-                effort: task.effort,
-                length: task.length,
+                bid_timing: task.bid_timing,
+                bid_unit: task.bid_unit,
                 is_scheduled: task.is_scheduled,
                 is_milestone: task.is_milestone,
-                resources: task.resources
+                schedule_constraint: task.schedule_constraint,
+                schedule_model: task.schedule_model,
+                schedule_timing: task.schedule_timing,
+                schedule_unit: task.schedule_unit
             });
             
             // TODO: do it properly

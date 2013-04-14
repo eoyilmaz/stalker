@@ -28,7 +28,8 @@ from sqlalchemy.schema import UniqueConstraint
 
 from pyramid.security import Allow
 
-from stalker.conf import defaults
+from stalker import defaults
+
 from stalker.db.declarative import Base
 from stalker.models.mixins import ACLMixin
 from stalker.models.entity import Entity
@@ -80,11 +81,9 @@ class RootFactory(object):
         
         # logger.debug('all_permissions: %s' % all_permissions)
         
-        d = defaults
-        
         return [
-            (Allow, 'Group:' + d.ADMIN_DEPARTMENT_NAME, all_permissions),
-            (Allow, 'User:' + d.ADMIN_NAME, all_permissions)
+            (Allow, 'Group:' + defaults.admin_department_name, all_permissions),
+            (Allow, 'User:' + defaults.admin_name, all_permissions)
         ]
     
     def __init__(self, request):
@@ -109,7 +108,7 @@ class Permission(Base):
     
     :param str action: An Enum value from the list: 'Add', 'View', 'Edit',
       'Delete'. Can not be None. The list can be changed from
-      defaults.DEFAULT_ACTIONS.
+      stalker.config.Config.default_actions.
     
     :param str class_name: The name of the class that this action is applied
       to. Can not be None or an empty string.
@@ -165,7 +164,7 @@ class Permission(Base):
     id = Column(Integer, primary_key=True)
     _access = Column('access', Enum('Allow', 'Deny', name='AccessNames'))
     _action = Column('action',
-                     Enum(*defaults.ACTIONS,name='ActionNames'))
+                     Enum(*defaults.actions,name='ActionNames'))
     _class_name = Column('class_name', String)
     
     def __init__(self, access, action, class_name):
@@ -218,10 +217,10 @@ class Permission(Base):
             raise TypeError('Permission.action should be an instance of str '
                             'or unicode not %s' % action.__class__.__name__)
         
-        if action not in defaults.ACTIONS:
+        if action not in defaults.actions:
             raise ValueError('Permission.action should be one of the values '
                              'of %s not %s' % 
-                             (defaults.ACTIONS, action))
+                             (defaults.actions, action))
         
         return action
     
@@ -801,7 +800,7 @@ class User(Entity, ACLMixin):
         """outputs a TaskJuggler formatted string
         """
         from jinja2 import Template
-        temp = Template(defaults.TJP_USER_TEMPLATE)
+        temp = Template(defaults.tjp_user_template)
         return temp.render({'user': self})
  
 # USER_PERMISSIONGROUPS

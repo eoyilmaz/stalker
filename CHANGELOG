@@ -27,6 +27,19 @@ Stalker Changes
   replacing the ``effort``, ``length`` and ``duration`` attributes. Together
   with the ``schedule_model`` attribute it will be used in scheduling the Task.
 
+* Updated the config system to the one used in oyProjectManager (based on
+  Sphinx config system). Now to reach the defaults::
+    
+    # instead of doing the following
+    from stalker.conf import defaults # not valid anymore
+    
+    # use this
+    from stalker import defaults
+  
+  If the above idiom is used, the old ``defaults`` module behaviour is
+  retained, so no code change is required other than the new lower case config
+  variable names.
+  
 0.2.0.a9
 --------
 * A new property called ``to_tjp`` added to the SimpleEntity class which needs

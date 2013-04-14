@@ -26,14 +26,15 @@ from pyramid.view import view_config
 from pyramid.security import authenticated_userid
 from pyramid.httpexceptions import HTTPServerError, HTTPOk
 
-
 import transaction
 from sqlalchemy.exc import IntegrityError
-from stalker.conf import defaults
 
 from stalker.db import DBSession
 from stalker import User, Task, Entity, Project, StatusList, Status
 from stalker.models.task import CircularDependencyError
+
+
+from stalker import defaults
 
 import logging
 from stalker import log
@@ -234,16 +235,15 @@ def update_gantt_tasks(request):
 def update_task_dialog(request):
     """runs when updating a task
     """
-    
     task_id = request.matchdict['task_id']
     task = Task.query.filter(Task.id==task_id).first()
     
     return {
+        'mode': 'UPDATE',
         'project': task.project,
         'task': task,
         'parent': task.parent,
-        'schedule_models': defaults.TASK_SCHEDULE_MODELS,
-        'mode': 'UPDATE'
+        'schedule_models': defaults.task_schedule_models
     }
 
 def depth_first_flatten(task, task_array=None):
@@ -404,9 +404,9 @@ def create_task_dialog(request):
     project = Project.query.filter_by(id=project_id).first()
     
     return {
+        'mode': 'CREATE',
         'project': project,
-        'schedule_models': defaults.TASK_SCHEDULE_MODELS,
-        'mode': 'CREATE'
+        'schedule_models': defaults.task_schedule_models
     }
 
 
@@ -424,9 +424,10 @@ def create_child_task_dialog(request):
     project = parent_task.project if parent_task else None
     
     return {
+        'mode': 'CREATE',
         'project': project,
         'parent': parent_task,
-        'schedule_models': defaults.TASK_SCHEDULE_MODELS
+        'schedule_models': defaults.task_schedule_models
     }
 
 
@@ -445,9 +446,10 @@ def create_dependent_task_dialog(request):
     project = depends_to_task.project if depends_to_task else None
     
     return {
+        'mode': 'CREATE',
         'project': project,
         'depends_to': depends_to_task,
-        'schedule_models': defaults.TASK_SCHEDULE_MODELS
+        'schedule_models': defaults.task_schedule_models
     }
 
 
@@ -493,7 +495,8 @@ def create_task(request):
     is_milestone = request.params.get('is_milestone', None)
     status_id = request.params.get('status_id', None)
     schedule_model = request.params.get('schedule_model') # there should be one
-    schedule_timing = request.params.get('schedule_timing', '0d 0h')
+    schedule_timing = request.params.get('schedule_timing')
+    schedule_unit = request.params.get('schedule_unit')
     
     kwargs = {}
     
@@ -562,7 +565,9 @@ def create_task(request):
         kwargs['start'] = start
         kwargs['end'] = end
         
-        kwargs['schedule_timing'] = schedule_timing
+        kwargs['schedule_model'] = int(schedule_model)
+        kwargs['schedule_timing'] = float(schedule_timing)
+        kwargs['schedule_unit'] = schedule_unit
         
         kwargs['resources'] = resources
         kwargs['depends'] = depends

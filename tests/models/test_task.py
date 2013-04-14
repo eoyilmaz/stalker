@@ -1,14 +1,30 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
 import unittest
 from stalker.exceptions import CircularDependencyError
 
-from stalker.conf import defaults
+from stalker import config
+defaults = config.Config()
+
 from stalker import db
 from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Entity, Project, Repository, StatusList, Status, Task,
@@ -157,52 +173,49 @@ class TaskTester(unittest.TestCase):
         """
         self.assertFalse(Task.__auto_name__)
     
-    def test_priority_argument_is_skipped_defaults_to_DEFAULT_TASK_PRIORITY(
-    self):
+    def test_priority_argument_is_skipped_defaults_to_task_priority(self):
         """testing if skipping the priority argument will default the priority
-        attribute to DEFAULT_TASK_PRIORITY.
+        attribute to task_priority.
         """
         self.kwargs.pop("priority")
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.priority, defaults.TASK_PRIORITY)
+        self.assertEqual(new_task.priority, defaults.task_priority)
 
-    def test_priority_argument_is_given_as_None_will_default_to_DEFAULT_TASK_PRIORITY(
-    self):
+    def test_priority_argument_is_given_as_None_will_default_to_task_priority(self):
         """testing if the priority argument is given as None will default the
-        priority attribute to DEFAULT_TASK_PRIORITY.
+        priority attribute to task_priority.
         """
         self.kwargs["priority"] = None
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.priority, defaults.TASK_PRIORITY)
+        self.assertEqual(new_task.priority, defaults.task_priority)
 
-    def test_priority_attribute_is_given_as_None_will_default_to_DEFAULT_TASK_PRIORITY(
-    self):
+    def test_priority_attribute_is_given_as_None_will_default_to_task_priority(self):
         """testing if the priority attribute is given as None will default the
-        priority attribute to DEFAULT_TASK_PRIORITY.
+        priority attribute to task_priority.
         """
         self.test_task.priority = None
-        self.assertEqual(self.test_task.priority, defaults.TASK_PRIORITY)
+        self.assertEqual(self.test_task.priority, defaults.task_priority)
 
-    def test_priority_argument_any_given_other_value_then_integer_will_default_to_DEFAULT_TASK_PRIORITY(self):
-        """testing if any other value then an positif integer for priority
-        argument will default the priority attribute to DEFAULT_TASK_PRIORITY.
+    def test_priority_argument_any_given_other_value_then_integer_will_default_to_task_priority(self):
+        """testing if any other value then an positive integer for priority
+        argument will default the priority attribute to task_priority.
         """
         test_values = ["a324", None, []]
 
         for test_value in test_values:
             self.kwargs["priority"] = test_value
             new_task = Task(**self.kwargs)
-            self.assertEqual(new_task.priority, defaults.TASK_PRIORITY)
+            self.assertEqual(new_task.priority, defaults.task_priority)
 
-    def test_priority_attribute_any_given_other_value_then_integer_will_default_to_DEFAULT_TASK_PRIORITY(self):
-        """testing if any other value then an positif integer for priority
-        attribute will default it to DEFAULT_TASK_PRIORITY.
+    def test_priority_attribute_any_given_other_value_then_integer_will_default_to_task_priority(self):
+        """testing if any other value then an positive integer for priority
+        attribute will default it to task_priority.
         """
         test_values = ["a324", None, []]
 
         for test_value in test_values:
             self.test_task.priority = test_value
-            self.assertEqual(self.test_task.priority, defaults.TASK_PRIORITY)
+            self.assertEqual(self.test_task.priority, defaults.task_priority)
 
     def test_priority_argument_is_negative(self):
         """testing if the priority argument is given as a negative value will
@@ -976,16 +989,16 @@ class TaskTester(unittest.TestCase):
         self.test_task.schedule_unit = test_value
         self.assertEqual(self.test_task.schedule_unit, test_value)
     
-    def test_schedule_unit_argument_value_is_not_in_defaults_DATETIME_UNITS(self):
+    def test_schedule_unit_argument_value_is_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when the schedule_unit value
-        is not in defaults.DATETIME_UNITS list
+        is not in stalker.config.Config.datetime_units list
         """
         self.kwargs['schedule_unit'] = 'os'
         self.assertRaises(ValueError, Task, **self.kwargs)
     
-    def test_schedule_unit_attribute_value_is_not_in_defaults_DATETIME_UNITS(self):
+    def test_schedule_unit_attribute_value_is_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when it is set to a value
-        which is not in defaults.DATETIME_UNITS list
+        which is not in stalker.config.Config.datetime_units list
         """
         self.assertRaises(ValueError, setattr, self.test_task, 'schedule_unit',
                           'so')
@@ -2065,16 +2078,16 @@ class TaskTester(unittest.TestCase):
         self.test_task.bid_unit = test_value
         self.assertEqual(self.test_task.bid_unit, test_value)
     
-    def test_bid_unit_argument_value_not_in_defaults_DATETIME_UNITS(self):
+    def test_bid_unit_argument_value_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when the given unit value is
-        not in the defaults.DATETIME_UNITS
+        not in the stalker.config.Config.datetime_units
         """
         self.kwargs['bid_unit'] = 'os'
         self.assertRaises(ValueError, Task, **self.kwargs)
     
-    def test_bid_unit_attribute_value_not_in_defaults_DATETIME_UNITS(self):
+    def test_bid_unit_attribute_value_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when the bid_unit value is
-        set to a value which is not in defaults.DATETIME_UNITS.
+        set to a value which is not in stalker.config.Config.datetime_units.
         """
         self.assertRaises(ValueError, setattr, self.test_task, 'bid_unit',
                           'sys')
@@ -2145,7 +2158,7 @@ class TaskTester(unittest.TestCase):
         self.kwargs['parent'] = None
         self.kwargs['schedule_timing'] = 10
         self.kwargs['schedule_unit'] = 'd'
-        self.kwargs['schedule_model'] = 0
+        self.kwargs['schedule_model'] = 'effort'
         self.kwargs['depends'] = []
         self.kwargs['resources'] = [self.test_user1, self.test_user2]
         self.test_user1.id = 5648
@@ -2165,10 +2178,11 @@ class TaskTester(unittest.TestCase):
         t1.id = 10221
         
         expected_tjp = """task Task_10221 "Modeling" {
-    effort 10d
-    allocate User_5648, User_7999
-    depends Project_14875.Task_6484, Project_14875.Task_6485
-}"""
+            effort 10d
+            allocate User_5648, User_7999
+            depends Project_14875.Task_6484, Project_14875.Task_6485
+        }
+        """
         self.assertEqual(t1.to_tjp, expected_tjp)
         
     
@@ -2189,7 +2203,7 @@ class TaskTester(unittest.TestCase):
         self.kwargs['name'] = 'Modeling'
         self.kwargs['schedule_timing'] = 1003
         self.kwargs['schedule_unit'] = 'h'
-        self.kwargs['schedule_model'] = 0
+        self.kwargs['schedule_model'] = 'effort'
         self.kwargs['depends'] = [dep_task1, dep_task2]
         
         self.test_user1.name = 'Test User 1'
@@ -2207,10 +2221,11 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**self.kwargs)
         new_task.id = 234234
         expected_tjp = """task Task_234234 "Modeling" {
-    effort 1003h
-    allocate User_1231, User_1232
-    depends Project_8898.Task_987879.Task_23423, Project_8898.Task_987879.Task_23424
-}"""
+            effort 1003h
+            allocate User_1231, User_1232
+            depends Project_8898.Task_987879.Task_23423, Project_8898.Task_987879.Task_23424
+        }
+        """
         self.assertEqual(new_task.to_tjp, expected_tjp)
     
     def test_to_tjp_attribute_is_working_properly_for_a_container_task(self):
@@ -2237,7 +2252,7 @@ class TaskTester(unittest.TestCase):
         self.kwargs['name'] = 'Modeling'
         self.kwargs['schedule_timing'] = 1
         self.kwargs['schedule_unit'] = 'd'
-        self.kwargs['schedule_model'] = 0
+        self.kwargs['schedule_model'] = 'effort'
         self.kwargs['depends'] = [dep_task1, dep_task2]
         
         self.test_user1.name = 'Test User 1'
@@ -2254,21 +2269,26 @@ class TaskTester(unittest.TestCase):
         t2.id = 5679
         
         expected_tjp = '''task Task_5648 "Modeling" {
-task Task_23423 "Modeling" {
-    effort 1d
-    allocate User_1231, User_1232
-}
-task Task_23424 "Modeling" {
-    effort 1d
-    allocate User_1231, User_1232
-}
-task Task_5679 "Modeling" {
-    effort 1d
-    allocate User_1231, User_1232
-    depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
-}
-}'''
-        self.assertEqual(t1.to_tjp, expected_tjp)
+        task Task_23423 "Modeling" {
+            effort 1d
+            allocate User_1231, User_1232
+        }
+        
+        task Task_23424 "Modeling" {
+            effort 1d
+            allocate User_1231, User_1232
+        }
+        
+        task Task_5679 "Modeling" {
+            effort 1d
+            allocate User_1231, User_1232
+            depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
+        }
+        
+        }
+        '''
+        self.maxDiff = None
+        self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
     
     def test_is_scheduled_is_a_read_only_attribute(self):
         """testing if the is_scheduled is a read-only attribute
@@ -2297,10 +2317,10 @@ task Task_5679 "Modeling" {
         self.test_task.computed_end = None
         self.assertFalse(self.test_task.is_scheduled)
 
-    def test_schedule_model_is_0_by_default(self):
-        """testing if the schedule_model is EFFORT by default
+    def test_schedule_model_is_effort_by_default(self):
+        """testing if the schedule_model is effort by default
         """
-        self.assertEqual(self.test_task.schedule_model, 0)
+        self.assertEqual(self.test_task.schedule_model, 'effort')
     
     # TODO: add schedule_model validation tests
     

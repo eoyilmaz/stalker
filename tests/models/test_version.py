@@ -1,15 +1,32 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import unittest
-from stalker.conf import defaults
 from stalker import (Link, Project, Repository, Sequence, Shot, Status,
                      StatusList, Task, Type, Version)
 from stalker import db
 from stalker.db.session import DBSession, ZopeTransactionExtension
+
+
+from stalker import config
+defaults = config.Config()
 
 import logging
 from stalker import log
@@ -224,7 +241,7 @@ class VersionTester(unittest.TestCase):
         self.kwargs.pop("take_name")
         new_version = Version(**self.kwargs)
         self.assertEqual(new_version.take_name,
-                         defaults.VERSION_TAKE_NAME)
+                         defaults.version_take_name)
 
     def test_take_name_argument_is_None(self):
         """testing if a TypeError will be raised when the take_name argument is

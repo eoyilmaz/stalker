@@ -96,7 +96,7 @@
         required: true,
         {% if target_entity_type %}
           disabled: true,
-          value: 'StatusListFor{{ target_entity_type }}'
+          value: '{{ target_entity_type }} Statuses'
         {% else %}
           disabled: false
         {% endif %}

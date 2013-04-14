@@ -21,11 +21,13 @@
 import re
 from sqlalchemy import Table, Column, Integer, ForeignKey, String, Boolean
 from sqlalchemy.exc import UnboundExecutionError
-from sqlalchemy.orm import relationship, validates, synonym
-from stalker.conf import defaults
+from sqlalchemy.orm import relationship, validates
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import StatusMixin
+
+
+from stalker import defaults
 
 from stalker.log import logging_level
 import logging
@@ -133,7 +135,7 @@ class Version(Entity, StatusMixin):
     
     def __init__(self,
                  version_of=None,
-                 take_name=defaults.VERSION_TAKE_NAME,
+                 take_name=defaults.version_take_name,
                  #version_number=None,
                  source_file=None,
                  inputs=None,

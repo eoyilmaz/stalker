@@ -1,8 +1,22 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
 import unittest
@@ -10,7 +24,9 @@ import unittest
 from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
                      Sequence, Shot, Status, StatusList, Structure, Task, Type,
                      User, db)
-from stalker.conf import defaults
+from stalker import config
+defaults = config.Config()
+
 from stalker.db.session import DBSession, ZopeTransactionExtension
 
 import logging
@@ -1244,7 +1260,7 @@ class ProjectTester(unittest.TestCase):
             pass
         new_project = Project(**self.kwargs)
         self.assertEqual(new_project.daily_working_hours,
-                         defaults.DAILY_WORKING_HOURS)
+                         defaults.daily_working_hours)
     
     def test_daily_working_hours_argument_is_None(self):
         """testing if the daily_working_hours attribute will be equal to the
@@ -1253,7 +1269,7 @@ class ProjectTester(unittest.TestCase):
         self.kwargs['daily_working_hours'] = None
         new_project = Project(**self.kwargs)
         self.assertEqual(new_project.daily_working_hours,
-                         defaults.DAILY_WORKING_HOURS)
+                         defaults.daily_working_hours)
     
     def test_daily_working_hours_attribute_is_None(self):
         """testing if the daily_working_hours attribute will be equal to the
@@ -1261,7 +1277,7 @@ class ProjectTester(unittest.TestCase):
         """
         self.test_project.daily_working_hours = None
         self.assertEqual(self.test_project.daily_working_hours,
-                         defaults.DAILY_WORKING_HOURS)
+                         defaults.daily_working_hours)
     
     def test_daily_working_hours_argument_is_not_integer(self):
         """testing if a TypeError will be raised when the daily_working_hours
@@ -1300,23 +1316,25 @@ class ProjectTester(unittest.TestCase):
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
         """
+        self.maxDiff = None
         from jinja2 import Template
         expected_tjp_temp = Template("""project Project_41 "Test Project" {{start}} - {{end}} {
-    timingresolution 60min
-    now {{now}}
-    dailyworkinghours {{dwh}}
-    weekstartsmonday
-    workinghours mon 09:30 - 18:30
-    workinghours tue 09:30 - 18:30
-    workinghours wed 09:30 - 18:30
-    workinghours thu 09:30 - 18:30
-    workinghours fri 09:30 - 18:30
-    workinghours sat off
-    workinghours sun off
-    timeformat "%Y-%m-%d"
-    scenario plan "Plan"
-    trackingscenario plan
-}""")
+            timingresolution 60min
+            now {{now}}
+            dailyworkinghours {{dwh}}
+            weekstartsmonday
+            workinghours mon 09:30 - 18:30
+            workinghours tue 09:30 - 18:30
+            workinghours wed 09:30 - 18:30
+            workinghours thu 09:30 - 18:30
+            workinghours fri 09:30 - 18:30
+            workinghours sat off
+            workinghours sun off
+            timeformat "%Y-%m-%d"
+            scenario plan "Plan"
+            trackingscenario plan
+        }
+        """)
         expected_tjp = expected_tjp_temp.render({
             'start' : self.test_project.start.date(),
             'end'   : self.test_project.end.date(),

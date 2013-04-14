@@ -1,12 +1,27 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import unittest
 from stalker import Entity, Status
-from stalker.conf import defaults
+from stalker import config
+defaults = config.Config()
 
 class StatusTest(unittest.TestCase):
     """tests the stalker.models.status.Status class
@@ -127,7 +142,7 @@ class StatusTest(unittest.TestCase):
         self.kwargs.pop('bg_color')
         new_status = Status(**self.kwargs)
         self.assertEqual(
-            defaults.STATUS_BG_COLOR,
+            defaults.status_bg_color,
             new_status.bg_color
         )
     
@@ -138,7 +153,7 @@ class StatusTest(unittest.TestCase):
         self.kwargs['bg_color'] = None
         new_status = Status(**self.kwargs)
         self.assertEqual(
-            defaults.STATUS_BG_COLOR,
+            defaults.status_bg_color,
             new_status.bg_color
         )
     
@@ -149,7 +164,7 @@ class StatusTest(unittest.TestCase):
         new_status = Status(**self.kwargs)
         new_status.bg_color = None
         self.assertEqual(
-            defaults.STATUS_BG_COLOR,
+            defaults.status_bg_color,
             new_status.bg_color
         )
     
@@ -223,7 +238,7 @@ class StatusTest(unittest.TestCase):
         self.kwargs.pop('fg_color')
         new_status = Status(**self.kwargs)
         self.assertEqual(
-            defaults.STATUS_FG_COLOR,
+            defaults.status_fg_color,
             new_status.fg_color
         )
     
@@ -234,7 +249,7 @@ class StatusTest(unittest.TestCase):
         self.kwargs['fg_color'] = None
         new_status = Status(**self.kwargs)
         self.assertEqual(
-            defaults.STATUS_FG_COLOR,
+            defaults.status_fg_color,
             new_status.fg_color
         )
     
@@ -245,7 +260,7 @@ class StatusTest(unittest.TestCase):
         new_status = Status(**self.kwargs)
         new_status.fg_color = None
         self.assertEqual(
-            defaults.STATUS_FG_COLOR,
+            defaults.status_fg_color,
             new_status.fg_color
         )
     

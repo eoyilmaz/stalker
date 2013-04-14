@@ -85,7 +85,7 @@ define(['dijit/form/Button', 'dijit/MenuItem'],
                         if (dialog != null){
                             dialog.destroyRecursive();
                         }
-
+                        
                         // get the data_id
                         if (data_id != null){
                             if (typeof(data_id) == 'function') {
@@ -93,15 +93,15 @@ define(['dijit/form/Button', 'dijit/MenuItem'],
                             } else {
                                 dialog = content_creator(data_id);
                             }
+                        } else {
+                            dialog = content_creator();
                         }
-
                         
                         // set the field updater
                         dialog.set(
                             'related_field_updater',
                             related_field_updater
                         );
-                        
                         
                         // show the dialog
                         dialog.show();

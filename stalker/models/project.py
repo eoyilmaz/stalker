@@ -25,7 +25,8 @@ from sqlalchemy import (Column, Integer, ForeignKey, Float, Boolean,
                         PickleType, Table)
 from sqlalchemy.orm import relationship, validates
 from stalker import User
-from stalker.conf import defaults
+from stalker import defaults
+
 from stalker.db.session import DBSession
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
@@ -371,7 +372,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         """validates the given daily working hours value
         """
         if dwh is None:
-            dwh = defaults.DAILY_WORKING_HOURS
+            dwh = defaults.daily_working_hours
         else:
             if not isinstance(dwh, int):
                 raise TypeError('%s.daily_working_hours should be an integer, '
@@ -441,7 +442,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         """
         from jinja2 import Template
         import datetime
-        temp = Template(defaults.TJP_PROJECT_TEMPLATE)
+        temp = Template(defaults.tjp_project_template)
         
         if not self.now:
             self.now = datetime.datetime.now()
@@ -463,7 +464,7 @@ class WorkingHours(object):
     key and the value is a list of two integers showing the working hours
     interval as the minutes after midnight. This is done in that way to ease
     the data transfer to TaskJuggler. The default value is defined in
-    :mod:`stalker.conf.defaults` ::
+    :class:`stalker.config.Config` ::
       
       wh = WorkingHours()
       wh.working_hours = {
@@ -486,18 +487,20 @@ class WorkingHours(object):
     It is possible to use day index and day short names as a key value to reach
     the data::
       
-      from stalker.conf import defaults
+      from stalker import config
+      defaults = config.Config()
+      
       wh = WorkingHours()
       
       # this is same by doing wh.working_hours['sun']
-      assert wh['sun'] == defaults.WORKING_HOURS['sun']
+      assert wh['sun'] == defaults.working_hours['sun']
       
       # you can reach the data using the weekday number as index
-      assert wh[0] == defaults.WORKING_HOURS['sun']
+      assert wh[0] == defaults.working_hours['sun']
       
       # working hours of sunday if defaults are used or any other day defined
-      # by the stalker.conf.defaults.DAY_ORDER
-      assert wh[0] == defaults.WORKING_HOURS[defaults.DAY_ORDER[0]]
+      # by the stalker.config.Config.day_order
+      assert wh[0] == defaults.working_hours[defaults.day_order[0]]
     
     :param working_hours: The dictionary that shows the working hours. The keys
       of the dictionary should be one of ['mon', 'tue', 'wed', 'thu', 'fri',
@@ -509,7 +512,7 @@ class WorkingHours(object):
     
     def __init__(self, working_hours=None, **kwargs):
         if working_hours is None:
-            working_hours = defaults.WORKING_HOURS
+            working_hours = defaults.working_hours
         self._wh = None
         self.working_hours = self._validate_working_hours(working_hours)
     
@@ -524,19 +527,19 @@ class WorkingHours(object):
     
     def __getitem__(self, item):
         if isinstance(item, int):
-            return self._wh[defaults.DAY_ORDER[item]]
+            return self._wh[defaults.day_order[item]]
         elif isinstance(item, str):
             return self._wh[item]
     
     def __setitem__(self, key, value):
         self._validate_wh_value(value)
         if isinstance(key, int):
-            self._wh[defaults.DAY_ORDER[key]] = value
+            self._wh[defaults.day_order[key]] = value
         elif isinstance(key, str):
             # check if key is in
-            if key not in defaults.DAY_ORDER:
+            if key not in defaults.day_order:
                 raise KeyError('%s accepts only %s as key, not %s' %
-                               (self.__class__.__name__, defaults.DAY_ORDER,
+                               (self.__class__.__name__, defaults.day_order,
                                 key))
             self._wh[key] = value
     
@@ -562,7 +565,7 @@ class WorkingHours(object):
         
         # update the default values with the supplied working_hour dictionary
         # copy the defaults
-        wh_def = copy.copy(defaults.WORKING_HOURS)
+        wh_def = copy.copy(defaults.working_hours)
         # update them
         wh_def.update(wh_in)
         
@@ -622,7 +625,7 @@ class WorkingHours(object):
         # render the template
         from jinja2 import Template
         
-        template = Template(defaults.TJP_WORKING_HOURS_TEMPLATE)
+        template = Template(defaults.tjp_working_hours_template)
         return template.render({'workinghours': self})
     
     @property

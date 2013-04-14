@@ -19,17 +19,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import uuid
-import random
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import synonym, relationship
 from sqlalchemy.orm.mapper import validates
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.schema import ForeignKey, Table
 from sqlalchemy.types import Enum
-from stalker.conf import defaults
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import StatusMixin
+
+from stalker import defaults
 
 from stalker.log import logging_level
 import logging
@@ -54,7 +54,7 @@ class Ticket(Entity, StatusMixin):
     _`Trac Workflow`:: http://trac.edgewall.org/wiki/TracWorkflow
     
     Stalker Ticket system is very flexible, to customize the workflow please
-    update the stalker.conf.defaults.TICKET_WORKFLOW dictionary.
+    update the :class:`~stalker.config.Config.ticket_workflow` dictionary.
     
     In the default setup, there are four actions available; ``accept``,
     ``resolve``, ``reopen``, ``reassign``, and five statuses available ``New``,
@@ -129,7 +129,7 @@ class Ticket(Entity, StatusMixin):
         reopen
     
     The :attr:`~stalker.models.ticket.Ticket.name` is automatically generated
-    by using the ``conf.defaults.DEFAULT_TICKET_LABEL`` attribute and
+    by using the ``stalker.config.Config.ticket_label`` attribute and
     :attr:`~stalker.models.ticket.Ticket.ticket_number`\ . So if defaults are
     used the first ticket name will be "Ticket#1" and the second "Ticket#2" and
     so on. For every project the number will restart from 1.
@@ -235,7 +235,7 @@ class Ticket(Entity, StatusMixin):
     def __init__(self, project=None, links=None, priority='TRIVIAL', **kwargs):
         # just force auto name generation
         self._number = self._generate_ticket_number()
-        kwargs['name'] = defaults.TICKET_LABEL + ' #%i' % self.number
+        kwargs['name'] = defaults.ticket_label + ' #%i' % self.number
         
         super(Ticket, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
@@ -332,10 +332,10 @@ class Ticket(Entity, StatusMixin):
         :param stalker.models.auth.User created_by: The User creating this
             action
         """
-        statuses = defaults.TICKET_WORKFLOW[action].keys()
+        statuses = defaults.ticket_workflow[action].keys()
         status = self.status.code.lower()
         if status in statuses:
-            action_data = defaults.TICKET_WORKFLOW[action][status]
+            action_data = defaults.ticket_workflow[action][status]
             new_status_code = action_data['new_status']
             action_name = action_data['action']
             
@@ -375,7 +375,7 @@ class Ticket(Entity, StatusMixin):
         """
         self.__action__('reopen', created_by)
     
-    # ACTIONS
+    # actions
     def set_owner(self, *args):
         """sets owner to the given owner
         """
@@ -455,7 +455,7 @@ class TicketLog(SimpleEntity):
     )
     
     action = Column(
-        Enum(*defaults.TICKET_WORKFLOW.keys(), name='TicketActions')
+        Enum(*defaults.ticket_workflow.keys(), name='TicketActions')
     )
     
     ticket_id = Column(Integer, ForeignKey('Tickets.id'))

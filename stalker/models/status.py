@@ -22,7 +22,8 @@
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
 
-from stalker.conf import defaults
+from stalker import defaults
+
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import TargetEntityTypeMixin
@@ -112,7 +113,7 @@ class Status(Entity, CodeMixin):
         """validates the given bg_color value
         """
         if bg_color is None:
-            bg_color = defaults.STATUS_BG_COLOR
+            bg_color = defaults.status_bg_color
         
         if not isinstance(bg_color, int):
             raise TypeError('Status.bg_color should be an integer '
@@ -128,7 +129,7 @@ class Status(Entity, CodeMixin):
         """validates the given fg_color value
         """
         if fg_color is None:
-            fg_color = defaults.STATUS_FG_COLOR
+            fg_color = defaults.status_fg_color
         
         if not isinstance(fg_color, int):
             raise TypeError('Status.fg_color should be an integer '

@@ -21,7 +21,7 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import reconstructor
 from stalker.models.task import Task
-from stalker.models.mixins import StatusMixin, ReferenceMixin, CodeMixin
+from stalker.models.mixins import ReferenceMixin, CodeMixin
 
 from stalker.log import logging_level
 import logging

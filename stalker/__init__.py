@@ -26,9 +26,15 @@ and vfx studios. See docs for more information.
 
 __version__ = '0.2.0.a10'
 
+
 from pyramid.config import Configurator
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+
+# before anything about stalker create the defaults
+from stalker import config as st_config
+defaults = st_config.Config()
+
 
 from stalker.models.auth import Group, Permission, User
 from stalker.models.asset import Asset
@@ -234,7 +240,6 @@ def main(global_config, **settings):
     config.add_route('update_group', 'update/group/{group_id}')
     config.add_route('view_group', 'view/group/{group_id}')
     config.add_route('get_groups', 'get/groups')
-    
     
     
     config.scan()

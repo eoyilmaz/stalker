@@ -28,7 +28,8 @@ from sqlalchemy.exc import IntegrityError
 import transaction
 from sqlalchemy import engine_from_config
 
-from stalker.conf import defaults
+from stalker import defaults
+
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 
@@ -36,6 +37,8 @@ from stalker.log import logging_level
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
+
 
 def setup(settings=None, callback=None):
     """Utility function that helps to connect the system to the given database.
@@ -46,14 +49,14 @@ def setup(settings=None, callback=None):
     :param settings: This is a dictionary which has keys prefixed with
         "sqlalchemy" and shows the settings. The most important one is the
         engine. The default is None, and in this case it uses the settings from
-        stalker.conf.defaults.DATABASE_ENGINE_SETTINGS
+        stalker.config.Config.database_engine_settings
     
     :param callback: A callback function which is called after database is
         initialized. It is a good place to register your own classes.
    """
 
     if settings is None:
-        settings = defaults.DATABASE_ENGINE_SETTINGS
+        settings = defaults.database_engine_settings
         logger.debug('no settings given, using the default: %s' % settings)
     
     logger.debug("settings: %s" % settings)
@@ -104,7 +107,7 @@ def __init_db__():
         register(class_)
     
     # create the admin if needed
-    if defaults.AUTO_CREATE_ADMIN:
+    if defaults.auto_create_admin:
         __create_admin__()
     
     # create Ticket statuses
@@ -124,7 +127,7 @@ def __create_admin__():
     
     # check if there is already an admin in the database
     if len(User.query
-        .filter_by(name=defaults.ADMIN_NAME)
+        .filter_by(name=defaults.admin_name)
         .all()) > 0:
         #there should be an admin user do nothing
         logger.debug("there is an admin already")
@@ -134,36 +137,36 @@ def __create_admin__():
     
     # create the admin department
     admin_department = Department.query.filter_by(
-        name=defaults.ADMIN_DEPARTMENT_NAME
+        name=defaults.admin_department_name
     ).first()
     
     if not admin_department:
-        admin_department = Department(name=defaults.ADMIN_DEPARTMENT_NAME)
+        admin_department = Department(name=defaults.admin_department_name)
         DBSession.add(admin_department)
     # create the admins group
     
     from stalker.models.auth import Group
     
     admins_group = Group.query\
-        .filter_by(name=defaults.ADMIN_GROUP_NAME)\
+        .filter_by(name=defaults.admin_group_name)\
         .first()
     
     if not admins_group:
-        admins_group = Group(name=defaults.ADMIN_GROUP_NAME)
+        admins_group = Group(name=defaults.admin_group_name)
         DBSession.add(admins_group)
     
     # create the admin user
     admin = User.query\
-        .filter_by(name=defaults.ADMIN_NAME)\
+        .filter_by(name=defaults.admin_name)\
         .first()
     
     if not admin:
         admin = User(
-            name=defaults.ADMIN_NAME,
-            code=defaults.ADMIN_CODE,
-            login=defaults.ADMIN_LOGIN,
-            password=defaults.ADMIN_PASSWORD,
-            email=defaults.ADMIN_EMAIL,   
+            name=defaults.admin_name,
+            code=defaults.admin_code,
+            login=defaults.admin_login,
+            password=defaults.admin_password,
+            email=defaults.admin_email,   
             departments=[admin_department],
             groups=[admins_group]
         )
@@ -186,7 +189,7 @@ def __create_ticket_statuses():
     """
     from stalker import User
     
-    admin = User.query.filter(User.login==defaults.ADMIN_NAME).first()
+    admin = User.query.filter(User.login==defaults.admin_name).first()
     
     # create statuses for Tickets
     from stalker import Status, StatusList
@@ -198,7 +201,7 @@ def __create_ticket_statuses():
             code=status_name.upper(),
             created_by=admin,
             updated_by=admin
-        ) for status_name in defaults.TICKET_STATUS_ORDER]
+        ) for status_name in defaults.ticket_status_order]
     
     ticket_status_list = StatusList(
         name='Ticket Statuses',
@@ -273,7 +276,7 @@ def __create_filename_template_types():
     
     logger.debug("creating default Types for FilenameTemplates")
     
-    admin = User.query.filter_by(login=defaults.ADMIN_NAME).first()
+    admin = User.query.filter_by(login=defaults.admin_name).first()
     
     if "Version" not in type_names:
         # mark them as created by admin
@@ -375,7 +378,7 @@ def register(class_):
         
         DBSession.add(new_entity_type)
     
-    for action in defaults.ACTIONS:
+    for action in defaults.actions:
         for access in  [Allow, Deny]:
             permission_obj = Permission(access, action, class_name)
             if permission_obj not in permissions_db:

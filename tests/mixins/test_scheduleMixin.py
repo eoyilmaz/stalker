@@ -1,18 +1,33 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# This file is part of Stalker.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.conf import defaults
 from stalker.models.mixins import ScheduleMixin
 from stalker.db.session import DBSession
 from stalker.models.entity import SimpleEntity
 
+from stalker import config
+defaults = config.Config()
 
 class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
     """a class which derives from another which has and __init__ already
@@ -210,7 +225,7 @@ class ScheduleMixinTester(unittest.TestCase):
             new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
 
             self.assertEqual(new_foo_obj.duration,
-                             defaults.TASK_DURATION)
+                             defaults.task_duration)
 
     def test_duration_argument_is_not_an_instance_of_date_when_end_argument_is_missing(self):
         """testing if the defaults for the duration attribute will be used when
@@ -223,7 +238,7 @@ class ScheduleMixinTester(unittest.TestCase):
             self.kwargs["duration"] = test_value
             new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
             self.assertEqual(new_foo_obj.duration,
-                             defaults.TASK_DURATION)
+                             defaults.task_duration)
 
     def test_duration_attribute_is_calculated_correctly(self):
         """testing if the duration attribute is calculated correctly
@@ -305,7 +320,7 @@ class ScheduleMixinTester(unittest.TestCase):
         """testing if the attributes are initialized to:
         
         start = datetime.datetime.now()
-        duration = stalker.conf.defaults.DEFAULT_TASK_DURATION
+        duration = stalker.config.Config.task_duration
         end = start + duration
         """
         #self.fail("test is not implemented yet")
@@ -321,14 +336,14 @@ class ScheduleMixinTester(unittest.TestCase):
         #self.assertEqual(new_foo_entity.start,
         #                 datetime.datetime(2013, 3, 22, 15, 30))
         self.assertEqual(new_foo_entity.duration,
-                         defaults.TASK_DURATION)
+                         defaults.task_duration)
         self.assertEqual(new_foo_entity.end,
                          new_foo_entity.start + new_foo_entity.duration)
     
     def test_init_only_start_argument_is_given(self):
         """testing if the attributes are initialized to:
         
-        duration = stalker.conf.defaults.DEFAULT_TASK_DURATION
+        duration = stalker.config.Config.default_task_duration
         end = start + duration
         """
         self.kwargs.pop("end")
@@ -336,7 +351,7 @@ class ScheduleMixinTester(unittest.TestCase):
 
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
 
-        self.assertEqual(new_foo_entity.duration, defaults.TASK_DURATION)
+        self.assertEqual(new_foo_entity.duration, defaults.task_duration)
         self.assertEqual(new_foo_entity.end,
                          new_foo_entity.start + new_foo_entity.duration)
     
@@ -385,14 +400,14 @@ class ScheduleMixinTester(unittest.TestCase):
     def test_init_only_end_argument_is_given(self):
         """testing if the attributes are initialized to:
         
-        duration = stalker.conf.defaults.DEFAULT_TASK_DURATION
+        duration = stalker.config.Config.default_task_duration
         start = end - duration
         """
         self.kwargs.pop("duration")
         self.kwargs.pop("start")
         new_foo_entity = SchedMixFooMixedInClass(**self.kwargs)
         self.assertEqual(new_foo_entity.duration,
-                         defaults.TASK_DURATION)
+                         defaults.task_duration)
         self.assertEqual(new_foo_entity.start,
                          new_foo_entity.end - new_foo_entity.duration)
     
@@ -417,7 +432,7 @@ class ScheduleMixinTester(unittest.TestCase):
     
     def test_resolution_argument_skipped(self):
         """testing if the timing_resolution attribute will be set to the default value
-        from the defaults.TIMING_RESOLUTION if timing_resolution argument is skipped
+        from the defaults.timing_resolution if timing_resolution argument is skipped
         """
         try:
             self.kwargs.pop('timing_resolution')
@@ -425,26 +440,26 @@ class ScheduleMixinTester(unittest.TestCase):
             pass
         
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(new_foo_obj.timing_resolution, defaults.TIMING_RESOLUTION)
+        self.assertEqual(new_foo_obj.timing_resolution, defaults.timing_resolution)
     
     def test_resolution_argument_is_None(self):
         """testing if the timing_resolution attribute will be set to the default value
-        from the defaults.TIMING_RESOLUTION if timing_resolution argument is None
+        from the defaults.timing_resolution if timing_resolution argument is None
         """
         self.kwargs['timing_resolution'] = None
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(new_foo_obj.timing_resolution, defaults.TIMING_RESOLUTION)
+        self.assertEqual(new_foo_obj.timing_resolution, defaults.timing_resolution)
     
     def test_resolution_attribute_is_set_to_None(self):
         """testing if the timing_resolution attribute will be set to the default value
-        from the defaults.TIMING_RESOLUTION if it is set to None
+        from the defaults.timing_resolution if it is set to None
         """
         self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         # check start conditions
         self.assertEqual(new_foo_obj.timing_resolution, self.kwargs['timing_resolution'])
         new_foo_obj.timing_resolution = None
-        self.assertEqual(new_foo_obj.timing_resolution, defaults.TIMING_RESOLUTION)
+        self.assertEqual(new_foo_obj.timing_resolution, defaults.timing_resolution)
     
     def test_resolution_argument_is_not_a_timedelta_instance(self):
         """testing if a TypeError will be raised when the timing_resolution argument
