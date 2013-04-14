@@ -25,13 +25,14 @@ from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
                      Sequence, Shot, Status, StatusList, Structure, Task, Type,
                      User, db)
 from stalker import config
+from stalker.models.studio import WorkingHours
+
 defaults = config.Config()
 
 from stalker.db.session import DBSession, ZopeTransactionExtension
 
 import logging
 from stalker import log
-from stalker.models.project import WorkingHours
 
 logger = logging.getLogger('stalker.models.project')
 logger.setLevel(log.logging_level)
@@ -1221,92 +1222,6 @@ class ProjectTester(unittest.TestCase):
         self.test_project.users = users
         self.assertItemsEqual(users, self.test_project.users)
     
-    def test_working_hours_argument_is_skipped(self):
-        """testing if the default working hours will be used when the
-        working_hours argument is skipped
-        """
-        self.kwargs['name'] = 'New Project'
-        try:
-            self.kwargs.pop('working_hours') # pop if there are any
-        except KeyError:
-            pass
-        
-        new_proj = Project(**self.kwargs)
-        self.assertEqual(new_proj.working_hours, WorkingHours())
-    
-    def test_working_hours_argument_is_None(self):
-        """testing if the a WorkingHour instance with default settings will be
-        used if the working_hours argument is skipped
-        """
-        self.kwargs['name'] = 'New Project'
-        self.kwargs['working_hours'] = None
-        new_proj = Project(**self.kwargs)
-        self.assertEqual(new_proj.working_hours, WorkingHours())
-    
-    def test_working_hours_attribute_is_None(self):
-        """testing if a WorkingHour instance will be created with the default
-        values if the working_hours attribute is set to None
-        """
-        self.test_project.working_horus = None
-        self.assertEqual(self.test_project.working_hours, WorkingHours())
-    
-    def test_daily_working_hours_argument_is_skipped(self):
-        """testing if the daily_working_hours attribute will be equal to the
-        default settings when the daily_working_hours argument is skipped
-        """
-        try:
-            self.kwargs.pop('daily_working_hours')
-        except KeyError:
-            pass
-        new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.daily_working_hours,
-                         defaults.daily_working_hours)
-    
-    def test_daily_working_hours_argument_is_None(self):
-        """testing if the daily_working_hours attribute will be equal to the
-        default settings value when the daily_working_hours argument is None
-        """
-        self.kwargs['daily_working_hours'] = None
-        new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.daily_working_hours,
-                         defaults.daily_working_hours)
-    
-    def test_daily_working_hours_attribute_is_None(self):
-        """testing if the daily_working_hours attribute will be equal to the
-        default settings value when it is set to None
-        """
-        self.test_project.daily_working_hours = None
-        self.assertEqual(self.test_project.daily_working_hours,
-                         defaults.daily_working_hours)
-    
-    def test_daily_working_hours_argument_is_not_integer(self):
-        """testing if a TypeError will be raised when the daily_working_hours
-        argument is not an integer
-        """
-        self.kwargs['daily_working_hours'] = 'not an integer'
-        self.assertRaises(TypeError, Project, **self.kwargs)
-    
-    def test_daily_working_hours_attribute_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the daily_working hours
-        attribute is set to a value other than an integer
-        """
-        self.assertRaises(TypeError, setattr, self.test_project,
-                          'daily_working_hours', 'not an intger')
-    
-    def test_daily_working_hours_argument_is_working_fine(self):
-        """testing if the daily working hours argument value is correctly
-        passed to daily_working_hours attribute
-        """
-        self.kwargs['daily_working_hours'] = 12
-        new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.daily_working_hours, 12)
-    
-    def test_daily_working_hours_attribute_is_working_properly(self):
-        """testing if the daily_working_hours attribute is working properly
-        """
-        self.test_project.daily_working_hours = 23
-        self.assertEqual(self.test_project.daily_working_hours, 23)
-    
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_id attribute is working properly
         """
@@ -1316,30 +1231,262 @@ class ProjectTester(unittest.TestCase):
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
         """
-        self.maxDiff = None
+        # self.maxDiff = None
         from jinja2 import Template
-        expected_tjp_temp = Template("""project Project_41 "Test Project" {{start}} - {{end}} {
-            timingresolution 60min
-            now {{now}}
-            dailyworkinghours {{dwh}}
-            weekstartsmonday
-            workinghours mon 09:30 - 18:30
-            workinghours tue 09:30 - 18:30
-            workinghours wed 09:30 - 18:30
-            workinghours thu 09:30 - 18:30
-            workinghours fri 09:30 - 18:30
-            workinghours sat off
-            workinghours sun off
-            timeformat "%Y-%m-%d"
-            scenario plan "Plan"
-            trackingscenario plan
+        expected_tjp_temp = Template("""task Project_41 "Test Project" {
+            
+                task Sequence_42 "Seq1" {
+            effort 0.0h
+            allocate 
         }
-        """)
+        
+            
+                task Sequence_43 "Seq2" {
+            effort 0.0h
+            allocate 
+        }
+        
+            
+                task Sequence_44 "Seq3" {
+            effort 0.0h
+            allocate 
+        }
+        
+            
+                task Sequence_45 "Seq4" {
+                task Task_61 "Test Task 4" {
+            effort 0.0h
+            allocate User_28
+        }
+        
+                task Task_62 "Test Task 5" {
+            effort 0.0h
+            allocate User_29
+        }
+        
+                task Task_63 "Test Task 6" {
+            effort 0.0h
+            allocate User_30
+        }
+        
+        }
+        
+            
+                task Sequence_46 "Seq5" {
+                task Task_64 "Test Task 7" {
+            effort 0.0h
+            allocate User_31
+        }
+        
+                task Task_65 "Test Task 8" {
+            effort 0.0h
+            allocate User_32
+        }
+        
+                task Task_66 "Test Task 9" {
+            effort 0.0h
+            allocate User_33
+        }
+        
+        }
+        
+            
+                task Sequence_47 "Seq6" {
+            effort 0.0h
+            allocate 
+        }
+        
+            
+                task Sequence_48 "Seq7" {
+            effort 0.0h
+            allocate 
+        }
+        
+            
+                task Shot_49 "{{shot1.name}}" {
+                task Task_67 "Test Task 10" {
+            effort 0.0h
+            allocate User_34
+        }
+        
+                task Task_68 "Test Task 11" {
+            effort 0.0h
+            allocate User_24, User_26
+        }
+        
+                task Task_69 "Test Task 12" {
+            effort 0.0h
+            allocate User_27, User_28
+        }
+        
+        }
+        
+            
+                task Shot_50 "{{shot2.name}}" {
+                task Task_70 "Test Task 13" {
+            effort 0.0h
+            allocate User_29, User_30
+        }
+        
+                task Task_71 "Test Task 14" {
+            effort 0.0h
+            allocate User_31, User_32
+        }
+        
+                task Task_72 "Test Task 15" {
+            effort 0.0h
+            allocate User_33, User_34
+        }
+        
+        }
+        
+            
+                task Shot_51 "{{shot3.name}}" {
+                task Task_73 "Test Task 16" {
+            effort 0.0h
+            allocate User_24, User_26, User_27
+        }
+        
+                task Task_74 "Test Task 17" {
+            effort 0.0h
+            allocate User_28, User_29, User_30
+        }
+        
+                task Task_75 "Test Task 18" {
+            effort 0.0h
+            allocate User_31, User_32, User_33
+        }
+        
+        }
+        
+            
+                task Shot_52 "{{shot4.name}}" {
+                task Task_76 "Test Task 19" {
+            effort 0.0h
+            allocate User_24, User_26, User_34
+        }
+        
+                task Task_77 "Test Task 20" {
+            effort 0.0h
+            allocate User_27, User_28, User_29
+        }
+        
+                task Task_78 "Test Task 21" {
+            effort 0.0h
+            allocate User_30, User_31, User_32
+        }
+        
+        }
+        
+            
+                task Asset_53 "Test Asset 1" {
+            effort 0.0h
+            allocate 
+        }
+        
+            
+                task Asset_54 "Test Asset 2" {
+            effort 0.0h
+            allocate 
+        }
+        
+            
+                task Asset_55 "Test Asset 3" {
+            effort 0.0h
+            allocate 
+        }
+        
+            
+                task Asset_56 "Test Asset 4" {
+                task Task_79 "Test Task 22" {
+            effort 0.0h
+            allocate User_24, User_33, User_34
+        }
+        
+                task Task_80 "Test Task 23" {
+            effort 0.0h
+            allocate User_26, User_27
+        }
+        
+                task Task_81 "Test Task 24" {
+            effort 0.0h
+            allocate User_28, User_29
+        }
+        
+        }
+        
+            
+                task Asset_57 "Test Asset 5" {
+                task Task_82 "Test Task 25" {
+            effort 0.0h
+            allocate User_30, User_31
+        }
+        
+                task Task_83 "Test Task 26" {
+            effort 0.0h
+            allocate User_32, User_33
+        }
+        
+                task Task_84 "Test Task 27" {
+            effort 0.0h
+            allocate User_24, User_34
+        }
+        
+        }
+        
+            
+                task Task_58 "Test Task 1" {
+            effort 0.0h
+            allocate User_24
+        }
+        
+            
+                task Task_59 "Test Task 2" {
+            effort 0.0h
+            allocate User_26
+        }
+        
+            
+                task Task_60 "Test Task 3" {
+            effort 0.0h
+            allocate User_27
+        }
+        
+            
+        }
+        
+""")
         expected_tjp = expected_tjp_temp.render({
-            'start' : self.test_project.start.date(),
-            'end'   : self.test_project.end.date(),
-            'now'   : self.test_project.round_time(datetime.datetime.now())
-                        .strftime('%Y-%m-%d-%H:%M'),
-            'dwh'   : self.test_project.daily_working_hours
+            'shot1': self.test_shot1,
+            'shot2': self.test_shot2,
+            'shot3': self.test_shot3,
+            'shot4': self.test_shot4
         })
+        
+        print expected_tjp
+        print "-----------------"
+        print self.test_project.to_tjp
+        
         self.assertEqual(self.test_project.to_tjp, expected_tjp)
+    
+    def test_active_attribute_is_True_by_default(self):
+        """testing if the active attribute is True by default
+        """
+        new_project = Project(**self.kwargs)
+        self.assertEqual(new_project.active, True)
+    
+    def test_is_active_is_read_only(self):
+        """testing if the is_active is a read only property
+        """
+        self.assertRaises(AttributeError, setattr, self.test_project,
+                          'is_active', True)
+    
+    def test_is_active_is_working_properly(self):
+        """testing if is_active is working properly
+        """
+        self.test_project.active = True
+        self.assertEqual(self.test_project.is_active, True)
+        
+        self.test_project.active = False
+        self.assertEqual(self.test_project.is_active, False)
+    

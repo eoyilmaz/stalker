@@ -28,13 +28,15 @@ Summary
    stalker.models.department.Department
    stalker.models.entity.Entity
    stalker.models.entity.SimpleEntity
-   stalker.models.entity.TaskableEntity
    stalker.models.format.ImageFormat
    stalker.models.link.Link
    stalker.models.message.Message
    stalker.models.note.Note
    stalker.models.project.Project
    stalker.models.repository.Repository
+   stalker.models.scene.Scene
+   stalker.models.scheduler.SchedulerBase
+   stalker.models.scheduler.TaskJugglerScheduler
    stalker.models.sequence.Sequence
    stalker.models.shot.Shot
    stalker.models.status.Status

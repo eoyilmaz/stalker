@@ -20,9 +20,11 @@
 
 import copy
 import unittest
-from stalker.models.project import WorkingHours
+import datetime
 
 from stalker import config
+from stalker.models.studio import WorkingHours
+
 defaults = config.Config()
 
 class WorkingHoursTester(unittest.TestCase):
@@ -139,15 +141,15 @@ class WorkingHoursTester(unittest.TestCase):
         """testing if the working hours for a day can be reached by an index
         """
         wh = WorkingHours()
-        self.assertEqual(wh[0], defaults.working_hours['sun'])
-        wh[0] = [[540, 1080]]
+        self.assertEqual(wh[6], defaults.working_hours['sun'])
+        wh[6] = [[540, 1080]]
     
-    def test_working_hours_day_0_is_sunday(self):
-        """testing if day zero is sunday (I hate this standard)
+    def test_working_hours_day_0_is_monday(self):
+        """testing if day zero is monday
         """
         wh = WorkingHours()
         wh[0] = [[270, 980]]
-        self.assertEqual(wh['sun'], wh[0])
+        self.assertEqual(wh['mon'], wh[0])
     
     def test_working_hours_can_be_string_indexed_with_the_date_short_name(self):
         """testing if the working hours information can be reached by using
@@ -300,3 +302,53 @@ class WorkingHoursTester(unittest.TestCase):
         
         expected_value = 42.5
         self.assertEqual(wh.weekly_working_hours, expected_value)
+    
+    def test_is_working_hour_is_working_properly(self):
+        """testing if the is_working_hour method is working properly
+        """
+        wh = WorkingHours()
+        
+        wh['mon'] = [[570, 720], [780, 1110]]
+        wh['tue'] = [[570, 720], [780, 1110]]
+        wh['wed'] = [[570, 720], [780, 1110]]
+        wh['thu'] = [[570, 720], [780, 1110]]
+        wh['fri'] = [[570, 720], [780, 1110]]
+        wh['sat'] = [[570, 720]]
+        wh['sun'] = []
+        
+        # monday
+        check_date = datetime.datetime(2013, 4, 8, 13, 55)
+        self.assertTrue(wh.is_working_hour(check_date))
+        
+        # sunday
+        check_date = datetime.datetime(2013, 4, 14, 13, 55)
+        self.assertFalse(wh.is_working_hour(check_date))
+        
+    def test_day_numbers_are_correct(self):
+        """testing if the day numbers are correct
+        """
+        wh = WorkingHours()
+        wh['mon'] = [[1, 2]]
+        wh['tue'] = [[3, 4]]
+        wh['wed'] = [[5, 6]]
+        wh['thu'] = [[7, 8]]
+        wh['fri'] = [[9, 10]]
+        wh['sat'] = [[11, 12]]
+        wh['sun'] = [[13, 14]]
+                                                
+        self.assertEqual(defaults.day_order[0], 'mon')
+        self.assertEqual(defaults.day_order[1], 'tue')
+        self.assertEqual(defaults.day_order[2], 'wed')
+        self.assertEqual(defaults.day_order[3], 'thu')
+        self.assertEqual(defaults.day_order[4], 'fri')
+        self.assertEqual(defaults.day_order[5], 'sat')
+        self.assertEqual(defaults.day_order[6], 'sun')
+        
+        self.assertEqual(wh['mon'], wh[0])
+        self.assertEqual(wh['tue'], wh[1])
+        self.assertEqual(wh['wed'], wh[2])
+        self.assertEqual(wh['thu'], wh[3])
+        self.assertEqual(wh['fri'], wh[4])
+        self.assertEqual(wh['sat'], wh[5])
+        self.assertEqual(wh['sun'], wh[6])
+    

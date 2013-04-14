@@ -20,7 +20,7 @@
 
 import datetime
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Date,
-                        Interval, DateTime)
+                        Interval, DateTime, PickleType)
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates, descriptor_props
@@ -980,3 +980,34 @@ class CodeMixin(object):
             raise ValueError('%s.code can not be an empty string')
         
         return code
+
+
+class WorkingHoursMixin(object):
+    """Sets working hours for the mixed in class.
+    
+    Generally is meaningful for users, departments and studio.
+    
+    :param working_hours: A :class:`~stalker.models.project.WorkingHours`
+      instance showing the working hours settings for that project. This data
+      is stored as a PickleType in the database.
+    """
+    
+    def __init__(self,
+                 working_hours=None):
+        self.working_hours = working_hours
+    
+    @declared_attr
+    def working_hours(cls):
+        return Column(PickleType)
+    
+    @validates('working_hours')
+    def _validate_working_hours(self, key, wh):
+        """validates the given working hours value
+        """
+        if wh is None:
+            # use the default one
+            from stalker import WorkingHours
+            wh = WorkingHours()
+        return wh
+
+    

@@ -525,6 +525,25 @@
           }, 'list_tasks_zoom_in_button');
           zoom_in_button.startup();
           
+          // AUTO - SCHEDULE
+          var auto_schedule_gantt_button = new Button({
+            label: 'Auto Schedule',
+            onClick: function(){
+              saveGanttOnServer().then(function(){
+                // xhr.post returns a `promise` use it if needed
+                return xhr.post(
+                '{{ request.route_url('auto_schedule_tasks') }}',
+                {
+                  method: 'POST'
+                }
+                );    
+              }).then(function(){
+                // reload scheduled tasks
+                loadGanttFromServer();
+              });
+            }
+          })
+          
         
       });
   });

@@ -160,16 +160,16 @@ class Config(object):
         task_priority = 500,
         
         working_hours = {
-          'mon': [[570, 1110]], # 9:30 - 18:30
-          'tue': [[570, 1110]], # 9:30 - 18:30
-          'wed': [[570, 1110]], # 9:30 - 18:30
-          'thu': [[570, 1110]], # 9:30 - 18:30
-          'fri': [[570, 1110]], # 9:30 - 18:30
+          'mon': [[540, 1080]], # 9:00 - 18:00
+          'tue': [[540, 1080]], # 9:00 - 18:00
+          'wed': [[540, 1080]], # 9:00 - 18:00
+          'thu': [[540, 1080]], # 9:00 - 18:00
+          'fri': [[540, 1080]], # 9:00 - 18:00
           'sat': [], # saturday off
           'sun': [], # sunday off
         },
         
-        day_order = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'],
+        day_order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
         
         daily_working_hours = 8,
         
@@ -195,22 +195,30 @@ class Config(object):
         {{wh(workinghours, 'sat')}}
         {{wh(workinghours, 'sun')}}""",
         
-        tjp_project_template = """project {{ project.tjp_id }} "{{ project.name }}" {{ project.start.date() }} - {{ project.end.date() }} {
-            timingresolution {{ '%i'|format(project.timing_resolution.total_seconds()//60|int) }}min
+        tjp_studio_template = """# render stalker.studio data as the main tj.project
+        project {{ studio.tjp_id }} "{{ studio.name }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
+            timingresolution {{ '%i'|format(studio.timing_resolution.total_seconds()//60|int) }}min
             now {{ now }}
-            dailyworkinghours {{ project.daily_working_hours }}
+            dailyworkinghours {{ studio.daily_working_hours }}
             weekstartsmonday
-        {{ project.working_hours.to_tjp }}
+        {{ studio.working_hours.to_tjp }}
             timeformat "%Y-%m-%d"
             scenario plan "Plan"
             trackingscenario plan
         }
         """,
         
+        tjp_project_template = """task {{project.tjp_id}} "{{project.name}}" {
+            {% for task in project.root_tasks %}
+                {{task.to_tjp}}
+            {% endfor %}
+        }
+        """,
+        
         tjp_task_template = """task {{task.tjp_id}} "{{task.name}}" {
         {%- if task.is_container -%}
             {%- for child_task in task.children %}
-        {{ child_task.to_tjp }}
+                {{ child_task.to_tjp }}
             {%- endfor %}
         {%- else %}
             {{task.schedule_model}} {{task.schedule_timing}}{{task.schedule_unit}}
@@ -225,8 +233,8 @@ class Config(object):
         {% endif %}
         }
         """,
-                
-                tjp_department_template = '''resource {{department.tjp_id}} "{{department.name}}" {
+        
+        tjp_department_template = '''resource {{department.tjp_id}} "{{department.name}}" {
         {%- for resource in department.users %}
             {{resource.to_tjp}}
         {%- endfor %}
@@ -245,11 +253,9 @@ class Config(object):
         }
         
         # tasks
-        task {{project.tjp_id}} "{{project.name}}"{
-            {% for task in project.root_tasks %}
-            {{task.to_tjp}}
-            {% endfor %}
-        }
+        {% for project in studio.active_projects %}
+            {{project.to_tjp}}
+        {% endfor %}
         
         # bookings
         

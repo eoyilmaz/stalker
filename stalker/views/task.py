@@ -30,7 +30,8 @@ import transaction
 from sqlalchemy.exc import IntegrityError
 
 from stalker.db import DBSession
-from stalker import User, Task, Entity, Project, StatusList, Status
+from stalker import (User, Task, Entity, Project, StatusList, Status,
+                     TaskJugglerScheduler)
 from stalker.models.task import CircularDependencyError
 
 
@@ -650,3 +651,13 @@ def get_user_tasks(request):
         tasks = user_tasks_with_parents
     
     return convert_to_jquery_gantt_task_format(tasks)
+
+@view_config(
+    route_name='auto_schedule_tasks',
+)
+def auto_schedule_tasks(request):
+    
+    tj_scheduler = TaskJugglerScheduler()
+    tj_scheduler.schedule()
+    
+    return HTTPOk()

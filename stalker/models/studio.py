@@ -18,15 +18,24 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
+import copy
+import logging
+import datetime
 
-from stalker.models.entity import SimpleEntity
+from sqlalchemy import Column, Integer
+from sqlalchemy.orm import validates
+
+from stalker import defaults, log, Entity, ScheduleMixin
+
+logger = logging.getLogger(__name__)
+logger.setLevel(log.logging_level)
 
 
-class Studio(SimpleEntity):
+class Studio(Entity, ScheduleMixin):
     """Manage all the studio information at once.
     
     With Stalker you can manage all you Studio data by using this class. Studio
-    knows all the projects, all the departments, all the users and ever thing
+    knows all the projects, all the departments, all the users and every thing
     about the studio. But the most important part of the Studio is that it can
     schedule all the Projects by using TaskJuggler.
     
@@ -45,9 +54,303 @@ class Studio(SimpleEntity):
       studio.to_tjp          # a tjp representation of the studio with all
                              # its projects, departments and resources etc.
       
-      studio.schedule_active_projects() # schedules all the active projects at
+      studio.schedule() # schedules all the active projects at
                                         # once
+    Working Hours
+    -------------
+    
+    In Stalker, Studio class also manages the working hours of the studio.
+    Allowing project tasks to be scheduled to be scheduled in those hours.
+    
+    :param int daily_working_hours: An integer specifying the daily working
+    hours for the studio. It is another critical value attribute which
+    TaskJuggler uses mainly converting working day values to working hours
+    (1d = 10h kind of thing).
     
     """
+
+    daily_working_hours = Column(Integer, default=8)
     
-    pass
+    def __init__(self,
+                daily_working_hours=None,
+                **kwargs):
+        super(Studio, self).__init__(**kwargs)
+        self.daily_working_hours = daily_working_hours
+    
+    @validates('daily_working_hours')
+    def _validate_daily_working_hours(self, key, dwh):
+        """validates the given daily working hours value
+        """
+        if dwh is None:
+            dwh = defaults.daily_working_hours
+        else:
+            if not isinstance(dwh, int):
+                raise TypeError('%s.daily_working_hours should be an integer, '
+                                'not %s' % 
+                                (self.__class__.__name__,
+                                 dwh.__class__.__name__))
+        return dwh
+    
+    def tjp_id(self):
+        """returns the tjp_id of the studio
+        """
+        raise NotImplemented
+    
+    def to_tjp(self):
+        """converts the studio to a tjp representation
+        """
+        from jinja2 import Template
+        temp = Template(defaults.tjp_studio_template)
+        
+        return temp.render({
+            'studio': self,
+            'datetime': datetime,
+            'now': self.round_time(self.now).strftime('%Y-%m-%d-%H:%M')
+        })
+        
+    @property
+    def projects(self):
+        """returns all the projects in the studio
+        """
+        raise NotImplemented
+    
+    @property
+    def active_projects(self):
+        """returns all the active projects in the studio
+        """
+        raise NotImplemented
+    
+    @property
+    def inactive_projects(self):
+        """return all the inactive projects in the studio
+        """
+        raise NotImplemented
+    
+    @property
+    def departments(self):
+        """returns all the departments in the studio
+        """
+        raise NotImplemented
+    
+    @property
+    def users(self):
+        """returns all the users in the studio
+        """
+        raise NotImplemented
+    
+    def schedule(self, scheduler=None):
+        """schedules all the active projects in the studio
+        
+        :param scheduler: The scheduler to be used in scheduling the tasks. The
+          default is :class:`~stalker.models.schedulers.TaskJugglerScheduler`.
+        """
+        raise NotImplemented
+
+
+class WorkingHours(object):
+    """A helper class to manage Studio working hours.
+    
+    Working hours is a data class to store the weekly working hours pattern of
+    the studio. 
+    
+    The data stored as a dictionary with the short day names are used as the
+    key and the value is a list of two integers showing the working hours
+    interval as the minutes after midnight. This is done in that way to ease
+    the data transfer to TaskJuggler. The default value is defined in
+    :class:`stalker.config.Config` ::
+      
+      wh = WorkingHours()
+      wh.working_hours = {
+          'mon': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'tue': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'wed': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'thu': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'fri': [[540, 720], [820, 1080]], # 9:00 - 12:00, 13:00 - 18:00
+          'sat': [], # saturday off
+          'sun': [], # sunday off
+      }
+    
+    The default value is 9:00 - 18:00 from Monday to Friday and Saturday and
+    Sunday are off.
+    
+    The working hours can be updated by the user supplied dictionary. If the
+    user supplied dictionary doesn't have all the days then the default values
+    will be used for those days.
+    
+    It is possible to use day index and day short names as a key value to reach
+    the data::
+      
+      from stalker import config
+      defaults = config.Config()
+      
+      wh = WorkingHours()
+      
+      # this is same by doing wh.working_hours['sun']
+      assert wh['sun'] == defaults.working_hours['sun']
+      
+      # you can reach the data using the weekday number as index
+      assert wh[0] == defaults.working_hours['mon']
+      
+      # working hours of sunday if defaults are used or any other day defined
+      # by the stalker.config.Config.day_order
+      assert wh[0] == defaults.working_hours[defaults.day_order[0]]
+    
+    :param working_hours: The dictionary that shows the working hours. The keys
+      of the dictionary should be one of ['mon', 'tue', 'wed', 'thu', 'fri',
+      'sat', 'sun']. And the values should be a list of two integers like
+      [[int, int], [int, int], ...] format, showing the minutes after midnight.
+      For missing days the default value will be used. If skipped the default
+      value is going to be used.
+    """
+    
+    def __init__(self, working_hours=None, **kwargs):
+        if working_hours is None:
+            working_hours = defaults.working_hours
+        self._wh = None
+        self.working_hours = self._validate_working_hours(working_hours)
+    
+    def __eq__(self, other):
+        """equality test
+        """
+        return isinstance(other, WorkingHours) and \
+               other.working_hours == self.working_hours
+    
+    def __str__(self):
+        return super(object, WorkingHours).__str__(self)
+    
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            return self._wh[defaults.day_order[item]]
+        elif isinstance(item, str):
+            return self._wh[item]
+    
+    def __setitem__(self, key, value):
+        self._validate_wh_value(value)
+        if isinstance(key, int):
+            self._wh[defaults.day_order[key]] = value
+        elif isinstance(key, str):
+            # check if key is in
+            if key not in defaults.day_order:
+                raise KeyError('%s accepts only %s as key, not %s' %
+                               (self.__class__.__name__, defaults.day_order,
+                                key))
+            self._wh[key] = value
+    
+    def _validate_working_hours(self, wh_in):
+        """validates the given working hours
+        """
+        if not isinstance(wh_in, dict):
+            raise TypeError('%s.working_hours should be a dictionary, not %s' % 
+                            (self.__class__.__name__,
+                             wh_in.__class__.__name__))
+        
+        for key in wh_in.keys():
+            if not isinstance(wh_in[key], list):
+                raise TypeError('%s.working_hours should be a dictionary with '
+                                'keys "mon, tue, wed, thu, fri, sat, sun" '
+                                'and the values should a list of lists of '
+                                'two integers like [[540, 720], [800, 1080]], '
+                                'not %s' % (self.__class__.__name__,
+                                            wh_in[key].__class__.__name__))
+            
+            # validate item values
+            self._validate_wh_value(wh_in[key])
+        
+        # update the default values with the supplied working_hour dictionary
+        # copy the defaults
+        wh_def = copy.copy(defaults.working_hours)
+        # update them
+        wh_def.update(wh_in)
+        
+        return wh_def
+    
+    @property
+    def working_hours(self):
+        """the getter of _wh
+        """
+        return self._wh
+    
+    @working_hours.setter
+    def working_hours(self, wh_in):
+        """the setter of _wh
+        """
+        self._wh = self._validate_working_hours(wh_in)
+    
+    def is_working_hour(self, check_for_date):
+        """checks if the given datetime is in working hours
+        
+        :param datetime.datetime check_for_date: The time to check if it is a
+          working hour
+        """
+        weekday_nr = check_for_date.weekday()
+        hour = check_for_date.hour
+        minute = check_for_date.minute
+        
+        time_from_midnight = hour * 60 + minute
+        
+        # check if the hour is inside the working hour ranges
+        logger.debug('checking for: %s' % time_from_midnight)
+        logger.debug('self[weekday_nr]: %s' % self[weekday_nr])
+        for working_hour_groups in self[weekday_nr]:
+            start = working_hour_groups[0]
+            end = working_hour_groups[1]
+            logger.debug('start       : %s' % start)
+            logger.debug('end         : %s' % end)
+            if start <= time_from_midnight < end:
+                return True
+        
+        return False
+    
+    def _validate_wh_value(self, value):
+        """validates the working hour value
+        """
+        err = '%s.working_hours value should be a list of lists of two ' \
+              'integers between and the range of integers should be 0-1440, ' \
+              'not %s'
+        
+        if not isinstance(value, list):
+            raise TypeError(err % (self.__class__.__name__,
+                                   value.__class__.__name__))
+        
+        for i in value:
+            if not isinstance(i, list):
+                raise TypeError( err % (self.__class__.__name__,
+                                        i.__class__.__name__))
+            
+            # check list length
+            if len(i) != 2:
+                raise RuntimeError( err %  (self.__class__.__name__, value))
+            
+            # check type
+            if not isinstance(i[0], int) or not isinstance(i[1], int):
+                raise TypeError(err % (self.__class__.__name__, value))
+            
+            # check range
+            if i[0] < 0 or i[0] > 1440 or i[1] < 0 or i[1] > 1440:
+                raise ValueError(err % (self.__class__.__name__, value))
+        
+        return value
+    
+    @property
+    def to_tjp(self):
+        """returns TaskJuggler representation of this object
+        """
+        # render the template
+        from jinja2 import Template
+        
+        template = Template(defaults.tjp_working_hours_template)
+        return template.render({'workinghours': self})
+    
+    @property
+    def weekly_working_hours(self):
+        """returns the total working hours in a week
+        """
+        weekly_working_hours = 0
+        for i in range(0, 7):
+            for start, end in self[i]:
+                weekly_working_hours += (end - start)
+        return weekly_working_hours / 60.0
+
+
+
+

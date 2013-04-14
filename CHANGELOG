@@ -2,6 +2,17 @@
 Stalker Changes
 ===============
 
+0.2.0.b1
+--------
+
+* WorkingHours.is_working_hour() is working now.
+
+* WorkingHours class is moved from stalker.models.project to
+  stalker.models.studio module.
+
+* ``daily_working_hours`` attribute is moved from
+  stalker.models.project.Project to stalker.models.studio.Studio class.
+
 0.2.0.a10
 ---------
 
@@ -39,9 +50,10 @@ Stalker Changes
   If the above idiom is used, the old ``defaults`` module behaviour is
   retained, so no code change is required other than the new lower case config
   variable names.
-  
+
 0.2.0.a9
 --------
+
 * A new property called ``to_tjp`` added to the SimpleEntity class which needs
   to be implemented in the child and is going to be used in TaskJuggler
   integration.

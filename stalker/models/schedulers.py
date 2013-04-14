@@ -27,7 +27,7 @@ import csv
 from jinja2 import Template
 
 import stalker
-from stalker import log, Entity
+from stalker import log, Entity, SimpleEntity
 from stalker import Department, User
 from stalker import defaults
 
@@ -42,8 +42,8 @@ class SchedulerBase(object):
     
     All the schedulers should be derived from this class.
     """
-    def __init__(self, projects=None):
-        self.projects = projects if projects else []
+    def __init__(self, studio=None):
+        self.studio = studio
     
     def schedule(self):
         """the main scheduling function should be implemented in the
@@ -58,16 +58,15 @@ class TaskJugglerScheduler(SchedulerBase):
     Integrates Stalker and TaskJuggler together by using TaskJugglerScheduler
     to solve the scheduling problem.
     
-    TaskJugglerScheduler needs a list of
-    :class:`~stalker.models.project.Project` instances to work with. TJS will
-    combine them in to one .tjp file and then solve them and restore the task
-    computed_start and computed_end dates. Combining all the Projects in one
-    tjp file has a very nice side effect, projects using the same resources
-    will respect their allocations to the resource.
+    TaskJugglerScheduler needs a :class:`~stalker.models.studio.Studio`
+    instance to work with. TJS will create a .tjp file and then solve the tasks
+    and restore the computed_start and computed_end dates. Combining all the
+    Projects in one tjp file has a very nice side effect, projects using the
+    same resources will respect their allocations to the resource.
     """
     
-    def __init__(self, projects=None):
-        super(TaskJugglerScheduler, self).__init__(projects)
+    def __init__(self, studio=None):
+        super(TaskJugglerScheduler, self).__init__(studio)
         
         self.tjp_content = ''
         
@@ -96,9 +95,7 @@ class TaskJugglerScheduler(SchedulerBase):
         
         self.tjp_content = template.render({
             'stalker': stalker,
-            'project': self.projects[0],
-            'departments': Department.query.all(),
-            'users': User.query.all(),
+            'studio': self.studio,
             'csv_file_name': self.temp_file_name,
             'csv_file_full_path': self.temp_file_full_path
         })

@@ -24,7 +24,7 @@ Stalker is a Production Asset Management System (ProdAM) designed for animation
 and vfx studios. See docs for more information.
 """
 
-__version__ = '0.2.0.a10'
+__version__ = '0.2.0.b1'
 
 
 from pyramid.config import Configurator
@@ -50,10 +50,12 @@ from stalker.models.note import Note
 from stalker.models.project import Project
 from stalker.models.repository import Repository
 from stalker.models.scene import Scene
+from stalker.models.schedulers import SchedulerBase, TaskJugglerScheduler
 from stalker.models.sequence import Sequence
 from stalker.models.shot import Shot
 from stalker.models.status import Status, StatusList
 from stalker.models.structure import Structure
+from stalker.models.studio import Studio, WorkingHours
 from stalker.models.tag import Tag
 from stalker.models.task import Booking, Task
 from stalker.models.template import FilenameTemplate
@@ -215,6 +217,7 @@ def main(global_config, **settings):
 
     config.add_route('get_gantt_tasks', 'get/gantt/tasks/{entity_id}')
     config.add_route('update_gantt_tasks', 'update/gantt/tasks')
+    config.add_route('auto_schedule_tasks', 'auto_schedule_tasks')
     
     # *************************************************************************
     # Booking

@@ -36,7 +36,7 @@ from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
                      Booking, Ticket, Scene)
 import logging
 from stalker import log
-from stalker.models.project import WorkingHours
+from stalker.models.studio import WorkingHours
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
