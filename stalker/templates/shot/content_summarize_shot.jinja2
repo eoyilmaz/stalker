@@ -51,9 +51,9 @@
     'dojox/charting/action2d/MoveSlice',
     'dijit/form/Button',
     'stalker/dialogCaller',
-    'stalker/goToLink',
+    'stalker/gotoLink',
     'dojo/ready'],
-          function(Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller,goToLink,ready){
+          function(Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller,gotoLink,ready){
             ready(function(){
               // Create the chart within it's "holding" node
               var pieChart = new Chart('shot_summary_chart1');
@@ -76,7 +76,7 @@
 
               // Create the slice mover
               var mag = new MoveSlice(pieChart, 'default');
-
+              
               // Render the chart!
               pieChart.render();
 
@@ -92,7 +92,7 @@
 
             });
 
-            goToLink({target:'central_content'});
+            gotoLink({target:'central_content'});
 
           });
 </script>

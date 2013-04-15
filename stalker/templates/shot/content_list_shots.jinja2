@@ -24,9 +24,9 @@
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
     'dojo/store/Memory', 'dojo/store/JsonRest', 'stalker/fieldUpdater',
-    'stalker/dialogCaller', 'stalker/goToLink','dojo/on', 'dojo/query','dojo/domReady!'],
+    'stalker/dialogCaller', 'stalker/gotoLink','dojo/on', 'dojo/query','dojo/domReady!'],
     function(registry, ObjectStore, DataGrid, Memory, JsonRest, fieldUpdater,
-             dialogCaller, goToLink, on, query){
+             dialogCaller, gotoLink, on, query){
 
       var shots_data_grid = new DataGrid({
         id: 'shots_data_grid',
@@ -93,7 +93,7 @@
           shots_data_grid.set('store', my_store );
           shots_data_grid.set('structure', structure );
 
-          goToLink({target:'central_content'});
+          gotoLink({target:'central_content'});
         });
 
 

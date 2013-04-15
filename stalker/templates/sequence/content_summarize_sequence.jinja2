@@ -52,10 +52,10 @@
     'dojox/charting/plot2d/Pie',
     'dojox/charting/action2d/MoveSlice',
     'dijit/form/Button',
-    'stalker/goToLink',
+    'stalker/gotoLink',
     'stalker/dialogCaller',
     'dojo/ready'],
-          function(Chart, theme, PiePlot,  MoveSlice, Button, goToLink, dialogCaller,ready){
+          function(Chart, theme, PiePlot,  MoveSlice, Button, gotoLink, dialogCaller,ready){
             ready(function(){
               // Create the chart within it's "holding" node
               var pieChart = new Chart('sequence_summary_chart1');
@@ -94,7 +94,7 @@
 
             });
 
-            goToLink({target:'central_content'});
+            gotoLink({target:'central_content'});
 
           });
 </script>

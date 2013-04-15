@@ -17,7 +17,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-define(['dijit/registry','dojo/on','dojo/query'],
+define(['dijit/registry', 'dojo/on', 'dojo/query'],
     function(registry, on, query){
         // ********************************************************************
         // GO TO LINK
@@ -46,22 +46,24 @@ define(['dijit/registry','dojo/on','dojo/query'],
         // method: String
         //   the method POST or GET
         //
-        var goToLink = function(kwargs){
-            var target = kwargs.target;
-            var contentPane = registry.byId(target);
-
-            // get the Link Elements
-            var dataLinks = query('.DataLink');
-
-
-            for (var i=0; i < dataLinks.length; i++){
-
-                on(dataLinks[i], 'click', function(){
-
-                    contentPane.set('href', this.getAttribute('stalker_href'));
-                    contentPane.reset();
-                })
+        var gotoLink = function(kwargs){
+            var target = kwargs.target || null;
+            
+            if (target){
+                var contentPane = registry.byId(target);
+                
+                if (contentPane){
+                    // get the Link Elements
+                    var dataLinks = query('.DataLink');
+                    
+                    for (var i=0; i<dataLinks.length; i++){
+                        on(dataLinks[i], 'click', function(){
+                            contentPane.set('href', this.getAttribute('stalker_href'));
+                            contentPane.reset();
+                        });
+                    }
+                }
             }
         };
-        return goToLink;
-    });
+        return gotoLink;
+});

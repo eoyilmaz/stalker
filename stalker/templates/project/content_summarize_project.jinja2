@@ -90,9 +90,9 @@
     'dojox/charting/action2d/MoveSlice',
     'dijit/form/Button',
     'stalker/dialogCaller',
-    'stalker/goToLink',
+    'stalker/gotoLink',
     'dojo/ready'],
-    function(registry, Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller, goToLink, ready){
+    function(registry, Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller, gotoLink, ready){
       ready(function(){
         // Create the chart within it's "holding" node
         var pieChart = new Chart('project_summary_chart1');
@@ -132,14 +132,7 @@
         
       });
 
-
-
-
-      goToLink({target:'central_content'});
-
-
-
-
+      gotoLink({target:'central_content'});
     
   });
 </script>
