@@ -25,18 +25,14 @@ import unittest
 import tempfile
 from sqlalchemy.exc import IntegrityError
 
-from stalker import defaults
-
-from stalker import db
 from stalker.db.session import DBSession, ZopeTransactionExtension
-from stalker import (Asset, Department, SimpleEntity, Entity, ImageFormat,
-                     Link, Note, Project, Repository, Sequence, Shot,
-                     Status, StatusList, Structure, Tag, Task, Type,
+from stalker import (db, defaults, Asset, Department, SimpleEntity, Entity,
+                     ImageFormat, Link, Note, Project, Repository, Sequence,
+                     Shot, Status, StatusList, Structure, Tag, Task, Type,
                      FilenameTemplate, User, Version, Permission, Group,
-                     Booking, Ticket, Scene)
+                     Booking, Ticket, Scene, WorkingHours, Studio)
 import logging
 from stalker import log
-from stalker.models.studio import WorkingHours
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -1397,10 +1393,8 @@ class DatabaseModelsTester(unittest.TestCase):
         type = new_project.type
         updated_by = new_project.updated_by
         users = new_project.users
-        working_hours = new_project.working_hours
         computed_start = new_project.computed_start
         computed_end = new_project.computed_end
-        daily_working_hours = new_project.daily_working_hours
         timing_resolution = new_project.timing_resolution
         
         # delete the project
@@ -1418,8 +1412,6 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(computed_start, new_project_DB.computed_start)
         self.assertEqual(computed_end, new_project_DB.computed_end)
         self.assertEqual(created_by, new_project_DB.created_by)
-        self.assertEqual(daily_working_hours,
-                         new_project_DB.daily_working_hours)
         self.assertEqual(date_created, new_project_DB.date_created)
         self.assertEqual(date_updated, new_project_DB.date_updated)
         self.assertEqual(description, new_project_DB.description)
@@ -1446,7 +1438,6 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(type, new_project_DB.type)
         self.assertEqual(updated_by, new_project_DB.updated_by)
         self.assertEqual(users, new_project_DB.users)
-        self.assertEqual(working_hours, new_project_DB.working_hours)
     
     def test_persistence_Repository(self):
         """testing the persistence of Repository
@@ -2198,7 +2189,41 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(custom_template, new_structure_DB.custom_template)
         self.assertEqual(tags, new_structure_DB.tags)
         self.assertEqual(updated_by, new_structure_DB.updated_by)
-
+    
+    def test_persistence_Studio(self):
+        """testing the persistence of Studio
+        """
+        test_studio = Studio(name='Test Studio')
+        DBSession.add(test_studio)
+        DBSession.commit()
+        
+        # customize attributes
+        test_studio.daily_working_hours = 11
+        test_studio.working_hours = WorkingHours(
+            working_hours={
+                'mon': [],
+                'sat': [[100, 1300]]
+            }
+        )
+        test_studio.timing_resolution = datetime.timedelta(hours=1, minutes=30)
+        
+        name = test_studio.name
+        daily_working_hours = test_studio.daily_working_hours
+        timing_resolution = test_studio._timing_resolution
+        working_hours = test_studio.working_hours
+        
+        del test_studio
+        
+        # get it back
+        test_studio_DB = Studio.query.first()
+        
+        self.assertEqual(name, test_studio_DB.name)
+        self.assertEqual(daily_working_hours,
+                         test_studio_DB.daily_working_hours)
+        self.assertEqual(timing_resolution, test_studio_DB.timing_resolution)
+        self.assertEqual(working_hours, test_studio_DB.working_hours)
+        
+    
     def test_persistence_Tag(self):
         """testing the persistence of Tag
         """

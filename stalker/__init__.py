@@ -45,7 +45,7 @@ from stalker.models.link import Link
 from stalker.models.message import Message
 from stalker.models.mixins import (ProjectMixin, ReferenceMixin, ScheduleMixin,
                                    StatusMixin, TargetEntityTypeMixin,
-                                   CodeMixin)
+                                   CodeMixin, WorkingHoursMixin)
 from stalker.models.note import Note
 from stalker.models.project import Project
 from stalker.models.repository import Repository

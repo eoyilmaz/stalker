@@ -13,6 +13,15 @@ Stalker Changes
 * ``daily_working_hours`` attribute is moved from
   stalker.models.project.Project to stalker.models.studio.Studio class.
 
+* Repository path variables now ends with a forward slash even if it is not
+  given.
+
+* Updated Project classes validation messages to correlate with Stalker
+  standard.
+
+* Implementation of the Studio class is finished. The scheduling works like a
+  charm.
+
 0.2.0.a10
 ---------
 

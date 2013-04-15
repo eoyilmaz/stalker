@@ -993,7 +993,8 @@ class WorkingHoursMixin(object):
     """
     
     def __init__(self,
-                 working_hours=None):
+                 working_hours=None,
+                 **kwargs):
         self.working_hours = working_hours
     
     @declared_attr

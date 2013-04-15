@@ -18,6 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
+import os
 import platform
 from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
@@ -54,14 +55,14 @@ class Repository(Entity):
     """
     
     __auto_name__ = False
-    __tablename__ = "Repositories"
-    __mapper_args__ = {"polymorphic_identity": "Repository"}
+    __tablename__ = 'Repositories'
+    __mapper_args__ = {'polymorphic_identity': 'Repository'}
     repository_id = Column(
-        "id",
+        'id',
         Integer,
-        ForeignKey("Entities.id"),
+        ForeignKey('Entities.id'),
         primary_key=True,
-        )
+    )
     linux_path = Column(String(256))
     windows_path = Column(String(256))
     osx_path = Column(String(256))
@@ -87,7 +88,9 @@ class Repository(Entity):
                             "or unicode not %s" %
                             (self.__class__.__name__,
                              linux_path_in.__class__.__name__))
-
+        
+        linux_path_in = os.path.normpath(linux_path_in) + '/'
+        
         return linux_path_in.replace("\\", "/")
 
     @validates("osx_path")
@@ -100,7 +103,8 @@ class Repository(Entity):
                             "unicode not %s" %
                             (self.__class__.__name__,
                              osx_path_in.__class__.__name__))
-
+        
+        osx_path_in = os.path.normpath(osx_path_in) + '/'
 
         return osx_path_in.replace("\\", "/")
 
@@ -111,12 +115,14 @@ class Repository(Entity):
 
         if not isinstance(windows_path_in, (str, unicode)):
             raise TypeError("%s.windows_path should be an instance of string "
-                            "or unicode" %
+                            "or unicode not %s" %
                             (self.__class__.__name__,
                              windows_path_in.__class__.__name__))
-
+        
+        windows_path_in = os.path.normpath(windows_path_in) + '/'
+        
         return windows_path_in.replace("\\", "/")
-
+    
     @property
     def path(self):
         """The path for the current os"""

@@ -73,13 +73,22 @@ class RepositoryTester(unittest.TestCase):
                 test_value
             )
 
-    def test_linux_path_attribute_works_properly(self):
-        """testing if linux_path attribute works properly
+    def test_linux_path_attribute_is_working_properly(self):
+        """testing if linux_path attribute is working properly
         """
-        test_value = "~/newRepoPath/Projects"
+        test_value = "~/newRepoPath/Projects/"
         self.test_repo.linux_path = test_value
         self.assertEqual(self.test_repo.linux_path, test_value)
-
+    
+    def test_linux_path_attribute_finishes_with_a_slash(self):
+        """testing if the linux_path attribute will be finished with a slash
+        even it is not supplied by default
+        """
+        test_value = '/mnt/T'
+        expected_value = '/mnt/T/'
+        self.test_repo.linux_path = test_value
+        self.assertEqual(self.test_repo.linux_path, expected_value)
+    
     def test_windows_path_argument_accepts_only_strings(self):
         """testing if windows_path argument accepts only string or unicode
         values
@@ -103,13 +112,23 @@ class RepositoryTester(unittest.TestCase):
                 test_value
             )
 
-    def test_windows_path_attribute_works_properly(self):
-        """testing if windows_path attribute works properly
+    def test_windows_path_attribute_is_working_properly(self):
+        """testing if windows_path attribute is working properly
         """
-        test_value = "~/newRepoPath/Projects"
+        test_value = "~/newRepoPath/Projects/"
         self.test_repo.windows_path = test_value
         self.assertEqual(self.test_repo.windows_path, test_value)
+    
 
+    def test_windows_path_attribute_finishes_with_a_slash(self):
+        """testing if the windows_path attribute will be finished with a slash
+        even it is not supplied by default
+        """
+        test_value = 'T:'
+        expected_value = 'T:/'
+        self.test_repo.windows_path = test_value
+        self.assertEqual(self.test_repo.windows_path, expected_value)
+    
     def test_osx_path_argument_accepts_only_strings(self):
         """testing if osx_path argument accepts only string or unicode
         values
@@ -133,13 +152,23 @@ class RepositoryTester(unittest.TestCase):
                 test_value
             )
 
-    def test_osx_path_attribute_works_properly(self):
-        """testing if osx_path attribute works properly
+    def test_osx_path_attribute_is_working_properly(self):
+        """testing if osx_path attribute is working properly
         """
-        test_value = "~/newRepoPath/Projects"
+        test_value = "~/newRepoPath/Projects/"
         self.test_repo.osx_path = test_value
         self.assertEqual(self.test_repo.osx_path, test_value)
+    
 
+    def test_osx_path_attribute_finishes_with_a_slash(self):
+        """testing if the osx_path attribute will be finished with a slash
+        even it is not supplied by default
+        """
+        test_value = '/Volumes/T'
+        expected_value = '/Volumes/T/'
+        self.test_repo.osx_path = test_value
+        self.assertEqual(self.test_repo.osx_path, expected_value)
+    
     @unittest.skipUnless(platform.system() == "Windows", "requires Windows")
     def test_path_returns_properly_for_windows(self):
         """testing if path returns the correct value for the os
@@ -209,7 +238,7 @@ class RepositoryTester(unittest.TestCase):
         new_repo = Repository(**self.kwargs)
 
         self.assertNotIn("\\", new_repo.linux_path)
-        self.assertEqual(new_repo.linux_path, "/mnt/M/Projects")
+        self.assertEqual(new_repo.linux_path, "/mnt/M/Projects/")
 
     def test_linux_path_attribute_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
@@ -217,7 +246,7 @@ class RepositoryTester(unittest.TestCase):
         """
         self.test_repo.linux_path = r"\mnt\M\Projects"
         self.assertNotIn("\\", self.test_repo.linux_path)
-        self.assertEqual(self.test_repo.linux_path, "/mnt/M/Projects")
+        self.assertEqual(self.test_repo.linux_path, "/mnt/M/Projects/")
 
     def test_osx_path_argument_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
@@ -227,7 +256,7 @@ class RepositoryTester(unittest.TestCase):
         new_repo = Repository(**self.kwargs)
 
         self.assertNotIn("\\", new_repo.linux_path)
-        self.assertEqual(new_repo.osx_path, "/Volumes/M/Projects")
+        self.assertEqual(new_repo.osx_path, "/Volumes/M/Projects/")
 
     def test_osx_path_attribute_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
@@ -235,7 +264,7 @@ class RepositoryTester(unittest.TestCase):
         """
         self.test_repo.osx_path = r"\Volumes\M\Projects"
         self.assertNotIn("\\", self.test_repo.osx_path)
-        self.assertEqual(self.test_repo.osx_path, "/Volumes/M/Projects")
+        self.assertEqual(self.test_repo.osx_path, "/Volumes/M/Projects/")
 
     def test_windows_path_argument_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
@@ -245,7 +274,7 @@ class RepositoryTester(unittest.TestCase):
         new_repo = Repository(**self.kwargs)
 
         self.assertNotIn("\\", new_repo.linux_path)
-        self.assertEqual(new_repo.windows_path, "M:/Projects")
+        self.assertEqual(new_repo.windows_path, "M:/Projects/")
 
     def test_windows_path_attribute_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
@@ -253,4 +282,4 @@ class RepositoryTester(unittest.TestCase):
         """
         self.test_repo.windows_path = r"M:\Projects"
         self.assertNotIn("\\", self.test_repo.windows_path)
-        self.assertEqual(self.test_repo.windows_path, "M:/Projects")
+        self.assertEqual(self.test_repo.windows_path, "M:/Projects/")

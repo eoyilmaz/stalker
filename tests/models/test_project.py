@@ -1237,19 +1237,16 @@ class ProjectTester(unittest.TestCase):
             
                 task Sequence_42 "Seq1" {
             effort 0.0h
-            allocate 
         }
         
             
                 task Sequence_43 "Seq2" {
             effort 0.0h
-            allocate 
         }
         
             
                 task Sequence_44 "Seq3" {
             effort 0.0h
-            allocate 
         }
         
             
@@ -1293,13 +1290,11 @@ class ProjectTester(unittest.TestCase):
             
                 task Sequence_47 "Seq6" {
             effort 0.0h
-            allocate 
         }
         
             
                 task Sequence_48 "Seq7" {
             effort 0.0h
-            allocate 
         }
         
             
@@ -1381,19 +1376,16 @@ class ProjectTester(unittest.TestCase):
             
                 task Asset_53 "Test Asset 1" {
             effort 0.0h
-            allocate 
         }
         
             
                 task Asset_54 "Test Asset 2" {
             effort 0.0h
-            allocate 
         }
         
             
                 task Asset_55 "Test Asset 3" {
             effort 0.0h
-            allocate 
         }
         
             

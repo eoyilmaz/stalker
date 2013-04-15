@@ -568,3 +568,4 @@ class ScheduleMixinTester(unittest.TestCase):
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         self.assertRaises(AttributeError, setattr, new_foo_obj,
                           'computed_duration', datetime.timedelta(10))
+    

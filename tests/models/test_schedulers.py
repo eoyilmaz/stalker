@@ -18,311 +18,69 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-
-
 import unittest
-import datetime
-import os
-from zope.sqlalchemy import ZopeTransactionExtension
-from stalker import db, Department, User, Project, Repository, Status, StatusList, Task
-import stalker
-from stalker.db import DBSession
-from stalker.models.schedulers import TaskJugglerScheduler
 
+from stalker import Studio, SchedulerBase
 
-
-class TaskJugglerSchedulerTester(unittest.TestCase):
-    """tests the stalker.models.scheduler.TaskJugglerScheduler class
+class SchedulerBaseTester(unittest.TestCase):
+    """tests the stalker.models.scheduler.SchedulerBase
     """
-    
-    @classmethod
-    def setUpClass(cls):
-        if DBSession:
-            DBSession.remove()
-        DBSession.configure(extension=None)
-    
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test
-        """
-        DBSession.configure(extension=ZopeTransactionExtension())
     
     def setUp(self):
         """set up the test
         """
-        # we need a database
-        db.setup({
-            'sqlalchemy.url': 'sqlite:///:memory:',
-            'sqlalchemy.echo': False
-        })
-        
-        # replace datetime now function
-        
-        # create departments
-        self.test_dep1 = Department(name='Dep1')
-        self.test_dep2 = Department(name='Dep2')
-        
-        # create resources
-        self.test_user1 = User(
-            login='user1',
-            name='User1',
-            email='user1@users.com',
-            password='1234',
-            departments=[self.test_dep1]
-        )
-        DBSession.add(self.test_user1)
-        
-        self.test_user2 = User(
-            login='user2',
-            name='User2',
-            email='user2@users.com',
-            password='1234',
-            departments=[self.test_dep1]
-        )
-        DBSession.add(self.test_user2)
-        
-        self.test_user3 = User(
-            login='user3',
-            name='User3',
-            email='user3@users.com',
-            password='1234',
-            departments=[self.test_dep2]
-        )
-        DBSession.add(self.test_user3)
-        
-        self.test_user4 = User(
-            login='user4',
-            name='User4',
-            email='user4@users.com',
-            password='1234',
-            departments=[self.test_dep2]
-        )
-        DBSession.add(self.test_user4)
-        
-        # user with two departments
-        self.test_user5 = User(
-            login='user5',
-            name='User5',
-            email='user5@users.com',
-            password='1234',
-            departments=[self.test_dep1, self.test_dep2]
-        )
-        DBSession.add(self.test_user5)
-        
-        # user with no departments
-        self.test_user6 = User(
-            login='user6',
-            name='User6',
-            email='user6@users.com',
-            password='1234'
-        )
-        DBSession.add(self.test_user6)
-        
-        # repository
-        self.test_repo = Repository(
-            name='Test Repository',
-            linux_path='/mnt/T/',
-            windows_path='T:/',
-            osx_path='/Volumes/T/'
-        )
-        DBSession.add(self.test_repo)
-        
-        # statuses
-        self.test_status1 = Status(name='Status 1', code='STS1')
-        self.test_status2 = Status(name='Status 2', code='STS2')
-        self.test_status3 = Status(name='Status 3', code='STS3')
-        self.test_status4 = Status(name='Status 4', code='STS4')
-        self.test_status5 = Status(name='Status 5', code='STS5')
-        DBSession.add_all([self.test_status1,
-                           self.test_status2,
-                           self.test_status3,
-                           self.test_status4,
-                           self.test_status5])
-        
-        # status lists
-        self.test_proj_status_list = StatusList(
-            name='Project Status List',
-            statuses=[self.test_status1, self.test_status2, self.test_status3],
-            target_entity_type='Project'
-        )
-        DBSession.add(self.test_proj_status_list) 
-        
-        # create one project
-        self.test_proj1 = Project(
-            name='Test Project 1',
-            code='TP1',
-            repository=self.test_repo,
-            status_list=self.test_proj_status_list,
-            start=datetime.datetime(2013, 4, 4),
-            end = datetime.datetime(2013, 5, 4)
-        )
-        DBSession.add(self.test_proj1)
-        self.test_proj1.now = datetime.datetime(2013, 4, 4)
-        
-        # create task status list
-        self.test_task_status_list = StatusList(
-            name='Task Statuses',
-            statuses=[self.test_status4, self.test_status5],
-            target_entity_type='Task'
-        )
-        DBSession.add(self.test_task_status_list)
-        
-        # create two tasks with the same resources
-        self.test_task1 = Task(
-            name='Task1',
-            project=self.test_proj1,
-            resources=[self.test_user1, self.test_user2],
-            schedule_model=0,
-            schedule_timing=50,
-            schedule_unit='h',
-            status_list=self.test_task_status_list
-        )
-        DBSession.add(self.test_task1)
-        
-        self.test_task2 = Task(
-            name='Task2',
-            project=self.test_proj1,
-            resources=[self.test_user1, self.test_user2],
-            schedule_model=0,
-            schedule_timing=60,
-            schedule_unit='h',
-            status_list=self.test_task_status_list
-        )
-        DBSession.add(self.test_task2)
-        DBSession.commit()
+        self.test_studio = Studio(name='Test Studio')
+        self.kwargs = {
+            'studio': self.test_studio
+        }
+        self.test_scheduler_base = SchedulerBase(**self.kwargs)
     
-    def test_tjp_file_is_created(self):
-        """testing if the tjp file is correctly created
+    def test_studio_argument_is_skipped(self):
+        """testing if the studio attribute will be None if the studio argument
+        is skipped
         """
-        # create the scheduler
-        tjp_sched = TaskJugglerScheduler()
-        tjp_sched.projects = [self.test_proj1]
-        
-        tjp_sched._create_tjp_file()
-        tjp_sched._create_tjp_file_content()
-        tjp_sched._fill_tjp_file()
-        
-        # check
-        self.assertTrue(os.path.exists(tjp_sched.tjp_file_full_path))
-        
-        # clean up the test
-        tjp_sched._clean_up()
+        self.kwargs.pop('studio')
+        new_scheduler_base = SchedulerBase(**self.kwargs)
+        self.assertIsNone(new_scheduler_base.studio)
     
-    def test_tjp_file_content_is_correct(self):
-        """testing if the tjp file content is correct
+    def test_studio_argument_is_None(self):
+        """testing if the studio attribute will be None if the studio argument
+        is None
         """
-        tjp_sched = TaskJugglerScheduler()
-        tjp_sched.projects = [self.test_proj1]
-        
-        tjp_sched._create_tjp_file()
-        tjp_sched._create_tjp_file_content()
-        
-        import jinja2
-        expected_tjp_template = jinja2.Template(
-        """# Generated By Stalker v{{stalker.__version__}}
-        project Project_30 "Test Project 1" 2013-04-04 - 2013-05-04 {
-            timingresolution 60min
-            now {{now}}
-            dailyworkinghours 8
-            weekstartsmonday
-            workinghours mon 09:30 - 18:30
-            workinghours tue 09:30 - 18:30
-            workinghours wed 09:30 - 18:30
-            workinghours thu 09:30 - 18:30
-            workinghours fri 09:30 - 18:30
-            workinghours sat off
-            workinghours sun off
-            timeformat "%Y-%m-%d"
-            scenario plan "Plan"
-            trackingscenario plan
-        }
-        
-            
-        # resources
-        resource resources "Resources" {
-            resource User_3 "admin"
-            resource User_14 "User1"
-            resource User_16 "User2"
-            resource User_17 "User3"
-            resource User_19 "User4"
-            resource User_20 "User5"
-            resource User_21 "User6"
-        }
-        
-        # tasks
-        task Project_30 "Test Project 1"{
-            
-            task Task_31 "Task1" {
-            effort 50.0h
-            allocate User_14, User_16
-        }
-        
-            
-            task Task_32 "Task2" {
-            effort 60.0h
-            allocate User_14, User_16
-        }
-        
-            
-        }
-        
-        # bookings
-        
-        # reports
-        taskreport breakdown "{{csv_path}}"{
-            formats csv
-            timeformat "%Y-%m-%d-%H:%M"
-            columns id, start, end
-        }
-        """)
-        expected_tjp_content = expected_tjp_template.render(
-            {
-                'stalker': stalker,
-                'now': self.test_proj1.round_time(self.test_proj1.now)
-                            .strftime('%Y-%m-%d-%H:%M'),
-                'csv_path': tjp_sched.temp_file_full_path
-            }
-        )
-        
-        self.maxDiff = None
-        tjp_sched._clean_up()
-        self.assertEqual(tjp_sched.tjp_content, expected_tjp_content)
+        self.kwargs['studio'] = None
+        new_scheduler_base = SchedulerBase(**self.kwargs)
+        self.assertIsNone(new_scheduler_base.studio)
     
-    def test_tasks_are_correctly_scheduled(self):
-        """testing if the tasks are correctly scheduled
+    def test_studio_attribute_is_None(self):
+        """testing if the studio argument can be set to None
         """
-        tjp_sched = TaskJugglerScheduler()
-        tjp_sched.projects = [self.test_proj1]
-        tjp_sched.schedule()
-        
-        # check if the task and project timings are all adjusted
-        self.assertEqual(
-            self.test_proj1.computed_start,
-            datetime.datetime(2013, 4, 4, 10, 0)
-        )
-        
-        self.assertEqual(
-            self.test_proj1.computed_end,
-            datetime.datetime(2013, 4, 12, 11, 0)
-        )
-        
-        self.assertEqual(
-            self.test_task1.computed_start,
-            datetime.datetime(2013, 4, 9, 13, 0)
-        )
-        self.assertEqual(
-            self.test_task1.computed_end,
-            datetime.datetime(2013, 4, 12, 11, 0)
-        )
-        
-        self.assertEqual(
-            self.test_task2.computed_start,
-            datetime.datetime(2013, 4, 4, 10, 0)
-        )
-        
-        self.assertEqual(
-            self.test_task2.computed_end,
-            datetime.datetime(2013, 4, 9, 13, 0)
-        )
+        self.test_scheduler_base.studio = None
+        self.assertIsNone(self.test_scheduler_base.studio)
     
-        
+    def test_studio_argument_is_not_a_Studio_instance(self):
+        """testing if a TypeError will be raised when the studio argument is
+        not stalker.models.studio.Studio instance
+        """
+        self.kwargs['studio'] = 'not a studio instance'
+        self.assertRaises(TypeError, SchedulerBase, **self.kwargs)
+    
+    def test_studio_attribute_is_not_a_Studio_instance(self):
+        """testing if a TypeError will be raised when the studio attribute is
+        set to a value which is not a stalker.models.studio.Studio instance
+        """
+        self.assertRaises(TypeError, setattr, self.test_scheduler_base,
+                          'studio', 'not a studio instance')
+    
+    def test_studio_argument_is_working_properly(self):
+        """testing if the studio argument value is correctly passed to the
+        studio attribute
+        """
+        self.assertEqual(self.test_scheduler_base.studio,
+                         self.kwargs['studio'])
+    
+    def test_studio_attribute_is_working_properly(self):
+        """testing if the studio attribute is working properly
+        """
+        new_studio = Studio(name='Test Studio 2')
+        self.test_scheduler_base.studio = new_studio
+        self.assertEqual(self.test_scheduler_base.studio, new_studio)

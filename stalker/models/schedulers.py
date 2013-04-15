@@ -43,7 +43,32 @@ class SchedulerBase(object):
     All the schedulers should be derived from this class.
     """
     def __init__(self, studio=None):
+        self._studio = None
         self.studio = studio
+    
+    def _validate_studio(self, studio_in):
+        """validates the given studio_in value
+        """
+        if studio_in is not None:
+            from stalker import Studio
+            if not isinstance(studio_in, Studio):
+                raise TypeError('%s.studio should be an instance of '
+                                'stalker.models.studio.Studio, not %s' %
+                                (self.__class__.__name__,
+                                 studio_in.__class__.__name__))
+        return studio_in
+    
+    @property
+    def studio(self):
+        """studio getter
+        """
+        return self._studio
+    
+    @studio.setter
+    def studio(self, studio_in):
+        """studio setter
+        """
+        self._studio = self._validate_studio(studio_in)
     
     def schedule(self):
         """the main scheduling function should be implemented in the
@@ -155,6 +180,14 @@ class TaskJugglerScheduler(SchedulerBase):
     def schedule(self):
         """does the scheduling
         """
+        # check the studio attribute
+        from stalker import Studio
+        if not isinstance(self.studio, Studio):
+            raise TypeError('%s.studio should be an instance of '
+                            'stalker.models.studio.Studio, not %s' %
+                            (self.__class__.__name__,
+                             self.studio.__class__.__name__))
+        
         # create a tjp file
         self._create_tjp_file()
         

@@ -266,8 +266,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
 
         if image_format is not None and\
            not isinstance(image_format, ImageFormat):
-            raise TypeError("the image_format should be an instance of "
-                            "stalker.models.format.ImageFormat")
+            raise TypeError("%s.image_format should be an instance of "
+                            "stalker.models.format.ImageFormat, not %s" %
+                            (self.__class__.__name__,
+                             image_format.__class__.__name__))
         return image_format
     
     @validates("lead")
@@ -276,8 +278,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         """
         if lead is not None:
             if not isinstance(lead, User):
-                raise TypeError("lead must be an instance of "
-                                "stalker.models.auth.User")
+                raise TypeError("%s.lead should be an instance of "
+                                "stalker.models.auth.User, not %s" %
+                                (self.__class__.__name__,
+                                lead.__class__.__name__))
         return lead
     
     @validates("repository")
@@ -287,11 +291,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         from stalker.models.repository import Repository
         
         if not isinstance(repository, Repository):
-            raise TypeError("The stalker.models.project.Project instance "
-                            "should be created with a "
-                            "stalker.models.repository.Repository instance "
-                            "passed through the 'repository' argument, the "
-                            "current value is '%s'" % repository)
+            raise TypeError("%s.repository should be an instance of"
+                            "stalker.models.repository.Repository, not %s" %
+                            (self.__class__.__name__,
+                             repository.__class__.__name__))
         return repository
     
     @validates("structure")
@@ -302,8 +305,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         
         if structure_in is not None:
             if not isinstance(structure_in, Structure):
-                raise TypeError("structure should be an instance of "
-                                "stalker.models.structure.Structure")
+                raise TypeError("%s.structure should be an instance of "
+                                "stalker.models.structure.Structure, not %s" %
+                                (self.__class__.__name__,
+                                 structure_in.__class__.__name__))
         return structure_in
     
     @validates('is_stereoscopic')

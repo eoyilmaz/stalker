@@ -22,16 +22,16 @@ import copy
 import logging
 import datetime
 
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import validates
 
-from stalker import defaults, log, Entity, ScheduleMixin
+from stalker import defaults, log, Entity, ScheduleMixin, WorkingHoursMixin, SchedulerBase
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
-class Studio(Entity, ScheduleMixin):
+class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
     """Manage all the studio information at once.
     
     With Stalker you can manage all you Studio data by using this class. Studio
@@ -67,15 +67,38 @@ class Studio(Entity, ScheduleMixin):
     TaskJuggler uses mainly converting working day values to working hours
     (1d = 10h kind of thing).
     
+    :param now: The now attribute overrides the TaskJugglers ``now`` attribute
+      allowing the user to schedule the projects as if the scheduling is done
+      on that date. The default value is the rounded value of
+      datetime.datetime.now().
+    
+    :type now: datetime.datetime
     """
+    
+    __auto_name__ = False
+    __tablename__ = 'Studios'
+    __mapper_args__ = {'polymorphic_identity': 'Studio'}
+    
+    studio_id = Column(
+        'id',
+        Integer,
+        ForeignKey('Entities.id'),
+        primary_key=True,
+    )
 
     daily_working_hours = Column(Integer, default=8)
     
     def __init__(self,
                 daily_working_hours=None,
+                now=None,
                 **kwargs):
         super(Studio, self).__init__(**kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
+        WorkingHoursMixin.__init__(self, **kwargs)
         self.daily_working_hours = daily_working_hours
+        self._now = None
+        self.now = self._validate_now(now)
+        self._scheduler = None
     
     @validates('daily_working_hours')
     def _validate_daily_working_hours(self, key, dwh):
@@ -91,60 +114,120 @@ class Studio(Entity, ScheduleMixin):
                                  dwh.__class__.__name__))
         return dwh
     
-    def tjp_id(self):
-        """returns the tjp_id of the studio
+    def _validate_now(self, now_in):
+        """validates the given now_in value
         """
-        raise NotImplemented
+        if now_in is None:
+            now_in = self.round_time(datetime.datetime.now())
+        
+        if not isinstance(now_in, datetime.datetime):
+            raise TypeError('%s.now attribute should be an instance of '
+                            'datetime.datetime, not %s' % 
+                            (self.__class__.__name__,
+                             now_in.__class__.__name__))
+        
+        return self.round_time(now_in)
     
+    @property
+    def now(self):
+        """now getter
+        """
+        return self._now
+    
+    @now.setter
+    def now(self, now_in):
+        """now setter
+        """
+        self._now = self._validate_now(now_in)
+    
+    def _validate_scheduler(self, scheduler_in):
+        """validates the given scheduler_in value
+        """
+        if scheduler_in is not None:
+            if not isinstance(scheduler_in, SchedulerBase):
+                raise TypeError('%s.scheduler should be an instance of '
+                                'stalker.models.scheduler.SchedulerBase, not '
+                                '%s' % (self.__class__.__name__,
+                                        scheduler_in.__class__.__name__))
+        return scheduler_in
+    
+    @property
+    def scheduler(self):
+        """scheduler getter
+        """
+        return self._scheduler
+    
+    @scheduler.setter
+    def scheduler(self, scheduler_in):
+        """the scheduler setter
+        """
+        self._scheduler = self._validate_scheduler(scheduler_in)
+    
+    @property
     def to_tjp(self):
         """converts the studio to a tjp representation
         """
         from jinja2 import Template
         temp = Template(defaults.tjp_studio_template)
-        
         return temp.render({
             'studio': self,
             'datetime': datetime,
             'now': self.round_time(self.now).strftime('%Y-%m-%d-%H:%M')
         })
-        
+    
     @property
     def projects(self):
         """returns all the projects in the studio
         """
-        raise NotImplemented
+        from stalker import Project
+        return Project.query.all()
     
     @property
     def active_projects(self):
         """returns all the active projects in the studio
         """
-        raise NotImplemented
+        from stalker import Project
+        return Project.query.filter(Project.active==True).all()
     
     @property
     def inactive_projects(self):
         """return all the inactive projects in the studio
         """
-        raise NotImplemented
+        from stalker import Project
+        return Project.query.filter(Project.active==False).all()
     
     @property
     def departments(self):
         """returns all the departments in the studio
         """
-        raise NotImplemented
+        from stalker import Department
+        return Department.query.all()
     
     @property
     def users(self):
         """returns all the users in the studio
         """
-        raise NotImplemented
+        from stalker import User
+        return User.query.all()
     
-    def schedule(self, scheduler=None):
-        """schedules all the active projects in the studio
-        
-        :param scheduler: The scheduler to be used in scheduling the tasks. The
-          default is :class:`~stalker.models.schedulers.TaskJugglerScheduler`.
+    def schedule(self):
+        """Schedules all the active projects in the studio. Needs a Scheduler,
+        so before calling it set a scheduler by using the :attr:`.scheduler`
+        attribute.
         """
-        raise NotImplemented
+        # check the scheduler first
+        if self.scheduler is None or \
+            not isinstance(self.scheduler, SchedulerBase):
+            raise RuntimeError ('There is no scheduler for this %s, please '
+                                'assign a scheduler to the %s.scheduler '
+                                'attribute, before calling %s.schedule()' %
+                                (self.__class__.__name__,
+                                 self.__class__.__name__,
+                                 self.__class__.__name__))
+        
+        # run the scheduler
+        self.scheduler.studio = self
+        self.scheduler.schedule()
 
 
 class WorkingHours(object):

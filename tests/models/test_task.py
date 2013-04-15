@@ -2269,17 +2269,17 @@ class TaskTester(unittest.TestCase):
         t2.id = 5679
         
         expected_tjp = '''task Task_5648 "Modeling" {
-        task Task_23423 "Modeling" {
+                task Task_23423 "Modeling" {
             effort 1d
             allocate User_1231, User_1232
         }
         
-        task Task_23424 "Modeling" {
+                task Task_23424 "Modeling" {
             effort 1d
             allocate User_1231, User_1232
         }
         
-        task Task_5679 "Modeling" {
+                task Task_5679 "Modeling" {
             effort 1d
             allocate User_1231, User_1232
             depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
@@ -2287,7 +2287,11 @@ class TaskTester(unittest.TestCase):
         
         }
         '''
-        self.maxDiff = None
+        #self.maxDiff = None
+        print t1.to_tjp
+        print '-----------------------'
+        print expected_tjp
+        print '-----------------------'
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
     
     def test_is_scheduled_is_a_read_only_attribute(self):
