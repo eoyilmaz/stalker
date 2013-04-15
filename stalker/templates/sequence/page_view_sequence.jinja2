@@ -33,11 +33,6 @@
               style: 'background-color: #ed008c'
             }, 'sequence_related_data_tab_container');
 
-            var users_content_pane = new ContentPane({
-              title: 'Users',
-              href: 'list/users/{{ sequence.id }}'
-            });
-
             var tasks_content_pane = new ContentPane({
               title: 'Tasks',
               href: 'list/tasks/{{ sequence.id }}'
@@ -53,7 +48,6 @@
               href: 'list/versions/{{ sequence.id }}'
             });
 
-            sequence_related_data_tab_container.addChild(users_content_pane);
             sequence_related_data_tab_container.addChild(tasks_content_pane);
             sequence_related_data_tab_container.addChild(tickets_content_pane);
             sequence_related_data_tab_container.addChild(versions_content_pane);

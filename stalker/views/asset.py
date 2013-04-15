@@ -178,6 +178,23 @@ def view_asset(request):
     }
 
 @view_config(
+    route_name='update_asset',
+    renderer='templates/asset/dialog_update_asset.jinja2',
+    permission='Update_Asset'
+)
+def update_asset(request):
+    """runs when updating a asset
+    """
+
+    asset_id = request.matchdict['asset_id']
+    asset = Asset.query.filter_by(id=asset_id).first()
+
+    return {
+        'asset': asset,
+        'projects': Project.query.all()
+    }
+
+@view_config(
     route_name='summarize_asset',
     renderer='templates/asset/content_summarize_asset.jinja2'
 )

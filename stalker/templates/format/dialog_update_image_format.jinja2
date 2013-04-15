@@ -24,47 +24,47 @@
       {# NAME #}
       <tr>
         <td class='label_column'>
-          <label for='image_format_name'>
+          <label for='update_image_format_name'>
             Name
           </label>
         </td>
         <td class='input_column'>
-          <input id='image_format_name'>
+          <input id='update_image_format_name'>
         </td>
       </tr>
       
       {# WIDTH #}
       <tr>
         <td class='label_column'>
-          <label for='image_format_width'>
+          <label for='update_image_format_width'>
             Width
           </label>
         </td>
         <td class='input_column'>
-          <input id='image_format_width'>
+          <input id='update_image_format_width'>
         </td>
       </tr>
       
       {# HEIGHT #}
       <tr>
         <td class='label_column'>
-          <label for='image_format_height'>
+          <label for='update_image_format_height'>
             Height
           </label>
         </td>
         <td class='input_column'>
-          <input id='image_format_height'>
+          <input id='update_image_format_height'>
         </td>
       </tr>
       
       <tr>
         <td class='label_column'>
-          <label for='image_format_pixel_aspect'>
+          <label for='update_image_format_pixel_aspect'>
             Pixel Aspect
           </label>
         </td>
         <td class='input_column'>
-          <input id='image_format_pixel_aspect'>
+          <input id='update_image_format_pixel_aspect'>
         </td>
       </tr>
       
@@ -72,8 +72,8 @@
   </form>
 </div>
 <div class='dijitDialogPaneActionBar'>
-  <button id='image_format_update_button'></button>
-  <button id='image_format_cancel_button'></button>
+  <button id='update_image_format_update_button'></button>
+  <button id='update_image_format_cancel_button'></button>
 </div>
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
@@ -100,7 +100,7 @@
         placeHolder: 'Enter a name',
         value: '{{ image_format.name }}',
         required: true
-      }, 'image_format_name');
+      }, 'update_image_format_name');
       name_textBox.startup();
       
       
@@ -114,7 +114,7 @@
         placeHolder: '',
         value: {{ image_format.width }},
         required: true
-      }, 'image_format_width');
+      }, 'update_image_format_width');
       width_numberTextBox.startup();
       
       
@@ -127,7 +127,7 @@
         placeHolder: '',
         value: {{ image_format.height }},
         required: true
-      }, 'image_format_height');
+      }, 'update_image_format_height');
       height_numberTextBox.startup();
       
       
@@ -140,7 +140,7 @@
         label: 'Pixel Aspect',
         value: {{ image_format.pixel_aspect }},
         required: true
-      }, 'image_format_pixel_aspect');
+      }, 'update_image_format_pixel_aspect');
       pixel_aspect_numberTextBox.startup();
       
       
@@ -160,7 +160,7 @@
             method: 'POST'
           });
         }
-      }, 'image_format_update_button');
+      }, 'update_image_format_update_button');
       update_button.startup();
       
       
@@ -174,7 +174,7 @@
         onClick: function(){
           registry.byId('update_image_format_dialog').destroyRecursive();
         }
-      }, 'image_format_cancel_button');
+      }, 'update_image_format_cancel_button');
       cancel_button.startup();
       
   });

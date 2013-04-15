@@ -136,6 +136,24 @@ def view_shot(request):
     }
 
 @view_config(
+    route_name='update_shot',
+    renderer='templates/shot/dialog_update_shot.jinja2',
+    permission='Update_Shot'
+)
+def update_shot(request):
+    """runs when updating a shot
+    """
+
+    shot_id = request.matchdict['shot_id']
+    shot = Shot.query.filter_by(id=shot_id).first()
+
+    return {
+        'shot': shot,
+        'projects': Project.query.all()
+    }
+
+
+@view_config(
     route_name='summarize_shot',
     renderer='templates/shot/content_summarize_shot.jinja2'
 )

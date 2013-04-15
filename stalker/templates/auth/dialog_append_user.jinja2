@@ -17,22 +17,45 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
-<div class='dijitDialogPaneContentArea' style='height: 380px;width: 380px'>
+<div class='dijitDialogPaneContentArea' style='height: 260px'>
   <form id='append_user_form'>
     <table style='width: 100%'>
+      <tr>
+        <td class='form_title'>
+          All Users
+        </td>
+        <td class='form_title'>
+          {{ entity.entity_type }} Users
+        </td>
+      </tr>
       <tr>
         <td class='input_column'>
           <select id='all_users_list'>
           </select>
         </td>
         <td class='input_column'>
-          <select id='project_users_list' >
+          <select id='entity_users_list' >
           </select>
         </td>
       </tr>
+      <tr>
+        <td class='button_column'>
+          <button id='user_append_button'>Append</button>
+          </td>
+      </tr>
+      <tr>
+        <td class='button_column'>
+          <button id='user_remove_button'>Remove</button>
+        </td>
+      </tr>
+
     </table>
   </form>
 
+</div>
+<div class='dijitDialogPaneActionBar'>
+  <button id='append_user_submit_button'>OK</button>
+  <button id='append_user_cancel_button'>Cancel</button>
 </div>
 
 {#<div class='dijitDialogPaneActionBar'>#}
@@ -43,6 +66,7 @@
 <script type="text/javascript">
   require(['dijit/registry',
            'dojo/store/Memory',
+           'dojo/data/ObjectStore',
            'dijit/form/Form',
            'dijit/form/Button',
            'dijit/form/MultiSelect',
@@ -50,66 +74,163 @@
            'stalker/submitForm',
            'stalker/dialogCaller',
            'stalker/fieldUpdater',
+           'dojo/_base/lang',
            'dojo/domReady!'
   ],
-          function(registry,
-                   Memory,
-                   Form,
-                   Button,
-                   MultiSelect,
-                   JsonRest,
-                   submitForm,
-                   dialogCaller,
-                   fieldUpdater)
-          {
-            // **********************************************************************
-            // Form
-            var append_user_form = new Form({
-              id: 'append_user_form'
-            }, 'append_user_form');
-            append_user_form.startup();
+    function(registry,
+             Memory,
+             ObjectStore,
+             Form,
+             Button,
+             MultiSelect,
+             JsonRest,
+             submitForm,
+             dialogCaller,
+             fieldUpdater,
+             lang)
+    {
+      // **********************************************************************
+      // Form
+      var append_user_form = new Form({
+        id: 'append_user_form'
+      }, 'append_user_form');
+      append_user_form.startup();
 
-            // **********************************************************************
-            // All User List
-            var all_users_memory = new JsonRest({
-              target: '/get/users'
-            });
+      // **********************************************************************
+      // Project User List
+      var entity_users_memory = new JsonRest({
+        target: '/get/users_byEntity/{{ entity.id }}'
+      });
 
-            var all_users_multi_select = new MultiSelect({
-              name: 'all_users',
-              required: false,
-              style: 'height: 150px; width: 200px'
-            }, 'all_users_list');
-            all_users_multi_select.startup();
 
-            // The Updater
-            var all_users_field_updater = fieldUpdater({
-              'memory': all_users_memory,
-              'widget': all_users_multi_select
-            });
-            // run the function to fill the data for the first time
-            all_users_field_updater({animate: false});
+      var entity_users_multi_select = new MultiSelect({
+        name: 'entity_users',
+        required: false,
+        style: 'height: 200px; width: 150px'
+      }, 'entity_users_list');
+      entity_users_multi_select.startup();
 
-            // **********************************************************************
-            // Project User List
-            var project_users_memory = new JsonRest({
-              target: '/get/users_byEntity/{{ project.id }}'
-            });
+      var eliminate_entity_users_from_all_users = function(data){
+        for (var i=0; i < data.length; i++){
+          remove_item(all_users_multi_select, data[i].id);
+        }
+      };
 
-            var project_users_multi_select = new MultiSelect({
-              name: 'project_users',
-              required: false,
-              style: 'height: 150px; width: 200px'
-            }, 'project_users_list');
-            project_users_multi_select.startup();
+      // The Updater
+      var entity_users_field_updater = fieldUpdater({
+        'memory': entity_users_memory,
+        'widget': entity_users_multi_select,
+        'callBack': eliminate_entity_users_from_all_users
+      });
 
-            // The Updater
-            var project_users_field_updater = fieldUpdater({
-              'memory': project_users_memory,
-              'widget': project_users_multi_select
-            });
-            // run the function to fill the data for the first time
-            project_users_field_updater({animate: false});
+      // **********************************************************************
+      // All User List
+      var all_users_memory = new JsonRest({
+        target: '/get/users'
+      });
 
-           });
+      var all_users_multi_select = new MultiSelect({
+        name: 'all_users',
+        required: false,
+        label: 'All Users',
+        style: 'height: 200px; width: 150px'
+      }, 'all_users_list');
+      all_users_multi_select.startup();
+
+      var get_entity_users_data = function(data){
+        // run the function to fill the data for the first time
+        entity_users_field_updater({animate: false});
+
+      };
+
+      // The Updater
+      var all_users_field_updater = fieldUpdater({
+        'memory': all_users_memory,
+        'widget': all_users_multi_select,
+        'callBack': get_entity_users_data
+      });
+      //run the function to fill the data for the first time
+      all_users_field_updater({animate: false});
+
+
+
+      var add_item = function(multi_select, opt){
+        var domNode = multi_select.domNode;
+        domNode.appendChild(opt);
+      };
+
+      var remove_item = function(multi_select, rId){
+        var domNode = multi_select.domNode;
+        dojo.query('option', domNode).forEach(function(opt, idx, arr){
+          if(opt.value == rId){
+            dojo.destroy(opt);
+          }
+        });
+      };
+
+      // **********************************************************************
+      // Append User Button
+      var user_append_button = new Button({
+        label: 'Append >>',
+        type: 'button',
+        onClick: function(){
+          var selected_data = all_users_multi_select.get('value');
+          var all_options = dojo.query('option', 'all_users_list');
+
+          for (var i=0; i<all_options.length; i++){
+            if (selected_data.indexOf(all_options[i].value) != -1 ){
+              add_item(entity_users_multi_select, all_options[i]);
+            }
+          }
+        }
+      }, 'user_append_button');
+
+      // **********************************************************************
+      // Remove User Button
+      var user_remove_button = new Button({
+        label: 'Remove',
+        type: 'button',
+        onClick: function(){
+          var selected_data = entity_users_multi_select.get('value');
+          var all_options = dojo.query('option', 'entity_users_list');
+
+          for (var i=0; i<all_options.length; i++){
+            if (selected_data.indexOf(all_options[i].value) != -1 ){
+              add_item(all_users_multi_select, all_options[i]);
+            }
+          }
+        }
+      }, 'user_remove_button');
+
+      // **********************************************************************
+      // Submit Button
+      var submit_button = new Button({
+        label: 'OK',
+        type: 'button',
+        onClick: function(){
+          submitForm({
+            dialog: registry.byId('append_user_dialog'),
+            form: append_user_form,
+            additional_data: {submitted: 'append'},
+            url: 'append/user/{{entity.id}}',
+            method: 'POST'
+          });
+        }
+      }, 'append_user_submit_button');
+      submit_button.startup();
+
+      // **********************************************************************
+      // Cancel Button
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          registry.byId('append_user_dialog').destroyRecursive();
+        }
+      }, 'append_user_cancel_button');
+      cancel_button.startup();
+
+      append_user_form.startup();
+
+     });
 </script>

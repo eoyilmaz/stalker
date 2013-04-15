@@ -97,7 +97,8 @@ def main(global_config, **settings):
     config.add_route('create_project', 'create/project')
     config.add_route('update_project', 'update/project/{project_id}')
     config.add_route('view_project', 'view/project/{project_id}')
-    config.add_route('list_projects', 'list/projects')
+    config.add_route('list_projects', 'list/projects/{entity_id}')
+    config.add_route('get_projects_byEntity', 'get/projects_byEntity/{entity_id}')
     config.add_route('summarize_project', 'summarize/project/{project_id}')
     config.add_route('get_projects', 'get/projects')
     
@@ -127,7 +128,8 @@ def main(global_config, **settings):
     config.add_route('list_users', 'list/users/{entity_id}')
     config.add_route('get_users', 'get/users')
     config.add_route('get_users_byEntity', 'get/users_byEntity/{entity_id}')
-    config.add_route('append_user', 'append/user/{project_id}')
+    config.add_route('get_users_not_in_entity', 'get/users_not_in_entity/{entity_id}')
+    config.add_route('append_user', 'append/user/{entity_id}')
     
     config.add_route('summarize_user', 'summarize/user/{user_id}')
     config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
@@ -225,7 +227,9 @@ def main(global_config, **settings):
     config.add_route('update_department', 'update/department/{department_id}')
     config.add_route('summarize_department', 'summarize/department/{department_id}')
     config.add_route('view_department', 'view/department/{department_id}')
+    config.add_route('list_departments', 'list/departments/{entity_id}')
     config.add_route('get_departments', 'get/departments')
+    config.add_route('get_departments_byEntity', 'get/departments_byEntity/{entity_id}')
     
     # *************************************************************************
     # Group

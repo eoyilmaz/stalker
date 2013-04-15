@@ -23,7 +23,7 @@ from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 
 from stalker.db import DBSession
-from stalker import User, Department
+from stalker import User, Department, Entity
 
 import logging
 from stalker import log
@@ -118,7 +118,6 @@ def view_department(request):
     route_name='summarize_department',
     renderer='templates/department/content_summarize_department.jinja2'
 )
-
 def summarize_department(request):
     """runs when getting general User info
     """
@@ -129,6 +128,48 @@ def summarize_department(request):
     return {
         'department': department
     }
+
+@view_config(
+    route_name='list_departments',
+    renderer='templates/department/content_list_departments.jinja2',
+    permission='Read_Department'
+)
+def list_departments(request):
+    """
+    """
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+
+
+    return {
+        'entity': entity
+
+    }
+
+@view_config(
+    route_name='get_departments_byEntity',
+    renderer='json',
+    permission='Read_Department'
+)
+def get_departments_byEntity(request):
+    """
+    """
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+
+    return [
+            {
+             'name': '<a class="DataLink" href="#" stalker_href="view/department/%s">%s</a>' %(department.id, department.name)
+
+            }
+            for department in entity.departments
+        ]
+
+
+
+
 
 
 

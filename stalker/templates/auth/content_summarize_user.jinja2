@@ -30,9 +30,9 @@
     </div>
 
     {# Basic Info #}
-    <div id='user_info' class='user_info'>
-        <h2 style='margin: 0px; text-align: right;'>{{ user.name }}</h2>
-        <h5 style='margin: 0px; text-align: right;'>({{ user.login }})</h5>
+    <div id='user_info' class='summary_info'>
+        <h2 style='margin: 0px; text-align: left;'>{{ user.name }}</h2>
+        <h5 style='margin: 0px; text-align: left;'>({{ user.login }})</h5>
         <table>
             <tr>
                 <td style='text-align: right'><b>Messages</b></td>
@@ -50,5 +50,64 @@
                 <td>({{ user.open_tickets|count }})</td>
             </tr>
         </table>
+        <button id='update_user_button'>Edit</button>
     </div>
+    {#  Charts  #}
+  <div>
+    <div id='user_summary_chart1'
+         style='width: 200px;
+                  height: 200px;
+                  position: absolute;
+                  right: 20px;'></div>
+  </div>
 </div>
+
+<script type="text/javascript">
+  require(['dojox/charting/Chart',
+    'dojox/charting/themes/Claro',
+    'dojox/charting/plot2d/Pie',
+    'dojox/charting/action2d/MoveSlice',
+    'dijit/form/Button',
+    'stalker/dialogCaller',
+    'dojo/ready'],
+          function(Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller,ready){
+            ready(function(){
+              // Create the chart within it's "holding" node
+              var pieChart = new Chart('user_summary_chart1');
+
+              // Add the only/default plot
+              pieChart.setTheme(theme);
+
+              // Add the only/default plot
+              pieChart.addPlot("default", {
+                type: PiePlot, // our plot2d/Pie module reference as type value
+                radius: 80,
+                fontColor: "black",
+                labelOffset: 0
+              });
+
+              var chartData = [1000, 12000];
+
+              // Add the series of data
+              pieChart.addSeries('January', chartData);
+
+              // Create the slice mover
+              var mag = new MoveSlice(pieChart, 'default');
+
+              // Render the chart!
+              pieChart.render();
+
+              // UPDATE STRUCTURE BUTTON
+              var update_user_button = dialogCaller({
+                label:'Update',
+                dialog_id: 'update_user_dialog',
+                content_creator: update_user_dialog_creator,
+                attach_to: 'update_user_button',
+                data_id: {{ user.id }}
+              });
+              update_user_button.startup();
+
+            });
+
+          });
+</script>

@@ -4,29 +4,93 @@
   <div id='shot_thumbnail' class='thumbnail'>No Avatar</div>
 
     {# Basic Info #}
-  <div id='shot_info' class='shot_info'>
+  <div id='shot_info' class='summary_info'>
     <h2 style='margin: 0px; text-align: left'>{{ shot.name }}</h2>
+    <h5 style='margin: 0px;'>({{ shot.code }})</h5>
     <table>
       <tr>
-        <td style='text-align: right'><b>Description : </b></td>
+        <td style='text-align: right'><b>Project</b></td>
         <td>&nbsp;</td>
-        <td>{{ shot.description }}</td>
+        <td>
+          <a href="#" class= "DataLink" stalker_href = "view/project/{{ shot.project.id }}">{{ shot.project.name }}</a>
+        </td>
       </tr>
       <tr>
-        <td style='text-align: right'><b>Created By : </b></td>
-        <td>&nbsp;</td>
-        <td>{{ shot.created_by.name }}</td>
-      </tr>
-      <tr>
-        <td style='text-align: right'><b>Type : </b></td>
-        <td>&nbsp;</td>
-        <td>{{ shot.type.name }}</td>
-      </tr>
-      <tr>
-        <td style='text-align: right'><b>Status : </b></td>
+        <td style='text-align: right'><b>Status</b></td>
         <td>&nbsp;</td>
         <td>{{ shot.status.name }}</td>
       </tr>
+      <tr>
+        <td style='text-align: right'><b>Created By</b></td>
+        <td>&nbsp;</td>
+        <td>
+          <a href="#" class= "DataLink" stalker_href = "view/user/{{ shot.created_by.id }}">{{ shot.created_by.name }}</a>
+        </td>
+      </tr>
+
+
     </table>
+    <button id='update_shot_button'>Update</button>
+  </div>
+    {#  Charts  #}
+  <div>
+    <div id='shot_summary_chart1'
+         style='width: 200px;
+                  height: 200px;
+                  position: absolute;
+                  right: 20px;'></div>
   </div>
 </div>
+
+<script type="text/javascript">
+  require(['dojox/charting/Chart',
+    'dojox/charting/themes/Claro',
+    'dojox/charting/plot2d/Pie',
+    'dojox/charting/action2d/MoveSlice',
+    'dijit/form/Button',
+    'stalker/dialogCaller',
+    'stalker/goToLink',
+    'dojo/ready'],
+          function(Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller,goToLink,ready){
+            ready(function(){
+              // Create the chart within it's "holding" node
+              var pieChart = new Chart('shot_summary_chart1');
+
+              // Add the only/default plot
+              pieChart.setTheme(theme);
+
+              // Add the only/default plot
+              pieChart.addPlot("default", {
+                type: PiePlot, // our plot2d/Pie module reference as type value
+                radius: 80,
+                fontColor: "black",
+                labelOffset: 0
+              });
+
+              var chartData = [1000, 12000];
+
+              // Add the series of data
+              pieChart.addSeries('January', chartData);
+
+              // Create the slice mover
+              var mag = new MoveSlice(pieChart, 'default');
+
+              // Render the chart!
+              pieChart.render();
+
+              // UPDATE STRUCTURE BUTTON
+              var update_shot_button = dialogCaller({
+                label:'Update',
+                dialog_id: 'update_shot_dialog',
+                content_creator: update_shot_dialog_creator,
+                attach_to: 'update_shot_button',
+                data_id: {{ shot.id }}
+              });
+              update_shot_button.startup();
+
+            });
+
+            goToLink({target:'central_content'});
+
+          });
+</script>

@@ -52,11 +52,6 @@
               style: 'background-color: #f8941d'
             }, 'asset_related_data_tab_container');
 
-            var users_content_pane = new ContentPane({
-              title: 'Users',
-              href: 'list/users/{{ asset.id }}'
-            });
-
             var tasks_content_pane = new ContentPane({
               title: 'Tasks',
               href: 'list/tasks/{{ asset.id }}'
@@ -72,7 +67,6 @@
               href: 'list/versions/{{ asset.id }}'
             });
 
-            asset_related_data_tab_container.addChild(users_content_pane);
             asset_related_data_tab_container.addChild(tasks_content_pane);
             asset_related_data_tab_container.addChild(tickets_content_pane);
             asset_related_data_tab_container.addChild(versions_content_pane);

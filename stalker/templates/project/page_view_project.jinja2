@@ -53,11 +53,6 @@
         style: 'background-color: #39b54a;'
       }, 'project_related_data_tab_container');
 
-      var users_content_pane = new ContentPane({
-        title: 'Users',
-        href: 'list/users/{{ project.id }}'
-      });
-      
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
         href: 'list/tasks/{{ project.id }}'
@@ -77,6 +72,11 @@
         title: 'Sequences',
         href: 'list/sequences/{{ project.id }}'
       });
+
+      var users_content_pane = new ContentPane({
+        title: 'Users',
+        href: 'list/users/{{ project.id }}'
+      });
       
       var tickets_content_pane = new ContentPane({
         title: 'Tickets',
@@ -85,28 +85,23 @@
 
 
 
-      project_related_data_tab_container.addChild(users_content_pane);
+
       project_related_data_tab_container.addChild(tasks_content_pane);
       project_related_data_tab_container.addChild(assets_content_pane);
       project_related_data_tab_container.addChild(shots_content_pane);
       project_related_data_tab_container.addChild(sequences_content_pane);
+      project_related_data_tab_container.addChild(users_content_pane);
       project_related_data_tab_container.addChild(tickets_content_pane);
       project_related_data_tab_container.startup();
 
       project_SplitContainer.addChild(summary_content_pane);
       project_SplitContainer.addChild(project_related_data_tab_container);
       project_SplitContainer.startup();
-{#      project_related_data_tab_container.watch("selectedChildWidget", function(name, oval, nval){#}
-{#        console.log("selected child changed from ", nval.title, " to ", nval.href);#}
-{##}
-{#        if(nval == assets_content_pane &&  assets_content_pane.href != 'list/assets/{{ project.id }}'){#}
-{##}
-{#          assets_content_pane.set('href', 'list/assets/{{ project.id }}');#}
-{##}
-{##}
-{#        }#}
-{##}
-{#      });#}
+
+      project_related_data_tab_container.watch("selectedChildWidget", function(name, oval, nval){
+        console.log("selected child changed from ", nval.title, " to ", nval.href);
+        nval.refresh();
+      });
       
   });
 </script>

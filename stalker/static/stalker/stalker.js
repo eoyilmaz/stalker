@@ -111,7 +111,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         };
         
         update_user_dialog_creator = function(user_id){
-            var myDialog = new DialogSimple({
+            return new DialogSimple({
                 id: 'update_user_dialog',
                 title: 'Update User',
                 href: 'update/user/' + user_id,
@@ -242,6 +242,17 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
                 id: 'create_asset_dialog',
                 title: 'New Asset',
                 href: '/create/asset/' + project_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
+
+        update_asset_dialog_creator = function(asset_id){
+            return new DialogSimple({
+                id: 'update_asset_dialog',
+                title: 'Update Asset',
+                href: '/update/asset/' + asset_id,
                 resize: true,
                 style: style,
                 executeScripts: true

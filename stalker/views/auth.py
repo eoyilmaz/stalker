@@ -143,14 +143,21 @@ def create_user(request):
 
 @view_config(
     route_name='update_user',
-    renderer='templates/auth/update_user.jinja2',
+    renderer='templates/auth/dialog_update_user.jinja2',
     permission='Update_User'
 )
 def update_user(request):
     """called when updating a user
     """
-    pass
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
 
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+
+    return {
+        'user': user
+    }
 
 @view_config(
     route_name='get_users',
@@ -176,8 +183,50 @@ def get_users_byEntity(request):
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
 
-    # works for Departments and Projects or any entity that has users attribute
+    users = []
 
+    for user in entity.users:
+        departmentStr = ''
+        groupStr = ''
+        for department in user.departments:
+            departmentStr += '<a class="DataLink" href="#" stalker_href="view/department/%s">%s</a><br/> ' % (department.id,department.name)
+        for group in user.groups:
+            groupStr += '<a class="DataLink" href="#" stalker_href="view/group/%s">%s</a><br/> ' % (group.id,group.name)
+        users.append({
+            'id': user.id,
+            'name': user.name,
+            'login': user.login,
+            'email': user.email,
+            'departments': departmentStr,
+            'groups': groupStr,
+            'tasksCount': len(user.tasks) ,
+            'ticketsCount': len(user.open_tickets)
+        })
+
+    # works for Departments and Projects or any entity that has users attribute
+    return users
+
+@view_config(
+    route_name='get_users_not_in_entity',
+    renderer='json',
+    permission='Read_User'
+)
+def get_users_not_in_entity(request):
+    """returns all the Users which are not related with the given Entity
+    """
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+    entity_class = None
+    if entity.entity_type == 'Project':
+        entity_class = Project
+    elif entity.entity_type == 'Department':
+        entity_class = Department
+
+    logger.debug(User.query.filter(User.notin_(entity_class.users)).all())
+
+
+    # works for Departments and Projects or any entity that has users attribute
     return [
         {
             'id': user.id,
@@ -188,6 +237,7 @@ def get_users_byEntity(request):
         }
         for user in entity.users
     ]
+
 
 @view_config(
     route_name='append_user',
@@ -201,12 +251,29 @@ def append_user(request):
     login = authenticated_userid(request)
     logged_user = User.query.filter_by(login=login).first()
 
-    project_id = request.matchdict['project_id']
-    project = Project.query.filter_by(id=project_id).first()
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+    if 'submitted' in request.params:
+        logger.debug('submitted in params')
+        if request.params['submitted'] == 'append':
+            logger.debug('submitted value is: append')
+            # append and add a new user
+            if  'entity_users' in request.params:
+                user_ids = [
+                    int(user_id)
+                    for user_id in request.POST.getall('entity_users')
+                ]
+                users = User.query.filter(
+                    User.id.in_(user_ids)).all()
+
+
+
+
 
     return {
             'user': logged_user,
-            'project': project
+            'entity': entity
         }
 
 
@@ -351,3 +418,5 @@ def home(request):
         'user': user,
         'projects': projects,
     }
+
+

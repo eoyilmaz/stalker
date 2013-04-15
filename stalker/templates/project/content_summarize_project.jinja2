@@ -20,17 +20,25 @@
 <div style="background-color: #39b54a " class="page_title">     </div>
 <div  id='project_details'>
     {# Thumbnail #}
-    <div id='project_thumbnail' class='thumbnail'>No Thumbnail</div>
+    <div id='project_thumbnail' class='thumbnail'>
+        {% if not project.thumbnail %}
+      <img src='{{ request.static_url("stalker:static/stalker/images/NoProjectPicture.jpg") }}' alt=''
+           style='width:192px; height: 192px'>
+    {% endif %}</div>
 
     {# Basic Info #}
-    <div id='project_info' class='project_info'>
-      <h2 style='margin: 0px; text-align: right'>{{ project.name }}</h2>
-      <h5 style='margin: 0px; text-align: right'>({{ project.code }})</h5>
+    <div id='project_info' class='summary_info'>
+      <h2 style='margin: 0px;'>{{ project.name }}</h2>
+      <h5 style='margin: 0px;'>({{ project.code }})</h5>
       <table>
         <tr>
           <td style='text-align: right'><b>Lead</b></td>
           <td>&nbsp;</td>
-          <td>{{ project.lead.name }} ({{ project.lead.login }})</td>
+
+          <td>
+            <a href="#" class= "DataLink" stalker_href = "view/user/{{ project.lead.id }}">{{ project.lead.name }}</a>
+            ({{ project.lead.login }})
+          </td>
         </tr>
         <tr>
           <td style='text-align: right'><b>Image Format</b></td>
@@ -58,23 +66,30 @@
           <td>{{ project.end }}</td>
         </tr>
       </table>
+      <button id='update_project_button'>Edit</button>
     </div>
-    
     {#  Charts  #}
     <div>
       <div id='project_summary_chart1'
-           style='width: 200px;
-                  height: 200px;
+           style='width: 192px;
+                  height: 192px;
                   position: absolute;
                   right: 20px;'></div>
     </div>
 </div>
 
 <script type="text/javascript">
-  require(['dojox/charting/Chart', 'dojox/charting/themes/Claro',
-    'dojox/charting/plot2d/Pie', 'dojox/charting/action2d/MoveSlice',
+
+  require(['dijit/registry',
+    'dojox/charting/Chart',
+    'dojox/charting/themes/Claro',
+    'dojox/charting/plot2d/Pie',
+    'dojox/charting/action2d/MoveSlice',
+    'dijit/form/Button',
+    'stalker/dialogCaller',
+    'stalker/goToLink',
     'dojo/ready'],
-    function(Chart, theme, PiePlot,  MoveSlice, ready){
+    function(registry, Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller, goToLink, ready){
       ready(function(){
         // Create the chart within it's "holding" node
         var pieChart = new Chart('project_summary_chart1');
@@ -100,8 +115,28 @@
 
         // Render the chart!
         pieChart.render();
+
+        // UPDATE STRUCTURE BUTTON
+        var update_project_button = dialogCaller({
+          label:'Update',
+          dialog_id: 'update_project_dialog',
+          content_creator: update_project_dialog_creator,
+          attach_to: 'update_project_button',
+          //related_field_updater: structure_field_updater,
+          data_id: {{ project.id }}
+        });
+        update_project_button.startup();
         
       });
+
+
+
+
+      goToLink({target:'central_content'});
+
+
+
+
     
   });
 </script>
