@@ -24,12 +24,28 @@
 
 <script type='text/javascript'>
   require(['dijit/registry',
-    'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dojo/store/Memory',
-    'dijit/form/FilteringSelect', 'dojo/store/JsonRest',
-    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/on', 'dojo/query',
+    'dojo/data/ObjectStore',
+    'dojox/grid/DataGrid',
+    'dojo/store/Memory',
+    'dijit/form/FilteringSelect',
+    'dojo/store/JsonRest',
+    'stalker/fieldUpdater',
+    'stalker/dialogCaller',
+    'stalker/goToLink',
+    'dojo/on',
+    'dojo/query',
     'dojo/domReady!'],
-      function(registry, ObjectStore, DataGrid, Memory, FilteringSelect,
-               JsonRest, fieldUpdater, dialogCaller, on, query){
+      function(registry,
+               ObjectStore,
+               DataGrid,
+               Memory,
+               FilteringSelect,
+               JsonRest,
+               fieldUpdater,
+               dialogCaller,
+               goToLink,
+               on,
+               query){
 
 
         var asset_data_grid = new DataGrid({
@@ -74,61 +90,44 @@
           asset_memory.query().then(function(data){
 
 
-            for(var i=0;i<data.length;i++ ){
+           for(var i=0;i<data.length;i++ ){
 
-              var assetName = data[i]["name"];
-              var assetLink = '<a class="DataGridLink" href="#" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';
+             var assetName = data[i]["name"];
+             var assetLink = '<a class="DataLink" href="#" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';
 
-              var userName = data[i]["user_name"];
-              var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
+             var userName = data[i]["user_name"];
+             var userLink = '<a class="DataLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
 
-              data[i]["asset_link"] = assetLink;
-              data[i]["user_link"] = userLink;
+             data[i]["asset_link"] = assetLink;
+             data[i]["user_link"] = userLink;
 
-            }
-
-
-                var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
-
-                var structure = [
-                  {name: 'Thumbnail',                         width: '100px'},
-                  {name: 'Name',        field: 'asset_link',  width: '100px'},
-                  {name: 'Type',        field: 'type',        width: '200px'},
-                  {name: 'Status',      field: 'status',      width: '150px', editable: true,
-                    widgetClass: FilteringSelect,
-                    widgetProps: {
-                      store: status_memory
-                    }},
-                  {name: 'Created By',  field: 'user_link',     width: '150px'},
-                  {name: 'Description', field: 'description', width: 'auto'}
-                ];
-
-                asset_data_grid.set('store', my_store );
-                asset_data_grid.set('structure', structure );
+           }
 
 
-                initUI();
+           var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
 
-              });
+           var structure = [
+             {name: 'Thumbnail',                         width: '100px'},
+             {name: 'Name',        field: 'asset_link',  width: '100px'},
+             {name: 'Type',        field: 'type',        width: '200px'},
+             {name: 'Status',      field: 'status',      width: '150px', editable: true,
+               widgetClass: FilteringSelect,
+               widgetProps: {
+                 store: status_memory
+               }},
+             {name: 'Created By',  field: 'user_link',     width: '150px'},
+             {name: 'Description', field: 'description', width: 'auto'}
+           ];
 
-            }
+           asset_data_grid.set('store', my_store );
+           asset_data_grid.set('structure', structure );
 
-        function initUI() {
 
 
-          // connect links
-          var contentPane = registry.byId('central_content');
 
-          // get the Link Elements
-          var dataGridLinks = query('.DataGridLink');
+           goToLink({target:'central_content'});
 
-          for (var i=0; i < dataGridLinks.length; i++){
-
-            on(dataGridLinks[i], 'click', function(){
-              contentPane.set('href', this.getAttribute('stalker_href'));
-              contentPane.reset();
-            })
-          }
+          });
 
         }
 

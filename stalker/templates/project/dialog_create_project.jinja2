@@ -303,12 +303,24 @@
           required: true
         }, 'project_image_format');
         imf_filteringSelect.startup();
-        
+
+        var imf_filteringSelect_selected_value = '';
+        var imf_data_length = 0;
+
+        var set_imf_filteringSelect_value = function(data){
+          if(imf_data_length!=0 && imf_data_length < data.length){
+            imf_filteringSelect_selected_value = data[data.length-1].id;
+          }
+          imf_filteringSelect.set('value',imf_filteringSelect_selected_value);
+          imf_data_length = data.length;
+        };
+
         // The Updater
         // supply a function to refresh the content of the format
         var imf_field_updater = fieldUpdater({
           'memory': imf_memory,
-          'widget': imf_filteringSelect
+          'widget': imf_filteringSelect,
+          'callBack': set_imf_filteringSelect_value
         });
         // run the function to fill the data for the first time
         imf_field_updater({animate: false});
@@ -331,7 +343,8 @@
           attach_to: 'project_update_image_format_button',
           related_field_updater: imf_field_updater,
           data_id: function(){
-            return imf_filteringSelect.get('value');
+            imf_filteringSelect_selected_value = imf_filteringSelect.get('value');
+            return imf_filteringSelect_selected_value;
           }
         });
         update_image_format_button.startup();
@@ -366,11 +379,23 @@
           required: true
         }, 'project_repository');
         repository_filteringSelect.startup();
+
+        var repository_filteringSelect_selected_value = '';
+        var repository_data_length = 0;
+
+        var set_repository_filteringSelect_value = function(data){
+          if(repository_data_length!=0 && repository_data_length < data.length){
+            repository_filteringSelect_selected_value = data[data.length-1].id;
+          }
+          repository_filteringSelect.set('value',repository_filteringSelect_selected_value);
+          repository_data_length = data.length;
+        };
         
         // The Updater
         var repo_field_updater = fieldUpdater({
           'memory': repository_memory,
-          'widget': repository_filteringSelect
+          'widget': repository_filteringSelect,
+          'callBack': set_repository_filteringSelect_value
         });
         // run the function to fill the data
         repo_field_updater({animate: false});
@@ -393,6 +418,7 @@
           attach_to: 'project_update_repository_button',
           related_field_updater: repo_field_updater,
           data_id: function(){
+            repository_filteringSelect_selected_value = repository_filteringSelect.get('value');
             return repository_filteringSelect.get('value');
           }
         });
@@ -416,11 +442,23 @@
           required: true
         }, 'project_structure');
         structure_filteringSelect.startup();
+
+        var structure_filteringSelect_selected_value = '';
+        var structure_data_length = 0;
+
+        var set_structure_filteringSelect_value = function(data){
+          if(structure_data_length!=0 && structure_data_length < data.length){
+            structure_filteringSelect_selected_value = data[data.length-1].id;
+          }
+          structure_filteringSelect.set('value',structure_filteringSelect_selected_value);
+          structure_data_length = data.length;
+        };
         
         // The Updater
         var structure_field_updater = fieldUpdater({
           'memory': structure_memory,
-          'widget': structure_filteringSelect
+          'widget': structure_filteringSelect,
+          'callBack': set_structure_filteringSelect_value
         });
         // call the updater to fill the field for the first time
         structure_field_updater({animate: false});
@@ -444,7 +482,8 @@
           attach_to: 'project_update_structure_button',
           related_field_updater: structure_field_updater,
           data_id: function(){
-            return structure_filteringSelect.get('value')
+            structure_filteringSelect_selected_value = structure_filteringSelect.get('value');
+            return structure_filteringSelect_selected_value;
           }
         });
         update_structure_button.startup();
@@ -465,11 +504,23 @@
           required: true
         }, 'project_lead');
         lead_filteringSelect.startup();
+
+        var lead_filteringSelect_selected_value = '';
+        var lead_data_length = 0;
+
+        var set_lead_filteringSelect_value = function(data){
+          if(lead_data_length!=0 && lead_data_length < data.length){
+            lead_filteringSelect_selected_value = data[data.length-1].id;
+          }
+          lead_filteringSelect.set('value',lead_filteringSelect_selected_value);
+          lead_data_length = data.length;
+        };
         
         // The Updater
         var lead_field_updater = fieldUpdater({
           'memory': lead_memory,
-          'widget': lead_filteringSelect
+          'widget': lead_filteringSelect,
+          'callBack': set_lead_filteringSelect_value
         });
         lead_field_updater({animate: false});
         
@@ -491,7 +542,8 @@
           attach_to: 'project_update_lead_button',
           related_field_updater: lead_field_updater,
           data_id: function(){
-            return lead_filteringSelect.get('value')
+            lead_filteringSelect_selected_value = lead_filteringSelect.get('value');
+            return lead_filteringSelect_selected_value;
           }
         });
         update_lead_button.startup();
@@ -511,7 +563,9 @@
           required: true
         }, 'project_status');
         status_filteringSelect.startup();
-        
+
+
+
         var update_button_function = function(data){
           
           if(data.length>0){
@@ -558,7 +612,7 @@
 
         // ********************************************************************
         // Ok Button
-        var submit_button = new Button({
+        var ok_button = new Button({
           label: 'OK',
           type: 'button',
           onClick: function(){
@@ -575,7 +629,7 @@
             });
           }
         }, 'project_submit_button');
-        submit_button.startup();
+        ok_button.startup();
         
         // ********************************************************************
         // Cancel Button

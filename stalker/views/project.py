@@ -27,7 +27,7 @@ from sqlalchemy.exc import IntegrityError
 import transaction
 from stalker.db import DBSession
 from stalker import (User, ImageFormat, Repository, Structure, Status,
-                     StatusList, Project)
+                     StatusList, Project, Entity)
 
 import logging
 from stalker import log
@@ -167,47 +167,65 @@ def create_project(request):
 def view_projects(request):
     """runs when viewing all projects
     """
+
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
     # just return all the projects
     return {
-        'projects': Project.query.all()
+        'entity': entity
     }
+
+@view_config(
+    route_name='get_projects_byEntity',
+    renderer='json',
+    permission='Read_Project'
+)
+def get_projects_byEntity(request):
+    """
+    """
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+
+    return [
+        {
+            'id': project.id,
+            'name': project.name,
+            }
+        for project in entity.projects
+    ]
+
 
 
 @view_config(
     route_name='update_project',
-    renderer='templates/project/update_project.jinja2',
+    renderer='templates/project/dialog_update_project.jinja2',
     permission='Update_Project'
 )
 def update_project(request):
     """runs when updateing a project
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
+    # referrer = request.url
+    # came_from = request.params.get('came_from', referrer)
     
-    proj_id = request.matchdict['project_id']
-    proj = Project.query.filter_by(id=proj_id).first()
+    project_id = request.matchdict['project_id']
+    project = Project.query.filter_by(id=project_id).first()
     
-    if request.params['submitted'] == 'update':
-        #return HTTPFound(location=came_from)
-        login = authenticated_userid(request)
-        authenticated_user = User.query.filter_by(login=login).first()
-        
-        # get the project and update it
-        # TODO: add this part
-        
-        # return where we came from
-        return HTTPFound(location=came_from)
-    
-    # just give the info enough to fill the form
+    # if request.params['submitted'] == 'update':
+    #     #return HTTPFound(location=came_from)
+    #     login = authenticated_userid(request)
+    #     authenticated_user = User.query.filter_by(login=login).first()
+    #
+    #     # get the project and update it
+    #     # TODO: add this part
+    #
+    #     # return where we came from
+    #     # return HTTPFound(location=came_from)
+    #
+    # # just give the info enough to fill the form
     return {
-        'project': proj,
-        'users': User.query.all(),
-        'image_formats': ImageFormat.query.all(),
-        'repositories': Repository.query.all(),
-        'structures': Structure.query.all(),
-        'status_lists': StatusList.query\
-                            .filter_by(target_entity_type='Project')\
-                            .all(),
+        'project': project
     }
 
 

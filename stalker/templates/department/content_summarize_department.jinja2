@@ -32,14 +32,18 @@
     </div>
 
     {# Basic Info #}
-  <div id='department_info' class='department_info'>
-    <h2 style='margin: 0px; text-align: right;'>{{ department.name }}</h2>
+  <div id='department_info' class='summary_info'>
+    <h2 style='margin: 0px; text-align: left;'>{{ department.name }}</h2>
     <table>
+        {% if department.lead %}
       <tr>
         <td style='text-align: right'><b>Lead</b></td>
         <td>&nbsp;</td>
-        <td>({{ department.lead.name }})</td>
+        <td>
+          <a href="#" class= "DataLink" stalker_href = "view/user/{{ department.lead.id }}">{{ department.lead.name}}</a>
+          ({{ department.lead.login }})</td>
       </tr>
+        {% endif %}
     </table>
   </div>
 </div>

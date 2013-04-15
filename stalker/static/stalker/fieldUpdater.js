@@ -119,8 +119,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                                 placeHolder = 'Select an item from list';
                             }
                             widget.set('placeHolder', placeHolder);
-//                            console.log('data.length: ' + data.length + " placeHolder "+placeHolder);
-                            
+//
                             if(widget.declaredClass != 'dijit.form.FilteringSelect'){
                                 try{
                                     widget.attr('value', data[0].id);

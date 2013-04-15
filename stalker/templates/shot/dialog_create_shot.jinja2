@@ -148,30 +148,19 @@
       
       // **********************************************************************
       // Project
-      var project_filtering_select;
 
-      {% if project %}
-        project_filtering_select = new TextBox({
-          name: 'project_id',
-          label: 'Project',
-          value: '{{ project.name }} ({{ project.entity_type }})',
-          disabled: true
-        }, 'shot_project');
-      project_filtering_select.startup();
+      var project_memory = new Memory({
+        data: [
+          {% for project in projects %}
+            {
+              name: '{{ project.name }}',
+              id: '{{ project.id }}'
+            },
+          {% endfor %}
+        ]
+      });
 
-      {% else %}
-        var project_memory = new Memory({
-          data: [
-            {% for project in projects %}
-              {
-                name: '{{ project.name }}',
-                id: '{{ project.id }}'
-              },
-            {% endfor %}
-          ]
-        });
-
-      project_filtering_select = new FilteringSelect({
+      var project_filtering_select = new FilteringSelect({
         name: 'project_id',
         required: true,
         store: project_memory,
@@ -181,6 +170,10 @@
         }
       }, 'shot_project');
       project_filtering_select.startup();
+
+      {% if project %}
+        project_filtering_select.set('value','{{ project.id }}');
+        project_filtering_select.set('disabled',true);
       {% endif %}
 
 
@@ -192,7 +185,7 @@
 
       var sequence_filtering_select = new FilteringSelect({
         name: 'sequence_id',
-        required: true,
+        required: false,
         disabled: true,
         label: 'Sequence'
       }, 'shot_sequence');
@@ -379,11 +372,7 @@
             additional_data: {
               submitted: 'create'
             },
-            {% if project %}
-              url: 'create/shot/{{project.id}}',
-            {% else %}
-              url: 'create/shot/' + project_filtering_select.value,
-            {% endif %}
+            url: 'create/shot/' + project_filtering_select.value,
             method: 'POST'
           });
         }

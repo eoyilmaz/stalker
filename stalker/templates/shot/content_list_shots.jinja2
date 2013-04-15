@@ -24,9 +24,9 @@
 <script type='text/javascript'>
   require(['dijit/registry', 'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
     'dojo/store/Memory', 'dojo/store/JsonRest', 'stalker/fieldUpdater',
-    'stalker/dialogCaller', 'dojo/on', 'dojo/query','dojo/domReady!'],
+    'stalker/dialogCaller', 'stalker/goToLink','dojo/on', 'dojo/query','dojo/domReady!'],
     function(registry, ObjectStore, DataGrid, Memory, JsonRest, fieldUpdater,
-             dialogCaller, on, query){
+             dialogCaller, goToLink, on, query){
 
       var shots_data_grid = new DataGrid({
         id: 'shots_data_grid',
@@ -70,10 +70,10 @@
           for(var i=0;i<data.length;i++ ){
 
             var shotName = data[i]["name"];
-            var shotLink = '<a class="DataGridLink" href="#" stalker_href="view/shot/' + data[i]['id'] + '">' + shotName + '</a>';
+            var shotLink = '<a class="DataLink" href="#" stalker_href="view/shot/' + data[i]['id'] + '">' + shotName + '</a>';
 
             var userName = data[i]["user_name"];
-            var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
+            var userLink = '<a class="DataLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
 
             data[i]["shot_link"] = shotLink;
             data[i]["user_link"] = userLink;
@@ -93,29 +93,10 @@
           shots_data_grid.set('store', my_store );
           shots_data_grid.set('structure', structure );
 
-          initUI();
+          goToLink({target:'central_content'});
         });
 
 
-
-      }
-
-      function initUI() {
-
-
-        // connect links
-        var contentPane = registry.byId('central_content');
-
-        // get the Link Elements
-        var dataGridLinks = query('.DataGridLink');
-
-        for (var i=0; i < dataGridLinks.length; i++){
-
-          on(dataGridLinks[i], 'click', function(){
-            contentPane.set('href', this.getAttribute('stalker_href'));
-            contentPane.reset();
-          })
-        }
 
       }
 

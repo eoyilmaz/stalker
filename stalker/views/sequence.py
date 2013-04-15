@@ -111,27 +111,27 @@ def create_sequence(request):
 
 @view_config(
     route_name='update_sequence',
-    renderer='templates/sequence/update_sequence.jinja2',
+    renderer='templates/sequence/dialog_update_sequence.jinja2',
     permission='Update_Sequence'
 )
 def update_sequence(request):
-    """runs when updateing a sequence
+    """runs when updating a sequence
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
+    # referrer = request.url
+    # came_from = request.params.get('came_from', referrer)
+    #
     sequence_id = request.matchdict['sequence_id']
     sequence = Sequence.query.filter_by(id=sequence_id).first()
-    
-    if request.params['submitted'] == 'update':
-        login = authenticated_userid(request)
-        authenticated_user = User.query.filter_by(login=login).first()
-        
-        # get the sequence and update it
-        # TODO: add this part
-        
-        # return where we came from
-        return HTTPFound(location=came_from)
+    #
+    # if request.params['submitted'] == 'update':
+    #     login = authenticated_userid(request)
+    #     authenticated_user = User.query.filter_by(login=login).first()
+    #
+    #     # get the sequence and update it
+    #     # TODO: add this part
+    #
+    #     # return where we came from
+    #     return HTTPFound(location=came_from)
     
     # just give the info enough to fill the form
     return {
@@ -140,6 +140,8 @@ def update_sequence(request):
         'status_lists': StatusList.query\
                             .filter_by(target_entity_type='Sequence')\
                             .all(),
+        'projects': Project.query.all()
+
     }
 
 @view_config(

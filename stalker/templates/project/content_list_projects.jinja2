@@ -52,46 +52,28 @@
 
                 user_memory.query().then(function(data){
                   for(var i=0;i<data.length;i++ ){
-                    var userName = data[i]["name"];
-                    var userLink = '<a class="DataGridLink" href="#" stalker_href="view/user/' + data[i]['id'] + '">' + userName + '</a>';
+                    var projectName = data[i]["name"];
+                    var projectLink = '<a class="DataLink" href="#" stalker_href="view/user/' + data[i]['id'] + '">' + projectName + '</a>';
 
-                    data[i]["user_link"] = userLink;
+                    data[i]["projectLink"] = projectLink;
                   }
 
                   var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
 
                   var structure = [
                     {name: 'Thumbnail',                           width: '100px'},
-                    {name: 'Name',         field: 'user_link',    width: '100px'},
-                    {name: 'Login Name',   field: 'login',        width: '200px'},
-                    {name: 'Tasks',        field: 'tasksCount',   width: '150px'},
-                    {name: 'Open Tickets', field: 'ticketsCount', width: 'auto'}
+                    {name: 'Name',         field: 'projectLink',    width: '100px'}
                   ];
 
                   projects_DataGrid.set('store', my_store );
                   projects_DataGrid.set('structure', structure );
 
-                  initUI();
-
+                  //goToLink({target:'central_content'});
                 });
 
               }
 
-              function initUI(){
-                // connect links
-                var contentPane = registry.byId('central_content');
 
-                // get the Link Elements
-                var dataGridLinks = query('.DataGridLink');
-
-                for (var i=0; i < dataGridLinks.length; i++){
-
-                  on(dataGridLinks[i], 'click', function(){
-                    contentPane.set('href', this.getAttribute('stalker_href'));
-                    contentPane.reset();
-                  })
-                }
-              }
 
               projects_DataGrid_updater();
 

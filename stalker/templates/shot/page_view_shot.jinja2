@@ -33,11 +33,6 @@
               style: 'background-color: #fff200'
             }, 'shot_related_data_tab_container');
 
-            var users_content_pane = new ContentPane({
-              title: 'Users',
-              href: 'list/users/{{ shot.id }}'
-            });
-
             var tasks_content_pane = new ContentPane({
               title: 'Tasks',
               href: 'list/tasks/{{ shot.id }}'
@@ -53,7 +48,6 @@
               href: 'list/versions/{{ shot.id }}'
             });
 
-            shot_related_data_tab_container.addChild(users_content_pane);
             shot_related_data_tab_container.addChild(tasks_content_pane);
             shot_related_data_tab_container.addChild(tickets_content_pane);
             shot_related_data_tab_container.addChild(versions_content_pane);

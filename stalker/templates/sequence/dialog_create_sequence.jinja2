@@ -199,35 +199,28 @@
       // **********************************************************************
       // Project
 
-      var project_select;
 
+      var project_memory = new Memory({
+        data: [
+          {% for project in projects %}
+            {
+              name: '{{ project.name }}',
+              id: '{{ project.id }}'
+            },
+          {% endfor %}
+        ]
+      });
+
+      var project_select = new FilteringSelect({
+        name: 'project_id',
+        required: true,
+        store: project_memory,
+        placeHolder: 'Select A Project'
+      }, 'sequence_project');
+      project_select.startup();
       {% if project %}
-        project_select = new TextBox({
-          name: 'project_id',
-          label: 'Project',
-          value: '{{ project.name }} ({{ project.entity_type }})',
-          disabled: true
-        }, 'sequence_project');
-        project_select.startup();
-      {% else %}
-        var project_memory = new Memory({
-          data: [
-            {% for project in projects %}
-              {
-                name: '{{ project.name }}',
-                id: '{{ project.id }}'
-              },
-            {% endfor %}
-          ]
-        });
-
-        project_select = new FilteringSelect({
-          name: 'project_id',
-          required: true,
-          store: project_memory,
-          placeHolder: 'Select A Project'
-        }, 'sequence_project');
-        project_select.startup();
+        project_select.set('value','{{ project.id }}');
+        project_select.set('disabled',true);
       {% endif %}
       
       
@@ -358,11 +351,7 @@
             additional_data: {
               submitted: 'create'
             },
-            {% if project %}
-              url: 'create/sequence/{{project.id}}',
-            {% else %}
-              url: 'create/sequence/' + project_select.value,
-            {% endif %}
+            url: 'create/sequence/' + project_select.value,
             method: 'POST'
           });
         }

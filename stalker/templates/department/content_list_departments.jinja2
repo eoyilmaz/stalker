@@ -1,0 +1,89 @@
+{# Stalker a Production Asset Management System
+ Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+
+ This file is part of Stalker.
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation;
+ version 2.1 of the License.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#}
+<div id='view_departments'>
+  <button id='view_departments_append_department_button'>Append Department</button>
+  <div id='departments_data_grid'></div>
+</div>
+
+<script type='text/javascript'>
+  require(['dijit/registry',
+    'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dojo/store/Memory',
+    'dijit/form/FilteringSelect', 'dojo/store/JsonRest',
+    'stalker/fieldUpdater', 'stalker/dialogCaller', 'stalker/goToLink','dojo/on', 'dojo/query',
+    'dojo/ready'],
+          function(registry, ObjectStore, DataGrid, Memory, FilteringSelect,
+                   JsonRest, fieldUpdater, dialogCaller, goToLink, on, query, ready){
+
+            ready(function(){
+
+              var departments_DataGrid = new DataGrid({
+                id: 'departments_data_grid',
+                width: '100%',
+                autoHeight: true,
+                singleClickEdit: true,
+                escapeHTMLInData: false,
+                rowSelector: '20px'
+              }, 'departments_data_grid');
+
+{#              var append_department_button = dialogCaller({#}
+{#                label: 'Append User',#}
+{#                dialog_id: 'append_department_dialog',#}
+{#                content_creator: append_department_dialog_creator,#}
+{#                attach_to: 'view_departments_append_department_button',#}
+{#                related_field_updater: departments_DataGrid_updater,#}
+{#                data_id: '{{ entity.id }}'#}
+{#              });#}
+
+              departments_DataGrid.startup();
+{#              append_department_button.startup();#}
+
+
+
+              function departments_DataGrid_updater(){
+
+                var department_memory = new JsonRest({
+                  target: '/get/departments_byEntity/{{ entity.id }}'
+                });
+
+                department_memory.query().then(function(data){
+
+                  var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
+
+                  var structure = [
+                    {name: 'Thumbnail',                      width: '100px'},
+                    {name: 'Name',         field: 'name',    width: '100px'}
+                  ];
+
+                  departments_DataGrid.set('store', my_store );
+                  departments_DataGrid.set('structure', structure );
+
+                  goToLink({target:'central_content'});
+
+                });
+
+              }
+
+
+
+              departments_DataGrid_updater();
+            });
+          });
+</script>
+

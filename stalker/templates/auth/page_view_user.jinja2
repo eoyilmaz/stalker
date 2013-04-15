@@ -52,24 +52,33 @@
         style: 'background-color: #00aef0;'
       }, 'user_related_data_tab_container');
 
-      
+
+      var projects_content_pane = new ContentPane({
+        title: 'Projects',
+        href:'list/projects/{{ user.id }}'
+      });
+
+
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
         href: 'list/tasks/{{ user.id }}'
       });
-      
-      var assets_content_pane = new ContentPane({
-        title: 'Assets',
-        href:'list/versions/{{ user.id }}'
+
+      var departments_content_pane = new ContentPane({
+        title: 'Departments',
+        href: 'list/departments/{{ user.id }}'
       });
+      
 
       var tickets_content_pane = new ContentPane({
         title: 'Tickets',
         content: 'list/tickets/{{ user.id }}'
       });
 
+
+      user_related_data_tab_container.addChild(projects_content_pane);
       user_related_data_tab_container.addChild(tasks_content_pane);
-      user_related_data_tab_container.addChild(assets_content_pane);
+      user_related_data_tab_container.addChild(departments_content_pane);
       user_related_data_tab_container.addChild(tickets_content_pane);
 
       user_related_data_tab_container.startup();

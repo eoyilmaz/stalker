@@ -174,7 +174,11 @@
           stalker_MenuBar.addChild(new MenuBarItem({
             label:"HOME ",
             onClick:function(){
-              appLayout.refresh();
+              central_content_pane.set(
+                      'href',
+                      'view/user/{{ user.id }}'
+              );
+              central_content_pane.refresh();
             }
           }));
           // ******************************************************************
@@ -313,6 +317,19 @@
                     central_content_pane.refresh();
                   }
                 })
+            );
+
+            // --------
+            // Update Project
+            project_setting_DropDownMenu.addChild(
+              dialogCaller({
+                label:'Update',
+                dialog_id:'update_project_dialog',
+                content_creator: update_project_dialog_creator,
+                widget_type: 'MenuItem',
+                data_id: pID
+
+              })
             );
 
             project_setting_DropDownMenu.addChild(

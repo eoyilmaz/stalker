@@ -221,6 +221,7 @@ a:hover {
     vertical-align: middle;
 }
 
+
 .project_info {
     position: absolute;
     clear: both;
@@ -276,4 +277,17 @@ a:hover {
     text-align: center;
     height: 4px;
 
+}
+
+.form_title {
+    color: #000000;
+    font-size: 13px;
+    text-align: center;
+
+}
+
+.summary_info {
+    position: absolute;
+    clear: both;
+    left: 204px;
 }
