@@ -66,7 +66,7 @@
     <td class="gdfCell"></td>
   </tr>
 --></div>
-
+  
   <div class="__template__" type="TASKBAR"><!--
   <div class="taskBox" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
@@ -115,6 +115,9 @@
     <div style="float: left;">
       <button id='list_tasks_zoom_out_button'>Zoom Out</button>
       <button id='list_tasks_zoom_in_button'>Zoom In</button>
+    </div>
+    <div style='float: right;'>
+      <button id='list_tasks_auto_schedule_button'>Auto Schedule</button>
     </div>
   </div>
 </div>
@@ -542,7 +545,7 @@
                 loadGanttFromServer();
               });
             }
-          })
+          }, 'list_tasks_auto_schedule_button')
           
         
       });

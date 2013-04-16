@@ -17,28 +17,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-define(['dijit/form/Button', 'dijit/MenuItem', 'stalker/dialogCreator'],
-    function(Button, MenuItem, dialogCreator){
-        // ********************************************************************
+define(['dojo/ready'],
+    function(ready){
+        // *******************************************************************
         // DialogCaller
         //
-        // Creates a widget (a button or a menuItem) which calls the given
-        // dialog and also works together with stalker.submitForm and updates
-        // the given field with the newly created or edited value.
+        // Creates a dialog and also works together with stalker.submitForm and
+        // updates the given field with the newly created or edited value.
         // 
         // PARAMETERS
-        // 
-        // label:
-        //   The label of the widget, default is 'Add'
         // 
         // dialog_id:
         //   the id of the parent dialog
         // 
         // content_creator:
         //   the content creator function for the dialog
-        // 
-        // attach_to:
-        //   the dom element to attach this button to
         // 
         // data_id:
         //   if we already have some id for the data, let say if we are adding
@@ -54,45 +47,47 @@ define(['dijit/form/Button', 'dijit/MenuItem', 'stalker/dialogCreator'],
         //   a function object without any parameters which will update the
         //   the related field which this form is adding data to.
         // 
-        // widget_type: 'Button' or 'MenuItem'
-        //   the type of widget
-        //
         
         // it calls a dialog which generally adds or edits a data
         // but it is not limited with that, it just calls the dialog
         
-        var dialogCaller = function(kwargs){
-            var label = kwargs.label || 'Add';
-            var dialog_id = kwargs.dialog_id || null;
-            var content_creator = kwargs.content_creator;
-            var attach_to = kwargs.attach_to;
+        var dialogCreator = function(kwargs){
+            var dialog_id = kwargs['dialog_id'] || null;
             var data_id = kwargs.data_id || function(){};
-            var related_field_updater = kwargs.related_field_updater || function(){};
-            var widget_type = kwargs.widget_type || 'Button';
+            var content_creator = kwargs.content_creator;
+            var related_field_updater = kwargs.related_field_updater || function(){};            
             
-            var WidgetClass = Button;
-            if (widget_type == 'MenuItem'){
-                WidgetClass = MenuItem;
-            }
-
-
-            var widget = new WidgetClass({
-                label: label,
-                onClick: function(){
-                    var myDialog = dialogCreator({
-                        dialog_id: dialog_id,
-                        data_id: data_id,
-                        content_creator: content_creator,
-                        related_field_updater: related_field_updater
-                    });
-                    myDialog.show();
+            if (dialog_id != null){
+                var dialog = dijit.byId(dialog_id);
+                if (dialog != null){
+                    dialog.destroyRecursive();
                 }
-            }, attach_to);
+                
+                // get the data_id
+                if (data_id != null){
+                    if (typeof(data_id) == 'function') {
+                        dialog = content_creator(data_id());
+                    } else {
+                        dialog = content_creator(data_id);
+                    }
+                } else {
+                    dialog = content_creator();
+                }
+
+                // set the field updater
+                dialog.set(
+                    'related_field_updater',
+                    related_field_updater
+                );
+
+                // show the dialog
+                //dialog.show();
+            }
             
-            return widget;
+            return dialog;
         };
         
-        return dialogCaller;
+        return dialogCreator;
     }
 );
 

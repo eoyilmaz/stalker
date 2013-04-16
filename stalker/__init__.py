@@ -101,6 +101,11 @@ def main(global_config, **settings):
     # *************************************************************************
     
     # *************************************************************************
+    # Studio
+    config.add_route('create_studio_dialog', 'dialog/create/studio')
+    config.add_route('create_studio', 'create/studio')
+    
+    # *************************************************************************
     # Project
     config.add_route('create_project', 'create/project')
     config.add_route('update_project', 'update/project/{project_id}')

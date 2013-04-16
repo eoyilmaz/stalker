@@ -1,0 +1,244 @@
+{# Stalker a Production Asset Management System
+ Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+ 
+ This file is part of Stalker.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation;
+ version 2.1 of the License.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#}
+<div class='dijitDialogPaneContentArea'> 
+  <form id='create_studio_form'>
+    <table style='width: 100%;'>
+      
+      {# Name #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_name'>Name</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_name'>
+        </td>
+      </tr>
+      
+      {# Thumbnail #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_thumbnail'>Thumbnail</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_thumbnail'>
+        </td>
+      </tr>
+      
+      {# Daily Working Hours #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_daily_working_hours'>Daily Working Hours</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_daily_working_hours'>
+        </td>
+      </tr>
+      
+      {# Working Hours #}
+      {# Monday #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_working_hours_mon'>Monday</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_working_hours_mon'>
+        </td>
+      </tr>
+      
+      {# Tuesday #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_working_hours_tue'>Tuesday</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_working_hours_tue'>
+        </td>
+      </tr>
+      
+      {# Wednesday #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_working_hours_wed'>Wednesday</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_working_hours_wed'>
+        </td>
+      </tr>
+      
+      {# Thursday #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_working_hours_thu'>Thursday</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_working_hours_thu'>
+        </td>
+      </tr>
+      
+      {# Friday #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_working_hours_fri'>Friday</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_working_hours_fri'>
+        </td>
+      </tr>
+      
+      {# Saturday #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_working_hours_sat'>Saturday</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_working_hours_sat'>
+        </td>
+      </tr>
+      
+      {# Sunday #}
+      <tr>
+        <td class='label_column'>
+          <label for='studio_working_hours_sun'>Sunday</label>
+        </td>
+        <td class='input_column'>
+          <input id='studio_working_hours_sun'>
+        </td>
+      </tr>
+      
+     </table>
+  </form>
+</div>
+
+<div class='dijitDialogPaneActionBar'>
+  <button id='studio_ok_button'>Ok</button>
+  <button id='studio_cancel_button'>Cancel</button>
+</div>
+
+<script type='text/javascript'>
+  require([
+    'dijit/registry',
+    'dijit/form/Form',
+    'dijit/form/ValidationTextBox',
+    'dijit/form/TextBox',
+    'dijit/form/NumberTextBox',
+    'dijit/form/FilteringSelect',
+    'dijit/form/Button',
+    'dijit/form/DateTextBox',
+    
+    'dojo/store/JsonRest',
+    
+    'dojo/date',
+    'dojo/date/stamp',
+    'dojo/date/locale',
+    
+    
+    'stalker/submitForm',
+    'stalker/fieldUpdater',
+    'stalker/dialogCaller',
+    
+    'dojo/ready'],
+    function(
+      registry,
+      Form,
+      ValidationTextBox,
+      TextBox,
+      NumberTextBox,
+      FilteringSelect,
+      Button,
+      DateTextBox,
+      
+      JsonRest,
+      
+      date,
+      stamp,
+      locale,
+      
+      submitForm,
+      fieldUpdater,
+      dialogCaller,
+      
+      ready){
+      
+      ready(function(){
+        // ********************************************************************
+        // Form
+        var create_studio_form = new Form({
+          id: 'create_studio_form'
+        }, 'create_studio_form');
+        
+        
+        // ********************************************************************
+        // Name
+        var name_textBox = new ValidationTextBox({
+          name: 'name',
+          label: 'Name',
+          required: true,
+          placeHolder: 'Enter a name'
+        }, 'studio_name');
+        name_textBox.startup();
+        
+        // ********************************************************************
+        // Daily Working Hours
+        var daily_working_hours_numberTextBox = NumberTextBox({
+          value: 8,
+          constrains: {min:0, max:24}
+        },'studio_daily_working_hours');
+        daily_working_hours_numberTextBox.startup();
+        
+        
+        
+        // ********************************************************************
+        // Ok Button
+        var ok_button = new Button({
+          label: 'OK',
+          type: 'button',
+          onClick: function(){
+            submitForm({
+              dialog: registry.byId('create_project_dialog'),
+              form: create_studio_form,
+              additional_data: {
+                submitted: 'create',
+                start: stamp.toISOString(start_dateTextBox.value),
+                end: stamp.toISOString(end_dateTextBox.value)
+              },
+              url: '{{ request.route_url("create_project") }}',
+              method: 'POST'
+            });
+          }
+        }, 'project_submit_button');
+        ok_button.startup();
+        
+        // ********************************************************************
+        // Cancel Button
+        var cancel_button = new Button({
+          label: 'Cancel',
+          type: 'button',
+          onClick: function(){
+            registry.byId('create_project_dialog').destroyRecursive();
+          }
+        }, 'project_cancel_button');
+        cancel_button.startup();
+        
+        create_studio_form.startup();
+      
+      });
+  });
+</script>
+

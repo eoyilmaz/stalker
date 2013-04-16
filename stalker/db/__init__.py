@@ -85,15 +85,14 @@ def __init_db__():
     """fills the database with default values
     """
     logger.debug("initializing database")
-    
+
     # register all Actions available for all SOM classes
     class_names = [
-        'Asset', 'Group', 'Permission', 'User', 'Department',
-        'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
-        'Project', 'Repository', 'Scene', 'Sequence', 'Shot',
-        'Status', 'StatusList', 'Structure', 'Tag', 'Booking', 'Task',
-        'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
-    ]
+        'Asset', 'Booking', 'Department', 'Entity', 'FilenameTemplate',
+        'Group', 'ImageFormat', 'Link', 'Message', 'Note', 'Permission',
+        'Project', 'Repository', 'Scene', 'Sequence', 'Shot', 'SimpleEntity',
+        'Status', 'StatusList', 'Structure', 'Studio', 'Tag', 'Task', 'Ticket',
+        'TicketLog', 'Type', 'User', 'Version']
     
     for class_name in class_names:
         _temp = __import__(

@@ -24,17 +24,30 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         var style = 'width: auto; height: auto; padding: 0px;';
         
         // ********************************************************************
+        // STUDIO
+        create_studio_dialog_creator = function (){
+            return new DialogSimple({
+                id: 'create_studio_dialog',
+                title: 'New Studio',
+                href: 'dialog/create/studio',
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
+        
+        
+        // ********************************************************************
         // PROJECT
         create_project_dialog_creator = function (){
-                return new DialogSimple({
-                    id: 'create_project_dialog',
-                    title: 'New Project',
-                    href: '/create/project',
-                    resize: true,
-                    style: style,
-                    executeScripts: true
-                });
-            
+            return new DialogSimple({
+                id: 'create_project_dialog',
+                title: 'New Project',
+                href: '/create/project',
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
         };
         
         update_project_dialog_creator = function(project_id){

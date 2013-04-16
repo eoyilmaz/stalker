@@ -433,7 +433,23 @@ class WorkingHours(object):
             for start, end in self[i]:
                 weekly_working_hours += (end - start)
         return weekly_working_hours / 60.0
-
+    
+    @property
+    def weekly_working_days(self):
+        """returns the weekly working days by looking at the working hours
+        settings
+        """
+        wwd = 0
+        for i in range(0,7):
+            if len(self[i]):
+                wwd += 1
+        return wwd
+    
+    @property
+    def yearly_working_days(self):
+        """returns the total working days in a year
+        """
+        return self.weekly_working_days * 52.1428
 
 
 

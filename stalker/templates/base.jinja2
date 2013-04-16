@@ -82,15 +82,18 @@
       <div id='stalker_logo'>
         <a href="/"  style='color: #000000'>STALKER</a>
       </div>
-
-      <div id='stalkerMenuBar' style='color: #000000'>
-      </div>
+      
+      {% if studio %}
+        <div id='stalkerMenuBar' style='color: #000000'></div>
+      {% endif %}
+      
       <div id='mebar'>
         <div style='color: #000000' id='mebutton'></div>
       </div>
 
     {% endblock %}
     </div>
+    
     <div style="margin-top: 0" id='central_content' class='centralPanel'>
     {% block content %}
       <div id='main_view'>
@@ -98,25 +101,79 @@
       </div>
     {% endblock %}
     </div>
-
+    
     <div id='footer' class='edgePanel'>
     {% block footer %}
-      <div class='footer'>&copy; Copyright 2008-2013, Erkan Ozgur Yilmaz.  <span style='font-size: 12px;'>v{{stalker.__version__}}</span></div>
+      <div class='footer'>&copy; Copyright 2009-2013, Erkan Ozgur Yilmaz.  <span style='font-size: 12px;'>Stalker v{{stalker.__version__}}</span></div>
     {% endblock %}
     </div>
   </div>
-
+  
+  
+  
+{#            {% if not studio %}#}
+{#            console.log('typeof(dialogCaller): ', typeof(dialogCaller));#}
+{#            console.log('typeof(dialogCreator): ', typeof(dialogCreator));#}
+{#            var create_studio_dialog = dialogCreator({#}
+{#              dialog_id: 'create_studio_dialog',#}
+{#              content_creator: create_studio_dialog_creator#}
+{#            });#}
+{#            create_studio_dialog.show();#}
+{#          {% endif %}#}
+  
+  
   <script type='text/javascript'>
-    require(['dojo/dom', 'dijit/registry', 'dijit/layout/BorderContainer',
-      'dojox/layout/ContentPane', "dijit/MenuBar", "dijit/MenuBarItem", "dijit/MenuSeparator",
-      "dijit/PopupMenuBarItem", "dijit/PopupMenuItem", "dijit/Menu", "dijit/MenuItem", "dijit/DropDownMenu",
-      'dijit/TooltipDialog','dijit/popup', 'dojo/on', 'dijit/form/DropDownButton',
-      'stalker/dialogCaller', 'dojo/store/JsonRest', 'dojo/store/Memory',
-      'dojo/_base/fx', 'dojo/ready'],
-      function(dom, registry, BorderContainer, ContentPane, MenuBar, MenuBarItem, MenuSeparator,
-               PopupMenuBarItem, PopupMenuItem, Menu, MenuItem, DropDownMenu, TooltipDialog,
-               popup, on, DropDownButton, dialogCaller,
-               JsonRest, Memory, fx, ready){
+    require([
+      'dijit/layout/BorderContainer',
+      'dojox/layout/ContentPane',
+       
+      'dijit/MenuBar',
+      'dijit/MenuBarItem',
+      'dijit/MenuSeparator',
+      'dijit/PopupMenuBarItem',
+      'dijit/PopupMenuItem',
+      'dijit/MenuItem',
+      'dijit/DropDownMenu',
+      'dijit/form/DropDownButton',
+      'dijit/TooltipDialog',
+      'dijit/popup',
+      
+      'dojo/on',
+      
+      
+      'dojo/store/JsonRest',
+      'dojo/store/Memory',
+      'dojo/_base/fx',
+      
+      'stalker/dialogCaller',
+      'stalker/dialogCreator',
+      
+      'dojo/ready'],
+      function(
+        BorderContainer,
+        ContentPane,
+        
+        MenuBar,
+        MenuBarItem,
+        MenuSeparator,
+        PopupMenuBarItem,
+        PopupMenuItem,
+        MenuItem,
+        DropDownMenu,
+        DropDownButton,
+        TooltipDialog,
+        popup,
+        
+        on,
+        
+        JsonRest,
+        Memory,
+        fx,
+
+        dialogCaller,
+        dialogCreator,
+        
+        ready){
         
         ready(function(){
           // ******************************************************************
@@ -183,7 +240,7 @@
           }));
           // ******************************************************************
           // STUDIO
-
+          
           var studio_DropDownMenu = new DropDownMenu({
 
           });

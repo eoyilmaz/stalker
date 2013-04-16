@@ -31,7 +31,7 @@ from sqlalchemy.exc import IntegrityError
 
 from stalker.db import DBSession
 from stalker import (User, Task, Entity, Project, StatusList, Status,
-                     TaskJugglerScheduler)
+                     TaskJugglerScheduler, Studio)
 from stalker.models.task import CircularDependencyError
 
 
@@ -656,8 +656,18 @@ def get_user_tasks(request):
     route_name='auto_schedule_tasks',
 )
 def auto_schedule_tasks(request):
+    """schedules all the tasks of active projects
+    """
+    # get the studio
+    studio = Studio.query.first()
     
-    tj_scheduler = TaskJugglerScheduler()
-    tj_scheduler.schedule()
+    if studio:
+        tj_scheduler = TaskJugglerScheduler()
+        studio.scheduler = tj_scheduler
+        
+        try:
+            studio.schedule()
+        except RuntimeError:
+            return HTTPServerError()
     
     return HTTPOk()

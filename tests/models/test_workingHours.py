@@ -352,3 +352,86 @@ class WorkingHoursTester(unittest.TestCase):
         self.assertEqual(wh['sat'], wh[5])
         self.assertEqual(wh['sun'], wh[6])
     
+    def test_weekly_working_days_is_a_read_only_attribute(self):
+        """testing if the weekly working days is a read-only attribute
+        """
+        wh = WorkingHours()
+        self.assertRaises(AttributeError, setattr, wh, 'weekly_working_days',
+                          6)
+    
+    def test_weekly_working_days_is_calculated_correctly(self):
+        """testing if the weekly working days are calculated correctly
+        """
+        wh = WorkingHours()
+        wh['mon'] = [[1, 2]]
+        wh['tue'] = [[3, 4]]
+        wh['wed'] = [[5, 6]]
+        wh['thu'] = [[7, 8]]
+        wh['fri'] = [[9, 10]]
+        wh['sat'] = []
+        wh['sun'] = []
+        self.assertEqual(wh.weekly_working_days, 5)
+        
+        wh = WorkingHours()
+        wh['mon'] = [[1, 2]]
+        wh['tue'] = [[3, 4]]
+        wh['wed'] = [[5, 6]]
+        wh['thu'] = [[7, 8]]
+        wh['fri'] = [[9, 10]]
+        wh['sat'] = [[11, 12]]
+        wh['sun'] = []
+        self.assertEqual(wh.weekly_working_days, 6)
+        
+        wh = WorkingHours()
+        wh['mon'] = [[1, 2]]
+        wh['tue'] = [[3, 4]]
+        wh['wed'] = [[5, 6]]
+        wh['thu'] = [[7, 8]]
+        wh['fri'] = [[9, 10]]
+        wh['sat'] = [[11, 12]]
+        wh['sun'] = [[13, 14]]
+        self.assertEqual(wh.weekly_working_days, 7)
+    
+    def test_yearly_working_days_is_a_read_only_attribute(self):
+        """testing if the yearly_working_days attribute is a read only
+        attribute
+        """
+        wh = WorkingHours()
+        self.assertRaises(AttributeError, setattr, wh, 'yearly_working_days',
+                          260.1)
+    
+    def test_yearly_working_days_is_calculated_correctly(self):
+        """testing if the yearly_working_days is calculated correctly
+        """
+
+        wh = WorkingHours()
+        wh['mon'] = [[1, 2]]
+        wh['tue'] = [[3, 4]]
+        wh['wed'] = [[5, 6]]
+        wh['thu'] = [[7, 8]]
+        wh['fri'] = [[9, 10]]
+        wh['sat'] = []
+        wh['sun'] = []
+        self.assertAlmostEqual(wh.yearly_working_days, 260.714, 3)
+        
+        wh = WorkingHours()
+        wh['mon'] = [[1, 2]]
+        wh['tue'] = [[3, 4]]
+        wh['wed'] = [[5, 6]]
+        wh['thu'] = [[7, 8]]
+        wh['fri'] = [[9, 10]]
+        wh['sat'] = [[11, 12]]
+        wh['sun'] = []
+        self.assertAlmostEqual(wh.yearly_working_days, 312.8568, 4)
+        
+        wh = WorkingHours()
+        wh['mon'] = [[1, 2]]
+        wh['tue'] = [[3, 4]]
+        wh['wed'] = [[5, 6]]
+        wh['thu'] = [[7, 8]]
+        wh['fri'] = [[9, 10]]
+        wh['sat'] = [[11, 12]]
+        wh['sun'] = [[13, 14]]
+        self.assertAlmostEqual(wh.yearly_working_days, 365, 0)
+         
+        
