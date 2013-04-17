@@ -135,13 +135,42 @@
 </div>
 
 <script type="text/javascript">
-  require(['dijit/registry',
-         'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dijit/form/Button',
-         'stalker/dialogCaller', 'dojo/store/JsonRest', 'dojo/request/xhr',
-         'dojo/_base/lang', 'dojo/query', 'dojo/Deferred', 'dijit/Menu',
-         'dijit/MenuItem', 'dijit/MenuSeparator', 'dojo/ready'],
-    function(registry, ObjectStore, DataGrid, Button, dialogCaller, JsonRest,
-             xhr, lang, query, Deferred, Menu, MenuItem, MenuSeparator, ready){
+  require([
+    'dijit/registry',
+    
+    'dijit/form/Button',
+    'dijit/Menu',
+    'dijit/MenuItem',
+    'dijit/MenuSeparator',
+    
+    'dojo/query',
+    'dojo/store/JsonRest',
+    'dojo/request/xhr',
+    'dojo/_base/lang',
+    'dojo/Deferred',
+
+    'stalker/dialogCaller',
+    'stalker/dialogCreator',
+    
+    'dojo/ready'],
+    function(
+      registry,
+      
+      Button,
+      Menu,
+      MenuItem,
+      MenuSeparator,
+      
+      query,
+      JsonRest,
+      xhr,
+      lang,
+      Deferred,
+      
+      dialogCaller,
+      dialogCreator,
+      
+      ready){
       ready(function(){
         
         $('#gantttemplates').loadTemplates();
@@ -161,6 +190,7 @@
             {% if entity.entity_type != 'User' %}
               data = lang.mixin(data,{'canWrite': 1, 'canWriteOnParent': 1});
             {% endif %}
+            
             var promise = ge.loadProject(data, Deferred);
             promise.then(function(){
               // now add the context menu to tasks
@@ -213,8 +243,8 @@
                   onClick: function(){
                     var node = this.getParent().currentTarget;
                     // get task id
-                    var task_id = node.getAttribute('taskid');
-                    alert('task id: ' + task_id);
+                    var taskId = node.getAttribute('taskid');
+                    alert('task id: ' + taskId);
                   }
                 });
               };
@@ -231,21 +261,21 @@
                 return new MenuItem({
                   label: 'Update Task',
                   onClick: function(){
-                    var node = this.getParent().currentTarget;
-                    // get task id
-                    var taskId = node.getAttribute('taskId');
-                    // create and call update_task dialog
-                    var dialog = registry.byId('update_task_dialog');
-                    if (dialog != null){
-                      dialog.destroyRecursive();
-                    }
-                    dialog = update_task_dialog_creator(taskId);
                     
-                    dialog.set(
-                      'related_field_updater',
-                      saveAndLoadGantt
-                    );
-                    dialog.show();
+                    var node = this.getParent().currentTarget;
+                    var taskId = node.getAttribute('taskId');
+                    
+                    saveGanttOnServer().then(function(){
+                      // create and call update_task dialog
+                      var dialog = dialogCreator({
+                        dialog_id: 'update_task_dialog',
+                        data_id: taskId,
+                        content_creator: update_task_dialog_creator,
+                        related_field_updater: loadGanttFromServer
+                      });
+                      
+                      dialog.show();
+                    });
                   }
                 });
               };
@@ -260,17 +290,17 @@
                   onClick: function(){
                     var node = this.getParent().currentTarget;
                     var taskId = node.getAttribute('taskId');
-                    var dialog = registry.byId('create_task_dialog');
-                    if (dialog != null){
-                      dialog.destroyRecursive();
-                    }
-                    dialog = create_child_task_dialog_creator(taskId);
-
-                    dialog.set(
-                            'related_field_updater',
-                            saveAndLoadGantt
-                    );
-                    dialog.show();
+                    
+                    saveGanttOnServer().then(function(){
+                      var dialog = dialogCreator({
+                        dialog_id: 'create_task_dialog',
+                        data_id: taskId,
+                        content_creator: create_child_task_dialog_creator,
+                        related_field_updater: loadGanttFromServer
+                      });
+                      
+                      dialog.show();
+                    });
                   }
                 });
               };
@@ -284,21 +314,18 @@
                   label: 'Create Dependent Task',
                   onClick: function(){
                     var node = this.getParent().currentTarget;
-                    console.log('node: ', node);
                     var taskId = node.getAttribute('taskId');
-                    console.log('taskId: ', taskId);
-                    var dialog = registry.byId('create_task_dialog');
-                    if (dialog != null){
-                      dialog.destroyRecursive();
-                    }
-
-                    dialog = create_dependent_task_dialog_creator(taskId);
-
-                    dialog.set(
-                            'related_field_updater',
-                            saveAndLoadGantt
-                    );
-                    dialog.show();
+                    
+                    saveGanttOnServer().then(function(){
+                      var dialog = dialogCreator({
+                        dialog_id: 'create_task_dialog',
+                        data_id: taskId,
+                        content_creator: create_dependent_task_dialog_creator,
+                        related_field_updater: loadGanttFromServer
+                      });
+                      dialog.show();
+                    });
+                    
                   }
                 });
               };
@@ -313,10 +340,10 @@
                   label: 'Create Booking',
                   onClick: function(){
                     var node = this.getParent().currentTarget;
-                    var task_id = node.getAttribute('taskId');
+                    var taskId = node.getAttribute('taskId');
                     
                     // check if it is a leaf task
-                    var task = ge.getTask(task_id);
+                    var task = ge.getTask(taskId);
                     //console.log(task);
                     
                     if(task.isParent()){
@@ -327,19 +354,15 @@
                       return;
                     }
                     
-                    var dialog = registry.byId('create_booking_dialog');
-                    if (dialog != null){
-                      dialog.destroyRecursive();
-                    }
-                    
-                    dialog = create_booking_dialog_creator(task_id);
-                    
-                    dialog.set(
-                      'related_field_updater',
-                      saveAndLoadGantt
-                    );
-                    
-                    dialog.show();
+                    saveGanttOnServer().then(function(){
+                      var dialog = dialogCreator({
+                        dialog_id: 'create_booking_dialog',
+                        data_id: taskId,
+                        content_creator: create_booking_dialog_creator,
+                        related_field_updater: loadGanttFromServer
+                      });
+                      dialog.show();
+                    });
                   }
                 })
               };
@@ -375,11 +398,6 @@
         
         
         function saveGanttOnServer() {
-        
-          //this is a simulation: save data to the local storage or to the textarea
-{#          saveInLocalStorage();#}
-          
-          
           var prj = ge.saveProject();
           
           delete prj.resources;

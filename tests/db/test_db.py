@@ -343,7 +343,7 @@ class DatabaseTester(unittest.TestCase):
             'Asset', 'Group', 'Permission', 'User', 'Department',
             'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
             'Project', 'Repository', 'Scene', 'Sequence', 'Shot', 'Status',
-            'StatusList', 'Structure', 'Tag', 'Booking', 'Task',
+            'StatusList', 'Structure', 'Studio', 'Tag', 'Booking', 'Task',
             'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
         ]
         
@@ -384,7 +384,7 @@ class DatabaseTester(unittest.TestCase):
         
         # and we still have correct amount of Permissions
         permissions = Permission.query.all()
-        self.assertEqual(len(permissions), 270)
+        self.assertEqual(len(permissions), 280)
         
         # clean the test
         shutil.rmtree(temp_db_path)

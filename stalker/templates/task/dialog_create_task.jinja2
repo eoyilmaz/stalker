@@ -217,11 +217,7 @@
       ready(function(){
         // ********************************************************************
         // Form
-        var task_form = new Form({
-            id: 'task_form'
-        }, 'task_form');
-        
-        
+        var task_form = new Form({}, 'task_form');
         
         // ********************************************************************
         // Project
@@ -242,27 +238,13 @@
         });
         
         var parent_widget;
-        {% if parent %}
-          {# Use a TextBox #}
-          parent_widget = new TextBox({
-            name: 'parent_id',
-            label: 'Parent',
-            value: '{{ parent.name }}',
-            disabled: true,
-{#            style: 'width: auto'#}
-          }, 'task_parent');
-          parent_widget.startup();
-        {% else %}
-          {# Use a filtering select #}
-          parent_widget = new FilteringSelect({
-            name: 'parent_id',
-            label: 'Parent',
-            required: false,
-{#            style: 'width: 100%'#}
-          }, 'task_parent');
-        {% endif %}
-        
-        
+        parent_widget = new FilteringSelect({
+          name: 'parent_id',
+          label: 'Parent',
+          required: false
+        }, 'task_parent');
+        parent_widget.startup();
+        // updating parent somewhere down, after the json store fills the widget
         
         // ********************************************************************
         // Name
@@ -317,7 +299,7 @@
           depends_tagSelect.set('store', new Memory({data: data}));
           
           {% if mode == 'UPDATE' %}
-            depends_tasSelect.set('value', [
+            depends_tagSelect.set('value', [
               {% for depend_task in task.depends %}
                 {{ depend_task.id }},
               {% endfor %}
@@ -329,8 +311,16 @@
             {% endif %}
           {% endif %}
           
-          {% if not parent %}
-            parent_widget.set('store', memory);
+          parent_widget.set('store', memory);
+          
+          {% if mode=='CREATE' %}
+            {% if parent %}
+              parent_widget.set('value', {{ parent.id }});
+            {% endif %}
+          {% elif mode=='UPDATE' %}
+            {% if task.parent %}
+              parent_widget.set('value', {{ task.parent.id }})
+            {% endif %}
           {% endif %}
         });
         
@@ -344,7 +334,7 @@
               {% for model in schedule_models %}
               {
                 name: '{{ model }}',
-                id: '{{ loop.index0 }}'
+                id: '{{ model }}'
               },
               {% endfor %}
             ]
@@ -354,9 +344,13 @@
         }, 'task_schedule_model');
         // select the first one
         {% if mode == 'CREATE' %}
-          schedule_model.set('value', 0);
+          schedule_model.set('value', '{{ schedule_models[0] }}');
         {% elif mode == 'UPDATE' %}
-            schedule_model.set('value', {{ task.schedule_model }});
+{#          {% for model in schedule_models %}#}
+{#            {% if model == task.schedule_model %}#}
+              schedule_model.set('value', '{{ task.schedule_model }}');
+{#            {% endif %}#}
+{#          {% endfor %}#}
         {% endif %}
         
         // ********************************************************************
@@ -400,6 +394,10 @@
         }, 'task_schedule_unit');
         schedule_unit_filteringSelect.startup();
         
+        {% if mode=='UPDATE' %}
+          schedule_unit_filteringSelect.set('value', '{{ task.schedule_unit }}');
+        {% endif %}
+        
         // ********************************************************************
         // Start Date
         // CheckBox
@@ -435,7 +433,7 @@
         var start_dateTextBox = new DateTextBox({
           name: 'start',
           label: 'Constrain Start Date',
-          value: new Date({% if task %}{{ task.start.strftime('%s')*1000 }}{% endif %}),// set it today by default
+          value: new Date({% if mode=='UPDATE' %}{{ task.start.strftime('%s') }}000{% endif %}),// set it today by default
           required: true,
           disabled: true,
           datePattern: 'dd-mm-yyyy',
@@ -468,7 +466,7 @@
           value: {% if mode == 'CREATE' %}
              'T09:00:00',
            {% else %}
-             'T{{ '%02d'|format(task.start.time) }}:00:00'
+             'T{{ '%02d'|format(task.start.hour) }}:{{'%02d'|format(task.start.minute) }}:00'
            {% endif %}        
         }, 'task_start_time');
         start_time_timeTextBox.startup();
@@ -515,11 +513,8 @@
           disabled: true,
           datePattern: 'dd-mm-yyyy',
           style: 'width: 90px;',
-          value: {% if mode=='CREATE' %}
-            new Date(),
-          {% elif mode=='UPDATE' %}
-            new Date({{ task.end.strftime('%s')|int * 1000 }}),
-          {% endif %}          //onChange: function(){
+          value: new Date({% if mode=='UPDATE' %}{{ task.end.strftime('%s') }}000{% endif %})
+          //onChange: function(){
           //  if (this.focused){
           //    update_dates(
           //      start_dateTextBox.getValue(),
@@ -577,7 +572,6 @@
         // ********************************************************************
         // Is Milestone
         var is_milestone_checkBox = new CheckBox({
-          id: 'is_milestone',
           name: 'is_milestone',
           label: 'Is Milestone',
           value: 'checked',
@@ -623,14 +617,14 @@
           resources_tagSelect.set('store', user_memory);
           
           {% if mode == 'UPDATE' %}
-          // set the selection
-          resources_tagSelect.set('selected', [
-            {% for resource in task.resources %}
-              {{ resource.id }},
-            {% endfor %}
-          ]);
+            // set the selection
+            var selected_resources =  [
+              {% for resource in task.resources %}
+                {{ resource.id }},
+              {% endfor %}
+            ];
+            resources_tagSelect.set('value', selected_resources);
           {% endif %}
-          
         });
         
 {#        // Create Button#}
@@ -672,7 +666,7 @@
               dialog.set('related_field_updater', status_field_updater);
               dialog.show();
             });
-            status_field_updater.set('callBack', function(){});
+            //status_field_updater.set('callBack', function(){});
           }
         };
         
@@ -709,26 +703,42 @@
           type: 'button',
           onClick: function(){
             
+            if(!task_form.validate()){
+              return;
+            }
+          
             var schedule_timing = schedule_timing_numberSpinner.value;
             var schedule_unit = schedule_unit_filteringSelect.value;
             
+            var dialog_id;
+            var url;
+            
+            {% if mode=='CREATE' %}
+              dialog_id = 'create_task_dialog';
+              url = '{{ request.route_url('create_task')}}'
+            {% elif mode=='UPDATE' %}
+              dialog_id = 'update_task_dialog';
+              url = '{{ request.route_url('update_task', task_id=task.id) }}'
+            {% endif %}
+            
             submitForm({
-              dialog: registry.byId('create_task_dialog'),
+              dialog: registry.byId(dialog_id),
               form: task_form,
               additional_data: {
                 project_id: {{ project.id }},
-                {% if parent %}
-                  parent_id: {{ parent.id }},
-                {% endif %}
+                parent_id: parent_widget.value,
                 is_milestone: eval(is_milestone_checkBox.get('checked')) ? 1 : 0,
                 start_date: stamp.toISOString(start_dateTextBox.value),
                 end_date: stamp.toISOString(end_dateTextBox.value),
                 start_time: stamp.toISOString(start_time_timeTextBox.value),
                 end_time: stamp.toISOString(end_time_timeTextBox.value)
               },
-              url: '{{ request.route_url('create_task', entity_id=project.id) }}',
+              url: url,
               method: 'POST'
             });
+            
+            
+            
           }
         }, 'task_ok_button');
         ok_button.startup();

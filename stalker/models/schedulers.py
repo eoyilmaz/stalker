@@ -188,6 +188,8 @@ class TaskJugglerScheduler(SchedulerBase):
                             (self.__class__.__name__,
                              self.studio.__class__.__name__))
         
+        # TODO: update the studio timings before doing anything
+        
         # create a tjp file
         self._create_tjp_file()
         

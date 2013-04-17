@@ -185,26 +185,28 @@ $.splittify = {
 //<%------------------------------------------------------------------------  UTILITIES ---------------------------------------------------------------%>
 function computeStart(start) { // TODO: Update this to support hours
   //console.log('computeStart running');
-  var d = new Date(start+3600000*12);
-  d.setHours(0, 0, 0, 0);
+//  var d = new Date(start+3600000*12);
+//  d.setHours(0, 0, 0, 0);
   //move to the next working day if the start is a holiday
-  while (isHoliday(d)) {
-    d.setDate(d.getDate() + 1);
-  }
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
+//  while (isHoliday(d)) {
+//    d.setDate(d.getDate() + 1);
+//  }
+//  d.setHours(0, 0, 0, 0);
+//  return d.getTime();
+    return start
 }
 
 function computeEnd(end) { // TODO: Update this to support hours
   //console.log('computeEnd running');
-  var d = new Date(end-3600000*12);
-  d.setHours(23, 59, 59, 999);
+//  var d = new Date(end-3600000*12);
+//  d.setHours(23, 59, 59, 999);
   //move to next working day
-  while (isHoliday(d)) {
-    d.setDate(d.getDate() + 1);
-  }
-  d.setHours(23, 59, 59, 999);
-  return d.getTime();
+//  while (isHoliday(d)) {
+//    d.setDate(d.getDate() + 1);
+//  }
+//  d.setHours(23, 59, 59, 999);
+//  return d.getTime();
+    return end
 }
 
 function computeEndByDuration(start, duration) {

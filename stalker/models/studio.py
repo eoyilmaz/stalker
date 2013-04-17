@@ -23,9 +23,10 @@ import logging
 import datetime
 
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, reconstructor
 
-from stalker import defaults, log, Entity, ScheduleMixin, WorkingHoursMixin, SchedulerBase
+from stalker import (defaults, log, Entity, ScheduleMixin, WorkingHoursMixin,
+                     SchedulerBase)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -87,7 +88,7 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
     )
 
     daily_working_hours = Column(Integer, default=8)
-    
+       
     def __init__(self,
                 daily_working_hours=None,
                 now=None,
@@ -99,6 +100,11 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
         self._now = None
         self.now = self._validate_now(now)
         self._scheduler = None
+
+    @reconstructor
+    def __init_on_load__(self):
+        self._now = None
+        super(Studio, self).__init_on_load__()
     
     @validates('daily_working_hours')
     def _validate_daily_working_hours(self, key, dwh):
@@ -118,7 +124,7 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
         """validates the given now_in value
         """
         if now_in is None:
-            now_in = self.round_time(datetime.datetime.now())
+            now_in = datetime.datetime.now()
         
         if not isinstance(now_in, datetime.datetime):
             raise TypeError('%s.now attribute should be an instance of '
@@ -132,6 +138,8 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
     def now(self):
         """now getter
         """
+        if self._now is None:
+            self._now = self.round_time(datetime.datetime.now())
         return self._now
     
     @now.setter

@@ -26,6 +26,9 @@ Stalker Changes
   (Button or MenuItem) calling it and updated dialogCaller.js to use
   dialogCreator while creating a dialog.
 
+* It is now possible to use any characters in SimpleEntity.name and the derived
+  classes.
+
 0.2.0.a10
 ---------
 

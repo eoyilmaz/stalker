@@ -339,7 +339,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'update_task_dialog',
                 title: 'Update Task',
-                href: '/update/task/' + task_id,
+                href: '/dialog/update/task/' + task_id,
                 resize: true,
                 style: style,
                 executeScripts: true

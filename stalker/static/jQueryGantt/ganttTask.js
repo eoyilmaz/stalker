@@ -30,15 +30,20 @@ function TaskFactory() {
    * Build a new Task
    */
   this.build = function(kwargs){
-    var start = kwargs['start'] || null;
-    var duration = kwargs['duration'] || null;
+//    var start = kwargs['start'] || null;
+//    var duration = kwargs['duration'] || null;
     
     // Set at beginning of day
-    var adjusted_start = computeStart(start);
-    var calculated_end = computeEndByDuration(adjusted_start, duration);
+//    var adjusted_start = computeStart(start);
+      
+//    if (duration != null){
+//        var calculated_end = computeEndByDuration(adjusted_start, duration);
+//    } else {
+//        calculated_end = kwargs['end'];
+//    }
     
-    kwargs['start'] = adjusted_start;
-    kwargs['end'] = calculated_end;
+//    kwargs['start'] = adjusted_start;
+//    kwargs['end'] = calculated_end;
     
     return new Task(kwargs);
   };
