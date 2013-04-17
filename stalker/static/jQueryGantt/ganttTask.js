@@ -26,27 +26,31 @@
  * raw data.
  */
 function TaskFactory() {
-  /**
-   * Build a new Task
-   */
-  this.build = function(kwargs){
-//    var start = kwargs['start'] || null;
-//    var duration = kwargs['duration'] || null;
-    
-    // Set at beginning of day
-//    var adjusted_start = computeStart(start);
-      
-//    if (duration != null){
-//        var calculated_end = computeEndByDuration(adjusted_start, duration);
-//    } else {
-//        calculated_end = kwargs['end'];
-//    }
-    
-//    kwargs['start'] = adjusted_start;
-//    kwargs['end'] = calculated_end;
-    
-    return new Task(kwargs);
-  };
+    /**
+     * Build a new Task
+     */
+    this.build = function(kwargs){
+    //    var start = kwargs['start'] || null;
+    //    var duration = kwargs['duration'] || null;
+        
+        // Set at beginning of day
+    //    var adjusted_start = computeStart(start);
+          
+    //    if (duration != null){
+    //        var calculated_end = computeEndByDuration(adjusted_start, duration);
+    //    } else {
+    //        calculated_end = kwargs['end'];
+    //    }
+        
+    //    kwargs['start'] = adjusted_start;
+    //    kwargs['end'] = calculated_end;
+        
+        // copy computed date values if any
+        kwargs['start'] = kwargs['computed_start'] || kwargs['start'];
+        kwargs['end']   = kwargs['computed_end'] || kwargs['end'];
+        
+        return new Task(kwargs);
+    };
 }
 
 function Task(kwargs) {
@@ -156,13 +160,13 @@ Task.prototype.setPeriod = function (start, end) {
         end:  this.end,
         duration: this.duration
     };
-
+    
     //console.debug("setStart",date,date instanceof Date);
     var wantedStartMillis = start;
     
     
     //set a legal start
-    start = computeStart(start);
+    //start = computeStart(start);
 
     //cannot start after end
     if (start > end) {
@@ -174,9 +178,10 @@ Task.prototype.setPeriod = function (start, end) {
     if (sups && sups.length > 0){
         var supEnd = 0;
         var link;
-        for (var i=0 ; i<sups.length ; i++) {
+        for (var i=0 ; i < sups.length ; i++) {
             link = sups[i];
-            supEnd = Math.max(supEnd, incrementDateByWorkingDays(link.from.end, link.lag));
+            //supEnd = Math.max(supEnd, incrementDateByWorkingDays(link.from.end, link.lag));
+            supEnd = Math.max(supEnd, link.end);
         }
         
         //if changed by depends move it
@@ -199,6 +204,7 @@ Task.prototype.setPeriod = function (start, end) {
     var wantedEndMillis = end;
     
     end = computeEnd(end);
+//    end = start + originalPeriod.end - originalPeriod.start
     
     if (this.end != end || this.end != wantedEndMillis) {
         this.end = end;
@@ -223,7 +229,7 @@ Task.prototype.setPeriod = function (start, end) {
         var bs = Infinity;
         var be = 0;
         var child;
-        for (var i=0 ; i<children.length ; i++) {
+        for (var i = 0; i < children.length; i++) {
             child = children[i];
             be = Math.max(be, child.end);
             bs = Math.min(bs, child.start);
@@ -239,13 +245,13 @@ Task.prototype.setPeriod = function (start, end) {
             return true;
         }
     }
-
+    
     //check global boundaries
     if (this.start < this.master.minEditableDate || this.end > this.master.maxEditableDate) {
         this.master.setErrorOnTransaction(GanttMaster.messages["CHANGE_OUT_OF_SCOPE"], this);
         todoOk = false;
     }
-
+    
     //console.debug("set period: somethingChanged",this);
     if (todoOk && !updateTree(this)) {
         todoOk = false;
@@ -272,21 +278,24 @@ Task.prototype.setPeriod = function (start, end) {
 Task.prototype.moveTo = function (start, ignoreMilestones) {
     //console.debug("moveTo ",this,start,ignoreMilestones);
     //var profiler = new Profiler("gt_task_moveTo");
-
+    
     if (start instanceof Date) {
         start = start.getTime();
     }
-
+    
+    // update this.duration
+    this.duration = this.end - this.start;
+    
     var originalPeriod = {
-        start:this.start,
-        end:this.end
+        start: this.start,
+        end: this.end
     };
-
-    var wantedStartMillis = start;
-
+    
+    var wantedStartMillis = computeStart(start);
+    
     //set a legal start
-    start = computeStart(start);
-
+    start = wantedStartMillis;
+    
     //if start is milestone cannot be move
     if (!ignoreMilestones && this.startIsMilestone && start != this.start) {
         //notify error
@@ -297,23 +306,23 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
         this.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"], this);
         return false;
     }
-
+    
     //if depends start is set to max end + lag of superior
     var sups = this.getSuperiors();
     if (sups && sups.length > 0) {
         var supEnd = 0;
         var link;
-        for (var i=0;i<sups.length;i++) {
+        for (var i=0 ; i < sups.length ; i++) {
             link = sups[i];
-            supEnd = Math.max(supEnd, incrementDateByWorkingDays(link.from.end, link.lag));
+            supEnd = Math.max(supEnd, link.end);
         }
         start = supEnd + 1;
     }
     //set a legal start
     start = computeStart(start);
-
+    
     var end = computeEndByDuration(start, this.duration);
-
+    
     if (this.start != start || this.start != wantedStartMillis) {
         //in case of end is milestone it never changes, but recompute duration
         if (!ignoreMilestones && this.endIsMilestone) {
@@ -624,7 +633,6 @@ Task.prototype.getParent = function() {
           this.parent.children.push(this);
       }
     }
-    
   }
   return this.parent;
 };
@@ -641,18 +649,6 @@ Task.prototype.getChildren = function() {
 
 
 Task.prototype.getDescendant = function() {
-  //var ret = [];
-  //if (this.master) {
-  //  //var pos = this.getRow();
-  //  for (var i = pos + 1; i < this.master.tasks.length; i++) {
-  //    var ch = this.master.tasks[i];
-  //    if (ch.level > this.level)
-  //      ret.push(ch);
-  //    else
-  //      break;
-  //  }
-  //}
-  //return ret;
   return this.children;
 };
 
@@ -690,7 +686,7 @@ Task.prototype.setDepends = function(depends){
         var deps = this.depends_string.split(',');
         var dep_id;
         var depend_index;
-        for (var i; i<deps.length; i++){
+        for (var i=0; i < deps.length; i++){
             dep_id = deps[i].split(':')[0].trim(); // don't care about the lag
             depend_index = this.master.task_ids.indexOf(dep);
             if (depend_index != -1){
@@ -717,19 +713,24 @@ Task.prototype.setDepends = function(depends){
 };
 
 
+
 Task.prototype.getSuperiors = function() {
-  var ret = [];
-  var task = this;
-  if (this.master) {
-    ret = this.master.links.filter(function(link) {
-      return link.to == task;
-    });
-  }
-  return ret;
+  // Returns the Tasks that this task depends to.
+  
+  //var ret = [];
+  //var task = this;
+  //if (this.master){
+    //ret = this.master.links.filter(function(link) {
+    //  return link.to == task;
+    //});
+  //}
+  //return ret;
+  return this.getDepends();
 };
 
 
 Task.prototype.getInferiors = function() {
+    // Returns the tasks that depends to this task
     var ret = [];
     var task = this;
     if (this.master) {
@@ -746,10 +747,8 @@ Task.prototype.isNew = function(){
 };
 
 Task.prototype.update_duration_from_schedule_timing = function(){
-    // updates the duration from schedule_timing
-    
+    // updates the duration from schedule_timing    
 };
-
 
 
 //<%------------------------------------------------------------------------  LINKS OBJECT ---------------------------------------------------------------%>

@@ -29,6 +29,11 @@ Stalker Changes
 * It is now possible to use any characters in SimpleEntity.name and the derived
   classes.
 
+* Fixed jQueryGantt, it is now possible to correctly move a TaskBar without
+  getting in to infinite loop.
+
+* The timing resolution of jQueryGantt is now 1 hour.
+
 0.2.0.a10
 ---------
 

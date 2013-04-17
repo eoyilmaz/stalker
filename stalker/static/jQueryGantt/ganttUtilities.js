@@ -183,8 +183,11 @@ $.splittify = {
 };
 
 //<%------------------------------------------------------------------------  UTILITIES ---------------------------------------------------------------%>
-function computeStart(start) { // TODO: Update this to support hours
+function computeStart(start, timing_resolution) { // TODO: Update this to support hours
   //console.log('computeStart running');
+    // TODO: this is the function that you are going to round the start to the timing resolution
+    // round to the closest day start by adding 12 hours to the start and then
+    // setting the hour value to 00:00:00.000
 //  var d = new Date(start+3600000*12);
 //  d.setHours(0, 0, 0, 0);
   //move to the next working day if the start is a holiday
@@ -193,11 +196,18 @@ function computeStart(start) { // TODO: Update this to support hours
 //  }
 //  d.setHours(0, 0, 0, 0);
 //  return d.getTime();
-    return start
+    //return start;
+    
+    // round to the given time interval
+    timing_resolution = timing_resolution || 3600000; // 1 hour
+    return (((start + timing_resolution * 0.5) / timing_resolution) >> 0 ) * timing_resolution;
 }
 
-function computeEnd(end) { // TODO: Update this to support hours
+function computeEnd(end, timing_resolution) { // TODO: Update this to support hours
   //console.log('computeEnd running');
+    // TODO: this is the function that you are going to round the end to the timing resolution
+    // round to the closest day end by adding 12 hours to the end and then
+    // setting the hour value to 23:59:59:999
 //  var d = new Date(end-3600000*12);
 //  d.setHours(23, 59, 59, 999);
   //move to next working day
@@ -206,20 +216,29 @@ function computeEnd(end) { // TODO: Update this to support hours
 //  }
 //  d.setHours(23, 59, 59, 999);
 //  return d.getTime();
-    return end
+//    return end;
+    
+    // round to the given time interval
+    timing_resolution = timing_resolution || 3600000; // 1 hour
+    return (((end + timing_resolution * 0.5) / timing_resolution) >> 0 ) * timing_resolution;
 }
 
-function computeEndByDuration(start, duration) {
-  var d = new Date(start);
-  //console.debug("computeEndByDuration start ",d,duration)
-  var q = duration - 1;
-  while (q > 0) {
-    d.setDate(d.getDate() + 1);
-    if (!isHoliday(d))
-      q--;
-  }
-  d.setHours(23, 59, 59, 999);
-  return d.getTime();
+function computeEndByDuration(start, duration, timing_resolution){
+    //var d = new Date(start);
+    //console.debug("computeEndByDuration start ",d,duration)
+    //var q = duration - 1;
+    //while (q > 0) {
+    //  d.setDate(d.getDate() + 1);
+    //  if (!isHoliday(d))
+    //    q--;
+    //}
+    //d.setHours(23, 59, 59, 999);
+    //return d.getTime();
+    
+    timing_resolution = timing_resolution || 3600000; // 1 hour
+    
+    var end = start + duration - 1;
+    return (((end + timing_resolution * 0.5) / timing_resolution) >> 0 ) * timing_resolution;
 }
 
 function incrementDateByWorkingDays(date, days) {
@@ -230,7 +249,8 @@ function incrementDateByWorkingDays(date, days) {
 
 function recomputeDuration(start, end) {
    //console.debug("recomputeDuration");
-   return new Date(start).distanceInWorkingDays(new Date(end));
+   //return new Date(start).distanceInWorkingDays(new Date(end));
+   return new Date(end - start);
 }
 
 

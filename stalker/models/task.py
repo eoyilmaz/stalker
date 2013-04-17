@@ -1016,7 +1016,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """A predicate which returns True if this task has both a
         computed_start and computed_end values
         """
-        return self.computed_start and self.computed_end
+        return self.computed_start is not None and \
+            self.computed_end is not None
     
     @property
     def total_effort_spent(self):

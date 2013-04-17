@@ -102,11 +102,13 @@
   var millisInWorkingDay =36000000;
   var workingDaysPerWeek =7;
 
-  function isHoliday(date) {
+  function isHoliday(date, ganttMaster) {
+    
+    
     var friIsHoly = false;
     var satIsHoly = false;
     var sunIsHoly = false;
-
+    
     pad = function (val) {
       val = "0" + val;
       return val.substr(val.length - 2);

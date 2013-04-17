@@ -353,7 +353,7 @@ Ganttalendar.prototype.drawTask = function (task) {
   //}).mousedown(function() {
   //  var task_id = $(this).attr("taskId");
   //  //console.log('task_id: ', task_id);
-  //  var task = self.master.getTask(task_id);
+  //  var task = self.master.getTask(task_id{);
   //  //console.log('task: ', task);
   //  task.rowElement.click();
   //});

@@ -81,28 +81,28 @@ GridEditor.prototype.addTask = function(task, row) {
 
 
 GridEditor.prototype.refreshTaskRow = function(task) {
-  //console.debug("refreshTaskRow")
-  //var profiler = new Profiler("editorRefreshTaskRow");
-  var row = task.rowElement;
+    //console.debug("refreshTaskRow")
+    //var profiler = new Profiler("editorRefreshTaskRow");
+    var row = task.rowElement;
+    
+    row.find(".taskRowIndex").html(task.getRow() + 1);
+    row.find(".indentCell").css("padding-left", task.getParents().length * 10);
+    row.find("[name=name]").val(task.name);
+    row.find("[name=code]").val(task.code);
+    row.find("[status]").attr("status", task.status);
+    
+    row.find("[name=duration]").val(task.duration);
+    row.find("[name=start]").val(new Date(task.start).format()).updateOldValue(); // called on dates only because for other field is called on focus event
+    row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
+    
+    var dep_string = '';
+    for (var i; i < task.getDepends().length ; i++){
+        dep_string = '' + task.depends[i] + ', ';
+    }
+    row.find("[name=depends]").val(dep_string);
+    row.find(".taskResources").html(task.getResourcesString());
 
-  row.find(".taskRowIndex").html(task.getRow() + 1);
-  row.find(".indentCell").css("padding-left", task.getParents().length * 10);
-  row.find("[name=name]").val(task.name);
-  row.find("[name=code]").val(task.code);
-  row.find("[status]").attr("status", task.status);
-
-  row.find("[name=duration]").val(task.duration);
-  row.find("[name=start]").val(new Date(task.start).format()).updateOldValue(); // called on dates only because for other field is called on focus event
-  row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
-  
-  var dep_string = '';
-  for (var i; i<task.getDepends().length; i++){
-    dep_string = '' + task.depends[i] + ', ';
-  }
-  row.find("[name=depends]").val(dep_string);
-  row.find(".taskResources").html(task.getResourcesString());
-
-  //profiler.stop();
+    //profiler.stop();
 };
 
 GridEditor.prototype.redraw = function() {

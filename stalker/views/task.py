@@ -84,13 +84,15 @@ def convert_to_jquery_gantt_task_format(tasks):
         # "canWriteOnParent": 0
     }
     
-    # logger.debug('loading gantt data:\n%s' % 
-    #              json.dumps(data,
-    #                         sort_keys=False,
-    #                         indent=4,
-    #                         separators=(',', ': ')
-    #              )
-    # )
+    logger.debug(data)
+    
+    logger.debug('loading gantt data:\n%s' % 
+                 json.dumps(data,
+                            sort_keys=False,
+                            indent=4,
+                            separators=(',', ': ')
+                 )
+    )
     return data
     
 
@@ -129,6 +131,7 @@ def update_with_jquery_gantt_task_data(json_data):
         
         task_start = task_data['start']
         task_duration = task_data.get('duration', 0)
+        task_end = task_data['end']
         task_resource_ids = [resource_data['id']
                              for resource_data in task_data['resources']]
         task_description = task_data.get('description', '')
@@ -163,7 +166,8 @@ def update_with_jquery_gantt_task_data(json_data):
             # logger.debug('task.start given (calc) : %s' % datetime.datetime.fromtimestamp(task_start/1000))
             task.start = datetime.datetime.fromtimestamp(task_start/1000)
             # logger.debug('task.start after set    : %s' % task.start)
-            task.duration = datetime.timedelta(task_duration)
+            #task.duration = datetime.timedelta(task_duration)
+            task.end = datetime.datetime.fromtimestamp(task_end/1000)
             
             resources = User.query.filter(User.id.in_(task_resource_ids)).all()
             task.resources = resources
@@ -230,28 +234,29 @@ def update_task(request):
     :param request: 
     :return:
     """
-    # params
+    # *************************************************************************
+    # collect data
     parent_id = request.params.get('parent_id', None)
+    if parent_id:
+        parent = Task.query.filter(Task.id==parent_id).first()
+    else:
+        parent = None
     name = str(request.params.get('name', None))
     description = request.params.get('description', '')
     is_milestone = int(request.params.get('is_milestone', None))
     status_id = int(request.params.get('status_id', None))
+    status = Status.query.filter_by(id=status_id).first()
     schedule_model = request.params.get('schedule_model') # there should be one
     schedule_timing = float(request.params.get('schedule_timing'))
     schedule_unit = request.params.get('schedule_unit')
     start = get_datetime(request, 'start_date', 'start_time')
     end = get_datetime(request, 'end_date', 'end_time')
     
-    # logger.debug('parent_id       : %s' % parent_id)
-    logger.debug('name            : %s' % name)
-    logger.debug('description     : %s' % description)
-    logger.debug('is_milestone    : %s' % is_milestone)
-    logger.debug('status_id       : %s' % status_id)
-    logger.debug('schedule_model  : %s' % schedule_model)
-    logger.debug('schedule_timing : %s' % schedule_timing)
-    logger.debug('schedule_unit   : %s' % schedule_unit)
-    logger.debug('start           : %s' % start)
-    logger.debug('end             : %s' % end)
+    depend_ids = [
+        int(d_id)
+        for d_id in request.POST.getall('depend_ids')
+    ]
+    depends = Task.query.filter(Task.id.in_(depend_ids)).all()
     
     resource_ids = [
         int(r_id)
@@ -259,37 +264,43 @@ def update_task(request):
     ]
     resources = User.query.filter(User.id.in_(resource_ids)).all()
     
+    logger.debug('parent_id       : %s' % parent_id)
+    logger.debug('parent          : %s' % parent)
+    logger.debug('depend_ids      : %s' % depend_ids)
+    logger.debug('depends         : %s' % depends)
+    logger.debug('resource_ids    : %s' % resource_ids)
+    logger.debug('resources       : %s' % resources)
+    logger.debug('name            : %s' % name)
+    logger.debug('description     : %s' % description)
+    logger.debug('is_milestone    : %s' % is_milestone)
+    logger.debug('status_id       : %s' % status_id)
+    logger.debug('status          : %s' % status)
+    logger.debug('schedule_model  : %s' % schedule_model)
+    logger.debug('schedule_timing : %s' % schedule_timing)
+    logger.debug('schedule_unit   : %s' % schedule_unit)
+    logger.debug('start           : %s' % start)
+    logger.debug('end             : %s' % end)
+    
     # get task
     task_id = request.matchdict['task_id']
     task = Task.query.filter(Task.id==task_id).first()
     
-    logger.debug('task in DBSession: %s' % (task in DBSession))
-    
     # update the task
-    if task:
-        if parent_id:
-            parent = Task.query.filter(Task.id==parent_id).first()
-            task.parent = parent
-        else:
-            task.parent = None
-        
-        task.name = name
-        
-        task.start = start
-        task.end = end
-        
-        logger.debug('updated task.name: %s' % task.name)
-        task.description = description
-        task.is_milestone = is_milestone
-        
-        status = Status.query.filter_by(id=status_id).first()
-        task.status = status
-        
-        logger.debug('schedule_model: %s' % schedule_model)
-        task.schedule_model = schedule_model
-        task.schedule_unit = schedule_unit
-        task.schedule_timing = schedule_timing
-        task.resources = resources
+    if not task:
+        return HTTPOk(detail='Task not updated')
+    
+    task.name = name
+    task.description = description
+    task.parent = parent
+    task.depends = depends
+    task.start = start
+    task.end = end
+    task.is_milestone = is_milestone
+    task.status = status
+    task.schedule_model = schedule_model
+    task.schedule_unit = schedule_unit
+    task.schedule_timing = schedule_timing
+    task.resources = resources
         
     
     return HTTPOk(detail='Task updated successfully')
@@ -525,16 +536,15 @@ def create_task(request):
     schedule_timing = float(request.params.get('schedule_timing'))
     schedule_unit = request.params.get('schedule_unit')
     
-    
     # get the resources
     resources = []
+    resource_ids = []
     if 'resource_ids' in request.params:
         resource_ids = [
             int(r_id)
             for r_id in request.POST.getall('resource_ids')
         ]
         resources = User.query.filter(User.id.in_(resource_ids)).all()
-    
     
     logger.debug('project_id      : %s' % project_id)
     logger.debug('parent_id       : %s' % parent_id)

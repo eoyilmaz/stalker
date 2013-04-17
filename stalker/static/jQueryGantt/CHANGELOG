@@ -7,6 +7,9 @@ StalkerGantt Changes
   everything is working properly right now.
 * Parent Tasks displayed differently than the leaf tasks (on paar with the
   other gantt charts).
+* Fixed jQueryGantt, it is now possible to correctly move a TaskBar without
+  getting in to infinite loop.
+* The timing resolution of jQueryGantt is now 1 hour.
 
 0.1.0.a1
 --------
