@@ -267,8 +267,8 @@ GanttMaster.prototype.loadTasks = function(tasks) {
         this.task_ids.push(task.id); //lookup table for task ids
     }
     
-    console.log('this.tasks    : ', this.tasks);
-    console.log('this.task_ids : ', this.task_ids);
+//    console.log('this.tasks    : ', this.tasks);
+//    console.log('this.task_ids : ', this.task_ids);
     
     // find root tasks
     var root_tasks = [];
@@ -280,8 +280,8 @@ GanttMaster.prototype.loadTasks = function(tasks) {
         }
         // also fill the task.depends
         this.tasks[i].getDepends();
-        console.log('task.depend_ids : ', this.tasks[i].depend_ids);
-        console.log('task.depends    : ', this.tasks[i].depends);
+//        console.log('task.depend_ids : ', this.tasks[i].depend_ids);
+//        console.log('task.depends    : ', this.tasks[i].depends);
     }
     
     
