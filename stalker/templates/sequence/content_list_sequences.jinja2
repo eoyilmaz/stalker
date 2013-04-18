@@ -52,10 +52,10 @@
                 for(var i=0;i<data.length;i++ ){
 
                   var sequenceName = data[i]["name"];
-                  var sequenceLink = '<a class="DataLink" href="#" stalker_href="view/sequence/' + data[i]['id'] + '">' + sequenceName + '</a>';
+                  var sequenceLink = '<a class="DataLink" href="#" stalker_target="sequences_content_pane" stalker_href="view/sequence/' + data[i]['id'] + '">' + sequenceName + '</a>';
 
                   var userName = data[i]["user_name"];
-                  var userLink = '<a class="DataLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
+                  var userLink = '<a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
 
                   data[i]["sequence_link"] = sequenceLink;
                   data[i]["user_link"] = userLink;
@@ -77,7 +77,7 @@
 
 
 
-                gotoLink({target:'central_content'});
+                gotoLink();
               });
 
 

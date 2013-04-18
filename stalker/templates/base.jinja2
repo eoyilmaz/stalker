@@ -83,9 +83,9 @@
         <a href="/"  style='color: #000000'>STALKER</a>
       </div>
       
-      {% if studio %}
-        <div id='stalkerMenuBar' style='color: #000000'></div>
-      {% endif %}
+{#      {% if studio %}#}
+      <div id='stalkerMenuBar' style='color: #000000'></div>
+{#      {% endif %}#}
       
       <div id='mebar'>
         <div style='color: #000000' id='mebutton'></div>
@@ -244,6 +244,15 @@
           var studio_DropDownMenu = new DropDownMenu({
 
           });
+
+          studio_DropDownMenu.addChild(
+                  dialogCaller({
+                    label:'Create Studio',
+                    dialog_id:'create_studio_dialog',
+                    content_creator: create_studio_dialog_creator,
+                    widget_type: 'MenuItem'
+                  })
+          );
 
           studio_DropDownMenu.addChild(new MenuItem({
             label: "Overview Projects"

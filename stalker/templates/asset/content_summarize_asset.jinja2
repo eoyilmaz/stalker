@@ -21,7 +21,12 @@
 <div id='asset_details_content_pane'>
   {# Avatar #}
   <div id='asset_thumbnail' class='thumbnail'>No Avatar</div>
-
+  <div id='asset_summary_chart1'
+      style='width: 100px;
+                  height: 100px;
+                  position: absolute;
+                  top: 200px;
+                  left: 0px;'></div>
   {# Basic Info #}
   <div id='asset_info' class='summary_info'>
     <h2 style='margin: 0px;'>{{ asset.name }}</h2>
@@ -31,7 +36,7 @@
         <td style='text-align: right'><b>Project</b></td>
         <td>&nbsp;</td>
         <td>
-          <a href="#" class= "DataLink" stalker_href = "view/project/{{ asset.project.id }}">{{ asset.project.name }}</a>
+          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/project/{{ asset.project.id }}">{{ asset.project.name }}</a>
         </td>
       </tr>
       <tr>
@@ -53,20 +58,21 @@
         <td style='text-align: right'><b>Created By</b></td>
         <td>&nbsp;</td>
         <td>
-          <a href="#" class= "DataLink" stalker_href = "view/user/{{ asset.created_by.id }}">{{ asset.created_by.name }}</a>
+          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ asset.created_by.id }}">{{ asset.created_by.name }}</a>
         </td>
       </tr>
+
     </table>
     <button id='update_asset_button'>Update</button>
   </div>
     {#  Charts  #}
-  <div>
-    <div id='asset_summary_chart1'
-         style='width: 200px;
-                  height: 200px;
-                  position: absolute;
-                  right: 20px;'></div>
-  </div>
+{#  <div>#}
+{#    <div id='asset_summary_chart1'#}
+{#         style='width: 200px;#}
+{#                  height: 200px;#}
+{#                  position: absolute;#}
+{#                  right: 20px;'></div>#}
+{#  </div>#}
 </div>
 
 <script type="text/javascript">
@@ -92,7 +98,7 @@
               // Add the only/default plot
               pieChart.addPlot("default", {
                 type: PiePlot, // our plot2d/Pie module reference as type value
-                radius: 80,
+                radius: 40,
                 fontColor: "black",
                 labelOffset: 0
               });
@@ -120,7 +126,7 @@
 
             });
 
-            gotoLink({target:'central_content'});
+            gotoLink();
 
           });
 </script>

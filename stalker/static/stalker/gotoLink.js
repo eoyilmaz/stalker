@@ -22,48 +22,23 @@ define(['dijit/registry', 'dojo/on', 'dojo/query'],
         // ********************************************************************
         // GO TO LINK
         //
-        // A helper function for form submission.
         //
-        // Helps to submit the data and update a related field together. Uses
-        // Deferred post and waits for the data to be send before updating the
-        // related field if any.
-        //
-        //
-        // PARAMETERS
-        //
-        // dialog: dijit.dialog.Dialog
-        //   the dialog to reset and destroy
-        //
-        // form: dijit.form.Form
-        //   the form to get the data form
-        //
-        // additional_data: Dictionary
-        //   additional data to append to the form data
-        //
-        // url: String
-        //   the url to submit the data to
-        //
-        // method: String
-        //   the method POST or GET
-        //
-        var gotoLink = function(kwargs){
-            var target = kwargs.target || null;
-            
-            if (target){
-                var contentPane = registry.byId(target);
-                
-                if (contentPane){
-                    // get the Link Elements
-                    var dataLinks = query('.DataLink');
-                    
-                    for (var i=0; i<dataLinks.length; i++){
-                        on(dataLinks[i], 'click', function(){
-                            contentPane.set('href', this.getAttribute('stalker_href'));
-                            contentPane.reset();
-                        });
-                    }
-                }
-            }
+        var gotoLink = function(){
+
+              // get the Link Elements
+              var dataLinks = query('.DataLink');
+
+              for (var i=0; i<dataLinks.length; i++){
+                  on(dataLinks[i], 'click', function(){
+                      var contentPane = registry.byId(this.getAttribute('stalker_target'));
+                      if (contentPane){
+                          contentPane.set('href', this.getAttribute('stalker_href'));
+                          contentPane.reset();
+                      }
+                  });
+              }
+
+
         };
         return gotoLink;
 });

@@ -93,10 +93,10 @@
            for(var i=0;i<data.length;i++ ){
 
              var assetName = data[i]["name"];
-             var assetLink = '<a class="DataLink" href="#" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';
+             var assetLink = '<a class="DataLink" href="#" stalker_target="assets_content_pane" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';
 
              var userName = data[i]["user_name"];
-             var userLink = '<a class="DataLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
+             var userLink = '<a class="DataLink" stalker_target="central_content" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
 
              data[i]["asset_link"] = assetLink;
              data[i]["user_link"] = userLink;
@@ -125,7 +125,7 @@
 
 
 
-           gotoLink({target:'central_content'});
+           gotoLink();
 
           });
 

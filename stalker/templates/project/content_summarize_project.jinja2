@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 
-<div style="text-align: center"><h4><b>Project Summary</b></h4></div>
+<div style="text-align: center"><h4><b>{{ project.name }} ({{ project.code }})</b></h4></div>
 
 <div id='project_details'>
     <div style="background-color: #39b54a " class="page_title"></div>
@@ -31,15 +31,14 @@
 
     {# Basic Info #}
     <div id='project_info' class='summary_info'>
-      <h2 style='margin: 0px; text-align: right'>{{ project.name }}</h2>
-      <h5 style='margin: 0px; text-align: right'>({{ project.code }})</h5>
+{#      <h2 style='margin: 0px; text-align: right'>{{ project.name }}</h2>#}
+{#      <h5 style='margin: 0px; text-align: right'>({{ project.code }})</h5>#}
       <table>
         <tr>
           <td style='text-align: right'><b>Lead</b></td>
           <td>&nbsp;</td>
-
           <td>
-            <a href="#" class= "DataLink" stalker_href = "view/user/{{ project.lead.id }}">{{ project.lead.name }}</a>
+            <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ project.lead.id }}">{{ project.lead.name }}</a>
             ({{ project.lead.login }})
           </td>
         </tr>
@@ -85,7 +84,7 @@
 
   require(['dijit/registry',
     'dojox/charting/Chart',
-    'dojox/charting/themes/Claro',
+    'dojox/charting/themes/Grasslands',
     'dojox/charting/plot2d/Pie',
     'dojox/charting/action2d/MoveSlice',
     'dijit/form/Button',
@@ -132,7 +131,7 @@
         
       });
 
-      gotoLink({target:'central_content'});
+      gotoLink();
     
   });
 </script>

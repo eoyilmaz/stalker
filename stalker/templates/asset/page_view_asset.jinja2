@@ -33,7 +33,7 @@
 
             var asset_SplitContainer = new SplitContainer({
               region: 'center',
-              orientation: 'vertical',
+              orientation: 'horizontal',
               splitter: false
 
             }, 'asset_split_container');
@@ -54,7 +54,7 @@
 
             var tasks_content_pane = new ContentPane({
               title: 'Tasks',
-              href: 'list/tasks/{{ asset.id }}'
+              href: 'list/tasks/{{ asset.id  }}'
             });
 
             var tickets_content_pane = new ContentPane({

@@ -308,7 +308,7 @@
         var imf_data_length = 0;
 
         var set_imf_filteringSelect_value = function(data){
-          if(imf_data_length!=0 && imf_data_length < data.length){
+          if(imf_data_length < data.length){
             imf_filteringSelect_selected_value = data[data.length-1].id;
           }
           imf_filteringSelect.set('value',imf_filteringSelect_selected_value);
@@ -384,7 +384,7 @@
         var repository_data_length = 0;
 
         var set_repository_filteringSelect_value = function(data){
-          if(repository_data_length!=0 && repository_data_length < data.length){
+          if(repository_data_length < data.length){
             repository_filteringSelect_selected_value = data[data.length-1].id;
           }
           repository_filteringSelect.set('value',repository_filteringSelect_selected_value);
@@ -447,7 +447,7 @@
         var structure_data_length = 0;
 
         var set_structure_filteringSelect_value = function(data){
-          if(structure_data_length!=0 && structure_data_length < data.length){
+          if(structure_data_length < data.length){
             structure_filteringSelect_selected_value = data[data.length-1].id;
           }
           structure_filteringSelect.set('value',structure_filteringSelect_selected_value);
@@ -509,7 +509,7 @@
         var lead_data_length = 0;
 
         var set_lead_filteringSelect_value = function(data){
-          if(lead_data_length!=0 && lead_data_length < data.length){
+          if(lead_data_length < data.length){
             lead_filteringSelect_selected_value = data[data.length-1].id;
           }
           lead_filteringSelect.set('value',lead_filteringSelect_selected_value);

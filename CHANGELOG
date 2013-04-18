@@ -26,6 +26,9 @@ Stalker Changes
   (Button or MenuItem) calling it and updated dialogCaller.js to use
   dialogCreator while creating a dialog.
 
+* The Shot, Asset, Sequence detail pages under the Project Overview now opens
+  inside the related tab on the Project Page.
+
 0.2.0.a10
 ---------
 

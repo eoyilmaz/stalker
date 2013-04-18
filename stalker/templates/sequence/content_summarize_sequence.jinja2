@@ -1,9 +1,14 @@
-<div style="text-align: center"><h4><b>Sequence Summary</b></h4></div>
-
 <div id='sequence_details_content_pane'>
   <div style="background-color: #ed008c " class="page_title"></div>
     {# Avatar #}
   <div id='sequence_thumbnail' class='thumbnail'>No Avatar</div>
+
+  <div id='sequence_summary_chart1'
+       style='width: 100px;
+                  height: 100px;
+                  position: absolute;
+                  top: 200px;
+                  left: 0px;'></div>
 
     {# Basic Info #}
   <div id='sequence_info' class='summary_info'>
@@ -14,7 +19,7 @@
         <td style='text-align: right'><b>Project</b></td>
         <td>&nbsp;</td>
         <td>
-          <a href="#" class= "DataLink" stalker_href = "view/project/{{ sequence.project.id }}">{{ sequence.project.name }}</a>
+          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/project/{{ sequence.project.id }}">{{ sequence.project.name }}</a>
         </td>
       </tr>
       <tr>
@@ -31,19 +36,13 @@
         <td style='text-align: right'><b>Created By</b></td>
         <td>&nbsp;</td>
         <td>
-          <a href="#" class= "DataLink" stalker_href = "view/user/{{ sequence.created_by.id }}">{{ sequence.created_by.name }}</a>
+          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ sequence.created_by.id }}">{{ sequence.created_by.name }}</a>
         </td>
       </tr>
     </table><button id='update_sequence_button'>Update</button>
   </div>
     {#  Charts  #}
-  <div>
-    <div id='sequence_summary_chart1'
-         style='width: 200px;
-                  height: 200px;
-                  position: absolute;
-                  right: 20px;'></div>
-  </div>
+
 </div>
 
 <script type="text/javascript">
@@ -66,7 +65,7 @@
               // Add the only/default plot
               pieChart.addPlot("default", {
                 type: PiePlot, // our plot2d/Pie module reference as type value
-                radius: 80,
+                radius: 40,
                 fontColor: "black",
                 labelOffset: 0
               });
@@ -94,7 +93,7 @@
 
             });
 
-            gotoLink({target:'central_content'});
+            gotoLink();
 
           });
 </script>

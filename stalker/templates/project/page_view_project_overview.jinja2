@@ -17,21 +17,39 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
+
+
 <div id='project_split_container'>
   <div id='project_summary'>
       {# Summary View #}
   </div>
   <div id='project_related_data_tab_container'>
-    {# Tab View #}
+      <div id='assets_content_pane'></div>
+      <div id='sequences_content_pane'></div>
+      <div id='shots_content_pane'></div>
   </div>
 </div>
 
-<script type='text/javascript'>
-  require(['dijit/registry', 'dijit/layout/SplitContainer',
-    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
-    function(registry, SplitContainer, TabContainer, ContentPane){
 
-      var project_SplitContainer = new SplitContainer({
+<script type='text/javascript'>
+  require(['dijit/registry',
+
+    'dijit/layout/SplitContainer',
+    'dijit/layout/TabContainer',
+    'dojox/layout/ContentPane',
+
+    'dojo/domReady!'],
+    function(registry,
+
+             SplitContainer,
+             TabContainer,
+             ContentPane){
+
+
+
+      // **********************************************************************
+
+      var project_content_SplitContainer = new SplitContainer({
         region: 'center',
         orientation: 'vertical',
         splitter: false
@@ -53,36 +71,42 @@
         style: 'background-color: #39b54a;'
       }, 'project_related_data_tab_container');
 
+
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
+        default_href:'list/tasks/{{ project.id }}',
         href: 'list/tasks/{{ project.id }}'
       });
-      
+
       var assets_content_pane = new ContentPane({
         title: 'Assets',
+        default_href:'list/assets/{{ project.id }}',
         href:'list/assets/{{ project.id }}'
-      });
-      
+      },'assets_content_pane');
+
       var shots_content_pane = new ContentPane({
         title: 'Shots',
+        default_href:'list/shots/{{ project.id }}',
         href: 'list/shots/{{ project.id }}'
-      });
+      },'shots_content_pane');
 
       var sequences_content_pane = new ContentPane({
         title: 'Sequences',
+        default_href:'list/sequences/{{ project.id }}',
         href: 'list/sequences/{{ project.id }}'
-      });
+      },'sequences_content_pane');
 
       var users_content_pane = new ContentPane({
         title: 'Users',
+        default_href:'list/users/{{ project.id }}',
         href: 'list/users/{{ project.id }}'
       });
-      
+
       var tickets_content_pane = new ContentPane({
         title: 'Tickets',
+        default_href:'list/tickets/{{ project.id }}',
         content: 'list/tickets/{{ project.id }}'
       });
-
 
 
 
@@ -94,12 +118,16 @@
       project_related_data_tab_container.addChild(tickets_content_pane);
       project_related_data_tab_container.startup();
 
-      project_SplitContainer.addChild(summary_content_pane);
-      project_SplitContainer.addChild(project_related_data_tab_container);
-      project_SplitContainer.startup();
+      project_content_SplitContainer.addChild(summary_content_pane);
+      project_content_SplitContainer.addChild(project_related_data_tab_container);
+      project_content_SplitContainer.startup();
 
       project_related_data_tab_container.watch("selectedChildWidget", function(name, oval, nval){
         console.log("selected child changed from ", nval.title, " to ", nval.href);
+        oval.set('href','');
+        oval.refresh();
+
+        nval.set('href',nval.default_href);
         nval.refresh();
       });
       

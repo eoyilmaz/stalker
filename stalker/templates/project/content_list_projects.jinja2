@@ -53,7 +53,7 @@
                 user_memory.query().then(function(data){
                   for(var i=0;i<data.length;i++ ){
                     var projectName = data[i]["name"];
-                    var projectLink = '<a class="DataLink" href="#" stalker_href="view/user/' + data[i]['id'] + '">' + projectName + '</a>';
+                    var projectLink = '<a class="DataLink" href="#" stalker_target = "central_content" stalker_href="view/user/' + data[i]['id'] + '">' + projectName + '</a>';
 
                     data[i]["projectLink"] = projectLink;
                   }

@@ -110,6 +110,7 @@ def main(global_config, **settings):
     config.add_route('create_project', 'create/project')
     config.add_route('update_project', 'update/project/{project_id}')
     config.add_route('view_project', 'view/project/{project_id}')
+    config.add_route('overview_project', 'overview/project/{project_id}')
     config.add_route('list_projects', 'list/projects/{entity_id}')
     config.add_route('get_projects_byEntity', 'get/projects_byEntity/{entity_id}')
     config.add_route('summarize_project', 'summarize/project/{project_id}')

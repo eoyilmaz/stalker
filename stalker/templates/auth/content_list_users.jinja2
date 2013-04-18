@@ -64,7 +64,7 @@
               user_memory.query().then(function(data){
                 for(var i=0;i<data.length;i++ ){
                   var userName = data[i]["name"];
-                  var userLink = '<a class="DataLink" href="#" stalker_href="view/user/' + data[i]['id'] + '">' + userName + '</a><br/>('+data[i]["login"]+')';
+                  var userLink = '<a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/user/' + data[i]['id'] + '">' + userName + '</a><br/>('+data[i]["login"]+')';
 
                   data[i]["user_link"] = userLink;
                 }
@@ -84,7 +84,7 @@
                 users_DataGrid.set('store', my_store );
                 users_DataGrid.set('structure', structure );
 
-                gotoLink({target:'central_content'});
+                gotoLink();
                 
               });
               

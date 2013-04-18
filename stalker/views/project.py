@@ -247,6 +247,11 @@ def get_projects(request):
 
 
 @view_config(
+    route_name='overview_project',
+    renderer='templates/project/page_view_project_overview.jinja2',
+    permission='Read_Project'
+)
+@view_config(
     route_name='view_project',
     renderer='templates/project/page_view_project.jinja2',
     permission='Read_Project'

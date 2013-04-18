@@ -70,10 +70,10 @@
           for(var i=0;i<data.length;i++ ){
 
             var shotName = data[i]["name"];
-            var shotLink = '<a class="DataLink" href="#" stalker_href="view/shot/' + data[i]['id'] + '">' + shotName + '</a>';
+            var shotLink = '<a class="DataLink" href="#" stalker_target="shots_content_pane" stalker_href="view/shot/' + data[i]['id'] + '">' + shotName + '</a>';
 
             var userName = data[i]["user_name"];
-            var userLink = '<a class="DataLink" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
+            var userLink = '<a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
 
             data[i]["shot_link"] = shotLink;
             data[i]["user_link"] = userLink;
@@ -93,7 +93,7 @@
           shots_data_grid.set('store', my_store );
           shots_data_grid.set('structure', structure );
 
-          gotoLink({target:'central_content'});
+          gotoLink();
         });
 
 
