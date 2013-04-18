@@ -24,6 +24,21 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         var style = 'width: auto; height: auto; padding: 0px;';
         
         // ********************************************************************
+        busy_dialog_creator = function(kwargs){
+            var id = kwargs['id'] || 'busy_dialog';
+            var title = kwargs['title'] || 'Stalker is busy...';
+            return new DialogSimple({
+                id: id,
+                title: title,
+                href: 'dialog/busy',
+                resize: true,
+                style: 'width: 350px; height: 70px;',
+                executeScripts: true
+            });
+        };
+        
+        
+        // ********************************************************************
         // STUDIO
         create_studio_dialog_creator = function (){
             return new DialogSimple({

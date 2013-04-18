@@ -553,15 +553,23 @@
             onClick: function(){
               saveGanttOnServer().then(function(){
                 // xhr.post returns a `promise` use it if needed
+                // show the busy dialog
+                var busy_dialog = busy_dialog_creator({
+                  id: 'auto_schedule_busy_dialog'
+                });
+                busy_dialog.show();
                 return xhr.post(
-                '{{ request.route_url('auto_schedule_tasks') }}',
-                {
-                  method: 'POST'
-                }
-                );    
+                  '{{ request.route_url('auto_schedule_tasks') }}',
+                  {
+                    method: 'POST'
+                  }
+                );
               }).then(function(){
                 // reload scheduled tasks
                 loadGanttFromServer();
+                // kill the busy dialog
+                var busy_dialog = dijit.byId('auto_schedule_busy_dialog');
+                busy_dialog.destroyRecursive();
               });
             }
           }, 'list_tasks_auto_schedule_button')

@@ -86,3 +86,12 @@ def get_datetime(request, date_attr, time_attr):
         second=time_part.second,
         microsecond=time_part.microsecond
     )
+
+@view_config(
+    route_name='busy_dialog',
+    renderer='templates/busy_dialog.jinja2'
+)
+def busy_dialog(request):
+    """generates a busy dialog
+    """
+    return {}

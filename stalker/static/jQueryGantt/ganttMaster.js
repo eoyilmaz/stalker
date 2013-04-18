@@ -143,15 +143,15 @@ GanttMaster.prototype.addTask = function(task, parent) {
     
     //recompute depends string
     this.updateDepends();
-
+    
     //add Link collection in memory
     var linkLoops = !this.updateLinks(task);
     
     //set the status according to parent
     if (task.getParent())
-        task.status=task.getParent().status;
+        task.status = task.getParent().status;
     else
-        task.status="STATUS_ACTIVE";
+        task.status = "STATUS_ACTIVE";
     
     var ret = task;
     if (linkLoops || !task.setPeriod(task.start, task.end)) {
@@ -227,6 +227,7 @@ GanttMaster.prototype.loadTasks = function(tasks) {
                 status: task.status,
                 parent_id: task.parent_id,
                 depend_ids: task.depend_ids,
+                depends: null,
                 resources: task.resources,
                 start: task.start,
                 duration: task.duration,
@@ -260,10 +261,14 @@ GanttMaster.prototype.loadTasks = function(tasks) {
             break;
           }
         }*/
-
+        
+        task.depends = null;
         this.tasks.push(task);  //append task at the end
         this.task_ids.push(task.id); //lookup table for task ids
     }
+    
+    console.log('this.tasks    : ', this.tasks);
+    console.log('this.task_ids : ', this.task_ids);
     
     // find root tasks
     var root_tasks = [];
@@ -274,7 +279,9 @@ GanttMaster.prototype.loadTasks = function(tasks) {
             root_tasks.push(this.tasks[i]);
         }
         // also fill the task.depends
-        task.getDepends();
+        this.tasks[i].getDepends();
+        console.log('task.depend_ids : ', this.tasks[i].depend_ids);
+        console.log('task.depends    : ', this.tasks[i].depends);
     }
     
     
@@ -307,7 +314,7 @@ GanttMaster.prototype.loadTasks = function(tasks) {
     
     //var prof=new Profiler("gm_loadTasks_addTaskLoop");
     for (var i=0 ; i<this.tasks.length ; i++) {
-        var task = this.tasks[i];
+        task = this.tasks[i];
         
         //add Link collection in memory
         var linkLoops = !this.updateLinks(task);
@@ -392,6 +399,7 @@ GanttMaster.prototype.redraw = function() {
 
 GanttMaster.prototype.reset = function() {
     this.tasks = [];
+    this.task_ids = [];
     this.links = [];
     this.deletedTaskIds=[];
     this.__undoStack = [];
@@ -458,14 +466,14 @@ GanttMaster.prototype.updateLinks = function(task) {
         var sups = task.getSuperiors();
         var loop = false;
         for (var i=0; i < sups.length; i++){
-            var supLink = sups[i];
-            if (supLink.from == target){
+            var supTask = sups[i];
+            if (supTask == target){
                 loop = true;
                 break;
             } else {
-                if (visited.indexOf(supLink.from) <= 0){
-                    visited.push(supLink.from);
-                    if (isLoop(supLink.from, target, visited)){
+                if (visited.indexOf(supTask) <= 0){
+                    visited.push(supTask);
+                    if (isLoop(supTask, target, visited)){
                         loop = true;
                         break;
                     }

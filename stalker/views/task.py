@@ -121,7 +121,7 @@ def update_with_jquery_gantt_task_data(json_data):
     
     # Updated Tasks
     for task_data in data['tasks']:
-        logger.debug('*********************************************')
+        # logger.debug('*********************************************')
         task_id = task_data['id']
         task_name = task_data['name'] # just take the part without 
                                       # the parenthesis
@@ -130,11 +130,12 @@ def update_with_jquery_gantt_task_data(json_data):
                 task_name = task_name[:-len(rstr)]
         
         task_start = task_data['start']
-        task_duration = task_data.get('duration', 0)
         task_end = task_data['end']
         task_resource_ids = [resource_data['id']
                              for resource_data in task_data['resources']]
         task_description = task_data.get('description', '')
+        
+        task_schedule_timing = float(task_data['schedule_timing'])
         
         # no need to update parent, it will only be possible by using
         # Stalker's own task edit UI
@@ -149,6 +150,7 @@ def update_with_jquery_gantt_task_data(json_data):
         task_depend_ids = task_data.get('depend_ids', [])
         
         # get the task itself
+        task = None
         if not isinstance(task_id, basestring): 
             # update task
             task = Task.query.filter(Task.id==task_id).first()
@@ -169,6 +171,8 @@ def update_with_jquery_gantt_task_data(json_data):
             #task.duration = datetime.timedelta(task_duration)
             task.end = datetime.datetime.fromtimestamp(task_end/1000)
             
+            task.schedule_timing = task_schedule_timing
+            
             resources = User.query.filter(User.id.in_(task_resource_ids)).all()
             task.resources = resources
             
@@ -185,9 +189,9 @@ def update_with_jquery_gantt_task_data(json_data):
     # logger.debug('*********************************************')
     
     # Deleted tasks
-    deleted_tasks = Task.query.filter(Task.id.in_(data['deletedTaskIds'])).all()
-    for task in deleted_tasks:
-        DBSession.delete(task)
+    #deleted_tasks = Task.query.filter(Task.id.in_(data['deletedTaskIds'])).all()
+    #for task in deleted_tasks:
+    #    DBSession.delete(task)
     
     # transaction will handle the commit don't bother doing anything
 
@@ -301,6 +305,7 @@ def update_task(request):
     task.schedule_unit = schedule_unit
     task.schedule_timing = schedule_timing
     task.resources = resources
+    task._reschedule(task.schedule_timing, task.schedule_unit)
         
     
     return HTTPOk(detail='Task updated successfully')

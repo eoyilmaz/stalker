@@ -96,6 +96,8 @@ def main(global_config, **settings):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     
+    config.add_route('busy_dialog', 'dialog/busy')
+    
     # *************************************************************************
     # DATA VIEWS
     # *************************************************************************

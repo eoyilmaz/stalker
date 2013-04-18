@@ -87,11 +87,11 @@ function Task(kwargs) {
     this.schedule_unit = kwargs['schedule_unit'] || 'h';
     this.schedule_constraint = kwargs['schedule_constraint'] || 0;
     
-    console.log('kwargs["schedule_model"] :', kwargs['schedule_model']);
-    console.log('schedule_model      : ', this.schedule_model);
-    console.log('schedule_timing     : ', this.schedule_timing);
-    console.log('schedule_unit       : ', this.schedule_unit);
-    console.log('schedule_constraint : ', this.schedule_constraint);
+//    console.log('kwargs["schedule_model"] :', kwargs['schedule_model']);
+//    console.log('schedule_model      : ', this.schedule_model);
+//    console.log('schedule_timing     : ', this.schedule_timing);
+//    console.log('schedule_unit       : ', this.schedule_unit);
+//    console.log('schedule_constraint : ', this.schedule_constraint);
     
     this.is_milestone = false;
     this.startIsMilestone = false;
@@ -110,7 +110,7 @@ function Task(kwargs) {
     }
     
     // update the duration according to the schedule_timing value
-    this.update_duration_from_schedule_timing();
+    //this.update_duration_from_schedule_timing();
 }
 
 Task.prototype.clone = function () {
@@ -154,16 +154,21 @@ Task.prototype.setPeriod = function (start, end) {
     if (end instanceof Date) {
         end = end.getTime();
     }
-
+    
     var originalPeriod = {
         start: this.start,
         end:  this.end,
-        duration: this.duration
+        duration: this.duration,
+        schedule_timing: this.schedule_timing
     };
     
     //console.debug("setStart",date,date instanceof Date);
-    var wantedStartMillis = start;
     
+    // round the values
+    start = computeStart(start);
+    end = computeEnd(end);
+    
+    var wantedStartMillis = start;
     
     //set a legal start
     //start = computeStart(start);
@@ -173,15 +178,17 @@ Task.prototype.setPeriod = function (start, end) {
         start = end;
     }
     
+    // update the schedule_timing
+    this.schedule_timing = this.schedule_timing * (end - start) / (this.end - this.start);
+    
     //if depends -> start is set to max end + lag of superior
     var sups = this.getSuperiors();
     if (sups && sups.length > 0){
         var supEnd = 0;
-        var link;
+        var supTask;
         for (var i=0 ; i < sups.length ; i++) {
-            link = sups[i];
-            //supEnd = Math.max(supEnd, incrementDateByWorkingDays(link.from.end, link.lag));
-            supEnd = Math.max(supEnd, link.end);
+            supTask = sups[i];
+            supEnd = Math.max(supEnd, supTask.end);
         }
         
         //if changed by depends move it
@@ -191,9 +198,6 @@ Task.prototype.setPeriod = function (start, end) {
     }
     
     var somethingChanged = false;
-    
-    //move date to closest day
-    var date = new Date(start);
     
     if (this.start != start || this.start != wantedStartMillis) {
         this.start = start;
@@ -654,13 +658,14 @@ Task.prototype.getDescendant = function() {
 
 Task.prototype.getDepends = function() {
     if (this.depends==null){
+        console.log('this.depends is null, recalculating this.depends');
         this.depends = [];
         if (this.depend_ids.length > 0){
             // find the tasks
             var dep_id;
             var dep;
             var dep_index;
-            for(var i=0; i<this.depend_ids.length; i++){
+            for(var i=0; i < this.depend_ids.length; i++){
                 dep_id = this.depend_ids[i];
                 dep_index = this.master.task_ids.indexOf(dep_id);
                 
