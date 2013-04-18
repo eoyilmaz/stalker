@@ -311,6 +311,8 @@ GanttMaster.prototype.loadTasks = function(tasks) {
     for (var i=0; i<this.tasks.length; i++){
         this.task_ids.push(this.tasks[i].id);
     }
+    // set the first task selected
+    this.currentTask = this.tasks[0];
     
     //var prof=new Profiler("gm_loadTasks_addTaskLoop");
     for (var i=0 ; i<this.tasks.length ; i++) {
@@ -557,13 +559,13 @@ GanttMaster.prototype.endTransaction = function() {
     var ret = true;
 
     //no error -> commit
-    if (this.__currentTransaction.errors.length <= 0) {
+    //if (this.__currentTransaction.errors.length <= 0) {
         //console.debug("committing transaction");
 
         //put snapshot in undo
-        this.__undoStack.push(this.__currentTransaction.snapshot);
+        //this.__undoStack.push(this.__currentTransaction.snapshot);
         //clear redo stack
-        this.__redoStack = [];
+        //this.__redoStack = [];
 
         //shrink gantt bundaries
         this.gantt.originalStartMillis = Infinity;
@@ -577,23 +579,23 @@ GanttMaster.prototype.endTransaction = function() {
         }
         this.taskIsChanged(); //enqueue for gantt refresh
         //error -> rollback
-    } else {
-        ret = false;
-        //console.debug("rolling-back transaction");
-        //try to restore changed tasks
-        var oldTasks = JSON.parse(this.__currentTransaction.snapshot);
-        this.deletedTaskIds = oldTasks.deletedTaskIds;
-        this.loadTasks(oldTasks.tasks);
-        this.redraw();
-        
-        //compose error message
-        var msg = "";
-        for (var i=0 ; i < this.__currentTransaction.errors.length ; i++) {
-            var err = this.__currentTransaction.errors[i];
-            msg = msg + err.msg + "\n\n";
-        }
-        alert(msg);
-    }
+    //} else {
+    //    ret = false;
+    //    //console.debug("rolling-back transaction");
+    //    //try to restore changed tasks
+    //    var oldTasks = JSON.parse(this.__currentTransaction.snapshot);
+    //    this.deletedTaskIds = oldTasks.deletedTaskIds;
+    //    this.loadTasks(oldTasks.tasks);
+    //    this.redraw();
+    //    
+    //    //compose error message
+    //    var msg = "";
+    //    for (var i=0 ; i < this.__currentTransaction.errors.length ; i++) {
+    //        var err = this.__currentTransaction.errors[i];
+    //        msg = msg + err.msg + "\n\n";
+    //    }
+    //    alert(msg);
+    //}
     //reset transaction
     this.__currentTransaction = undefined;
 

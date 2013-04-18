@@ -357,8 +357,8 @@
         // Schedule Timing
         var schedule_timing_numberSpinner = new NumberSpinner({
           name: 'schedule_timing',
-          value: {% if mode=='CREATE' %}0{% elif mode=='UPDATE' %}{{ task.schedule_timing }}{% endif %},
-          constraints:{ min: 0 },
+          value: {% if mode=='CREATE' %}1{% elif mode=='UPDATE' %}{{ task.schedule_timing }}{% endif %},
+          constraints:{ min: 0.1 },
           style: 'width: 65px; text-align: right; float: left; margin-right: 3px;'
         }, 'task_schedule_timing');
         schedule_timing_numberSpinner.startup();

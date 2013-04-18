@@ -135,137 +135,137 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
   var self = this;
 
   //bind dateField on dates
-  taskRow.find(".date").each(function () {
-    var el = $(this);
-
-    el.click(function () {
-      var inp = $(this);
-      inp.dateField({
-        inputField:el
-      });
-    });
-
-    el.blur(function (date) {
-      var inp = $(this);
-      if (inp.isValueChanged()) {
-        if (!Date.isValid(inp.val())) {
-          alert(GanttMaster.messages["INVALID_DATE_FORMAT"]);
-          inp.val(inp.getOldValue());
-
-        } else {
-          var date = Date.parseString(inp.val());
-          var row = inp.closest("tr");
-          var taskId = row.attr("taskId");
-          var task = self.master.getTask(taskId);
-          var lstart = task.start;
-          var lend = task.end;
-
-          if (inp.attr("name") == "start") {
-            lstart = date.getTime();
-            if (lstart >= lend) {
-              var end_as_date = new Date(lstart);
-              lend = end_as_date.add('d', task.duration).getTime();
-            }
-
-            //update task from editor
-            self.master.beginTransaction();
-            self.master.moveTask(task, lstart);
-            self.master.endTransaction();
-
-          } else {
-            var end_as_date = new Date(date.getTime());
-            lend = end_as_date.getTime();
-            if (lstart >= lend) {
-              end_as_date.add('d', -1 * task.duration);
-              lstart = end_as_date.getTime();
-            }
-
-            //update task from editor
-            self.master.beginTransaction();
-            self.master.changeTaskDates(task, lstart, lend);
-            self.master.endTransaction();
-          }
-
-
-          inp.updateOldValue(); //in order to avoid multiple call if nothing changed
-        }
-      }
-    });
-  });
-
-
-  //binding on blur for task update (date exluded as click on calendar blur and then focus, so will always return false, its called refreshing the task row)
-  taskRow.find("input:not(.date)").focus(function () {
-    $(this).updateOldValue();
-
-  }).blur(function () {
-    var el = $(this);
-    if (el.isValueChanged()) {
-      var row = el.closest("tr");
-      var taskId = row.attr("taskId");
-
-      var task = self.master.getTask(taskId);
-
-      //update task from editor
-      var field = el.attr("name");
-
-      self.master.beginTransaction();
-
-      if (field == "depends") {
-        task.setDepends(el.val()); // set the depends with the depends_string
-        // update links
-        var linkOK = self.master.updateLinks(task);
-        if (linkOK) {
-          //synchronize status fro superiors states
-          var sups = task.getSuperiors();
-          for (var i = 0; i < sups.length; i++) {
-            if (!sups[i].from.synchronizeStatus())
-              break;
-          }
-
-          self.master.changeTaskDates(task, task.start, task.end);
-        }
-
-      } else if (field == "duration") {
-        var dur = task.duration;
-        dur = parseInt(el.val()) || 1;
-        el.val(dur);
-        var newEnd = computeEndByDuration(task.start, dur);
-        self.master.changeTaskDates(task, task.start, newEnd);
-
-      } else {
-        task[field] = el.val();
-      }
-      self.master.endTransaction();
-    }
-  });
+//  taskRow.find(".date").each(function () {
+//    var el = $(this);
+//    
+//    el.click(function () {
+//      var inp = $(this);
+//      inp.dateField({
+//        inputField:el
+//      });
+//    });
+//
+//    el.blur(function (date) {
+//      var inp = $(this);
+//      if (inp.isValueChanged()) {
+//        if (!Date.isValid(inp.val())) {
+//          alert(GanttMaster.messages["INVALID_DATE_FORMAT"]);
+//          inp.val(inp.getOldValue());
+//
+//        } else {
+//          var date = Date.parseString(inp.val());
+//          var row = inp.closest("tr");
+//          var taskId = row.attr("taskId");
+//          var task = self.master.getTask(taskId);
+//          var lstart = task.start;
+//          var lend = task.end;
+//
+//          if (inp.attr("name") == "start") {
+//            lstart = date.getTime();
+//            if (lstart >= lend) {
+//              var end_as_date = new Date(lstart);
+//              lend = end_as_date.add('d', task.duration).getTime();
+//            }
+//
+//            //update task from editor
+//            self.master.beginTransaction();
+//            self.master.moveTask(task, lstart);
+//            self.master.endTransaction();
+//
+//          } else {
+//            var end_as_date = new Date(date.getTime());
+//            lend = end_as_date.getTime();
+//            if (lstart >= lend) {
+//              end_as_date.add('d', -1 * task.duration);
+//              lstart = end_as_date.getTime();
+//            }
+//
+//            //update task from editor
+//            self.master.beginTransaction();
+//            self.master.changeTaskDates(task, lstart, lend);
+//            self.master.endTransaction();
+//          }
+//
+//
+//          inp.updateOldValue(); //in order to avoid multiple call if nothing changed
+//        }
+//      }
+//    });
+//  });
 
 
-  //change status
-  taskRow.find(".taskStatus").click(function () {
-    var el = $(this);
-    var tr = el.closest("[taskId]");
-    var taskId = tr.attr("taskId");
-    var task = self.master.getTask(taskId);
+//  //binding on blur for task update (date exluded as click on calendar blur and then focus, so will always return false, its called refreshing the task row)
+//  taskRow.find("input:not(.date)").focus(function () {
+//    $(this).updateOldValue();
+//
+//  }).blur(function () {
+//    var el = $(this);
+//    if (el.isValueChanged()) {
+//      var row = el.closest("tr");
+//      var taskId = row.attr("taskId");
+//
+//      var task = self.master.getTask(taskId);
+//
+//      //update task from editor
+//      var field = el.attr("name");
+//
+//      self.master.beginTransaction();
+//
+//      if (field == "depends") {
+//        task.setDepends(el.val()); // set the depends with the depends_string
+//        // update links
+//        var linkOK = self.master.updateLinks(task);
+//        if (linkOK) {
+//          //synchronize status fro superiors states
+//          var sups = task.getSuperiors();
+//          for (var i = 0; i < sups.length; i++) {
+//            if (!sups[i].from.synchronizeStatus())
+//              break;
+//          }
+//
+//          self.master.changeTaskDates(task, task.start, task.end);
+//        }
+//
+//      } else if (field == "duration") {
+//        var dur = task.duration;
+//        dur = parseInt(el.val()) || 1;
+//        el.val(dur);
+//        var newEnd = computeEndByDuration(task.start, dur);
+//        self.master.changeTaskDates(task, task.start, newEnd);
+//
+//      } else {
+//        task[field] = el.val();
+//      }
+//      self.master.endTransaction();
+//    }
+//  });
 
-    var changer = $.JST.createFromTemplate({}, "CHANGE_STATUS");
-    changer.css("top", tr.position().top + self.element.parent().scrollTop());
-    changer.find("[status=" + task.status + "]").addClass("selected");
-    changer.find(".taskStatus").click(function () {
-      self.master.beginTransaction();
-      task.changeStatus($(this).attr("status"));
-      self.master.endTransaction();
-      el.attr("status", task.status);
-      changer.remove();
-      el.show();
 
-    });
-    el.hide().oneTime(3000, "hideChanger", function () {
-      changer.remove();
-      $(this).show();
-    });
-    el.after(changer);
-  });
+//  //change status
+//  taskRow.find(".taskStatus").click(function () {
+//    var el = $(this);
+//    var tr = el.closest("[taskId]");
+//    var taskId = tr.attr("taskId");
+//    var task = self.master.getTask(taskId);
+//
+//    var changer = $.JST.createFromTemplate({}, "CHANGE_STATUS");
+//    changer.css("top", tr.position().top + self.element.parent().scrollTop());
+//    changer.find("[status=" + task.status + "]").addClass("selected");
+//    changer.find(".taskStatus").click(function () {
+//      self.master.beginTransaction();
+//      task.changeStatus($(this).attr("status"));
+//      self.master.endTransaction();
+//      el.attr("status", task.status);
+//      changer.remove();
+//      el.show();
+//
+//    });
+//    el.hide().oneTime(3000, "hideChanger", function () {
+//      changer.remove();
+//      $(this).show();
+//    });
+//    el.after(changer);
+//  });
 
 
   ////expand collapse todo to be completed

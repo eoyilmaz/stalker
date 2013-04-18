@@ -658,7 +658,6 @@ Task.prototype.getDescendant = function() {
 
 Task.prototype.getDepends = function() {
     if (this.depends==null){
-        console.log('this.depends is null, recalculating this.depends');
         this.depends = [];
         if (this.depend_ids.length > 0){
             // find the tasks

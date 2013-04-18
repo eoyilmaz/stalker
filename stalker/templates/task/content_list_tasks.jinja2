@@ -52,7 +52,7 @@
     <td class="gdfCell taskAssigs">(#=obj.getResourcesString()#)</td>
   </tr>
 --></div>
-
+  
   <div class="__template__" type="TASKEMPTYROW"><!--
   <tr class="taskEditRow emptyRow" >
     <th class="gdfCell" align="right"></th>
@@ -70,7 +70,6 @@
   <div class="__template__" type="TASKBAR"><!--
   <div class="taskBox" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
-{#      <div class="taskStatus" status="(#=obj.status#)"></div>#}
       <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
       <div class="taskScheduleModel" style="position: absolute; text-align: center; width: 100%;">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div>
       <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
@@ -125,7 +124,7 @@
 {# GANTT CHART #}
 <div id="workSpace"
      style="padding:0px;
-      overflow-y:auto;
+      overflow-y:hidden;
       overflow-x:hidden;
       border:1px solid #e5e5e5;
       position:relative;

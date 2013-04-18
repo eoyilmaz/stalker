@@ -40,6 +40,9 @@ Stalker Changes
   * Colorized the Sunday column in suitable zoom levels. In upcoming releases
     it will use the stalker.models.studio.Studio.working_hours attribute to
     determine if the day/hour is an off day/hour.
+  * Disabled editing of date fields.
+  * Disabled undo/redo queue for performance test.
+  * Fixed vertical overflow in gantt chart.
 
 
 0.2.0.a10
