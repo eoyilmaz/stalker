@@ -21,7 +21,7 @@
 <div style="text-align: center"><h4><b>{{ project.name }} ({{ project.code }})</b></h4></div>
 
 <div id='project_details'>
-    <div style="background-color: #39b54a " class="page_title"></div>
+    <div style="background-color: #39b54a" class="page_title"></div>
     {# Thumbnail #}
     <div id='project_thumbnail' class='thumbnail'>
         {% if not project.thumbnail %}
@@ -84,7 +84,7 @@
 
   require(['dijit/registry',
     'dojox/charting/Chart',
-    'dojox/charting/themes/Grasslands',
+    'dojox/charting/themes/Tufte',
     'dojox/charting/plot2d/Pie',
     'dojox/charting/action2d/MoveSlice',
     'dijit/form/Button',
@@ -107,7 +107,7 @@
           labelOffset: 0
         });
 
-        var chartData = [1000, 12000];
+        var chartData = [100, 120, 50, 15, 80];
         
         // Add the series of data
         pieChart.addSeries('January', chartData);

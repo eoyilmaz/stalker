@@ -161,7 +161,7 @@ def get_departments_byEntity(request):
 
     return [
             {
-             'name': '<a class="DataLink" href="#" stalker_href="view/department/%s">%s</a>' %(department.id, department.name)
+             'name': '<a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/department/%s">%s</a>' %(department.id, department.name)
 
             }
             for department in entity.departments

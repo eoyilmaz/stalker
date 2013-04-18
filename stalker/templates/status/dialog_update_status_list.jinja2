@@ -140,15 +140,17 @@
         var statuses_field_updater = fieldUpdater({
           memory: statuses_memory,
           widget: statuses_tagSelect,
-          selected: [
-            {% for status in status_list.statuses %}
-              {{ status.id }},
-            {% endfor %}
-          ]
+
         });
         // run the function to fill the data for the first time
         statuses_field_updater({animate: false});
-        
+
+        statuses_tagSelect.set('value', [
+          {% for status in status_list.statuses %}
+            {{ status.id }},
+          {% endfor %}
+        ]);
+
         // create Status Button
         var create_status_button = dialogCaller({
           label: 'New',

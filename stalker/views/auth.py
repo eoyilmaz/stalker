@@ -189,9 +189,9 @@ def get_users_byEntity(request):
         departmentStr = ''
         groupStr = ''
         for department in user.departments:
-            departmentStr += '<a class="DataLink" href="#" stalker_href="view/department/%s">%s</a><br/> ' % (department.id,department.name)
+            departmentStr += '<a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/department/%s">%s</a><br/> ' % (department.id,department.name)
         for group in user.groups:
-            groupStr += '<a class="DataLink" href="#" stalker_href="view/group/%s">%s</a><br/> ' % (group.id,group.name)
+            groupStr += '<a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/group/%s">%s</a><br/> ' % (group.id,group.name)
         users.append({
             'id': user.id,
             'name': user.name,

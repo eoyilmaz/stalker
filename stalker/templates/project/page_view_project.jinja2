@@ -24,6 +24,7 @@
       {# Summary View #}
   </div>
   <div id='project_related_data_tab_container'>
+    <div id="tasks_content_pane"></div>
     <div id='assets_content_pane'></div>
     <div id='sequences_content_pane'></div>
     <div id='shots_content_pane'></div>
@@ -76,7 +77,7 @@
               title: 'Tasks',
               default_href:'list/tasks/{{ project.id }}',
               href: 'list/tasks/{{ project.id }}'
-            });
+            },'tasks_content_pane');
 
             var assets_content_pane = new ContentPane({
               title: 'Assets',

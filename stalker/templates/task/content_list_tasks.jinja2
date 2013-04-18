@@ -245,6 +245,13 @@
                     // get task id
                     var taskId = node.getAttribute('taskid');
                     alert('task id: ' + taskId);
+                    var contentPane = registry.byId('tasks_content_pane');
+                    contentPane.set(
+                            'href',
+                            'view/task/' + taskId
+                    );
+                    contentPane.refresh();
+
                   }
                 });
               };

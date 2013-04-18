@@ -1,8 +1,8 @@
-<div style="margin: 0" id='shot_split_container'>
-  <div id='task_summary'>
+<div style="margin: 0" id='task_split_container'>
+  <div id='ptask_summary'>
       {# Summary View #}
   </div>
-  <div id='task_related_data_tab_container'>
+  <div id='ptask_related_data_tab_container'>
       {# Tab View #}
   </div>
 </div>
@@ -16,7 +16,6 @@
               region: 'center',
               orientation: 'horizontal',
               splitter: false
-
             }, 'task_split_container');
 
             var summary_content_pane = new ContentPane({
@@ -30,21 +29,29 @@
             // Bottom Part - Complex Data View
             var task_related_data_tab_container = new TabContainer({
               region: 'bottom',
-              style: 'background-color: #fff200'
+              style: 'background-color: #fff2f0'
             }, 'task_related_data_tab_container');
+
+            var bookings_content_pane = new ContentPane({
+              title: 'Bookings',
+              href: 'list/bookings/{{ task.id }}'
+            });
+
+            var versions_content_pane = new ContentPane({
+              title: 'Versions',
+              content: 'list/versions/{{ task.id }}'
+            });
 
             var tickets_content_pane = new ContentPane({
               title: 'Tickets',
               content: 'list/tickets/{{ task.id }}'
             });
 
-            var versions_content_pane = new ContentPane({
-              title: 'Versions',
-              href: 'list/versions/{{ task.id }}'
-            });
 
-            task_related_data_tab_container.addChild(tickets_content_pane);
+
+            task_related_data_tab_container.addChild(bookings_content_pane);
             task_related_data_tab_container.addChild(versions_content_pane);
+            task_related_data_tab_container.addChild(tickets_content_pane);
             task_related_data_tab_container.startup();
 
             task_SplitContainer.addChild(summary_content_pane);

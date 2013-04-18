@@ -1,43 +1,39 @@
-<div id='shot_details_content_pane'>
-  <div style="background-color: #fff200 " class="page_title"></div>
-    {# Avatar #}
-  <div id='shot_thumbnail' class='thumbnail'>No Avatar</div>
-
-  <div id='shot_summary_chart1'
-       style='width: 100px;
-                  height: 100px;
+<div id='task_details_content_pane'>
+  <div style="background-color: #fff2f0 " class="page_title"></div>
+  <div id='task_summary_chart1'
+       style='width: 200px;
+                  height: 200px;
                   position: absolute;
-                  top: 200px;
+                  top: 10px;
                   left: 0px;'></div>
 
     {# Basic Info #}
-  <div id='shot_info' class='summary_info'>
-    <h2 style='margin: 0px; text-align: left'>{{ shot.name }}</h2>
-    <h5 style='margin: 0px;'>({{ shot.code }})</h5>
+  <div id='task_info' class='summary_info'>
+    <h2 style='margin: 0px; text-align: left'>{{ task.name }}</h2>
     <table>
       <tr>
         <td style='text-align: right'><b>Project</b></td>
         <td>&nbsp;</td>
         <td>
-          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/project/{{ shot.project.id }}">{{ shot.project.name }}</a>
+          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/project/{{ task.project.id }}">{{ task.project.name }}</a>
         </td>
       </tr>
       <tr>
         <td style='text-align: right'><b>Status</b></td>
         <td>&nbsp;</td>
-        <td>{{ shot.status.name }}</td>
+        <td>{{ task.status.name }}</td>
       </tr>
       <tr>
         <td style='text-align: right'><b>Created By</b></td>
         <td>&nbsp;</td>
         <td>
-          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ shot.created_by.id }}">{{ shot.created_by.name }}</a>
+          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ task.created_by.id }}">{{ task.created_by.name }}</a>
         </td>
       </tr>
 
 
     </table>
-    <button id='update_shot_button'>Update</button>
+    <button id='update_task_button'>Update</button>
   </div>
     {#  Charts  #}
 
@@ -45,7 +41,7 @@
 
 <script type="text/javascript">
   require(['dojox/charting/Chart',
-    'dojox/charting/themes/Tufte',
+    'dojox/charting/themes/DataChart',
     'dojox/charting/plot2d/Pie',
     'dojox/charting/action2d/MoveSlice',
     'dijit/form/Button',
@@ -55,7 +51,7 @@
           function(Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller,gotoLink,ready){
             ready(function(){
               // Create the chart within it's "holding" node
-              var pieChart = new Chart('shot_summary_chart1');
+              var pieChart = new Chart('task_summary_chart1');
 
               // Add the only/default plot
               pieChart.setTheme(theme);
@@ -63,7 +59,7 @@
               // Add the only/default plot
               pieChart.addPlot("default", {
                 type: PiePlot, // our plot2d/Pie module reference as type value
-                radius: 40,
+                radius: 80,
                 fontColor: "black",
                 labelOffset: 0
               });
@@ -75,19 +71,19 @@
 
               // Create the slice mover
               var mag = new MoveSlice(pieChart, 'default');
-              
+
               // Render the chart!
               pieChart.render();
 
               // UPDATE STRUCTURE BUTTON
-              var update_shot_button = dialogCaller({
+              var update_task_button = dialogCaller({
                 label:'Update',
-                dialog_id: 'update_shot_dialog',
-                content_creator: update_shot_dialog_creator,
-                attach_to: 'update_shot_button',
-                data_id: {{ shot.id }}
+                dialog_id: 'update_task_dialog',
+                content_creator: update_task_dialog_creator,
+                attach_to: 'update_task_button',
+                data_id: {{ task.id }}
               });
-              update_shot_button.startup();
+              update_task_button.startup();
 
             });
 

@@ -205,7 +205,7 @@
           widget: sequence_filtering_select
         });
         sequence_filtering_select.set('disabled', false);
-        sequence_field_updater();
+        sequence_field_updater({animate: false});
 
       {% else %}
         sequence_field_updater = fieldUpdater({

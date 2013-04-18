@@ -729,3 +729,43 @@ def auto_schedule_tasks(request):
             return HTTPServerError()
     
     return HTTPOk()
+
+@view_config(
+    route_name='view_task',
+    renderer='templates/task/page_view_task.jinja2'
+)
+def view_task(request):
+    """runs when viewing a task
+    """
+
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+    task_id = request.matchdict['task_id']
+    task = Task.query.filter_by(id=task_id).first()
+
+    return {
+        'user': logged_in_user,
+        'task': task
+    }
+
+@view_config(
+    route_name='summarize_task',
+    renderer='templates/task/content_summarize_task.jinja2'
+)
+def summarize_task(request):
+    """runs when viewing an task
+    """
+
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+    task_id = request.matchdict['task_id']
+    task = Task.query.filter_by(id=task_id).first()
+
+    return {
+        'user': logged_in_user,
+        'task': task
+    }
+
+

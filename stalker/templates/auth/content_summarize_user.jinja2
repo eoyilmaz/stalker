@@ -18,8 +18,6 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 
-<div style="text-align: center"><h4><b>User Summary</b></h4></div>
-
 <div id='user_details_content_pane'>
    <div style="background-color: #00aef0;" class="page_title"></div>
 
@@ -67,7 +65,7 @@
 
 <script type="text/javascript">
   require(['dojox/charting/Chart',
-    'dojox/charting/themes/Claro',
+    'dojox/charting/themes/Tufte',
     'dojox/charting/plot2d/Pie',
     'dojox/charting/action2d/MoveSlice',
     'dijit/form/Button',
@@ -89,7 +87,7 @@
                 labelOffset: 0
               });
 
-              var chartData = [1000, 12000];
+              var chartData = [10, 14,33,5,8];
 
               // Add the series of data
               pieChart.addSeries('January', chartData);

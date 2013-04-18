@@ -196,7 +196,7 @@ require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
               widget: sequence_filtering_select,
             //callBack: set_sequence_filtering_select_selected_value
             });
-          sequence_field_updater();
+          sequence_field_updater({animate: false});
 
           // New Sequence Button
           var create_sequence_button = dialogCaller({
