@@ -37,7 +37,8 @@
           <label for='studio_thumbnail'>Thumbnail</label>
         </td>
         <td class='input_column'>
-          <input id='studio_thumbnail'>
+          <div id='studio_thumbnail_list'></div>
+          <div id='studio_thumbnail'></div>
         </td>
       </tr>
       
@@ -52,76 +53,116 @@
       </tr>
       
       {# Working Hours #}
-      {# Monday #}
       <tr>
         <td class='label_column'>
-          <label for='studio_working_hours_mon'>Monday</label>
+          Working Hours
         </td>
-        <td class='input_column'>
-          <input id='studio_working_hours_mon'>
+        <td>
+          <table style='width: 525px; table-layout: fixed'>
+            {# Working Hours #}
+            {# Monday #}
+            <tbody>
+              <tr>  
+                <td style='text-align: center'>Mon</td>
+                
+                {# Tuesday #}
+                <td style='text-align: center'>Tue</td>
+              
+                {# Wednesday #}
+                <td style='text-align: center'>Wed</td>
+                
+                {# Thursday #}
+                <td style='text-align: center'>Thu</td>
+              
+                {# Friday #}
+                <td style='text-align: center'>Fri</td>
+              
+                {# Saturday #}
+                <td style='text-align: center'>Sat</td>
+              
+                {# Sunday #}
+                <td style='text-align: center'>Sun</td>
+              </tr>
+              
+              <tr>
+                {# Monday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_mon_start'></div>
+                </td>
+                
+                {# Tuesday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_tue_start'></div>
+                </td>
+                
+                {# Wednesday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_wed_start'></div>
+                </td>
+                
+                {# Thursday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_thu_start'></div>
+                </td>
+                
+                {# Firday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_fri_start'></div>
+                </td>
+                
+                {# Saturday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_sat_start'></div>
+                </td>
+                
+                {# Sunday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_sun_start'></div>
+                </td>
+              </tr>
+            
+
+              <tr>
+                {# Monday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_mon_end'></div>
+                </td>
+                
+                {# Tuesday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_tue_end'></div>
+                </td>
+                
+                {# Wednesday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_wed_end'></div>
+                </td>
+                
+                {# Thursday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_thu_end'></div>
+                </td>
+                
+                {# Firday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_fri_end'></div>
+                </td>
+                
+                {# Saturday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_sat_end'></div>
+                </td>
+                
+                {# Sunday #}
+                <td class='input_column'>
+                  <div id='studio_working_hours_sun_end'></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </td>
       </tr>
-      
-      {# Tuesday #}
-      <tr>
-        <td class='label_column'>
-          <label for='studio_working_hours_tue'>Tuesday</label>
-        </td>
-        <td class='input_column'>
-          <input id='studio_working_hours_tue'>
-        </td>
-      </tr>
-      
-      {# Wednesday #}
-      <tr>
-        <td class='label_column'>
-          <label for='studio_working_hours_wed'>Wednesday</label>
-        </td>
-        <td class='input_column'>
-          <input id='studio_working_hours_wed'>
-        </td>
-      </tr>
-      
-      {# Thursday #}
-      <tr>
-        <td class='label_column'>
-          <label for='studio_working_hours_thu'>Thursday</label>
-        </td>
-        <td class='input_column'>
-          <input id='studio_working_hours_thu'>
-        </td>
-      </tr>
-      
-      {# Friday #}
-      <tr>
-        <td class='label_column'>
-          <label for='studio_working_hours_fri'>Friday</label>
-        </td>
-        <td class='input_column'>
-          <input id='studio_working_hours_fri'>
-        </td>
-      </tr>
-      
-      {# Saturday #}
-      <tr>
-        <td class='label_column'>
-          <label for='studio_working_hours_sat'>Saturday</label>
-        </td>
-        <td class='input_column'>
-          <input id='studio_working_hours_sat'>
-        </td>
-      </tr>
-      
-      {# Sunday #}
-      <tr>
-        <td class='label_column'>
-          <label for='studio_working_hours_sun'>Sunday</label>
-        </td>
-        <td class='input_column'>
-          <input id='studio_working_hours_sun'>
-        </td>
-      </tr>
-      
+
      </table>
   </form>
 </div>
@@ -137,10 +178,13 @@
     'dijit/form/Form',
     'dijit/form/ValidationTextBox',
     'dijit/form/TextBox',
-    'dijit/form/NumberTextBox',
+    'dijit/form/NumberSpinner',
     'dijit/form/FilteringSelect',
     'dijit/form/Button',
     'dijit/form/DateTextBox',
+    'dojox/form/Uploader',
+    'dojox/form/uploader/FileList',
+    'dijit/form/TimeTextBox',
     
     'dojo/store/JsonRest',
     
@@ -159,10 +203,13 @@
       Form,
       ValidationTextBox,
       TextBox,
-      NumberTextBox,
+      NumberSpinner,
       FilteringSelect,
       Button,
       DateTextBox,
+      Uploader,
+      FileList,
+      TimeTextBox,
       
       JsonRest,
       
@@ -195,15 +242,133 @@
         name_textBox.startup();
         
         // ********************************************************************
+        // Thumbnail
+        var thumbnail_uploader = new dojox.form.Uploader({
+          label: 'Browse...',
+          multiple: false,
+          uploadOnSelect: true,
+          url: 'upload/thumbnail'
+        }, 'studio_thumbnail');
+        thumbnail_uploader.startup();
+
+        var thumbnail_list = new dojox.form.uploader.FileList({
+          uploader:thumbnail_uploader
+        }, 'studio_thumbnail_list');
+        thumbnail_list.startup();
+        
+        
+        // ********************************************************************
         // Daily Working Hours
-        var daily_working_hours_numberTextBox = NumberTextBox({
+        var daily_working_hours_numberSpinner = NumberSpinner({
+          name: 'dwh',
           value: 8,
-          constrains: {min:0, max:24}
+          constraints: {min:0, max:24}
         },'studio_daily_working_hours');
-        daily_working_hours_numberTextBox.startup();
+        daily_working_hours_numberSpinner.startup();
+        
+        
+        // **************
+        // Hours
+        
+        time_text_box_creator = function(kwargs){
+          var name = kwargs['name'];
+          var value = kwargs['value'] || 'T09:00:00';
+          var attach_to = kwargs['attach_to'];
+          
+          var temp_timeTextBox = TimeTextBox({
+            name: name,
+            value: value,
+            style: 'width: 75px;',
+            constraints: {
+              timePattern: 'HH:mm:ss',
+              clickableIncrement: 'T01:00:00',
+              visibleIncrement: 'T01:00:00',
+              visibleRange: 'T01:00:00'
+            }
+          }, attach_to);
+          temp_timeTextBox.startup();
+          return temp_timeTextBox;
+        };
+        
+        // Monday
+        var mon_start = time_text_box_creator({
+          attach_to: 'studio_working_hours_mon_start'
+        });
+        
+        var mon_end = time_text_box_creator({
+          value: 'T18:00:00',
+          attach_to: 'studio_working_hours_mon_end'
+        });
+        
+
+        // Tuesday
+        var tue_start = time_text_box_creator({
+          attach_to: 'studio_working_hours_tue_start'
+        });
+        
+        var tue_end = time_text_box_creator({
+          value: 'T18:00:00',
+          attach_to: 'studio_working_hours_tue_end'
+        });
+        
+
+        // Wednesday
+        var wed_start = time_text_box_creator({
+          attach_to: 'studio_working_hours_wed_start'
+        });
+        
+        var wed_end = time_text_box_creator({
+          value: 'T18:00:00',
+          attach_to: 'studio_working_hours_wed_end'
+        });
+        
+        
+        // Thursday
+        var thu_start = time_text_box_creator({
+          attach_to: 'studio_working_hours_thu_start'
+        });
+        
+        var thu_end = time_text_box_creator({
+          value: 'T18:00:00',
+          attach_to: 'studio_working_hours_thu_end'
+        });
+        
+        
+        // Friday
+        var fri_start = time_text_box_creator({
+          attach_to: 'studio_working_hours_fri_start'
+        });
+        
+        var fri_end = time_text_box_creator({
+          value: 'T18:00:00',
+          attach_to: 'studio_working_hours_fri_end'
+        });
+        
+        
+        // Saturday
+        var sat_start = time_text_box_creator({
+          attach_to: 'studio_working_hours_sat_start'
+        });
+        
+        var sat_end = time_text_box_creator({
+          value: 'T18:00:00',
+          attach_to: 'studio_working_hours_sat_end'
+        });
+        
+        
+        // Sunday
+        var sun_start = time_text_box_creator({
+          attach_to: 'studio_working_hours_sun_start'
+        });
+        
+        var sun_end = time_text_box_creator({
+          value: 'T18:00:00',
+          attach_to: 'studio_working_hours_sun_end'
+        });
         
         
         
+    
         // ********************************************************************
         // Ok Button
         var ok_button = new Button({
@@ -211,18 +376,29 @@
           type: 'button',
           onClick: function(){
             submitForm({
-              dialog: registry.byId('create_project_dialog'),
+              dialog: registry.byId('create_studio_dialog'),
               form: create_studio_form,
               additional_data: {
-                submitted: 'create',
-                start: stamp.toISOString(start_dateTextBox.value),
-                end: stamp.toISOString(end_dateTextBox.value)
+                mon_start: stamp.toISOString(mon_start.value),
+                mon_end: stamp.toISOString(mon_end.value),
+                tue_start: stamp.toISOString(tue_start.value),
+                tue_end: stamp.toISOString(tue_end.value),
+                wed_start: stamp.toISOString(wed_start.value),
+                wed_end: stamp.toISOString(wed_end.value),
+                thu_start: stamp.toISOString(thu_start.value),
+                thu_end: stamp.toISOString(thu_end.value),
+                fri_start: stamp.toISOString(fri_start.value),
+                fri_end: stamp.toISOString(fri_end.value),
+                sat_start: stamp.toISOString(sat_start.value),
+                sat_end: stamp.toISOString(sat_end.value),
+                sun_start: stamp.toISOString(sun_start.value),
+                sun_end: stamp.toISOString(sun_end.value)
               },
-              url: '{{ request.route_url("create_project") }}',
+              url: '{{ request.route_url("create_studio") }}',
               method: 'POST'
             });
           }
-        }, 'project_submit_button');
+        }, 'studio_ok_button');
         ok_button.startup();
         
         // ********************************************************************
@@ -231,9 +407,9 @@
           label: 'Cancel',
           type: 'button',
           onClick: function(){
-            registry.byId('create_project_dialog').destroyRecursive();
+            registry.byId('create_studio_dialog').destroyRecursive();
           }
-        }, 'project_cancel_button');
+        }, 'studio_cancel_button');
         cancel_button.startup();
         
         create_studio_form.startup();

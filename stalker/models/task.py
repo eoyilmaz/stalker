@@ -40,6 +40,13 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
+# schedule constraints
+CONSTRAINT_NONE = 0
+CONSTRAINT_START = 1
+CONSTRAINT_END = 2
+CONSTRAINT_BOTH = 3
+
+
 class Booking(Entity, ScheduleMixin):
     """Holds information about the time spend on a specific
     :class:`~stalker.models.task.Task` by a specific
@@ -188,15 +195,15 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     --------------
     
     A Task needs to be created with a Project instance. It is also valid if no
-    project is supplied but there is a parent Task passed to the parent
-    argument. It is also possible to pass both project and the parent task.
+    project is supplied but there should be a parent Task passed to the parent
+    argument. And it is also possible to pass both project and the parent task.
     
     Because it will create an ambiguity, Stalker will raise a RuntimeWarning,
-    if both project and task are given and the owner project of the given task
-    is different then the supplied project instance. But again Stalker will
-    warn the user but will continue to use the task as the parent and will
-    correctly use the project of the given task as the project of the newly
-    created task.
+    if both project and task are given and the owner project of the given
+    parent task is different then the supplied project instance. But again
+    Stalker will warn the user but will continue to use the task as the parent
+    and will correctly use the project of the given task as the project of the
+    newly created task.
     
     The following codes are a couple of examples for creating Task instances::
       
@@ -218,32 +225,44 @@ class Task(Entity, StatusMixin, ScheduleMixin):
       task3 = Task(name='Failure 2') # no project no parent, this is an orphan
                                      # task.
     
-    Scheduling
-    ----------
+    Also initially Stalker will pin point the :attr:`.start` value and then
+    will calculate proper :attr:`.end` and :attr:`.duration` values by using
+    the :attr:`.schedule_timing` and :attr:`.schedule_unit` attributes. But
+    these values (start, end and duration) are temporary values for an
+    unscheduled task. The final date values will be calculated by TaskJuggler
+    in the `auto scheduling` phase.
+    
+    Auto Scheduling
+    ---------------
     
     Stalker uses TaskJuggler for task scheduling. After defining all the tasks,
     Stalker will convert them to a single tjp file along with the recorded
     :class:`~stalker.models.task.Booking`\ s and let TaskJuggler to solve the
     scheduling problem.
     
-    During the scheduling (with TaskJuggler), the calculation of task duration
-    is effected by the working hours setting of the Project that the task
-    belongs to, the effort that needs to spend for that task and the
-    availability of the resources assigned to the task.
+    During the auto scheduling (with TaskJuggler), the calculation of task
+    duration, start and end dates are effected by the working hours setting of
+    the :class:`~stalker.models.studio.Studio`, the effort that needs to spend
+    for that task and the availability of the resources assigned to the task.
     
     A good practice for creating a project plan is to supply the parent/child
     and dependency relation between tasks and the effort and resource
     information per task and leave the start and end date calculation to
     TaskJuggler. It is also possible to use the ``length`` or ``duration``
-    values (set :attr:`.schedule_model` to 'EFFORT', 'LENGTH' or 'DURATION' to
+    values (set :attr:`.schedule_model` to 'effort', 'length' or 'duration' to
     get the desired scheduling model).
     
-    The default scheduling model for Stalker tasks is 'EFFORT'.
+    The default :attr:`.schedule_model` for Stalker tasks is 'effort`, the
+    default :attr:`.schedule_unit` is ``hour`` and the default value of
+    :attr:`.schedule_timing` is defined by the
+    :attr:`stalker.config.Config.timing_resolution`. So for a
+    config where the ``timing_resolution`` is set to 1 hour the schedule_timing
+    is 1.
     
     To convert a Task instance to a TaskJuggler compatible string use the
     :attr:`.to_tjp`` attribute. It will try to create a good representation of
-    the Task by using the resources, schedule model, schedule timing and
-    schedule constraints.
+    the Task by using the resources, schedule_model, schedule_timing and
+    schedule_constraint attributes.
     
     Task/Task Relation
     --------------------
@@ -453,7 +472,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     schedule_model = Column(
         Enum(*defaults.task_schedule_models, name='TaskScheduleModels'),
-        default=0, nullable=False
+        default=defaults.task_schedule_models[0], nullable=False
     )
     
     schedule_constraint = Column(Integer, default=0, nullable=False)
@@ -466,7 +485,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  start=None,
                  end=None,
                  duration=None,
-                 schedule_timing=0,
+                 schedule_timing=None,
                  schedule_unit='h',
                  schedule_model=None,
                  schedule_constraint=0,
@@ -481,18 +500,11 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         kwargs['end'] = end
         kwargs['duration'] = duration
         
-        logger.debug('Task kwargs      : %s' % kwargs)
-        logger.debug('Task project arg : %s' % project)
-        logger.debug('Task parent arg  : %s' % parent)
         super(Task, self).__init__(**kwargs)
         
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-        
-        logger.debug('Task kwargs (after super init) : %s' % kwargs)
-        logger.debug('Task project arg (after init)  : %s' % project)
-        logger.debug('Task parent arg (after init)   : %s' % parent)
         
         self.parent = parent
         self._project =  project
@@ -514,17 +526,16 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         if resources is None:
             resources = []
         
-        self.resources = resources 
+        self.resources = resources
         
-        self.schedule_timing = schedule_timing
+        self.schedule_constraint = schedule_constraint
         self.schedule_unit = schedule_unit
+        self.schedule_timing = schedule_timing
         
         if not schedule_model:
             schedule_model = defaults.task_schedule_models[0]
         self.schedule_model = schedule_model
         
-        self.schedule_constraint = schedule_constraint
-         
         if bid_timing is None:
             bid_timing = self.schedule_timing
         
@@ -542,6 +553,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
         # TODO : fix this
         tmp = self.start # just read the start to update them
+        self._reschedule(self.schedule_timing, self.schedule_unit)
         # call supers __init_on_load__
         super(Task, self).__init_on_load__()
 
@@ -582,13 +594,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         
         # check for circular dependency toward the parent, non of the parents
         # should be depending to the given depends_to_task
-        parent = self.parent
-        while parent:
-            if parent in depends.depends:
-                raise CircularDependencyError('One of the parents of %s is '
+        with DBSession.no_autoflush:
+            parent = self.parent
+            while parent:
+                if parent in depends.depends:
+                    raise CircularDependencyError('One of the parents of %s is '
                                               'depending to %s' % 
                                               (self, depends))
-            parent = parent.parent
+                parent = parent.parent
         
         return depends
     
@@ -597,7 +610,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """validates the given schedule_timing
         """
         if schedule_timing is None:
-            schedule_timing = 0
+            schedule_timing = defaults.timing_resolution.seconds/3600
+            self.schedule_unit = 'h'
         
         if not isinstance(schedule_timing, (int, float)):
             raise TypeError(
@@ -606,6 +620,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                     self.__class__.__name__, self.__class__.__name__,
                     schedule_timing.__class__.__name__)
             )
+        
+        # reschedule
+        self._reschedule(schedule_timing, self.schedule_unit)
+        
         return schedule_timing
     
     @validates('schedule_unit')
@@ -631,7 +649,43 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                 self.__class__.__name__, schedule_unit.__class__.__name__)
             )
         
+        if self.schedule_timing:
+            self._reschedule(self.schedule_timing, schedule_unit)
+        
         return schedule_unit
+    
+    def _reschedule(self, schedule_timing, schedule_unit):
+        """Updates the start and end date values by using the schedule_timing
+        and schedule_unit values.
+        
+        :param schedule_timing: An integer or float value showing the value of
+          the schedule timing.
+        :type schedule_timing: int, float
+        :param str schedule_unit: one of 'min', 'h', 'd', 'w', 'm', 'y'
+        """
+        # update end date value by using the start and calculated duration
+        if self.is_leaf:
+            unit = defaults.datetime_units_to_timedelta_kwargs.get(
+                schedule_unit,
+                None
+            )
+            if not unit: # we are in a pre flushing state do not do anything
+                return
+            
+            kwargs = {
+                unit['name']: schedule_timing * unit['multiplier']
+            }
+            calculated_duration = datetime.timedelta(**kwargs)
+            if self.schedule_constraint == CONSTRAINT_NONE or \
+                        self.schedule_constraint == CONSTRAINT_START:
+                # get end
+                self._validate_dates(self.start, None, calculated_duration)
+            elif self.schedule_constraint == CONSTRAINT_END:
+                # get start
+                self._validate_dates(None, self.end, calculated_duration)
+            elif self.schedule_constraint == CONSTRAINT_BOTH:
+                # restore duration
+                self._validate_dates(self.start, self.end, None)
     
     @validates("is_milestone")
     def _validate_is_milestone(self, key, is_milestone):
@@ -669,15 +723,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             if self.parent:
                 # use its project as the project
                 
-                # disable autoflush
                 # to prevent prematurely flush the parent
-                autoflush = DBSession.autoflush
-                DBSession.autoflush = False
+                with DBSession.no_autoflush:
+                    project = self.parent.project
                 
-                project = self.parent.project
-                
-                # reset autoflush
-                DBSession.autoflush = autoflush
             else:
                     # no project, no task, go mad again!!!
                     raise TypeError('%s.project should be an instance of '
@@ -699,25 +748,23 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             # check if there is a parent
             if self.parent:
                 # check if given project is matching the parent.project
-                autoflush = DBSession.autoflush
-                DBSession.autoflush = False
-                if self.parent._project != project:
-                    # don't go mad again, but warn the user that there is an
-                    # ambiguity!!!
-                    import warnings
-                    
-                    message = 'The supplied parent and the project is not ' \
-                              'matching in %s, Stalker will use the parent ' \
-                              'project (%s) as the parent of this %s' % \
-                              (self,
-                               self.parent._project,
-                               self.__class__.__name__)
-                    
-                    warnings.warn(message, RuntimeWarning)
-                    
-                    # use the parent.project
-                    project = self.parent._project
-                DBSession.autoflush = autoflush
+                with DBSession.no_autoflush:
+                    if self.parent._project != project:
+                        # don't go mad again, but warn the user that there is an
+                        # ambiguity!!!
+                        import warnings
+                        
+                        message = 'The supplied parent and the project is not ' \
+                                  'matching in %s, Stalker will use the parent ' \
+                                  'project (%s) as the parent of this %s' % \
+                                  (self,
+                                   self.parent._project,
+                                   self.__class__.__name__)
+                        
+                        warnings.warn(message, RuntimeWarning)
+                        
+                        # use the parent.project
+                        project = self.parent._project
         return project
     
     @validates("priority")
@@ -745,13 +792,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
         # just empty the resources list
         # do it without a flush
-        
-        autoflush = DBSession.autoflush
-        DBSession.autoflush = False
-        
-        self.resources = []
-        
-        DBSession.autoflush = autoflush
+        with DBSession.no_autoflush:
+            self.resources = []
         
         return child
     
@@ -974,7 +1016,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """A predicate which returns True if this task has both a
         computed_start and computed_end values
         """
-        return self.computed_start and self.computed_end
+        return self.computed_start is not None and \
+            self.computed_end is not None
     
     @property
     def total_effort_spent(self):

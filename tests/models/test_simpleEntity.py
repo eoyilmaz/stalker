@@ -74,14 +74,15 @@ class SimpleEntityTester(unittest.TestCase):
             ("testName", "testName"),
             ("test-Name", "test-Name"),
             ("1testName", "1testName"),
-            ("_testName", "testName"),
-            ("2423$+^^+^'%+%%&_testName", "2423_testName"),
-            ("2423$+^^+^'%+%%&_testName_35", "2423_testName_35"),
-            ("2423$ +^^+^ '%+%%&_ testName_ 35", "2423 _ testName_ 35"),
+            ("_testName", "_testName"),
+            ("2423$+^^+^'%+%%&_testName", "2423$+^^+^'%+%%&_testName"),
+            ("2423$+^^+^'%+%%&_testName_35", "2423$+^^+^'%+%%&_testName_35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35", "2423$ +^^+^ '%+%%&_ testName_ 35"),
             ("SH001", "SH001"),
             ("46-BJ-3A", "46-BJ-3A"),
             ('304-sb-0403-0040', '304-sb-0403-0040'),
             ("Ozgur    Yilmaz\n\n\n", "Ozgur Yilmaz"),
+            ("     Ozgur Yilmaz    ", "Ozgur Yilmaz")
         ]
         
         self.nice_name_test_values = [

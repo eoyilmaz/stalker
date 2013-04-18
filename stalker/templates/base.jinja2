@@ -60,7 +60,7 @@
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
         href='{{ request.static_url("stalker:static/dojox/grid/resources/claroGrid.css") }}'/>
   <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-        href='{{ request.static_url("stalker:static/dojox/gantt/resources/gantt.css") }}'/>
+        href='{{ request.static_url("stalker:static/dojox/form/resources/UploaderFileList.css") }}'/>
   
   <script type='text/javascript'
           data-dojo-config="async: true, parseOnLoad: true"
@@ -84,7 +84,7 @@
       </div>
       
 {#      {% if studio %}#}
-      <div id='stalkerMenuBar' style='color: #000000'></div>
+        <div id='stalkerMenuBar' style='color: #000000'></div>
 {#      {% endif %}#}
       
       <div id='mebar'>
@@ -244,7 +244,8 @@
           var studio_DropDownMenu = new DropDownMenu({
 
           });
-
+          
+          {% if not studio %}
           studio_DropDownMenu.addChild(
                   dialogCaller({
                     label:'Create Studio',
@@ -253,6 +254,9 @@
                     widget_type: 'MenuItem'
                   })
           );
+          {% endif %}
+          
+          
 
           studio_DropDownMenu.addChild(new MenuItem({
             label: "Overview Projects"

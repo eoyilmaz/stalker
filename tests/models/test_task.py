@@ -30,6 +30,9 @@ from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Entity, Project, Repository, StatusList, Status, Task,
                      Type, User, Booking)
 
+from stalker.models.task import (CONSTRAINT_NONE, CONSTRAINT_START,
+                                 CONSTRAINT_END, CONSTRAINT_BOTH)
+
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -902,27 +905,33 @@ class TaskTester(unittest.TestCase):
     #    self.assertEqual(new_task1.resources, [])
     
     def test_schedule_timing_argument_skipped(self):
-        """testing if the schedule_timing attribute will be 0 if the
+        """testing if the schedule_timing attribute will be equal to the
+        stalker.config.Config.timing_resolution.seconds/3600 if the
         schedule_timing argument is skipped
         """
         self.kwargs.pop("schedule_timing")
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing, 0)
+        self.assertEqual(new_task.schedule_timing,
+                         defaults.timing_resolution.seconds/3600)
     
     def test_schedule_timing_argument_is_None(self):
-        """testing if the schedule_timing attribute will be 0 if the
+        """testing if the schedule_timing attribute will be equal to the
+        stalker.config.Config.timing_resolution.seconds/3600 if the
         schedule_timing argument is None
         """
         self.kwargs["schedule_timing"] = None
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing, 0)
+        self.assertEqual(new_task.schedule_timing,
+                         defaults.timing_resolution.seconds/3600)
     
     def test_schedule_timing_attribute_is_set_to_None(self):
-        """testing if the schedule_timing attribute will be 0 if it is set
-        to None
+        """testing if the schedule_timing attribute will be equal to the
+        stalker.config.Config.timing_resolution.seconds/3600 if it is set to
+        None
         """
         self.test_task.schedule_timing = None
-        self.assertEqual(self.test_task.schedule_timing, 0)
+        self.assertEqual(self.test_task.schedule_timing,
+                         defaults.timing_resolution.seconds/3600)
     
     def test_schedule_timing_argument_is_not_an_integer_or_float(self):
         """testing if a TypeError will be raised when the schedule_timing
@@ -1797,6 +1806,7 @@ class TaskTester(unittest.TestCase):
         # remove effort and duration. Why?
         self.kwargs.pop('schedule_timing')
         self.kwargs.pop('schedule_unit')
+        self.kwargs['schedule_constraint'] = CONSTRAINT_BOTH
         
         now = datetime.datetime(2013, 3, 22, 15, 0)
         dt = datetime.timedelta
@@ -1854,6 +1864,7 @@ class TaskTester(unittest.TestCase):
         # remove effort and duration
         self.kwargs.pop('schedule_timing')
         self.kwargs.pop('schedule_unit')
+        self.kwargs['schedule_constraint'] = CONSTRAINT_BOTH
         
         now = datetime.datetime(2013, 3, 22, 15, 0)
         dt = datetime.timedelta
@@ -1895,6 +1906,70 @@ class TaskTester(unittest.TestCase):
         # check if it is still the same
         self.assertEqual(task1.start, now + dt(1))
         self.assertEqual(task1.end, now + dt(8)) 
+    
+    def test_end_value_is_calculated_with_the_schedule_timing_and_schedule_unit(self):
+        """testing for a newly created task the end attribute value will be
+        calculated using the schedule_timing and schedule_unit
+        """
+        self.kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0)
+        self.kwargs.pop('end')
+        self.kwargs['schedule_timing'] = 10
+        self.kwargs['schedule_unit'] = 'h'
+        
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.end,
+            datetime.datetime(2013, 4, 17, 10, 0)
+        )
+        
+        self.kwargs['schedule_timing'] = 5
+        self.kwargs['schedule_unit'] = 'd'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.end,
+            datetime.datetime(2013, 4, 22, 0, 0)
+        )
+    
+    def test_start_value_is_calculated_with_the_schedule_timing_and_schedule_unit_if_schedule_constraint_is_set_to_end(self):
+        """testing if the start date value will be recalculated from the
+        schedule_timing and schedule_unit if the schedule_constraint is set to
+        end
+        """
+        self.kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0)
+        self.kwargs['end'] = datetime.datetime(2013, 4, 18, 0, 0)
+        self.kwargs['schedule_constraint'] = CONSTRAINT_END
+        self.kwargs['schedule_timing'] = 10
+        self.kwargs['schedule_unit'] = 'd'
+        
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.end,
+            datetime.datetime(2013, 4, 18, 0, 0)
+        )
+        self.assertEqual(
+            new_task.start,
+            datetime.datetime(2013, 4, 8, 0, 0)
+        )
+    
+    def test_start_and_end_values_are_not_touched_if_the_schedule_constraint_is_set_to_both(self):
+        """testing if the start and end date values are not touched if the
+        schedule constraint is set to both
+        """
+        self.kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0)
+        self.kwargs['end'] = datetime.datetime(2013, 4, 27, 0, 0)
+        self.kwargs['schedule_constraint'] = CONSTRAINT_BOTH
+        self.kwargs['schedule_timing'] = 100
+        self.kwargs['schedule_unit'] = 'd'
+        
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.start,
+            datetime.datetime(2013, 4, 17, 0, 0)
+        )
+        self.assertEqual(
+            new_task.end,
+            datetime.datetime(2013, 4, 27, 0, 0)
+        )
     
     def test_level_attribute_is_a_read_only_property(self):
         """testing if the level attribute is a read only property
@@ -2288,10 +2363,10 @@ class TaskTester(unittest.TestCase):
         }
         '''
         #self.maxDiff = None
-        print t1.to_tjp
-        print '-----------------------'
-        print expected_tjp
-        print '-----------------------'
+        #print t1.to_tjp
+        #print '-----------------------'
+        #print expected_tjp
+        #print '-----------------------'
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
     
     def test_is_scheduled_is_a_read_only_attribute(self):

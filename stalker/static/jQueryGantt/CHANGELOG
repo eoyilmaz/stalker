@@ -7,6 +7,15 @@ StalkerGantt Changes
   everything is working properly right now.
 * Parent Tasks displayed differently than the leaf tasks (on paar with the
   other gantt charts).
+* Fix; t is now possible to correctly move a TaskBar without getting in to an
+  infinite loop which was freezing the browser.
+* The timing resolution of jQueryGantt is now 1 hour.
+* Fix; GanttMaster.task_ids were not properly cleaned in GanttMaster.reset(),
+  resulting wrong links to be created.
+* Added a new zoom level where it is possible to see the every 1 hour of 1 day.
+* Colorized the Sunday column in suitable zoom levels. In upcoming releases it
+  will use the stalker.models.studio.Studio.working_hours attribute to
+  determine if the day/hour is an off day/hour.
 
 0.1.0.a1
 --------

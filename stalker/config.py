@@ -45,11 +45,13 @@ class Config(object):
         # 
         database_engine_settings = {
             "sqlalchemy.url": "sqlite:///:memory:",
-            "sqlalchemy.echo": False,
+            "sqlalchemy.echo": True,
         },
         
         database_session_settings = {},
         
+        # Storage for uploaded files
+        server_storage_path = os.path.join(tempfile.gettempdir(), 'Stalker'),
         
         #
         # Tells Stalker to create an admin by default
@@ -72,8 +74,6 @@ class Config(object):
         key = "stalker_default_key",
         
         version_take_name = "Main",
-
-        ticket_label = "Ticket",
         
         actions = ['Create', 'Read', 'Update', 'Delete', 'List'], #CRUDL
         
@@ -81,7 +81,8 @@ class Config(object):
         status_fg_color = 0x000000,
         
         # Tickets
-
+        ticket_label = "Ticket",
+        
         # define the available actions per Status
         ticket_status_order = [
             'new', 'accepted', 'assigned', 'reopened', 'closed'
@@ -156,7 +157,8 @@ class Config(object):
          
         # Task Management
         timing_resolution = datetime.timedelta(hours=1),
-        task_duration = datetime.timedelta(days=10),
+        task_duration = datetime.timedelta(hours=1),
+        
         task_priority = 500,
         
         working_hours = {
@@ -174,6 +176,16 @@ class Config(object):
         daily_working_hours = 8,
         
         datetime_units = ['min', 'h', 'd', 'w', 'm', 'y'],
+        datetime_unit_names = ['minute', 'hour', 'day', 'week', 'month', 'year'],
+        
+        datetime_units_to_timedelta_kwargs = {
+            'min': {'name': 'minutes', 'multiplier': 1},
+            'h'  : {'name': 'hours'  , 'multiplier': 1},
+            'd'  : {'name': 'days'   , 'multiplier': 1},
+            'w'  : {'name': 'weeks'  , 'multiplier': 1},
+            'm'  : {'name': 'days'   , 'multiplier': 30},
+            'y'  : {'name': 'days'   , 'multiplier': 365}
+        },
         
         task_schedule_models = ['effort', 'length', 'duration'],
         
@@ -320,8 +332,6 @@ class Config(object):
         thumbnail_format = "jpg",
         thumbnail_quality = 70,
         thumbnail_size = [320, 180],
-        
-        server_local_storage = os.path.join(tempfile.gettempdir(), 'Stalker')
         
     )
 

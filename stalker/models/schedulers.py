@@ -25,6 +25,7 @@ import datetime
 import csv
 
 from jinja2 import Template
+import transaction
 
 import stalker
 from stalker import log, Entity, SimpleEntity
@@ -175,7 +176,7 @@ class TaskJugglerScheduler(SchedulerBase):
                     entity.computed_start = start_date
                     entity.computed_end = end_date
         
-        DBSession.commit()
+        transaction.commit()
     
     def schedule(self):
         """does the scheduling
@@ -187,6 +188,24 @@ class TaskJugglerScheduler(SchedulerBase):
                             'stalker.models.studio.Studio, not %s' %
                             (self.__class__.__name__,
                              self.studio.__class__.__name__))
+        
+        # ********************************************************************
+        # Adjust Studio.start and Studio.end
+        # get the active projects
+        # get root tasks
+        # calculate the earliest start and the latest end
+        self.studio._start = datetime.datetime(2013, 1, 1)
+        self.studio._end = datetime.datetime(2016, 1, 1)
+        #for project in self.studio.active_projects:
+        #    for root_task in project.root_tasks:
+        #        if root_task.start < self.studio.start:
+        #            self.studio.start = root_task.start
+        #        if root_task.end > self.studio.end:
+        #            self.studio.end = root_task.end
+        
+        # now for safety multiply the duration by 2
+        #self.studio.end = (self.studio.end - self.studio.start) * 5 + \
+        #                  self.studio.start
         
         # create a tjp file
         self._create_tjp_file()

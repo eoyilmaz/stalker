@@ -28,7 +28,7 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.minGanttSize = minGanttSize;
   this.includeToday=true; //when true today is always visible. If false boundaries comes from tasks periods
 
-  this.zoomLevels = ["d","w","m","q","s","y"];
+  this.zoomLevels = ['h', "d","w","m","q","s","y"];
   //this.zoomLevels = ["w","m","q","s","y"];
   
   this.element = this.create(zoom, startmillis, endMillis);
@@ -199,10 +199,12 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         var daysInMonth = parseInt((date.getTime() - sm) / (3600000 * 24));
         tr1.append(createHeadCell(new Date(sm).format("MMMM yyyy"), daysInMonth)); //spans mumber of dayn in the month
       }, function(date) {
-        tr2.append(createHeadCell(date.format("d"), 1, isHoliday(date) ? "holyH" : null));
+        //tr2.append(createHeadCell(date.format("d"), 1, isHoliday(date) ? "holyH" : null));
+        tr2.append(createHeadCell(date.format("d"), 1, date.getDay() == 0 ? "holyH" : null));
         var nd = new Date(date.getTime());
         nd.setDate(date.getDate() + 1);
-        trBody.append(createBodyCell(1, nd.getDate() == 1, isHoliday(date) ? "holy" : null));
+        //trBody.append(createBodyCell(1, nd.getDate() == 1, isHoliday(date) ? "holy" : null));
+        trBody.append(createBodyCell(1, nd.getDate() == 1, date.getDay() == 0 ? "holy" : null));
         date.setDate(date.getDate() + 1);
       });
     } else if (zoom == "w") {
@@ -214,22 +216,40 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         tr1.append(createHeadCell(date.format("MMM d") + " - " + end.format("MMM d'yy"), 7));
         date.setDate(date.getDate() + 7);
       }, function(date) {
-        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null));
-        trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
+        //tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null));
+        //trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
+        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, date.getDay() == 0 ? "holyH" : null));
+        trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, date.getDay() == 0 ? "holy" : null));
         date.setDate(date.getDate() + 1);
       });
     } else if (zoom == "d") {
       //days
       computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 200); //1 day= 200px
       iterate(function(date) {
-        tr1.append(createHeadCell(date.format("EEEE d MMMM yyyy"), 4, isHoliday(date) ? "holyH" : null));
+        //tr1.append(createHeadCell(date.format("EEEE d MMMM yyyy"), 4, isHoliday(date) ? "holyH" : null));
+        tr1.append(createHeadCell(date.format("EEEE d MMMM yyyy"), 4, date.getDay() == 0 ? "holyH" : null));
         date.setDate(date.getDate() + 1);
       }, function(date) {
-        tr2.append(createHeadCell(date.format("HH"), 1, isHoliday(date) ? "holyH" : null));
-        trBody.append(createBodyCell(1, date.getHours() > 17, isHoliday(date) ? "holy" : null));
+        //tr2.append(createHeadCell(date.format("HH"), 1, isHoliday(date) ? "holyH" : null));
+        //trBody.append(createBodyCell(1, date.getHours() > 18, isHoliday(date) ? "holy" : null));
+        tr2.append(createHeadCell(date.format("HH"), 1, date.getDay() == 0 ? "holyH" : null));
+        trBody.append(createBodyCell(1, date.getHours() > 18, date.getDay() == 0 ? "holy" : null));
         date.setHours(date.getHours() + 6);
       });
-
+    } else if (zoom == "h") {
+        // hours
+        computedTableWidth = Math.floor(((endPeriod - startPeriod ) / 3600000) * 40); // 1 hour= 50px
+        iterate(function(date){
+            //tr1.append(createHeadCell(date.format('EEE d MMMM yyyy'), 24, isHoliday(date) ? 'holyH': null));
+            tr1.append(createHeadCell(date.format('EEE d MMMM yyyy'), 24, date.getDay() == 0 ? 'holyH': null));
+            date.setDate(date.getDate() + 1);
+        }, function(date){
+            //tr2.append(createHeadCell(date.format('HH'), 1, isHoliday(date) ? 'holyH': null));
+            //trBody.append(createBodyCell(1, date.getHours() > 18, isHoliday(date) ? 'holy' : null));
+            tr2.append(createHeadCell(date.format('HH'), 1, date.getDay() == 0 ? 'holyH': null));
+            trBody.append(createBodyCell(1, date.getHours() > 18, date.getDay() == 0 ? 'holy' : null));
+            date.setHours(date.getHours() + 1);
+        });
     } else {
       console.error("Wrong level " + zoom);
     }
@@ -353,7 +373,7 @@ Ganttalendar.prototype.drawTask = function (task) {
   //}).mousedown(function() {
   //  var task_id = $(this).attr("taskId");
   //  //console.log('task_id: ', task_id);
-  //  var task = self.master.getTask(task_id);
+  //  var task = self.master.getTask(task_id{);
   //  //console.log('task: ', task);
   //  task.rowElement.click();
   //});

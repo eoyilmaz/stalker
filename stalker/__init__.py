@@ -96,6 +96,8 @@ def main(global_config, **settings):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     
+    config.add_route('busy_dialog', 'dialog/busy')
+    
     # *************************************************************************
     # DATA VIEWS
     # *************************************************************************
@@ -213,7 +215,7 @@ def main(global_config, **settings):
     config.add_route('update_task_dialog', 'dialog/update/task/{task_id}')
     
     config.add_route('create_task', 'create/task')
-
+    
     config.add_route('view_task', 'view/task/{task_id}')
     config.add_route('update_task', 'update/task/{task_id}')
     config.add_route('list_tasks', 'list/tasks/{entity_id}')

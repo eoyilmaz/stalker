@@ -223,7 +223,7 @@ class StatusMixin(object):
     def __init__(self, status=None, status_list=None, **kwargs):
         self.status_list = status_list
         self.status = status
-        logger.debug('%s.status: %s' % (self.__class__.__name__, status))
+        # logger.debug('%s.status: %s' % (self.__class__.__name__, status))
     
     @declared_attr
     def status_id(cls):
@@ -368,8 +368,8 @@ class StatusMixin(object):
             status = self.status_list[status]
         
         # check if the given status is in the status_list
-        logger.debug('self.status_list: %s' % self.status_list)
-        logger.debug('given status: %s' % status)
+        # logger.debug('self.status_list: %s' % self.status_list)
+        # logger.debug('given status: %s' % status)
         
         if status not in self.status_list:
             raise ValueError("The given Status instance for %s.status is not "
@@ -609,14 +609,14 @@ attribute value."""
             else:
                 if duration is None:
                     duration = defaults.task_duration
-                
+                    
                 start = end - duration
         
         # check end
         if end is None:
             if duration is None:
                 duration = defaults.task_duration
-        
+            
             end = start + duration
         
         if end < start:

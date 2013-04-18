@@ -38,6 +38,8 @@ function GanttMaster() {
     this.minEditableDate = 0;
     this.maxEditableDate = Infinity;
     
+    this.timing_resolution = 3600000; // as miliseconds, for now it is 1 hour
+    
     this.canWriteOnParent=true;
     this.canWrite=true;
     
@@ -126,7 +128,6 @@ GanttMaster.prototype.updateDepends = function() {
   for (var i=0 ; i<this.links.length ; i++) {
       var link = this.links[i];
       link.to.depends.push(link.from.id);
-      //link.to.depends_string = link.to.depends_string + (link.to.depends_string == "" ? "" : ",") + (link.from.getRow() + 1) + (link.lag ? ":" + link.lag : "");
   }
   
 };
@@ -142,15 +143,15 @@ GanttMaster.prototype.addTask = function(task, parent) {
     
     //recompute depends string
     this.updateDepends();
-
+    
     //add Link collection in memory
     var linkLoops = !this.updateLinks(task);
     
     //set the status according to parent
     if (task.getParent())
-        task.status=task.getParent().status;
+        task.status = task.getParent().status;
     else
-        task.status="STATUS_ACTIVE";
+        task.status = "STATUS_ACTIVE";
     
     var ret = task;
     if (linkLoops || !task.setPeriod(task.start, task.end)) {
@@ -226,6 +227,7 @@ GanttMaster.prototype.loadTasks = function(tasks) {
                 status: task.status,
                 parent_id: task.parent_id,
                 depend_ids: task.depend_ids,
+                depends: null,
                 resources: task.resources,
                 start: task.start,
                 duration: task.duration,
@@ -234,6 +236,8 @@ GanttMaster.prototype.loadTasks = function(tasks) {
                 bid_unit: task.bid_unit,
                 is_scheduled: task.is_scheduled,
                 is_milestone: task.is_milestone,
+                computed_start: task.computed_start,
+                computed_end: task.computed_end,
                 schedule_constraint: task.schedule_constraint,
                 schedule_model: task.schedule_model,
                 schedule_timing: task.schedule_timing,
@@ -257,10 +261,14 @@ GanttMaster.prototype.loadTasks = function(tasks) {
             break;
           }
         }*/
-
+        
+        task.depends = null;
         this.tasks.push(task);  //append task at the end
         this.task_ids.push(task.id); //lookup table for task ids
     }
+    
+//    console.log('this.tasks    : ', this.tasks);
+//    console.log('this.task_ids : ', this.task_ids);
     
     // find root tasks
     var root_tasks = [];
@@ -271,7 +279,9 @@ GanttMaster.prototype.loadTasks = function(tasks) {
             root_tasks.push(this.tasks[i]);
         }
         // also fill the task.depends
-        task.getDepends();
+        this.tasks[i].getDepends();
+//        console.log('task.depend_ids : ', this.tasks[i].depend_ids);
+//        console.log('task.depends    : ', this.tasks[i].depends);
     }
     
     
@@ -301,10 +311,12 @@ GanttMaster.prototype.loadTasks = function(tasks) {
     for (var i=0; i<this.tasks.length; i++){
         this.task_ids.push(this.tasks[i].id);
     }
+    // set the first task selected
+    this.currentTask = this.tasks[0];
     
     //var prof=new Profiler("gm_loadTasks_addTaskLoop");
     for (var i=0 ; i<this.tasks.length ; i++) {
-        var task = this.tasks[i];
+        task = this.tasks[i];
         
         //add Link collection in memory
         var linkLoops = !this.updateLinks(task);
@@ -389,6 +401,7 @@ GanttMaster.prototype.redraw = function() {
 
 GanttMaster.prototype.reset = function() {
     this.tasks = [];
+    this.task_ids = [];
     this.links = [];
     this.deletedTaskIds=[];
     this.__undoStack = [];
@@ -454,15 +467,15 @@ GanttMaster.prototype.updateLinks = function(task) {
         
         var sups = task.getSuperiors();
         var loop = false;
-        for (var i=0 ; i<sups.length ; i++){
-            var supLink = sups[i];
-            if (supLink.from == target){
+        for (var i=0; i < sups.length; i++){
+            var supTask = sups[i];
+            if (supTask == target){
                 loop = true;
                 break;
             } else {
-                if (visited.indexOf(supLink.from) <= 0){
-                    visited.push(supLink.from);
-                    if (isLoop(supLink.from, target, visited)){
+                if (visited.indexOf(supTask) <= 0){
+                    visited.push(supTask);
+                    if (isLoop(supTask, target, visited)){
                         loop = true;
                         break;
                     }
@@ -478,6 +491,7 @@ GanttMaster.prototype.updateLinks = function(task) {
     });
     
     var todoOk = true;
+    
     // just update the depends list
     if (task.getDepends()) {
         //cannot depend from an ancestor
@@ -489,24 +503,24 @@ GanttMaster.prototype.updateLinks = function(task) {
         var newDepsString = "";
         
         var visited = [];
-        for (var j=0; j<deps.length ; j++) {
+        for (var j=0; j < deps.length; j++) {
             var dep = deps[j];
             var lag = 0;
             
-            var sup_index = this.task_ids.indexOf(dep.id);
-            var sup = this.tasks[sup_index];
-            if (sup) {
-                if (parents && parents.indexOf(sup) >= 0) {
-                    this.setErrorOnTransaction(task.name + "\n" + GanttMaster.messages.CANNOT_DEPENDS_ON_ANCESTORS+"\n" + sup.name);
+            //var sup_index = this.task_ids.indexOf(dep.id);
+            //var sup = this.tasks[sup_index];
+            if (dep) {
+                if (parents && parents.indexOf(dep) >= 0) {
+                    this.setErrorOnTransaction(task.name + "\n" + GanttMaster.messages.CANNOT_DEPENDS_ON_ANCESTORS+"\n" + dep.name);
                     todoOk = false;
-                } else if (descendants && descendants.indexOf(sup) >= 0) {
-                    this.setErrorOnTransaction(task.name + "\n"+GanttMaster.messages.CANNOT_DEPENDS_ON_DESCENDANTS+"\n" + sup.name);
+                } else if (descendants && descendants.indexOf(dep) >= 0) {
+                    this.setErrorOnTransaction(task.name + "\n"+GanttMaster.messages.CANNOT_DEPENDS_ON_DESCENDANTS+"\n" + dep.name);
                     todoOk = false;
-                } else if (isLoop(sup, task, visited)) {
+                } else if (isLoop(dep, task, visited)) {
                     todoOk = false;
-                    this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE+"\n" + task.name + " -> " + sup.name);
+                    this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE+"\n" + task.name + " -> " + dep.name);
                 } else {
-                    this.links.push(new Link(sup, task, lag));
+                    this.links.push(new Link(dep, task, lag));
                     newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;
                 }
             }
@@ -545,18 +559,18 @@ GanttMaster.prototype.endTransaction = function() {
     var ret = true;
 
     //no error -> commit
-    if (this.__currentTransaction.errors.length <= 0) {
+    //if (this.__currentTransaction.errors.length <= 0) {
         //console.debug("committing transaction");
 
         //put snapshot in undo
-        this.__undoStack.push(this.__currentTransaction.snapshot);
+        //this.__undoStack.push(this.__currentTransaction.snapshot);
         //clear redo stack
-        this.__redoStack = [];
+        //this.__redoStack = [];
 
         //shrink gantt bundaries
         this.gantt.originalStartMillis = Infinity;
         this.gantt.originalEndMillis = -Infinity;
-        for (var i=0;i<this.tasks.length;i++) {
+        for (var i=0 ; i < this.tasks.length ; i++) {
             var task = this.tasks[i];
             if (this.gantt.originalStartMillis > task.start)
                 this.gantt.originalStartMillis = task.start;
@@ -565,23 +579,23 @@ GanttMaster.prototype.endTransaction = function() {
         }
         this.taskIsChanged(); //enqueue for gantt refresh
         //error -> rollback
-    } else {
-        ret = false;
-        //console.debug("rolling-back transaction");
-        //try to restore changed tasks
-        var oldTasks = JSON.parse(this.__currentTransaction.snapshot);
-        this.deletedTaskIds=oldTasks.deletedTaskIds;
-        this.loadTasks(oldTasks.tasks);
-        this.redraw();
-
-        //compose error message
-        var msg = "";
-        for (var i=0;i<this.__currentTransaction.errors.length;i++) {
-            var err = this.__currentTransaction.errors[i];
-            msg = msg + err.msg + "\n\n";
-        }
-        alert(msg);
-    }
+    //} else {
+    //    ret = false;
+    //    //console.debug("rolling-back transaction");
+    //    //try to restore changed tasks
+    //    var oldTasks = JSON.parse(this.__currentTransaction.snapshot);
+    //    this.deletedTaskIds = oldTasks.deletedTaskIds;
+    //    this.loadTasks(oldTasks.tasks);
+    //    this.redraw();
+    //    
+    //    //compose error message
+    //    var msg = "";
+    //    for (var i=0 ; i < this.__currentTransaction.errors.length ; i++) {
+    //        var err = this.__currentTransaction.errors[i];
+    //        msg = msg + err.msg + "\n\n";
+    //    }
+    //    alert(msg);
+    //}
     //reset transaction
     this.__currentTransaction = undefined;
 

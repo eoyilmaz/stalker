@@ -24,7 +24,7 @@ from pyramid.view import view_config, forbidden_view_config
 from sqlalchemy import or_
 
 import stalker
-from stalker import User, Department, Group, Tag, Project, Entity
+from stalker import User, Department, Group, Tag, Project, Entity, Studio
 from stalker.db import DBSession
 from stalker.views import log_param
 
@@ -412,11 +412,13 @@ def forbidden(request):
 def home(request):
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
+    studio = Studio.query.all()
     projects = Project.query.all()
     return {
         'stalker': stalker,
         'user': user,
         'projects': projects,
+        'studio': studio,
     }
 
 

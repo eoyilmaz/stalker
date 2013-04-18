@@ -21,11 +21,12 @@
 
 import datetime
 import json
+import logging
 
 from pyramid.view import view_config
 from pyramid.security import authenticated_userid
 from pyramid.httpexceptions import HTTPServerError, HTTPOk
-
+from sqlalchemy.orm.exc import DetachedInstanceError
 import transaction
 from sqlalchemy.exc import IntegrityError
 
@@ -33,38 +34,12 @@ from stalker.db import DBSession
 from stalker import (User, Task, Entity, Project, StatusList, Status,
                      TaskJugglerScheduler, Studio)
 from stalker.models.task import CircularDependencyError
-
-
 from stalker import defaults
-
-import logging
 from stalker import log
+from stalker.views import get_datetime
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
-
-
-def convert_to_depend_index(task, tasks):
-    """converts the given task and its dependencies to the format suitable
-    for jQueryGantt's depends input
-    
-    :param task: A Stalker Task
-    
-    :param [] tasks: A list of Stalker Tasks
-    """
-    depends = ''
-    for dependent_task in task.depends:
-        # find the index of the task in the given tasks
-        try:
-            i = tasks.index(dependent_task)
-        except ValueError:
-            pass
-        else:
-            depends += ",%i" % (i+1) # depends is 1-based where i is 0-based
-    if depends.startswith(','):
-        logger.debug('converted to depends: %s' % depends[1:])
-        return depends[1:]
-    else:
-        return ''
 
 
 def convert_to_jquery_gantt_task_format(tasks):
@@ -93,6 +68,7 @@ def convert_to_jquery_gantt_task_format(tasks):
                 'end': int(task.end.strftime('%s')) * 1000,
                 'is_scheduled': task.is_scheduled,
                 'schedule_timing': task.schedule_timing,
+                'schedule_unit': task.schedule_unit,
                 'schedule_model': task.schedule_model,
                 'schedule_constraint': task.schedule_constraint,
                 'computed_start': int(task.computed_start.strftime('%s')) * 1000 if task.computed_start else None,
@@ -107,6 +83,8 @@ def convert_to_jquery_gantt_task_format(tasks):
         # "canWrite": 0,
         # "canWriteOnParent": 0
     }
+    
+    logger.debug(data)
     
     logger.debug('loading gantt data:\n%s' % 
                  json.dumps(data,
@@ -125,16 +103,16 @@ def update_with_jquery_gantt_task_data(json_data):
     :param data: jQueryGantt produced json string
     """
     
-    logger.debug(json_data)
+    # logger.debug(json_data)
     data = json.loads(json_data)
     
-    logger.debug('updating tasks with gantt data:\n%s' % 
-                 json.dumps(data,
-                            sort_keys=False,
-                            indent=4,
-                            separators=(',', ': ')
-                 )
-    )
+    # logger.debug('updating tasks with gantt data:\n%s' % 
+    #              json.dumps(data,
+    #                         sort_keys=False,
+    #                         indent=4,
+    #                         separators=(',', ': ')
+    #              )
+    # )
     
     
     task_name_replace_strs = [
@@ -143,7 +121,7 @@ def update_with_jquery_gantt_task_data(json_data):
     
     # Updated Tasks
     for task_data in data['tasks']:
-        logger.debug('*********************************************')
+        # logger.debug('*********************************************')
         task_id = task_data['id']
         task_name = task_data['name'] # just take the part without 
                                       # the parenthesis
@@ -152,10 +130,12 @@ def update_with_jquery_gantt_task_data(json_data):
                 task_name = task_name[:-len(rstr)]
         
         task_start = task_data['start']
-        task_duration = task_data.get('duration', 0)
+        task_end = task_data['end']
         task_resource_ids = [resource_data['id']
                              for resource_data in task_data['resources']]
         task_description = task_data.get('description', '')
+        
+        task_schedule_timing = float(task_data['schedule_timing'])
         
         # no need to update parent, it will only be possible by using
         # Stalker's own task edit UI
@@ -170,6 +150,7 @@ def update_with_jquery_gantt_task_data(json_data):
         task_depend_ids = task_data.get('depend_ids', [])
         
         # get the task itself
+        task = None
         if not isinstance(task_id, basestring): 
             # update task
             task = Task.query.filter(Task.id==task_id).first()
@@ -181,13 +162,16 @@ def update_with_jquery_gantt_task_data(json_data):
         
         # update it
         if task:
-            logger.debug('task %s' % task)
+            # logger.debug('task %s' % task)
             task.name = task_name
-            logger.debug('task.start given (raw)  : %s' % task_start)
-            logger.debug('task.start given (calc) : %s' % datetime.datetime.fromtimestamp(task_start/1000))
+            # logger.debug('task.start given (raw)  : %s' % task_start)
+            # logger.debug('task.start given (calc) : %s' % datetime.datetime.fromtimestamp(task_start/1000))
             task.start = datetime.datetime.fromtimestamp(task_start/1000)
-            logger.debug('task.start after set    : %s' % task.start)
-            task.duration = datetime.timedelta(task_duration)
+            # logger.debug('task.start after set    : %s' % task.start)
+            #task.duration = datetime.timedelta(task_duration)
+            task.end = datetime.datetime.fromtimestamp(task_end/1000)
+            
+            task.schedule_timing = task_schedule_timing
             
             resources = User.query.filter(User.id.in_(task_resource_ids)).all()
             task.resources = resources
@@ -196,21 +180,18 @@ def update_with_jquery_gantt_task_data(json_data):
             
             task_depends = Task.query.filter(Task.id.in_(task_depend_ids)).all()
             
-            logger.debug('task.parent : %s' % task.parent)
-            logger.debug('task_depends: %s' % task_depends)
+            # logger.debug('task.parent : %s' % task.parent)
+            # logger.debug('task_depends: %s' % task_depends)
             
             task.depends = task_depends
             DBSession.add(task)
     
-    logger.debug('*********************************************')
+    # logger.debug('*********************************************')
     
     # Deleted tasks
-    deleted_tasks = Task.query.filter(Task.id.in_(data['deletedTaskIds'])).all()
-    for task in deleted_tasks:
-        DBSession.delete(task)
-    
-    # create new tasks
-    
+    #deleted_tasks = Task.query.filter(Task.id.in_(data['deletedTaskIds'])).all()
+    #for task in deleted_tasks:
+    #    DBSession.delete(task)
     
     # transaction will handle the commit don't bother doing anything
 
@@ -247,8 +228,90 @@ def update_task_dialog(request):
         'schedule_models': defaults.task_schedule_models
     }
 
+@view_config(
+    route_name='update_task',
+    permission='Update_Task'
+)
+def update_task(request):
+    """Updates the given task with the data coming from the request
+    
+    :param request: 
+    :return:
+    """
+    # *************************************************************************
+    # collect data
+    parent_id = request.params.get('parent_id', None)
+    if parent_id:
+        parent = Task.query.filter(Task.id==parent_id).first()
+    else:
+        parent = None
+    name = str(request.params.get('name', None))
+    description = request.params.get('description', '')
+    is_milestone = int(request.params.get('is_milestone', None))
+    status_id = int(request.params.get('status_id', None))
+    status = Status.query.filter_by(id=status_id).first()
+    schedule_model = request.params.get('schedule_model') # there should be one
+    schedule_timing = float(request.params.get('schedule_timing'))
+    schedule_unit = request.params.get('schedule_unit')
+    start = get_datetime(request, 'start_date', 'start_time')
+    end = get_datetime(request, 'end_date', 'end_time')
+    
+    depend_ids = [
+        int(d_id)
+        for d_id in request.POST.getall('depend_ids')
+    ]
+    depends = Task.query.filter(Task.id.in_(depend_ids)).all()
+    
+    resource_ids = [
+        int(r_id)
+        for r_id in request.POST.getall('resource_ids')
+    ]
+    resources = User.query.filter(User.id.in_(resource_ids)).all()
+    
+    logger.debug('parent_id       : %s' % parent_id)
+    logger.debug('parent          : %s' % parent)
+    logger.debug('depend_ids      : %s' % depend_ids)
+    logger.debug('depends         : %s' % depends)
+    logger.debug('resource_ids    : %s' % resource_ids)
+    logger.debug('resources       : %s' % resources)
+    logger.debug('name            : %s' % name)
+    logger.debug('description     : %s' % description)
+    logger.debug('is_milestone    : %s' % is_milestone)
+    logger.debug('status_id       : %s' % status_id)
+    logger.debug('status          : %s' % status)
+    logger.debug('schedule_model  : %s' % schedule_model)
+    logger.debug('schedule_timing : %s' % schedule_timing)
+    logger.debug('schedule_unit   : %s' % schedule_unit)
+    logger.debug('start           : %s' % start)
+    logger.debug('end             : %s' % end)
+    
+    # get task
+    task_id = request.matchdict['task_id']
+    task = Task.query.filter(Task.id==task_id).first()
+    
+    # update the task
+    if not task:
+        return HTTPOk(detail='Task not updated')
+    
+    task.name = name
+    task.description = description
+    task.parent = parent
+    task.depends = depends
+    task.start = start
+    task.end = end
+    task.is_milestone = is_milestone
+    task.status = status
+    task.schedule_model = schedule_model
+    task.schedule_unit = schedule_unit
+    task.schedule_timing = schedule_timing
+    task.resources = resources
+    task._reschedule(task.schedule_timing, task.schedule_unit)
+        
+    
+    return HTTPOk(detail='Task updated successfully')
+
 def depth_first_flatten(task, task_array=None):
-    """Does a depth first flattening on the child tasks of the given taks.
+    """Does a depth first flattening on the child tasks of the given task.
     :param task: start from this task
     :param task_array: previous flattened task array
     :return: list of flat tasks
@@ -314,7 +377,7 @@ def get_gantt_tasks(request):
             
             # do a depth first search for child tasks
             for root_task in root_tasks:
-                logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
+                # logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
                 tasks.extend(depth_first_flatten(root_task))
         
         elif entity.entity_type == 'User':
@@ -335,19 +398,19 @@ def get_gantt_tasks(request):
                         parent = parent.parent
                 
                 
-                logger.debug('user_task_with_parents: %s' % user_tasks_with_parents)
-                logger.debug('tasks                 : %s' % tasks)
+                # logger.debug('user_task_with_parents: %s' % user_tasks_with_parents)
+                # logger.debug('tasks                 : %s' % tasks)
                 tasks = list(set(user_tasks_with_parents))
     
     tasks.sort(key=lambda x: x.start)
     
-    if log.logging_level == logging.DEBUG:
-        logger.debug('tasks count: %i' % len(tasks))
-        for task in tasks:
-            logger.debug('------------------------------')
-            logger.debug('task name: %s' % task.name)
-            logger.debug('start date: %s' % task.start)
-            logger.debug('end date: %s' % task.end)
+    # if log.logging_level == logging.DEBUG:
+    #     logger.debug('tasks count: %i' % len(tasks))
+    #     for task in tasks:
+    #         logger.debug('------------------------------')
+    #         logger.debug('task name: %s' % task.name)
+    #         logger.debug('start date: %s' % task.start)
+    #         logger.debug('end date: %s' % task.end)
     
     return convert_to_jquery_gantt_task_format(tasks)
 
@@ -445,37 +508,13 @@ def create_dependent_task_dialog(request):
     depends_to_task = Task.query.filter_by(id=depends_to_task_id).first()
     
     project = depends_to_task.project if depends_to_task else None
-    
+     
     return {
         'mode': 'CREATE',
         'project': project,
         'depends_to': depends_to_task,
         'schedule_models': defaults.task_schedule_models
     }
-
-
-def get_datetime(request, date_attr, time_attr):
-    """Extracts a datetime object from the given request
-    :param request: the request object
-    :param date_attr: the attribute name
-    :return: datetime.datetime
-    """
-    # TODO: no time zone info here, please add time zone
-    date_part = datetime.datetime.strptime(
-        request.params[date_attr][:-6],
-        "%Y-%m-%dT%H:%M:%S"
-    )
-    time_part = datetime.datetime.strptime(
-        request.params[time_attr][:-6],
-        "%Y-%m-%dT%H:%M:%S"
-    )
-    # update the time values of date_part with time_part
-    return date_part.replace(
-        hour=time_part.hour,
-        minute=time_part.minute,
-        second=time_part.second,
-        microsecond=time_part.microsecond
-    )
 
 
 @view_config(
@@ -488,16 +527,41 @@ def create_task(request):
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
     
-    # params
+    # ***********************************************************************
+    # collect params
     project_id = request.params.get('project_id', None)
     parent_id = request.params.get('parent_id', None)
     name = request.params.get('name', None)
     description = request.params.get('description', '')
     is_milestone = request.params.get('is_milestone', None)
     status_id = request.params.get('status_id', None)
+    if status_id:
+        status_id = int(status_id)
     schedule_model = request.params.get('schedule_model') # there should be one
-    schedule_timing = request.params.get('schedule_timing')
+    schedule_timing = float(request.params.get('schedule_timing'))
     schedule_unit = request.params.get('schedule_unit')
+    
+    # get the resources
+    resources = []
+    resource_ids = []
+    if 'resource_ids' in request.params:
+        resource_ids = [
+            int(r_id)
+            for r_id in request.POST.getall('resource_ids')
+        ]
+        resources = User.query.filter(User.id.in_(resource_ids)).all()
+    
+    logger.debug('project_id      : %s' % project_id)
+    logger.debug('parent_id       : %s' % parent_id)
+    logger.debug('name            : %s' % name)
+    logger.debug('description     : %s' % description)
+    logger.debug('is_milestone    : %s' % is_milestone)
+    logger.debug('status_id       : %s' % status_id)
+    logger.debug('schedule_model  : %s' % schedule_model)
+    logger.debug('schedule_timing : %s' % schedule_timing)
+    logger.debug('schedule_unit   : %s' % schedule_unit)
+    logger.debug('resource_ids    : %s' % resource_ids)
+    logger.debug('resources       : %s' % resources)
     
     kwargs = {}
     
@@ -527,20 +591,9 @@ def create_task(request):
                 detail='No StatusList found'
             )
         
-        status_id = int(request.params['status_id'])
-        logger.debug('status_id: %s' % status_id)
-        
         status = Status.query.filter_by(id=status_id).first()
         logger.debug('status: %s' % status)
         
-        # get the resources
-        resources = []
-        if 'resource_ids' in request.params:
-            resource_ids = [
-                int(r_id)
-                for r_id in request.POST.getall('resource_ids')
-            ]
-            resources = User.query.filter(User.id.in_(resource_ids)).all()
         
         # get the dates
         start = get_datetime(request, 'start_date', 'start_time')
@@ -566,8 +619,8 @@ def create_task(request):
         kwargs['start'] = start
         kwargs['end'] = end
         
-        kwargs['schedule_model'] = int(schedule_model)
-        kwargs['schedule_timing'] = float(schedule_timing)
+        kwargs['schedule_model'] = schedule_model
+        kwargs['schedule_timing'] = schedule_timing
         kwargs['schedule_unit'] = schedule_unit
         
         kwargs['resources'] = resources
@@ -664,6 +717,11 @@ def auto_schedule_tasks(request):
     if studio:
         tj_scheduler = TaskJugglerScheduler()
         studio.scheduler = tj_scheduler
+        
+        logger.debug('studio.name: %s' % studio.name)
+        logger.debug('studio.working_hours[0]: %s' % studio.working_hours[0])
+        logger.debug('studio.daily_working_hours: %s' % studio.daily_working_hours)
+        logger.debug('studio.to_tjp: %s' % studio.to_tjp)
         
         try:
             studio.schedule()
