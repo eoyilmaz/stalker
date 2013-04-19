@@ -146,7 +146,7 @@ Task.prototype.createResource = function (kwargs) {
 Task.prototype.setPeriod = function (start, end) {
     //console.debug("setPeriod ",this.name,new Date(start),new Date(end));
     //var profilerSetPer = new Profiler("gt_setPeriodJS");
-
+    
     if (start instanceof Date) {
         start = start.getTime();
     }
@@ -179,7 +179,12 @@ Task.prototype.setPeriod = function (start, end) {
     }
     
     // update the schedule_timing
-    this.schedule_timing = this.schedule_timing * (end - start) / (this.end - this.start);
+    // TODO: we need to consider the timing_resolution while doing this
+    if (this.schedule_unit == 'h'){
+        this.schedule_timing = (this.schedule_timing * (end - start) / (this.end - this.start)  >> 0);
+    } else {
+        this.schedule_timing = ((this.schedule_timing * (end - start) / (this.end - this.start) * 10) >> 0) / 10;
+    }
     
     //if depends -> start is set to max end + lag of superior
     var sups = this.getSuperiors();
@@ -192,7 +197,7 @@ Task.prototype.setPeriod = function (start, end) {
         }
         
         //if changed by depends move it
-        if (computeStart(supEnd) != start) {
+        if (computeStart(supEnd) > start) {
             return this.moveTo(supEnd + 1, false);
         }
     }
@@ -320,7 +325,9 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
             link = sups[i];
             supEnd = Math.max(supEnd, link.end);
         }
-        start = supEnd + 1;
+        if (supEnd > start){
+            start = supEnd + 1;
+        }
     }
     //set a legal start
     start = computeStart(start);

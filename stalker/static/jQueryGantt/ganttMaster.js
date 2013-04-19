@@ -40,6 +40,22 @@ function GanttMaster() {
     
     this.timing_resolution = 3600000; // as miliseconds, for now it is 1 hour
     
+    // this is in minutes from midnight because Stalker is designed in that way
+    this.working_hours = {
+        'mon': [[540, 1080]],
+        'tue': [[540, 1080]],
+        'wed': [[540, 1080]],
+        'thu': [[540, 1080]],
+        'fri': [[540, 1080]],
+        'sat': [],
+        'sun': []
+    };
+    
+    this.daily_working_hours = 9; // this is the default
+    this.weekly_working_hours = 45;
+    this.weekly_working_days = 5;
+    this.yearly_working_days = 260.714; // 5 * 52.1428
+    
     this.canWriteOnParent=true;
     this.canWrite=true;
     
@@ -185,6 +201,12 @@ GanttMaster.prototype.loadProject = function(project, Deferred) {
         this.resource_ids.push(this.resources[i].id);
     }
     
+    this.timing_resolution = project.timing_resolution || this.timing_resolution;
+    this.working_hours = project.working_hours || this.working_hours;
+    this.daily_working_hours = project.daily_working_hours || this.daily_working_hours;
+    this.weekly_working_hours = project.weekly_working_hours || this.weekly_working_hours;
+    this.weekly_working_days = project.weekly_working_days || this.weekly_working_days;
+    
     this.canWrite = project.canWrite;
     this.canWriteOnParent = project.canWriteOnParent;
     
@@ -206,6 +228,10 @@ GanttMaster.prototype.loadProject = function(project, Deferred) {
         self.gantt.centerOnToday();
         deferred.resolve('success');
     });
+    
+    console.log('daily_working_hours : ', this.daily_working_hours);
+    console.log('timing_resolution   : ', this.timing_resolution);
+    console.log('working_hours       : ', this.working_hours);
     
     return deferred.promise;
 };

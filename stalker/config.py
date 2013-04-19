@@ -23,6 +23,7 @@ import datetime
 import logging
 import tempfile
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -171,9 +172,14 @@ class Config(object):
           'sun': [], # sunday off
         },
         
-        day_order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+        # this is strongly related with the working_hours settings,
+        # this should match each other
+        daily_working_hours = 9,
+        weekly_working_hours = 45,
+        weekly_working_days = 5,
+        yearly_working_days = 260.714, # 5 * 52.1428
         
-        daily_working_hours = 8,
+        day_order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
         
         datetime_units = ['min', 'h', 'd', 'w', 'm', 'y'],
         datetime_unit_names = ['minute', 'hour', 'day', 'week', 'month', 'year'],
@@ -232,8 +238,8 @@ class Config(object):
                 {{ child_task.to_tjp }}
             {%- endfor %}
         {%- else %}
+            {% if task.resources|length -%}
             {{task.schedule_model}} {{task.schedule_timing}}{{task.schedule_unit}}
-            {%- if task.resources|length %}
             allocate {% for resource in task.resources -%}
                 {%-if loop.index != 1 %}, {% endif %}{{resource.tjp_id}}{% endfor %}
             {%- endif -%}
@@ -380,22 +386,22 @@ class Config(object):
             )
             
             try:
-                try:
-                    logger.debug("importing user config")
-                    execfile(resolved_path, self.user_config)
-                except SyntaxError, err:
-                    raise RuntimeError("There is a syntax error in your "
-                                       "configuration file: " + str(err))
-                
+                logger.debug("importing user config")
+                execfile(resolved_path, self.user_config)
+            except IOError:
+                logger.warning("The $STALKER_PATH: %s doesn't exists! "
+                               "skipping user config" % resolved_path)
+            except SyntaxError, err:
+                raise RuntimeError("There is a syntax error in your "
+                                   "configuration file: %s" % str(err))
+            finally:
                 # append the data to the current settings
                 logger.debug("updating system config")
                 for key in self.user_config:
                     #if key in self.config_values:
                     self.config_values[key] = self.user_config[key]
             
-            except IOError:
-                logger.warning("The $STALKER_PATH:" + resolved_path + \
-                               " doesn't exists! skipping user config")
+            
     
     def __getattr__(self, name):
         return self.config_values[name]

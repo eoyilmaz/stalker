@@ -48,14 +48,21 @@ CONSTRAINT_BOTH = 3
 
 
 class Booking(Entity, ScheduleMixin):
-    """Holds information about the time spend on a specific
+    """Holds information about the uninterrupted time spend on a specific
     :class:`~stalker.models.task.Task` by a specific
     :class:`~stalker.models.auth.User`.
     
+    It is so important to note that the booking reports the uninterrupted time
+    that is spent for a Task. Thus it doesn't care about the working time
+    attributes like daily working hours, weekly working days or anything else.
+    Again it is the uninterrupted time which is spent for a task.
+    
+    Entering a booking for 2 days will book the resource for 48 hours not,
+    2 * daily working hours.
+    
     Bookings are created per resource. It means, you need to record all the 
     works separately for each resource. So there is only one resource in a 
-    Booking instance, thus :attr:`~stalker.models.task.Booking.duration`
-    attribute is equal to the meaning of ``effort``.
+    Booking instance.
     
     A :class:`~stalker.models.task.Booking` instance needs to be initialized
     with a :class:`~stalker.models.task.Task` and a
@@ -1020,11 +1027,58 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             self.computed_end is not None
     
     @property
-    def total_effort_spent(self):
+    def total_booked_seconds(self):
         """The total effort spent for this Task. It is the sum of all the
-        Bookings recorded for this task.
+        Bookings recorded for this task as seconds.
+        
+        :returns int: An integer showing the total seconds spent.
         """
-        return None
+        seconds = 0
+        for booking in self.bookings:
+            seconds += booking.duration.total_seconds()
+        return seconds
+    
+    @property
+    def schedule_seconds(self):
+        """returns the total effort, length or duration in seconds, for
+        completeness calculation
+        """
+        schedule_timing = self.schedule_timing
+        schedule_model = self.schedule_model
+        schedule_unit = self.schedule_unit
+        from stalker import Studio
+        studio = Studio.query.first()
+        data_source = studio if studio else defaults
+        
+        if schedule_model == 'effort':
+            if schedule_unit == 'min':
+                return schedule_timing * 60
+            
+            elif schedule_unit == 'h':
+                return schedule_timing * 3600
+            
+            elif schedule_unit == 'd':
+                # we need to have a studio or defaults
+                return schedule_timing * data_source.daily_working_hours * 3600
+            
+            elif schedule_unit == 'w':
+                return schedule_timing * data_source.weekly_working_hours * 3600
+            
+            elif schedule_unit == 'm':
+                return schedule_timing * 4 * data_source.weekly_working_hours * 3600
+            
+            elif schedule_unit == 'y':
+                return schedule_timing * \
+                       data_source.yearly_working_days * \
+                       data_source.daily_working_hours * 3600
+    
+    @property
+    def remaining_seconds(self):
+        """returns the remaining amount of efforts, length or duration left
+        in this Task as seconds.
+        """
+        # for effort based tasks use the bookings
+        return self.schedule_seconds - self.total_booked_seconds
     
     @property
     def computed_duration(self):

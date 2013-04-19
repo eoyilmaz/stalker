@@ -20,8 +20,8 @@
 <div class='dijitDialogPaneContentArea'>
   <form id='create_booking_form'>
     <table style='width: 100%'>
-      
-      {# TASK #}
+
+        {# TASK #}
       <tr>
         <td class='label_column'>
           <label for='booking_task'>Task</label>
@@ -30,8 +30,8 @@
           <input id='booking_task'>
         </td>
       </tr>
-      
-      {# RESOURCE #}
+
+        {# RESOURCE #}
       <tr>
         <td class='label_column'>
           <label for='booking_resource'>Resource</label>
@@ -40,39 +40,53 @@
           <input id='booking_resource'>
         </td>
       </tr>
-      
-      {# START #}
+
+        {# START #}
       <tr>
         <td class='label_column'>
           <label for='booking_start_date'>Start Date</label>
         </td>
         <td class='input_column'>
-            <input id='booking_start_date'>
-            <input id='booking_start_time'>
+          <input id='booking_start_date'>
+          <input id='booking_start_time'>
         </td>
       </tr>
-      
-      {# END #}
+
+        {# END #}
       <tr>
         <td class='label_column'>
           <label for='booking_end_date'>End Date</label>
         </td>
         <td class='input_column'>
-            <input id='booking_end_date'>
-            <input id='booking_end_time'>
+          <input id='booking_end_date'>
+          <input id='booking_end_time'>
         </td>
       </tr>
-      
-      {# HOURS TO COMPLETE#}
+
+        {# HOURS TO COMPLETE#}
       <tr>
         <td class='label_column'>
           <label for='booking_hours_to_complete'>Hours To Complete</label>
         </td>
         <td class='input_column'>
           <input id='booking_hours_to_complete'>
+          <div style='float: left; margin-left: 3px; margin-top: 2px'>
+            <input id='booking_is_complete' type='checkbox'>
+            <label for='booking_is_complete'>is complete?</label>
+          </div>
         </td>
       </tr>
-      
+
+        {# NOTES #}
+      <tr>
+        <td class='label_column'>
+          <label for='booking_notes'>Notes</label>
+        </td>
+        <td class='input_column'>
+          <input id='booking_notes'>
+        </td>
+      </tr>
+
     </table>
   </form>
 </div>
@@ -89,209 +103,267 @@
     'dijit/form/TextBox',
     'dijit/form/FilteringSelect',
     'dijit/form/Button',
-    
+    'dijit/form/SimpleTextarea',
+    'dijit/form/NumberSpinner',
+    'dijit/form/CheckBox',
+
     'dijit/form/DateTextBox',
     'dijit/form/TimeTextBox',
-    'dijit/form/NumberTextBox',
-    
+
     'dojo/store/Memory',
     'dojo/store/JsonRest',
-    
+
     'dojo/date',
     'dojo/date/stamp',
     'dojo/date/locale',
-    
+
     'stalker/submitForm',
     'stalker/fieldUpdater',
+
+    'dojo/ready'
+  ], function(
+          registry,
+          Form,
+          TextBox,
+          FilteringSelect,
+          Button,
+          SimpleTextarea,
+          NumberSpinner,
+          CheckBox,
+
+          DateTextBox,
+          TimeTextBox,
+
+          Memory,
+          JsonRest,
+
+          date,
+          stamp,
+          locale,
+
+          submitForm,
+          fieldUpdater,
+
+          ready){
     
-    'dojo/ready'],
-    function(
-      registry,
-      Form,
-      TextBox,
-      FilteringSelect,
-      Button,
-      
-      DateTextBox,
-      TimeTextBox,
-      NumberTextBox,
-      
-      Memory,
-      JsonRest,
-      
-      date,
-      stamp,
-      locale,
-      
-      submitForm,
-      fieldUpdater,
-      
-      ready){
-      
-      ready(function(){
-        
-        // ********************************************************************
-        // Form
-        var create_booking_form = new Form({
-          id: 'create_booking_form'
-        }, 'create_booking_form');
-        
-        
-        
-        // ********************************************************************
-        // Task
-        var task_textBox = new TextBox({
-          name: 'task_name',
-          label: 'Task',
-          value: '{{ task.name }}',
-          disabled: true,
-          required: true
-        }, 'booking_task');
-        task_textBox.startup();
-        
-        // ********************************************************************
-        // Resource
-        var resource_memory = new Memory({
-          data: [
-            {% for resource in task.resources %}
+    ready(function(){
+
+      // ********************************************************************
+      // Form
+      var create_booking_form = new Form({
+        id: 'create_booking_form'
+      }, 'create_booking_form');
+
+
+
+      // ********************************************************************
+      // Task
+      var task_textBox = new TextBox({
+        name: 'task_name',
+        label: 'Task',
+        value: '{{ task.name }}',
+        disabled: true,
+        required: true
+      }, 'booking_task');
+      task_textBox.startup();
+
+      // ********************************************************************
+      // Resource
+      var resource_memory = new Memory({
+        data: [
+          {% for resource in task.resources %}
             {
               name: '{{ resource.name }}',
               id: {{ resource.id }}
             },
-            {% endfor %}
-          ]
-        });
-        
-        var resource_filteringSelect = new FilteringSelect({
-          name: 'resource_name',
-          label: 'Resource',
-          data: resource_memory,
-          value: '{{ logged_in_user.id }}',
-          required: true
-        }, 'booking_resource');
-        resource_filteringSelect.startup();
-        
-        
-        // ********************************************************************
-        // Start Date
-        
-        // Date
-        var start_dateTextBox = new DateTextBox({
-          name: 'start',
-          label: 'Start Date',
-          value: new Date(),// set it today by default
-          required: true,
-          datePattern: 'dd-mm-yyyy',
-          onChange: function(){
-            if (this.focused){
-              update_dates(
-                start_dateTextBox.getValue(),
-                end_dateTextBox.getValue(),
-                null
-              );
-            }
-          }
-        }, 'booking_start_date');
-        start_dateTextBox.startup();
-        
-        // Time
-        var start_time_timeTextBox = new TimeTextBox({
-          name: 'start_time',
-          value: 'T09:00:00',
-          constraints: {
-            timePattern: 'HH:mm:ss',
-            clickableIncrement: 'T01:00:00',
-            visibleIncrement: 'T01:00:00',
-            visibleRange: 'T01:00:00'
-          }
-        }, 'booking_start_time');
-        start_time_timeTextBox.startup();
-        
-        
-        
-        // ********************************************************************
-        // End Date
-        
-        // Date
-        var end_dateTextBox = new DateTextBox({
-          name: 'end',
-          label: 'End Date',
-          value: new Date(), // set it today by default
-          required: true,
-          datePattern: 'dd-mm-yyyy',
-          onChange: function(){
-            if (this.focused){
-              update_dates(
-                start_dateTextBox.getValue(),
-                end_dateTextBox.getValue(),
-                null
-              );
-            }
-          }
-        }, 'booking_end_date');
-        end_dateTextBox.startup();
-        
-        // Time 
-        var end_time_timeTextBox = new TimeTextBox({
-          name: 'end_time',
-          value: 'T18:00:00',
-          constraints: {
-            timePattern: 'HH:mm:ss',
-            clickableIncrement: 'T01:00:00',
-            visibleIncrement: 'T01:00:00',
-            visibleRange: 'T01:00:00'
-          }
-        }, 'booking_end_time');
-        end_time_timeTextBox.startup();
-        
-        // ********************************************************************
-        // Hours To Complete
-        // calculate the value from the task.effort - task.total_effort_spent
-        var hours_to_complete_numberTextBox = new NumberTextBox({
-          
-        });
-        
-        // ********************************************************************
-        // Ok Button
-        var ok_button = new Button({
-          label: 'Ok',
-          type: 'button',
-          onClick: function(){
-            submitForm({
-              dialog: registry.byId('create_booking_dialog'),
-              form: create_booking_form,
-              additional_data: {
-                task_id: {{ task.id }},
-                start_date: stamp.toISOString(start_dateTextBox.value),
-                end_date: stamp.toISOString(end_dateTextBox.value),
-                start_time: stamp.toISOString(start_time_timeTextBox.value),
-                end_time: stamp.toISOString(end_time_timeTextBox.value)
-              },
-              url: '{{ request.route_url('create_booking', task_id=task.id) }}',
-              method: 'POST'
-            });
-          }
-        }, 'booking_ok_button');
-        ok_button.startup();
-        
-        
-        
-        
-        // ********************************************************************
-        // Cancel Button
-        var cancel_button = new Button({
-          label: 'Cancel',
-          type: 'button',
-          onClick: function(){
-            var dialog = create_booking_form.getParent()
-            dialog.destroyRecursive();
-          }
-        }, 'booking_cancel_button');
-        cancel_button.startup();
-   
-        
-        create_booking_form.startup();
+          {% endfor %}
+        ]
       });
       
+      var resource_filteringSelect = new FilteringSelect({
+        name: 'resource_id',
+        label: 'Resource',
+        store: resource_memory,
+        value: '{{ logged_in_user.id }}',
+        required: true
+      }, 'booking_resource');
+      resource_filteringSelect.startup();
+
+      // if there is only 1 resource automatically select it
+      if (resource_memory.data.length == 1){
+        resource_filteringSelect.set('value', resource_memory.data[0].id);
+      }
+
+
+      // ********************************************************************
+      // Start Date
+
+      // Date
+      var start_dateTextBox = new DateTextBox({
+        name: 'start_date',
+        label: 'Start Date',
+        value: new Date(),// set it today by default
+        required: true,
+        datePattern: 'dd-mm-yyyy',
+        style: 'width: 90px;',
+        onChange: function(){
+          if (this.focused){
+            update_hours_to_complete(
+                    start_dateTextBox.getValue(),
+                    end_dateTextBox.getValue()
+            );
+          }
+        }
+      }, 'booking_start_date');
+      start_dateTextBox.startup();
+
+      // Time
+      var start_time_timeTextBox = new TimeTextBox({
+        name: 'start_time',
+        value: 'T09:00:00',
+        style: 'width: 85px;',
+        constraints: {
+          timePattern: 'HH:mm:ss',
+          clickableIncrement: 'T01:00:00',
+          visibleIncrement: 'T01:00:00',
+          visibleRange: 'T01:00:00'
+        }
+      }, 'booking_start_time');
+      start_time_timeTextBox.startup();
+
+
+
+      // ********************************************************************
+      // End Date
+
+      // Date
+      var end_dateTextBox = new DateTextBox({
+        name: 'end_date',
+        label: 'End Date',
+        value: new Date(), // set it today by default
+        required: true,
+        datePattern: 'dd-mm-yyyy',
+        style: 'width: 90px;',
+        onChange: function(){
+          if (this.focused){
+            update_hours_to_complete(
+                    start_dateTextBox.getValue(),
+                    end_dateTextBox.getValue()
+            );
+          }
+        }
+      }, 'booking_end_date');
+      end_dateTextBox.startup();
+
+      // Time 
+      var end_time_timeTextBox = new TimeTextBox({
+        name: 'end_time',
+        value: 'T18:00:00',
+        style: 'width: 85px',
+        constraints: {
+          timePattern: 'HH:mm:ss',
+          clickableIncrement: 'T01:00:00',
+          visibleIncrement: 'T01:00:00',
+          visibleRange: 'T01:00:00'
+        }
+      }, 'booking_end_time');
+      end_time_timeTextBox.startup();
+
+      // ********************************************************************
+      // Hours To Complete
+      var hours_to_complete_numberTextBox = new NumberSpinner({
+        name: 'hours_to_complete',
+        value: 0,
+        constraints: {min:0},
+        style: 'width: 90px; float: left;'
+      }, 'booking_hours_to_complete');
+      hours_to_complete_numberTextBox.startup();
+      
+      // CheckBox
+      var is_complete_checkBox = new CheckBox({
+        name: 'is_complete',
+        value: 'checked',
+        label: 'is complete?',
+        checked: false,
+        onChange: function(new_value){
+          // disable the hours_to_complete if checked
+          // and set the value to 0
+          if (new_value){
+            hours_to_complete_numberTextBox.set('disabled', true);
+            hours_to_complete_numberTextBox.set('value', 0);
+          } else {
+            hours_to_complete_numberTextBox.set('disabled', false);
+            var remaining_hours = calculate_remaining_hours();
+            hours_to_complete_numberTextBox.set('value', remaining_hours);
+          }
+        }
+      }, 'booking_is_complete');
+
+
+      var calculate_remaining_hours = function(){
+        // total hours of bookings should have been given by Stalker
+        // calculate the remaining hours
+{#        var total_booked_seconds = {{ task.total_booked_seconds }};#}
+{#        var remaining_seconds = {{ task.remaining_seconds }};#}
+        
+{#        console.log('total_booked_seconds: ', total_booked_seconds);#}
+{#        console.log('remaining_seconds: ', remaining_seconds);#}
+        
+        // get the time difference from interface
+{#        var start = new Date(start_dateTextBox.value);#}
+        
+      };
+    
+    
+    
+      // ********************************************************************
+      // Notes
+      var notes = new SimpleTextarea({
+        name: 'notes',
+        style: 'width: 176px;'
+      }, 'booking_notes');
+      notes.startup();
+
+      // ********************************************************************
+      // Ok Button
+      var ok_button = new Button({
+        label: 'Ok',
+        type: 'button',
+        onClick: function(){
+          submitForm({
+            dialog: registry.byId('create_booking_dialog'),
+            form: create_booking_form,
+            additional_data: {
+              start_date: stamp.toISOString(start_dateTextBox.value),
+              end_date: stamp.toISOString(end_dateTextBox.value),
+              start_time: stamp.toISOString(start_time_timeTextBox.value),
+              end_time: stamp.toISOString(end_time_timeTextBox.value)
+            },
+            url: '{{ request.route_url('create_booking', task_id=task.id) }}',
+            method: 'POST'
+          });
+        }
+      }, 'booking_ok_button');
+      ok_button.startup();
+
+
+
+
+      // ********************************************************************
+      // Cancel Button
+      var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function(){
+          var dialog = create_booking_form.getParent()
+          dialog.destroyRecursive();
+        }
+      }, 'booking_cancel_button');
+      cancel_button.startup();
+
+
+      create_booking_form.startup();
     });
+
+  });
 </script>

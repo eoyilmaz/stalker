@@ -96,6 +96,7 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
         super(Studio, self).__init__(**kwargs)
         ScheduleMixin.__init__(self, **kwargs)
         WorkingHoursMixin.__init__(self, **kwargs)
+        # TODO: daily_working_hours should be in WorkingHours not in Studio
         self.daily_working_hours = daily_working_hours
         self._now = None
         self.now = self._validate_now(now)
@@ -236,6 +237,24 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
         # run the scheduler
         self.scheduler.studio = self
         self.scheduler.schedule()
+    
+    @property
+    def weekly_working_hours(self):
+        """returns the WorkingHours.weekly_working_hours
+        """
+        return self.working_hours.weekly_working_hours
+    
+    @property
+    def weekly_working_days(self):
+        """returns the WorkingHours.weekly_working_hours
+        """
+        return self.working_hours.weekly_working_days
+    
+    @property
+    def yearly_working_days(self):
+        """returns the yearly working days
+        """
+        return self.working_hours.yearly_working_days
 
 
 class WorkingHours(object):
@@ -305,9 +324,6 @@ class WorkingHours(object):
         """
         return isinstance(other, WorkingHours) and \
                other.working_hours == self.working_hours
-    
-    def __str__(self):
-        return super(object, WorkingHours).__str__(self)
     
     def __getitem__(self, item):
         if isinstance(item, int):

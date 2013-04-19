@@ -44,11 +44,11 @@
   <tr taskId="(#=obj.id#)" class="taskEditRow" >
     <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
     <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
-    <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.getParents().length>0?'':'font-weight: bold'#)"></td>
+    <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.name#)</td>
     <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="duration" value="(#=obj.duration#)"></td>
-    <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depends#)" (#=obj.hasExternalDep?"readonly":""#)></td>
+    <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depend_ids#)" (#=obj.hasExternalDep?"readonly":""#)></td>
     <td class="gdfCell taskAssigs">(#=obj.getResourcesString()#)</td>
   </tr>
 --></div>
@@ -70,10 +70,12 @@
   <div class="__template__" type="TASKBAR"><!--
   <div class="taskBox" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
+      <div class="taskExtraTiming" style="width:(#=obj.bid/obj.schedule_timing*100#)%;;"></div>
       <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
+      <div class="taskBid" style="width:(#=obj.bid/obj.schedule_timing#)%; background-color:red;"></div>
       <div class="taskScheduleModel" style="position: absolute; text-align: center; width: 100%;">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div>
-      <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
       <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
+      
       <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
       <div class="taskLabel">(#=obj.name#)</div>
       <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
@@ -176,7 +178,7 @@
         
         var ge = new GanttMaster();
         ge.init($("#workSpace"));
-        console.log(ge);
+        //console.log(ge);
         
         // The Memory
         var tasks_memory;

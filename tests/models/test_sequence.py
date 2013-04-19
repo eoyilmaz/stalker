@@ -302,23 +302,7 @@ class SequenceTester(unittest.TestCase):
         self.kwargs["status_list"] = status_list
         new_sequence = Sequence(**self.kwargs)
         self.assertEqual(new_sequence.status_list, status_list)
-
-    def test_ScheduleMixin_initialization(self):
-        """testing if the ScheduleMixin part is initialized correctly
-        """
-        start = \
-            datetime.datetime(2013, 3, 22, 15, 0) + datetime.timedelta(days=25)
-        end = start + datetime.timedelta(days=12)
-        
-        self.kwargs["start"] = start
-        self.kwargs["end"] = end
-        
-        new_sequence = Sequence(**self.kwargs)
-        
-        self.assertEqual(new_sequence.start, start)
-        self.assertEqual(new_sequence.end, end)
-        #self.assertEqual(new_sequence.duration, end - start)
-
+    
     def test_TaskableEntity_initialization(self):
         """testing if the TaskableEntity part is initialized correctly
         """

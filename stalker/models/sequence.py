@@ -85,8 +85,6 @@ class Sequence(Task, ReferenceMixin, CodeMixin):
         
         # call the mixin __init__ methods
         ReferenceMixin.__init__(self, **kwargs)
-        #StatusMixin.__init__(self, **kwargs)
-        #ScheduleMixin.__init__(self, **kwargs)
         CodeMixin.__init__(self, **kwargs)
         
         self.lead = lead

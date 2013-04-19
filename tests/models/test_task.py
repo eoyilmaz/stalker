@@ -1411,6 +1411,280 @@ class TaskTester(unittest.TestCase):
         self.assertIn(new_booking3, self.test_task.bookings)
         self.assertNotIn(new_booking3, new_task.bookings)
     
+    def test_total_booked_seconds_is_a_read_only_attribute(self):
+        """testing if the total_booked_seconds is a read only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task,
+                          'total_booked_seconds', 33)
+    
+    def test_total_booked_seconds_is_the_sum_of_all_bookings(self):
+        """testing if the total_booked_seconds is the sum of all bookings in
+        hours
+        """
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+        
+        self.test_task.bookings = []
+        book1 = Booking(
+            task=self.test_task,
+            resource=self.test_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+        
+        self.assertIn(book1, self.test_task.bookings)
+        
+        book2 = Booking(
+            task=self.test_task,
+            resource=self.test_task.resources[1],
+            start=now,
+            end=now + td(hours=12)
+        )
+        self.assertEqual(self.test_task.total_booked_seconds, 20 * 3600)
+    
+    def test_schedule_seconds_is_a_read_only_attribute(self):
+        """testing if the schedule_seconds is a read only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task,
+                          'schedule_seconds', 232400)
+    
+    def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio(self):
+        """testing if schedule_seconds attribute is working properly for a
+        effort based task on an environment where there are no studio
+        """
+        # no studio, using defaults
+        self.kwargs['schedule_model'] = 'effort'
+
+        self.kwargs['schedule_timing'] = 10
+        self.kwargs['schedule_unit'] = 'h'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+
+        self.kwargs['schedule_timing'] = 23
+        self.kwargs['schedule_unit'] = 'd'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds,
+                         23 * defaults.daily_working_hours * 3600)
+        
+        self.kwargs['schedule_timing'] = 2
+        self.kwargs['schedule_unit'] = 'w'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds,
+                         2 * defaults.weekly_working_hours * 3600)
+        
+        self.kwargs['schedule_timing'] = 2.5
+        self.kwargs['schedule_unit'] = 'm'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds,
+                         2.5 * 4 * defaults.weekly_working_hours * 3600)
+        
+        self.kwargs['schedule_timing'] = 3.1
+        self.kwargs['schedule_unit'] = 'y'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.schedule_seconds,
+            3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600
+        )
+
+    def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_studio(self):
+        """testing if schedule_seconds attribute is working properly for a
+        effort based task where there is a studio present
+        """
+        # no studio, using defaults
+        from stalker import Studio
+        studio = Studio(name='Test Studio')
+        
+        self.kwargs['schedule_model'] = 'effort'
+
+        self.kwargs['schedule_timing'] = 10
+        self.kwargs['schedule_unit'] = 'h'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+
+        self.kwargs['schedule_timing'] = 23
+        self.kwargs['schedule_unit'] = 'd'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds,
+                         23 * studio.daily_working_hours * 3600)
+
+        self.kwargs['schedule_timing'] = 2
+        self.kwargs['schedule_unit'] = 'w'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds,
+                         2 * studio.weekly_working_hours * 3600)
+
+        self.kwargs['schedule_timing'] = 2.5
+        self.kwargs['schedule_unit'] = 'm'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds,
+                         2.5 * 4 * studio.weekly_working_hours * 3600)
+
+        self.kwargs['schedule_timing'] = 3.1
+        self.kwargs['schedule_unit'] = 'y'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.schedule_seconds,
+            3.1 * studio.yearly_working_days * studio.daily_working_hours * 3600
+        )
+    
+    def test_remaining_seconds_attribute_is_a_read_only_attribute(self):
+        """testing if the remaining hours is a read only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task,
+                          'remaining_seconds', 2342)
+    
+    def test_remaining_seconds_is_working_properly(self):
+        """testing if the remaining hours is working properly
+        """
+        
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = datetime.datetime(2013, 4, 19, 10, 0)
+        
+        self.kwargs['schedule_model'] = 'effort'
+        
+        
+        
+        
+        
+        # -------------- HOURS --------------
+        self.kwargs['schedule_timing'] = 10
+        self.kwargs['schedule_unit'] = 'h'
+        new_task = Task(**self.kwargs)
+        
+        # create a booking of 2 hours
+        book1 = Booking(
+            task=new_task,
+            start=now,
+            duration=td(hours=2),
+            resource=new_task.resources[0]
+        )
+        new_task.bookings.append(book1)
+        
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_booked_seconds
+        )
+        
+        
+        
+        
+        # -------------- DAYS --------------
+        self.kwargs['schedule_timing'] = 23
+        self.kwargs['schedule_unit'] = 'd'
+        new_task = Task(**self.kwargs)
+        
+        # create a booking of 5 days
+        book1 = Booking(
+            task=new_task,
+            start=now,
+            end=now + td(days=5),
+            resource=new_task.resources[0]
+        )
+        
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_booked_seconds
+        )
+        
+        # add another 2 hours
+        book2 = Booking(
+            task=new_task,
+            start=now,
+            duration=td(hours=2),
+            resource=new_task.resources[0]
+        )
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_booked_seconds
+        )
+        
+        
+        
+        
+        # ------------------- WEEKS ------------------
+        self.kwargs['schedule_timing'] = 2
+        self.kwargs['schedule_unit'] = 'w'
+        new_task = Task(**self.kwargs)
+        
+        # create a booking of 2 hours
+        book1 = Booking(
+            task=new_task,
+            start=now,
+            duration=td(hours=2),
+            resource=new_task.resources[0]
+        )
+        new_task.bookings.append(book1)
+        
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_booked_seconds
+        )
+        
+        # create a booking of 1 week
+        book2 = Booking(
+            task=new_task,
+            start=now,
+            duration=td(weeks=1),
+            resource=new_task.resources[0]
+        )
+        new_task.bookings.append(book2)
+        
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_booked_seconds
+        )
+        
+        
+        
+        
+        # ------------------ MONTH -------------------
+        self.kwargs['schedule_timing'] = 2.5
+        self.kwargs['schedule_unit'] = 'm'
+        new_task = Task(**self.kwargs)
+        
+        # create a booking of 1 months or 30 days, remaining_seconds can be negative
+        book1 = Booking(
+            task=new_task,
+            start=now,
+            duration=td(days=30),
+            resource=new_task.resources[0]
+        )
+        
+        new_task.bookings.append(book1)
+        
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_booked_seconds
+        )
+        
+        # ------------------ YEARS ---------------------
+        self.kwargs['schedule_timing'] = 3.1
+        self.kwargs['schedule_unit'] = 'y'
+        new_task = Task(**self.kwargs)
+        
+        # create a booking of 1 months or 30 days, remaining_seconds can be negative
+        book1 = Booking(
+            task=new_task,
+            start=now,
+            duration=td(days=30),
+            resource=new_task.resources[0]
+        )
+        
+        new_task.bookings.append(book1)
+        
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_booked_seconds
+        )
+
     def test_versions_attribute_is_None(self):
         """testing if a TypeError will be raised when the versions attribute
         is set to None

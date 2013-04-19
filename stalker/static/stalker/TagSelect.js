@@ -40,23 +40,23 @@ define([
 
             name: null,
             store: null,
-            
+
             required: false,
-            
+
             tags: [],
             input_field_widget: null,
             type: 'FilteringSelect',
-            
+
             selected: [], // pre defined selection list
-            
+
             button_div: null,
-            
+
             _setNameAttr: function(value){
                 if (this.input_field_widget){
                     this.input_field_widget.set('name', value);
                 }
             },
-            
+
             _setStyleAttr: function(value){
                 console.log(
                     'setting the TagSelect.input_field_widget.style: ', value
@@ -66,18 +66,18 @@ define([
                     this.input_field_widget.set('style', value);
                 }
             },
-            
+
             _setStoreAttr: function(value){
                 if (this.input_field_widget){
                     this.input_field_widget.set('store', value);
                     this.store = value;
                 }
             },
-            
+
             // value: Array
             //      The value of this widget
             value: [],
-            
+
             _getValueAttr: function(){
                 // return the value of the buttons
                 var value = [];
@@ -86,16 +86,16 @@ define([
                 }
                 return value;
             },
-            
+
             _setValueAttr: function(value){
                 // create the tags for the `selected` list
                 var tag_value;
                 var tag_label;
                 var result;
-                
+
                 // remove all previous tags
                 this.reset();
-                
+
                 for (var i=0; i < value.length; i++){
                     if (this.store){
                         // get the labels of the selected ids
@@ -107,7 +107,7 @@ define([
                         tag_label = value[i];
                     }
                     tag_value = value[i];
-                    
+
                     // create the items
                     if (tag_label != ''){
                         this.add_tag({
@@ -117,7 +117,7 @@ define([
                     }
                 }
             },
-            
+
             _setDisabledAttr: function(value){
                 // set the input field widget and all the tags disabled
                 this.input_field_widget.set('disabled', value);
@@ -125,7 +125,7 @@ define([
                     this.tags[i].set('disabled', value);
                 }
             },
-            
+
             isValid: function(){
                 console.log('TagSelect.isValid is running!!!')
                 if (this.required){
@@ -141,18 +141,18 @@ define([
 //            },
 //            validator: function(){
 //            },
-            
+
             constructor: function stalker_tagSelect_constructor(args){
                 if (args){
                     lang.mixin(this, args);
                 }
             },
-            
+
             startup: function stalker_tagSelect_startup(){
                 this.inherited(arguments);
                 this.input_field_widget.startup();
             },
-            
+
             reset: function stalker_tagSelect_reset(){
                 this.inherited(arguments);
                 if (this.input_field_widget != null){
@@ -163,8 +163,8 @@ define([
                 }
                 this.tags = [];
             },
-            
-            
+
+
             // 
             // adds the given value to the store again
             // 
@@ -175,8 +175,8 @@ define([
                 if (this.store){
                     this.store.add(value);
                 }
-            }, 
-            
+            },
+
             //
             // creates a Tag with the given label and value and removes the
             // given value from the store if there is a store and the given
@@ -187,7 +187,7 @@ define([
             add_tag: function(kwargs){
                 var label = kwargs.label;
                 var value = kwargs.value;
-                
+
                 if (label != null){
                     if (label != ''){
                         // add a new button to the the tagList
@@ -196,26 +196,26 @@ define([
                             value: value
                         }, domConstruct.create('div', null, this.tag_list_ap));
                         tag.startup();
-                        
+
                         // attach self to the tag
                         tag.tagSelect = this;
-                        
+
                         // add the button as a tag to this widget
                         this.tags.push(tag);
-                        
+
                         // delete the current value from the FilteringSelect
                         this.input_field_widget.set('value', '');
-                        
+
                         // also remove the current value from the store
                         if (this.store){
                             this.store.remove(value);
-                        } 
-                        
+                        }
+
                     }
                 }
             },
 
-            
+
             //
             // removes the given tag from the tagList and returns the value of
             // the tag to the store
@@ -227,36 +227,36 @@ define([
                     // don't bother doing anything with that
                     return;
                 }
-                
+
                 // return the tag value to the store
                 if (this.store){
                     var value = tag.getValue();
                     this.store.add(value);
                 }
-                
+
                 // remove the tag from the tags list
                 var index = this.tags.indexOf(tag);
                 if (index != -1){
                     this.tags.splice(index, 1);
                 }
-                
+
                 // destroy the tag
                 tag.destroyRecursive();
             },
-            
+
             postCreate: function tagSelect_postCreate(){
                 // Run any parent postCreate processes - can be done at any point
                 this.inherited(arguments);
-                
+
                 // Get a DOM node reference for the root of our widget
                 var parent = this;
                 var domNode = this.domNode;
-                
+
                 var input_widget_ap = this.input_widget_ap;
                 var tag_list_ap = this.tag_list_ap;
-                
+
                 this.tags = [];
-                
+
                 // create the input field widget with the given arguments
                 var WidgetClass = null;
                 if (this.type == 'FilteringSelect'){
@@ -264,23 +264,23 @@ define([
                 } else if (this.type == 'TextBox') {
                     WidgetClass = TextBox;
                 }
-                
+
                 this.input_field_widget = new WidgetClass({
                         required: false
                     }, domConstruct.create("div", {}, input_widget_ap)
                 );
-                
+
                 // set the input_widget_ap width to limit the size of the
                 // tag list
                 var content_box = domGeometry.getContentBox(
                     this.input_field_widget.domNode
                 );
-                tag_list_ap.style.width = String(content_box.w) + 'px'; 
-                
+                tag_list_ap.style.width = String(content_box.w) + 'px';
+
                 var tag_create_func = lang.hitch(this, function(e){
                     var item;
                     var current_label;
-                    
+
                     if (this.type == 'FilteringSelect'){
                         item = this.input_field_widget.item;
                         if (item != null){
@@ -289,25 +289,25 @@ define([
                     } else if (this.type == 'TextBox'){
                         current_label = this.input_field_widget.value;
                     }
-                    
+
                     if (current_label != null){
                         if (current_label != ''){
                             var current_id = this.input_field_widget.value;
-                            
+
                             this.add_tag({
                                 label: current_label,
                                 value: current_id
                             });
-                            
+
                         }
                     }
                 });
-                
+
                 // register the tag_create_func to `change` event
                 on(this.input_field_widget, 'change', tag_create_func);
-                
+
             }
-    });
+        });
 });
 
 

@@ -17,12 +17,17 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+from pyramid.httpexceptions import HTTPOk
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
-from stalker import Task, User
+from stalker import Task, User, Studio
+
+from stalker import defaults
 
 import logging
 from stalker import log
+from stalker.views import get_datetime
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
@@ -43,7 +48,31 @@ def create_booking_dialog(request):
     task_id = request.matchdict['task_id']
     task = Task.query.filter(Task.task_id==task_id).first()
     
+    studio = Studio.query.first()
+    if not studio:
+        studio = defaults
+    
     return {
+        'studio': studio,
         'logged_in_user': logged_in_user,
         'task': task
     }
+
+@view_config(
+    route_name='create_booking',
+    permission='Create_Booking'
+)
+def create_booking(request):
+    """runs when creating a booking
+    """
+    task_id = request.matchdict['task_id']
+    task = Task.query.filter(Task.id==task_id).first()
+    
+    #**************************************************************************
+    # collect data
+    resource_id = request.get('resource_id')
+    start_date = get_datetime(request, 'start_date', 'start_time')
+    end_date = get_datetime(request, 'end_date', 'end_time')
+    
+    
+    return HTTPOk()

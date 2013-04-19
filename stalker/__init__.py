@@ -209,7 +209,7 @@ def main(global_config, **settings):
     # Task
     
     # Dialogs
-    config.add_route('create_task_dialog', 'dialog/create/task/{project_id}')
+    config.add_route('create_task_dialog', 'dialog/create/task/{entity_id}')
     config.add_route('create_child_task_dialog', 'dialog/create/child_task/{task_id}')
     config.add_route('create_dependent_task_dialog', 'dialog/create/dependent_task/{task_id}')
     config.add_route('update_task_dialog', 'dialog/update/task/{task_id}')
