@@ -48,6 +48,29 @@ def convert_to_jquery_gantt_task_format(tasks):
     :param tasks: List of Stalker Tasks.
     :return: json compatible dictionary
     """
+    
+    data_source = Studio.query.first()
+    if not data_source:
+        data_source = defaults
+    
+    dwh = data_source.daily_working_hours
+    wwh = data_source.weekly_working_hours
+    wwd = data_source.weekly_working_days
+    ywd = data_source.yearly_working_days
+    timing_resolution = data_source.timing_resolution
+    
+    # it should work both for studio and defaults
+    working_hours = {
+        'mon': data_source.working_hours['mon'],
+        'tue': data_source.working_hours['tue'],
+        'wed': data_source.working_hours['wed'],
+        'thu': data_source.working_hours['thu'],
+        'fri': data_source.working_hours['fri'],
+        'sat': data_source.working_hours['sat'],
+        'sun': data_source.working_hours['sun']
+    }
+    logger.debug('studio.working_hours : %s' % working_hours)
+    
     data = {
         'tasks' : [
             {
@@ -80,6 +103,13 @@ def convert_to_jquery_gantt_task_format(tasks):
             'id': resource.id,
             'name': resource.name
         } for resource in User.query.all()],
+        'timing_resolution': timing_resolution.total_seconds() * 1000,
+        'working_hours': working_hours,
+        'daily_working_hours': dwh,
+        'weekly_working_hours': wwh,
+        'weekly_working_days': wwd,
+        'yearly_working_days': ywd
+        
         # "canWrite": 0,
         # "canWriteOnParent": 0
     }
@@ -379,7 +409,6 @@ def get_gantt_tasks(request):
             for root_task in root_tasks:
                 # logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
                 tasks.extend(depth_first_flatten(root_task))
-        
         elif entity.entity_type == 'User':
             user = entity
             
@@ -401,6 +430,14 @@ def get_gantt_tasks(request):
                 # logger.debug('user_task_with_parents: %s' % user_tasks_with_parents)
                 # logger.debug('tasks                 : %s' % tasks)
                 tasks = list(set(user_tasks_with_parents))
+        else: # Asset, Shot, Sequence
+            project = entity.project
+            start_from_task = entity
+            # find the root task
+            while start_from_task.parent:
+                start_from_task = start_from_task.parent
+            root_task = start_from_task
+            tasks.extend(depth_first_flatten(root_task))
     
     tasks.sort(key=lambda x: x.start)
     
@@ -464,12 +501,23 @@ def list_tasks(request):
 def create_task_dialog(request):
     """only project information is present
     """
-    project_id = request.matchdict['project_id']
-    project = Project.query.filter_by(id=project_id).first()
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+    
+    parent = None
+    if entity.entity_type == 'Project':
+        project = entity
+    else:
+        project = entity.project
+        parent = entity
+        
+    
+    # project = Project.query.filter_by(id=project_id).first()
     
     return {
         'mode': 'CREATE',
         'project': project,
+        'parent': parent,
         'schedule_models': defaults.task_schedule_models
     }
 

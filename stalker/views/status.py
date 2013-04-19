@@ -44,7 +44,7 @@ logger.setLevel(log.logging_level)
     permission='Update_Status'
 )
 def create_update_status(request):
-    """called when adding or updateing a Status
+    """called when adding or updating a Status
     """
     referrer = request.url
     came_from = request.params.get('came_from', referrer)
@@ -123,7 +123,7 @@ def create_update_status(request):
     permission='Create_StatusList'
 )
 def create_status_list(request):
-    """called when adding or updateing a StatusList
+    """called when adding or updating a StatusList
     """
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()

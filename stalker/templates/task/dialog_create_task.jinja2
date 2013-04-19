@@ -642,8 +642,15 @@
         // Status
         //
         // The Memory
+        var entity_type;
+        {% if mode=='CREATE' %}
+        entity_type = 'Task';
+        {% elif mode=='UPDATE' %}
+        entity_type = '{{ task.entity_type }}';
+        {% endif %}
+        
         var status_memory = new JsonRest({
-          target: 'get/statuses_for/Task'
+          target: 'get/statuses_for/' + entity_type,
         });
         
         // The Field
@@ -662,7 +669,8 @@
               if (dialog != null){
                 dialog.destroyRecursive();
               }
-              dialog = update_status_list_dialog_creator('Task');
+              
+              dialog = update_status_list_dialog_creator(entity_type);
               dialog.set('related_field_updater', status_field_updater);
               dialog.show();
             });

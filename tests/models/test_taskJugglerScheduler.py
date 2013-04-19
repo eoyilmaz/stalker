@@ -212,6 +212,8 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
         """
         tjp_sched = TaskJugglerScheduler()
         test_studio = Studio(name='Test Studio')
+        test_studio.daily_working_hours = 9
+        
         test_studio.id = 564
         test_studio.start = datetime.datetime(2013, 4, 16, 0, 7)
         test_studio.end = datetime.datetime(2013, 6, 30, 0, 0)
@@ -227,7 +229,7 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
         project Studio_564 "Test Studio" 2013-04-16 - 2013-06-30 {
             timingresolution 60min
             now {{studio.now.strftime('%Y-%m-%d-%H:%M')}}
-            dailyworkinghours 8
+            dailyworkinghours 9
             weekstartsmonday
             workinghours mon 09:00 - 18:00
             workinghours tue 09:00 - 18:00
@@ -307,7 +309,9 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
         """testing if the tasks are correctly scheduled
         """
         tjp_sched = TaskJugglerScheduler()
-        test_studio = Studio(name='Test Studio')
+        test_studio = Studio(name='Test Studio',
+                             now=datetime.datetime(2013, 4, 16, 0, 0))
+        test_studio.daily_working_hours = 9
         DBSession.add(test_studio)
         
         tjp_sched.studio = test_studio
