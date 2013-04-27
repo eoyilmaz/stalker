@@ -384,23 +384,23 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         };
         
         // ********************************************************************
-        // BOOKING
-        create_booking_dialog_creator = function(task_id){
+        // TIME LOG
+        create_time_log_dialog_creator = function(task_id){
             return new DialogSimple({
-                id: 'create_booking_dialog',
-                title: 'New Booking',
-                href: 'dialog/create/booking/' + task_id,
+                id: 'create_time_log_dialog',
+                title: 'New TimeLog',
+                href: 'dialog/create/time_log/' + task_id,
                 resize: true,
                 style: style,
                 executeScripts: true
             });
         };
         
-        update_booking_dialog_creator = function(booking_id){
+        update_time_log_dialog_creator = function(time_log_id){
             return new DialogSimple({
-                id: 'update_booking_dialog',
-                title: 'Update Booking',
-                href: 'dialog/update/booking/' + booking_id,
+                id: 'update_time_log_dialog',
+                title: 'Update TimeLog',
+                href: 'dialog/update/time_log/' + time_log_id,
                 resize: true,
                 style: style,
                 executeScripts: true

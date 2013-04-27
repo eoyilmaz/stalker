@@ -28,7 +28,7 @@ defaults = config.Config()
 from stalker import db
 from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Entity, Project, Repository, StatusList, Status, Task,
-                     Type, User, Booking)
+                     Type, User, TimeLog)
 
 from stalker.models.task import (CONSTRAINT_NONE, CONSTRAINT_START,
                                  CONSTRAINT_END, CONSTRAINT_BOTH)
@@ -160,7 +160,7 @@ class TaskTester(unittest.TestCase):
             'depends': [self.test_dependent_task1,
                         self.test_dependent_task2],
             'is_complete': False,
-            'bookings': [],
+            'time_logs': [],
             'versions': [],
             'is_milestone': False,
             'status': 0,
@@ -1338,39 +1338,39 @@ class TaskTester(unittest.TestCase):
         self.test_task.is_milestone = True
         self.assertEqual(self.test_task.resources, [])
     
-    def test_bookings_attribute_is_None(self):
-        """testing if a TypeError will be raised when the bookings attribute
+    def test_time_logs_attribute_is_None(self):
+        """testing if a TypeError will be raised when the time_logs attribute
         is set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_task, "bookings", None)
+        self.assertRaises(TypeError, setattr, self.test_task, "time_logs", None)
     
-    def test_bookings_attribute_is_not_a_list(self):
-        """testing if a TypeError will be raised when the bookings attribute is
+    def test_time_logs_attribute_is_not_a_list(self):
+        """testing if a TypeError will be raised when the time_logs attribute is
         not set to a list
         """
-        self.assertRaises(TypeError, setattr, self.test_task, "bookings", 123)
+        self.assertRaises(TypeError, setattr, self.test_task, "time_logs", 123)
     
-    def test_bookings_attribute_is_not_a_list_of_Booking_instances(self):
-        """testing if a TypeError will be raised when the bookings attribute is
-        not a list of Booking instances
+    def test_time_logs_attribute_is_not_a_list_of_TimeLog_instances(self):
+        """testing if a TypeError will be raised when the time_logs attribute is
+        not a list of TimeLog instances
         """
-        self.assertRaises(TypeError, setattr, self.test_task, "bookings",
-            [1, "1", 1.2, "a booking", []])
+        self.assertRaises(TypeError, setattr, self.test_task, "time_logs",
+            [1, "1", 1.2, "a time_log", []])
     
-    def test_bookings_attribute_is_working_properly(self):
-        """testing if the booking attribute is working properly
+    def test_time_logs_attribute_is_working_properly(self):
+        """testing if the time_log attribute is working properly
         """
         now = datetime.datetime.now()
         dt = datetime.timedelta
         
-        new_booking1 = Booking(
+        new_time_log1 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[0],
             start=now + dt(100),
             end=now + dt(101)
         )
         
-        new_booking2 = Booking(
+        new_time_log2 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[0],
             start=now + dt(101),
@@ -1381,35 +1381,35 @@ class TaskTester(unittest.TestCase):
         self.kwargs['name'] = 'New Task'
         new_task = Task(**self.kwargs)
         
-        # create a new Booking for that task
-        new_booking3 = Booking(
+        # create a new TimeLog for that task
+        new_time_log3 = TimeLog(
             task=new_task,
             resource=new_task.resources[0],
             start=now + dt(102),
             end=now + dt(103)
         )
         
-        DBSession.add_all([new_booking1, new_booking2, new_booking3])
+        DBSession.add_all([new_time_log1, new_time_log2, new_time_log3])
         DBSession.commit()
         
         # check if everything is in place
-        self.assertIn(new_booking1, self.test_task.bookings)
-        self.assertIn(new_booking2, self.test_task.bookings)
-        self.assertIn(new_booking3, new_task.bookings)
+        self.assertIn(new_time_log1, self.test_task.time_logs)
+        self.assertIn(new_time_log2, self.test_task.time_logs)
+        self.assertIn(new_time_log3, new_task.time_logs)
         
-        # now move the booking to test_task
-        self.test_task.bookings.append(new_booking3)
+        # now move the time_log to test_task
+        self.test_task.time_logs.append(new_time_log3)
         
-        # check if new_booking3 is in test_task
-        self.assertIn(new_booking3, self.test_task.bookings)
+        # check if new_time_log3 is in test_task
+        self.assertIn(new_time_log3, self.test_task.time_logs)
         
-        # there needs to be a database session commit to remove the booking
-        # from the previous tasks bookings attribute
+        # there needs to be a database session commit to remove the time_log
+        # from the previous tasks time_logs attribute
         
         DBSession.commit()
         
-        self.assertIn(new_booking3, self.test_task.bookings)
-        self.assertNotIn(new_booking3, new_task.bookings)
+        self.assertIn(new_time_log3, self.test_task.time_logs)
+        self.assertNotIn(new_time_log3, new_task.time_logs)
     
     def test_total_booked_seconds_is_a_read_only_attribute(self):
         """testing if the total_booked_seconds is a read only attribute
@@ -1417,25 +1417,25 @@ class TaskTester(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.test_task,
                           'total_booked_seconds', 33)
     
-    def test_total_booked_seconds_is_the_sum_of_all_bookings(self):
-        """testing if the total_booked_seconds is the sum of all bookings in
+    def test_total_booked_seconds_is_the_sum_of_all_time_logs(self):
+        """testing if the total_booked_seconds is the sum of all time_logs in
         hours
         """
         dt = datetime.datetime
         td = datetime.timedelta
         now = dt.now()
         
-        self.test_task.bookings = []
-        book1 = Booking(
+        self.test_task.time_logs = []
+        book1 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[0],
             start=now,
             end=now + td(hours=8)
         )
         
-        self.assertIn(book1, self.test_task.bookings)
+        self.assertIn(book1, self.test_task.time_logs)
         
-        book2 = Booking(
+        book2 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[1],
             start=now,
@@ -1553,14 +1553,14 @@ class TaskTester(unittest.TestCase):
         self.kwargs['schedule_unit'] = 'h'
         new_task = Task(**self.kwargs)
         
-        # create a booking of 2 hours
-        book1 = Booking(
+        # create a time_log of 2 hours
+        book1 = TimeLog(
             task=new_task,
             start=now,
             duration=td(hours=2),
             resource=new_task.resources[0]
         )
-        new_task.bookings.append(book1)
+        new_task.time_logs.append(book1)
         
         # check
         self.assertEqual(
@@ -1576,8 +1576,8 @@ class TaskTester(unittest.TestCase):
         self.kwargs['schedule_unit'] = 'd'
         new_task = Task(**self.kwargs)
         
-        # create a booking of 5 days
-        book1 = Booking(
+        # create a time_log of 5 days
+        book1 = TimeLog(
             task=new_task,
             start=now,
             end=now + td(days=5),
@@ -1591,7 +1591,7 @@ class TaskTester(unittest.TestCase):
         )
         
         # add another 2 hours
-        book2 = Booking(
+        book2 = TimeLog(
             task=new_task,
             start=now,
             duration=td(hours=2),
@@ -1610,14 +1610,14 @@ class TaskTester(unittest.TestCase):
         self.kwargs['schedule_unit'] = 'w'
         new_task = Task(**self.kwargs)
         
-        # create a booking of 2 hours
-        book1 = Booking(
+        # create a time_log of 2 hours
+        book1 = TimeLog(
             task=new_task,
             start=now,
             duration=td(hours=2),
             resource=new_task.resources[0]
         )
-        new_task.bookings.append(book1)
+        new_task.time_logs.append(book1)
         
         # check
         self.assertEqual(
@@ -1625,14 +1625,14 @@ class TaskTester(unittest.TestCase):
             new_task.schedule_seconds - new_task.total_booked_seconds
         )
         
-        # create a booking of 1 week
-        book2 = Booking(
+        # create a time_log of 1 week
+        book2 = TimeLog(
             task=new_task,
             start=now,
             duration=td(weeks=1),
             resource=new_task.resources[0]
         )
-        new_task.bookings.append(book2)
+        new_task.time_logs.append(book2)
         
         # check
         self.assertEqual(
@@ -1648,15 +1648,15 @@ class TaskTester(unittest.TestCase):
         self.kwargs['schedule_unit'] = 'm'
         new_task = Task(**self.kwargs)
         
-        # create a booking of 1 months or 30 days, remaining_seconds can be negative
-        book1 = Booking(
+        # create a time_log of 1 months or 30 days, remaining_seconds can be negative
+        book1 = TimeLog(
             task=new_task,
             start=now,
             duration=td(days=30),
             resource=new_task.resources[0]
         )
         
-        new_task.bookings.append(book1)
+        new_task.time_logs.append(book1)
         
         # check
         self.assertEqual(
@@ -1669,15 +1669,15 @@ class TaskTester(unittest.TestCase):
         self.kwargs['schedule_unit'] = 'y'
         new_task = Task(**self.kwargs)
         
-        # create a booking of 1 months or 30 days, remaining_seconds can be negative
-        book1 = Booking(
+        # create a time_log of 1 months or 30 days, remaining_seconds can be negative
+        book1 = TimeLog(
             task=new_task,
             start=now,
             duration=td(days=30),
             resource=new_task.resources[0]
         )
         
-        new_task.bookings.append(book1)
+        new_task.time_logs.append(book1)
         
         # check
         self.assertEqual(

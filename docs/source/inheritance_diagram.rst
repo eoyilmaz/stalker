@@ -35,7 +35,7 @@ Inheritance Diagram
    stalker.models.studio.Studio
    stalker.models.studio.WorkingHours
    stalker.models.tag.Tag
-   stalker.models.task.Booking
+   stalker.models.task.TimeLog
    stalker.models.task.Task
    stalker.models.template.FilenameTemplate
    stalker.models.ticket.Ticket

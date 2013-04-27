@@ -30,7 +30,7 @@ from stalker import (db, defaults, Asset, Department, SimpleEntity, Entity,
                      ImageFormat, Link, Note, Project, Repository, Sequence,
                      Shot, Status, StatusList, Structure, Tag, Task, Type,
                      FilenameTemplate, User, Version, Permission, Group,
-                     Booking, Ticket, Scene, WorkingHours, Studio)
+                     TimeLog, Ticket, Scene, WorkingHours, Studio)
 import logging
 from stalker import log
 
@@ -343,7 +343,7 @@ class DatabaseTester(unittest.TestCase):
             'Asset', 'Group', 'Permission', 'User', 'Department',
             'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
             'Project', 'Repository', 'Scene', 'Sequence', 'Shot', 'Status',
-            'StatusList', 'Structure', 'Studio', 'Tag', 'Booking', 'Task',
+            'StatusList', 'Structure', 'Studio', 'Tag', 'TimeLog', 'Task',
             'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Version',
         ]
         
@@ -596,13 +596,13 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(type, test_asset_DB.type)
         self.assertEqual(updated_by, test_asset_DB.updated_by)
     
-    def test_persistence_Booking(self):
-        """testing the persistence of Booking
+    def test_persistence_TimeLog(self):
+        """testing the persistence of TimeLog
         """
         logger.setLevel(log.logging_level)
         
-        name = 'Test Booking'
-        description = 'this is a booking'
+        name = 'Test TimeLog'
+        description = 'this is a time log'
         created_by = None
         updated_by = None
         date_created = datetime.datetime.now()
@@ -676,26 +676,26 @@ class DatabaseModelsTester(unittest.TestCase):
             status_list=task_status_list
         )
         
-        test_booking = Booking(
+        test_time_log = TimeLog(
             task=test_task,
             resource=user1,
             start=datetime.datetime(2013, 1, 10),
             end=datetime.datetime(2013, 1, 13)
         )
         
-#        DBSession.add(test_booking)
+#        DBSession.add(test_time_log)
 #        DBSession.commit()
 #        
-#        del test_booking
+#        del test_time_log
 #        
 #        # now retrieve it back
-#        test_booking_DB = Booking.query.filter_by(name=name).first()
+#        test_time_log_DB = TimeLog.query.filter_by(name=name).first()
 #        
-#        self.assertEqual(date_created, test_booking_DB.date_created)
-#        self.assertEqual(date_updated, test_booking_DB.date_updated)
-#        self.assertEqual(start, test_booking_DB.start)
-#        self.assertEqual(end, test_booking_DB.end)
-#        self.assertEqual(user1, test_booking_DB.user1)
+#        self.assertEqual(date_created, test_time_log_DB.date_created)
+#        self.assertEqual(date_updated, test_time_log_DB.date_updated)
+#        self.assertEqual(start, test_time_log_DB.start)
+#        self.assertEqual(end, test_time_log_DB.end)
+#        self.assertEqual(user1, test_time_log_DB.user1)
         
     
     def test_persistence_Department(self):
@@ -2362,7 +2362,7 @@ class DatabaseModelsTester(unittest.TestCase):
         DBSession.add(test_task)
         DBSession.commit()
         
-        bookings = test_task.bookings
+        time_logs = test_task.time_logs
         created_by = test_task.created_by
         date_created = test_task.date_created
         date_updated = test_task.date_updated
@@ -2394,7 +2394,7 @@ class DatabaseModelsTester(unittest.TestCase):
         
         assert(isinstance(test_task_DB, Task))
         
-        self.assertEqual(bookings, test_task_DB.bookings)
+        self.assertEqual(time_logs, test_task_DB.time_logs)
         self.assertEqual(created_by, test_task_DB.created_by)
         self.assertEqual(computed_start, test_task_DB.computed_start)
         self.assertEqual(computed_end, test_task_DB.computed_end)

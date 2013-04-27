@@ -32,14 +32,14 @@ logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 @view_config(
-    route_name='create_booking_dialog',
-    renderer='templates/booking/dialog_create_booking.jinja2',
-    permission='Create_Booking'
+    route_name='create_time_log_dialog',
+    renderer='templates/time_log/dialog_create_time_log.jinja2',
+    permission='Create_TimeLog'
 )
-def create_booking_dialog(request):
-    """creates a create_booking_dialog by using the given task
+def create_time_log_dialog(request):
+    """creates a create_time_log_dialog by using the given task
     """
-    logger.debug('inside create_booking_dialog')
+    logger.debug('inside create_time_log_dialog')
     
     # get logged in user
     logged_in_user_id = authenticated_userid(request)
@@ -59,11 +59,11 @@ def create_booking_dialog(request):
     }
 
 @view_config(
-    route_name='create_booking',
-    permission='Create_Booking'
+    route_name='create_time_log',
+    permission='Create_TimeLog'
 )
-def create_booking(request):
-    """runs when creating a booking
+def create_time_log(request):
+    """runs when creating a time_log
     """
     task_id = request.matchdict['task_id']
     task = Task.query.filter(Task.id==task_id).first()

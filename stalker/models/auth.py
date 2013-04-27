@@ -468,12 +468,12 @@ class User(Entity, ACLMixin):
         """
     )
 
-    bookings = relationship(
-        "Booking",
-        primaryjoin="Bookings.c.resource_id==Users.c.id",
+    time_logs = relationship(
+        "TimeLog",
+        primaryjoin="TimeLogs.c.resource_id==Users.c.id",
         back_populates="resource",
-        doc="""A list of :class:`~stalker.models.task.Booking` instances which
-        holds the bookings created for this :class:`~stalker.models.auth.User`.
+        doc="""A list of :class:`~stalker.models.task.TimeLog` instances which
+        holds the time logs created for this :class:`~stalker.models.auth.User`.
         """
     )
 

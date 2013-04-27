@@ -20,13 +20,13 @@
 
 import unittest
 import datetime
-from stalker import (Project, Repository, Status, StatusList, Task, Booking,
+from stalker import (Project, Repository, Status, StatusList, Task, TimeLog,
                      User)
 from stalker.exceptions import OverBookedWarning
 
 
-class BookingTester(unittest.TestCase):
-    """tests the Booking class
+class TimeLogTester(unittest.TestCase):
+    """tests the TimeLog class
     """
 
     def setUp(self):
@@ -81,54 +81,54 @@ class BookingTester(unittest.TestCase):
         )
 
         self.kwargs = {
-            "name": "test booking",
+            "name": "test time_log",
             "task": self.test_task,
             "resource": self.test_resource,
             "start": datetime.datetime(2013, 3, 22, 1, 0),
             "duration": datetime.timedelta(10)
         }
 
-        # create a Booking
+        # create a TimeLog
         # and test it
-        self.test_booking = Booking(**self.kwargs)
+        self.test_time_log = TimeLog(**self.kwargs)
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
-        Booking class
+        TimeLog class
         """
-        self.assertTrue(Booking.__auto_name__)
+        self.assertTrue(TimeLog.__auto_name__)
     
     def test_task_argument_is_Skipped(self):
         """testing if a TypeError will be raised when the task argument is
         skipped
         """
         self.kwargs.pop("task")
-        self.assertRaises(TypeError, Booking, **self.kwargs)
+        self.assertRaises(TypeError, TimeLog, **self.kwargs)
 
     def test_task_argument_is_None(self):
         """testing if a TypeError will be raised when the task argument is None
         """
         self.kwargs["task"] = None
-        self.assertRaises(TypeError, Booking, **self.kwargs)
+        self.assertRaises(TypeError, TimeLog, **self.kwargs)
 
     def test_task_attribute_is_None(self):
         """testing if a TypeError will be raised when the task attribute i
         None
         """
-        self.assertRaises(TypeError, setattr, self.test_booking, "task", None)
+        self.assertRaises(TypeError, setattr, self.test_time_log, "task", None)
 
     def test_task_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task argument is not
         a stalker.models.task.Task instance
         """
         self.kwargs["task"] = "this is a task"
-        self.assertRaises(TypeError, Booking, **self.kwargs)
+        self.assertRaises(TypeError, TimeLog, **self.kwargs)
 
     def test_task_attribute_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task attribute is not
         a stalker.models.task.Task instance
         """
-        self.assertRaises(TypeError, setattr, self.test_booking, "task",
+        self.assertRaises(TypeError, setattr, self.test_time_log, "task",
                           "this is a task")
 
     def test_task_attribute_is_working_properly(self):
@@ -140,13 +140,13 @@ class BookingTester(unittest.TestCase):
             status_list=self.test_task_status_list,
             resources=[self.test_resource],
         )
-        self.assertNotEqual(self.test_booking.task, new_task)
-        self.test_booking.task = new_task
-        self.assertEqual(self.test_booking.task, new_task)
+        self.assertNotEqual(self.test_time_log.task, new_task)
+        self.test_time_log.task = new_task
+        self.assertEqual(self.test_time_log.task, new_task)
 
     def test_task_argument_updates_backref(self):
         """testing if the Task given with the task argument is updated correctly
-        with the current Booking instance is listed in the bookings attribute of
+        with the current TimeLog instance is listed in the time_logs attribute of
         the Task
         """
         new_task = Task(
@@ -156,19 +156,19 @@ class BookingTester(unittest.TestCase):
             resources=[self.test_resource],
         )
 
-        # now create a new booking for the new task
+        # now create a new time_log for the new task
         self.kwargs["task"] = new_task
         self.kwargs["start"] = self.kwargs["start"] +\
                                     self.kwargs["duration"] +\
                                     datetime.timedelta(120)
-        new_booking = Booking(**self.kwargs)
+        new_time_log = TimeLog(**self.kwargs)
 
-        # now check if the new_booking is in task.bookings
-        self.assertIn(new_booking, new_task.bookings)
+        # now check if the new_time_log is in task.time_logs
+        self.assertIn(new_time_log, new_task.time_logs)
 
     def test_task_attribute_updates_backref(self):
         """testing if the Task given with the task attribute is updated
-        correctly with the current Booking instance is listed in the bookings
+        correctly with the current TimeLog instance is listed in the time_logs
         attribute of the Task
         """
         new_task = Task(
@@ -178,28 +178,28 @@ class BookingTester(unittest.TestCase):
             resources=[self.test_resource],
         )
         
-        self.test_booking.task = new_task
-        self.assertIn(self.test_booking, new_task.bookings)
+        self.test_time_log.task = new_task
+        self.assertIn(self.test_time_log, new_task.time_logs)
     
     def test_resource_argument_is_skipped(self):
         """testing if a TypeError will be raised when the resource argument is
         skipped
         """
         self.kwargs.pop("resource")
-        self.assertRaises(TypeError, Booking, **self.kwargs)
+        self.assertRaises(TypeError, TimeLog, **self.kwargs)
     
     def test_resource_argument_is_None(self):
         """testing if a TypeError will be raised when the resource argument is
         None
         """
         self.kwargs["resource"] = None
-        self.assertRaises(TypeError, Booking, **self.kwargs)
+        self.assertRaises(TypeError, TimeLog, **self.kwargs)
 
     def test_resource_attribute_is_None(self):
         """testing if a TypeError will be raised when the resource attribute is
         set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_booking, "resource",
+        self.assertRaises(TypeError, setattr, self.test_time_log, "resource",
                           None)
 
     def test_resource_argument_is_not_a_User_instance(self):
@@ -207,13 +207,13 @@ class BookingTester(unittest.TestCase):
         not a stalker.models.user.User instance
         """
         self.kwargs["resource"] = "This is a resource"
-        self.assertRaises(TypeError, Booking, **self.kwargs)
+        self.assertRaises(TypeError, TimeLog, **self.kwargs)
 
     def test_resource_attribute_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the resource attribute is
         set to a value other than a stalker.models.user.User instance
         """
-        self.assertRaises(TypeError, setattr, self.test_booking, "resource",
+        self.assertRaises(TypeError, setattr, self.test_time_log, "resource",
                           "this is a resource")
 
     def test_resource_attribute_is_working_properly(self):
@@ -226,13 +226,13 @@ class BookingTester(unittest.TestCase):
             password="1234",
         )
 
-        self.assertNotEqual(self.test_booking.resource, new_resource)
-        self.test_booking.resource = new_resource
-        self.assertEqual(self.test_booking.resource, new_resource)
+        self.assertNotEqual(self.test_time_log.resource, new_resource)
+        self.test_time_log.resource = new_resource
+        self.assertEqual(self.test_time_log.resource, new_resource)
 
     def test_resource_argument_updates_backref(self):
         """testing if the User instance given with the resource argument is
-        updated with the current Booking is listed in the bookings attribute of
+        updated with the current TimeLog is listed in the time_logs attribute of
         the User instance
         """
         new_resource = User(
@@ -243,13 +243,13 @@ class BookingTester(unittest.TestCase):
         )
 
         self.kwargs["resource"] = new_resource
-        new_booking = Booking(**self.kwargs)
+        new_time_log = TimeLog(**self.kwargs)
 
-        self.assertEqual(new_booking.resource, new_resource)
+        self.assertEqual(new_time_log.resource, new_resource)
 
     def test_resource_attribute_updates_backref(self):
         """testing if the User instance given with the resource attribute is
-        updated with the current Booking is listed in the bookings attribute of
+        updated with the current TimeLog is listed in the time_logs attribute of
         the User instance
         """
         new_resource = User(
@@ -259,155 +259,155 @@ class BookingTester(unittest.TestCase):
             password="1234",
         )
 
-        self.assertNotEqual(self.test_booking.resource, new_resource)
-        self.test_booking.resource = new_resource
-        self.assertEqual(self.test_booking.resource, new_resource)
+        self.assertNotEqual(self.test_time_log.resource, new_resource)
+        self.test_time_log.resource = new_resource
+        self.assertEqual(self.test_time_log.resource, new_resource)
 
     def test_ScheduleMixin_initialization(self):
         """testing if the ScheduleMixin part is initialized correctly
         """
         # it should have schedule attributes
-        self.assertEqual(self.test_booking.start,
+        self.assertEqual(self.test_time_log.start,
                          self.kwargs["start"])
-        self.assertEqual(self.test_booking.duration, self.kwargs["duration"])
+        self.assertEqual(self.test_time_log.duration, self.kwargs["duration"])
 
-        self.test_booking.start = datetime.datetime(2013, 3, 22, 4, 0)
-        self.test_booking.end = self.test_booking.start +\
+        self.test_time_log.start = datetime.datetime(2013, 3, 22, 4, 0)
+        self.test_time_log.end = self.test_time_log.start +\
                                      datetime.timedelta(10)
-        self.assertEqual(self.test_booking.duration, datetime.timedelta(10))
+        self.assertEqual(self.test_time_log.duration, datetime.timedelta(10))
 
     def test_OverbookedWarning_1(self):
-        """testing if a OverBookingWarning will be raised when the resource 
+        """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
         #####
         #####
         """
-        # booking1
-        self.kwargs["name"] = "booking1"
+        # time_log1
+        self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0),
         self.kwargs["duration"] = datetime.timedelta(10)
         
-        booking1 = Booking(**self.kwargs)
+        time_log1 = TimeLog(**self.kwargs)
         
-        # booking2
-        self.kwargs["name"] = "booking2"
+        # time_log2
+        self.kwargs["name"] = "time_log2"
         import warnings
         warnings.resetwarnings()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            new_booking = Booking(**self.kwargs)
+            new_time_log = TimeLog(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, OverBookedWarning)
             )
 
     def test_OverbookedWarning_2(self):
-        """testing if a OverBookingWarning will be raised when the resource 
+        """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
         #######
         #####
         """
-        # booking1
-        self.kwargs["name"] = "booking1"
+        # time_log1
+        self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0),
         self.kwargs["duration"] = datetime.timedelta(10)
 
-        booking1 = Booking(**self.kwargs)
+        time_log1 = TimeLog(**self.kwargs)
 
-        # booking2
-        self.kwargs["name"] = "booking2"
+        # time_log2
+        self.kwargs["name"] = "time_log2"
         self.kwargs["duration"] = datetime.timedelta(8)
         
         import warnings
         warnings.resetwarnings()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            new_booking = Booking(**self.kwargs)
+            new_time_log = TimeLog(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, OverBookedWarning)
             )
     
     def test_OverbookedWarning_3(self):
-        """testing if a OverBookingWarning will be raised when the resource 
+        """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
         #####
         #######
         """
-        # booking1
-        self.kwargs["name"] = "booking1"
+        # time_log1
+        self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0),
         self.kwargs["duration"] = datetime.timedelta(8)
 
-        booking1 = Booking(**self.kwargs)
+        time_log1 = TimeLog(**self.kwargs)
 
-        # booking2        
-        self.kwargs["name"] = "booking2"
+        # time_log2        
+        self.kwargs["name"] = "time_log2"
         self.kwargs["duration"] = datetime.timedelta(10)
         
         import warnings
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            new_booking = Booking(**self.kwargs)
+            new_time_log = TimeLog(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, OverBookedWarning)
             )
 
     def test_OverbookedWarning_4(self):
-        """testing if a OverBookingWarning will be raised when the resource 
+        """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:        
         #######
           #####
         """
-        # booking1
-        self.kwargs["name"] = "booking1"
+        # time_log1
+        self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
                                     datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
         
-        booking1 = Booking(**self.kwargs)
+        time_log1 = TimeLog(**self.kwargs)
         
-        # booking2
-        self.kwargs["name"] = "booking2"
+        # time_log2
+        self.kwargs["name"] = "time_log2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(10)
         
         import warnings
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            new_booking = Booking(**self.kwargs)
+            new_time_log = TimeLog(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, OverBookedWarning)
             )
 
     def test_OverbookedWarning_5(self):
-        """testing if a OverBookingWarning will be raised when the resource 
+        """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
           #####
         #######
         """
-        # booking1
-        self.kwargs["name"] = "booking1"
+        # time_log1
+        self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(10)
         
-        booking1 = Booking(**self.kwargs)
+        time_log1 = TimeLog(**self.kwargs)
         
-        # booking2
-        self.kwargs["name"] = "booking2"
+        # time_log2
+        self.kwargs["name"] = "time_log2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
                                     datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
@@ -415,29 +415,29 @@ class BookingTester(unittest.TestCase):
         import warnings
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            new_booking = Booking(**self.kwargs)
+            new_time_log = TimeLog(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, OverBookedWarning)
             )
 
     def test_OverbookedWarning_6(self):
-        """testing if a OverBookingWarning will be raised when the resource 
+        """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
           #######
         #######
         """
-        # booking1
-        self.kwargs["name"] = "booking1"
+        # time_log1
+        self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(15)
         
-        booking1 = Booking(**self.kwargs)
+        time_log1 = TimeLog(**self.kwargs)
         
-        # booking2
-        self.kwargs["name"] = "booking2"
+        # time_log2
+        self.kwargs["name"] = "time_log2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
                                     datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
@@ -445,84 +445,84 @@ class BookingTester(unittest.TestCase):
         import warnings
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            new_booking = Booking(**self.kwargs)
+            new_time_log = TimeLog(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, OverBookedWarning)
             ) 
     
     def test_OverbookedWarning_7(self):
-        """testing if a OverBookingWarning will be raised when the resource 
+        """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
         #######
           #######
         """
-        # booking1
-        self.kwargs["name"] = "booking1"
+        # time_log1
+        self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
                                     datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
         
-        booking1 = Booking(**self.kwargs)
+        time_log1 = TimeLog(**self.kwargs)
         
-        # booking2        
-        self.kwargs["name"] = "booking2"
+        # time_log2        
+        self.kwargs["name"] = "time_log2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(15)
         
         import warnings
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            new_booking = Booking(**self.kwargs)
+            new_time_log = TimeLog(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, OverBookedWarning)
             )
 
     def test_OverbookedWarning_8(self):
-        """testing if no OverBookingWarning will be raised when the resource 
+        """testing if no OverTimeLogWarning will be raised when the resource 
         is not already booked for the given time period.
         
         Simple case diagram:
         #######
                  #######
         """
-        # booking1
-        self.kwargs["name"] = "booking1"
+        # time_log1
+        self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(5)
 
-        booking1 = Booking(**self.kwargs)
+        time_log1 = TimeLog(**self.kwargs)
 
-        # booking2
-        self.kwargs["name"] = "booking2"
+        # time_log2
+        self.kwargs["name"] = "time_log2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) +\
                                     datetime.timedelta(20)
         # no warning
-        booking2 = Booking(**self.kwargs)
+        time_log2 = TimeLog(**self.kwargs)
 
     def test_OverbookedWarning_9(self):
-        """testing if no OverBookingWarning will be raised when the resource 
+        """testing if no OverTimeLogWarning will be raised when the resource 
         is not already booked for the given time period.
         
         Simple case diagram:
                  #######
         #######
         """
-        # booking1
-        self.kwargs["name"] = "booking1"
+        # time_log1
+        self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) +\
                                     datetime.timedelta(20)
         self.kwargs["duration"] = datetime.timedelta(5)
 
-        booking1 = Booking(**self.kwargs)
+        time_log1 = TimeLog(**self.kwargs)
 
-        # booking2
-        self.kwargs["name"] = "booking2"
+        # time_log2
+        self.kwargs["name"] = "time_log2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
 
         # no warning
-        booking2 = Booking(**self.kwargs)
+        time_log2 = TimeLog(**self.kwargs)

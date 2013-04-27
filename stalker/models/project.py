@@ -63,7 +63,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     :attr:`~stalker.models.project.Project.to_tjp` attribute generates a tjp
     compliant string which includes the project definition, the tasks of the
     project, the resources in the project including the vacation definitions
-    and all the bookings recorded for the project.
+    and all the time logs recorded for the project.
     
     For custom attributes or directives that needs to be passed to TaskJuggler
     you can use the :attr:`~stalker.models.project.Project.custom_tjp`

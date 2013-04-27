@@ -57,7 +57,7 @@ from stalker.models.status import Status, StatusList
 from stalker.models.structure import Structure
 from stalker.models.studio import Studio, WorkingHours
 from stalker.models.tag import Tag
-from stalker.models.task import Booking, Task
+from stalker.models.task import TimeLog, Task
 from stalker.models.template import FilenameTemplate
 from stalker.models.ticket import Ticket, TicketLog
 from stalker.models.type import Type, EntityType
@@ -231,14 +231,14 @@ def main(global_config, **settings):
     config.add_route('auto_schedule_tasks', 'auto_schedule_tasks')
     
     # *************************************************************************
-    # Booking
-    config.add_route('create_booking_dialog', 'dialog/create/booking/{task_id}')
-    config.add_route('update_booking_dialog', 'dialog/update/booking/{booking_id}')
+    # TimeLog
+    config.add_route('create_time_log_dialog', 'dialog/create/time_log/{task_id}')
+    config.add_route('update_time_log_dialog', 'dialog/update/time_log/{time_log_id}')
     
-    config.add_route('create_booking', 'create/booking/{task_id}')
+    config.add_route('create_time_log', 'create/time_log/{task_id}')
     
-    config.add_route('get_bookings', 'get/bookings/{task_id}') # returns json
-    config.add_route('list_bookings', 'list/bookings/{task_id}')      # returns response
+    config.add_route('get_time_logs', 'get/time_logs/{task_id}') # returns json
+    config.add_route('list_time_logs', 'list/time_logs/{task_id}')      # returns response
     
     # *************************************************************************
     # Department

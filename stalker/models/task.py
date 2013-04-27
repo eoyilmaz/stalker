@@ -47,59 +47,59 @@ CONSTRAINT_END = 2
 CONSTRAINT_BOTH = 3
 
 
-class Booking(Entity, ScheduleMixin):
+class TimeLog(Entity, ScheduleMixin):
     """Holds information about the uninterrupted time spend on a specific
     :class:`~stalker.models.task.Task` by a specific
     :class:`~stalker.models.auth.User`.
     
-    It is so important to note that the booking reports the uninterrupted time
+    It is so important to note that the TimeLog reports the uninterrupted time
     that is spent for a Task. Thus it doesn't care about the working time
     attributes like daily working hours, weekly working days or anything else.
     Again it is the uninterrupted time which is spent for a task.
     
-    Entering a booking for 2 days will book the resource for 48 hours not,
+    Entering a time log for 2 days will book the resource for 48 hours not,
     2 * daily working hours.
     
-    Bookings are created per resource. It means, you need to record all the 
+    TimeLogs are created per resource. It means, you need to record all the 
     works separately for each resource. So there is only one resource in a 
-    Booking instance.
+    TimeLog instance.
     
-    A :class:`~stalker.models.task.Booking` instance needs to be initialized
+    A :class:`~stalker.models.task.TimeLog` instance needs to be initialized
     with a :class:`~stalker.models.task.Task` and a
     :class:`~stalker.models.auth.User` instances.
     
-    Adding overlapping booking for a :class:`~stalker.models.auth.User` will
+    Adding overlapping time log for a :class:`~stalker.models.auth.User` will
     raise a :class:`~stalker.errors.OverBookedWarning`.
     
     :param task: The :class:`~stalker.models.task.Task` instance that this
-      booking belongs to.
+      time log belongs to.
     
     :param resource: The :class:`~stalker.models.auth.User` instance that this
-      booking is created for.
+      time log is created for.
     """
     __auto_name__ = True
-    __tablename__ = "Bookings"
-    __mapper_args__ = {"polymorphic_identity": "Booking"}
-    booking_id = Column("id", Integer, ForeignKey("Entities.id"),
+    __tablename__ = "TimeLogs"
+    __mapper_args__ = {"polymorphic_identity": "TimeLog"}
+    time_log_id = Column("id", Integer, ForeignKey("Entities.id"),
                         primary_key=True)
     task_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
     task = relationship(
         "Task",
-        primaryjoin="Bookings.c.task_id==Tasks.c.id",
+        primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
         uselist=False,
-        back_populates="bookings",
+        back_populates="time_logs",
         doc="""The :class:`~stalker.models.task.Task` instance that this 
-        booking is created for"""
+        time log is created for"""
     )
     
     resource_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     resource = relationship(
         "User",
-        primaryjoin="Bookings.c.resource_id==Users.c.id",
+        primaryjoin="TimeLogs.c.resource_id==Users.c.id",
         uselist=False,
-        back_populates="bookings",
+        back_populates="time_logs",
         doc="""The :class:`~stalker.models.auth.User` instance that this 
-        booking is created for"""
+        time_log is created for"""
     )
     
     def __init__(
@@ -110,7 +110,7 @@ class Booking(Entity, ScheduleMixin):
             end=None,
             duration=None,
             **kwargs):
-        super(Booking, self).__init__(**kwargs)
+        super(TimeLog, self).__init__(**kwargs)
         kwargs['start'] = start
         kwargs['end'] = end
         kwargs['duration'] = duration
@@ -146,21 +146,21 @@ class Booking(Entity, ScheduleMixin):
                              resource.__class__.__name__))
         
         # check for overbooking
-        logger.debug('resource.bookings: %s' % resource.bookings)
-        for booking in resource.bookings:
-            logger.debug('booking       : %s' % booking)
-            logger.debug('booking.start : %s' % booking.start)
-            logger.debug('booking.end   : %s' % booking.end)
-            logger.debug('self.start    : %s' % self.start)
-            logger.debug('self.end      : %s' % self.end)
+        logger.debug('resource.time_logs: %s' % resource.time_logs)
+        for time_log in resource.time_logs:
+            logger.debug('time_log       : %s' % time_log)
+            logger.debug('time_log.start : %s' % time_log.start)
+            logger.debug('time_log.end   : %s' % time_log.end)
+            logger.debug('self.start     : %s' % self.start)
+            logger.debug('self.end       : %s' % self.end)
             
-            if booking.start == self.start or\
-               booking.end == self.end or \
-               booking.start < self.end < booking.end or \
-               booking.start < self.start < booking.end:
+            if time_log.start == self.start or\
+               time_log.end == self.end or \
+               time_log.start < self.end < time_log.end or \
+               time_log.start < self.start < time_log.end:
                 warnings.warn(
                     "The resource %s is overly booked with %s and %s" %
-                    (resource, self, booking),
+                    (resource, self, time_log),
                     OverBookedWarning
                 )
         return resource
@@ -244,7 +244,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     Stalker uses TaskJuggler for task scheduling. After defining all the tasks,
     Stalker will convert them to a single tjp file along with the recorded
-    :class:`~stalker.models.task.Booking`\ s and let TaskJuggler to solve the
+    :class:`~stalker.models.task.TimeLog`\ s and let TaskJuggler to solve the
     scheduling problem.
     
     During the auto scheduling (with TaskJuggler), the calculation of task
@@ -426,11 +426,11 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     priority = Column(Integer)
     
-    bookings = relationship(
-        "Booking",
-        primaryjoin="Bookings.c.task_id==Tasks.c.id",
+    time_logs = relationship(
+        "TimeLog",
+        primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
         back_populates="task",
-        doc="""A list of :class:`~stalker.models.task.Booking` instances showing who and when spent how much effort on this task.
+        doc="""A list of :class:`~stalker.models.task.TimeLog` instances showing who and when spent how much effort on this task.
         """
     )
 
@@ -516,7 +516,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         self.parent = parent
         self._project =  project
         
-        self.bookings = []
+        self.time_logs = []
         self.versions = []
         
         self.is_milestone = is_milestone
@@ -569,17 +569,17 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
         return super(Task, self).__eq__(other) and isinstance(other, Task)
 
-    @validates("bookings")
-    def _validate_bookings(self, key, booking):
-        """validates the given bookings value
+    @validates("time_logs")
+    def _validate_time_logs(self, key, time_log):
+        """validates the given time_logs value
         """
-        if not isinstance(booking, Booking):
+        if not isinstance(time_log, TimeLog):
             raise TypeError(
-                "all the elements in the %s.bookings should be an instances "
-                "of stalker.models.task.Booking not %s instance" %
-                (self.__class__.__name__, booking.__class__.__name__))
+                "all the elements in the %s.time_logs should be an instances "
+                "of stalker.models.task.TimeLog not %s instance" %
+                (self.__class__.__name__, time_log.__class__.__name__))
         
-        return booking
+        return time_log
 
     @validates("is_complete")
     def _validate_is_complete(self, key, complete_in):
@@ -1029,13 +1029,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     @property
     def total_booked_seconds(self):
         """The total effort spent for this Task. It is the sum of all the
-        Bookings recorded for this task as seconds.
+        TimeLogs recorded for this task as seconds.
         
         :returns int: An integer showing the total seconds spent.
         """
         seconds = 0
-        for booking in self.bookings:
-            seconds += booking.duration.total_seconds()
+        for time_log in self.time_logs:
+            seconds += time_log.duration.total_seconds()
         return seconds
     
     @property
@@ -1077,7 +1077,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """returns the remaining amount of efforts, length or duration left
         in this Task as seconds.
         """
-        # for effort based tasks use the bookings
+        # for effort based tasks use the time_logs
         return self.schedule_seconds - self.total_booked_seconds
     
     @property

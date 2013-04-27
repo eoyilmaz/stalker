@@ -17,8 +17,8 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
-<div id='view_bookings'>
-  <div id='bookings_data_grid'></div>
+<div id='view_time_logs'>
+  <div id='time_logs_data_grid'></div>
 </div>
 
 <script type='text/javascript'>
@@ -32,36 +32,36 @@
 
             ready(function(){
 
-              var bookings_DataGrid = new DataGrid({
-                id: 'bookings_data_grid',
+              var time_logs_DataGrid = new DataGrid({
+                id: 'time_logs_data_grid',
                 width: '100%',
                 autoHeight: true,
                 singleClickEdit: true,
                 escapeHTMLInData: false,
                 rowSelector: '20px'
-              }, 'bookings_data_grid');
+              }, 'time_logs_data_grid');
 
-              {#              var append_booking_button = dialogCaller({#}
+              {#              var append_time_log_button = dialogCaller({#}
               {#                label: 'Append User',#}
-              {#                dialog_id: 'append_booking_dialog',#}
-              {#                content_creator: append_booking_dialog_creator,#}
-              {#                attach_to: 'view_bookings_append_booking_button',#}
-              {#                related_field_updater: bookings_DataGrid_updater,#}
+              {#                dialog_id: 'append_time_log_dialog',#}
+              {#                content_creator: append_time_log_dialog_creator,#}
+              {#                attach_to: 'view_time_logs_append_time_log_button',#}
+              {#                related_field_updater: time_logs_DataGrid_updater,#}
               {#                data_id: '{{ entity.id }}'#}
               {#              });#}
 
-              bookings_DataGrid.startup();
-              {#              append_booking_button.startup();#}
+              time_logs_DataGrid.startup();
+              {#              append_time_log_button.startup();#}
 
 
 
-              function bookings_DataGrid_updater(){
+              function time_logs_DataGrid_updater(){
 
-                var booking_memory = new JsonRest({
-                  target: '/get/bookings_byEntity/{{ entity.id }}'
+                var time_log_memory = new JsonRest({
+                  target: '/get/time_logs_byEntity/{{ entity.id }}'
                 });
 
-                booking_memory.query().then(function(data){
+                time_log_memory.query().then(function(data){
 
                   var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
 
@@ -70,8 +70,8 @@
                     {name: 'Name',         field: 'name',    width: '100px'}
                   ];
 
-                  bookings_DataGrid.set('store', my_store );
-                  bookings_DataGrid.set('structure', structure );
+                  time_logs_DataGrid.set('store', my_store );
+                  time_logs_DataGrid.set('structure', structure );
 
                   gotoLink();
 
@@ -81,7 +81,7 @@
 
 
 
-              bookings_DataGrid_updater();
+              time_logs_DataGrid_updater();
             });
           });
 </script>

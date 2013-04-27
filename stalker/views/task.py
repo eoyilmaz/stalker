@@ -26,7 +26,6 @@ import logging
 from pyramid.view import view_config
 from pyramid.security import authenticated_userid
 from pyramid.httpexceptions import HTTPServerError, HTTPOk
-from sqlalchemy.orm.exc import DetachedInstanceError
 import transaction
 from sqlalchemy.exc import IntegrityError
 

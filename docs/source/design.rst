@@ -57,12 +57,12 @@ Lets look at how a simple studio works and try to create our asset management
 concepts around it.
 
 An animation/vfx studios duty is to complete a
-:class:`~stalker.models.project.Project`. A project, generally is about to create
-a :class:`~stalker.models.sequence.Sequence` of :class:`~stalker.models.shot.Shot`\
-s which are a series of images those at the end converts to a movie. So a
-sequence in general contains Shots. Shots can contain
-:class:`~stalker.models.asset.Asset`\ s. So basically to complete a project the
-studio should complete the sequences thus the shots and assets.
+:class:`~stalker.models.project.Project`. A project, generally is about to
+create a :class:`~stalker.models.sequence.Sequence` of
+:class:`~stalker.models.shot.Shot`\ s which are a series of images those at the
+end converts to a movie. So a sequence in general contains Shots. Shots can
+contain :class:`~stalker.models.asset.Asset`\ s. So basically to complete a
+project the studio should complete the sequences thus the shots and assets.
 
 Furthermore all the Projects, Sequences, Shots or Assets are splitted in to
 different :class:`~stalker.models.task.Task`\ s those need to be done
@@ -70,7 +70,7 @@ sequentially or in parallel to complete that project.
 
 A Task relates to a work, a work is a quantity of time spend or going to be
 spend for that specific task. The time spend on the course of completion of a
-Task can be recorded with :class:`~stalker.models.task.Booking`\ s. Bookings
+Task can be recorded with :class:`~stalker.models.task.TimeLog`\ s. TimeLogs
 shows the time of an artist is booked for a certain Task. It can be showing a
 past work or a future work. So it holds information about how much time has
 been spent to complete a Task.
@@ -91,7 +91,7 @@ the system to have a flexible structure.
 
 There are two levels of expansion, the first level is the simplest one, by just
 adding different statuses, different types or these kind of things in
-which Stalker's current design is ready to. This is expalined in `How To
+which Stalker's current design is ready to. This is explained in `How To
 Customize Stalker`_
 
 The second level of expansion is achieved by expanding the SOM. Expanding the

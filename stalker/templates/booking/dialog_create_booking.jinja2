@@ -18,61 +18,61 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-  <form id='create_booking_form'>
+  <form id='create_time_log_form'>
     <table style='width: 100%'>
 
         {# TASK #}
       <tr>
         <td class='label_column'>
-          <label for='booking_task'>Task</label>
+          <label for='time_log_task'>Task</label>
         </td>
         <td class='input_column'>
-          <input id='booking_task'>
+          <input id='time_log_task'>
         </td>
       </tr>
 
         {# RESOURCE #}
       <tr>
         <td class='label_column'>
-          <label for='booking_resource'>Resource</label>
+          <label for='time_log_resource'>Resource</label>
         </td>
         <td class='input_column'>
-          <input id='booking_resource'>
+          <input id='time_log_resource'>
         </td>
       </tr>
 
         {# START #}
       <tr>
         <td class='label_column'>
-          <label for='booking_start_date'>Start Date</label>
+          <label for='time_log_start_date'>Start Date</label>
         </td>
         <td class='input_column'>
-          <input id='booking_start_date'>
-          <input id='booking_start_time'>
+          <input id='time_log_start_date'>
+          <input id='time_log_start_time'>
         </td>
       </tr>
 
         {# END #}
       <tr>
         <td class='label_column'>
-          <label for='booking_end_date'>End Date</label>
+          <label for='time_log_end_date'>End Date</label>
         </td>
         <td class='input_column'>
-          <input id='booking_end_date'>
-          <input id='booking_end_time'>
+          <input id='time_log_end_date'>
+          <input id='time_log_end_time'>
         </td>
       </tr>
 
         {# HOURS TO COMPLETE#}
       <tr>
         <td class='label_column'>
-          <label for='booking_hours_to_complete'>Hours To Complete</label>
+          <label for='time_log_hours_to_complete'>Hours To Complete</label>
         </td>
         <td class='input_column'>
-          <input id='booking_hours_to_complete'>
+          <input id='time_log_hours_to_complete'>
           <div style='float: left; margin-left: 3px; margin-top: 2px'>
-            <input id='booking_is_complete' type='checkbox'>
-            <label for='booking_is_complete'>is complete?</label>
+            <input id='time_log_is_complete' type='checkbox'>
+            <label for='time_log_is_complete'>is complete?</label>
           </div>
         </td>
       </tr>
@@ -80,10 +80,10 @@
         {# NOTES #}
       <tr>
         <td class='label_column'>
-          <label for='booking_notes'>Notes</label>
+          <label for='time_log_notes'>Notes</label>
         </td>
         <td class='input_column'>
-          <input id='booking_notes'>
+          <input id='time_log_notes'>
         </td>
       </tr>
 
@@ -92,8 +92,8 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='booking_ok_button'>Ok</button>
-  <button id='booking_cancel_button'>Cancel</button>
+  <button id='time_log_ok_button'>Ok</button>
+  <button id='time_log_cancel_button'>Cancel</button>
 </div>
 
 <script type="text/javascript">
@@ -150,9 +150,9 @@
 
       // ********************************************************************
       // Form
-      var create_booking_form = new Form({
-        id: 'create_booking_form'
-      }, 'create_booking_form');
+      var create_time_log_form = new Form({
+        id: 'create_time_log_form'
+      }, 'create_time_log_form');
 
 
 
@@ -164,7 +164,7 @@
         value: '{{ task.name }}',
         disabled: true,
         required: true
-      }, 'booking_task');
+      }, 'time_log_task');
       task_textBox.startup();
 
       // ********************************************************************
@@ -186,7 +186,7 @@
         store: resource_memory,
         value: '{{ logged_in_user.id }}',
         required: true
-      }, 'booking_resource');
+      }, 'time_log_resource');
       resource_filteringSelect.startup();
 
       // if there is only 1 resource automatically select it
@@ -214,7 +214,7 @@
             );
           }
         }
-      }, 'booking_start_date');
+      }, 'time_log_start_date');
       start_dateTextBox.startup();
 
       // Time
@@ -228,7 +228,7 @@
           visibleIncrement: 'T01:00:00',
           visibleRange: 'T01:00:00'
         }
-      }, 'booking_start_time');
+      }, 'time_log_start_time');
       start_time_timeTextBox.startup();
 
 
@@ -252,7 +252,7 @@
             );
           }
         }
-      }, 'booking_end_date');
+      }, 'time_log_end_date');
       end_dateTextBox.startup();
 
       // Time 
@@ -266,7 +266,7 @@
           visibleIncrement: 'T01:00:00',
           visibleRange: 'T01:00:00'
         }
-      }, 'booking_end_time');
+      }, 'time_log_end_time');
       end_time_timeTextBox.startup();
 
       // ********************************************************************
@@ -276,7 +276,7 @@
         value: 0,
         constraints: {min:0},
         style: 'width: 90px; float: left;'
-      }, 'booking_hours_to_complete');
+      }, 'time_log_hours_to_complete');
       hours_to_complete_numberTextBox.startup();
       
       // CheckBox
@@ -297,11 +297,11 @@
             hours_to_complete_numberTextBox.set('value', remaining_hours);
           }
         }
-      }, 'booking_is_complete');
+      }, 'time_log_is_complete');
 
 
       var calculate_remaining_hours = function(){
-        // total hours of bookings should have been given by Stalker
+        // total hours of time_logs should have been given by Stalker
         // calculate the remaining hours
 {#        var total_booked_seconds = {{ task.total_booked_seconds }};#}
 {#        var remaining_seconds = {{ task.remaining_seconds }};#}
@@ -321,7 +321,7 @@
       var notes = new SimpleTextarea({
         name: 'notes',
         style: 'width: 176px;'
-      }, 'booking_notes');
+      }, 'time_log_notes');
       notes.startup();
 
       // ********************************************************************
@@ -331,19 +331,19 @@
         type: 'button',
         onClick: function(){
           submitForm({
-            dialog: registry.byId('create_booking_dialog'),
-            form: create_booking_form,
+            dialog: registry.byId('create_time_log_dialog'),
+            form: create_time_log_form,
             additional_data: {
               start_date: stamp.toISOString(start_dateTextBox.value),
               end_date: stamp.toISOString(end_dateTextBox.value),
               start_time: stamp.toISOString(start_time_timeTextBox.value),
               end_time: stamp.toISOString(end_time_timeTextBox.value)
             },
-            url: '{{ request.route_url('create_booking', task_id=task.id) }}',
+            url: '{{ request.route_url('create_time_log', task_id=task.id) }}',
             method: 'POST'
           });
         }
-      }, 'booking_ok_button');
+      }, 'time_log_ok_button');
       ok_button.startup();
 
 
@@ -355,14 +355,14 @@
         label: 'Cancel',
         type: 'button',
         onClick: function(){
-          var dialog = create_booking_form.getParent()
+          var dialog = create_time_log_form.getParent()
           dialog.destroyRecursive();
         }
-      }, 'booking_cancel_button');
+      }, 'time_log_cancel_button');
       cancel_button.startup();
 
 
-      create_booking_form.startup();
+      create_time_log_form.startup();
     });
 
   });

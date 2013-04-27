@@ -49,6 +49,8 @@ Stalker Changes
 * The Shot, Asset, Sequence detail pages under the Project Overview now opens
   inside the related tab on the Project Page.
 
+* Booking class is renamed to TimeLog.
+
 0.2.0.a10
 ---------
 

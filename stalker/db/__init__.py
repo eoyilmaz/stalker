@@ -88,7 +88,7 @@ def __init_db__():
 
     # register all Actions available for all SOM classes
     class_names = [
-        'Asset', 'Booking', 'Department', 'Entity', 'FilenameTemplate',
+        'Asset', 'TimeLog', 'Department', 'Entity', 'FilenameTemplate',
         'Group', 'ImageFormat', 'Link', 'Message', 'Note', 'Permission',
         'Project', 'Repository', 'Scene', 'Sequence', 'Shot', 'SimpleEntity',
         'Status', 'StatusList', 'Structure', 'Studio', 'Tag', 'Task', 'Ticket',
