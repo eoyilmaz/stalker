@@ -96,7 +96,7 @@ GridEditor.prototype.refreshTaskRow = function(task) {
     row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
     
     var dep_string = '';
-    for (var i; i < task.getDepends().length ; i++){
+    for (var i = 0 ; i < task.getDepends().length ; i++){
         dep_string = '' + task.depends[i] + ', ';
     }
     row.find("[name=depends]").val(dep_string);

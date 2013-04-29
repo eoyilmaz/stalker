@@ -18,11 +18,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 from stalker import (Asset, Entity, Link, Project, Repository, Scene, Sequence,
                      Shot, Status, StatusList, Task, Type, ImageFormat)
 
-class ShotTester(unittest.TestCase):
+class ShotTester(unittest2.TestCase):
     """Tests the Shot class
     """
     

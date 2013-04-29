@@ -55,7 +55,7 @@ $.JST = {
   createFromTemplate: function(jsonData, template, transformToPrintable) {
     var templates = $.JST._templates;
 
-    var jsData=new Object();
+    var jsData = new Object();
     if (transformToPrintable){
       for (var prop in jsonData){
         var value = jsonData[prop];

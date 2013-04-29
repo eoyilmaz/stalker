@@ -31,7 +31,7 @@ class Message(Entity, StatusMixin):
     """The base of the messaging system in Stalker
     
     Messages are one of the ways to collaborate in Stalker. The model of the
-    messages is taken from the e-mail system. So it is pretty similiar to an
+    messages is taken from the e-mail system. So it is pretty similar to an
     e-mail message.
     
     :param from: the :class:`~stalker.models.user.User` object sending the

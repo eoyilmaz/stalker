@@ -102,7 +102,8 @@ def convert_to_jquery_gantt_task_format(tasks):
             'id': resource.id,
             'name': resource.name
         } for resource in User.query.all()],
-        'timing_resolution': timing_resolution.total_seconds() * 1000,
+        'timing_resolution': (timing_resolution.days * 86400 +
+                              timing_resolution.seconds) * 1000,
         'working_hours': working_hours,
         'daily_working_hours': dwh,
         'weekly_working_hours': wwh,

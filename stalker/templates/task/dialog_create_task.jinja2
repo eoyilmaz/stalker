@@ -319,7 +319,7 @@
             {% endif %}
           {% elif mode=='UPDATE' %}
             {% if task.parent %}
-              parent_widget.set('value', {{ task.parent.id }})
+              parent_widget.set('value', {{ task.parent.id }});
             {% endif %}
           {% endif %}
         });
@@ -650,7 +650,7 @@
         {% endif %}
         
         var status_memory = new JsonRest({
-          target: 'get/statuses_for/' + entity_type,
+          target: 'get/statuses_for/' + entity_type
         });
         
         // The Field
@@ -723,10 +723,10 @@
             
             {% if mode=='CREATE' %}
               dialog_id = 'create_task_dialog';
-              url = '{{ request.route_url('create_task')}}'
+              url = '{{ request.route_url('create_task')}}';
             {% elif mode=='UPDATE' %}
               dialog_id = 'update_task_dialog';
-              url = '{{ request.route_url('update_task', task_id=task.id) }}'
+              url = '{{ request.route_url('update_task', task_id=task.id) }}';
             {% endif %}
             
             submitForm({

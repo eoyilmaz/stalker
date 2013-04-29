@@ -19,10 +19,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import platform
-import unittest
+import unittest2
 from stalker import Repository, Tag
 
-class RepositoryTester(unittest.TestCase):
+class RepositoryTester(unittest2.TestCase):
     """tests the Repository class
     """
     
@@ -169,19 +169,19 @@ class RepositoryTester(unittest.TestCase):
         self.test_repo.osx_path = test_value
         self.assertEqual(self.test_repo.osx_path, expected_value)
     
-    @unittest.skipUnless(platform.system() == "Windows", "requires Windows")
+    @unittest2.skipUnless(platform.system() == "Windows", "requires Windows")
     def test_path_returns_properly_for_windows(self):
         """testing if path returns the correct value for the os
         """
         self.assertEqual(self.test_repo.path, self.test_repo.windows_path)
 
-    @unittest.skipUnless(platform.system() == "Linux", "requires Linux")
+    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
     def test_path_returns_properly_for_linux(self):
         """testing if path returns the correct value for the os
         """
         self.assertEqual(self.test_repo.path, self.test_repo.linux_path)
 
-    @unittest.skipUnless(platform.system() == "Darwin", "requires OSX")
+    @unittest2.skipUnless(platform.system() == "Darwin", "requires OSX")
     def test_path_returns_properly_for_osx(self):
         """testing if path returns the correct value for the os
         """

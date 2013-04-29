@@ -19,11 +19,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
-from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Date,
-                        Interval, DateTime, PickleType)
+from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Interval,
+                        DateTime, PickleType)
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import synonym, relationship, validates, descriptor_props
+from sqlalchemy.orm import synonym, relationship, validates
 
 from stalker import defaults
 
@@ -741,7 +741,10 @@ attribute value."""
         
         _`Stackoverflow` : http://stackoverflow.com/a/10854034/1431079
         """
-        ts = self.timing_resolution.total_seconds()
+        # to be compatible with python 2.6 use the following instead of
+        # total_seconds()
+        ts = self.timing_resolution.days * 86400 + \
+             self.timing_resolution.seconds
         return datetime.datetime.fromtimestamp(
             (int(dt.strftime('%s')) + ts * 0.5) // ts * ts
         )

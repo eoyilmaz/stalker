@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 import datetime
 
 from sqlalchemy import Column, Integer, ForeignKey
@@ -50,7 +50,7 @@ class DeclSchedMixB(SimpleEntity, ScheduleMixin):
         ScheduleMixin.__init__(self, **kwargs)
 
 
-class ScheduleMixinTester(unittest.TestCase):
+class ScheduleMixinTester(unittest2.TestCase):
     """tests ScheduleMixin setup
     """
 

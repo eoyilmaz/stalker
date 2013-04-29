@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 
-import unittest
+import unittest2
 import datetime
 import logging
 from stalker import db
@@ -33,7 +33,7 @@ from stalker import (Group, Department, Project, Repository,
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class UserTest(unittest.TestCase):
+class UserTest(unittest2.TestCase):
     """Tests the user class
     """
     

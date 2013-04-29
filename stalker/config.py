@@ -214,7 +214,7 @@ class Config(object):
         {{wh(workinghours, 'sun')}}""",
         
         tjp_studio_template = """project {{ studio.tjp_id }} "{{ studio.name }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
-            timingresolution {{ '%i'|format(studio.timing_resolution.total_seconds()//60|int) }}min
+            timingresolution {{ '%i'|format((studio.timing_resolution.days * 86400 + studio.timing_resolution.seconds)//60|int) }}min
             now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
             dailyworkinghours {{ studio.daily_working_hours }}
             weekstartsmonday

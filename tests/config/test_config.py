@@ -21,10 +21,10 @@
 import os
 import shutil
 import tempfile
-import unittest
+import unittest2
 import logging
 
-class ConfigTester(unittest.TestCase):
+class ConfigTester(unittest2.TestCase):
     """test the system configuration
     """
     

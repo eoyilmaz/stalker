@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.mixins import StatusMixin
@@ -48,7 +48,7 @@ class DeclStatMixB(SimpleEntity, StatusMixin):
         super(B, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
 
-class StatusMixinTester(unittest.TestCase):
+class StatusMixinTester(unittest2.TestCase):
     """tests StatusMixin
     """
 
@@ -105,7 +105,7 @@ class StatusMixinTester(unittest.TestCase):
             status_list=self.test_a_statusList
         )
 
-        self.assertIn(self.test_stat1, new_a_ins.status_list)
-        self.assertNotIn(self.test_stat2, new_a_ins.status_list)
-        self.assertIn(self.test_stat3, new_a_ins.status_list)
+        self.assertTrue(self.test_stat1 in new_a_ins.status_list)
+        self.assertFalse(self.test_stat2 in new_a_ins.status_list)
+        self.assertTrue(self.test_stat3 in new_a_ins.status_list)
     

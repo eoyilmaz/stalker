@@ -76,15 +76,15 @@ jQuery.fn.dateField = function(options) {
     theDiv.append(divShortcuts);
   }
 
-
-  $("body").append(theDiv);
+  var body = $("body");
+  body.append(theDiv);
   nearBestPosition(theOpener,theDiv);
   theDiv.bringToFront();
 
 
   //register for click outside. Delayed to avoid it run immediately
-  $("body").oneTime(100, "regclibodcal", function() {
-    $("body").bind("click.dateField", function() {
+  body.oneTime(100, "regclibodcal", function() {
+    body.bind("click.dateField", function() {
       $(this).unbind("click.dateField");
       theDiv.remove();
     });

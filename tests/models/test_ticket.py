@@ -4,7 +4,7 @@
 # License: http://www.opensource.org/licenses/BSD-2-Clause
 import tempfile
 
-import unittest
+import unittest2
 from stalker import db
 #import os
 from stalker.db.session import DBSession
@@ -25,7 +25,7 @@ import logging
 logger = logging.getLogger("stalker.models.ticket")
 logger.setLevel(log.logging_level)
 
-class TicketTester(unittest.TestCase):
+class TicketTester(unittest2.TestCase):
     """Tests the :class:`~stalker.models.ticket.Ticket` class
     """
     

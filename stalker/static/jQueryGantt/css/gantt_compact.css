@@ -213,22 +213,22 @@
 }
 
 .taskBox .layout .milestone{
-  top:0px;
-  position:absolute;
-  width:16px;
-  background: url(milestone.png) no-repeat;
-  height:16px;
-  display:none;
+  top: 0;
+  position: absolute;
+  width: 16px;
+  background: url(../images/milestone.png) no-repeat;
+  height: 16px;
+  display: none;
 }
 .taskBox .layout .milestone.end{
-  right:0;
+  right: 0;
 }
 .taskBox .layout .milestone.active{
-  display:block;
+  display: block;
 }
 
 .taskBox.hasChild .layout{
-  border-top:2px solid black;
+  border-top: 2px solid black;
 }
 
 .taskBox .taskProgress{
@@ -243,7 +243,7 @@
 }
 
 .taskBox .layout.extDep{
-  background-image:url(hasExternalDeps.png);
+  background-image:url(../images/hasExternalDeps.png);
 }
 
 

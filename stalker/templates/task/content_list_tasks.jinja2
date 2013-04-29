@@ -125,7 +125,7 @@
 
 {# GANTT CHART #}
 <div id="workSpace"
-     style="padding:0px;
+     style="padding:0;
       overflow-y:hidden;
       overflow-x:hidden;
       border:1px solid #e5e5e5;
@@ -466,9 +466,10 @@
         
         //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
         function getFile() {
-          $("#gimBaPrj").val(JSON.stringify(ge.saveProject()));
+          var gimBaPrj = $("#gimBaPrj");
+          gimBaPrj.val(JSON.stringify(ge.saveProject()));
           $("#gimmeBack").submit();
-          $("#gimBaPrj").val("");
+          gimBaPrj.val("");
         }
         
 {#        {% if entity.entity_type != 'User' %}#}

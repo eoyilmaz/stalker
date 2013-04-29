@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 
-<div style="text-align: center"><h4><b>{{ project.name }} ({{ project.code }})</b></h4></div>
+<div style="text-align: center"><h4><strong>{{ project.name }} ({{ project.code }})</strong></h4></div>
 
 <div id='project_details'>
     <div style="background-color: #39b54a" class="page_title"></div>
@@ -35,7 +35,7 @@
 {#      <h5 style='margin: 0px; text-align: right'>({{ project.code }})</h5>#}
       <table>
         <tr>
-          <td style='text-align: right'><b>Lead</b></td>
+          <td style='text-align: right'><strong>Lead</strong></td>
           <td>&nbsp;</td>
           <td>
             <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ project.lead.id }}">{{ project.lead.name }}</a>
@@ -43,27 +43,27 @@
           </td>
         </tr>
         <tr>
-          <td style='text-align: right'><b>Image Format</b></td>
+          <td style='text-align: right'><strong>Image Format</strong></td>
           <td>&nbsp;</td>
           <td>{{ project.image_format.name }} ({{ project.image_format.width }} x {{ project.image_format.height }} x {{ project.image_format.pixel_aspect }})</td>
         </tr>
         <tr>
-          <td style='text-align: right'><b>Status</b></td>
+          <td style='text-align: right'><strong>Status</strong></td>
           <td>&nbsp;</td>
           <td>{{ project.status.name }} / {{ project.status.code }}</td>
         </tr>
         <tr>
-          <td style='text-align: right'><b>Repository</b></td>
+          <td style='text-align: right'><strong>Repository</strong></td>
           <td>&nbsp;</td>
           <td>{{ project.repository.name }}</td>
         </tr>
         <tr>
-          <td style='text-align: right'><b>Start Date</b></td>
+          <td style='text-align: right'><strong>Start Date</strong></td>
           <td>&nbsp;</td>
           <td>{{ project.start }}</td>
         </tr>
         <tr>
-          <td style='text-align: right'><b>End Date</b></td>
+          <td style='text-align: right'><strong>End Date</strong></td>
           <td>&nbsp;</td>
           <td>{{ project.end }}</td>
         </tr>

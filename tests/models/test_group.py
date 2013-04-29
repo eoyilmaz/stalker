@@ -18,11 +18,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 from stalker.models.auth import User, Group
 from stalker.db.session import DBSession, ZopeTransactionExtension
 
-class GroupTester(unittest.TestCase):
+class GroupTester(unittest2.TestCase):
     """tests the stalker.models.auth.Group class
     """
     

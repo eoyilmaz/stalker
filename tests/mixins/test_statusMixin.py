@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy import orm
 from stalker import db
@@ -37,7 +37,7 @@ class StatMixClass(SimpleEntity, StatusMixin):
         super(StatMixClass, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
 
-class StatusMixinTester(unittest.TestCase):
+class StatusMixinTester(unittest2.TestCase):
     """tests the StatusMixin class
     """
     
@@ -369,7 +369,7 @@ class StatusListNoAutoAddClass(SimpleEntity, StatusMixin):
         """
         super(StatusListAutoAddClass, self).__init_on_load__()
 
-class StatusMixinDBTester(unittest.TestCase):
+class StatusMixinDBTester(unittest2.TestCase):
     """tests the StatusMixin with a DB is already setup
     """
     

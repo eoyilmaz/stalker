@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.db.session import DBSession
@@ -56,7 +56,7 @@ class DeclRefMixB(SimpleEntity, ReferenceMixin):
         ReferenceMixin.__init__(self, **kwargs)
 
 
-class ReferenceMixinTester(unittest.TestCase):
+class ReferenceMixinTester(unittest2.TestCase):
     """Tests ReferenceMixin
     """
 
@@ -73,8 +73,8 @@ class ReferenceMixinTester(unittest.TestCase):
         a_ins.references.append(new_link1)
         b_ins.references.append(new_link2)
 
-        self.assertIn(new_link1, a_ins.references)
-        self.assertIn(new_link2, b_ins.references)
+        self.assertTrue(new_link1 in a_ins.references)
+        self.assertTrue(new_link2 in b_ins.references)
 
     def tearDown(self):
         """clean up the test

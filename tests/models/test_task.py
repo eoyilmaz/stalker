@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
-import unittest
+import unittest2
 from stalker.exceptions import CircularDependencyError
 
 from stalker import config
@@ -37,7 +37,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class TaskTester(unittest.TestCase):
+class TaskTester(unittest2.TestCase):
     """Tests the stalker.models.task.Task class
     """
     

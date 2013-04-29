@@ -21,7 +21,6 @@ blockquote, q {
 }
 
 blockquote:before, blockquote:after, q:before, q:after {
-    content: '';
     content: none;
 }
 
@@ -96,25 +95,25 @@ p {
 h1 {
     font-size: 1.75em;
     line-height: 1.7em;
-    font-family: helvetica, verdana;
+    font-family: helvetica, verdana, sans-serif;
 }
 
 h2 {
     font-size: 1.5em;
     line-height: 1.7em;
-    font-family: helvetica, verdana;
+    font-family: helvetica, verdana, sans-serif;
 }
 
 h3 {
     font-size: 1.25em;
     line-height: 1.7em;
-    font-family: helvetica, verdana;
+    font-family: helvetica, verdana, sans-serif;
 }
 
 h4 {
     font-size: 1em;
     line-height: 1.7em;
-    font-family: helvetica, verdana;
+    font-family: helvetica, verdana, sans-serif;
 }
 
 html, body {

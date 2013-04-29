@@ -200,11 +200,7 @@
         validator: function(value, constrains){
           // check if the value matches the password field
           var pass = password_textBox.value;
-          if (value != pass){
-            return false;
-          } else {
-            return true;
-          }
+          return value == pass;
         }
       }, 'user_confirm_password');
       confirm_password_textBox.startup();

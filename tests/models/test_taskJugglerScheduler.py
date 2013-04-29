@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
-import unittest
+import unittest2
 import os
 from zope.sqlalchemy import ZopeTransactionExtension
 
@@ -30,7 +30,7 @@ import stalker
 from stalker.db import DBSession
 
 
-class TaskJugglerSchedulerTester(unittest.TestCase):
+class TaskJugglerSchedulerTester(unittest2.TestCase):
     """tests the stalker.models.scheduler.TaskJugglerScheduler class
     """
     

@@ -171,7 +171,7 @@ a:hover {
     height: 24px;
     width: 100%;
     text-align: center;
-    bottom: 0px;
+    bottom: 0;
     background-color: #e3e3e3;
     color: #a0a0a0;
     overflow: hidden;
@@ -213,8 +213,7 @@ a:hover {
 .project_thumbnail {
     width: 192px;
     height: 192px;
-    border: 1px;
-    border-color: black;
+    border: 1px black;
     background-color: #d3d3d3;
     float: left;
     text-align: center;
@@ -232,8 +231,7 @@ a:hover {
 .user_avatar {
     width: 192px;
     height: 192px;
-    border: 1px;
-    border-color: black;
+    border: 1px black;
     background-color: #d3d3d3;
     float: left;
     text-align: center;
@@ -249,8 +247,7 @@ a:hover {
 .thumbnail {
     width: 192px;
     height: 192px;
-    border: 1px;
-    border-color: black;
+    border: 1px black;
     background-color: #d3d3d3;
     float: left;
     text-align: center;

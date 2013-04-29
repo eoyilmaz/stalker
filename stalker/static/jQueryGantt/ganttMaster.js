@@ -191,6 +191,7 @@ GanttMaster.prototype.addTask = function(task, parent) {
 /**
  * a project contains tasks, resources, roles, and info about permissions
  * @param project
+ * @param Deferred
  */
 GanttMaster.prototype.loadProject = function(project, Deferred) {
     var deferred = new Deferred;

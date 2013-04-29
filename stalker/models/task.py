@@ -22,7 +22,7 @@ import datetime
 from sqlalchemy.ext.declarative import declared_attr
 import warnings
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
-                        String, DateTime, Float)
+                        DateTime, Float)
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 from stalker import User
 
@@ -989,7 +989,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     def tjp_abs_id(self):
         """returns the calculated absolute id of this task
         """
-        abs_id = ''
         if self.parent:
             abs_id = self.parent.tjp_abs_id
         else:
@@ -1035,7 +1034,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
         seconds = 0
         for time_log in self.time_logs:
-            seconds += time_log.duration.total_seconds()
+            seconds += (time_log.duration.days * 86400 +
+                        time_log.duration.seconds)
         return seconds
     
     @property

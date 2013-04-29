@@ -8,32 +8,32 @@
                   height: 100px;
                   position: absolute;
                   top: 200px;
-                  left: 0px;'></div>
+                  left: 0;'></div>
 
     {# Basic Info #}
   <div id='sequence_info' class='summary_info'>
-    <h2 style='margin: 0px; text-align: left'>{{ sequence.name }}</h2>
-    <h5 style='margin: 0px;'>({{ sequence.code }})</h5>
+    <h2 style='margin: 0; text-align: left'>{{ sequence.name }}</h2>
+    <h5 style='margin: 0;'>({{ sequence.code }})</h5>
     <table>
       <tr>
-        <td style='text-align: right'><b>Project</b></td>
+        <td style='text-align: right'><strong>Project</strong></td>
         <td>&nbsp;</td>
         <td>
           <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/project/{{ sequence.project.id }}">{{ sequence.project.name }}</a>
         </td>
       </tr>
       <tr>
-        <td style='text-align: right'><b>Status</b></td>
+        <td style='text-align: right'><strong>Status</strong></td>
         <td>&nbsp;</td>
         <td>{{ sequence.status.name }}</td>
       </tr>
       <tr>
-        <td style='text-align: right'><b>Description</b></td>
+        <td style='text-align: right'><strong>Description</strong></td>
         <td>&nbsp;</td>
         <td>{{ sequence.description }}</td>
       </tr>
       <tr>
-        <td style='text-align: right'><b>Created By</b></td>
+        <td style='text-align: right'><strong>Created By</strong></td>
         <td>&nbsp;</td>
         <td>
           <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ sequence.created_by.id }}">{{ sequence.created_by.name }}</a>

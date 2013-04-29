@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.mixins import CodeMixin
@@ -41,7 +41,7 @@ class CodeMixFooMixedInClass(SimpleEntity, CodeMixin):
         super(CodeMixFooMixedInClass, self).__init__(**kwargs)
         CodeMixin.__init__(self, **kwargs)
 
-class CodeMixinTester(unittest.TestCase):
+class CodeMixinTester(unittest2.TestCase):
     """Tests the CodeMixin
     """
 

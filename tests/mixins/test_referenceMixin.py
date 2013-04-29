@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.entity import Entity
@@ -38,7 +38,7 @@ class RefMixFooClass(SimpleEntity, ReferenceMixin):
         super(RefMixFooClass, self).__init__(**kwargs)
 
 
-class ReferenceMixinTester(unittest.TestCase):
+class ReferenceMixinTester(unittest2.TestCase):
     """tests the ReferenceMixin
     """
     
@@ -174,8 +174,8 @@ class ReferenceMixinTester(unittest.TestCase):
 
         myGreatEntity = GreatEntity(name="Test")
         # we should have a references attribute right now
-        myGreatEntity.references
-
+        var = myGreatEntity.references
+        
         image_link_type = Type(
             name='Image',
             code='image',

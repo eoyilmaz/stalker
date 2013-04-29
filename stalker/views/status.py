@@ -167,7 +167,7 @@ def create_status_list(request):
                         transaction.abort()
                         http_error = HTTPServerError()
                         http_error.explanation = e.message
-                        return(http_error)
+                        return http_error
                     else:
                         logger.debug('flushing the DBSession, no problem here!')
                         DBSession.flush()

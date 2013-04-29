@@ -536,7 +536,7 @@ Date.fromInt=function (dateInt){
   var year = parseInt(dateInt/10000);
   var month = parseInt((dateInt-year*10000)/100);
   var day = parseInt(dateInt-year*10000-month*100);
-  return new Date(year,month-1,day,12,00,00);
+  return new Date(year,month-1,day,12,0,0);
 };
 
 
@@ -581,4 +581,4 @@ Date.prototype.setFirstDayOfThisWeek= function (firstDayOfWeek){
   if (!firstDayOfWeek)
     firstDayOfWeek=Date.firstDayOfWeek;
   this.setDate(this.getDate() - this.getDay() +firstDayOfWeek - (this.getDay()==0 && firstDayOfWeek!=0 ?7:0));
-}
+};

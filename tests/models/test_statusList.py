@@ -18,10 +18,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 from stalker import Status, StatusList
 
-class StatusListTest(unittest.TestCase):
+class StatusListTest(unittest2.TestCase):
     """testing the StatusList class
     """
     

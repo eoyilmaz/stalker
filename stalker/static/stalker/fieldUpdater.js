@@ -100,7 +100,7 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                         widget.render();
                     } else {
                         // store current value
-                        var old_value = widget.get('value')
+                        var old_value = widget.get('value');
                         try{
                             widget.reset();
                         } catch(err) {

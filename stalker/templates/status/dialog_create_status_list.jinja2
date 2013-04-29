@@ -96,7 +96,7 @@
         required: true,
         {% if target_entity_type %}
           disabled: true,
-          value: '{{ target_entity_type }} Statuses'
+          value: '{{ target_entity_type }} Statuses',
         {% else %}
           disabled: false
         {% endif %}
@@ -124,7 +124,7 @@
         store: target_entity_type_store,
         {% if target_entity_type %}
           disabled: true,
-          value: '{{ target_entity_type }}'
+          value: '{{ target_entity_type }}',
         {% else %}
           disabled: false
         {% endif %}

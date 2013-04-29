@@ -20,7 +20,7 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
-from stalker import User, Entity
+from stalker import Entity
 from stalker.models.mixins import CodeMixin, ProjectMixin
 
 from stalker.log import logging_level

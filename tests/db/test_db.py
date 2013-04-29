@@ -21,7 +21,7 @@
 import os
 import shutil
 import datetime
-import unittest
+import unittest2
 import tempfile
 from sqlalchemy.exc import IntegrityError
 
@@ -37,7 +37,7 @@ from stalker import log
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
-class DatabaseTester(unittest.TestCase):
+class DatabaseTester(unittest2.TestCase):
     """tests the database and connection to the database
     """
     
@@ -284,7 +284,7 @@ class DatabaseTester(unittest.TestCase):
             .filter(StatusList.name=='Ticket Statuses')\
             .first()
         
-        self.assertIsInstance(ticket_status_list, StatusList)
+        self.assertTrue(isinstance(ticket_status_list, StatusList))
         
         expected_status_names = ['New', 'Reopened', 'Closed', 'Accepted',
                                  'Assigned']
@@ -314,7 +314,7 @@ class DatabaseTester(unittest.TestCase):
         actions = defaults.actions
         
         for action in permissions_DB:
-            self.assertIn(action.action, actions)
+            self.assertTrue(action.action in actions)
     
     def test_register_raise_TypeError_for_wrong_class_name_argument(self):
         """testing if a TypeError will be raised if the class_name argument is
@@ -357,9 +357,9 @@ class DatabaseTester(unittest.TestCase):
         from pyramid.security import Allow, Deny
         
         for permission in permission_DB:
-            self.assertIn(permission.access, [Allow, Deny])
-            self.assertIn(permission.action,  defaults.actions)
-            self.assertIn(permission.class_name, class_names)
+            self.assertTrue(permission.access in [Allow, Deny])
+            self.assertTrue(permission.action in  defaults.actions)
+            self.assertTrue(permission.class_name in class_names)
             logger.debug('permission.access: %s' % permission.access)
             logger.debug('permission.action: %s' % permission.action)
             logger.debug('permission.class_name: %s' % permission.class_name)
@@ -404,10 +404,10 @@ class DatabaseTester(unittest.TestCase):
         
         self.assertEqual(len(f_types), 2)
         type_names = [t.name for t in f_types]
-        self.assertIn("Version", type_names)
-        self.assertIn("Reference", type_names)
+        self.assertTrue("Version" in type_names)
+        self.assertTrue("Reference" in type_names)
 
-class DatabaseModelsTester(unittest.TestCase):
+class DatabaseModelsTester(unittest2.TestCase):
     """tests the database model
     
     NOTE TO OTHER DEVELOPERS:
@@ -779,7 +779,7 @@ class DatabaseModelsTester(unittest.TestCase):
         DBSession.add(test_dep)
         DBSession.commit()
         
-        self.assertIn(test_dep, DBSession)
+        self.assertTrue(test_dep in DBSession)
         
         created_by = test_dep.created_by
         date_created = test_dep.date_created
@@ -2056,7 +2056,7 @@ class DatabaseModelsTester(unittest.TestCase):
         new_sequence_list = StatusList(**kwargs)
         
         DBSession.add(new_sequence_list)
-        self.assertIn(new_sequence_list, DBSession)
+        self.assertTrue(new_sequence_list in DBSession)
         self.assertRaises(IntegrityError, DBSession.commit)
     
     def test_persistence_Structure(self):

@@ -18,13 +18,13 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 import datetime
 
 from stalker import (Entity, Link, Project, Repository, Status,
                      StatusList, Type, User, Scene)
 
-class SceneTester(unittest.TestCase):
+class SceneTester(unittest2.TestCase):
     """Tests stalker.models.scene.Scene class
     """
     

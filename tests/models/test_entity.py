@@ -1,9 +1,9 @@
 #-*- coding: utf-8 -*-
 
-import unittest
+import unittest2
 from stalker import Entity, Note, Tag, User
 
-class EntityTester(unittest.TestCase):
+class EntityTester(unittest2.TestCase):
     """tests the Entity class
     """
     

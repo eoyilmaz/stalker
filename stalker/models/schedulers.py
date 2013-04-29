@@ -28,13 +28,10 @@ from jinja2 import Template
 import transaction
 
 import stalker
-from stalker import log, Entity, SimpleEntity
-from stalker import Department, User
+from stalker import log, Entity
 from stalker import defaults
 
 import logging
-from stalker.db import DBSession
-
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 

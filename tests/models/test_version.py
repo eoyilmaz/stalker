@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 from stalker import (Link, Project, Repository, Sequence, Shot, Status,
                      StatusList, Task, Type, Version)
 from stalker import db
@@ -33,7 +33,7 @@ from stalker import log
 logger = logging.getLogger('stalker.models.version.Version')
 logger.setLevel(log.logging_level)
 
-class VersionTester(unittest.TestCase):
+class VersionTester(unittest2.TestCase):
     """tests stalker.models.version.Version class
     """
     @classmethod

@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
-import unittest
+import unittest2
 
 from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
                      Sequence, Shot, Status, StatusList, Structure, Task, Type,
@@ -36,7 +36,7 @@ from stalker import log
 logger = logging.getLogger('stalker.models.project')
 logger.setLevel(log.logging_level)
 
-class ProjectTester(unittest.TestCase):
+class ProjectTester(unittest2.TestCase):
     """tests the Project class
     """
     

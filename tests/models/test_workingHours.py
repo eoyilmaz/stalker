@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import copy
-import unittest
+import unittest2
 import datetime
 
 from stalker import config
@@ -27,7 +27,7 @@ from stalker.models.studio import WorkingHours
 
 defaults = config.Config()
 
-class WorkingHoursTester(unittest.TestCase):
+class WorkingHoursTester(unittest2.TestCase):
     """tests the stalker.models.project.WorkingHours class
     """
     

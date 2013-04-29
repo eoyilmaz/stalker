@@ -19,10 +19,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 from sqlalchemy import Column, Integer, ForeignKey, Table
-from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, synonym, reconstructor, validates
+
 from stalker import ImageFormat
-from stalker.db import Base, DBSession
+from stalker.db import Base
 from stalker.models.task import Task
 from stalker.models.mixins import (StatusMixin, ReferenceMixin, CodeMixin)
 

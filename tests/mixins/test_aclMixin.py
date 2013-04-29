@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 
-import unittest
+import unittest2
 from sqlalchemy import Column, Integer
 from stalker import db
 from stalker.db.session import DBSession, ZopeTransactionExtension
@@ -36,7 +36,7 @@ class TestClassForACL(Base, ACLMixin):
     def __init__(self):
         self.name = None
 
-class ACLMixinTester(unittest.TestCase):
+class ACLMixinTester(unittest2.TestCase):
     """tests the stalker.models.mixins.ACLMixin class
     """
     @classmethod
@@ -87,7 +87,7 @@ class ACLMixinTester(unittest.TestCase):
     def test_acl_property_returns_a_list(self):
         """testing if the __acl__ property returns a list
         """
-        self.assertIsInstance(self.test_instance.__acl__, list)
+        self.assertTrue(isinstance(self.test_instance.__acl__, list))
     
     def test_acl_property_returns_a_proper_ACL_list(self):
         """testing if the __acl__ property returns a proper ACL list according

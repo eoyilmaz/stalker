@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <title>Teamwork</title>
 
-  <link rel=stylesheet href="platform.css" type="text/css">
+  <link rel=stylesheet href="css/platform.css" type="text/css">
   <link rel=stylesheet href="libs/dateField/jquery.dateField.css" type="text/css">
   <link rel=stylesheet href="gantt.css" type="text/css">
 
@@ -33,7 +33,7 @@
 <div id="ndo" style="position:absolute;right:5px;top:5px;width:378px;padding:5px;background-color: #FFF5E6; border:1px solid #F9A22F; font-size:12px">
   This Gantt can be used in a complete project management solution - imports your Gantt and more - <a href="http://twproject.com" target="_blank">Teamwork: give it a try</a>.
 </div>
-<div id="workSpace" style="padding:0px; overflow-y:auto; overflow-x:hidden;border:1px solid #e5e5e5;position:relative;margin:0 5px"></div>
+<div id="workSpace" style="padding:0; overflow-y:auto; overflow-x:hidden;border:1px solid #e5e5e5;position:relative;margin:0 5px"></div>
 
 <div id="taZone" style="display:none;">
   <textarea rows="8" cols="150" id="ta">
@@ -85,12 +85,14 @@ $(function() {
   ge.init(workSpace);
 
   //inject some buttons (for this demo only)
-  $(".ganttButtonBar div").append("<button onclick='clearGantt();' class='button'>clear</button>")
+  var ganttButtonBar_div = $(".ganttButtonBar div");
+  ganttButtonBar_div.append("<button onclick='clearGantt();' class='button'>clear</button>")
           .append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
           .append("<button onclick='openResourceEditor();' class='button'>edit resources</button>")
           .append("<button onclick='getFile();' class='button'>export</button>");
-  $(".ganttButtonBar h1").html("<img src='twGanttSmall.png'>");
-  $(".ganttButtonBar div").addClass('buttons');
+  var ganttButtonBar_h1 = $(".ganttButtonBar h1");
+  ganttButtonBar_h1.html("<img src='twGanttSmall.png'>");
+  ganttButtonBar_div.addClass('buttons');
   //overwrite with localized ones
   loadI18n();
 
@@ -284,9 +286,10 @@ function openResourceEditor() {
 
 //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
 function getFile() {
-  $("#gimBaPrj").val(JSON.stringify(ge.saveProject()));
+  var gimBaPrj = $("#gimBaPrj");
+  gimBaPrj.val(JSON.stringify(ge.saveProject()));
   $("#gimmeBack").submit();
-  $("#gimBaPrj").val("");
+  gimBaPrj.val("");
 
   /*  var uriContent = "data:text/html;charset=utf-8," + encodeURIComponent(JSON.stringify(prj));
    console.debug(uriContent);

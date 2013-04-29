@@ -225,7 +225,7 @@
 }
 
 .taskBox .layout .milestone{
-    top:0px;
+    top: 0;
     position:absolute;
     width:16px;
     background: url('../images/milestone.png') no-repeat;
@@ -259,7 +259,7 @@
 .taskBox .taskExtraTiming{
     background-color:darkred;
     height: 100%;
-    right: 0px;
+    right: 0;
     position:absolute
 }
 
@@ -290,7 +290,7 @@
 
 .parentTaskBox .layout .rightPin {
     top: 3px;
-    right: 0px;
+    right: 0;
     position: absolute;
     width: 10px;
     height: 10px;
@@ -306,12 +306,12 @@
 }
 
 .parentTaskBox .layout .milestone{
-    top:0px;
-    position:absolute;
-    width:16px;
+    top: 0;
+    position: absolute;
+    width: 16px;
     background: url('../images/milestone.png') no-repeat;
-    height:16px;
-    display:none;
+    height: 16px;
+    display: none;
 }
 .parentTaskBox .layout .milestone.end{
     right:0;
@@ -346,7 +346,7 @@
     color:black;
     text-align:right;
     padding-right:5px;
-    padding-top: 0px;
+    padding-top: 0;
     overflow:hidden;
     left:-210px;
     width:195px;
@@ -360,7 +360,7 @@
     left: 100%;
     overflow: visible;
     padding-left: 15px;
-    padding-top: 0px;
+    padding-top: 0;
     position: absolute;
     text-align: left;
     white-space: nowrap;
@@ -373,7 +373,7 @@
     left: 100%;
     overflow: visible;
     padding-left: 15px;
-    padding-top: 0px;
+    padding-top: 0;
     position: absolute;
     text-align: left;
     white-space: nowrap;
@@ -383,7 +383,7 @@
 
 .taskDepLine {
     background-color: #b8d1ed;
-    border: 0px solid #b8d1ed;
+    border: 0 solid #b8d1ed;
     overflow: hidden;
     position: absolute;
 }

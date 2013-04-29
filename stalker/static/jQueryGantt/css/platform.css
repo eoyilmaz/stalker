@@ -129,11 +129,11 @@ h4 {
 .cvcColorSquare{
   display:inline-block;
   text-align:left;
-  border:#fff 0px solid;
-  box-shadow:0px 0px 5px #999;
+  border:#fff 0 solid;
+  box-shadow:0 0 5px #999;
   -moz-box-shadow:2px 2px 2px #999;
-  -webkit-box-shadow:0px 0px 5px #999;
-  -o-box-shadow:0px 0px 5px #999;
+  -webkit-box-shadow:0 0 5px #999;
+  -o-box-shadow:0 0 5px #999;
   text-indent:10px;
   border-radius:5px
 }

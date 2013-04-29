@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.mixins import TargetEntityTypeMixin
@@ -42,7 +42,7 @@ class TargetEntityTypeMixedClass(SimpleEntity, TargetEntityTypeMixin):
         super(TargetEntityTypeMixedClass, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, **kwargs)
 
-class TargetEntityMixinTester(unittest.TestCase):
+class TargetEntityMixinTester(unittest2.TestCase):
     """Tests the TargetEntityMixin
     """
     def setUp(self):

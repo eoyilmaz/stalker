@@ -127,7 +127,7 @@ define([
             },
 
             isValid: function(){
-                console.log('TagSelect.isValid is running!!!')
+                console.log('TagSelect.isValid is running!!!');
                 if (this.required){
                     // check if there are any tags selected
                     return this.tags.length > 0;

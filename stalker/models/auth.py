@@ -106,8 +106,8 @@ class Permission(Base):
     :param str access: An Enum value which can have the one of the values of
       ``Allow`` or ``Deny``.
     
-    :param str action: An Enum value from the list: 'Add', 'View', 'Edit',
-      'Delete'. Can not be None. The list can be changed from
+    :param str action: An Enum value from the list ['Add', 'View', 'Edit',
+      'Delete']. Can not be None. The list can be changed from
       stalker.config.Config.default_actions.
     
     :param str class_name: The name of the class that this action is applied
@@ -392,7 +392,7 @@ class User(Entity, ACLMixin):
         String(256),
         unique=True,
         nullable=False,
-        doc="""email of the user, accepts strings or unicodes"""
+        doc="""email of the user, accepts strings or unicode"""
     )
     
     password = Column(

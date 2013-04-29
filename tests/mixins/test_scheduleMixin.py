@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
-import unittest
+import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.mixins import ScheduleMixin
@@ -42,7 +42,7 @@ class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
         super(SchedMixFooMixedInClass, self).__init__(**kwargs)
         ScheduleMixin.__init__(self, **kwargs)
 
-class ScheduleMixinTester(unittest.TestCase):
+class ScheduleMixinTester(unittest2.TestCase):
     """Tests the ScheduleMixin
     """
     
