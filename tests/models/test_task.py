@@ -1411,14 +1411,14 @@ class TaskTester(unittest2.TestCase):
         self.assertIn(new_time_log3, self.test_task.time_logs)
         self.assertNotIn(new_time_log3, new_task.time_logs)
     
-    def test_total_booked_seconds_is_a_read_only_attribute(self):
-        """testing if the total_booked_seconds is a read only attribute
+    def test_total_logged_seconds_is_a_read_only_attribute(self):
+        """testing if the total_logged_seconds is a read only attribute
         """
         self.assertRaises(AttributeError, setattr, self.test_task,
-                          'total_booked_seconds', 33)
+                          'total_logged_seconds', 33)
     
-    def test_total_booked_seconds_is_the_sum_of_all_time_logs(self):
-        """testing if the total_booked_seconds is the sum of all time_logs in
+    def test_total_logged_seconds_is_the_sum_of_all_time_logs(self):
+        """testing if the total_logged_seconds is the sum of all time_logs in
         hours
         """
         dt = datetime.datetime
@@ -1441,7 +1441,7 @@ class TaskTester(unittest2.TestCase):
             start=now,
             end=now + td(hours=12)
         )
-        self.assertEqual(self.test_task.total_booked_seconds, 20 * 3600)
+        self.assertEqual(self.test_task.total_logged_seconds, 20 * 3600)
     
     def test_schedule_seconds_is_a_read_only_attribute(self):
         """testing if the schedule_seconds is a read only attribute
@@ -1565,7 +1565,7 @@ class TaskTester(unittest2.TestCase):
         # check
         self.assertEqual(
             new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_booked_seconds
+            new_task.schedule_seconds - new_task.total_logged_seconds
         )
         
         
@@ -1587,7 +1587,7 @@ class TaskTester(unittest2.TestCase):
         # check
         self.assertEqual(
             new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_booked_seconds
+            new_task.schedule_seconds - new_task.total_logged_seconds
         )
         
         # add another 2 hours
@@ -1599,7 +1599,7 @@ class TaskTester(unittest2.TestCase):
         )
         self.assertEqual(
             new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_booked_seconds
+            new_task.schedule_seconds - new_task.total_logged_seconds
         )
         
         
@@ -1622,7 +1622,7 @@ class TaskTester(unittest2.TestCase):
         # check
         self.assertEqual(
             new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_booked_seconds
+            new_task.schedule_seconds - new_task.total_logged_seconds
         )
         
         # create a time_log of 1 week
@@ -1637,7 +1637,7 @@ class TaskTester(unittest2.TestCase):
         # check
         self.assertEqual(
             new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_booked_seconds
+            new_task.schedule_seconds - new_task.total_logged_seconds
         )
         
         
@@ -1661,7 +1661,7 @@ class TaskTester(unittest2.TestCase):
         # check
         self.assertEqual(
             new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_booked_seconds
+            new_task.schedule_seconds - new_task.total_logged_seconds
         )
         
         # ------------------ YEARS ---------------------
@@ -1682,7 +1682,7 @@ class TaskTester(unittest2.TestCase):
         # check
         self.assertEqual(
             new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_booked_seconds
+            new_task.schedule_seconds - new_task.total_logged_seconds
         )
 
     def test_versions_attribute_is_None(self):

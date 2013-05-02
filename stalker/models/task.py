@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
+from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 import warnings
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
@@ -36,6 +37,7 @@ from stalker.models.mixins import ScheduleMixin, StatusMixin
 
 from stalker.log import logging_level
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
@@ -71,6 +73,12 @@ class TimeLog(Entity, ScheduleMixin):
     Adding overlapping time log for a :class:`~stalker.models.auth.User` will
     raise a :class:`~stalker.errors.OverBookedWarning`.
     
+    TimeLog instances automatically extends the
+    :attr:`~stalker.models.task.Task.schedule_timing` of the assigned Task if
+    the :attr:`~stalker.models.task.Task.total_logged_seconds` is getting
+    bigger than the :attr:`~stalker.models.task.Task.schedule_timing` after
+    this TimeLog.
+    
     :param task: The :class:`~stalker.models.task.Task` instance that this
       time log belongs to.
     
@@ -81,7 +89,7 @@ class TimeLog(Entity, ScheduleMixin):
     __tablename__ = "TimeLogs"
     __mapper_args__ = {"polymorphic_identity": "TimeLog"}
     time_log_id = Column("id", Integer, ForeignKey("Entities.id"),
-                        primary_key=True)
+                         primary_key=True)
     task_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
     task = relationship(
         "Task",
@@ -91,7 +99,7 @@ class TimeLog(Entity, ScheduleMixin):
         doc="""The :class:`~stalker.models.task.Task` instance that this 
         time log is created for"""
     )
-    
+
     resource_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     resource = relationship(
         "User",
@@ -101,7 +109,7 @@ class TimeLog(Entity, ScheduleMixin):
         doc="""The :class:`~stalker.models.auth.User` instance that this 
         time_log is created for"""
     )
-    
+
     def __init__(
             self,
             task=None,
@@ -117,7 +125,52 @@ class TimeLog(Entity, ScheduleMixin):
         ScheduleMixin.__init__(self, **kwargs)
         self.task = task
         self.resource = resource
-    
+
+    def _adjust_task_schedule(self, task):
+        """Adjusts the task schedule timing if necessary
+        
+        :param task: The task that is going to be adjusted
+        """
+        # do the schedule_timing expansion here
+        total_seconds = self.duration.days * 86400 + self.duration.seconds
+        remaining_seconds = task.remaining_seconds
+        from stalker import Studio
+
+        studio = None
+        try:
+            studio = Studio.query.first()
+        except UnboundExecutionError:
+            pass
+        
+        data_source = studio if studio else defaults
+        conversion_ratio = 1
+        if task.schedule_unit == 'min':
+            conversion_ratio = 60
+        elif task.schedule_unit == 'h':
+            conversion_ratio = 3600
+        elif task.schedule_unit == 'd':
+            conversion_ratio = data_source.daily_working_hours * 3600
+        elif task.schedule_unit == 'w':
+            conversion_ratio = data_source.weekly_working_hours * 3600
+        elif task.schedule_unit == 'm':
+            conversion_ratio = data_source.weekly_working_hours * 4 * 3600
+        elif task.schedule_unit == 'y':
+            conversion_ratio = data_source.yearly_working_days * \
+                               data_source.daily_working_hours * 3600
+        logger.debug('remaining_seconds : %s' % remaining_seconds)
+        logger.debug('total_seconds     : %s' % total_seconds)
+        logger.debug('conversion_ratio  : %s' % conversion_ratio)
+        if remaining_seconds < total_seconds:
+            # expand it
+            # first convert the task.schedule_timing to hours (by using studio
+            # or defaults)
+            # then add the needed seconds as hours
+
+            # do it normally
+            task.schedule_timing = float(task.schedule_timing) + \
+                                   float(
+                                       total_seconds - remaining_seconds) / conversion_ratio
+
     @validates("task")
     def _validate_task(self, key, task):
         """validates the given task value
@@ -128,13 +181,16 @@ class TimeLog(Entity, ScheduleMixin):
                             (self.__class__.__name__,
                              task.__class__.__name__))
         
+        # adjust task schedule
+        self._adjust_task_schedule(task)
+        
         return task
-    
+
     @validates("resource")
     def _validate_resource(self, key, resource):
         """validates the given resource value
         """
-        
+
         if resource is None:
             raise TypeError("%s.resource can not be None" %
                             self.__class__.__name__)
@@ -144,7 +200,7 @@ class TimeLog(Entity, ScheduleMixin):
                             "stalker.models.auth.User instance not %s" %
                             (self.__class__.__name__,
                              resource.__class__.__name__))
-        
+
         # check for overbooking
         logger.debug('resource.time_logs: %s' % resource.time_logs)
         for time_log in resource.time_logs:
@@ -153,11 +209,11 @@ class TimeLog(Entity, ScheduleMixin):
             logger.debug('time_log.end   : %s' % time_log.end)
             logger.debug('self.start     : %s' % self.start)
             logger.debug('self.end       : %s' % self.end)
-            
-            if time_log.start == self.start or\
-               time_log.end == self.end or \
-               time_log.start < self.end < time_log.end or \
-               time_log.start < self.start < time_log.end:
+
+            if time_log.start == self.start or \
+                            time_log.end == self.end or \
+                                    time_log.start < self.end < time_log.end or \
+                                    time_log.start < self.start < time_log.end:
                 warnings.warn(
                     "The resource %s is overly booked with %s and %s" %
                     (resource, self, time_log),
@@ -169,6 +225,7 @@ class TimeLog(Entity, ScheduleMixin):
 def update_task_dates(func):
     """decorator that updates the date after the function finishes its job
     """
+
     def wrap(*args, **kwargs):
         # call the function as usual
         rvalue = func(*args, **kwargs)
@@ -176,7 +233,9 @@ def update_task_dates(func):
         task_class = args[0]
         args[0]._validate_dates(task_class.start, task_class.end, None)
         return rvalue
-    # return decorated function
+
+        # return decorated function
+
     return wrap
 
 
@@ -346,7 +405,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     __mapper_args__ = {'polymorphic_identity': "Task"}
     task_id = Column("id", Integer, ForeignKey('Entities.id'),
                      primary_key=True)
-    
+
     project_id = Column('project_id', Integer, ForeignKey('Projects.id'),
                         nullable=True)
     _project = relationship(
@@ -356,7 +415,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         uselist=False,
         post_update=True,
     )
-    
+
     parent_id = Column('parent_id', Integer, ForeignKey('Tasks.id'))
     parent = relationship(
         'Task',
@@ -365,16 +424,16 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         back_populates='children',
         post_update=True,
     )
-    
+
     children = relationship(
-      'Task',
-       primaryjoin='Tasks.c.parent_id==Tasks.c.id',
-       back_populates='parent',
-       post_update=True,
+        'Task',
+        primaryjoin='Tasks.c.parent_id==Tasks.c.id',
+        back_populates='parent',
+        post_update=True,
     )
-    
+
     tasks = synonym('children')
-    
+
     is_milestone = Column(
         Boolean,
         doc="""Specifies if this Task is a milestone.
@@ -384,7 +443,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         of the project.
         """
     )
-    
+
     # UPDATE THIS: is_complete should look to Task.status, but it is may be
     # faster to query in this way, judge later
     is_complete = Column(
@@ -397,7 +456,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
         """
     )
-    
+
     depends = relationship(
         "Task",
         secondary="Task_Dependencies",
@@ -412,7 +471,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         some way depends to this one again.
         """
     )
-    
+
     resources = relationship(
         "User",
         secondary="Task_Resources",
@@ -423,9 +482,9 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""The list of :class:`stalker.models.auth.User`\ s instances assigned to this Task.
         """
     )
-    
+
     priority = Column(Integer)
-    
+
     time_logs = relationship(
         "TimeLog",
         primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
@@ -441,20 +500,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         doc="""A list of :class:`~stalker.models.version.Version` instances showing the files created for this task.
         """
     )
-    
+
     #_start = Column('start', DateTime)
     #_end = Column('end', DateTime)
-    
+
     computed_start = Column(DateTime)
     computed_end = Column(DateTime)
-    
+
     bid_timing = Column(
         Float, nullable=True, default=0,
         doc="""The value of the initial bid of this Task. It is an integer or
         a float.
         """
     )
-    
+
     bid_unit = Column(
         Enum(*defaults.datetime_units, name='TaskBidUnit'),
         nullable=True,
@@ -462,13 +521,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
         """
     )
-    
+
     schedule_timing = Column(
         Float, nullable=True, default=0,
         doc="""It is the value of the schedule timing. It is a float value.
         """
     )
-    
+
     schedule_unit = Column(
         Enum(*defaults.datetime_units, name='TaskScheduleUnit'),
         nullable=False, default='h',
@@ -476,14 +535,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
         """
     )
-    
+
     schedule_model = Column(
         Enum(*defaults.task_schedule_models, name='TaskScheduleModels'),
         default=defaults.task_schedule_models[0], nullable=False
     )
-    
+
     schedule_constraint = Column(Integer, default=0, nullable=False)
-    
+
     def __init__(self,
                  project=None,
                  parent=None,
@@ -501,58 +560,58 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  is_milestone=False,
                  priority=defaults.task_priority,
                  **kwargs):
-        
+
         # update kwargs with extras
         kwargs['start'] = start
         kwargs['end'] = end
         kwargs['duration'] = duration
-        
+
         super(Task, self).__init__(**kwargs)
-        
+
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
-        
+
         self.parent = parent
-        self._project =  project
-        
+        self._project = project
+
         self.time_logs = []
         self.versions = []
-        
+
         self.is_milestone = is_milestone
         self.is_complete = False
-        
+
         if depends is None:
             depends = []
-        
+
         self.depends = depends
-        
+
         if self.is_milestone:
             resources = None
-        
+
         if resources is None:
             resources = []
-        
+
         self.resources = resources
-        
+
         self.schedule_constraint = schedule_constraint
         self.schedule_unit = schedule_unit
         self.schedule_timing = schedule_timing
-        
+
         if not schedule_model:
             schedule_model = defaults.task_schedule_models[0]
         self.schedule_model = schedule_model
-        
+
         if bid_timing is None:
             bid_timing = self.schedule_timing
-        
+
         if bid_unit is None:
             bid_unit = self.schedule_unit
-            
+
         self.bid_timing = bid_timing
         self.bid_unit = bid_unit
         self.priority = priority
-   
+
     @reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
@@ -578,7 +637,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                 "all the elements in the %s.time_logs should be an instances "
                 "of stalker.models.task.TimeLog not %s instance" %
                 (self.__class__.__name__, time_log.__class__.__name__))
-        
+
         return time_log
 
     @validates("is_complete")
@@ -594,32 +653,33 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         if not isinstance(depends, Task):
             raise TypeError("all the elements in the depends should be an "
                             "instance of stalker.models.task.Task")
-        
+
         # check for the circular dependency
         _check_circular_dependency(depends, self, 'depends')
         _check_circular_dependency(depends, self, 'children')
-        
+
         # check for circular dependency toward the parent, non of the parents
         # should be depending to the given depends_to_task
         with DBSession.no_autoflush:
             parent = self.parent
             while parent:
                 if parent in depends.depends:
-                    raise CircularDependencyError('One of the parents of %s is '
-                                              'depending to %s' % 
-                                              (self, depends))
+                    raise CircularDependencyError(
+                        'One of the parents of %s is '
+                        'depending to %s' %
+                        (self, depends))
                 parent = parent.parent
-        
+
         return depends
-    
+
     @validates('schedule_timing')
     def _validate_schedule_timing(self, key, schedule_timing):
         """validates the given schedule_timing
         """
         if schedule_timing is None:
-            schedule_timing = defaults.timing_resolution.seconds/3600
+            schedule_timing = defaults.timing_resolution.seconds / 3600
             self.schedule_unit = 'h'
-        
+
         if not isinstance(schedule_timing, (int, float)):
             raise TypeError(
                 '%s.schedule_timing should be an integer or float number'
@@ -627,40 +687,40 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                     self.__class__.__name__, self.__class__.__name__,
                     schedule_timing.__class__.__name__)
             )
-        
+
         # reschedule
         self._reschedule(schedule_timing, self.schedule_unit)
-        
+
         return schedule_timing
-    
+
     @validates('schedule_unit')
     def _validate_schedule_unit(self, key, schedule_unit):
         """validates the given schedule_unit
         """
         if schedule_unit is None:
             schedule_unit = 'h'
-        
+
         if not isinstance(schedule_unit, (str, unicode)):
             raise TypeError(
                 '%s.schedule_unit should be a string value one of %s showing '
                 'the unit of the schedule timing of this %s, not %s' % (
-                self.__class__.__name__, defaults.datetime_units,
-                self.__class__.__name__, schedule_unit.__class__.__name__)
+                    self.__class__.__name__, defaults.datetime_units,
+                    self.__class__.__name__, schedule_unit.__class__.__name__)
             )
-        
+
         if schedule_unit not in defaults.datetime_units:
             raise ValueError(
                 '%s.schedule_unit should be a string value one of %s showing '
                 'the unit of the schedule timing of this %s, not %s' % (
-                self.__class__.__name__, defaults.datetime_units,
-                self.__class__.__name__, schedule_unit.__class__.__name__)
+                    self.__class__.__name__, defaults.datetime_units,
+                    self.__class__.__name__, schedule_unit.__class__.__name__)
             )
-        
+
         if self.schedule_timing:
             self._reschedule(self.schedule_timing, schedule_unit)
-        
+
         return schedule_unit
-    
+
     def _reschedule(self, schedule_timing, schedule_unit):
         """Updates the start and end date values by using the schedule_timing
         and schedule_unit values.
@@ -678,13 +738,13 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             )
             if not unit: # we are in a pre flushing state do not do anything
                 return
-            
+
             kwargs = {
                 unit['name']: schedule_timing * unit['multiplier']
             }
             calculated_duration = datetime.timedelta(**kwargs)
             if self.schedule_constraint == CONSTRAINT_NONE or \
-                        self.schedule_constraint == CONSTRAINT_START:
+                            self.schedule_constraint == CONSTRAINT_START:
                 # get end
                 self._validate_dates(self.start, None, calculated_duration)
             elif self.schedule_constraint == CONSTRAINT_END:
@@ -693,16 +753,16 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             elif self.schedule_constraint == CONSTRAINT_BOTH:
                 # restore duration
                 self._validate_dates(self.start, self.end, None)
-    
+
     @validates("is_milestone")
     def _validate_is_milestone(self, key, is_milestone):
         """validates the given milestone value
         """
         if is_milestone:
             self.resources = []
-        
+
         return bool(is_milestone)
-    
+
     @validates('parent')
     def _validate_parent(self, key, parent):
         """validates the given parent value
@@ -712,15 +772,15 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             if not isinstance(parent, Task):
                 raise TypeError('%s.parent should be an instance of '
                                 'stalker.models.task.Task, not '
-                                'a %s' %  (self.__class__.__name__,
-                                           parent.__class__.__name__))
-            
+                                'a %s' % (self.__class__.__name__,
+                                          parent.__class__.__name__))
+
             # check for cycle
             _check_circular_dependency(self, parent, 'children')
             _check_circular_dependency(self, parent, 'depends')
-        
+
         return parent
-    
+
     @validates('_project')
     def _validates_project(self, key, project):
         """validates the given project instance
@@ -729,26 +789,27 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             # check if there is a parent defined
             if self.parent:
                 # use its project as the project
-                
+
                 # to prevent prematurely flush the parent
                 with DBSession.no_autoflush:
                     project = self.parent.project
-                
+
             else:
-                    # no project, no task, go mad again!!!
-                    raise TypeError('%s.project should be an instance of '
+                # no project, no task, go mad again!!!
+                raise TypeError('%s.project should be an instance of '
                                 'stalker.models.project.Project, not %s. Or '
                                 'please supply a stalker.models.task.Task '
                                 'with the parent argument, so Stalker can use '
                                 'the project of the supplied parent task' %
-                                    (self.__class__.__name__,
-                                     project.__class__.__name__))
-        
+                                (self.__class__.__name__,
+                                 project.__class__.__name__))
+
         from stalker import Project
+
         if not isinstance(project, Project):
             # go mad again it is not a project instance
             raise TypeError('%s.project should be an instance of '
-                            'stalker.models.project.Project, not %s' % 
+                            'stalker.models.project.Project, not %s' %
                             (self.__class__.__name__,
                              project.__class__.__name__))
         else:
@@ -760,20 +821,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                         # don't go mad again, but warn the user that there is an
                         # ambiguity!!!
                         import warnings
-                        
+
                         message = 'The supplied parent and the project is not ' \
                                   'matching in %s, Stalker will use the parent ' \
                                   'project (%s) as the parent of this %s' % \
                                   (self,
                                    self.parent._project,
                                    self.__class__.__name__)
-                        
+
                         warnings.warn(message, RuntimeWarning)
-                        
+
                         # use the parent.project
                         project = self.parent._project
         return project
-    
+
     @validates("priority")
     def _validate_priority(self, key, priority):
         """validates the given priority value
@@ -782,17 +843,17 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             priority = int(priority)
         except (ValueError, TypeError):
             pass
-        
+
         if not isinstance(priority, int):
             priority = defaults.task_priority
-        
+
         if priority < 0:
             priority = 0
         elif priority > 1000:
             priority = 1000
-        
+
         return priority
-    
+
     @validates('children')
     def _validate_children(self, key, child):
         """validates the given child
@@ -801,37 +862,38 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # do it without a flush
         with DBSession.no_autoflush:
             self.resources = []
-        
+
         return child
-    
+
     @validates("resources")
     def _validate_resources(self, key, resource):
         """validates the given resources value
         """
         from stalker.models.auth import User
+
         if not isinstance(resource, User):
             raise TypeError("Task.resources should be a list of "
                             "stalker.models.auth.User instances not %s" %
                             resource.__class__.__name__)
-        
+
             ## milestones do not need resources
             #if self.is_milestone:
             #resource = None
-        
+
         return resource
-    
+
     @validates("versions")
     def _validate_versions(self, key, version):
         """validates the given version value
         """
         from stalker.models.version import Version
-        
+
         if not isinstance(version, Version):
             raise TypeError("Task.versions should only have "
                             "stalker.models.version.Version instances")
-        
+
         return version
-    
+
     @validates('bid_timing')
     def _validate_bid_timing(self, key, bid_timing):
         """validates the given bid_timing value
@@ -840,34 +902,34 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             if not isinstance(bid_timing, (int, float)):
                 raise TypeError(
                     '%s.bid_timing should be an integer or float showing the '
-                    'value of the initial bid for this %s, not %s' % 
+                    'value of the initial bid for this %s, not %s' %
                     (self.__class__.__name__, self.__class__.__name__,
                      bid_timing.__class__.__name__))
         return bid_timing
-    
+
     @validates('bid_unit')
     def _validate_bid_unit(self, key, bid_unit):
         """validates the given bid_unit value
         """
         if bid_unit is None:
             bid_unit = 'h'
-        
+
         if not isinstance(bid_unit, (str, unicode)):
             raise TypeError(
                 '%s.bid_unit should be a string value one of %s showing '
-            'the unit of the bid timing of this %s, not %s' % (
-            self.__class__.__name__, defaults.datetime_units,
-            self.__class__.__name__, bid_unit.__class__.__name__))
-        
+                'the unit of the bid timing of this %s, not %s' % (
+                    self.__class__.__name__, defaults.datetime_units,
+                    self.__class__.__name__, bid_unit.__class__.__name__))
+
         if bid_unit not in defaults.datetime_units:
             raise ValueError(
-                    '%s.bid_unit should be a string value one of %s showing '
+                '%s.bid_unit should be a string value one of %s showing '
                 'the unit of the bid timing of this %s, not %s' % (
-                self.__class__.__name__, defaults.datetime_units,
-                self.__class__.__name__, bid_unit.__class__.__name__))
-        
+                    self.__class__.__name__, defaults.datetime_units,
+                    self.__class__.__name__, bid_unit.__class__.__name__))
+
         return bid_unit
-    
+
     def _validate_start(self, start_in):
         """validates the given start value
         """
@@ -875,11 +937,11 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             start_in = self.project.round_time(datetime.datetime.now())
         elif not isinstance(start_in, datetime.datetime):
             raise TypeError('%s.start should be an instance of '
-                            'datetime.datetime, not %s' % 
+                            'datetime.datetime, not %s' %
                             (self.__class__.__name__,
                              start_in.__class__.__name__))
         return start_in
-    
+
     def _start_getter(self):
         """overridden start getter
         """
@@ -891,7 +953,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                     start = child.start
             self._validate_dates(start, self._end, self._duration)
         return self._start
-    
+
     def _start_setter(self, start_in):
         """overridden start setter
         """
@@ -899,9 +961,9 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         # update the start only if this is not a container task
         if self.is_leaf:
             self._validate_dates(start_in, self._end, self._duration)
-        
-        # logger.debug('Task.start_setter afterV: %s' % self.start)
-    
+
+            # logger.debug('Task.start_setter afterV: %s' % self.start)
+
     @declared_attr
     def start(self):
         return synonym(
@@ -916,7 +978,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                 """
             )
         )
-    
+
     def _end_getter(self):
         """overridden end getter
         """
@@ -929,14 +991,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                     end = child.end
             self._validate_dates(self._start, end, self._duration)
         return self._end
-    
+
     def _end_setter(self, end_in):
         """overridden end setter
         """
         # update the end only if this is not a container task
         if self.is_leaf:
             self._validate_dates(self.start, end_in, self.duration)
-    
+
     @declared_attr
     def end(self):
         return synonym(
@@ -951,10 +1013,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                 """
             )
         )
-    
+
     def _project_getter(self):
         return self._project
-    
+
     project = synonym(
         '_project',
         descriptor=property(
@@ -966,25 +1028,25 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         Project of a Task it is defined when the Task is created.
         """
     )
-    
+
     @property
     def is_root(self):
         """Returns True if the Task has no parent
         """
         return not bool(self.parent)
-    
+
     @property
     def is_container(self):
         """Returns True if the Task has children Tasks
         """
         return bool(len(self.children))
-    
+
     @property
     def is_leaf(self):
         """Returns True if the Task has no children Tasks
         """
         return not bool(len(self.children))
-    
+
     @property
     def tjp_abs_id(self):
         """returns the calculated absolute id of this task
@@ -993,17 +1055,18 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             abs_id = self.parent.tjp_abs_id
         else:
             abs_id = self.project.tjp_id
-        
+
         return abs_id + '.' + self.tjp_id
-    
+
     @property
     def to_tjp(self):
         """TaskJuggler representation of this task
         """
         from jinja2 import Template
+
         temp = Template(defaults.tjp_task_template)
         return temp.render({'task': self})
-    
+
     @property
     def level(self):
         """Returns the level of this task. It is a temporary property and will
@@ -1013,20 +1076,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         i = 0
         current = self
         while current:
-            i+=1
+            i += 1
             current = current.parent
         return i
-    
+
     @property
     def is_scheduled(self):
         """A predicate which returns True if this task has both a
         computed_start and computed_end values
         """
         return self.computed_start is not None and \
-            self.computed_end is not None
-    
+               self.computed_end is not None
+
     @property
-    def total_booked_seconds(self):
+    def total_logged_seconds(self):
         """The total effort spent for this Task. It is the sum of all the
         TimeLogs recorded for this task as seconds.
         
@@ -1037,7 +1100,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             seconds += (time_log.duration.days * 86400 +
                         time_log.duration.seconds)
         return seconds
-    
+
     @property
     def schedule_seconds(self):
         """returns the total effort, length or duration in seconds, for
@@ -1047,45 +1110,50 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         schedule_model = self.schedule_model
         schedule_unit = self.schedule_unit
         from stalker import Studio
-        studio = Studio.query.first()
+
+        try:
+            studio = Studio.query.first()
+        except UnboundExecutionError:
+            studio = None
         data_source = studio if studio else defaults
-        
+
         if schedule_model == 'effort':
             if schedule_unit == 'min':
                 return schedule_timing * 60
-            
+
             elif schedule_unit == 'h':
                 return schedule_timing * 3600
-            
+
             elif schedule_unit == 'd':
                 # we need to have a studio or defaults
                 return schedule_timing * data_source.daily_working_hours * 3600
-            
+
             elif schedule_unit == 'w':
                 return schedule_timing * data_source.weekly_working_hours * 3600
-            
+
             elif schedule_unit == 'm':
                 return schedule_timing * 4 * data_source.weekly_working_hours * 3600
-            
+
             elif schedule_unit == 'y':
                 return schedule_timing * \
                        data_source.yearly_working_days * \
                        data_source.daily_working_hours * 3600
-    
+
     @property
     def remaining_seconds(self):
         """returns the remaining amount of efforts, length or duration left
         in this Task as seconds.
         """
         # for effort based tasks use the time_logs
-        return self.schedule_seconds - self.total_booked_seconds
-    
+        return self.schedule_seconds - self.total_logged_seconds
+
     @property
     def computed_duration(self):
         """it is the direct difference of computed_start and computed_end
         """
         return self.computed_end - self.computed_start \
             if self.computed_end and self.computed_start else None
+
 
 def _check_circular_dependency(task, check_for_task, attr_name):
     """checks the circular dependency in task if it has check_for_task in its
@@ -1102,7 +1170,6 @@ def _check_circular_dependency(task, check_for_task, attr_name):
                 dependent_task, check_for_task, attr_name
             )
 
-            
 
 # TASK_DEPENDENCIES
 Task_Dependencies = Table(

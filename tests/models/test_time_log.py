@@ -33,7 +33,7 @@ class TimeLogTester(unittest2.TestCase):
         """setup the test
         """
         # create a resource
-        self.test_resource = User(
+        self.test_resource1 = User(
             name="User1",
             login="user1",
             email="user1@users.com",
@@ -83,7 +83,7 @@ class TimeLogTester(unittest2.TestCase):
         self.kwargs = {
             "name": "test time_log",
             "task": self.test_task,
-            "resource": self.test_resource,
+            "resource": self.test_resource1,
             "start": datetime.datetime(2013, 3, 22, 1, 0),
             "duration": datetime.timedelta(10)
         }
@@ -97,7 +97,7 @@ class TimeLogTester(unittest2.TestCase):
         TimeLog class
         """
         self.assertTrue(TimeLog.__auto_name__)
-    
+
     def test_task_argument_is_Skipped(self):
         """testing if a TypeError will be raised when the task argument is
         skipped
@@ -138,7 +138,7 @@ class TimeLogTester(unittest2.TestCase):
             name="Test task 2",
             project=self.test_project,
             status_list=self.test_task_status_list,
-            resources=[self.test_resource],
+            resources=[self.test_resource1],
         )
         self.assertNotEqual(self.test_time_log.task, new_task)
         self.test_time_log.task = new_task
@@ -153,14 +153,14 @@ class TimeLogTester(unittest2.TestCase):
             name="Test Task 3",
             project=self.test_project,
             status_list=self.test_task_status_list,
-            resources=[self.test_resource],
+            resources=[self.test_resource1],
         )
 
         # now create a new time_log for the new task
         self.kwargs["task"] = new_task
-        self.kwargs["start"] = self.kwargs["start"] +\
-                                    self.kwargs["duration"] +\
-                                    datetime.timedelta(120)
+        self.kwargs["start"] = self.kwargs["start"] + \
+                               self.kwargs["duration"] + \
+                               datetime.timedelta(120)
         new_time_log = TimeLog(**self.kwargs)
 
         # now check if the new_time_log is in task.time_logs
@@ -175,19 +175,19 @@ class TimeLogTester(unittest2.TestCase):
             name="Test Task 3",
             project=self.test_project,
             status_list=self.test_task_status_list,
-            resources=[self.test_resource],
+            resources=[self.test_resource1],
         )
-        
+
         self.test_time_log.task = new_task
         self.assertIn(self.test_time_log, new_task.time_logs)
-    
+
     def test_resource_argument_is_skipped(self):
         """testing if a TypeError will be raised when the resource argument is
         skipped
         """
         self.kwargs.pop("resource")
         self.assertRaises(TypeError, TimeLog, **self.kwargs)
-    
+
     def test_resource_argument_is_None(self):
         """testing if a TypeError will be raised when the resource argument is
         None
@@ -272,8 +272,8 @@ class TimeLogTester(unittest2.TestCase):
         self.assertEqual(self.test_time_log.duration, self.kwargs["duration"])
 
         self.test_time_log.start = datetime.datetime(2013, 3, 22, 4, 0)
-        self.test_time_log.end = self.test_time_log.start +\
-                                     datetime.timedelta(10)
+        self.test_time_log.end = self.test_time_log.start + \
+                                 datetime.timedelta(10)
         self.assertEqual(self.test_time_log.duration, datetime.timedelta(10))
 
     def test_OverbookedWarning_1(self):
@@ -289,12 +289,13 @@ class TimeLogTester(unittest2.TestCase):
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0),
         self.kwargs["duration"] = datetime.timedelta(10)
-        
+
         time_log1 = TimeLog(**self.kwargs)
-        
+
         # time_log2
         self.kwargs["name"] = "time_log2"
         import warnings
+
         warnings.resetwarnings()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
@@ -322,8 +323,9 @@ class TimeLogTester(unittest2.TestCase):
         # time_log2
         self.kwargs["name"] = "time_log2"
         self.kwargs["duration"] = datetime.timedelta(8)
-        
+
         import warnings
+
         warnings.resetwarnings()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
@@ -331,7 +333,7 @@ class TimeLogTester(unittest2.TestCase):
             self.assertTrue(
                 issubclass(w[-1].category, OverBookedWarning)
             )
-    
+
     def test_OverbookedWarning_3(self):
         """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
@@ -351,8 +353,9 @@ class TimeLogTester(unittest2.TestCase):
         # time_log2        
         self.kwargs["name"] = "time_log2"
         self.kwargs["duration"] = datetime.timedelta(10)
-        
+
         import warnings
+
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
             new_time_log = TimeLog(**self.kwargs)
@@ -371,18 +374,19 @@ class TimeLogTester(unittest2.TestCase):
         # time_log1
         self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
-                                    datetime.timedelta(2)
+        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
+                               datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
-        
+
         time_log1 = TimeLog(**self.kwargs)
-        
+
         # time_log2
         self.kwargs["name"] = "time_log2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(10)
-        
+
         import warnings
+
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
             new_time_log = TimeLog(**self.kwargs)
@@ -403,16 +407,17 @@ class TimeLogTester(unittest2.TestCase):
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(10)
-        
+
         time_log1 = TimeLog(**self.kwargs)
-        
+
         # time_log2
         self.kwargs["name"] = "time_log2"
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
-                                    datetime.timedelta(2)
+        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
+                               datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
-        
+
         import warnings
+
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
             new_time_log = TimeLog(**self.kwargs)
@@ -433,23 +438,24 @@ class TimeLogTester(unittest2.TestCase):
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(15)
-        
+
         time_log1 = TimeLog(**self.kwargs)
-        
+
         # time_log2
         self.kwargs["name"] = "time_log2"
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
-                                    datetime.timedelta(5)
+        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
+                               datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
-        
+
         import warnings
+
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
             new_time_log = TimeLog(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, OverBookedWarning)
-            ) 
-    
+            )
+
     def test_OverbookedWarning_7(self):
         """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
@@ -461,18 +467,19 @@ class TimeLogTester(unittest2.TestCase):
         # time_log1
         self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) -\
-                                    datetime.timedelta(5)
+        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
+                               datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
-        
+
         time_log1 = TimeLog(**self.kwargs)
-        
+
         # time_log2        
         self.kwargs["name"] = "time_log2"
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(15)
-        
+
         import warnings
+
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
             new_time_log = TimeLog(**self.kwargs)
@@ -498,8 +505,8 @@ class TimeLogTester(unittest2.TestCase):
 
         # time_log2
         self.kwargs["name"] = "time_log2"
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) +\
-                                    datetime.timedelta(20)
+        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) + \
+                               datetime.timedelta(20)
         # no warning
         time_log2 = TimeLog(**self.kwargs)
 
@@ -514,8 +521,8 @@ class TimeLogTester(unittest2.TestCase):
         # time_log1
         self.kwargs["name"] = "time_log1"
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) +\
-                                    datetime.timedelta(20)
+        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) + \
+                               datetime.timedelta(20)
         self.kwargs["duration"] = datetime.timedelta(5)
 
         time_log1 = TimeLog(**self.kwargs)
@@ -526,3 +533,119 @@ class TimeLogTester(unittest2.TestCase):
 
         # no warning
         time_log2 = TimeLog(**self.kwargs)
+
+    def test_time_log_extends_effort_of_task(self):
+        """testing if the TimeLog will expand the Task.schedule_timing if it is
+        getting longer than Task.total_logged_seconds
+        """
+        task1 = Task(
+            name='Test Task 1',
+            schedule_timing=10,
+            schedule_unit='h',
+            schedule_model='effort',
+            resource=self.test_resource1,
+            status_list=self.test_task_status_list,
+            project=self.test_project
+        )
+        
+        # check everything is initialized as they should be
+        self.assertEqual(task1.total_logged_seconds, 0)
+        self.assertEqual(task1.remaining_seconds, 36000)
+        
+        dt = datetime.datetime
+        td = datetime.timedelta
+        
+        # now create time log for the task
+        timeLog1 = TimeLog(
+            task=task1,
+            resource=self.test_resource1,
+            start=dt(2013, 5, 2, 15, 0),
+            duration=td(hours=5)
+        )
+        
+        # now check if the remaining seconds is correctly calculated
+        self.assertEqual(
+            task1.remaining_seconds, 18000
+        )
+        
+        # and the schedule_timing is not expanded
+        self.assertEqual(
+            task1.schedule_timing,
+            10
+        )
+        
+        # now add a new timeLog which expands the Task
+        timeLog2 = TimeLog(
+            task=task1,
+            resource=self.test_resource1,
+            start=dt(2013, 5, 2, 20, 0),
+            duration=td(hours=8)
+        )
+        
+        # check if the task schedule_timing is correctly expanded to 13 hours
+        self.assertEqual(
+            task1.schedule_timing,
+            13
+        )
+    
+    def test_time_log_extends_effort_of_task_with_different_time_unit(self):
+        """testing if the TimeLog will expand the Task.schedule_timing if it is
+        getting longer than Task.total_logged_seconds and can work with
+        different time units
+        """
+        from stalker import defaults
+        defaults.daily_working_hours = 10
+
+        task1 = Task(
+            name='Test Task 1',
+            schedule_timing=2,
+            schedule_unit='d',
+            schedule_model='effort',
+            resource=self.test_resource1,
+            status_list=self.test_task_status_list,
+            project=self.test_project
+        )
+        
+        # check everything is initialized as they should be
+        self.assertEqual(task1.total_logged_seconds, 0)
+        
+        # there are no studio created so it should use the defaults
+        self.assertEqual(task1.remaining_seconds,
+                         2 * 10 * 60 * 60)
+        
+        dt = datetime.datetime
+        td = datetime.timedelta
+        
+        # now create time log for the task
+        timeLog1 = TimeLog(
+            task=task1,
+            resource=self.test_resource1,
+            start=dt(2013, 5, 2, 10, 0),
+            duration=td(hours=10)
+        )
+        
+        # now check if the remaining seconds is correctly calculated
+        self.assertEqual(
+            task1.remaining_seconds, 10 * 60 * 60
+        )
+        
+        # and the schedule_timing is not expanded
+        self.assertEqual(
+            task1.schedule_timing,
+            2
+        )
+        
+        # now add a new timeLog which expands the Task
+        timeLog2 = TimeLog(
+            task=task1,
+            resource=self.test_resource1,
+            start=dt(2013, 5, 2, 20, 0),
+            duration=td(hours=15)
+        )
+        
+        # check if the task schedule_timing is correctly expanded to 2.5 days
+        self.assertEqual(
+            task1.schedule_timing,
+            2.5
+        )
+        

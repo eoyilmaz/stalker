@@ -115,6 +115,9 @@ def __init_db__():
     # create FilenameTemplate Types
     __create_filename_template_types()
     
+    ## create TimeLog Types
+    #__create_time_log_types()
+    
     logger.debug('finished initializing the database')
 
 def __create_admin__():
@@ -256,6 +259,44 @@ def __create_ticket_statuses():
     else:
         DBSession.flush()
         logger.debug("Ticket Types are created successfully")
+
+def __create_time_log_types():
+    """Creates two default :class:`~stalker.models.type.Type`\ s for
+    :class:`~stalker.models.task.TimeLog` objects.
+    
+    TODO: still evaluating if this is needed
+    """
+    from stalker import TimeLog, Type, User
+    
+    admin = User.query.filter_by(login=defaults.admin_name).first()
+    
+    # Normal
+    logger.debug('Creating TimeLog.type "Normal"')
+    normal_type = Type(
+        name='Normal',
+        code='Normal',
+        target_entity_type=TimeLog,
+        created_by=admin
+    )
+    DBSession.add(normal_type)
+    
+    logger.debug('Creating TimeLog.type "Extra"')
+    extra_type = Type(
+        name='Extra',
+        code='Extra',
+        target_entity_type=TimeLog,
+        created_by=admin
+    )
+    DBSession.add(extra_type)
+    try:
+        transaction.commit()
+    except IntegrityError as e:
+        logger.debug(e)
+        transaction.abort()
+        logger.debug('TimeLog Types are already in database')
+    else:
+        DBSession.flush()
+        logger.debug('TimeLog Types are created successfully')
 
 def __create_filename_template_types():
     """Creates two default :class:`~stalker.models.type.Type`\ s for

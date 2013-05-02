@@ -18,6 +18,7 @@ requires = [
     'pyseq',
     'jinja2',
     'pyramid_jinja2',
+    'unittest2',
 ]
 
 setup(name='stalker',

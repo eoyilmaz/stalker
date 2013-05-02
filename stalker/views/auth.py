@@ -412,7 +412,7 @@ def forbidden(request):
 def home(request):
     login = authenticated_userid(request)
     user = User.query.filter_by(login=login).first()
-    studio = Studio.query.all()
+    studio = Studio.query.first()
     projects = Project.query.all()
     return {
         'stalker': stalker,
