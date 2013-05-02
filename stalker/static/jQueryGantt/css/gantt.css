@@ -209,11 +209,23 @@
 
 .taskBox .layout {
     height:100%;
-    /*color:red;*/
     border-radius: 3px;
-    background: #eee; /* Old browsers */
-    border:1px solid #bbb;
-    /*box-shadow: 3px 3px 8px -1px black;*/
+    /*background: #CCCCCC; *//* Old browsers */
+    border:1px solid #AAAAAA;
+    
+    background-image: linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    background-image: -o-linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    background-image: -moz-linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    background-image: -webkit-linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    background-image: -ms-linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0, #E0E0E0),
+        color-stop(0.50, #FFFFFF)
+    );    
 }
 
 .taskBox .taskStatus {
@@ -245,22 +257,33 @@
 }
 
 .taskBox .taskProgress{
-    height:3px;
+    /*height:3px;*/
+    height: 100%;
     position:absolute;
+    
+    background-image: linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    background-image: -o-linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    background-image: -moz-linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    background-image: -webkit-linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    background-image: -ms-linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0, #6DD900),
+        color-stop(0.50, #99FF33)
+    );    
+    
 }
 
-.taskBox .taskBid{
+.taskBox .taskExtraTiming{
     height: 7px;
     position: absolute;
     border-radius: 2px;
     top: 9px;
-}
-
-.taskBox .taskExtraTiming{
-    background-color:darkred;
-    height: 100%;
     right: 0;
-    position:absolute
+    background-color: red;
 }
 
 .taskBox .layout.extDep{

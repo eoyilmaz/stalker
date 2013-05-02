@@ -2413,8 +2413,8 @@ class TaskTester(unittest2.TestCase):
         """
         self.assertRaises(TypeError, setattr, self.test_task, 'bid_unit', 10)
     
-    def test_bid_hour_argument_is_working_properly(self):
-        """testing if the bid_hour argument is working properly
+    def test_bid_unit_argument_is_working_properly(self):
+        """testing if the bid_unit argument is working properly
         """
         self.kwargs['bid_unit'] = 'h'
         new_task = Task(**self.kwargs)

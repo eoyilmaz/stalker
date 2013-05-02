@@ -123,11 +123,11 @@ class TimeLog(Entity, ScheduleMixin):
         kwargs['end'] = end
         kwargs['duration'] = duration
         ScheduleMixin.__init__(self, **kwargs)
-        self.task = task
         self.resource = resource
+        self.task = task
 
-    def _adjust_task_schedule(self, task):
-        """Adjusts the task schedule timing if necessary
+    def _expand_task_schedule_timing(self, task):
+        """Expands the task schedule timing if necessary
         
         :param task: The task that is going to be adjusted
         """
@@ -138,7 +138,8 @@ class TimeLog(Entity, ScheduleMixin):
 
         studio = None
         try:
-            studio = Studio.query.first()
+            with DBSession.no_autoflush:
+                studio = Studio.query.first()
         except UnboundExecutionError:
             pass
         
@@ -182,7 +183,7 @@ class TimeLog(Entity, ScheduleMixin):
                              task.__class__.__name__))
         
         # adjust task schedule
-        self._adjust_task_schedule(task)
+        self._expand_task_schedule_timing(task)
         
         return task
 
@@ -1096,9 +1097,10 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         :returns int: An integer showing the total seconds spent.
         """
         seconds = 0
-        for time_log in self.time_logs:
-            seconds += (time_log.duration.days * 86400 +
-                        time_log.duration.seconds)
+        with DBSession.no_autoflush:
+            for time_log in self.time_logs:
+                seconds += (time_log.duration.days * 86400 +
+                            time_log.duration.seconds)
         return seconds
 
     @property
@@ -1112,7 +1114,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         from stalker import Studio
 
         try:
-            studio = Studio.query.first()
+            with DBSession.no_autoflush:
+                studio = Studio.query.first()
         except UnboundExecutionError:
             studio = None
         data_source = studio if studio else defaults

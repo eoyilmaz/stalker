@@ -91,8 +91,12 @@ def convert_to_jquery_gantt_task_format(tasks):
                 'is_scheduled': task.is_scheduled,
                 'schedule_timing': task.schedule_timing,
                 'schedule_unit': task.schedule_unit,
+                'bid_timing': task.bid_timing,
+                'bid_unit': task.bid_unit,
                 'schedule_model': task.schedule_model,
                 'schedule_constraint': task.schedule_constraint,
+                'schedule_seconds': task.schedule_seconds,
+                'total_logged_seconds': task.total_logged_seconds,
                 'computed_start': int(task.computed_start.strftime('%s')) * 1000 if task.computed_start else None,
                 'computed_end': int(task.computed_end.strftime('%s')) * 1000 if task.computed_end else None,
             }
@@ -285,6 +289,7 @@ def update_task(request):
     schedule_unit = request.params.get('schedule_unit')
     start = get_datetime(request, 'start_date', 'start_time')
     end = get_datetime(request, 'end_date', 'end_time')
+    update_bid = request.params.get('update_bid')
     
     depend_ids = [
         int(d_id)
@@ -314,6 +319,7 @@ def update_task(request):
     logger.debug('schedule_unit   : %s' % schedule_unit)
     logger.debug('start           : %s' % start)
     logger.debug('end             : %s' % end)
+    logger.debug('update_bid      : %s' % update_bid)
     
     # get task
     task_id = request.matchdict['task_id']
@@ -336,7 +342,9 @@ def update_task(request):
     task.schedule_timing = schedule_timing
     task.resources = resources
     task._reschedule(task.schedule_timing, task.schedule_unit)
-        
+    if update_bid:
+        task.bid_timing = task.schedule_timing
+        task.bid_unit = task.schedule_unit
     
     return HTTPOk(detail='Task updated successfully')
 

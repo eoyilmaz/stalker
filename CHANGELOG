@@ -7,8 +7,10 @@ Stalker Changes
 
 * Stalker is now compatible with Python 2.6.
 
-* TimeLog instances will expand Task.schedule_timing value automatically if the
-  total amount of logged time is more than the schedule_timing value.
+* TimeLog:
+  * TimeLog instances will expand Task.schedule_timing value automatically if
+    the total amount of logged time is more than the schedule_timing value.
+  * Logged in time will now be visible in gantt charts as a green bar.
 
 0.2.0.b1
 --------

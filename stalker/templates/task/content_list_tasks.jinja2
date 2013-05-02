@@ -70,9 +70,8 @@
     <div class="__template__" type="TASKBAR"><!--
   <div class="taskBox" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
-      <div class="taskExtraTiming" style="width:(#=obj.bid/obj.schedule_timing*100#)%;;"></div>
-      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
-      <div class="taskBid" style="width:(#=obj.bid/obj.schedule_timing#)%; background-color:red;"></div>
+      <div class="taskProgress" style="width:(#=obj.schedule_seconds>0?obj.total_logged_seconds/obj.schedule_seconds*100:0#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
+      <div class="taskExtraTiming" style="width:(#=(obj.schedule_timing - obj.bid_timing)/obj.schedule_timing*100#)%;;"></div>
       <div class="taskScheduleModel" style="position: absolute; text-align: center; width: 100%;">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div>
       <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
       
