@@ -31,14 +31,30 @@ logger = logging.getLogger(__name__)
 log.logging_level = logging.DEBUG
 logger.setLevel(log.logging_level)
 
+
 @view_config(
-    route_name='create_studio_dialog',
+    route_name='dialog_create_studio',
     renderer='templates/studio/dialog_create_studio.jinja2'
 )
 def create_studio_dialog(request):
     """creates the content of the create_studio_dialog
     """
-    return {}
+    return {
+        'mode': 'CREATE'
+    }
+
+
+@view_config(
+    route_name='dialog_update_studio',
+    renderer='templates/studio/dialog_create_studio.jinja2'
+)
+def update_studio_dialog(request):
+    """updates the given studio
+    """
+    return {
+        'mode': 'UPDATE',
+        'studio': Studio.query.first()
+    }
 
 
 @view_config(
@@ -47,7 +63,6 @@ def create_studio_dialog(request):
 def create_studio(request):
     """creates the studio
     """
-    
     name = request.params.get('name', None)
     dwh = request.params.get('dwh', None)
     wh_mon_start = get_time(request, 'mon_start')
@@ -86,6 +101,8 @@ def create_studio(request):
         set_wh_for_day('fri', wh_fri_start, wh_fri_end)
         set_wh_for_day('sat', wh_sat_start, wh_sat_end)
         set_wh_for_day('sun', wh_sun_start, wh_sun_end)
+        
+        studio.working_hours = wh
         
         DBSession.add(studio)
         # Commit will be handled by the zope transaction extension

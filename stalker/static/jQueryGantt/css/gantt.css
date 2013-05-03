@@ -301,6 +301,7 @@
 .parentTaskBox .layout {
     height: 5px;
     background: black;
+    border-radius: 3px 3px 0 0;
 }
 
 .parentTaskBox .layout .leftPin {

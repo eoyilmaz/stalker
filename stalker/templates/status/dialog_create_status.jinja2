@@ -18,170 +18,165 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-  <form id='create_status_form'>
-    <table style='width:100%;'>
-      
-      {# NAME #}
-      <tr>
-        <td class='label_column'>
-          <label for='status_name'>
-            Name
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='status_name'>
-        </td>
-      </tr>
-      
-      {# CODE #}
-      <tr>
-        <td class='label_column'>
-          <label for='status_code'>
-            Code
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='status_code'>
-        </td>
-      </tr>
-  
-      {# FG Color #}
-      <tr>
-        <td class='label_column'>
-          <label for='status_fg_color'>
-            FG Color
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='status_fg_color'>
-        </td>
-      </tr>
-      
-      {# BG Color #}
-      <tr>
-        <td class='label_column'>
-          <label for='status_bg_color'>
-            BG Color
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='status_bg_color'>
-        </td>
-      </tr>
-      
-    </table>
-  </form>
+    <form id='create_status_form'>
+        <table style='width:100%;'>
+
+            {# NAME #}
+            <tr>
+                <td class='label_column'>
+                    <label for='status_name'>
+                        Name
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='status_name'>
+                </td>
+            </tr>
+
+            {# CODE #}
+            <tr>
+                <td class='label_column'>
+                    <label for='status_code'>
+                        Code
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='status_code'>
+                </td>
+            </tr>
+
+            {# FG Color #}
+            <tr>
+                <td class='label_column'>
+                    <label for='status_fg_color'>
+                        FG Color
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='status_fg_color'>
+                </td>
+            </tr>
+
+            {# BG Color #}
+            <tr>
+                <td class='label_column'>
+                    <label for='status_bg_color'>
+                        BG Color
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='status_bg_color'>
+                </td>
+            </tr>
+
+        </table>
+    </form>
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='status_submit_button'></button>
-  <button id='status_cancel_button'></button>
+    <button id='status_submit_button'></button>
+    <button id='status_cancel_button'></button>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
-    'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-    'dijit/form/SimpleTextarea', 'dijit/form/Button', 'dijit/ColorPalette',
-    'stalker/submitForm', 'dojo/domReady!'],
-    function(registry, Memory, Form, ValidationTextBox, TextBox,
-             SimpleTextarea, Button, ColorPalette, submitForm){
-      
-      
-      
-      
-      // **********************************************************************
-      // Form
-      var create_status_form = new Form({
-        id: 'create_status_form'
-      }, 'create_status_form');
-      create_status_form.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // Name
-      var name_textBox = new ValidationTextBox({
-        name: 'name',
-        label: 'Name',
-        placeHolder: 'Enter a name',
-        required: true
-      }, 'status_name');
-      name_textBox.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // Code
-      var code_textBox = new ValidationTextBox({
-        name: 'code',
-        label: 'Code',
-        placeHolder: 'Enter a code',
-        required: true
-      }, 'status_code');
-      code_textBox.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // FG Color
-      // TODO: set default colors
-      var fg_color_colorPalette = new ColorPalette({
-        name: 'fg_color',
-        label: 'FG Color',
-        required: true
-      }, 'status_fg_color');
-      fg_color_colorPalette.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // BG Color
-      var bg_color_colorPalette = new ColorPalette({
-        name: 'bg_color',
-        label: 'BG Color',
-        required: true
-      }, 'status_bg_color');
-      bg_color_colorPalette.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // Submit Button
-      var submit_button = new Button({
-        label: 'OK',
-        type: 'button',
-        onClick: function(){
-          submitForm({
-            dialog: registry.byId('create_status_dialog'),
-            form: create_status_form,
-            additional_data: {submitted: 'create'},
-            url: '{{ request.route_url('create_status')}}',
-            method: 'POST'
-          });
-        }
-      }, 'status_submit_button');
-      submit_button.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // Cancel Button
-      var cancel_button = new Button({
-        label: 'Cancel',
-        type: 'button',
-        onClick: function(){
-          registry.byId('create_status_dialog').destroyRecursive();
-        }
-      }, 'status_cancel_button');
-      cancel_button.startup();
-      
-      
-      
-  });
+    require([
+        'dojo/ready',
+        'dojo/store/Memory',
+
+        'dijit/registry',
+        'dijit/form/Form',
+        'dijit/form/ValidationTextBox',
+        'dijit/form/TextBox',
+        'dijit/form/SimpleTextarea',
+        'dijit/form/Button',
+        'dijit/ColorPalette',
+
+        'stalker/submitForm'
+    ], function (ready, Memory, registry, Form, ValidationTextBox, TextBox,
+                 SimpleTextarea, Button, ColorPalette, submitForm) {
+        
+        ready(function () {
+            // **********************************************************************
+            // Form
+            var create_status_form = new Form({
+                id: 'create_status_form'
+            }, 'create_status_form');
+            create_status_form.startup();
+
+
+            // **********************************************************************
+            // Name
+            var name_textBox = new ValidationTextBox({
+                name: 'name',
+                label: 'Name',
+                placeHolder: 'Enter a name',
+                required: true
+            }, 'status_name');
+            name_textBox.startup();
+
+
+            // **********************************************************************
+            // Code
+            var code_textBox = new ValidationTextBox({
+                name: 'code',
+                label: 'Code',
+                placeHolder: 'Enter a code',
+                required: true
+            }, 'status_code');
+            code_textBox.startup();
+
+
+            // **********************************************************************
+            // FG Color
+            var fg_color_colorPalette = new ColorPalette({
+                name: 'fg_color',
+                label: 'FG Color',
+                required: true,
+                value: '#000000'
+            }, 'status_fg_color');
+            fg_color_colorPalette.startup();
+
+
+            // **********************************************************************
+            // BG Color
+            var bg_color_colorPalette = new ColorPalette({
+                name: 'bg_color',
+                label: 'BG Color',
+                required: true,
+                value: '#ffffff'
+            }, 'status_bg_color');
+            bg_color_colorPalette.startup();
+
+
+            // **********************************************************************
+            // Submit Button
+            var submit_button = new Button({
+                label: 'OK',
+                type: 'button',
+                onClick: function () {
+                    submitForm({
+                        dialog: registry.byId('create_status_dialog'),
+                        form: create_status_form,
+                        additional_data: {submitted: 'create'},
+                        url: '{{ request.route_url('create_status')}}',
+                        method: 'POST'
+                    });
+                }
+            }, 'status_submit_button');
+            submit_button.startup();
+
+
+            // **********************************************************************
+            // Cancel Button
+            var cancel_button = new Button({
+                label: 'Cancel',
+                type: 'button',
+                onClick: function () {
+                    registry.byId('create_status_dialog').destroyRecursive();
+                }
+            }, 'status_cancel_button');
+            cancel_button.startup();
+
+        });
+    });
 </script>

@@ -104,7 +104,8 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Studio
-    config.add_route('create_studio_dialog', 'dialog/create/studio')
+    config.add_route('dialog_create_studio', 'dialog/create/studio')
+    config.add_route('dialog_update_studio', 'dialog/update/studio')
     config.add_route('create_studio', 'create/studio')
     
     # *************************************************************************
@@ -145,7 +146,10 @@ def main(global_config, **settings):
     config.add_route('get_users', 'get/users')
     config.add_route('get_users_byEntity', 'get/users_byEntity/{entity_id}')
     config.add_route('get_users_not_in_entity', 'get/users_not_in_entity/{entity_id}')
-    config.add_route('append_user', 'append/user/{entity_id}')
+    config.add_route('dialog_append_users', 'dialog/append/user/{entity_id}')
+    
+    config.add_route('append_user', 'append/user')
+    config.add_route('append_users', 'append/users')
     
     config.add_route('summarize_user', 'summarize/user/{user_id}')
     config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
@@ -209,10 +213,10 @@ def main(global_config, **settings):
     # Task
     
     # Dialogs
-    config.add_route('create_task_dialog', 'dialog/create/task/{entity_id}')
-    config.add_route('create_child_task_dialog', 'dialog/create/child_task/{task_id}')
-    config.add_route('create_dependent_task_dialog', 'dialog/create/dependent_task/{task_id}')
-    config.add_route('update_task_dialog', 'dialog/update/task/{task_id}')
+    config.add_route('dialog_create_task', 'dialog/create/task/{entity_id}')
+    config.add_route('dialog_create_child_task', 'dialog/create/child_task/{task_id}')
+    config.add_route('dialog_create_dependent_task', 'dialog/create/dependent_task/{task_id}')
+    config.add_route('dialog_update_task', 'dialog/update/task/{task_id}')
     
     config.add_route('create_task', 'create/task')
     
@@ -232,8 +236,8 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # TimeLog
-    config.add_route('create_time_log_dialog', 'dialog/create/time_log/{task_id}')
-    config.add_route('update_time_log_dialog', 'dialog/update/time_log/{time_log_id}')
+    config.add_route('dialog_create_time_log', 'dialog/create/time_log/{task_id}')
+    config.add_route('dialog_update_time_log', 'dialog/update/time_log/{time_log_id}')
     
     config.add_route('create_time_log', 'create/time_log/{task_id}')
     

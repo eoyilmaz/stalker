@@ -153,7 +153,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'append_user_dialog',
                 title: 'Append User',
-                href: 'append/user/' + entity_id,
+                href: 'dialog/append/user/' + entity_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -166,7 +166,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'create_filename_template_dialog',
                 title: 'New Filename Template',
-                href: '/create/filename_template',
+                href: 'create/filename_template',
                 resize: true,
                 style: style,
                 executeScripts: true

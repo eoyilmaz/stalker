@@ -49,6 +49,8 @@ def convert_to_jquery_gantt_task_format(tasks):
     """
     
     data_source = Studio.query.first()
+    logger.debug('data_source : %s' % data_source)
+    
     if not data_source:
         data_source = defaults
     
@@ -118,15 +120,15 @@ def convert_to_jquery_gantt_task_format(tasks):
         # "canWriteOnParent": 0
     }
     
-    logger.debug(data)
+    #logger.debug(data)
     
-    logger.debug('loading gantt data:\n%s' % 
-                 json.dumps(data,
-                            sort_keys=False,
-                            indent=4,
-                            separators=(',', ': ')
-                 )
-    )
+    #logger.debug('loading gantt data:\n%s' % 
+    #             json.dumps(data,
+    #                        sort_keys=False,
+    #                        indent=4,
+    #                        separators=(',', ': ')
+    #             )
+    #)
     return data
     
 
@@ -231,8 +233,7 @@ def update_with_jquery_gantt_task_data(json_data):
 
 
 @view_config(
-    route_name='update_gantt_tasks',
-    renderer='json'
+    route_name='update_gantt_tasks'
 )
 def update_gantt_tasks(request):
     """updates the given tasks with the given JSON data
@@ -241,11 +242,11 @@ def update_gantt_tasks(request):
     data = request.params['prj']
     if data:
         update_with_jquery_gantt_task_data(data)
-    return {}
+    return HTTPOk()
 
 
 @view_config(
-    route_name='update_task_dialog',
+    route_name='dialog_update_task',
     renderer='templates/task/dialog_create_task.jinja2'
 )
 def update_task_dialog(request):
@@ -502,7 +503,7 @@ def list_tasks(request):
 
 
 @view_config(
-    route_name='create_task_dialog',
+    route_name='dialog_create_task',
     renderer='templates/task/dialog_create_task.jinja2',
     permission='Create_Task'
 )
@@ -531,7 +532,7 @@ def create_task_dialog(request):
 
 
 @view_config(
-    route_name='create_child_task_dialog',
+    route_name='dialog_create_child_task',
     renderer='templates/task/dialog_create_task.jinja2',
     permission='Create_Task'
 )
@@ -552,7 +553,7 @@ def create_child_task_dialog(request):
 
 
 @view_config(
-    route_name='create_dependent_task_dialog',
+    route_name='dialog_create_dependent_task',
     renderer='templates/task/dialog_create_task.jinja2',
     permission='Create_Task'
 )

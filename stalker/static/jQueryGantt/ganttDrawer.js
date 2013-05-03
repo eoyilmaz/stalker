@@ -290,9 +290,9 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
   
   //if include today synch extremes
   if (this.includeToday){
-    var today=new Date().getTime();
-    originalStartmillis=originalStartmillis>today ? today:originalStartmillis;
-    originalEndMillis=originalEndMillis<today ? today:originalEndMillis;
+    var today = new Date().getTime();
+    originalStartmillis = originalStartmillis > today ? today : originalStartmillis;
+    originalEndMillis = originalEndMillis < today ? today : originalEndMillis;
   }
 
 

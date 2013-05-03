@@ -141,6 +141,25 @@ Task.prototype.getResourcesString = function () {
   return ret;
 };
 
+Task.prototype.getResourcesString_with_links = function () {
+  var ret = "";
+  for (var i=0 ; i<this.resources.length ; i++) {
+    var resource = this.resources[i];
+    var res = this.master.getResource(resource.id);
+    if (res) {
+      ret = ret + (ret == "" ? "" : ", ") + "<a class='DataLink' href='#' stalker_target='central_content' stalker_href='view/user/" + resource.id + "'>" + res.name + "</a>";
+    }
+  }
+  return ret;
+};
+
+Task.prototype.link = function(){
+    return "<a class='DataLink' href='#' stalker_target='tasks_content_pane' stalker_href='view/task/" + this.id + "'>" + this.name + "</a>";
+};
+
+
+
+
 Task.prototype.createResource = function (kwargs) {
   var resource = new Resource(kwargs);
   this.resources.push(resource);

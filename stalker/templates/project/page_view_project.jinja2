@@ -20,118 +20,113 @@
 
 
 <div id='project_split_container'>
-  <div id='project_summary'>
-      {# Summary View #}
-  </div>
-  <div id='project_related_data_tab_container'>
-    <div id="tasks_content_pane"></div>
-    <div id='assets_content_pane'></div>
-    <div id='sequences_content_pane'></div>
-    <div id='shots_content_pane'></div>
-  </div>
+    <div id='project_summary'>
+        {# Summary View #}
+    </div>
+    <div id='project_related_data_tab_container'>
+        <div id="tasks_content_pane"></div>
+        <div id='assets_content_pane'></div>
+        <div id='sequences_content_pane'></div>
+        <div id='shots_content_pane'></div>
+    </div>
 </div>
 
 
 <script type='text/javascript'>
-  require(['dijit/registry',
+    require(['dijit/registry',
 
-    'dijit/layout/SplitContainer',
-    'dijit/layout/TabContainer',
-    'dojox/layout/ContentPane',
+        'dijit/layout/SplitContainer',
+        'dijit/layout/TabContainer',
+        'dojox/layout/ContentPane',
 
-    'dojo/domReady!'],
-          function(registry,
-
-                   SplitContainer,
-                   TabContainer,
-                   ContentPane){
+        'dojo/domReady!'],
+            function (registry, SplitContainer, TabContainer, ContentPane) {
 
 
 
-            // **********************************************************************
+                // **********************************************************************
 
-            var project_content_SplitContainer = new SplitContainer({
-              region: 'center',
-              orientation: 'vertical',
-              splitter: false
+                var project_content_SplitContainer = new SplitContainer({
+                    region: 'center',
+                    orientation: 'vertical',
+                    splitter: false
 
-            }, 'project_split_container');
+                }, 'project_split_container');
 
-            var summary_content_pane = new ContentPane({
-              title: 'Summarize',
-              href: 'summarize/project/{{ project.id }}',
-              region: 'top',
-              style: 'padding: 0; background-color: #eeeeee;'
-            },'project_summary');
-
-
-            // **********************************************************************
-            // Bottom Part - Complex Data View
-            var project_related_data_tab_container = new TabContainer({
-              region: 'bottom',
-              style: 'background-color: #cccccc;'
-            }, 'project_related_data_tab_container');
+                var summary_content_pane = new ContentPane({
+                    title: 'Summarize',
+                    href: 'summarize/project/{{ project.id }}',
+                    region: 'top',
+                    style: 'padding: 0; background-color: #eeeeee;'
+                }, 'project_summary');
 
 
-            var tasks_content_pane = new ContentPane({
-              title: 'Tasks',
-              default_href:'list/tasks/{{ project.id }}',
-              href: 'list/tasks/{{ project.id }}'
-            },'tasks_content_pane');
+                // **********************************************************************
+                // Bottom Part - Complex Data View
+                var project_related_data_tab_container = new TabContainer({
+                    region: 'bottom',
+                    style: 'background-color: #cccccc;'
+                }, 'project_related_data_tab_container');
 
-            var assets_content_pane = new ContentPane({
-              title: 'Assets',
-              default_href:'list/assets/{{ project.id }}',
-              href:'list/assets/{{ project.id }}'
-            },'assets_content_pane');
 
-            var shots_content_pane = new ContentPane({
-              title: 'Shots',
-              default_href:'list/shots/{{ project.id }}',
-              href: 'list/shots/{{ project.id }}'
-            },'shots_content_pane');
+                var tasks_content_pane = new ContentPane({
+                    title: 'Tasks',
+                    default_href: 'list/tasks/{{ project.id }}',
+                    href: 'list/tasks/{{ project.id }}'
+                }, 'tasks_content_pane');
 
-            var sequences_content_pane = new ContentPane({
-              title: 'Sequences',
-              default_href:'list/sequences/{{ project.id }}',
-              href: 'list/sequences/{{ project.id }}'
-            },'sequences_content_pane');
+                var assets_content_pane = new ContentPane({
+                    title: 'Assets',
+                    default_href: 'list/assets/{{ project.id }}',
+                    href: 'list/assets/{{ project.id }}'
+                }, 'assets_content_pane');
 
-            var users_content_pane = new ContentPane({
-              title: 'Users',
-              default_href:'list/users/{{ project.id }}',
-              href: 'list/users/{{ project.id }}'
+                var shots_content_pane = new ContentPane({
+                    title: 'Shots',
+                    default_href: 'list/shots/{{ project.id }}',
+                    href: 'list/shots/{{ project.id }}'
+                }, 'shots_content_pane');
+
+                var sequences_content_pane = new ContentPane({
+                    title: 'Sequences',
+                    default_href: 'list/sequences/{{ project.id }}',
+                    href: 'list/sequences/{{ project.id }}'
+                }, 'sequences_content_pane');
+
+                var users_content_pane = new ContentPane({
+                    title: 'Users',
+                    default_href: 'list/users/{{ project.id }}',
+                    href: 'list/users/{{ project.id }}'
+                });
+
+                var tickets_content_pane = new ContentPane({
+                    title: 'Tickets',
+                    default_href: 'list/tickets/{{ project.id }}',
+                    content: 'list/tickets/{{ project.id }}'
+                });
+
+
+                project_related_data_tab_container.addChild(tasks_content_pane);
+                project_related_data_tab_container.addChild(assets_content_pane);
+                project_related_data_tab_container.addChild(shots_content_pane);
+                project_related_data_tab_container.addChild(sequences_content_pane);
+                project_related_data_tab_container.addChild(users_content_pane);
+                project_related_data_tab_container.addChild(tickets_content_pane);
+                project_related_data_tab_container.startup();
+
+                project_content_SplitContainer.addChild(summary_content_pane);
+                project_content_SplitContainer.addChild(project_related_data_tab_container);
+                project_content_SplitContainer.startup();
+
+                project_related_data_tab_container.watch("selectedChildWidget", function (name, oval, nval) {
+                    console.log("selected child changed from ", nval.title, " to ", nval.href);
+                    oval.set('href', '');
+                    oval.refresh();
+
+                    nval.set('href', nval.default_href);
+                    nval.refresh();
+                });
+
             });
-
-            var tickets_content_pane = new ContentPane({
-              title: 'Tickets',
-              default_href:'list/tickets/{{ project.id }}',
-              content: 'list/tickets/{{ project.id }}'
-            });
-
-
-
-            project_related_data_tab_container.addChild(tasks_content_pane);
-            project_related_data_tab_container.addChild(assets_content_pane);
-            project_related_data_tab_container.addChild(shots_content_pane);
-            project_related_data_tab_container.addChild(sequences_content_pane);
-            project_related_data_tab_container.addChild(users_content_pane);
-            project_related_data_tab_container.addChild(tickets_content_pane);
-            project_related_data_tab_container.startup();
-
-            project_content_SplitContainer.addChild(summary_content_pane);
-            project_content_SplitContainer.addChild(project_related_data_tab_container);
-            project_content_SplitContainer.startup();
-
-            project_related_data_tab_container.watch("selectedChildWidget", function(name, oval, nval){
-              console.log("selected child changed from ", nval.title, " to ", nval.href);
-              oval.set('href','');
-              oval.refresh();
-
-              nval.set('href',nval.default_href);
-              nval.refresh();
-            });
-
-          });
 </script>
 

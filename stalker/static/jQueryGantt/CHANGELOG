@@ -1,6 +1,14 @@
 ====================
 StalkerGantt Changes
 ====================
+0.1.0.a3
+--------
+* TaskBar now shows the logged in time and shows them by painting the bar
+  itself to green.
+* Removed the TaskBid div, the extra time spent to a task is now shown with the
+  TaskExtraTime div.
+* Removed all the editing functions in the TaskGrid area.
+
 0.1.0.a2
 --------
 * Fixed a lot of issues related with the new data structure, it seems

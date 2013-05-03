@@ -17,7 +17,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
-<div style="margin-top: 0" id='user_border_container'>
+{#<div style="margin-top: 0" id='user_border_container'>#}
 {#  <div id='user_summary'>#}
       {# Summary View #}
 {#  </div>#}
@@ -27,6 +27,17 @@
 {#    <div id='tickets_pane'></div>#}
 {#    <div id='departments_pane'></div>#}
 {#  </div>#}
+{#</div>#}
+<div id='user_border_container'>
+    <div id='user_summary'>
+        {# Summary View #}
+    </div>
+    <div id='user_related_data_tab_container'>
+        <div id="tasks_content_pane"></div>
+        <div id='projects_content_pane'></div>
+        <div id='departments_content_pane'></div>
+        <div id='tickets_content_pane'></div>
+    </div>
 </div>
 
 <script type='text/javascript'>
@@ -78,24 +89,24 @@
       var tasks_content_pane = new ContentPane({
         title: 'Tasks',
         href: 'list/tasks/{{ user.id }}'
-      });
+      },'tasks_content_pane');
 
 
       var projects_content_pane = new ContentPane({
         title: 'Projects',
         href:'list/projects/{{ user.id }}'
-      });
+      },'projects_content_pane');
 
       var departments_content_pane = new ContentPane({
         title: 'Departments',
         href: 'list/departments/{{ user.id }}'
-      });
+      },'departments_content_pane');
 
 
       var tickets_content_pane = new ContentPane({
         title: 'Tickets',
         content: 'list/tickets/{{ user.id }}'
-      });
+      },'tickets_content_pane');
 
 
       user_related_data_tab_container.addChild(tasks_content_pane);
@@ -111,7 +122,16 @@
       //document.body.appendChild(user_SplitContainer.domNode);
       user_related_data_tab_container.startup();
       user_SplitContainer.startup();
-{#    });#}
+      
+{#      user_related_data_tab_container.watch("selectedChildWidget", function (name, oval, nval) {#}
+{#                    console.log("selected child changed from ", nval.title, " to ", nval.href);#}
+{#                    oval.set('href', '');#}
+{#                    oval.refresh();#}
+{##}
+{#                    nval.set('href', nval.default_href);#}
+{#                    nval.refresh();#}
+{#                });#}
+
   });
 </script>
 

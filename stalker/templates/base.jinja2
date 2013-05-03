@@ -20,20 +20,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Stalker v{{stalker.__version__}}</title>
+    <title>Stalker v{{ stalker.__version__ }}</title>
     <meta charset='utf-8'>
     <meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
     <meta name='keywords' content='python web application'/>
     <meta name='description' content='pyramid web application'/>
     <link rel='shortcut icon'
-          href='{{request.static_url("stalker:static/stalker/images/favicon.ico")}}'/>
+          href='{{ request.static_url("stalker:static/stalker/images/favicon.ico") }}'/>
     <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
-          href='{{request.static_url("stalker:static/stalker/css/stalker.css")}}'/>
+          href='{{ request.static_url("stalker:static/stalker/css/stalker.css") }}'/>
 
     {# load jQuery and jQuery Gantt first#}
-    <link rel=stylesheet href='{{ request.static_url("stalker:static/jQueryGantt/css/platform.css") }}' type="text/css">
-    <link rel=stylesheet href='{{ request.static_url("stalker:static/jQueryGantt/libs/dateField/jquery.dateField.css") }}' type="text/css">
-    <link rel=stylesheet href='{{ request.static_url("stalker:static/jQueryGantt/css/gantt.css") }}' type="text/css">
+    <link rel=stylesheet
+          href='{{ request.static_url("stalker:static/jQueryGantt/css/platform.css") }}'
+          type="text/css">
+    <link rel=stylesheet
+          href='{{ request.static_url("stalker:static/jQueryGantt/libs/dateField/jquery.dateField.css") }}'
+          type="text/css">
+    <link rel=stylesheet
+          href='{{ request.static_url("stalker:static/jQueryGantt/css/gantt.css") }}'
+          type="text/css">
 
     <script src='{{ request.static_url("stalker:static/jquery/1.7/jquery.min.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jqueryui/1.8/jquery-ui.min.js") }}'></script>
@@ -80,7 +86,7 @@
         <div id='header' class='edgePanel' style="overflow: hidden">
             {% block header %}
                 <div id='stalker_logo'>
-                    <a href="/"  style='color: #000000'>STALKER</a>
+                    <a href="/" style='color: #000000'>STALKER</a>
                 </div>
 
                 <div id='stalkerMenuBar' style='color: #000000'></div>
@@ -102,7 +108,10 @@
 
         <div id='footer' class='edgePanel'>
             {% block footer %}
-                <div class='footer'>&copy; Copyright 2009-2013, Erkan Ozgur Yilmaz.  <span style='font-size: 12px;'>Stalker v{{stalker.__version__}}</span></div>
+                <div class='footer'>&copy; Copyright 2009-2013, Erkan Ozgur
+                                           Yilmaz. <span
+                            style='font-size: 12px;'>Stalker v{{ stalker.__version__ }}</span>
+                </div>
             {% endblock %}
         </div>
     </div>
@@ -135,33 +144,13 @@
         'stalker/dialogCreator',
 
         'dojo/ready'],
-            function(
-                    BorderContainer,
-                    ContentPane,
+            function (BorderContainer, ContentPane, MenuBar, MenuBarItem,
+                      MenuSeparator, PopupMenuBarItem, PopupMenuItem, MenuItem,
+                      DropDownMenu, DropDownButton, TooltipDialog, popup, on,
+                      JsonRest, Memory, fx, dialogCaller, dialogCreator,
+                      ready) {
 
-                    MenuBar,
-                    MenuBarItem,
-                    MenuSeparator,
-                    PopupMenuBarItem,
-                    PopupMenuItem,
-                    MenuItem,
-                    DropDownMenu,
-                    DropDownButton,
-                    TooltipDialog,
-                    popup,
-
-                    on,
-
-                    JsonRest,
-                    Memory,
-                    fx,
-
-                    dialogCaller,
-                    dialogCreator,
-
-                    ready){
-
-                ready(function(){
+                ready(function () {
                     // ******************************************************************
                     // create the BorderContainer and attach it to our appLayout div
                     var appLayout = new BorderContainer({
@@ -209,14 +198,14 @@
                     // MenuBar
                     var stalker_MenuBar = new MenuBar({
 
-                    },'stalkerMenuBar');
+                    }, 'stalkerMenuBar');
 
                     // ******************************************************************
                     // HOME
 
                     stalker_MenuBar.addChild(new MenuBarItem({
-                        label:"HOME ",
-                        onClick:function(){
+                        label: "HOME ",
+                        onClick: function () {
                             central_content_pane.set(
                                     'href',
                                     'view/user/{{ user.id }}'
@@ -234,8 +223,8 @@
                     {% if not studio %}
                         studio_DropDownMenu.addChild(
                                 dialogCaller({
-                                    label:'Create Studio',
-                                    dialog_id:'create_studio_dialog',
+                                    label: 'Create Studio',
+                                    dialog_id: 'create_studio_dialog',
                                     content_creator: create_studio_dialog_creator,
                                     widget_type: 'MenuItem'
                                 })
@@ -273,8 +262,8 @@
                     // Filename Template
                     settings_DropDownMenu.addChild(
                             dialogCaller({
-                                label:'Filename Tamplate',
-                                dialog_id:'create_filename_template_dialog',
+                                label: 'Filename Tamplate',
+                                dialog_id: 'create_filename_template_dialog',
                                 content_creator: create_filename_template_dialog_creator,
                                 widget_type: 'MenuItem'
                             })
@@ -284,8 +273,8 @@
                     // Image Format
                     settings_DropDownMenu.addChild(
                             dialogCaller({
-                                label:'Image Format',
-                                dialog_id:'create_image_format_dialog',
+                                label: 'Image Format',
+                                dialog_id: 'create_image_format_dialog',
                                 content_creator: create_image_format_dialog_creator,
                                 widget_type: 'MenuItem'
                             })
@@ -295,8 +284,8 @@
                     // Repository
                     settings_DropDownMenu.addChild(
                             dialogCaller({
-                                label:'Repository',
-                                dialog_id:'create_repository_dialog',
+                                label: 'Repository',
+                                dialog_id: 'create_repository_dialog',
                                 content_creator: create_repository_dialog_creator,
                                 widget_type: 'MenuItem'
                             })
@@ -306,8 +295,8 @@
                     // Status
                     settings_DropDownMenu.addChild(
                             dialogCaller({
-                                label:'Status',
-                                dialog_id:'create_status_dialog',
+                                label: 'Status',
+                                dialog_id: 'create_status_dialog',
                                 content_creator: create_status_dialog_creator,
                                 widget_type: 'MenuItem'
                             })
@@ -317,8 +306,8 @@
                     // Status List
                     settings_DropDownMenu.addChild(
                             dialogCaller({
-                                label:'Status List',
-                                dialog_id:'create_status_list_dialog',
+                                label: 'Status List',
+                                dialog_id: 'create_status_list_dialog',
                                 content_creator: create_status_list_dialog_creator,
                                 widget_type: 'MenuItem'
                             })
@@ -328,8 +317,8 @@
                     // Structure
                     settings_DropDownMenu.addChild(
                             dialogCaller({
-                                label:'Structure',
-                                dialog_id:'create_structure_dialog',
+                                label: 'Structure',
+                                dialog_id: 'create_structure_dialog',
                                 content_creator: create_structure_dialog_creator,
                                 widget_type: 'MenuItem'
                             })
@@ -360,7 +349,7 @@
 
                     // --------
                     // Project Menu
-                    var create_project_setting_DropDownMenu = function (pID){
+                    var create_project_setting_DropDownMenu = function (pID) {
 
                         var project_setting_DropDownMenu = new DropDownMenu({
 
@@ -372,7 +361,7 @@
                                 new MenuItem({
                                     label: 'View',
                                     dataId: pID,
-                                    onClick: function(){
+                                    onClick: function () {
                                         central_content_pane.set(
                                                 'href',
                                                 'view/project/' + this.get('dataId')
@@ -386,8 +375,8 @@
                         // Update Project
                         project_setting_DropDownMenu.addChild(
                                 dialogCaller({
-                                    label:'Update',
-                                    dialog_id:'update_project_dialog',
+                                    label: 'Update',
+                                    dialog_id: 'update_project_dialog',
                                     content_creator: update_project_dialog_creator,
                                     widget_type: 'MenuItem',
                                     data_id: pID
@@ -403,8 +392,8 @@
                         // Asset
                         project_setting_DropDownMenu.addChild(
                                 dialogCaller({
-                                    label:'New Asset',
-                                    dialog_id:'create_asset_dialog',
+                                    label: 'New Asset',
+                                    dialog_id: 'create_asset_dialog',
                                     content_creator: create_asset_dialog_creator,
                                     widget_type: 'MenuItem',
                                     data_id: pID
@@ -416,8 +405,8 @@
                         // Sequence
                         project_setting_DropDownMenu.addChild(
                                 dialogCaller({
-                                    label:'New Sequence',
-                                    dialog_id:'create_sequence_dialog',
+                                    label: 'New Sequence',
+                                    dialog_id: 'create_sequence_dialog',
                                     content_creator: create_sequence_dialog_creator,
                                     widget_type: 'MenuItem',
                                     data_id: pID
@@ -428,8 +417,8 @@
                         // Shot
                         project_setting_DropDownMenu.addChild(
                                 dialogCaller({
-                                    label:'New Shot',
-                                    dialog_id:'create_shot_dialog',
+                                    label: 'New Shot',
+                                    dialog_id: 'create_shot_dialog',
                                     content_creator: create_shot_dialog_creator,
                                     widget_type: 'MenuItem',
                                     data_id: pID
@@ -442,8 +431,8 @@
 
                         project_setting_DropDownMenu.addChild(
                                 dialogCaller({
-                                    label:'Add User',
-                                    dialog_id:'create_user_dialog',
+                                    label: 'Add User',
+                                    dialog_id: 'create_user_dialog',
                                     content_creator: create_user_dialog_creator,
                                     widget_type: 'MenuItem',
                                     data_id: pID
@@ -460,16 +449,16 @@
                     });
 
                     // Projects Updater
-                    var projects_DropDownMenu_updater = function(){
+                    var projects_DropDownMenu_updater = function () {
                         // delete the current items
                         var items = projects_DropDownMenu.getChildren();
-                        for (var i=0; i< items.length; i++){
+                        for (var i = 0; i < items.length; i++) {
                             items[i].destroyRecursive();
                         }
 
                         // query new items
-                        var result = projects_memory.query().then(function(data){
-                            for (var i=0; i < data.length; i++){
+                        var result = projects_memory.query().then(function (data) {
+                            for (var i = 0; i < data.length; i++) {
                                 projects_DropDownMenu.addChild(
                                         new PopupMenuItem({
                                             label: data[i].name,
@@ -486,8 +475,8 @@
 
                             projects_DropDownMenu.addChild(
                                     dialogCaller({
-                                        label:'New Project',
-                                        dialog_id:'create_project_dialog',
+                                        label: 'New Project',
+                                        dialog_id: 'create_project_dialog',
                                         content_creator: create_project_dialog_creator,
                                         widget_type: 'MenuItem',
                                         related_field_updater: projects_DropDownMenu_updater
@@ -502,8 +491,8 @@
                             // Asset
                             projects_DropDownMenu.addChild(
                                     dialogCaller({
-                                        label:'New Asset',
-                                        dialog_id:'create_asset_dialog',
+                                        label: 'New Asset',
+                                        dialog_id: 'create_asset_dialog',
                                         content_creator: create_asset_dialog_creator,
                                         widget_type: 'MenuItem'
 
@@ -514,8 +503,8 @@
                             // Sequence
                             projects_DropDownMenu.addChild(
                                     dialogCaller({
-                                        label:'New Sequence',
-                                        dialog_id:'create_sequence_dialog',
+                                        label: 'New Sequence',
+                                        dialog_id: 'create_sequence_dialog',
                                         content_creator: create_sequence_dialog_creator,
                                         widget_type: 'MenuItem'
                                     })
@@ -525,8 +514,8 @@
                             // Shot
                             projects_DropDownMenu.addChild(
                                     dialogCaller({
-                                        label:'New Shot',
-                                        dialog_id:'create_shot_dialog',
+                                        label: 'New Shot',
+                                        dialog_id: 'create_shot_dialog',
                                         content_creator: create_shot_dialog_creator,
                                         widget_type: 'MenuItem'
                                     })
@@ -557,7 +546,7 @@
                     });
 
                     // Department Menu
-                    var create_department_setting_DropDownMenu = function (dID){
+                    var create_department_setting_DropDownMenu = function (dID) {
 
                         var department_setting_DropDownMenu = new DropDownMenu();
 
@@ -565,9 +554,9 @@
                         // View Department
                         department_setting_DropDownMenu.addChild(
                                 new MenuItem({
-                                    label: 'Users',
+                                    label: 'View',
                                     dataId: dID,
-                                    onClick: function(){
+                                    onClick: function () {
                                         central_content_pane.set(
                                                 'href',
                                                 'view/department/' + this.get('dataId')
@@ -577,37 +566,65 @@
                                 })
                         );
 
-                        department_setting_DropDownMenu.addChild(
-                                new MenuSeparator({})
-                        );
-
                         // ----------
                         // ADD USER
                         department_setting_DropDownMenu.addChild(
                                 dialogCaller({
-                                    label:'New User',
-                                    dialog_id:'create_user_dialog',
+                                    label: 'New User',
+                                    dialog_id: 'create_user_dialog',
                                     content_creator: create_user_dialog_creator,
                                     widget_type: 'MenuItem',
                                     data_id: dID
                                 })
                         );
+                        
+                        
+                        
+                        department_setting_DropDownMenu.addChild(
+                                new MenuSeparator({})
+                        );
+                        
+                        // List Users
+                        var users_memory = new JsonRest({
+                            target: 'get/users_byEntity/' + dID
+                        });
+
+                        var result = users_memory.query().then(function (data) {
+                            for (var i = 0; i < data.length; i++) {
+                                var user_id = data[i]['id'];
+                                var user_name = data[i]['name'];
+                                department_setting_DropDownMenu.addChild(
+                                        new MenuItem({
+                                            label: user_name,
+                                            dataId: user_id,
+                                            onClick: function () {
+                                                central_content_pane.set(
+                                                        'href',
+                                                        'view/user/' + this.get('dataId')
+                                                );
+                                                central_content_pane.refresh();
+                                            }
+                                        })
+                                );
+                            }
+                        });
+                        
 
                         return department_setting_DropDownMenu;
 
                     };
 
                     // Departments Updater
-                    var departments_DropDownMenu_updater = function(){
+                    var departments_DropDownMenu_updater = function () {
                         // delete the current items
                         var items = crew_DropDownMenu.getChildren();
-                        for (var i=0; i<items.length; i++){
+                        for (var i = 0; i < items.length; i++) {
                             items[i].destroyRecursive();
                         }
 
                         // query new items
-                        var result = departments_memory.query().then(function(data){
-                            for (var i=0; i < data.length; i++){
+                        var result = departments_memory.query().then(function (data) {
+                            for (var i = 0; i < data.length; i++) {
                                 crew_DropDownMenu.addChild(
                                         new PopupMenuItem({
                                             label: data[i].name,
@@ -655,8 +672,8 @@
                             // ADD USER
                             crew_DropDownMenu.addChild(
                                     dialogCaller({
-                                        label:'New User',
-                                        dialog_id:'create_user_dialog',
+                                        label: 'New User',
+                                        dialog_id: 'create_user_dialog',
                                         content_creator: create_user_dialog_creator,
                                         widget_type: 'MenuItem',
                                         data_id: '-1'
@@ -675,7 +692,6 @@
                             );
 
 
-
                         });
                     };
 
@@ -690,7 +706,7 @@
                         id: 'mebar_tooltipDialog',
                         style: 'width: 250px; height: 100%',
                         href: '/me_menu',
-                        onMouseLeave: function(){
+                        onMouseLeave: function () {
                             mebar_tooltipDialog.set('visible', false);
                             popup.close(mebar_tooltipDialog);
                         }

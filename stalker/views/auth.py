@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, HTTPOk
 from pyramid.security import authenticated_userid, forget, remember
 from pyramid.view import view_config, forbidden_view_config
 from sqlalchemy import or_
@@ -240,41 +240,70 @@ def get_users_not_in_entity(request):
 
 
 @view_config(
-    route_name='append_user',
-    renderer='templates/auth/dialog_append_user.jinja2',
-    permission='List_User'
+    route_name='dialog_append_users',
+    renderer='templates/auth/dialog_append_users.jinja2'
 )
-def append_user(request):
-    """returns all the Users of a given Entity
+def append_user_dialog(request):
+    """runs for append user dialog
     """
-
     login = authenticated_userid(request)
     logged_user = User.query.filter_by(login=login).first()
-
+    
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
-
-    if 'submitted' in request.params:
-        logger.debug('submitted in params')
-        if request.params['submitted'] == 'append':
-            logger.debug('submitted value is: append')
-            # append and add a new user
-            if  'entity_users' in request.params:
-                user_ids = [
-                    int(user_id)
-                    for user_id in request.POST.getall('entity_users')
-                ]
-                users = User.query.filter(
-                    User.id.in_(user_ids)).all()
-
-
-
-
-
+    
     return {
-            'user': logged_user,
-            'entity': entity
-        }
+        'user': logged_user,
+        'entity': entity
+    }
+
+@view_config(
+    route_name='append_user'
+)
+def append_user(request):
+    """appends the given user to the given Project or Department
+    """
+    # user
+    user_id = request.params.get('user_id', None)
+    user = User.query.filter(User.id==user_id).first()
+    
+    # entity
+    entity_id = request.params.get('entity_id', None)
+    entity = Entity.query.filter(Entity.id==entity_id).first()
+    
+    if user and entity:
+        entity.users.append(user)
+        DBSession.add_all([entity, user])
+    
+    return HTTPOk()
+
+
+@view_config(
+    route_name='append_users'
+)
+def append_users(request):
+    """appends the given users o the given Project or Department
+    """
+    # users
+    user_ids = [
+        int(u_id)
+        for u_id in request.POST.getall('entity_users')
+    ]
+    users = User.query.filter(User.id.in_(user_ids)).all()
+    
+    # entity
+    entity_id = request.params.get('entity_id', None)
+    entity = Entity.query.filter(Entity.id==entity_id).first()
+    
+    logger.debug('entity : %s' % entity)
+    logger.debug('users  : %s' % users)
+    
+    if users and entity:
+        entity.users = users
+        DBSession.add(entity)
+        DBSession.add_all(users)
+    
+    return HTTPOk()
 
 
 @view_config(

@@ -76,9 +76,9 @@
       <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
       
       <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
-      <div class="taskLabel">(#=obj.name#)</div>
+      <div class="taskLabel">(#=obj.link()#)</div>
       <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
-      <div class="taskResourceLabel">(#=obj.getResourcesString()#)</div>
+      <div class="taskResourceLabel">(#=obj.getResourcesString_with_links()#)</div>
     </div>
   </div>
   --></div>
@@ -92,7 +92,7 @@
       <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
       <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
       <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
-      <div class="taskLabel">(#=obj.name#)</div>
+      <div class="taskLabel">(#=obj.link()#)</div>
       <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
     </div>
   </div>
@@ -154,6 +154,7 @@
 
         'stalker/dialogCaller',
         'stalker/dialogCreator',
+        'stalker/gotoLink',
 
         'dojo/ready'], function(
             registry,
@@ -171,6 +172,7 @@
 
             dialogCaller,
             dialogCreator,
+            gotoLink,
 
             ready){
         ready(function(){
@@ -399,6 +401,9 @@
 
                         leaf_task_menu.startup();
                         parent_task_menu.startup();
+                    
+                        // create User page links
+                        gotoLink();
 
                     });
                 });

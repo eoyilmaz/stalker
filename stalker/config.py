@@ -254,6 +254,9 @@ class Config(object):
             allocate {% for resource in task.resources -%}
                 {%-if loop.index != 1 %}, {% endif %}{{resource.tjp_id}}{% endfor %}
             {%- endif -%}
+            {% for time_log in task.time_logs %}
+            booking {{time_log.resource.tjp_id}} {{time_log.start.strftime('%Y-%m-%d-%H:%M:%S')}} +{{'%i'|format(time_log.duration.days*24 + time_log.duration.seconds/3600)}}h { overtime 2 }
+            {%- endfor %}
             {%- if task.depends %}
             depends {% for depends in task.depends %}
                 {%- if loop.index != 1 %}, {% endif %}{{depends.tjp_abs_id}}

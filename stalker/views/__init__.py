@@ -17,14 +17,20 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
-import datetime
 
 import logging
+import datetime
+
 from pyramid.httpexceptions import HTTPServerError
 from pyramid.view import view_config
+from pyramid.response import  Response
+
+
 from stalker import log
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
+
+
 
 def log_param(request, param):
     if param in request.params:
@@ -33,10 +39,6 @@ def log_param(request, param):
         logger.debug('%s not in params' % param)
 
 
-
-# register exception views
-
-from pyramid.response import  Response
 
 @view_config(
    context=HTTPServerError 

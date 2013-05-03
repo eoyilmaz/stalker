@@ -68,12 +68,12 @@ class CircularDependencyError(Exception):
 #        self.value = value
 
 
-class OverBookedWarning(Warning):
+class OverBookedError(Exception):
     """Raised when a resource is booked more than once for the same time period
     """
 
     def __init__(self, value=""):
-        super(OverBookedWarning, self).__init__(value)
+        super(OverBookedError, self).__init__(value)
         self.value = value
 
     def __str__(self):

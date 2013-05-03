@@ -22,7 +22,7 @@ import unittest2
 import datetime
 from stalker import (Project, Repository, Status, StatusList, Task, TimeLog,
                      User)
-from stalker.exceptions import OverBookedWarning
+from stalker.exceptions import OverBookedError
 
 
 class TimeLogTester(unittest2.TestCase):
@@ -276,7 +276,7 @@ class TimeLogTester(unittest2.TestCase):
                                  datetime.timedelta(10)
         self.assertEqual(self.test_time_log.duration, datetime.timedelta(10))
 
-    def test_OverbookedWarning_1(self):
+    def test_OverbookedError_1(self):
         """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
@@ -294,17 +294,10 @@ class TimeLogTester(unittest2.TestCase):
 
         # time_log2
         self.kwargs["name"] = "time_log2"
-        import warnings
+        
+        self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
-        warnings.resetwarnings()
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            new_time_log = TimeLog(**self.kwargs)
-            self.assertTrue(
-                issubclass(w[-1].category, OverBookedWarning)
-            )
-
-    def test_OverbookedWarning_2(self):
+    def test_OverbookedError_2(self):
         """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
@@ -324,17 +317,9 @@ class TimeLogTester(unittest2.TestCase):
         self.kwargs["name"] = "time_log2"
         self.kwargs["duration"] = datetime.timedelta(8)
 
-        import warnings
+        self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
-        warnings.resetwarnings()
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            new_time_log = TimeLog(**self.kwargs)
-            self.assertTrue(
-                issubclass(w[-1].category, OverBookedWarning)
-            )
-
-    def test_OverbookedWarning_3(self):
+    def test_OverbookedError_3(self):
         """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
@@ -354,16 +339,9 @@ class TimeLogTester(unittest2.TestCase):
         self.kwargs["name"] = "time_log2"
         self.kwargs["duration"] = datetime.timedelta(10)
 
-        import warnings
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            new_time_log = TimeLog(**self.kwargs)
-            self.assertTrue(
-                issubclass(w[-1].category, OverBookedWarning)
-            )
-
-    def test_OverbookedWarning_4(self):
+        self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
+    
+    def test_OverbookedError_4(self):
         """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
@@ -385,16 +363,9 @@ class TimeLogTester(unittest2.TestCase):
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
         self.kwargs["duration"] = datetime.timedelta(10)
 
-        import warnings
+        self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            new_time_log = TimeLog(**self.kwargs)
-            self.assertTrue(
-                issubclass(w[-1].category, OverBookedWarning)
-            )
-
-    def test_OverbookedWarning_5(self):
+    def test_OverbookedError_5(self):
         """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
@@ -416,16 +387,9 @@ class TimeLogTester(unittest2.TestCase):
                                datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
 
-        import warnings
+        self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            new_time_log = TimeLog(**self.kwargs)
-            self.assertTrue(
-                issubclass(w[-1].category, OverBookedWarning)
-            )
-
-    def test_OverbookedWarning_6(self):
+    def test_OverbookedError_6(self):
         """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
@@ -447,16 +411,9 @@ class TimeLogTester(unittest2.TestCase):
                                datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
 
-        import warnings
+        self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            new_time_log = TimeLog(**self.kwargs)
-            self.assertTrue(
-                issubclass(w[-1].category, OverBookedWarning)
-            )
-
-    def test_OverbookedWarning_7(self):
+    def test_OverbookedError_7(self):
         """testing if a OverTimeLogWarning will be raised when the resource 
         is already booked for the given time period.
         
@@ -480,14 +437,9 @@ class TimeLogTester(unittest2.TestCase):
 
         import warnings
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            new_time_log = TimeLog(**self.kwargs)
-            self.assertTrue(
-                issubclass(w[-1].category, OverBookedWarning)
-            )
+        self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
-    def test_OverbookedWarning_8(self):
+    def test_OverbookedError_8(self):
         """testing if no OverTimeLogWarning will be raised when the resource 
         is not already booked for the given time period.
         
@@ -510,7 +462,7 @@ class TimeLogTester(unittest2.TestCase):
         # no warning
         time_log2 = TimeLog(**self.kwargs)
 
-    def test_OverbookedWarning_9(self):
+    def test_OverbookedError_9(self):
         """testing if no OverTimeLogWarning will be raised when the resource 
         is not already booked for the given time period.
         

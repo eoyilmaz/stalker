@@ -289,3 +289,4 @@ def view_project_related_data(request):
         'user': user,
         'project': project
     }
+

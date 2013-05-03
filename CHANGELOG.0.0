@@ -1,0 +1,83 @@
+0.0.1.20101227
+--------------
+
+* the test_db is converted to a proper unittest which is testing all the
+  models one by one
+* test/db renamed to test/z_db to let nose run it latest to solve the problem
+  about mocker and sqlalchemy fighting each other.
+* Mapping syntax is changed a little bit, now to do the mapping, the
+  <mapper>.setup() function needs to be called to be able to do the mapping
+  any time
+* started adding tests for every class in SOM
+
+0.0.1.20101226
+--------------
+
+* in user.User the last_name attribute could be an empty string
+* removed SimpleEntity, TaggedEntity and introduced StatusedEntity to make the
+  inheritance clear and let users to find somebody to blame by moving all the
+  audit information to the the SimpleEntity class in which everything is
+  inherited from. Now even a Tag has audit information.
+
+0.0.1.20101225
+--------------
+
+* entity.AuditEntity.created_by can now be None (for now)
+* user.User.last_name can now be None, to let users like admin have no last
+  name
+* creating tables for catch the general inheritance of the entity classes
+* entitiy.SimpleEntity.name's first letter is not capitalized any more
+* department.Department class now accepts Null for lead attribute (for now
+  again)
+
+0.0.1.20101224
+--------------
+
+* started playing with the SQLAlchemy side of the system
+
+0.0.1.20101223
+--------------
+
+* updating the documentation
+* AuditEntity now accepts None for updated_by attribute when it an object is
+  created, but sets it to the same value with created_by attribute
+
+0.0.1.20101219
+--------------
+
+* started to implement:
+  * a database entry point
+  * a customizable object model and database tables
+  * an automatic mapper to map the objects and tables together according to
+     user settings
+  
+  things can change a lot in this phase, I'm just trying to figure out the
+  best possible way to do it.
+
+* added a new entity type called TaggedEntity which derives from SimpleEntity,
+  and moved all the tag related attributes of SimpleEntity to TaggedEntity,
+  and all the child classes deriving from SimpleEntity now derives from
+  TaggedEntity, also moved the tests related with tag in SimpleEntity to
+  TaggedEntity.
+* tag.Tag now derives from the SimpleEntity and doesn't add any other
+  attribute to its super.
+* updated tests for tag.Tag
+* updated docs for TaggedEntity
+* finished implementing the Department object and its tests
+* removed the notes attribute from the Entity class
+
+0.0.1.20101209
+--------------
+
+* added the inheritance diagram as an rst page to reference it anywhere needed
+* added the empty classes for:
+  * Asset
+  * AssetBase
+  * Booking
+  * Shot
+  * Structure
+  * Template
+  * Version
+
+* added the Department class
+* added inheritance diagrams to the autosummary pages of the classes

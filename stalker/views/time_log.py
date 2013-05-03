@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 @view_config(
-    route_name='create_time_log_dialog',
+    route_name='dialog_create_time_log',
     renderer='templates/time_log/dialog_create_time_log.jinja2',
     permission='Create_TimeLog'
 )
@@ -58,6 +58,7 @@ def create_time_log_dialog(request):
         'logged_in_user': logged_in_user,
         'task': task
     }
+
 
 @view_config(
     route_name='create_time_log',

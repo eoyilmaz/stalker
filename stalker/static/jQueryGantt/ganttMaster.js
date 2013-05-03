@@ -270,7 +270,7 @@ GanttMaster.prototype.loadTasks = function(tasks) {
                 schedule_timing: task.schedule_timing,
                 schedule_unit: task.schedule_unit,
                 schedule_seconds: task.schedule_seconds,
-                total_logged_seconds: task.total_logged_seconds
+                total_logged_seconds: task.total
             });
             
             // TODO: do it properly

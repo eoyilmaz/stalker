@@ -21,19 +21,18 @@
 import datetime
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
-import warnings
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float)
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
-from stalker import User
+
 
 from stalker import defaults
-
+from stalker.models.entity import Entity
+from stalker.models.auth import User
+from stalker.models.mixins import ScheduleMixin, StatusMixin
 from stalker.db import DBSession
 from stalker.db.declarative import Base
-from stalker.exceptions import OverBookedWarning, CircularDependencyError
-from stalker.models.entity import Entity
-from stalker.models.mixins import ScheduleMixin, StatusMixin
+from stalker.exceptions import OverBookedError, CircularDependencyError
 
 from stalker.log import logging_level
 import logging
@@ -71,7 +70,7 @@ class TimeLog(Entity, ScheduleMixin):
     :class:`~stalker.models.auth.User` instances.
     
     Adding overlapping time log for a :class:`~stalker.models.auth.User` will
-    raise a :class:`~stalker.errors.OverBookedWarning`.
+    raise a :class:`~stalker.errors.OverBookedError`.
     
     TimeLog instances automatically extends the
     :attr:`~stalker.models.task.Task.schedule_timing` of the assigned Task if
@@ -215,12 +214,17 @@ class TimeLog(Entity, ScheduleMixin):
                             time_log.end == self.end or \
                                     time_log.start < self.end < time_log.end or \
                                     time_log.start < self.start < time_log.end:
-                warnings.warn(
+                raise OverBookedError(
                     "The resource %s is overly booked with %s and %s" %
                     (resource, self, time_log),
-                    OverBookedWarning
                 )
         return resource
+
+# TODO: Consider contracting a Task with TimeLogs, what will happen when the task has logged in time
+# TODO: Check, what happens when a task has TimeLogs and will have child task later on, will it be ok with TJ
+# TODO: Create a TimeLog/Resource view where each resource is in one row and we have the days and hours in columns, you can temporarily store the resource report of TJ in db
+# TODO: Task with no resource can not have booking (I think this is automatically done already!)
+
 
 
 def update_task_dates(func):

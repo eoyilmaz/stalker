@@ -30,10 +30,11 @@ define(['dijit/registry', 'dojo/on', 'dojo/query'],
 
               for (var i=0; i<dataLinks.length; i++){
                   on(dataLinks[i], 'click', function(){
+                      alert("gotoLink");
                       var contentPane = registry.byId(this.getAttribute('stalker_target'));
                       if (contentPane){
                           contentPane.set('href', this.getAttribute('stalker_href'));
-                          contentPane.reset();
+                          contentPane.refresh();
                       }
                   });
               }
