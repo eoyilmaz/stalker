@@ -7,29 +7,31 @@ Stalker Changes
 
 * Stalker is now compatible with Python 2.6.
 * TimeLog:
-  * TimeLog instances will expand Task.schedule_timing value automatically if
-    the total amount of logged time is more than the schedule_timing value.
-  * TimeLogs are now considered while scheduling the task.
-  * Fixed: TimeLogs raises OverBookedError when appending the same TimeLog
+  * Update: TimeLog instances will expand Task.schedule_timing value
+    automatically if the total amount of logged time is more than the
+    schedule_timing value.
+  * Update: TimeLogs are now considered while scheduling the task.
+  * Fix: TimeLogs raises OverBookedError when appending the same TimeLog
     instance to the same resource.
 * WebUI:
-  * Logged in work times will now be visible in gantt charts as a green bar in
-    the TaskBar div.
-  * Fixed Studio creation, the working hours were not correctly passed to the
-    studio instance.
-  * "Append User Dialog" is now working properly.
-  * Department menus under 'Crew' menu are now showing the department users.
-  * Color choosers in "Create Status Dialog" now have colors picked by default
+  * Update: Logged in work times will now be visible in gantt charts as a green
+    bar in the TaskBar div.
+  * Fix: The working hours were not correctly passed to the studio instance
+    in Studio creation.
+  * Fix: "Append User Dialog" is now working properly.
+  * Update: Department menus under 'Crew' menu are now showing the department
+    users.
+  * Update: Color choosers in "Create Status Dialog" now have colors picked by default
     for BG and FG colors.
-  * Combined ``user_create_dialog`` and ``user_update_dialog`` into one.
-  * Replaced DataGrid objects with dgrid.
-  * Added navigation bar for assets, shots, sequences.
-  * Combined ``project_create_dialog`` and ``project_update_dialog`` into one.
-  * Updating a project now correctly refreshes the ``project_summary`` content
-    pane.
+  * Update: Combined ``user_create_dialog`` and ``user_update_dialog`` into one.
+  * Update: Replaced DataGrid objects with dgrid.
+  * Update: Added navigation bar for assets, shots, sequences.
+  * Update: Combined ``project_create_dialog`` and ``project_update_dialog`` into one.
+  * Fix: Updating a project now correctly refreshes the ``project_summary``
+    content pane.
 * jQueryGantt:
-  * Replaced the ``duration`` column with ``timing`` which correctly shows the
-    schedule timing info of the related task.
+  * Update: Replaced the ``duration`` column with ``timing`` which correctly
+    shows the schedule timing info of the related task.
   * Fix: The ``depends`` column shows the dependent task names correctly.
 
 0.2.0.b1

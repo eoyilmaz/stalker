@@ -363,36 +363,47 @@
                         // mode is CREATE
                         // or
                         // mode is UPDATE and the login is different then previous
-                        if ((mode == 'CREATE' || (mode == 'UPDATE' && login != '{{ user.login }}')) && data['available'] == 0) {
-                            console.log('code is here 3A');
-                            login_textBox.invalidMessage = 'This login is not available';
-                            login_textBox.validator = function () {
-                                return false;
-                            };
+
+                        if (data['available'] == 0) {
+                            {% if mode=='UPDATE' %}
+                                if ( login != '{{ user.login }}' ) {
+                            {% endif %}
+                                    login_textBox.invalidMessage = 'This login is not available';
+                                    login_textBox.validator = function () {
+                                        return false;
+                                    };
+                            {% if mode=='UPDATE' %}
+                                }
+                            {% endif %}
                         } else {
                             console.log('code is here 3B');
                             login_textBox.validator = function () {
                                 return true;
                             };
                         }
+                    
                     }).then(function () {
 
-                        console.log('code is here 4');
                         var email_memory = new JsonRest({
                             target: 'check/email_availability/' + email_textBox.value
                         });
 
                         var email_result = email_memory.query().then(function (data) {
-                            console.log('code is here 5');
-
+                            
                             var email = email_textBox.value;
 
-                            if ((mode == 'CREATE' || (mode == 'UPDATE' && email != '{{ user.email }}')) && data['available'] == 0) {
-                                console.log('code is here 5A');
-                                email_textBox.invalidMessage = 'This email is not available';
-                                email_textBox.validator = function () {
-                                    return false;
-                                };
+                            if (data['available'] == 0) {
+                                {% if mode=='UPDATE' %}
+                                    if (email != '{{ user.email }}' ) {
+                                {% endif %}
+                                        email_textBox.invalidMessage = 'This email is not available';
+                                        email_textBox.validator = function () {
+                                            return false;
+                                        };
+                                {% if mode=='UPDATE' %}
+                                    }
+                                {% endif %}
+                        
                             } else {
                                 console.log('code is here 5B');
                                 email_textBox.validator = function () {
@@ -400,24 +411,25 @@
                                 };
                             }
                         }).then(function () {
-                            console.log('code is here 6');
+                            
                             if (login_textBox.validate()) {
-                                console.log('code is here 7');
                                 if (email_textBox.validate()) {
-                                    console.log('code is here 8');
+                                    
+                                    var url;
+                                    {% if mode=='CREATE' %}
+                                        url = 'create/user';
+                                    {% elif mode=='UPDATE'%}
+                                        url = 'update/user/{{user.id}}';
+                                    {% endif %}
+                                    
                                     submitForm({
                                         dialog: dialog,
                                         form: user_form,
                                         method: 'POST',
-                                        {% if mode=='CREATE' %}
-                                            url: 'create/user',
-                                        {% elif mode=='UPDATE' %}
-                                            url: 'update/user/{{user.id}}',
-                                        {% endif %}
+                                        url: url,
                                         additional_data: {
                                             {% if department %}
-                                                department_id:
-                                                {{ department.id }}
+                                                department_id: {{ department.id }}
                                             {% endif %}
                                         }
                                     });
