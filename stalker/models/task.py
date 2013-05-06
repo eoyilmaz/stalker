@@ -209,15 +209,16 @@ class TimeLog(Entity, ScheduleMixin):
             logger.debug('time_log.end   : %s' % time_log.end)
             logger.debug('self.start     : %s' % self.start)
             logger.debug('self.end       : %s' % self.end)
-
-            if time_log.start == self.start or \
-                            time_log.end == self.end or \
-                                    time_log.start < self.end < time_log.end or \
-                                    time_log.start < self.start < time_log.end:
-                raise OverBookedError(
-                    "The resource %s is overly booked with %s and %s" %
-                    (resource, self, time_log),
-                )
+            
+            if time_log != self:
+                if time_log.start == self.start or \
+                                time_log.end == self.end or \
+                                        time_log.start < self.end < time_log.end or \
+                                        time_log.start < self.start < time_log.end:
+                    raise OverBookedError(
+                        "The resource %s is overly booked with %s and %s" %
+                        (resource, self, time_log),
+                    )
         return resource
 
 # TODO: Consider contracting a Task with TimeLogs, what will happen when the task has logged in time

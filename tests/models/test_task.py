@@ -1544,10 +1544,6 @@ class TaskTester(unittest2.TestCase):
         
         self.kwargs['schedule_model'] = 'effort'
         
-        
-        
-        
-        
         # -------------- HOURS --------------
         self.kwargs['schedule_timing'] = 10
         self.kwargs['schedule_unit'] = 'h'
@@ -1579,7 +1575,7 @@ class TaskTester(unittest2.TestCase):
         # create a time_log of 5 days
         book1 = TimeLog(
             task=new_task,
-            start=now,
+            start=now+td(hours=2),
             end=now + td(days=5),
             resource=new_task.resources[0]
         )
@@ -1593,7 +1589,7 @@ class TaskTester(unittest2.TestCase):
         # add another 2 hours
         book2 = TimeLog(
             task=new_task,
-            start=now,
+            start=now+td(days=5),
             duration=td(hours=2),
             resource=new_task.resources[0]
         )
@@ -1613,7 +1609,7 @@ class TaskTester(unittest2.TestCase):
         # create a time_log of 2 hours
         book1 = TimeLog(
             task=new_task,
-            start=now,
+            start=now+td(days=6),
             duration=td(hours=2),
             resource=new_task.resources[0]
         )
@@ -1628,7 +1624,7 @@ class TaskTester(unittest2.TestCase):
         # create a time_log of 1 week
         book2 = TimeLog(
             task=new_task,
-            start=now,
+            start=now+td(days=7),
             duration=td(weeks=1),
             resource=new_task.resources[0]
         )
@@ -1651,7 +1647,7 @@ class TaskTester(unittest2.TestCase):
         # create a time_log of 1 months or 30 days, remaining_seconds can be negative
         book1 = TimeLog(
             task=new_task,
-            start=now,
+            start=now+td(days=15),
             duration=td(days=30),
             resource=new_task.resources[0]
         )
@@ -1672,7 +1668,7 @@ class TaskTester(unittest2.TestCase):
         # create a time_log of 1 months or 30 days, remaining_seconds can be negative
         book1 = TimeLog(
             task=new_task,
-            start=now,
+            start=now+td(days=55),
             duration=td(days=30),
             resource=new_task.resources[0]
         )

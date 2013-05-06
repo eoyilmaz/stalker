@@ -10,6 +10,8 @@ Stalker Changes
   * TimeLog instances will expand Task.schedule_timing value automatically if
     the total amount of logged time is more than the schedule_timing value.
   * TimeLogs are now considered while scheduling the task.
+  * Fixed: TimeLogs raises OverBookedError when appending the same TimeLog
+    instance to the same resource.
 * WebUI:
   * Logged in work times will now be visible in gantt charts as a green bar in
     the TaskBar div.

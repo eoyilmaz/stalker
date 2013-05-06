@@ -277,7 +277,7 @@ class TimeLogTester(unittest2.TestCase):
         self.assertEqual(self.test_time_log.duration, datetime.timedelta(10))
 
     def test_OverbookedError_1(self):
-        """testing if a OverTimeLogWarning will be raised when the resource 
+        """testing if a OverBookedError will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
@@ -298,7 +298,7 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_2(self):
-        """testing if a OverTimeLogWarning will be raised when the resource 
+        """testing if a OverBookedError will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
@@ -320,7 +320,7 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_3(self):
-        """testing if a OverTimeLogWarning will be raised when the resource 
+        """testing if a OverBookedError will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
@@ -342,7 +342,7 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
     
     def test_OverbookedError_4(self):
-        """testing if a OverTimeLogWarning will be raised when the resource 
+        """testing if a OverBookedError will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:        
@@ -366,7 +366,7 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_5(self):
-        """testing if a OverTimeLogWarning will be raised when the resource 
+        """testing if a OverBookedError will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
@@ -390,7 +390,7 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_6(self):
-        """testing if a OverTimeLogWarning will be raised when the resource 
+        """testing if a OverBookedError will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
@@ -414,7 +414,7 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_7(self):
-        """testing if a OverTimeLogWarning will be raised when the resource 
+        """testing if a OverBookedError will be raised when the resource 
         is already booked for the given time period.
         
         Simple case diagram:
@@ -440,7 +440,7 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_8(self):
-        """testing if no OverTimeLogWarning will be raised when the resource 
+        """testing if no OverBookedError will be raised when the resource 
         is not already booked for the given time period.
         
         Simple case diagram:
@@ -463,7 +463,7 @@ class TimeLogTester(unittest2.TestCase):
         time_log2 = TimeLog(**self.kwargs)
 
     def test_OverbookedError_9(self):
-        """testing if no OverTimeLogWarning will be raised when the resource 
+        """testing if no OverBookedError will be raised when the resource 
         is not already booked for the given time period.
         
         Simple case diagram:
@@ -485,6 +485,21 @@ class TimeLogTester(unittest2.TestCase):
 
         # no warning
         time_log2 = TimeLog(**self.kwargs)
+    
+    def test_OverbookedError_10(self):
+        """testing i no OverBookedError will be raised for the same TimeLog
+        instance
+        """
+        # time_log1
+        self.kwargs['name'] = 'time_log1'
+        self.kwargs['resource'] = self.test_resource2
+        self.kwargs['start'] = datetime.datetime(2013, 5, 6, 14, 0)
+        self.kwargs['duration'] = datetime.timedelta(20)
+        
+        time_log1 = TimeLog(**self.kwargs)
+        
+        # no warning
+        self.test_resource2.time_logs.append(time_log1)
 
     def test_time_log_extends_effort_of_task(self):
         """testing if the TimeLog will expand the Task.schedule_timing if it is
