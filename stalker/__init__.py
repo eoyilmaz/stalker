@@ -110,8 +110,12 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Project
+    config.add_route('dialog_create_project', 'dialog/create/project')
+    config.add_route('dialog_update_project', 'dialog/update/project/{project_id}')
+    
     config.add_route('create_project', 'create/project')
-    config.add_route('update_project', 'update/project/{project_id}')
+    config.add_route('update_project', 'update/project')
+    
     config.add_route('view_project', 'view/project/{project_id}')
     config.add_route('overview_project', 'overview/project/{project_id}')
     config.add_route('list_projects', 'list/projects/{entity_id}')

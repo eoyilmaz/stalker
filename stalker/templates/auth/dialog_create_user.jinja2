@@ -117,327 +117,340 @@
 </div>
 
 <script type="text/javascript">
-    require(['dijit/registry', 'dijit/form/Form', 'dijit/form/ValidationTextBox',
-        'dijit/form/TextBox', 'dojo/store/Memory', 'dojo/store/JsonRest',
-        'dijit/form/Button', 'stalker/TagSelect', 'stalker/submitForm',
-        'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/domReady!'],
-            function (registry, Form, ValidationTextBox, TextBox, Memory,
-                      JsonRest, Button, TagSelect, submitForm, fieldUpdater,
-                      dialogCaller) {
-                
-                // mode CREATE or UPDATE
-                var mode = '{{ mode }}';
+    require([
+        'dojo/store/Memory',
+        'dojo/store/JsonRest',
+        'dojo/ready',
 
-                // ************************************************************
-                // Form
-                var user_form = new Form({
-                    id: 'user_form'
-                }, 'user_form');
-                var dialog = user_form.getParent();
+        'dijit/registry',
+        'dijit/form/Form',
+        'dijit/form/ValidationTextBox',
+        'dijit/form/TextBox',
+        'dijit/form/Button',
 
-                // ************************************************************
-                // Name
-                var name_textBox = new ValidationTextBox({
-                    name: 'name',
-                    label: 'Name',
-                    placeHolder: 'Enter a user name',
-                    required: true,
-                    {% if mode=='UPDATE' %}
-                        value: '{{ user.name }}',
-                    {% endif %}
-                }, 'user_name');
-                name_textBox.startup();
+        'stalker/TagSelect',
+        'stalker/submitForm',
+        'stalker/fieldUpdater',
+        'stalker/dialogCaller'
+    ], function (Memory, JsonRest, ready, registry, Form, ValidationTextBox,
+                 TextBox, Button, TagSelect, submitForm, fieldUpdater,
+                 dialogCaller) {
 
+        ready(function () {
+            // mode CREATE or UPDATE
+            var mode = '{{ mode }}';
 
-                // ************************************************************
-                // Login
-                var login_textBox = new ValidationTextBox({
-                    name: 'login',
-                    label: 'Login',
-                    placeHolder: 'Enter a login name',
-                    required: true,
-                    {% if mode=='UPDATE' %}
-                        value: '{{ user.login }}',
-                    {% endif %}
-                    onChange: function () {
-                        // reset the validator
-                        this.validator = login_textBox_orig_validator;
-                    }
-                }, 'user_login');
-                login_textBox.startup();
+            // ************************************************************
+            // Form
+            var user_form = new Form({
+                id: 'user_form'
+            }, 'user_form');
+            user_form.startup();
 
-                // because the submit button is changing the validator,
-                // store the original validator to be replaced on change
-                var login_textBox_orig_validator = login_textBox.validator;
+            var dialog = user_form.getParent();
 
-
-                // ************************************************************
-                // Email
-                var email_textBox = new ValidationTextBox({
-                    name: 'email',
-                    label: 'e-mail',
-                    placeHolder: 'Enter an e-mail',
-                    {% if mode=='UPDATE' %}
-                        value: '{{ user.email }}',
-                    {% endif %}
-                    required: true
-                }, 'user_email');
-                email_textBox.startup();
-
-                // because the submit button is changing the validator,
-                // store the original validator to be replaced on change
-                var email_textBox_orig_validator = email_textBox.validator;
-
-
-                // ************************************************************
-                // Password
-                var password_textBox = new ValidationTextBox({
-                    name: 'password',
-                    label: 'Password',
-                    type: 'password',
-                    placeHolder: 'Enter a password',
-                    {% if mode=='UPDATE' %}
-                        value: 'DONTCHANGE',
-                    {% endif %}
-                    required: true
-                }, 'user_password');
-                password_textBox.startup();
-
-
-                // ************************************************************
-                // Re-Type Password
-                var confirm_password_textBox = new ValidationTextBox({
-                    label: 'Confirm Password',
-                    type: 'password',
-                    required: true,
-                    placeHolder: 'Re-enter password',
-                    invalidMessage: "Passwords doesn't match!",
-                    validator: function (value, constrains) {
-                        // check if the value matches the password field
-                        var pass = password_textBox.value;
-                        return value == pass;
-                    },
-                    {% if mode=='UPDATE' %}
-                        value: 'DONTCHANGE',
-                    {% endif %}
-                }, 'user_confirm_password');
-                confirm_password_textBox.startup();
-
-
-                // ************************************************************
-                // Departments
-                var departments_tagSelect;
-                var create_department_button;
-                var selected_departments;
-                
-                var departments_jsonRest = new JsonRest({
-                    target: 'get/departments'
-                });
-                
-                
-                {% if mode=='CREATE' %}
-                    {% if department %}
-                        selected_departments = [{{ department.id }}];
-                    {% endif %}
-                {% elif mode=='UPDATE' %}
-                    selected_departments = [
-                        {% for department in user.departments %}
-                            {{ department.id }},
-                        {% endfor %}
-                    ];
-                {% endif %}
-
-                departments_tagSelect = new TagSelect({
-                    name: 'department_ids',
-                    label: 'Department',
-                    placeHolder: 'Select departments'
-                }, 'user_departments');
-                departments_tagSelect.startup();
-
-                var departments_field_updater = fieldUpdater({
-                    memory: departments_jsonRest,
-                    widget: departments_tagSelect,
-                    selected: selected_departments
-                });
-                departments_field_updater({animate: false});
-
-                // New Department Button
-                create_department_button = dialogCaller({
-                    label: 'New',
-                    dialog_id: 'create_department_dialog',
-                    content_creator: create_department_dialog_creator,
-                    attach_to: 'user_create_department_button',
-                    related_field_updater: departments_field_updater
-                });
-                create_department_button.startup();
-
-                    
-
-
-                // ************************************************************ 
-                // Groups
-                var groups_jsonRest = new JsonRest({
-                    target: 'get/groups'
-                });
-
-                var groups_tagSelect = new TagSelect({
-                    name: 'group_ids',
-                    placeHolder: 'Select groups'
-                }, 'user_groups');
-                groups_tagSelect.startup();
-
-                var result_group = groups_jsonRest.query().then(function (data) {
-                    var groups_memory = new Memory({data: data});
-                    groups_tagSelect.set('store', groups_memory);
-                });
-
-                // The Updater
-                var groups_field_updater = fieldUpdater({
-                    memory: groups_jsonRest,
-                    widget: groups_tagSelect
-                });
-
-                // New Group Button
-                var create_group_button = dialogCaller({
-                    label: 'New',
-                    dialog_id: 'create_group_dialog',
-                    content_creator: create_group_dialog_creator,
-                    attach_to: 'user_create_group_button',
-                    related_field_updater: groups_field_updater
-                }, 'user_create_group');
-                create_group_button.startup();
-
-
-                // ************************************************************
-                // Tags
-                var tags_tagSelect = new TagSelect({
-                    name: 'tags',
-                    type: 'TextBox'
-                }, 'user_tags');
-                tags_tagSelect.startup();
-            
+            // ************************************************************
+            // Name
+            var name_textBox = new ValidationTextBox({
+                name: 'name',
+                label: 'Name',
+                placeHolder: 'Enter a user name',
+                required: true,
                 {% if mode=='UPDATE' %}
-                    var selected_tags = [
-                        {% for tag in user.tags %}
-                            {{ tag.name }},
-                        {% endfor %}
-                    ];
-                    tags_tagSelect.set('value', selected_tags);
+                    value: '{{ user.name }}',
                 {% endif %}
+            }, 'user_name');
+            name_textBox.startup();
 
 
-                // ************************************************************
-                // Submit Button
-                var submit_button = new Button({
-                    label: 'OK',
-                    type: 'button',
-                    onClick: function () {
-                        // validate login name
-                        // check login availability
+            // ************************************************************
+            // Login
+            var login_textBox = new ValidationTextBox({
+                name: 'login',
+                label: 'Login',
+                placeHolder: 'Enter a login name',
+                required: true,
+                {% if mode=='UPDATE' %}
+                    value: '{{ user.login }}',
+                {% endif %}
+                onChange: function () {
+                    // reset the validator
+                    this.validator = login_textBox_orig_validator;
+                }
+            }, 'user_login');
+            login_textBox.startup();
 
-                        console.log('code is here 1');
+            // because the submit button is changing the validator,
+            // store the original validator to be replaced on change
+            var login_textBox_orig_validator = login_textBox.validator;
 
-                        var login_memory = new JsonRest({
-                            target: 'check/login_availability/' + login_textBox.value
+
+            // ************************************************************
+            // Email
+            var email_textBox = new ValidationTextBox({
+                name: 'email',
+                label: 'e-mail',
+                placeHolder: 'Enter an e-mail',
+                {% if mode=='UPDATE' %}
+                    value: '{{ user.email }}',
+                {% endif %}
+                required: true
+            }, 'user_email');
+            email_textBox.startup();
+
+            // because the submit button is changing the validator,
+            // store the original validator to be replaced on change
+            var email_textBox_orig_validator = email_textBox.validator;
+
+
+            // ************************************************************
+            // Password
+            var password_textBox = new ValidationTextBox({
+                name: 'password',
+                label: 'Password',
+                type: 'password',
+                placeHolder: 'Enter a password',
+                {% if mode=='UPDATE' %}
+                    value: 'DONTCHANGE',
+                {% endif %}
+                required: true
+            }, 'user_password');
+            password_textBox.startup();
+
+
+            // ************************************************************
+            // Re-Type Password
+            var confirm_password_textBox = new ValidationTextBox({
+                label: 'Confirm Password',
+                type: 'password',
+                required: true,
+                placeHolder: 'Re-enter password',
+                invalidMessage: "Passwords doesn't match!",
+                validator: function (value, constrains) {
+                    // check if the value matches the password field
+                    var pass = password_textBox.value;
+                    return value == pass;
+                },
+                {% if mode=='UPDATE' %}
+                    value: 'DONTCHANGE',
+                {% endif %}
+            }, 'user_confirm_password');
+            confirm_password_textBox.startup();
+
+
+            // ************************************************************
+            // Departments
+            var departments_tagSelect;
+            var create_department_button;
+            var selected_departments;
+
+            var departments_jsonRest = new JsonRest({
+                target: 'get/departments'
+            });
+
+
+            {% if mode=='CREATE' %}
+                {% if department %}
+                    selected_departments = [{{ department.id }}];
+                {% endif %}
+            {% elif mode=='UPDATE' %}
+                selected_departments = [
+                    {% for department in user.departments %}
+                        {{ department.id }},
+                    {% endfor %}
+                ];
+            {% endif %}
+
+            departments_tagSelect = new TagSelect({
+                name: 'department_ids',
+                label: 'Department',
+                placeHolder: 'Select departments'
+            }, 'user_departments');
+            departments_tagSelect.startup();
+
+            var departments_field_updater = fieldUpdater({
+                memory: departments_jsonRest,
+                widget: departments_tagSelect,
+                selected: selected_departments
+            });
+            departments_field_updater({animate: false});
+
+            // New Department Button
+            create_department_button = dialogCaller({
+                label: 'New',
+                dialog_id: 'create_department_dialog',
+                content_creator: create_department_dialog_creator,
+                attach_to: 'user_create_department_button',
+                related_field_updater: departments_field_updater
+            });
+            create_department_button.startup();
+
+
+            // ************************************************************ 
+            // Groups
+            var groups_jsonRest = new JsonRest({
+                target: 'get/groups'
+            });
+
+            var groups_tagSelect = new TagSelect({
+                name: 'group_ids',
+                placeHolder: 'Select groups'
+            }, 'user_groups');
+            groups_tagSelect.startup();
+
+            var result_group = groups_jsonRest.query().then(function (data) {
+                var groups_memory = new Memory({data: data});
+                groups_tagSelect.set('store', groups_memory);
+            });
+
+            // The Updater
+            var groups_field_updater = fieldUpdater({
+                memory: groups_jsonRest,
+                widget: groups_tagSelect
+            });
+
+            // New Group Button
+            var create_group_button = dialogCaller({
+                label: 'New',
+                dialog_id: 'create_group_dialog',
+                content_creator: create_group_dialog_creator,
+                attach_to: 'user_create_group_button',
+                related_field_updater: groups_field_updater
+            }, 'user_create_group');
+            create_group_button.startup();
+
+
+            // ************************************************************
+            // Tags
+            var tags_tagSelect = new TagSelect({
+                name: 'tags',
+                type: 'TextBox'
+            }, 'user_tags');
+            tags_tagSelect.startup();
+
+            {% if mode=='UPDATE' %}
+                var selected_tags = [
+                    {% for tag in user.tags %}
+                        {{ tag.name }},
+                    {% endfor %}
+                ];
+                tags_tagSelect.set('value', selected_tags);
+            {% endif %}
+
+
+            // ************************************************************
+            // Submit Button
+            var submit_button = new Button({
+                label: 'OK',
+                type: 'button',
+                onClick: function () {
+                    // validate login name
+                    // check login availability
+
+                    console.log('code is here 1');
+
+                    var login_memory = new JsonRest({
+                        target: 'check/login_availability/' + login_textBox.value
+                    });
+
+                    console.log('code is here 2');
+                    var login_result = login_memory.query().then(function (data) {
+                        console.log('code is here 3');
+
+                        var login = login_textBox.value;
+
+                        // check of the login if
+                        // mode is CREATE
+                        // or
+                        // mode is UPDATE and the login is different then previous
+                        if ((mode == 'CREATE' || (mode == 'UPDATE' && login != '{{ user.login }}')) && data['available'] == 0) {
+                            console.log('code is here 3A');
+                            login_textBox.invalidMessage = 'This login is not available';
+                            login_textBox.validator = function () {
+                                return false;
+                            };
+                        } else {
+                            console.log('code is here 3B');
+                            login_textBox.validator = function () {
+                                return true;
+                            };
+                        }
+                    }).then(function () {
+
+                        console.log('code is here 4');
+                        var email_memory = new JsonRest({
+                            target: 'check/email_availability/' + email_textBox.value
                         });
 
-                        console.log('code is here 2');
-                        var login_result = login_memory.query().then(function (data) {
-                            console.log('code is here 3');
-                            
-                            var login = login_textBox.value;
-                            
-                            // check of the login if
-                            // mode is CREATE
-                            // or
-                            // mode is UPDATE and the login is different then previous
-                            if ((mode=='CREATE' || (mode=='UPDATE' && login != '{{ user.login }}')) && data['available'] == 0) {
-                                console.log('code is here 3A');
-                                login_textBox.invalidMessage = 'This login is not available';
-                                login_textBox.validator = function () {
+                        var email_result = email_memory.query().then(function (data) {
+                            console.log('code is here 5');
+
+                            var email = email_textBox.value;
+
+                            if ((mode == 'CREATE' || (mode == 'UPDATE' && email != '{{ user.email }}')) && data['available'] == 0) {
+                                console.log('code is here 5A');
+                                email_textBox.invalidMessage = 'This email is not available';
+                                email_textBox.validator = function () {
                                     return false;
                                 };
                             } else {
-                                console.log('code is here 3B');
-                                login_textBox.validator = function () {
+                                console.log('code is here 5B');
+                                email_textBox.validator = function () {
                                     return true;
                                 };
                             }
                         }).then(function () {
-                                
-                            console.log('code is here 4');
-                            var email_memory = new JsonRest({
-                                target: 'check/email_availability/' + email_textBox.value
-                            });
-
-                            var email_result = email_memory.query().then(function (data) {
-                                console.log('code is here 5');
-                                
-                                var email = email_textBox.value;
-
-                                if ((mode=='CREATE' || (mode=='UPDATE' && email != '{{ user.email }}')) && data['available'] == 0) {
-                                    console.log('code is here 5A');
-                                    email_textBox.invalidMessage = 'This email is not available';
-                                    email_textBox.validator = function () {
-                                        return false;
-                                    };
-                                } else {
-                                    console.log('code is here 5B');
-                                    email_textBox.validator = function () {
-                                        return true;
-                                    };
-                                }
-                            }).then(function () {
-                                console.log('code is here 6');
-                                if (login_textBox.validate()) {
-                                    console.log('code is here 7');
-                                    if (email_textBox.validate()) {
-                                        console.log('code is here 8');
-                                        submitForm({
-                                            dialog: dialog,
-                                            form: user_form,
-                                            method: 'POST',
-                                            {% if mode=='CREATE' %}
-                                                url: 'create/user',
-                                            {% elif mode=='UPDATE' %}
-                                                url: 'update/user/{{user.id}}',
+                            console.log('code is here 6');
+                            if (login_textBox.validate()) {
+                                console.log('code is here 7');
+                                if (email_textBox.validate()) {
+                                    console.log('code is here 8');
+                                    submitForm({
+                                        dialog: dialog,
+                                        form: user_form,
+                                        method: 'POST',
+                                        {% if mode=='CREATE' %}
+                                            url: 'create/user',
+                                        {% elif mode=='UPDATE' %}
+                                            url: 'update/user/{{user.id}}',
+                                        {% endif %}
+                                        additional_data: {
+                                            {% if department %}
+                                                department_id:
+                                                {{ department.id }}
                                             {% endif %}
-                                            additional_data: {
-                                                {% if department %}
-                                                    department_id: {{ department.id }}
-                                                {% endif %}
-                                            }
-                                        });
-                                    } else {
-                                        // focus on email_textBox to show the error message
-                                        console.log('code is here 9');
-                                        email_textBox.focus();
-                                    }
+                                        }
+                                    });
                                 } else {
-                                    console.log('code is here 10');
-                                    // focus on login_textBox to show the error message
-                                    login_textBox.focus();
+                                    // focus on email_textBox to show the error message
+                                    console.log('code is here 9');
+                                    email_textBox.focus();
                                 }
+                            } else {
+                                console.log('code is here 10');
+                                // focus on login_textBox to show the error message
+                                login_textBox.focus();
+                            }
 
-                                console.log('code is here 11');
-                            });
+                            console.log('code is here 11');
                         });
-                    }
-                }, 'user_submit_button');
-                submit_button.startup();
+                    });
+                }
+            }, 'user_submit_button');
+            submit_button.startup();
 
-                // ************************************************************
-                // Cancel Button
-                var cancel_button = new Button({
-                    label: 'Cancel',
-                    type: 'button',
-                    onClick: function () {
-                        dialog.destroyRecursive();
-                    }
-                }, 'user_cancel_button');
-                cancel_button.startup();
+            // ************************************************************
+            // Cancel Button
+            var cancel_button = new Button({
+                label: 'Cancel',
+                type: 'button',
+                onClick: function () {
+                    dialog.destroyRecursive();
+                }
+            }, 'user_cancel_button');
+            cancel_button.startup();
 
-                user_form.startup();
 
-            });
+        });
+    });
 </script>

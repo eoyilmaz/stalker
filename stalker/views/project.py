@@ -19,13 +19,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 from sqlalchemy.exc import IntegrityError
 
 import transaction
 from stalker.db import DBSession
+from stalker.views import get_date
 from stalker import (User, ImageFormat, Repository, Structure, Status,
                      StatusList, Project, Entity)
 
@@ -36,127 +37,165 @@ logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='create_project',
+    route_name='dialog_create_project',
     renderer='templates/project/dialog_create_project.jinja2',
-    permission='Create_Project'
+)
+def create_project_dialog(request):
+    """called when the create project dialog is requested
+    """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+    
+    return {
+        'mode': 'CREATE',
+        'logged_user': logged_user
+    }
+
+
+@view_config(
+    route_name='dialog_update_project',
+    renderer='templates/project/dialog_create_project.jinja2'
+)
+def update_project_dialog(request):
+    """runs when updating a project
+    """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+    
+    project_id = request.matchdict['project_id']
+    project = Project.query.filter_by(id=project_id).first()
+    
+    return {
+        'mode': 'UPDATE',
+        'project': project,
+        'logged_user': logged_user
+    }
+
+
+@view_config(
+    route_name='create_project'
 )
 def create_project(request):
-    """called when adding a project
+    """called when adding a new Project
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
+
     login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
+    logged_user = User.query.filter_by(login=login).first()
     
-    if 'submitted' in request.params:
-        if request.params['submitted'] == 'create':
-            # TODO: remove this later
-            for param in ['name',
-                          'code',
-                          'image_format',
-                          'repository',
-                          'structure',
-                          'lead',
-                          'status']:
-                if param not in request.params:
-                    logger.debug('%s is not in parameters' % param)
- 
-            if 'name' in request.params and \
-                'code' in request.params and \
-                'image_format' in request.params and \
-                'repository' in request.params and \
-                'structure' in request.params and \
-                'lead' in request.params and \
-                'status' in request.params:
-                #login = request.params['login']
-                # so create the project
-                
-                
-                # get the image format
-                imf_id = int(request.params['image_format'])
-                imf = ImageFormat.query.filter_by(id=imf_id).one()
-                
-                # get repository
-                repo_id = int(request.params['repository'])
-                repo = Repository.query.filter_by(id=repo_id).one()
-                
-                # get structure
-                structure_id = int(request.params['structure'])
-                structure = Structure.query.filter_by(id=structure_id).one()
-                
-                # get lead
-                lead_id = int(request.params['lead'])
-                lead = User.query.filter_by(id=lead_id).first()
-                
-                logger.debug('project.lead = %s' % lead)
-
-                # status
-                status_id = int(request.params['status'])
-                status = Status.query.filter_by(id=status_id).first()
-
-                # status list
-                status_list = StatusList.query\
-                    .filter_by(target_entity_type='Project').first()
-
-                # get the dates
-                # TODO: no time zone info here, please add time zone
-                start = datetime.datetime.strptime(
-                    request.params['start'][:-6],
-                    "%Y-%m-%dT%H:%M:%S"
-                )
-                end = datetime.datetime.strptime(
-                    request.params['end'][:-6],
-                    "%Y-%m-%dT%H:%M:%S"
-                )
-
-                logger.debug('start : %s' % start)
-                logger.debug('end : %s' % end)
-
-                try:
-                    new_project = Project(
-                        name=request.params['name'],
-                        code=request.params['code'],
-                        image_format=imf,
-                        repository=repo,
-                        created_by=user,
-                        fps=request.params['fps'],
-                        structure=structure,
-                        lead=lead,
-                        status_list=status_list,
-                        status=status,
-                        start=start,
-                        end=end
-                    )
-                except (AttributeError, TypeError, ValueError) as e:
-                    logger.debug(e.message)
-                else:
-                    DBSession.add(new_project)
-                    try:
-                        transaction.commit()
-                    except (IntegrityError, AssertionError) as e:
-                        logger.debug(e.message)
-                        transaction.abort()
-                    else:
-                        logger.debug('flushing the DBSession, no problem here!')
-                        DBSession.flush()
-                        logger.debug('finished adding Project')
-            else:
-                logger.debug('there are missing parameters')
-            # do not return anything
-            # or maybe we should return to where we came from
+    # parameters
+    name = request.params.get('name')
+    code = request.params.get('code')
+    fps = int(request.params.get('fps'))
     
-    # just one wants to see the add project form
-    return {
-        'user': user,
-        'users': User.query.all(),
-        'image_formats': ImageFormat.query.all(),
-        'repositories': Repository.query.all(),
-        'structures': Structure.query.all(),
-        'status_lists': StatusList.query\
-                            .filter_by(target_entity_type='Project')\
-                            .all(),
-    }
+    imf_id = int(request.params.get('image_format', -1))
+    imf = ImageFormat.query.filter_by(id=imf_id).first()
+    
+    repo_id = int(request.params.get('repository_id', -1))
+    repo = Repository.query.filter_by(id=repo_id).first()
+    
+    structure_id = int(request.params.get('structure_id', -1))
+    structure = Structure.query.filter_by(id=structure_id).first()
+    
+    lead_id = int(request.params.get('lead_id', -1))
+    lead = User.query.filter_by(id=lead_id).first()
+    
+    status_id = int(request.params.get('status_id', -1))
+    status = Status.query.filter_by(id=status_id).first()
+    
+    # get the dates
+    start = get_date(request, 'start')
+    end = get_date(request, 'end')
+    
+    if name and code and imf and repo and structure and lead_id and status:
+        # lets create the project
+        
+        # status list
+        status_list = StatusList.query\
+            .filter_by(target_entity_type='Project').first()
+        
+        new_project = Project(
+            name=request.params['name'],
+            code=request.params['code'],
+            image_format=imf,
+            repository=repo,
+            created_by=logged_user,
+            fps=request.params['fps'],
+            structure=structure,
+            lead=lead,
+            status_list=status_list,
+            status=status,
+            start=start,
+            end=end
+        )
+        
+        DBSession.add(new_project)
+        
+    else:
+        logger.debug('there are missing parameters')
+        HTTPServerError()
+    
+    return HTTPOk()
+
+
+@view_config(
+    route_name='update_project'
+)
+def update_project(request):
+    """called when updating a Project
+    """
+
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+    
+    # parameters
+    project_id = request.params.get('project_id', -1)
+    project = Project.query.filter_by(id=project_id).first()
+    
+    name = request.params.get('name')
+    
+    fps = int(request.params.get('fps'))
+    
+    imf_id = int(request.params.get('image_format', -1))
+    imf = ImageFormat.query.filter_by(id=imf_id).first()
+    
+    repo_id = int(request.params.get('repository_id', -1))
+    repo = Repository.query.filter_by(id=repo_id).first()
+    
+    structure_id = int(request.params.get('structure_id', -1))
+    structure = Structure.query.filter_by(id=structure_id).first()
+    
+    lead_id = int(request.params.get('lead_id', -1))
+    lead = User.query.filter_by(id=lead_id).first()
+    
+    status_id = int(request.params.get('status_id', -1))
+    status = Status.query.filter_by(id=status_id).first()
+    
+    # get the dates
+    start = get_date(request, 'start')
+    end = get_date(request, 'end')
+    
+    if project and name and imf and repo and structure and lead and \
+            status:
+        
+        project.name = name
+        project.image_format = imf
+        project.repository = repo
+        project.updated_by = logged_user
+        project.fps = fps
+        project.structure = structure
+        project.lead = lead
+        project.status = status
+        project.start = start
+        project.end = end
+    
+        DBSession.add(project)
+    
+    else:
+        logger.debug('there are missing parameters')
+        HTTPServerError()
+    
+    return HTTPOk()
+
 
 
 @view_config(
@@ -195,38 +234,6 @@ def get_projects_byEntity(request):
             }
         for project in entity.projects
     ]
-
-
-
-@view_config(
-    route_name='update_project',
-    renderer='templates/project/dialog_update_project.jinja2',
-    permission='Update_Project'
-)
-def update_project(request):
-    """runs when updateing a project
-    """
-    # referrer = request.url
-    # came_from = request.params.get('came_from', referrer)
-    
-    project_id = request.matchdict['project_id']
-    project = Project.query.filter_by(id=project_id).first()
-    
-    # if request.params['submitted'] == 'update':
-    #     #return HTTPFound(location=came_from)
-    #     login = authenticated_userid(request)
-    #     authenticated_user = User.query.filter_by(login=login).first()
-    #
-    #     # get the project and update it
-    #     # TODO: add this part
-    #
-    #     # return where we came from
-    #     # return HTTPFound(location=came_from)
-    #
-    # # just give the info enough to fill the form
-    return {
-        'project': project
-    }
 
 
 @view_config(

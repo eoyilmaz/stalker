@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-    <form id='create_project_form'>
+    <form id='project_form'>
         <table style='width: 100%;'>
 
             {# NAME #}
@@ -175,10 +175,13 @@ require(['dijit/registry', 'dijit/form/Form',
             ready(function () {
                 // ********************************************************************
                 // Form
-                var create_project_form = new Form({
-                    id: 'create_project_form'
-                }, 'create_project_form');
-
+                var project_form = new Form({
+                    id: 'project_form'
+                }, 'project_form');
+                
+                // get the dialog
+                var dialog = project_form.getParent();
+                
 
                 // ********************************************************************
                 // Name
@@ -186,7 +189,10 @@ require(['dijit/registry', 'dijit/form/Form',
                     name: 'name',
                     label: 'Name',
                     required: true,
-                    placeHolder: 'Enter a name'
+                    placeHolder: 'Enter a name',
+                    {% if mode=='UPDATE' %}
+                        value: '{{ project.name }}'
+                    {% endif %}
                 }, 'project_name');
                 name_textBox.startup();
 
@@ -197,17 +203,28 @@ require(['dijit/registry', 'dijit/form/Form',
                     name: 'code',
                     label: 'Code',
                     required: true,
-                    placeHolder: 'Enter a code'
+                    placeHolder: 'Enter a code',
+                    {% if mode=='UPDATE' %}
+                        value: '{{ project.code }}',
+                        disabled: true // cannot change the code for an already created project
+                    {% endif %}
                 }, 'project_code');
                 name_textBox.startup();
 
 
                 // **********************************************************************
                 // Start Date
+                
+                var start_date_value = new Date(); // set it today by default
+                
+                {% if mode=='UPDATE' %}
+                    start_date_value = new Date(parseInt({{ project.start.strftime('%s') }})*1000);
+                {% endif %}
+                
                 var start_dateTextBox = new DateTextBox({
                     name: 'start',
                     label: 'Start Date',
-                    value: new Date(),// set it today by default
+                    value: start_date_value,
                     required: true,
                     datePattern: 'dd-mm-yyyy',
                     onChange: function () {
@@ -224,10 +241,16 @@ require(['dijit/registry', 'dijit/form/Form',
 
                 // **********************************************************************
                 // End Date
+                var end_date_value = new Date(); // set it today by default
+                
+                {% if mode=='UPDATE' %}
+                    end_date_value = new Date(parseInt({{ project.end.strftime('%s') }})*1000);
+                {% endif %}
+                
                 var end_dateTextBox = new DateTextBox({
                     name: 'end',
                     label: 'End Date',
-                    value: new Date(), // set it today by default
+                    value: end_date_value,
                     required: true,
                     datePattern: 'dd-mm-yyyy',
                     onChange: function () {
@@ -280,7 +303,11 @@ require(['dijit/registry', 'dijit/form/Form',
                         );
                     }
                 };
-                //update_dates();
+                update_dates(
+                    start_dateTextBox.getValue(),
+                    end_dateTextBox.getValue(),
+                    null
+                );
 
 
                 // ********************************************************************
@@ -301,7 +328,11 @@ require(['dijit/registry', 'dijit/form/Form',
 
                 var imf_filteringSelect_selected_value = '';
                 var imf_data_length = 0;
-
+            
+                {% if mode=='UPDATE' %}
+                    imf_filteringSelect_selected_value = '{{ project.image_format.id }}';
+                {% endif %}
+                
                 var set_imf_filteringSelect_value = function (data) {
                     if (imf_data_length < data.length) {
                         imf_filteringSelect_selected_value = data[data.length - 1].id;
@@ -350,7 +381,11 @@ require(['dijit/registry', 'dijit/form/Form',
                 var fps_numberTextBox = new NumberTextBox({
                     name: 'fps',
                     label: 'FPS',
-                    value: 25,
+                    {% if mode=='CREATE' %}
+                        value: 25,
+                    {% elif mode=='UPDATE' %}
+                        value: {{ project.fps }},
+                    {% endif %}
                     placeHolder: '',
                     required: true
                 }, 'project_fps');
@@ -365,7 +400,7 @@ require(['dijit/registry', 'dijit/form/Form',
                 });
 
                 var repository_filteringSelect = new FilteringSelect({
-                    name: 'repository',
+                    name: 'repository_id',
                     label: 'Repository',
                     required: true
                 }, 'project_repository');
@@ -373,9 +408,13 @@ require(['dijit/registry', 'dijit/form/Form',
 
                 var repository_filteringSelect_selected_value = '';
                 var repository_data_length = 0;
+                
+                {% if mode=='UPDATE' %}
+                    repository_filteringSelect_selected_value = '{{ project.repository.id }}';
+                {% endif %}
 
                 var set_repository_filteringSelect_value = function (data) {
-                    if (repository_data_length < data.length) {
+                    if (repository_data_length != 0 && repository_data_length < data.length) {
                         repository_filteringSelect_selected_value = data[data.length - 1].id;
                     }
                     repository_filteringSelect.set('value', repository_filteringSelect_selected_value);
@@ -386,6 +425,7 @@ require(['dijit/registry', 'dijit/form/Form',
                 var repo_field_updater = fieldUpdater({
                     'memory': repository_memory,
                     'widget': repository_filteringSelect,
+                    'selected': repository_filteringSelect_selected_value,
                     'callBack': set_repository_filteringSelect_value
                 });
                 // run the function to fill the data
@@ -426,7 +466,7 @@ require(['dijit/registry', 'dijit/form/Form',
 
                 // The Field
                 var structure_filteringSelect = new FilteringSelect({
-                    name: 'structure',
+                    name: 'structure_id',
                     label: 'Structure',
                     required: true
                 }, 'project_structure');
@@ -434,9 +474,13 @@ require(['dijit/registry', 'dijit/form/Form',
 
                 var structure_filteringSelect_selected_value = '';
                 var structure_data_length = 0;
+                
+                {% if mode=='UPDATE' %}
+                    structure_filteringSelect_selected_value = '{{ project.structure.id }}';
+                {% endif %}
 
                 var set_structure_filteringSelect_value = function (data) {
-                    if (structure_data_length < data.length) {
+                    if (structure_data_length !=0 && structure_data_length < data.length) {
                         structure_filteringSelect_selected_value = data[data.length - 1].id;
                     }
                     structure_filteringSelect.set('value', structure_filteringSelect_selected_value);
@@ -447,6 +491,7 @@ require(['dijit/registry', 'dijit/form/Form',
                 var structure_field_updater = fieldUpdater({
                     'memory': structure_memory,
                     'widget': structure_filteringSelect,
+                    'selected': structure_filteringSelect_selected_value,
                     'callBack': set_structure_filteringSelect_value
                 });
                 // call the updater to fill the field for the first time
@@ -486,7 +531,7 @@ require(['dijit/registry', 'dijit/form/Form',
 
                 // The Field
                 var lead_filteringSelect = new FilteringSelect({
-                    name: 'lead',
+                    name: 'lead_id',
                     label: 'User',
                     required: true
                 }, 'project_lead');
@@ -495,8 +540,12 @@ require(['dijit/registry', 'dijit/form/Form',
                 var lead_filteringSelect_selected_value = '';
                 var lead_data_length = 0;
 
+                {% if mode=='UPDATE' %}
+                    lead_filteringSelect_selected_value = '{{ project.lead.id }}';
+                {% endif %}
+
                 var set_lead_filteringSelect_value = function (data) {
-                    if (lead_data_length < data.length) {
+                    if (lead_data_length != 0 && lead_data_length < data.length) {
                         lead_filteringSelect_selected_value = data[data.length - 1].id;
                     }
                     lead_filteringSelect.set('value', lead_filteringSelect_selected_value);
@@ -507,6 +556,7 @@ require(['dijit/registry', 'dijit/form/Form',
                 var lead_field_updater = fieldUpdater({
                     'memory': lead_memory,
                     'widget': lead_filteringSelect,
+                    'selected': lead_filteringSelect_selected_value,
                     'callBack': set_lead_filteringSelect_value
                 });
                 lead_field_updater({animate: false});
@@ -545,35 +595,39 @@ require(['dijit/registry', 'dijit/form/Form',
 
                 // The Field
                 var status_filteringSelect = new FilteringSelect({
-                    name: 'status',
+                    name: 'status_id',
                     label: 'Status',
                     required: true
                 }, 'project_status');
                 status_filteringSelect.startup();
 
+                var status_filteringSelect_selected_value = '';
+                {% if mode=='UPDATE' %}
+                    status_filteringSelect_selected_value = '{{ project.status.id }}';
+                {% endif %}
 
                 var update_button_function = function (data) {
-
-                    if (data.length > 0) {
-
-                        add_status_button.set('onClick', function () {
-
-                            var dialog = dijit.byId('update_status_list_dialog');
-
-                            if (dialog != null) {
-                                dialog.destroyRecursive();
-                            }
-                            dialog = update_status_list_dialog_creator('Project');
-                            // set the field updater
-                            dialog.set('related_field_updater', status_field_updater);
-                            // show the dialog
-                            dialog.show();
-                        });
-
-                        status_field_updater.set('callBack', function () {
-                        });
-
-                    }
+                    {% if mode=='CREATE' %}
+                        if (data.length > 0) {
+    
+                            add_status_button.set('onClick', function () {
+    
+                                var dialog = dijit.byId('update_status_list_dialog');
+    
+                                if (dialog != null) {
+                                    dialog.destroyRecursive();
+                                }
+                                dialog = update_status_list_dialog_creator('Project');
+                                // set the field updater
+                                dialog.set('related_field_updater', status_field_updater);
+                                // show the dialog
+                                dialog.show();
+                            });
+    
+                        }
+                    {% elif mode=='UPDATE' %}
+                        status_filteringSelect.set('value',status_filteringSelect_selected_value);
+                    {% endif %}
                 };
 
                 // The Updater
@@ -604,14 +658,20 @@ require(['dijit/registry', 'dijit/form/Form',
                     type: 'button',
                     onClick: function () {
                         submitForm({
-                            dialog: registry.byId('create_project_dialog'),
-                            form: create_project_form,
+                            dialog: dialog,
+                            form: project_form,
                             additional_data: {
-                                submitted: 'create',
                                 start: stamp.toISOString(start_dateTextBox.value),
-                                end: stamp.toISOString(end_dateTextBox.value)
+                                end: stamp.toISOString(end_dateTextBox.value),
+                                {% if mode=='UPDATE' %}
+                                    'project_id': {{ project.id }}
+                                {% endif %}
                             },
-                            url: '{{ request.route_url("create_project") }}',
+                            {% if mode=='CREATE' %}
+                                url: '{{ request.route_url("create_project") }}',
+                            {% elif mode=='UPDATE' %}
+                                url: '{{ request.route_url("update_project") }}',
+                            {% endif %}
                             method: 'POST'
                         });
                     }
@@ -624,12 +684,12 @@ require(['dijit/registry', 'dijit/form/Form',
                     label: 'Cancel',
                     type: 'button',
                     onClick: function () {
-                        registry.byId('create_project_dialog').destroyRecursive();
+                        dialog.destroyRecursive();
                     }
                 }, 'project_cancel_button');
                 cancel_button.startup();
 
-                create_project_form.startup();
+                project_form.startup();
 
             });
         });

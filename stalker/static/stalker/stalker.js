@@ -58,7 +58,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'create_project_dialog',
                 title: 'New Project',
-                href: '/create/project',
+                href: '/dialog/create/project',
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -69,7 +69,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'update_project_dialog',
                 title: 'Update Project',
-                href: '/update/project/' + project_id,
+                href: '/dialog/update/project/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true

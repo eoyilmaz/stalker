@@ -151,9 +151,8 @@ define(['dojo/store/Memory', 'dojo/_base/fx'],
                     }
                     
                     if (animate == true){
-                        // animate the field to indicate it is updated
-//                        console.log("animate");
-
+                        // animate the field to indicate it is updated;
+                        
                         var domNode = widget.domNode;
                         var bgColor = domNode.style.backgroundColor;
                         fx.animateProperty({

@@ -66,6 +66,19 @@ def get_time(request, time_attr):
         minutes=time_part.minute
     )
 
+def get_date(request, date_attr):
+    """Extracts a datetime object from the given request
+    
+    :param request: the request instance
+    :param date_attr: the attribute name
+    :return: datetime.datetime
+    """
+    # TODO: no time zone info here, please add time zone
+    return datetime.datetime.strptime(
+        request.params[date_attr][:-6],
+        "%Y-%m-%dT%H:%M:%S"
+    )
+
 def get_datetime(request, date_attr, time_attr):
     """Extracts a datetime object from the given request
     :param request: the request object

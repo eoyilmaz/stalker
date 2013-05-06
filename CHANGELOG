@@ -23,7 +23,8 @@ Stalker Changes
     for BG and FG colors.
   * Combined ``user_create_dialog`` and ``user_update_dialog`` into one.
   * Replaced DataGrid objects with dgrid.
-  * Added navigation bar for assets, shots, sequences
+  * Added navigation bar for assets, shots, sequences.
+  * Combined ``project_create_dialog`` and ``project_update_dialog`` into one.
 
 0.2.0.b1
 --------
