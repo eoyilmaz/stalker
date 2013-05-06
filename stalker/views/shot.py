@@ -182,13 +182,21 @@ def get_shots(request):
     """
     project_id = request.matchdict['project_id']
     project = Project.query.filter_by(id=project_id).first()
-    return [
-        {
+
+    shots = []
+
+    for shot in Shot.query.filter_by(project_id=project_id).all():
+        sequenceStr = ''
+        for sequence in shot.sequences:
+            sequenceStr += '<a class="DataLink" href="#" stalker_target="sequences_content_pane" stalker_href="view/sequence/%s">%s</a><br/> ' % (sequence.id,sequence.name)
+        shots.append({
             'id': shot.id,
             'name': shot.name,
+            'sequences': sequenceStr,
             'status': shot.status.name,
             'user_id': shot.created_by.id,
             'user_name': shot.created_by.name
-        }
-        for shot in Shot.query.filter_by(project_id=project_id).all()
-    ]
+        })
+
+
+    return shots

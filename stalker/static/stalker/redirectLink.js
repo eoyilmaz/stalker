@@ -18,27 +18,22 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 define(['dijit/registry', 'dojo/on', 'dojo/query'],
-    function(registry, on, query){
+    function (registry, on, query) {
         // ********************************************************************
         // GO TO LINK
         //
         //
-        var gotoLink = function(){
+        var redirectLink = function (kwargs) {
+            var target = kwargs.target;
+            var address = kwargs.address;
 
-              // get the Link Elements
-              var dataLinks = query('.DataLink');
-
-              for (var i=0; i<dataLinks.length; i++){
-                  on(dataLinks[i], 'click', function(){
-                      var contentPane = registry.byId(this.getAttribute('stalker_target'));
-                      if (contentPane){
-                          contentPane.set('href', this.getAttribute('stalker_href'));
-                          contentPane.refresh();
-                      }
-                  });
-              }
+            var contentPane = registry.byId(target);
+            if (contentPane) {
+                contentPane.set('href', address);
+                contentPane.refresh();
+            }
 
 
         };
-        return gotoLink;
-});
+        return redirectLink;
+    });

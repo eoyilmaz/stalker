@@ -289,5 +289,10 @@ a:hover {
     left: 204px;
 }
 
+.title_summary_info{
+    position: absolute;
+    clear: both;
+    height: 30;
+    left:10px;
 
-
+}

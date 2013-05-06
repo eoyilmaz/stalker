@@ -1,0 +1,24 @@
+<div id='nav_bar_content_pane'>
+    <div style='height: 20px; position: absolute;
+                  left: 10px; top: 5px;'>
+        <a class="DataLink" href="#"
+           stalker_target="{{ entity.entity_type.lower() }}s_content_pane"
+           stalker_href="list/{{ entity.entity_type.lower() }}s/{{ entity.project.id }}">
+            {{ entity.entity_type }}s </a>/{{ entity.name }}({{ entity.code }})
+
+    </div>
+    <div style='height: 20px; position: absolute;
+                  right: 20px; top: 5px;'>{{ entity.status.name }}</div>
+
+</div>
+<script type="text/javascript">
+    require([
+        'stalker/gotoLink',
+        'dojo/ready'],
+            function (gotoLink, ready) {
+
+                gotoLink();
+
+
+            });
+</script>

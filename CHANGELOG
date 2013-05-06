@@ -22,6 +22,8 @@ Stalker Changes
   * Color choosers in "Create Status Dialog" now have colors picked by default
     for BG and FG colors.
   * Combined ``user_create_dialog`` and ``user_update_dialog`` into one.
+  * Replaced DataGrid objects with dgrid.
+  * Added navigation bar for assets, shots, sequences
 
 0.2.0.b1
 --------

@@ -290,3 +290,22 @@ def view_project_related_data(request):
         'project': project
     }
 
+@view_config(
+    route_name='view_entity_nav_bar',
+    renderer='templates/content_nav_bar.jinja2',
+    permission='Read_Project'
+)
+def view_entity_nav_bar(request):
+    """runs when viewing all projects
+    """
+
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+
+
+    # just return all the projects
+    return {
+        'entity': entity
+
+    }

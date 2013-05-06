@@ -1,8 +1,8 @@
 {# Stalker a Production Asset Management System
  Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
- 
+
  This file is part of Stalker.
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation;
@@ -18,119 +18,234 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='list_assets'>
-  <button id='list_assets_create_asset_button'>New Asset</button>
-  <div id='assets_data_grid'></div>
+    <button id='list_assets_create_asset_button'>New Asset</button>
+    <div id='assets_data_grid'></div>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry',
-    'dojo/data/ObjectStore',
-    'dojox/grid/DataGrid',
-    'dojo/store/Memory',
-    'dijit/form/FilteringSelect',
-    'dojo/store/JsonRest',
-    'stalker/fieldUpdater',
-    'stalker/dialogCaller',
-    'stalker/gotoLink',
-    'dojo/on',
-    'dojo/query',
-    'dojo/domReady!'],
-      function(registry,
-               ObjectStore,
-               DataGrid,
-               Memory,
-               FilteringSelect,
-               JsonRest,
-               fieldUpdater,
-               dialogCaller,
-               gotoLink,
-               on,
-               query){
+
+    var redirectLink = function (targetPane, address) {
+        var contentPane = dijit.byId(targetPane);
+        contentPane.set('href', address);
+        contentPane.refresh();
+    }
+    require(['dijit/registry',
+        'dojo/data/ObjectStore',
+        "dgrid/List",
+        "dgrid/Grid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dgrid/editor",
+        'dojo/store/Memory',
+        'dijit/form/Select',
+        'dojo/store/JsonRest',
+        'stalker/fieldUpdater',
+        'stalker/dialogCaller',
+        'dojo/domReady!'],
+            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, Select, JsonRest, fieldUpdater, dialogCaller) {
 
 
-        var asset_data_grid = new DataGrid({
-          id: 'assets_data_grid',
-              width: '100%',
-              autoHeight: true,
-              singleClickEdit: true,
-              escapeHTMLInData: false,
-              rowSelector: '20px'
-            }, 'assets_data_grid');
+                var asset_data_grid = new Grid({
+                    id: 'assets_data_grid',
+                    width: '100%',
+                    selectionMode: "single",
+                    cellNavigation: true,
+                    autoHeight: true,
+                    rowSelector: '20px'
+                }, 'assets_data_grid');
 
-        var create_asset_button = dialogCaller({
-              label: 'New Asset',
-              dialog_id: 'create_asset_dialog',
-              content_creator: create_asset_dialog_creator,
-              attach_to: 'list_assets_create_asset_button',
-              related_field_updater: asset_data_grid_updater,
-              data_id: '{{ project.id }}'
+
+                var create_asset_button = dialogCaller({
+                    label: 'New Asset',
+                    dialog_id: 'create_asset_dialog',
+                    content_creator: create_asset_dialog_creator,
+                    attach_to: 'list_assets_create_asset_button',
+                    related_field_updater: asset_data_grid_updater,
+                    data_id: '{{ project.id }}'
+                });
+
+                create_asset_button.startup();
+
+
+                var status_memory = new JsonRest({
+                    target: 'get/statuses_for/Asset'
+                });
+
+                var status_store;
+                status_memory.query().then(function (data) {
+
+                    status_store = new ObjectStore({ objectStore: new Memory({ data: data }) });
+                    asset_data_grid_updater();
+                });
+
+
+                function asset_data_grid_updater() {
+
+                    var asset_memory = new JsonRest({
+                        target: '/get/assets/{{ project.id }}'
+                    });
+
+                    asset_memory.query().then(function (data) {
+
+
+                        var columns = [
+                            {
+                                field: '_item',
+                                label: "Name",
+                                sortable: false,
+                                formatter: function (value) {
+
+                                    var targetPane = "'assets_content_pane'";
+                                    var address = "'view/asset/" + value.id + "'";
+
+                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                                }
+                            },
+                            {
+                                field: 'type',
+                                label: "Type"
+                            },
+                            {
+                                field: '_item',
+                                label: "Status",
+                                formatter: function (item) {
+
+                                    var bg_color = '#'+item.status_bg_color.toString(16);
+                                    var fg_color = '#'+item.status_fg_color.toString(16);
+
+
+                                    return '<span style="color: '+fg_color+'; background-color:'+bg_color+'; ">'+item.status+'</span>';
+                                }
+
+                            },
+                            {
+                                field: '_item',
+                                label: "Created By",
+                                sortable: false,
+                                formatter: function (value) {
+
+                                    var targetPane = "'central_content'";
+                                    var address = "'view/user/" + value.user_id + "'";
+
+                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
+                                }
+
+                            },
+                            {
+                                field: 'description',
+                                label: "Description"
+                            }
+                        ]
+
+
+                        asset_data_grid.renderArray(data);
+
+                        asset_data_grid.set('columns', columns);
+
+                    });
+
+                }
+
             });
-
-        asset_data_grid.startup();
-        create_asset_button.startup();
-
-        //asset_data_grid_updater();
-
-           var status_memory = new JsonRest({
-              target: 'get/statuses_for/Asset'
-            });
-
-           status_memory.query().then(function(data){
-              asset_data_grid_updater();
-            });
-
-
-
-        function asset_data_grid_updater(){
-
-          var asset_memory = new JsonRest({
-            target: '/get/assets/{{ project.id }}'
-          });
-
-          asset_memory.query().then(function(data){
-
-
-           for(var i=0;i<data.length;i++ ){
-
-             var assetName = data[i]["name"];
-             var assetLink = '<a class="DataLink" href="#" stalker_target="assets_content_pane" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';
-
-             var userName = data[i]["user_name"];
-             var userLink = '<a class="DataLink" stalker_target="central_content" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
-
-             data[i]["asset_link"] = assetLink;
-             data[i]["user_link"] = userLink;
-
-           }
-
-
-           var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
-
-           var structure = [
-             {name: 'Thumbnail',                         width: '100px'},
-             {name: 'Name',        field: 'asset_link',  width: '100px'},
-             {name: 'Type',        field: 'type',        width: '200px'},
-             {name: 'Status',      field: 'status',      width: '150px', editable: true,
-               widgetClass: FilteringSelect,
-               widgetProps: {
-                 store: status_memory
-               }},
-             {name: 'Created By',  field: 'user_link',     width: '150px'},
-             {name: 'Description', field: 'description', width: 'auto'}
-           ];
-
-           asset_data_grid.set('store', my_store );
-           asset_data_grid.set('structure', structure );
-
-
-
-
-           gotoLink();
-
-          });
-
-        }
-
-      });
 </script>
 
+
+{#<script type='text/javascript'>#}
+{#    require(['dijit/registry',#}
+{#        'dojo/data/ObjectStore',#}
+{#        'dojox/grid/DataGrid',#}
+{#        'dojo/store/Memory',#}
+{#        'dijit/form/FilteringSelect',#}
+{#        'dojo/store/JsonRest',#}
+{#        'stalker/fieldUpdater',#}
+{#        'stalker/dialogCaller',#}
+{#        'stalker/gotoLink',#}
+{#        'dojo/on',#}
+{#        'dojo/query',#}
+{#        'dojo/domReady!'],#}
+{#            function (registry, ObjectStore, DataGrid, Memory, FilteringSelect, JsonRest, fieldUpdater, dialogCaller, gotoLink, on, query) {#}
+{##}
+{##}
+{#                var asset_data_grid = new DataGrid({#}
+{#                    id: 'assets_data_grid',#}
+{#                    width: '100%',#}
+{#                    autoHeight: true,#}
+{#                    singleClickEdit: true,#}
+{#                    escapeHTMLInData: false,#}
+{#                    rowSelector: '20px'#}
+{#                }, 'assets_data_grid');#}
+{##}
+{#                var create_asset_button = dialogCaller({#}
+{#                    label: 'New Asset',#}
+{#                    dialog_id: 'create_asset_dialog',#}
+{#                    content_creator: create_asset_dialog_creator,#}
+{#                    attach_to: 'list_assets_create_asset_button',#}
+{#                    related_field_updater: asset_data_grid_updater,#}
+{#                    data_id: '{{ project.id }}'#}
+{#                });#}
+{##}
+{#                asset_data_grid.startup();#}
+{#                create_asset_button.startup();#}
+{##}
+{#                //asset_data_grid_updater();#}
+{##}
+{#                var status_memory = new JsonRest({#}
+{#                    target: 'get/statuses_for/Asset'#}
+{#                });#}
+{##}
+{#                status_memory.query().then(function (data) {#}
+{#                    asset_data_grid_updater();#}
+{#                });#}
+{##}
+{##}
+{#                function asset_data_grid_updater() {#}
+{##}
+{#                    var asset_memory = new JsonRest({#}
+{#                        target: '/get/assets/{{ project.id }}'#}
+{#                    });#}
+{##}
+{#                    asset_memory.query().then(function (data) {#}
+{##}
+{##}
+{#                        for (var i = 0; i < data.length; i++) {#}
+{##}
+{#                            var assetName = data[i]["name"];#}
+{#                            var assetLink = '<a class="DataLink" href="#" stalker_target="assets_content_pane" stalker_href="view/asset/' + data[i]['id'] + '">' + assetName + '</a>';#}
+{##}
+{#                            var userName = data[i]["user_name"];#}
+{#                            var userLink = '<a class="DataLink" stalker_target="central_content" href="#" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';#}
+{##}
+{#                            data[i]["asset_link"] = assetLink;#}
+{#                            data[i]["user_link"] = userLink;#}
+{##}
+{#                        }#}
+{##}
+{##}
+{#                        var my_store = new ObjectStore({ objectStore: new Memory({ data: data }) });#}
+{##}
+{#                        var structure = [#}
+{#                            {name: 'Thumbnail', width: '100px'},#}
+{#                            {name: 'Name', field: 'asset_link', width: '100px'},#}
+{#                            {name: 'Type', field: 'type', width: '200px'},#}
+{#                            {name: 'Status', field: 'status', width: '150px', editable: true,#}
+{#                                widgetClass: FilteringSelect,#}
+{#                                widgetProps: {#}
+{#                                    store: status_memory#}
+{#                                }},#}
+{#                            {name: 'Created By', field: 'user_link', width: '150px'},#}
+{#                            {name: 'Description', field: 'description', width: 'auto'}#}
+{#                        ];#}
+{##}
+{#                        asset_data_grid.set('store', my_store);#}
+{#                        asset_data_grid.set('structure', structure);#}
+{##}
+{#                        //asset_data_grid.render();#}
+{#                        gotoLink();#}
+{##}
+{#                    });#}
+{##}
+{#                }#}
+{##}
+{#            });#}
+{#</script>#}
+{##}

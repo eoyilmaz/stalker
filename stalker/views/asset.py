@@ -229,6 +229,8 @@ def get_assets(request):
             'name': asset.name,
             'type': asset.type.name,
             'status': asset.status.name,
+            'status_bg_color': asset.status.bg_color,
+            'status_fg_color': asset.status.fg_color,
             'user_id': asset.created_by.id,
             'user_name': asset.created_by.name,
             'description': asset.description
