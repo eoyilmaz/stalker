@@ -133,6 +133,13 @@ class TaskTester(unittest2.TestCase):
             password="1234"
         )
         
+        self.test_user3 = User(
+            name="User3",
+            login="user3",
+            email="user3@user3.com",
+            password="1234"
+        )
+        
         self.test_dependent_task1 = Task(
             name="Dependent Task1",
             project=self.test_project1,
@@ -151,6 +158,7 @@ class TaskTester(unittest2.TestCase):
             'project': self.test_project1,
             'priority': 500,
             'resources': [self.test_user1, self.test_user2],
+            'watchers': [self.test_user3],
             'bid_timing': 4,
             'bid_unit': 'd',
             'schedule_timing': 1,
@@ -864,45 +872,638 @@ class TaskTester(unittest2.TestCase):
         new_task.resources.remove(new_user2)
         self.assertNotIn(new_task, new_user2.tasks)
     
-#def testing_resources_attribute_will_be_an_empty_list_for_a_container_Task(self):
-    #    """testing if the resources attribute will be an empty list for a
-    #    container Task
-    #    """
-    #    self.kwargs['name'] = 'Task1'
-    #    new_task1 = Task(**self.kwargs)
-    #    
-    #    self.kwargs['name'] = 'Task2'
-    #    new_task2 = Task(**self.kwargs)
-    #    
-    #    self.kwargs['name'] = 'Task3'
-    #    new_task3 = Task(**self.kwargs)
-    #    
-    #    self.assertTrue(len(new_task1.children) > 0)
-    #    new_task2.parent = new_task1
-    #    new_task1.children.append(new_task3)
-    #    
-    #    self.assertEqual(new_task1.children, [])
+    #def testing_resources_attribute_will_be_an_empty_list_for_a_container_Task(self):
+        #    """testing if the resources attribute will be an empty list for a
+        #    container Task
+        #    """
+        #    self.kwargs['name'] = 'Task1'
+        #    new_task1 = Task(**self.kwargs)
+        #    
+        #    self.kwargs['name'] = 'Task2'
+        #    new_task2 = Task(**self.kwargs)
+        #    
+        #    self.kwargs['name'] = 'Task3'
+        #    new_task3 = Task(**self.kwargs)
+        #    
+        #    self.assertTrue(len(new_task1.children) > 0)
+        #    new_task2.parent = new_task1
+        #    new_task1.children.append(new_task3)
+        #    
+        #    self.assertEqual(new_task1.children, [])
+        
+    #def testing_resources_attribute_will_still_append_data_to_itself_for_a_container_Task(self):
+        #    """testing if the resources attribute will not append any data to
+        #    itself for a container Task
+        #    """
+        #    self.kwargs['name'] = 'Task1'
+        #    new_task1 = Task(**self.kwargs)
+        #    
+        #    self.kwargs['name'] = 'Task2'
+        #    new_task2 = Task(**self.kwargs)
+        #    
+        #    self.kwargs['name'] = 'Task3'
+        #    new_task3 = Task(**self.kwargs)
+        #    
+        #    new_task2.parent = new_task1
+        #    new_task1.children.append(new_task3)
+        #    
+        #    # now try to append a resource ot the container task
+        #    new_task1.resources.append(self.test_user1)
+        #    
+        #    self.assertEqual(new_task1.resources, [])
     
-#def testing_resources_attribute_will_still_append_data_to_itself_for_a_container_Task(self):
-    #    """testing if the resources attribute will not append any data to
-    #    itself for a container Task
-    #    """
-    #    self.kwargs['name'] = 'Task1'
-    #    new_task1 = Task(**self.kwargs)
-    #    
-    #    self.kwargs['name'] = 'Task2'
-    #    new_task2 = Task(**self.kwargs)
-    #    
-    #    self.kwargs['name'] = 'Task3'
-    #    new_task3 = Task(**self.kwargs)
-    #    
-    #    new_task2.parent = new_task1
-    #    new_task1.children.append(new_task3)
-    #    
-    #    # now try to append a resource ot the container task
-    #    new_task1.resources.append(self.test_user1)
-    #    
-    #    self.assertEqual(new_task1.resources, [])
+    def test_watchers_argument_is_skipped(self):
+        """testing if the watchers attribute will be an empty list when the
+        watchers argument is skipped
+        """
+        self.kwargs.pop("watchers")
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.watchers, [])
+
+    def test_watchers_argument_is_None(self):
+        """testing if the watchers attribute will be an empty list when the
+        watchers argument is None
+        """
+        self.kwargs["watchers"] = None
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.watchers, [])
+
+    def test_watchers_attribute_is_None(self):
+        """testing if a TypeError will be raised whe the watchers attribute
+        is set to None
+        """
+        self.assertRaises(TypeError, setattr, self.test_task, "watchers",
+                          None)
+
+    def test_watchers_argument_is_not_list(self):
+        """testing if a TypeError will be raised when the watchers argument is
+        not a list
+        """
+        self.kwargs["watchers"] = "a resource"
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_watchers_attribute_is_not_list(self):
+        """testing if a TypeError will be raised when the watchers attribute
+        is set to any other value then a list
+        """
+        self.assertRaises(TypeError, setattr, self.test_task, "watchers",
+                          "a resource")
+
+    def test_watchers_argument_is_set_to_a_list_of_other_values_then_User(self):
+        """testing if a TypeError will be raised when the watchers argument is
+        set to a list of other values then a User
+        """
+        self.kwargs["watchers"] = ["a", "list", "of", "watchers",
+                                    self.test_user1]
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_watchers_attribute_is_set_to_a_list_of_other_values_then_User(self):
+        """testing if a TypeError will be raised when the watchers attribute
+        is set to a list of other values then a User
+        """
+        self.kwargs["watchers"] = ["a", "list", "of", "watchers",
+                                    self.test_user1]
+        self.assertRaises(TypeError, self.test_task, **self.kwargs)
+
+    def test_watchers_attribute_is_working_properly(self):
+        """testing if the watchers attribute is working properly
+        """
+        test_value = [self.test_user1]
+        self.test_task.watchers = test_value
+        self.assertEqual(self.test_task.watchers, test_value)
+
+    def test_watchers_argument_back_references_to_User(self):
+        """testing if the User instances passed with the watchers argument
+        will have the current task in their User.watching attribute
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="test1",
+            login="test1",
+            email="test1@test.com",
+            password="test1"
+        )
+
+        new_user2 = User(
+            name="test2",
+            login="test2",
+            email="test2@test.com",
+            password="test2"
+        )
+
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.watching)
+
+        # now change the watchers list
+        new_task.watchers = [new_user2]
+        self.assertIn(new_task, new_user2.watching)
+        self.assertNotIn(new_task, new_user1.watching)
+
+        # now append the new user
+        new_task.watchers.append(new_user1)
+        self.assertIn(new_task, new_user1.watching)
+
+    def test_watchers_attribute_back_references_to_User(self):
+        """testing if the User instances passed with the watchers argument will
+        have the current task in their User.watching attribute
+        """
+        # create a new user
+        new_user = User(
+            name="Test User",
+            login="testuser",
+            email="testuser@test.com",
+            password="testpass"
+        )
+
+        # assign it to a newly created task
+        #self.kwargs["watchers"] = [new_user]
+        new_task = Task(**self.kwargs)
+        new_task.watchers = [new_user]
+
+        # now check if the user has the task in its watching list
+        self.assertIn(new_task, new_user.watching)
+
+    def test_watchers_attribute_will_clear_itself_from_the_previous_Users(self):
+        """testing if the watchers attribute is updated will clear itself from
+        the current watchers watching attribute.
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its watching list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now update the watchers list
+        new_task.watchers = [new_user3, new_user4]
+
+        # now check if the new watchers has the task in their watching attribute
+        self.assertIn(new_task, new_user3.watching)
+        self.assertIn(new_task, new_user4.watching)
+
+        # and if it is not in the previous users watching list
+        self.assertNotIn(new_task, new_user1.watching)
+        self.assertNotIn(new_task, new_user2.watching)
+
+    def test_watchers_attribute_will_handle_append(self):
+        """testing if the watchers attribute will handle appending users
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+        
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now update the watchers list
+        new_task.watchers.append(new_user3)
+        new_task.watchers.append(new_user4)
+
+        # now check if the new watchers has the task in their watching
+        # attribute
+        self.assertIn(new_task, new_user3.watching)
+        self.assertIn(new_task, new_user4.watching)
+
+    def test_watchers_attribute_will_handle_extend(self):
+        """testing if the watchers attribute will handle extending users
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+        
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+        
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its tasks list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now update the watchers list
+        new_task.watchers.extend([new_user3, new_user4])
+
+        # now check if the new watchers has the task in their watching
+        # attribute
+        self.assertIn(new_task, new_user3.watching)
+        self.assertIn(new_task, new_user4.watching)
+
+    def test_watchers_attribute_will_handle___setitem__(self):
+        """testing if the watchers attribute will handle __setitem__ing users
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+        
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+        
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its watching list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now update the watchers list
+        new_task.watchers[0] = new_user3
+        new_task.watchers[1] = new_user4
+
+        # now check if the new watchers has the task in their watching
+        # attribute
+        self.assertIn(new_task, new_user3.watching)
+        self.assertIn(new_task, new_user4.watching)
+
+        # and check if the first and second users doesn't have task anymore
+        self.assertNotIn(new_task, new_user1.watching)
+        self.assertNotIn(new_task, new_user2.watching)
+
+    def test_watchers_attribute_will_handle___setslice__(self):
+        """testing if the watchers attribute will handle __setslice__ing users
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+       
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its watching list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now update the watchers list
+        new_task.watchers[1:2] = [new_user3, new_user4]
+
+        # now check if the new watchers has the task in their tasks attribute
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user3.watching)
+        self.assertIn(new_task, new_user4.watching)
+
+        # and check if the users watching list doesn't have the task anymore
+        self.assertNotIn(new_task, new_user2.watching)
+
+    def test_watchers_attribute_will_handle_insert(self):
+        """testing if the watchers attribute will handle inserting users
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+        
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its watching list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now update the watchers list
+        new_task.watchers.insert(0, new_user3)
+        new_task.watchers.insert(0, new_user4)
+
+        # now check if the new watchers has the task in their watching
+        # attribute
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+        self.assertIn(new_task, new_user3.watching)
+        self.assertIn(new_task, new_user4.watching)
+
+    def test_watchers_attribute_will_handle___add__(self):
+        """testing if the watchers attribute will handle __add__ing users
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass"
+        )
+
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+        
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its watching list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now update the watchers list
+        new_task.watchers = new_task.watchers + [new_user3, new_user4]
+
+        # now check if the new watchers has the task in their watching
+        # attribute
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+        self.assertIn(new_task, new_user3.watching)
+        self.assertIn(new_task, new_user4.watching)
+
+    def test_watchers_attribute_will_handle___iadd__(self):
+        """testing if the watchers attribute will handle __iadd__ing users
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass")
+
+        new_user3 = User(
+            name="Test User3",
+            login="testuser3",
+            email="testuser3@test.com",
+            password="testpass")
+
+        new_user4 = User(
+            name="Test User4",
+            login="testuser4",
+            email="testuser4@test.com",
+            password="testpass"
+        )
+
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its watching list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now update the watchers list
+        new_task.watchers += [new_user3, new_user4]
+
+        # now check if the new watchers has the task in their watching
+        # attribute
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+        self.assertIn(new_task, new_user3.watching)
+        self.assertIn(new_task, new_user4.watching)
+
+    def test_watchers_attribute_will_handle_pop(self):
+        """testing if the watchers attribute will handle popping users
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its watching list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now pop the watchers
+        new_task.watchers.pop(0)
+        self.assertNotIn(new_task, new_user1.watching)
+
+        new_task.watchers.pop()
+        self.assertNotIn(new_task, new_user2.watching)
+
+    def test_watchers_attribute_will_handle_remove(self):
+        """testing if the watchers attribute will handle removing users
+        """
+        # create a couple of new users
+        new_user1 = User(
+            name="Test User1",
+            login="testuser1",
+            email="testuser1@test.com",
+            password="testpass"
+        )
+        
+        new_user2 = User(
+            name="Test User2",
+            login="testuser2",
+            email="testuser2@test.com",
+            password="testpass"
+        )
+        
+        # now add the 1 and 2 to the watchers with the watchers argument
+        # assign it to a newly created task
+        self.kwargs["watchers"] = [new_user1, new_user2]
+        new_task = Task(**self.kwargs)
+
+        # now check if the user has the task in its watching list
+        self.assertIn(new_task, new_user1.watching)
+        self.assertIn(new_task, new_user2.watching)
+
+        # now pop the watchers
+        new_task.watchers.remove(new_user1)
+        self.assertNotIn(new_task, new_user1.watching)
+        
+        new_task.watchers.remove(new_user2)
+        self.assertNotIn(new_task, new_user2.watching)
     
     def test_schedule_timing_argument_skipped(self):
         """testing if the schedule_timing attribute will be equal to the

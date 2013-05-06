@@ -485,8 +485,18 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
         #backref="tasks",
         back_populates="tasks",
-        doc="""The list of :class:`stalker.models.auth.User`\ s instances assigned to this Task.
+        doc="""The list of :class:`~stalker.models.auth.User`\ s assigned to this Task.
         """
+    )
+    
+    watchers = relationship(
+        'User',
+        secondary='Task_Watchers',
+        primaryjoin='Tasks.c.id==Task_Watchers.c.task_id',
+        secondaryjoin='Task_Watchers.c.watcher_id==Users.c.id',
+        back_populates='watching',
+        doc='''The list of :class:`~stalker.models.auth.User`\ s watching this Task.
+        '''
     )
 
     priority = Column(Integer)
@@ -554,6 +564,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                  parent=None,
                  depends=None,
                  resources=None,
+                 watchers=None,
                  start=None,
                  end=None,
                  duration=None,
@@ -597,9 +608,12 @@ class Task(Entity, StatusMixin, ScheduleMixin):
 
         if resources is None:
             resources = []
-
         self.resources = resources
-
+        
+        if watchers is None:
+            watchers = []
+        self.watchers = watchers
+        
         self.schedule_constraint = schedule_constraint
         self.schedule_unit = schedule_unit
         self.schedule_timing = schedule_timing
@@ -887,7 +901,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             #resource = None
 
         return resource
+    
+    @validates("watchers")
+    def _validate_watchers(self, key, watcher):
+        """validates the given watcher value
+        """
+        from stalker.models.auth import User
 
+        if not isinstance(watcher, User):
+            raise TypeError("%s.watchers should be a list of "
+                            "stalker.models.auth.User instances not %s" %
+                            (self.__class__.__name__,
+                             watcher.__class__.__name__))
+        return watcher
+    
     @validates("versions")
     def _validate_versions(self, key, version):
         """validates the given version value
@@ -1192,6 +1219,13 @@ Task_Resources = Table(
     "Task_Resources", Base.metadata,
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("resource_id", Integer, ForeignKey("Users.id"), primary_key=True)
+)
+
+# TASK_WATCHERS
+Task_Watchers = Table(
+    "Task_Watchers", Base.metadata,
+    Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
+    Column("watcher_id", Integer, ForeignKey("Users.id"), primary_key=True)
 )
 
 

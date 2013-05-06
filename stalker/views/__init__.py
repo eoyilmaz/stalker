@@ -25,11 +25,9 @@ from pyramid.httpexceptions import HTTPServerError
 from pyramid.view import view_config
 from pyramid.response import  Response
 
-
 from stalker import log
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
-
 
 
 def log_param(request, param):
@@ -37,7 +35,6 @@ def log_param(request, param):
         logger.debug('%s: %s' % (param, request.params[param]))
     else:
         logger.debug('%s not in params' % param)
-
 
 
 @view_config(
@@ -48,6 +45,7 @@ def server_error(exc, request):
     response = Response('Server Error: %s' % msg)
     response.status_int = 500
     return response
+
 
 def get_time(request, time_attr):
     """Extracts a time object from the given request
@@ -66,6 +64,7 @@ def get_time(request, time_attr):
         minutes=time_part.minute
     )
 
+
 def get_date(request, date_attr):
     """Extracts a datetime object from the given request
     
@@ -78,6 +77,7 @@ def get_date(request, date_attr):
         request.params[date_attr][:-6],
         "%Y-%m-%dT%H:%M:%S"
     )
+
 
 def get_datetime(request, date_attr, time_attr):
     """Extracts a datetime object from the given request
@@ -101,6 +101,7 @@ def get_datetime(request, date_attr, time_attr):
         second=time_part.second,
         microsecond=time_part.microsecond
     )
+
 
 @view_config(
     route_name='busy_dialog',

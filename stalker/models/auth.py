@@ -106,8 +106,8 @@ class Permission(Base):
     :param str access: An Enum value which can have the one of the values of
       ``Allow`` or ``Deny``.
     
-    :param str action: An Enum value from the list ['Add', 'View', 'Edit',
-      'Delete']. Can not be None. The list can be changed from
+    :param str action: An Enum value from the list ['Create', 'Read', 'Update',
+      'Delete', 'List']. Can not be None. The list can be changed from
       stalker.config.Config.default_actions.
     
     :param str class_name: The name of the class that this action is applied
@@ -138,8 +138,8 @@ class Permission(Base):
       # get the permissions for the Project class
       project_permissions = Permission.query\
           .filter(Actions.access='Allow')\
+          .filter(Actions.action='Create')\
           .filter(Actions.class_name='Project')\
-          .filter(Actions.action='Add')\
           .first()
       
       # now we have the permission specifying the allowance of creating a
@@ -152,8 +152,6 @@ class Permission(Base):
       # and persist this information in the database
       DBSession.add(group)
       transaction.commit()
-    
-    
     """
     __tablename__ = 'Permissions'
     __table_args__  = (
@@ -320,7 +318,13 @@ class User(Entity, ACLMixin):
 
       Other than these two new rules all the previous formatting rules from the
       :class:`~stalker.models.entity.SimpleEntity` are valid.
-      
+    
+    .. versionadded 0.2.0: Task Watchers
+       
+       New to version 0.2.0 users can be assigned to a
+       :class:`~stalker.models.task.Task` as a **Watcher**. Which can be used
+       to inform the users in watchers list about the updates of certain Tasks.
+    
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
     
@@ -467,6 +471,17 @@ class User(Entity, ACLMixin):
         It is a list of :class:`~stalker.models.task.Task` instances.
         """
     )
+    
+    watching = relationship(
+        'Task',
+        secondary='Task_Watchers',
+        back_populates='watchers',
+        doc=''':class:`~stalker.models.task.Tasks`\ s that this user is
+        assigned as a watcher.
+        
+        It is a list of :class:`~stalker.models.task.Task` instances.
+        '''
+    )
 
     time_logs = relationship(
         "TimeLog",
@@ -488,6 +503,7 @@ class User(Entity, ACLMixin):
         projects_lead=None,
         sequences_lead=None,
         tasks=None,
+        watching=None,
         last_login=None,
         **kwargs
     ):
@@ -522,6 +538,9 @@ class User(Entity, ACLMixin):
             tasks = []
         
         self.tasks = tasks
+        
+        if watching is None:
+            watching = []
 
         self.last_login = last_login
 
@@ -734,16 +753,26 @@ class User(Entity, ACLMixin):
     def _validate_tasks(self, key, task):
         """validates the given tasks attribute
         """
-        
         from stalker.models.task import Task
-        
         if not isinstance(task, Task):
             raise TypeError(
                 "any element in %s.tasks should be an instance of "
                 "stalker.models.task.Task not %s" %
                 (self.__class__.__name__, task.__class__.__name__)
             )
-
+        return task
+    
+    @validates("watching")
+    def _validate_watching(self, key, task):
+        """validates the given watching attribute
+        """
+        from stalker.models.task import Task
+        if not isinstance(task, Task):
+            raise TypeError(
+                "any element in %s.watching should be an instance of "
+                "stalker.models.task.Task not %s" %
+                (self.__class__.__name__, task.__class__.__name__)
+            )
         return task
     
     @validates('projects')

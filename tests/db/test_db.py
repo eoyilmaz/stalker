@@ -2365,7 +2365,8 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         test_task = Task(
             name="Test Task",
-            resources=[user1, user2, user3],
+            resources=[user1, user2],
+            watchers=[user3],
             parent=new_asset,
             status_list=task_status_list,
             effort='5h',
@@ -2391,6 +2392,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         name = test_task.name
         priority = test_task.priority
         resources = test_task.resources
+        watchers = test_task.watchers
         start = test_task.start
         status = test_task.status
         status_list = test_task.status_list
@@ -2433,6 +2435,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(type_, test_task_DB.type)
         self.assertEqual(updated_by, test_task_DB.updated_by)
         self.assertEqual(versions, test_task_DB.versions)
+        self.assertEqual(watchers, test_task_DB.watchers)
         self.assertEqual(schedule_model, test_task_DB.schedule_model)
         self.assertEqual(schedule_timing, test_task_DB.schedule_timing)
         self.assertEqual(schedule_unit, test_task_DB.schedule_unit)
@@ -2606,6 +2609,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         sequences_lead = new_user.sequences_lead
         tags = new_user.tags
         tasks = new_user.tasks
+        watching = new_user.watching
         updated_by = new_user.updated_by
 
         # delete new_user
@@ -2637,6 +2641,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(sequences_lead, new_user_DB.sequences_lead)
         self.assertEqual(tags, new_user_DB.tags)
         self.assertEqual(tasks, new_user_DB.tasks)
+        self.assertEqual(watching, new_user_DB.watching)
         self.assertEqual(updated_by, new_user_DB.updated_by)
 
         # as the member of a department
