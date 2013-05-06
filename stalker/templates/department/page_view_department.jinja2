@@ -17,53 +17,56 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
-<div id='department_split_container'>
-  <div id='department_summary'>
-      {# Summary #}
-  </div>
-  <div id='department_related_data_tab_container'>
-      {# Tab View #}
-  </div>
+<div id='department_border_container'>
+    <div id='department_summary'>
+        {# Summary #}
+    </div>
+    <div id='department_related_data_tab_container'>
+        {# Tab View #}
+    </div>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dijit/layout/SplitContainer',
-    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
-          function(registry, SplitContainer, TabContainer, ContentPane){
+    require(['dijit/registry', 'dijit/layout/BorderContainer',
+        'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+            function (registry, BorderContainer, TabContainer, ContentPane) {
 
-            var department_SplitContainer = new SplitContainer({
-              region: 'center',
-              orientation: 'vertical',
-              splitter: false
+                var department_BorderContainer = new BorderContainer({
+                    region: 'center',
+                    orientation: 'vertical',
+                    splitter: false
 
-            }, 'department_split_container');
+                }, 'department_border_container');
 
-            var summary_content_pane = new ContentPane({
-              title: 'Summarize',
-              href: 'summarize/department/{{ department.id }}',
-              region: 'top',
-              style: 'padding: 0; background-color: #eeeeee;'
-            },'department_summary');
+                var summary_content_pane = new ContentPane({
+                    title: 'Summarize',
+                    href: 'summarize/department/{{ department.id }}',
+                    region: 'top',
+                    style: 'width:100%; height:200px; padding: 0; background-color: #eeeeee;',
+                    splitter: true
+                }, 'department_summary');
 
-            // **********************************************************************
-            // Bottom Part - Complex Data View
+                // **********************************************************************
+                // Bottom Part - Complex Data View
 
-            var department_related_data_tab_container = new TabContainer({
-              region: 'bottom',
-              style: 'background-color: #662d91;'
-            },department_related_data_tab_container);
+                var department_related_data_tab_container = new TabContainer({
 
-            var users_content_pane = new ContentPane({
-              title: 'Users',
-              href: 'list/users/{{ department.id }}'
+                    region: 'center',
+                    style: 'width: 100%; background-color: #662d91;'
+
+                }, department_related_data_tab_container);
+
+                var users_content_pane = new ContentPane({
+                    title: 'Users',
+                    href: 'list/users/{{ department.id }}'
+                });
+
+                department_related_data_tab_container.addChild(users_content_pane);
+
+                department_BorderContainer.addChild(summary_content_pane);
+                department_BorderContainer.addChild(department_related_data_tab_container);
+                department_BorderContainer.startup();
+
             });
-
-            department_related_data_tab_container.addChild(users_content_pane);
-
-            department_SplitContainer.addChild(summary_content_pane);
-            department_SplitContainer.addChild(department_related_data_tab_container);
-            department_SplitContainer.startup();
-
-          });
 </script>
 

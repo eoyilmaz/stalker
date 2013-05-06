@@ -117,6 +117,7 @@ def main(global_config, **settings):
     config.add_route('get_projects_byEntity', 'get/projects_byEntity/{entity_id}')
     config.add_route('summarize_project', 'summarize/project/{project_id}')
     config.add_route('get_projects', 'get/projects')
+    config.add_route('view_entity_nav_bar','view/entity_nav_bar/{entity_id}')
     
     # *************************************************************************
     # ImageFormat

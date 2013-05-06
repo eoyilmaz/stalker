@@ -18,100 +18,117 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div style="margin-top: 0" id='user_border_container'>
-{#  <div id='user_summary'>#}
-      {# Summary View #}
-{#  </div>#}
-{#  <div id='user_related_data_tab_container'>#}
-{#    <div id='tasks_pane'></div>#}
-{#    <div id='projects_pane'></div>#}
-{#    <div id='tickets_pane'></div>#}
-{#    <div id='departments_pane'></div>#}
-{#  </div>#}
+    {#  <div id='user_summary'>#}
+    {# Summary View #}
+    {#  </div>#}
+    {#  <div id='user_related_data_tab_container'>#}
+    {#    <div id='tasks_pane'></div>#}
+    {#    <div id='projects_pane'></div>#}
+    {#    <div id='tickets_pane'></div>#}
+    {#    <div id='departments_pane'></div>#}
+    {#  </div>#}
 </div>
 
 <script type='text/javascript'>
-  require([
-    "dojo/dom",
-    'dijit/layout/SplitContainer',
-    'dijit/layout/TabContainer',
-    'dojox/layout/ContentPane',
-    'dijit/registry',
-    'dojo/domReady!'
-  ], function(
-          dom,
-          SplitContainer,
-          TabContainer,
-          ContentPane,
-          registry,
-          ready
-          ){
+    require([
+        "dojo/dom",
+        'dijit/layout/BorderContainer',
+        'dijit/layout/TabContainer',
+        'dojox/layout/ContentPane',
+        'dojo/on',
+        'dijit/registry',
+        'dojo/domReady!'
+    ], function (dom, BorderContainer, TabContainer, ContentPane, on, registry, ready) {
 
-{#    ready(function(){#}
-      var user_SplitContainer = new SplitContainer({
-                region: 'center',
-                orientation: 'vertical',
-                splitter: false
-      },'user_border_container');
+        {#    ready(function(){#}
+        var user_BorderContainer = new BorderContainer({
+            id: 'user_border_container',
+            region: 'center',
+            orientation: 'vertical',
+            splitter: true,
+            resizable: false,
+            style: 'width:100%; height:100%; margin:0;'
+        }, 'user_border_container');
 
-      var summary_content_pane = new ContentPane({
-        title: 'Summarize',
-        href: 'summarize/user/{{ user.id }}',
-        region:'leading',
-        style: 'width: 1000px; height: 200px;  padding: 0; background-color: #eeeeee;',
-        splitter:true
+        var summary_content_pane = new ContentPane({
+            title: 'Summarize',
+            href: 'summarize/user/{{ user.id }}',
+            region: 'top',
+            style: 'width:100%; height:200px; padding: 0; background-color: #eeeeee;',
+            splitter: true
 
-      });
+        });
 
-      user_SplitContainer.addChild(summary_content_pane);
+        user_BorderContainer.addChild(summary_content_pane);
 
-      // **********************************************************************
-      // Bottom Part - Complex Data View
-      var user_related_data_tab_container = new TabContainer({
-        title: 'Tab',
-        region: 'bottom',
-        style: 'width: 1000px; height: 300px; background-color: #00aef0;',
-        splitter:true
+        // **********************************************************************
+        // Bottom Part - Complex Data View
+        var user_related_data_tab_container = new TabContainer({
+            title: 'Tab',
+            region: 'center',
+            style: 'width: 100%; background-color: #00aef0;'
 
-      });
+        });
 
 
-      var tasks_content_pane = new ContentPane({
-        title: 'Tasks',
-        href: 'list/tasks/{{ user.id }}'
-      });
+        var tasks_content_pane = new ContentPane({
+            title: 'Tasks',
+            href: 'list/tasks/{{ user.id }}'
+        });
 
 
-      var projects_content_pane = new ContentPane({
-        title: 'Projects',
-        href:'list/projects/{{ user.id }}'
-      });
+        var projects_content_pane = new ContentPane({
+            title: 'Projects',
+            href: 'list/projects/{{ user.id }}'
+        });
 
-      var departments_content_pane = new ContentPane({
-        title: 'Departments',
-        href: 'list/departments/{{ user.id }}'
-      });
-
-
-      var tickets_content_pane = new ContentPane({
-        title: 'Tickets',
-        content: 'list/tickets/{{ user.id }}'
-      });
+        var departments_content_pane = new ContentPane({
+            title: 'Departments',
+            href: 'list/departments/{{ user.id }}'
+        });
 
 
-      user_related_data_tab_container.addChild(tasks_content_pane);
-      user_related_data_tab_container.addChild(projects_content_pane);
-      user_related_data_tab_container.addChild(departments_content_pane);
-      user_related_data_tab_container.addChild(tickets_content_pane);
-
-      // user_related_data_tab_container.startup();
+        var tickets_content_pane = new ContentPane({
+            title: 'Tickets',
+            content: 'list/tickets/{{ user.id }}'
+        });
 
 
-      user_SplitContainer.addChild(user_related_data_tab_container);
+        user_related_data_tab_container.addChild(tasks_content_pane);
+        user_related_data_tab_container.addChild(projects_content_pane);
+        user_related_data_tab_container.addChild(departments_content_pane);
+        user_related_data_tab_container.addChild(tickets_content_pane);
 
-      //document.body.appendChild(user_SplitContainer.domNode);
-      user_related_data_tab_container.startup();
-      user_SplitContainer.startup();
-{#    });#}
-  });
+        // user_related_data_tab_container.startup();
+
+
+        user_BorderContainer.addChild(user_related_data_tab_container);
+
+        //document.body.appendChild(user_BorderContainer.domNode);
+        user_related_data_tab_container.startup();
+        user_BorderContainer.startup();
+
+        function refreshCurrentPane() {
+
+            currentPane.refresh();
+
+        }
+
+        function init() {
+            var lSplitter = registry.byId("user_border_container").getSplitter("top");
+            on(lSplitter.domNode, 'mouseup', refreshCurrentPane);
+        }
+
+        init();
+
+        var currentPane;
+
+        user_related_data_tab_container.watch("selectedChildWidget", function (name, oval, nval) {
+            console.log("selected child changed from ", nval.title, " to ", nval.href);
+
+
+            currentPane = nval;
+        });
+    });
 </script>
 

@@ -1,63 +1,73 @@
-<div style="margin: 0" id='task_split_container'>
-  <div id='ptask_summary'>
-      {# Summary View #}
-  </div>
-  <div id='ptask_related_data_tab_container'>
-      {# Tab View #}
-  </div>
+<div style="margin: 0" id='task_border_container'>
+    <div id='task_nav_bar_content_pane'>
+        {# Summary View #}
+    </div>
+    <div id='ptask_related_data_tab_container'>
+        {# Tab View #}
+    </div>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dijit/layout/SplitContainer',
-    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
-          function(registry, SplitContainer, TabContainer, ContentPane){
+    require(['dijit/registry', 'dijit/layout/BorderContainer',
+        'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+            function (registry, BorderContainer, TabContainer, ContentPane) {
 
-            var task_SplitContainer = new SplitContainer({
-              region: 'center',
-              orientation: 'horizontal',
-              splitter: false
-            }, 'task_split_container');
+                var task_BorderContainer = new BorderContainer({
+                    id: 'task_border_container',
+                    region: 'center',
+                    orientation: 'vertical',
+                    splitter: true,
+                    resizable: false,
+                    style: 'width:100%; height:100%; margin:0;'
+                }, 'task_border_container');
 
-            var summary_content_pane = new ContentPane({
-              title: 'Summarize',
-              href: 'summarize/task/{{ task.id }}',
-              region: 'top',
-              style: 'padding: 0; background-color: #eeeeee;'
-            },'task_summary');
 
-            // **********************************************************************
-            // Bottom Part - Complex Data View
-            var task_related_data_tab_container = new TabContainer({
-              region: 'bottom',
-              style: 'background-color: #fff2f0'
-            }, 'task_related_data_tab_container');
+                var nav_bar_content_pane = new ContentPane({
+                    title: 'NavBar',
+                    href: 'view/entity_nav_bar/{{ task.id }}',
+                    region: 'top',
+                    style: 'width:100%; height:25px; padding: 0;'
+                }, 'task_nav_bar_content_pane');
 
-            var time_logs_content_pane = new ContentPane({
-              title: 'TimeLogs',
-              href: 'list/time_logs/{{ task.id }}'
+
+                // **********************************************************************
+                // Bottom Part - Complex Data View
+                var task_related_data_tab_container = new TabContainer({
+                    region: 'center',
+                    style: 'background-color: #fff2f0'
+                }, 'task_related_data_tab_container');
+
+                var time_logs_content_pane = new ContentPane({
+                    title: 'TimeLogs',
+                    href: 'list/time_logs/{{ task.id }}'
+                });
+
+                var versions_content_pane = new ContentPane({
+                    title: 'Versions',
+                    content: 'list/versions/{{ task.id }}'
+                });
+
+                var tickets_content_pane = new ContentPane({
+                    title: 'Tickets',
+                    content: 'list/tickets/{{ task.id }}'
+                });
+
+                var summary_content_pane = new ContentPane({
+                    title: 'Summarize',
+                    href: 'summarize/task/{{ task.id }}'
+                });
+
+
+                task_related_data_tab_container.addChild(time_logs_content_pane);
+                task_related_data_tab_container.addChild(versions_content_pane);
+                task_related_data_tab_container.addChild(tickets_content_pane);
+                task_related_data_tab_container.addChild(summary_content_pane);
+                task_related_data_tab_container.startup();
+
+                task_BorderContainer.addChild(nav_bar_content_pane);
+                task_BorderContainer.addChild(task_related_data_tab_container);
+                task_BorderContainer.startup();
+
+
             });
-
-            var versions_content_pane = new ContentPane({
-              title: 'Versions',
-              content: 'list/versions/{{ task.id }}'
-            });
-
-            var tickets_content_pane = new ContentPane({
-              title: 'Tickets',
-              content: 'list/tickets/{{ task.id }}'
-            });
-
-
-
-            task_related_data_tab_container.addChild(time_logs_content_pane);
-            task_related_data_tab_container.addChild(versions_content_pane);
-            task_related_data_tab_container.addChild(tickets_content_pane);
-            task_related_data_tab_container.startup();
-
-            task_SplitContainer.addChild(summary_content_pane);
-            task_SplitContainer.addChild(task_related_data_tab_container);
-            task_SplitContainer.startup();
-
-
-          });
 </script>

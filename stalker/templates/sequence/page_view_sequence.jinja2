@@ -1,62 +1,72 @@
 <div style="margin: 0" id='sequence_split_container'>
-  <div id='sequence_summary'>
-      {# Summary View #}
-  </div>
-  <div id='sequence_related_data_tab_container'>
-      {# Tab View #}
-  </div>
+    <div id='sequence_nav_bar_content_pane'>
+        {# Summary View #}
+    </div>
+    <div id='sequence_related_data_tab_container'>
+        {# Tab View #}
+    </div>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dijit/layout/SplitContainer',
-    'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
-          function(registry, SplitContainer, TabContainer, ContentPane){
+    require(['dijit/registry', 'dijit/layout/BorderContainer',
+        'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+            function (registry, BorderContainer, TabContainer, ContentPane) {
 
-            var sequence_SplitContainer = new SplitContainer({
-              region: 'center',
-              orientation: 'horizontal',
-              splitter: false
+                var sequence_BorderContainer = new BorderContainer({
+                    id: 'sequence_border_container',
+                    region: 'center',
+                    orientation: 'vertical',
+                    splitter: true,
+                    resizable: false,
+                    style: 'width:100%; height:100%; margin:0; padding: 0;'
 
-            }, 'sequence_split_container');
+                }, 'sequence_split_container');
 
-            var summary_content_pane = new ContentPane({
-              title: 'Summarize',
-              href: 'summarize/sequence/{{ sequence.id }}',
-              region: 'top',
-              style: 'padding: 0; background-color: #eeeeee;'
-            },'sequence_summary');
+                var nav_bar_content_pane = new ContentPane({
+                    title: 'NavBar',
+                    href: 'view/entity_nav_bar/{{ sequence.id }}',
+                    region: 'top',
+                    style: 'width:100%; height:25px; padding: 0;'
+                }, 'sequence_nav_bar_content_pane');
 
-            // **********************************************************************
-            // Bottom Part - Complex Data View
-            var sequence_related_data_tab_container = new TabContainer({
-              region: 'bottom',
-              style: 'background-color: #ed008c'
-            }, 'sequence_related_data_tab_container');
 
-            var tasks_content_pane = new ContentPane({
-              title: 'Tasks',
-              href: 'list/tasks/{{ sequence.id }}'
+                // **********************************************************************
+                // Bottom Part - Complex Data View
+                var sequence_related_data_tab_container = new TabContainer({
+                    region: 'center',
+                    style: 'background-color: #ed008c'
+                }, 'sequence_related_data_tab_container');
+
+                var tasks_content_pane = new ContentPane({
+                    title: 'Tasks',
+                    href: 'list/tasks/{{ sequence.id }}'
+                });
+
+                var tickets_content_pane = new ContentPane({
+                    title: 'Tickets',
+                    content: 'list/tickets/{{ sequence.id }}'
+                });
+
+                var versions_content_pane = new ContentPane({
+                    title: 'Versions',
+                    href: 'list/versions/{{ sequence.id }}'
+                });
+
+                var summary_content_pane = new ContentPane({
+                    title: 'Summarize',
+                    href: 'summarize/sequence/{{ sequence.id }}'
+                }, 'sequence_summary');
+
+                sequence_related_data_tab_container.addChild(tasks_content_pane);
+                sequence_related_data_tab_container.addChild(tickets_content_pane);
+                sequence_related_data_tab_container.addChild(versions_content_pane);
+                sequence_related_data_tab_container.addChild(summary_content_pane);
+                sequence_related_data_tab_container.startup();
+
+                sequence_BorderContainer.addChild(nav_bar_content_pane);
+                sequence_BorderContainer.addChild(sequence_related_data_tab_container);
+                sequence_BorderContainer.startup();
+
+
             });
-
-            var tickets_content_pane = new ContentPane({
-              title: 'Tickets',
-              content: 'list/tickets/{{ sequence.id }}'
-            });
-
-            var versions_content_pane = new ContentPane({
-              title: 'Versions',
-              href: 'list/versions/{{ sequence.id }}'
-            });
-
-            sequence_related_data_tab_container.addChild(tasks_content_pane);
-            sequence_related_data_tab_container.addChild(tickets_content_pane);
-            sequence_related_data_tab_container.addChild(versions_content_pane);
-            sequence_related_data_tab_container.startup();
-
-            sequence_SplitContainer.addChild(summary_content_pane);
-            sequence_SplitContainer.addChild(sequence_related_data_tab_container);
-            sequence_SplitContainer.startup();
-
-
-          });
 </script>

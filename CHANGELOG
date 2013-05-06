@@ -6,6 +6,9 @@ Stalker Changes
 --------
 
 * Stalker is now compatible with Python 2.6.
+* WebUI:
+  * Replaced DataGrid objects with dgrid.
+  * Added navigation bar for assets, shots, sequences
 
 0.2.0.b1
 --------
