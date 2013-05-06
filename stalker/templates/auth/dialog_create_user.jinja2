@@ -248,7 +248,6 @@
                 target: 'get/departments'
             });
 
-
             {% if mode=='CREATE' %}
                 {% if department %}
                     selected_departments = [{{ department.id }}];
@@ -288,29 +287,44 @@
 
             // ************************************************************ 
             // Groups
+            var groups_tagSelect;
+            var create_group_button;
+            var selected_groups;
+            
+            // Store
             var groups_jsonRest = new JsonRest({
                 target: 'get/groups'
             });
-
-            var groups_tagSelect = new TagSelect({
+            
+            {% if mode=='UPDATE' %}
+                selected_groups = [
+                    {% for group in user.groups %}
+                        {{ group.id }},
+                    {% endfor %}
+                ];
+            {% endif %}
+            
+            groups_tagSelect = new TagSelect({
                 name: 'group_ids',
                 placeHolder: 'Select groups'
             }, 'user_groups');
             groups_tagSelect.startup();
 
-            var result_group = groups_jsonRest.query().then(function (data) {
-                var groups_memory = new Memory({data: data});
-                groups_tagSelect.set('store', groups_memory);
-            });
+            //var result_group = groups_jsonRest.query().then(function (data) {
+            //    var groups_memory = new Memory({data: data});
+            //    groups_tagSelect.set('store', groups_memory);
+            //});
 
             // The Updater
             var groups_field_updater = fieldUpdater({
                 memory: groups_jsonRest,
-                widget: groups_tagSelect
+                widget: groups_tagSelect,
+                selected: selected_groups
             });
-
+            groups_field_updater({animate: false});
+            
             // New Group Button
-            var create_group_button = dialogCaller({
+            create_group_button = dialogCaller({
                 label: 'New',
                 dialog_id: 'create_group_dialog',
                 content_creator: create_group_dialog_creator,

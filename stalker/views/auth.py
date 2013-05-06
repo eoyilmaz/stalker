@@ -227,8 +227,6 @@ def update_user(request):
     return HTTPOk()
 
 
-
-
 @view_config(
     route_name='get_users',
     renderer='json',
@@ -240,6 +238,20 @@ def get_users(request):
     return [
         {'id': user.id, 'name': user.name}
         for user in User.query.all()
+    ]
+
+
+@view_config(
+    route_name='get_groups',
+    renderer='json',
+    permission='List_Group'
+)
+def get_groups(request):
+    """returns all the groups in database
+    """
+    return [
+        {'id': group.id, 'name': group.name}
+        for group in Group.query.all()
     ]
 
 
