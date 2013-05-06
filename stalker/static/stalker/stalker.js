@@ -131,7 +131,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'create_user_dialog',
                 title: 'New User',
-                href: '/create/user/' + department_id,
+                href: 'dialog/create/user/' + department_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -142,7 +142,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'update_user_dialog',
                 title: 'Update User',
-                href: 'update/user/' + user_id,
+                href: 'dialog/update/user/' + user_id,
                 resize: true,
                 style: style,
                 executeScripts: true

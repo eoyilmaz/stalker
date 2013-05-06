@@ -9,14 +9,17 @@ Stalker Changes
 * TimeLog:
   * TimeLog instances will expand Task.schedule_timing value automatically if
     the total amount of logged time is more than the schedule_timing value.
-  * Logged in time will now be visible in gantt charts as a green bar.
   * TimeLogs are now considered while scheduling the task.
-* Fixed Studio creation in webUI, the working hours were not correctly passed
-  to the studio instance.
-* "Append User Dialog" is now working properly.
-* Color choosers in "Create Status Dialog" now have colors picked by default
-  for BG and FG colors.
-* Department menus under 'Crew' menu are now showing the department users.
+* WebUI:
+  * Logged in work times will now be visible in gantt charts as a green bar in
+    the TaskBar div.
+  * Fixed Studio creation, the working hours were not correctly passed to the
+    studio instance.
+  * "Append User Dialog" is now working properly.
+  * Department menus under 'Crew' menu are now showing the department users.
+  * Color choosers in "Create Status Dialog" now have colors picked by default
+    for BG and FG colors.
+  * Combined ``user_create_dialog`` and ``user_update_dialog`` into one.
 
 0.2.0.b1
 --------

@@ -95,7 +95,6 @@ def create_filename_template(request):
             logger.debug('adding a new FilenameTemplate')
             # create and add a new FilenameTemplate
             
-            # TODO: remove this later
             for param in ['name',
                           'target_entity_type',
                           'type_id',

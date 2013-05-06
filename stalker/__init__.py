@@ -139,14 +139,19 @@ def main(global_config, **settings):
     
     # ************************************************************************* 
     # User
-    config.add_route('create_user', 'create/user/{department_id}')
+    
+    # dialogs
+    config.add_route('dialog_create_user', 'dialog/create/user/{department_id}')
+    config.add_route('dialog_update_user', 'dialog/update/user/{user_id}')
+    config.add_route('dialog_append_users', 'dialog/append/user/{entity_id}')
+    
+    config.add_route('create_user', 'create/user')
     config.add_route('update_user', 'update/user/{user_id}')
     config.add_route('view_user', 'view/user/{user_id}')
     config.add_route('list_users', 'list/users/{entity_id}')
     config.add_route('get_users', 'get/users')
     config.add_route('get_users_byEntity', 'get/users_byEntity/{entity_id}')
     config.add_route('get_users_not_in_entity', 'get/users_not_in_entity/{entity_id}')
-    config.add_route('dialog_append_users', 'dialog/append/user/{entity_id}')
     
     config.add_route('append_user', 'append/user')
     config.add_route('append_users', 'append/users')
@@ -155,6 +160,9 @@ def main(global_config, **settings):
     config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
     config.add_route('view_user_versions', 'view/user/versions/{user_id}')
     config.add_route('view_user_tickets', 'view/user/tickets/{user_id}')
+    
+    config.add_route('check_login_availability', 'check/login_availability/{login}')
+    config.add_route('check_email_availability', 'check/email_availability/{email}')
     
     # *************************************************************************
     # FilenameTemplate

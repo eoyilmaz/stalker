@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-from pyramid.httpexceptions import HTTPFound, HTTPOk
+from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
 from pyramid.security import authenticated_userid, forget, remember
 from pyramid.view import view_config, forbidden_view_config
 from sqlalchemy import or_
@@ -33,10 +33,49 @@ from stalker import log
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
+
 @view_config(
-    route_name='create_user',
-    renderer='templates/auth/dialog_create_user.jinja2',
-    permission='Create_User'
+    route_name='dialog_create_user',
+    renderer='templates/auth/dialog_create_user.jinja2'
+)
+def dialog_create_user(request):
+    """called by create user dialog
+    """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+
+    department_id = request.matchdict['department_id']
+    department = Department.query.filter_by(id=department_id).first()
+
+    return {
+        'mode': 'CREATE',
+        'logged_user': logged_user,
+        'department': department
+    }
+
+
+@view_config(
+    route_name='dialog_update_user',
+    renderer='templates/auth/dialog_create_user.jinja2'
+)
+def dialog_update_user(request):
+    """called when updating a user
+    """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+    
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+    
+    return {
+        'mode': 'UPDATE',
+        'logged_user': logged_user,
+        'user': user
+    }
+
+
+@view_config(
+    route_name='create_user'
 )
 def create_user(request):
     """called when adding a User
@@ -44,120 +83,151 @@ def create_user(request):
     login = authenticated_userid(request)
     logged_user = User.query.filter_by(login=login).first()
     
-    if 'submitted' in request.params:
-        logger.debug('submitted in params')
-        if request.params['submitted'] == 'create':
-            logger.debug('submitted value is: create')
-            # create and add a new user
-            if 'name' in request.params and \
-               'login' in request.params and \
-               'email' in request.params and \
-               'password' in request.params:
+    name = request.params.get('name', None)
+    login = request.params.get('login', None)
+    email = request.params.get('email', None)
+    password = request.params.get('password', None)
+    department_id = request.params.get('department_id', None)
+    
+    # create and add a new user
+    if name and login and email and password:
+        departments = []
 
-                department_id = request.matchdict['department_id']
-                departments = []
-
-                if department_id == '-1':
-                # Departments
-                    if 'department_ids' in request.params:
-                        dep_ids = [
-                            int(dep_id)
-                            for dep_id in request.POST.getall('department_ids')
-                        ]
-                        departments = Department.query.filter(
-                                        Department.id.in_(dep_ids)).all()
-                else:
-                    department = Department.query.filter_by(id=department_id).first()
-                    departments = [department]
-
-
-            # Groups
-                groups = []
-                if 'group_ids' in request.params:
-                    grp_ids = [
-                        int(grp_id)
-                        for grp_id in request.POST.getall('group_ids')
-                    ]
-                    groups = Group.query.filter(
-                                    Group.id.in_(grp_ids)).all()
-                
-                # Tags
-                tags = []
-                if 'tag_ids' in request.params:
-                    tag_ids = [
-                        int(tag_id)
-                        for tag_id in request.POST.getall('tag_ids')
-                    ]
-                    tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
-                
-                logger.debug('creating new user')
-                new_user = User(
-                    name=request.params['name'],
-                    login=request.params['login'],
-                    email=request.params['email'],
-                    password=request.params['password'],
-                    created_by=logged_user,
-                    departments=departments,
-                    groups=groups,
-                    tags=tags
-                )
-                
-                logger.debug('adding new user to db')
-                DBSession.add(new_user)
-                logger.debug('added new user successfully')
-            else:
-                logger.debug('not all parameters are in request.params')
-                log_param(request, 'name')
-                log_param(request, 'login')
-                log_param(request, 'email')
-                log_param(request, 'password')
-                
-        #elif request.params['submitted'] == 'update':
-        #    # just update the given user
-        #    user_id = request.matchdict['user_id']
-        #    user = User.query.filter_by(id=user_id).one()
-        #    
-        #    with transaction.manager:
-        #        user.name = request.params['name']
-        #        user.email = request.params['email']
-        #        user.password = request.params['password']
-        #        user.updated_by = logged_user
-        #        # TODO: update the rest later
-        #        DBSession.add(user)
+        if department_id:
+            department = Department.query.filter_by(id=department_id).first()
+            departments = [department]
         else:
-            logger.debug('submitted value is not create but: %s' %
-                         request.params['submitted'])
+            # Departments
+            if 'department_ids' in request.params:
+                dep_ids = [
+                    int(dep_id)
+                    for dep_id in request.POST.getall('department_ids')
+                ]
+                departments = Department.query.filter(
+                                Department.id.in_(dep_ids)).all()
+    
+    # Groups
+        groups = []
+        if 'group_ids' in request.params:
+            grp_ids = [
+                int(grp_id)
+                for grp_id in request.POST.getall('group_ids')
+            ]
+            groups = Group.query.filter(
+                            Group.id.in_(grp_ids)).all()
+        
+        # Tags
+        tags = []
+        if 'tag_ids' in request.params:
+            tag_ids = [
+                int(tag_id)
+                for tag_id in request.POST.getall('tag_ids')
+            ]
+            tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+        
+        logger.debug('creating new user')
+        new_user = User(
+            name=request.params['name'],
+            login=request.params['login'],
+            email=request.params['email'],
+            password=request.params['password'],
+            created_by=logged_user,
+            departments=departments,
+            groups=groups,
+            tags=tags
+        )
+        
+        logger.debug('adding new user to db')
+        DBSession.add(new_user)
+        logger.debug('added new user successfully')
     else:
-        logger.debug('submitted is not among parameters')
-        for key in request.params.keys():
-            logger.debug('request.params[%s]: %s' % (key, request.params[key]))
-
-
-    department = Department.query.filter_by(id=request.matchdict['department_id']).first()
-
-    return {
-        'user': logged_user,
-        'department': department
-    }
+        logger.debug('not all parameters are in request.params')
+        log_param(request, 'name')
+        log_param(request, 'login')
+        log_param(request, 'email')
+        log_param(request, 'password')
+        HTTPServerError()
+    
+    return HTTPOk()
 
 
 @view_config(
-    route_name='update_user',
-    renderer='templates/auth/dialog_update_user.jinja2',
-    permission='Update_User'
+    route_name='update_user'
 )
 def update_user(request):
-    """called when updating a user
+    """called when updating a User
     """
     login = authenticated_userid(request)
     logged_user = User.query.filter_by(login=login).first()
+    
+    user_id = int(request.matchdict['user_id'])
+    name = request.params.get('name', None)
+    login = request.params.get('login', None)
+    email = request.params.get('email', None)
+    password = request.params.get('password', None)
+    
+    # create and add a new user
+    if name and login and email and password:
+        departments = []
 
-    user_id = request.matchdict['user_id']
-    user = User.query.filter_by(id=user_id).first()
+        # Departments
+        if 'department_ids' in request.params:
+            dep_ids = [
+                int(dep_id)
+                for dep_id in request.POST.getall('department_ids')
+            ]
+            departments = Department.query \
+                .filter(Department.id.in_(dep_ids)).all()
 
-    return {
-        'user': user
-    }
+        # Groups
+        groups = []
+        if 'group_ids' in request.params:
+            grp_ids = [
+                int(grp_id)
+                for grp_id in request.POST.getall('group_ids')
+            ]
+            groups = Group.query \
+                .filter(Group.id.in_(grp_ids)).all()
+        
+        # Tags
+        tags = []
+        if 'tag_ids' in request.params:
+            tag_ids = [
+                int(tag_id)
+                for tag_id in request.POST.getall('tag_ids')
+            ]
+            tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+        
+        logger.debug('creating new user')
+        user = User.query.filter(User.id==user_id).first()
+        
+        user.name = name
+        user.login = login
+        user.email = email
+        user.updated_by = logged_user
+        user.departments = departments
+        user.groups = groups
+        user.tags = tags
+        
+        password = request.params['password']
+        if password != 'DONTCHANGE':
+            user.password = password
+        
+        logger.debug('updating user')
+        DBSession.add(user)
+        logger.debug('updated user successfully')
+    else:
+        logger.debug('not all parameters are in request.params')
+        log_param(request, 'name')
+        log_param(request, 'login')
+        log_param(request, 'email')
+        log_param(request, 'password')
+        HTTPServerError()
+    
+    return HTTPOk()
+
+
+
 
 @view_config(
     route_name='get_users',
@@ -171,6 +241,7 @@ def get_users(request):
         {'id': user.id, 'name': user.name}
         for user in User.query.all()
     ]
+
 
 @view_config(
     route_name='get_users_byEntity',
@@ -205,6 +276,7 @@ def get_users_byEntity(request):
 
     # works for Departments and Projects or any entity that has users attribute
     return users
+
 
 @view_config(
     route_name='get_users_not_in_entity',
@@ -451,3 +523,43 @@ def home(request):
     }
 
 
+@view_config(
+    route_name='check_login_availability',
+    renderer='json'
+)
+def check_login_availability(request):
+    """checks it the given login is available
+    """
+    login = request.matchdict['login']
+    logger.debug('checking availability for: %s' % login)
+    
+    available = 1
+    if login:
+        user = User.query.filter(User.login==login).first()
+        if user:
+            available = 0
+    
+    return {
+        'available': available
+    }
+
+
+@view_config(
+    route_name='check_email_availability',
+    renderer='json'
+)
+def check_email_availability(request):
+    """checks it the given email is available
+    """
+    email = request.matchdict['email']
+    logger.debug('checking availability for: %s' % email)
+    
+    available = 1
+    if email:
+        user = User.query.filter(User.email==email).first()
+        if user:
+            available = 0
+    
+    return {
+        'available': available
+    }

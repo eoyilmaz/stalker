@@ -490,8 +490,6 @@ Task.prototype.changeStatus = function(newStatus) {
         }
 
         if (todoOk) {
-          //todo set progress to 100% if set on config
-
           var chds = task.getChildren();
           //set children as done
           for (var i=0;i<chds.length;i++)
