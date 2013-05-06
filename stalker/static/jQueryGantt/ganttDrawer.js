@@ -36,20 +36,26 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
 }
 
 Ganttalendar.prototype.zoomGantt = function(isPlus) {
-  var curLevel = this.zoom;
-  var pos = this.zoomLevels.indexOf(curLevel + "");
+    var curLevel = this.zoom;
+    var pos = this.zoomLevels.indexOf(curLevel + "");
 
-  var newPos = pos;
-  if (isPlus) {
-    newPos = pos <= 0 ? 0 : pos - 1;
-  } else {
-    newPos = pos >= this.zoomLevels.length - 1 ? this.zoomLevels.length - 1 : pos + 1;
-  }
-  if (newPos != pos) {
-    curLevel = this.zoomLevels[newPos];
-    this.zoom = curLevel;
-    this.refreshGantt();
-  }
+    var newPos = pos;
+    if (isPlus) {
+        newPos = pos <= 0 ? 0 : pos - 1;
+    } else {
+        newPos = pos >= this.zoomLevels.length - 1 ? this.zoomLevels.length - 1 : pos + 1;
+    }
+    if (newPos != pos) {
+        curLevel = this.zoomLevels[newPos];
+        this.zoom = curLevel;
+        this.refreshGantt();
+    }
+    
+    // refresh links
+    require(['stalker/gotoLink'], function(gotoLink){
+       gotoLink(); 
+    });
+    
 };
 
 

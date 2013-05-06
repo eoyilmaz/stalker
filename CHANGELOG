@@ -25,6 +25,12 @@ Stalker Changes
   * Replaced DataGrid objects with dgrid.
   * Added navigation bar for assets, shots, sequences.
   * Combined ``project_create_dialog`` and ``project_update_dialog`` into one.
+  * Updating a project now correctly refreshes the ``project_summary`` content
+    pane.
+* jQueryGantt:
+  * Replaced the ``duration`` column with ``timing`` which correctly shows the
+    schedule timing info of the related task.
+  * Fix: The ``depends`` column shows the dependent task names correctly.
 
 0.2.0.b1
 --------

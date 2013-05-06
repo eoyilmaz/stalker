@@ -230,9 +230,9 @@ GanttMaster.prototype.loadProject = function(project, Deferred) {
         deferred.resolve('success');
     });
     
-    console.log('daily_working_hours : ', this.daily_working_hours);
-    console.log('timing_resolution   : ', this.timing_resolution);
-    console.log('working_hours       : ', this.working_hours);
+//    console.log('daily_working_hours : ', this.daily_working_hours);
+//    console.log('timing_resolution   : ', this.timing_resolution);
+//    console.log('working_hours       : ', this.working_hours);
     
     return deferred.promise;
 };

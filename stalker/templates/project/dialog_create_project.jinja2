@@ -334,7 +334,7 @@ require(['dijit/registry', 'dijit/form/Form',
                 {% endif %}
                 
                 var set_imf_filteringSelect_value = function (data) {
-                    if (imf_data_length < data.length) {
+                    if (imf_data_length != 0 && imf_data_length < data.length) {
                         imf_filteringSelect_selected_value = data[data.length - 1].id;
                     }
                     imf_filteringSelect.set('value', imf_filteringSelect_selected_value);
@@ -346,6 +346,7 @@ require(['dijit/registry', 'dijit/form/Form',
                 var imf_field_updater = fieldUpdater({
                     'memory': imf_memory,
                     'widget': imf_filteringSelect,
+                    'selected': imf_filteringSelect_selected_value,
                     'callBack': set_imf_filteringSelect_value
                 });
                 // run the function to fill the data for the first time

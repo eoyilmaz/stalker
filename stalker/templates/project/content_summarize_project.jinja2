@@ -18,62 +18,67 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 
-<div style="text-align: center"><h4><strong>{{ project.name }} ({{ project.code }})</strong></h4></div>
+<div style="text-align: center"><h4><strong>{{ project.name }}
+    ({{ project.code }})</strong></h4></div>
 
 <div id='project_details'>
     <div style="background-color: #39b54a" class="page_title"></div>
     {# Thumbnail #}
     <div id='project_thumbnail' class='thumbnail'>
         {% if not project.thumbnail %}
-      <img src='{{ request.static_url("stalker:static/stalker/images/NoProjectPicture.jpg") }}' alt=''
-           style='width:192px; height: 192px'>
-    {% endif %}</div>
+            <img src='{{ request.static_url("stalker:static/stalker/images/NoProjectPicture.jpg") }}'
+                 alt=''
+                 style='width:192px; height: 192px'>
+        {% endif %}</div>
 
     {# Basic Info #}
     <div id='project_info' class='summary_info'>
-{#      <h2 style='margin: 0px; text-align: right'>{{ project.name }}</h2>#}
-{#      <h5 style='margin: 0px; text-align: right'>({{ project.code }})</h5>#}
-      <table>
-        <tr>
-          <td style='text-align: right'><strong>Lead</strong></td>
-          <td>&nbsp;</td>
-          <td>
-            <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ project.lead.id }}">{{ project.lead.name }}</a>
-            ({{ project.lead.login }})
-          </td>
-        </tr>
-        <tr>
-          <td style='text-align: right'><strong>Image Format</strong></td>
-          <td>&nbsp;</td>
-          <td>{{ project.image_format.name }} ({{ project.image_format.width }} x {{ project.image_format.height }} x {{ project.image_format.pixel_aspect }})</td>
-        </tr>
-        <tr>
-          <td style='text-align: right'><strong>Status</strong></td>
-          <td>&nbsp;</td>
-          <td>{{ project.status.name }} / {{ project.status.code }}</td>
-        </tr>
-        <tr>
-          <td style='text-align: right'><strong>Repository</strong></td>
-          <td>&nbsp;</td>
-          <td>{{ project.repository.name }}</td>
-        </tr>
-        <tr>
-          <td style='text-align: right'><strong>Start Date</strong></td>
-          <td>&nbsp;</td>
-          <td>{{ project.start }}</td>
-        </tr>
-        <tr>
-          <td style='text-align: right'><strong>End Date</strong></td>
-          <td>&nbsp;</td>
-          <td>{{ project.end }}</td>
-        </tr>
-      </table>
-      <button id='update_project_button'>Edit</button>
+        {#      <h2 style='margin: 0px; text-align: right'>{{ project.name }}</h2>#}
+        {#      <h5 style='margin: 0px; text-align: right'>({{ project.code }})</h5>#}
+        <table>
+            <tr>
+                <td style='text-align: right'><strong>Lead</strong></td>
+                <td>&nbsp;</td>
+                <td>
+                    <a href="#" class="DataLink"
+                       stalker_target="central_content"
+                       stalker_href="view/user/{{ project.lead.id }}">{{ project.lead.name }}</a>
+                    ({{ project.lead.login }})
+                </td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><strong>Image Format</strong>
+                </td>
+                <td>&nbsp;</td>
+                <td>{{ project.image_format.name }} ({{ project.image_format.width }} x {{ project.image_format.height }} x {{ project.image_format.pixel_aspect }})</td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><strong>Status</strong></td>
+                <td>&nbsp;</td>
+                <td>{{ project.status.name }} / {{ project.status.code }}</td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><strong>Repository</strong></td>
+                <td>&nbsp;</td>
+                <td>{{ project.repository.name }}</td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><strong>Start Date</strong></td>
+                <td>&nbsp;</td>
+                <td>{{ project.start }}</td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><strong>End Date</strong></td>
+                <td>&nbsp;</td>
+                <td>{{ project.end }}</td>
+            </tr>
+        </table>
+        <button id='update_project_button'>Update</button>
     </div>
     {#  Charts  #}
     <div>
-      <div id='project_summary_chart1'
-           style='width: 192px;
+        <div id='project_summary_chart1'
+             style='width: 192px;
                   height: 192px;
                   position: absolute;
                   right: 20px;'></div>
@@ -82,56 +87,66 @@
 
 <script type="text/javascript">
 
-  require(['dijit/registry',
-    'dojox/charting/Chart',
-    'dojox/charting/themes/MiamiNice',
-    'dojox/charting/plot2d/Pie',
-    'dojox/charting/action2d/MoveSlice',
-    'dijit/form/Button',
-    'stalker/dialogCaller',
-    'stalker/gotoLink',
-    'dojo/ready'],
-    function(registry, Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller, gotoLink, ready){
-      ready(function(){
-        // Create the chart within it's "holding" node
-        var pieChart = new Chart('project_summary_chart1');
-        
-        // Add the only/default plot
-        pieChart.setTheme(theme);
+    require(['dijit/registry',
+        'dojox/charting/Chart',
+        'dojox/charting/themes/MiamiNice',
+        'dojox/charting/plot2d/Pie',
+        'dojox/charting/action2d/MoveSlice',
+        'dijit/form/Button',
+        'stalker/dialogCaller',
+        'stalker/gotoLink',
+        'dojo/ready'],
+            function (registry, Chart, theme, PiePlot, MoveSlice, Button,
+                      dialogCaller, gotoLink, ready) {
+                ready(function () {
+                    // Create the chart within it's "holding" node
+                    var pieChart = new Chart('project_summary_chart1');
 
-        // Add the only/default plot
-        pieChart.addPlot("default", {
-          type: PiePlot, // our plot2d/Pie module reference as type value
-          radius: 80,
-          fontColor: "black",
-          labelOffset: 0
-        });
+                    // Add the only/default plot
+                    pieChart.setTheme(theme);
 
-        var chartData = [100, 120, 50, 15, 80];
-        
-        // Add the series of data
-        pieChart.addSeries('January', chartData);
-        
-        // Create the slice mover
-        var mag = new MoveSlice(pieChart, 'default');
+                    // Add the only/default plot
+                    pieChart.addPlot("default", {
+                        type: PiePlot, // our plot2d/Pie module reference as type value
+                        radius: 80,
+                        fontColor: "black",
+                        labelOffset: 0
+                    });
 
-        // Render the chart!
-        pieChart.render();
+                    var chartData = [100, 120, 50, 15, 80];
 
-        // UPDATE STRUCTURE BUTTON
-        var update_project_button = dialogCaller({
-          label:'Update',
-          dialog_id: 'update_project_dialog',
-          content_creator: update_project_dialog_creator,
-          attach_to: 'update_project_button',
-          //related_field_updater: structure_field_updater,
-          data_id: {{ project.id }}
-        });
-        update_project_button.startup();
-        
-      });
+                    // Add the series of data
+                    pieChart.addSeries('January', chartData);
 
-      gotoLink();
-    
-  });
+                    // Create the slice mover
+                    var mag = new MoveSlice(pieChart, 'default');
+
+                    // Render the chart!
+                    pieChart.render();
+
+                    // UPDATE PROJECT BUTTON
+                    
+                    var project_summary_updater = function(){
+                        // refresh the content pane
+                        // get the content pane by id, alternatively we can use the parent of the button
+                        var content_pane = dijit.byId('project_summary');
+                        // refresh the pane
+                        content_pane.refresh();
+                    };
+                    
+                    var update_project_button = dialogCaller({
+                        label: 'Update',
+                        dialog_id: 'update_project_dialog',
+                        content_creator: update_project_dialog_creator,
+                        attach_to: 'update_project_button',
+                        related_field_updater: project_summary_updater,
+                        data_id: {{ project.id }}
+                    });
+                    update_project_button.startup();
+
+                });
+
+                gotoLink();
+
+            });
 </script>
