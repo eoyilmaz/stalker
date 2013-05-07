@@ -18,11 +18,11 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 
-<div style="text-align: center"><h4><strong>{{ project.name }}
+<div style="background-color: #eeeeee; text-align: center"><h4><strong>{{ project.name }}
     ({{ project.code }})</strong></h4></div>
 
 <div id='project_details'>
-    <div style="background-color: #39b54a" class="page_title"></div>
+    <div style="background-color: #8ecfb0" class="page_title"></div>
     {# Thumbnail #}
     <div id='project_thumbnail' class='thumbnail'>
         {% if not project.thumbnail %}
@@ -113,7 +113,7 @@
                         labelOffset: 0
                     });
 
-                    var chartData = [100, 120, 50, 15, 80];
+                    var chartData = [100, 120, 50, 15, 80,66,90,30];
 
                     // Add the series of data
                     pieChart.addSeries('January', chartData);

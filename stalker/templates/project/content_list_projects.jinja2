@@ -18,66 +18,78 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='view_projects'>
-  <div id='projects_data_grid'></div>
+    <div id='projects_data_grid'></div>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry',
-    'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dojo/store/Memory',
-    'dijit/form/FilteringSelect', 'dojo/store/JsonRest',
-    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/on', 'dojo/query',
-    'dojo/ready'],
-          function(registry, ObjectStore, DataGrid, Memory, FilteringSelect,
-                   JsonRest, fieldUpdater, dialogCaller, on, query, ready){
-
-            ready(function(){
-
-              var projects_DataGrid = new DataGrid({
-                id: 'projects_data_grid',
-                width: '100%',
-                autoHeight: true,
-                singleClickEdit: true,
-                escapeHTMLInData: false,
-                rowSelector: '20px'
-              }, 'projects_data_grid');
-
-              projects_DataGrid.startup();
+    require(['dijit/registry',
+        'dojo/data/ObjectStore',
+        "dgrid/List",
+        "dgrid/Grid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dgrid/editor",
+        'dojo/store/Memory',
+        'dijit/form/FilteringSelect',
+        'dojo/store/JsonRest',
+        'stalker/fieldUpdater',
+        'stalker/dialogCaller',
+        'dojo/on',
+        'dojo/query',
+        'dojo/domReady!'],
+            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, FilteringSelect, JsonRest, fieldUpdater, dialogCaller, on, quer) {
 
 
-              function projects_DataGrid_updater(){
-
-                var user_memory = new JsonRest({
-                  target: '/get/projects_byEntity/{{ entity.id }}'
-                });
-
-                user_memory.query().then(function(data){
-                  for(var i=0;i<data.length;i++ ){
-                    var projectName = data[i]["name"];
-                    var projectLink = '<a class="DataLink" href="#" stalker_target = "central_content" stalker_href="view/user/' + data[i]['id'] + '">' + projectName + '</a>';
-
-                    data[i]["projectLink"] = projectLink;
-                  }
-
-                  var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
-
-                  var structure = [
-                    {name: 'Thumbnail',                           width: '100px'},
-                    {name: 'Name',         field: 'projectLink',    width: '100px'}
-                  ];
-
-                  projects_DataGrid.set('store', my_store );
-                  projects_DataGrid.set('structure', structure );
-
-                  //gotoLink({target:'central_content'});
-                });
-
-              }
+                var projects_DataGrid = new Grid({
+                    id: 'projects_data_grid',
+                    width: '100%',
+                    autoHeight: true
+                }, 'projects_data_grid');
 
 
+                function projects_DataGrid_updater() {
 
-              projects_DataGrid_updater();
+                    var user_memory = new JsonRest({
+                        target: '/get/projects_byEntity/{{ entity.id }}'
+                    });
+
+                    user_memory.query().then(function (data) {
+
+
+                        var columns = [
+                            {
+                                label: "Thumbnail"
+                            },
+                            {
+                                field: 'name',
+                                label: "Name",
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (value) {
+
+                                    var targetPane = "'central_content'";
+                                    var address = "'view/project/" + value.id + "'";
+
+                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                                }
+                            }
+                        ];
+
+
+                        projects_DataGrid.renderArray(data);
+
+                        projects_DataGrid.set('columns', columns);
+
+
+                    });
+
+                }
+
+
+                projects_DataGrid_updater();
 
             });
-          });
+
 </script>
 

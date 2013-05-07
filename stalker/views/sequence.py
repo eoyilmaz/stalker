@@ -29,6 +29,7 @@ from stalker import User, Project, StatusList, Status, Sequence, Type
 
 import logging
 from stalker import log
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
@@ -43,34 +44,35 @@ def create_sequence(request):
     """
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
-    
+
     if 'submitted' in request.params:
-        logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
-        
+        logger.debug(
+            'request.params["submitted"]: %s' % request.params['submitted'])
+
         if request.params['submitted'] == 'create':
-            
+
             if 'name' in request.params and \
-               'code' in request.params and \
-               'description' in request.params and \
-               'status_id' in request.params:
+                            'code' in request.params and \
+                            'description' in request.params and \
+                            'status_id' in request.params:
 
                 project_id = request.matchdict['project_id']
                 project = Project.query.filter_by(id=project_id).first()
-                
+
                 # get the status_list
                 status_list = StatusList.query.filter_by(
                     target_entity_type='Sequence'
                 ).first()
-                
+
                 # there should be a status_list
                 if status_list is None:
                     return HTTPServerError(
                         detail='No StatusList found'
                     )
-                
+
                 status_id = int(request.params['status_id'])
                 status = Status.query.filter_by(id=status_id).first()
-                
+
                 try:
                     new_sequence = Sequence(
                         name=request.params['name'],
@@ -91,14 +93,15 @@ def create_sequence(request):
                         logger.debug(e.message)
                         transaction.abort()
                     else:
-                        logger.debug('flushing the DBSession, no problem here!')
+                        logger.debug(
+                            'flushing the DBSession, no problem here!')
                         DBSession.flush()
                         logger.debug('finished adding Sequence')
             else:
                 logger.debug('there are missing parameters')
 
-
-    project = Project.query.filter_by(id=request.matchdict['project_id']).first()
+    project = Project.query.filter_by(
+        id=request.matchdict['project_id']).first()
 
     return {
         'project': project,
@@ -132,17 +135,18 @@ def update_sequence(request):
     #
     #     # return where we came from
     #     return HTTPFound(location=came_from)
-    
+
     # just give the info enough to fill the form
     return {
         'sequence': sequence,
         'users': User.query.all(),
-        'status_lists': StatusList.query\
-                            .filter_by(target_entity_type='Sequence')\
-                            .all(),
+        'status_lists': StatusList.query \
+            .filter_by(target_entity_type='Sequence') \
+            .all(),
         'projects': Project.query.all()
 
     }
+
 
 @view_config(
     route_name='view_sequence',
@@ -163,6 +167,7 @@ def view_sequence(request):
         'sequence': sequence
     }
 
+
 @view_config(
     route_name='summarize_sequence',
     renderer='templates/sequence/content_summarize_sequence.jinja2'
@@ -181,6 +186,8 @@ def summarize_sequence(request):
         'user': logged_in_user,
         'sequence': sequence
     }
+
+
 @view_config(
     route_name='get_sequences',
     renderer='json',
@@ -192,12 +199,14 @@ def get_sequences(request):
     project_id = request.matchdict['project_id']
     project = Project.query.filter_by(id=project_id).first()
     return [
-            {
-                'id': sequence.id,
-                'name': sequence.name,
-                'status': sequence.status.name,
-                'user_id': sequence.created_by.id,
-                'user_name': sequence.created_by.name
-            }
-            for sequence in project.sequences
+        {
+            'id': sequence.id,
+            'name': sequence.name,
+            'status': sequence.status.name,
+            'status_bg_color': sequence.status.bg_color,
+            'status_fg_color': sequence.status.fg_color,
+            'user_id': sequence.created_by.id,
+            'user_name': sequence.created_by.name
+        }
+        for sequence in project.sequences
     ]

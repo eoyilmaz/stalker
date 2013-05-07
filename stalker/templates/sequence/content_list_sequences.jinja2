@@ -1,91 +1,113 @@
 <div id='list_sequences'>
-  <button id='list_sequences_create_sequence_button'>New Sequence</button>
-  <div id='sequences_data_grid'></div>
+    <button id='list_sequences_create_sequence_button'>New Sequence</button>
+    <div id='sequences_data_grid'></div>
 </div>
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
-    'dojo/store/Memory', 'dojo/store/JsonRest', 'stalker/fieldUpdater',
-    'stalker/dialogCaller', 'stalker/gotoLink','dojo/on', 'dojo/query','dojo/domReady!'],
-          function(registry, ObjectStore, DataGrid, Memory, JsonRest, fieldUpdater,
-                   dialogCaller, gotoLink, on, query){
+    require([
+        'dijit/registry',
+        'dojo/data/ObjectStore',
+        "dgrid/List",
+        "dgrid/Grid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dgrid/editor",
+        'dojo/store/Memory',
+        'dojo/store/JsonRest',
+        'stalker/fieldUpdater',
+        'stalker/dialogCaller',
+        'dojo/on',
+        'dojo/query',
+        'dojo/domReady!'],
+            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, JsonRest, fieldUpdater, dialogCaller, on, query) {
 
-            var sequences_data_grid = new DataGrid({
-              id: 'sequences_data_grid',
-              width: '100%',
-              autoHeight: true,
-              singleClickEdit: true,
-              escapeHTMLInData: false,
-              rowSelector: '20px'
-            }, 'sequences_data_grid');
+                var sequences_data_grid = new Grid({
+                    id: 'sequences_data_grid',
+                    width: '100%',
+                    autoHeight: true
+                }, 'sequences_data_grid');
 
-            var create_sequence_button = dialogCaller({
-              label: 'New Sequence',
-              dialog_id: 'create_sequence_dialog',
-              content_creator: create_sequence_dialog_creator,
-              attach_to: 'list_sequences_create_sequence_button',
-              related_field_updater: sequence_data_grid_updater,
-              data_id: '{{ project.id }}'
-            });
+                var create_sequence_button = dialogCaller({
+                    label: 'New Sequence',
+                    dialog_id: 'create_sequence_dialog',
+                    content_creator: create_sequence_dialog_creator,
+                    attach_to: 'list_sequences_create_sequence_button',
+                    related_field_updater: sequence_data_grid_updater,
+                    data_id: '{{ project.id }}'
+                });
 
-            sequences_data_grid.startup();
-            create_sequence_button.startup();
+                create_sequence_button.startup();
 
-            //asset_data_grid_updater();
+                //asset_data_grid_updater();
 
-            var status_memory = new JsonRest({
-              target: 'get/statuses_for/Sequence'
-            });
+                var status_memory = new JsonRest({
+                    target: 'get/statuses_for/Sequence'
+                });
 
-            status_memory.query().then(function(data){
-              sequence_data_grid_updater();
-            });
+                status_memory.query().then(function (data) {
+                    sequence_data_grid_updater();
+                });
 
 
-            function sequence_data_grid_updater(){
+                function sequence_data_grid_updater() {
 
-              var sequence_memory = new JsonRest({
-                target: '/get/sequences/{{ project.id }}'
-              });
+                    var sequence_memory = new JsonRest({
+                        target: '/get/sequences/{{ project.id }}'
+                    });
 
-              sequence_memory.query().then(function(data){
+                    sequence_memory.query().then(function (data) {
 
-                for(var i=0;i<data.length;i++ ){
+                        var columns = [
+                            {
+                                field: 'status',
+                                label: "Status",
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (item) {
 
-                  var sequenceName = data[i]["name"];
-                  var sequenceLink = '<a class="DataLink" href="#" stalker_target="sequences_content_pane" stalker_href="view/sequence/' + data[i]['id'] + '">' + sequenceName + '</a>';
+                                    var bg_color = '#' + item.status_bg_color.toString(16);
+                                    var fg_color = '#' + item.status_fg_color.toString(16);
 
-                  var userName = data[i]["user_name"];
-                  var userLink = '<a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
 
-                  data[i]["sequence_link"] = sequenceLink;
-                  data[i]["user_link"] = userLink;
+                                    return '<span style="color:' + bg_color + '; background-color:' + bg_color + '; ">....</span><span style="color:' + bg_color + '; ">  ' + item.status + '</span>';
+                                }
 
+                            },
+                            {
+                                field: 'name',
+                                label: "Name",
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (value) {
+
+                                    var targetPane = "'sequences_content_pane'";
+                                    var address = "'view/sequence/" + value.id + "'";
+
+                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                                }
+                            },
+                            {
+                                field: 'user_name',
+                                label: "Created By",
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (value) {
+
+                                    var targetPane = "'central_content'";
+                                    var address = "'view/user/" + value.user_id + "'";
+
+                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
+                                }
+                            }
+                        ];
+
+                        sequences_data_grid.renderArray(data);
+                        sequences_data_grid.set('columns', columns);
+
+                    });
                 }
-
-
-                var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
-
-                var structure = [
-                  {name: 'Thumbnail',                         width: '100px'},
-                  {name: 'Name',        field: 'sequence_link',  width: '100px'},
-                  {name: 'Status',      field: 'status',      width: '150px'},
-                  {name: 'Created By',  field: 'user_link',     width: '150px'}
-                ];
-
-                sequences_data_grid.set('store', my_store );
-                sequences_data_grid.set('structure', structure );
-
-
-
-                gotoLink();
-              });
-
-
-
-            }
-
-
-
-          });
+            });
 </script>
 

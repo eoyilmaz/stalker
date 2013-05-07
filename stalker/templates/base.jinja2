@@ -131,6 +131,12 @@
 
 
     <script type='text/javascript'>
+    var redirectLink = function (targetPane, address) {
+
+        var contentPane = dijit.byId(targetPane);
+        contentPane.set('href', address);
+        contentPane.refresh();
+    }
     require([
         'dijit/layout/BorderContainer',
         'dojox/layout/ContentPane',

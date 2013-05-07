@@ -188,12 +188,15 @@ def get_shots(request):
     for shot in Shot.query.filter_by(project_id=project_id).all():
         sequenceStr = ''
         for sequence in shot.sequences:
-            sequenceStr += '<a class="DataLink" href="#" stalker_target="sequences_content_pane" stalker_href="view/sequence/%s">%s</a><br/> ' % (sequence.id,sequence.name)
+            sequenceStr += '<a href="javascript:redirectLink(%s, %s)">%s</a><br/>' % \
+                             ("'sequences_content_pane'" , ("'view/sequence/%s'" % sequence.id) , sequence.name)
         shots.append({
             'id': shot.id,
             'name': shot.name,
             'sequences': sequenceStr,
             'status': shot.status.name,
+            'status_bg_color': shot.status.bg_color,
+            'status_fg_color': shot.status.fg_color,
             'user_id': shot.created_by.id,
             'user_name': shot.created_by.name
         })

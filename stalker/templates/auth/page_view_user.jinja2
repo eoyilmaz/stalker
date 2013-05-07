@@ -66,31 +66,39 @@
         var user_related_data_tab_container = new TabContainer({
             title: 'Tab',
             region: 'center',
-            style: 'width: 100%; background-color: #00aef0;'
+            style: 'width: 100%; background-color: #45b8cc;'
 
         });
 
 
         var tasks_content_pane = new ContentPane({
             title: 'Tasks',
-            href: 'list/tasks/{{ user.id }}'
+            href: 'list/tasks/{{ user.id }}',
+            default_href: 'list/tasks/{{ user.id }}',
+            style:' padding: 0; margin:0;'
         });
 
 
         var projects_content_pane = new ContentPane({
             title: 'Projects',
-            href: 'list/projects/{{ user.id }}'
+            href: 'list/projects/{{ user.id }}',
+            default_href: 'list/projects/{{ user.id }}',
+            style:' padding: 0; margin:0;'
         });
 
         var departments_content_pane = new ContentPane({
             title: 'Departments',
-            href: 'list/departments/{{ user.id }}'
+            href: 'list/departments/{{ user.id }}',
+            default_href: 'list/departments/{{ user.id }}',
+            style:' padding: 0; margin:0;'
         });
 
 
         var tickets_content_pane = new ContentPane({
             title: 'Tickets',
-            content: 'list/tickets/{{ user.id }}'
+            href: 'list/tickets/{{ user.id }}',
+            default_href: 'list/tickets/{{ user.id }}',
+            style:' padding: 0; margin:0;'
         });
 
 
@@ -99,35 +107,36 @@
         user_related_data_tab_container.addChild(departments_content_pane);
         user_related_data_tab_container.addChild(tickets_content_pane);
 
-        // user_related_data_tab_container.startup();
-
-
         user_BorderContainer.addChild(user_related_data_tab_container);
 
-        //document.body.appendChild(user_BorderContainer.domNode);
         user_related_data_tab_container.startup();
         user_BorderContainer.startup();
 
-        function refreshCurrentPane() {
-
-            currentPane.refresh();
-
-        }
-
-        function init() {
-            var lSplitter = registry.byId("user_border_container").getSplitter("top");
-            on(lSplitter.domNode, 'mouseup', refreshCurrentPane);
-        }
-
-        init();
-
-        var currentPane;
+        {##}
+        {#        function refreshCurrentPane() {#}
+        {##}
+        {#            currentPane.refresh();#}
+        {##}
+        {#        }#}
+        {##}
+        {#        function init() {#}
+        {#            var lSplitter = registry.byId("user_border_container").getSplitter("top");#}
+        {#            on(lSplitter.domNode, 'mouseup', refreshCurrentPane);#}
+        {#        }#}
+        {##}
+        {#        init();#}
+        {##}
+        {#        var currentPane;#}
 
         user_related_data_tab_container.watch("selectedChildWidget", function (name, oval, nval) {
             console.log("selected child changed from ", nval.title, " to ", nval.href);
+            oval.set('href', '');
+            oval.refresh();
 
+            nval.set('href', nval.default_href);
+            nval.refresh();
 
-            currentPane = nval;
+            //currentPane = nval;
         });
     });
 </script>

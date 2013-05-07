@@ -7,21 +7,13 @@
          style='width: 100px;
                   height: 100px;
                   position: absolute;
-                  top: 200px;
-                  left: 0;'></div>
+                  right: 0;'></div>
 
     {# Basic Info #}
     <div id='shot_info' class='summary_info'>
-        {#    <table>#}
-        {#      <tr width ="%100">#}
-        {#        <td width ='25%'><h3><a class="DataLink" href="#" stalker_target="shots_content_pane" stalker_href="list/shots/{{ shot.project.id }}"> Shots/ </a>{{ shot.name }}({{ shot.code }})</h3></td>#}
-        {#        <td width ='25%'> <button id='update_shot_button'>Update</button></td>#}
-        {#        <td width ='25%'>{{ shot.status.name }}</td>#}
-        {#        <td width ='25%'>#}
-        {#          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ shot.created_by.id }}">{{ shot.created_by.name }}</a>#}
-        {#        </td>#}
-        {#      </tr>#}
-        {#    </table>#}
+
+        <h2 style='margin: 0;'>{{ shot.name }}</h2>
+        <h5 style='margin: 0;'>({{ shot.code }})</h5>
         <table>
             <tr>
                 <td style='text-align: right'><strong>Project</strong></td>

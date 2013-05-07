@@ -17,9 +17,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-
 html, body {
-    font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif; 
+    font: 12px Myriad, Helvetica, Tahoma, Arial, clean, sans-serif;
     *font-size: 75%;
     /*background-color: #c0c0c0;*/
     font-size: 12px;
@@ -28,7 +27,7 @@ html, body {
     padding: 0;
     overflow: hidden;
     -moz-user-select: none;
-    -webkit-user-select: none; 
+    -webkit-user-select: none;
 }
 
 #appLayout {
@@ -52,6 +51,7 @@ h2 {
 h3 {
     font-size: 16px;
     line-height: 20px;
+
 }
 
 p {
@@ -72,12 +72,15 @@ ul li ol {
 a:link {
     text-decoration: none;
 }
+
 a:visited {
     text-decoration: none;
 }
+
 a:active {
     text-decoration: none
 }
+
 a:hover {
     text-decoration: underline;
 }
@@ -105,7 +108,7 @@ a:hover {
     float: left;
 }
 
-#header{
+#header {
     /*background-color: #2A2C2E;*/
     clear: both;
     color: white;
@@ -115,7 +118,7 @@ a:hover {
     width: 100%;
 }
 
-#stalker_logo{
+#stalker_logo {
     float: left;
     clear: both;
     /*font-size: 16px;*/
@@ -131,14 +134,17 @@ a:hover {
     color: white;
     text-decoration: none;
 }
+
 #stalker_logo a:visited {
     color: white;
     text-decoration: none;
 }
+
 #stalker_logo a:active {
     color: white;
     text-decoration: none
 }
+
 #stalker_logo a:hover {
     color: white;
     text-decoration: underline;
@@ -166,8 +172,8 @@ a:hover {
     height: 96px;
 }
 
-#footer{
-    position:absolute;
+#footer {
+    position: absolute;
     height: 24px;
     width: 100%;
     text-align: center;
@@ -220,13 +226,11 @@ a:hover {
     vertical-align: middle;
 }
 
-
 .project_info {
     position: absolute;
     clear: both;
     left: 204px;
 }
-
 
 .user_avatar {
     width: 192px;
@@ -247,8 +251,8 @@ a:hover {
 .thumbnail {
     width: 192px;
     height: 192px;
-    border: 1px black;
-    background-color: #d3d3d3;
+    /*border: 1px black;*/
+    /*background-color: #d3d3d3;*/
     float: left;
     text-align: center;
     vertical-align: middle;
@@ -289,10 +293,34 @@ a:hover {
     left: 204px;
 }
 
-.title_summary_info{
+.title_summary_info {
     position: absolute;
     clear: both;
     height: 30;
-    left:10px;
+    left: 10px;
 
+}
+
+.dgrid {
+    height: auto;
+    background: #eee;
+}
+
+.dgrid .dgrid-column-name {
+   width: auto;
+   font-weight: bold;
+}
+
+.dgrid .dgrid-header-scroll {
+    display: none;
+}
+
+.dgrid .dgrid-header {
+    right: 0;
+}
+
+.dgrid .dgrid-scroller {
+    position: relative;
+    overflow-y: hidden;
+    margin-top: 0;
 }

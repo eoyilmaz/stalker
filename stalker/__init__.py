@@ -266,7 +266,9 @@ def main(global_config, **settings):
     config.add_route('list_departments', 'list/departments/{entity_id}')
     config.add_route('get_departments', 'get/departments')
     config.add_route('get_departments_byEntity', 'get/departments_byEntity/{entity_id}')
-    
+
+    config.add_route('dialog_append_departments', 'dialog/append/departments/{user_id}')
+    config.add_route('append_departments', 'append/departments')
     # *************************************************************************
     # Group
     

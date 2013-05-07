@@ -17,17 +17,14 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
-<div style="text-align: center"><h4><strong>Department Summary</strong></h4></div>
-
 <div id='department_details_content_pane'>
-  <div style="background-color: #662d91 " class="page_title"></div>
+  <div style="background-color: #7f9599 " class="page_title"></div>
     {# Avatar #}
       {# Avatar #}
     <div id='user_avatar'
          class='thumbnail'>
       {% if not department.thumbnail %}
-      <img src='{{ request.static_url("stalker:static/stalker/images/NoPicture.gif") }}' alt=''
-              style='width:192px; height: 192px'>
+      <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}'>
       {% endif %}
     </div>
 

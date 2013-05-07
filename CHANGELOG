@@ -5,6 +5,8 @@ Stalker Changes
 0.2.0.b2
 --------
 
+
+
 * Stalker is now compatible with Python 2.6.
 * SOM:
   * Task:
@@ -42,6 +44,9 @@ Stalker Changes
     teamMenuCreator.js, which is able to create menus for any groups and faux
     groups.
   * Fix: ``user_create_dialog`` now shows and updates groups.
+  * Update: All DataGrid field updated with dgrid class.
+  * Add: Placeholder images added for user and department.
+  * Change: Colors for the layouts are changed with MiamiNice PieChart's color.
 * jQueryGantt:
   * Update: Replaced the ``duration`` column with ``timing`` which correctly
     shows the schedule timing info of the related task.

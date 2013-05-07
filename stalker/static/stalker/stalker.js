@@ -430,6 +430,18 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
                 executeScripts: true
             });
         };
+
+        append_department_dialog_creator = function(user_id){
+
+            return new DialogSimple({
+                id: 'append_department_dialog',
+                title: 'Append Department',
+                href: 'dialog/append/departments/' + user_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
         
         // ********************************************************************
         // GROUPS

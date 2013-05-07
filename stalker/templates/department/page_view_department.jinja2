@@ -17,7 +17,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
-<div id='department_border_container'>
+<div style="margin-top: 0" id='department_border_container'>
     <div id='department_summary'>
         {# Summary #}
     </div>
@@ -42,7 +42,7 @@
                     title: 'Summarize',
                     href: 'summarize/department/{{ department.id }}',
                     region: 'top',
-                    style: 'width:100%; height:200px; padding: 0; background-color: #eeeeee;',
+                    style: 'width:100%; height:200px; padding: 0; margin:0; background-color: #eeeeee;',
                     splitter: true
                 }, 'department_summary');
 
@@ -52,13 +52,14 @@
                 var department_related_data_tab_container = new TabContainer({
 
                     region: 'center',
-                    style: 'width: 100%; background-color: #662d91;'
+                    style: 'width: 100%; background-color: #7f9599'
 
-                }, department_related_data_tab_container);
+                }, 'department_related_data_tab_container');
 
                 var users_content_pane = new ContentPane({
                     title: 'Users',
-                    href: 'list/users/{{ department.id }}'
+                    href: 'list/users/{{ department.id }}',
+                    style: 'padding: 0; margin:0;'
                 });
 
                 department_related_data_tab_container.addChild(users_content_pane);

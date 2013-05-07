@@ -18,89 +18,124 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='list_shots'>
-  <button id='list_shots_create_shot_button'>New Shot</button>
-  <div id='shots_data_grid'></div>
+    <button id='list_shots_create_shot_button'>New Shot</button>
+    <div id='shots_data_grid'></div>
 </div>
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/data/ObjectStore', 'dojox/grid/DataGrid',
-    'dojo/store/Memory', 'dojo/store/JsonRest', 'stalker/fieldUpdater',
-    'stalker/dialogCaller', 'stalker/gotoLink','dojo/on', 'dojo/query','dojo/domReady!'],
-    function(registry, ObjectStore, DataGrid, Memory, JsonRest, fieldUpdater,
-             dialogCaller, gotoLink, on, query){
+    require([
+        'dijit/registry',
+        'dojo/data/ObjectStore',
+        "dgrid/List",
+        "dgrid/Grid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dgrid/editor",
+        'dojo/store/Memory',
+        'dojo/store/JsonRest',
+        'stalker/fieldUpdater',
+        'stalker/dialogCaller',
+        'dojo/on',
+        'dojo/query',
+        'dojo/domReady!'],
+            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, JsonRest, fieldUpdater, dialogCaller, on, query) {
 
-      var shots_data_grid = new DataGrid({
-        id: 'shots_data_grid',
-        width: '100%',
-        autoHeight: true,
-        singleClickEdit: true,
-        escapeHTMLInData: false,
-        rowSelector: '20px'
-      }, 'shots_data_grid');
+                var shots_data_grid = new Grid({
+                    id: 'shots_data_grid',
+                    width: '100%',
+                    autoHeight: true
+                }, 'shots_data_grid');
 
-      var create_shot_button = dialogCaller({
-        label: 'New Shot',
-        dialog_id: 'create_shot_dialog',
-        content_creator: create_shot_dialog_creator,
-        attach_to: 'list_shots_create_shot_button',
-        related_field_updater: shot_data_grid_updater,
-        data_id: '{{ project.id }}'
-      });
+                var create_shot_button = dialogCaller({
+                    label: 'New Shot',
+                    dialog_id: 'create_shot_dialog',
+                    content_creator: create_shot_dialog_creator,
+                    attach_to: 'list_shots_create_shot_button',
+                    related_field_updater: shot_data_grid_updater,
+                    data_id: '{{ project.id }}'
+                });
 
-      shots_data_grid.startup();
-      create_shot_button.startup();
-
-
-      var status_memory = new JsonRest({
-        target: 'get/statuses_for/Shot'
-      });
-
-      status_memory.query().then(function(data){
-        shot_data_grid_updater();
-      });
+                create_shot_button.startup();
 
 
-      function shot_data_grid_updater(){
+                var status_memory = new JsonRest({
+                    target: 'get/statuses_for/Shot'
+                });
 
-        var shot_memory = new JsonRest({
-          target: '/get/shots/{{ project.id }}'
-        });
-
-        shot_memory.query().then(function(data){
-
-          for(var i=0;i<data.length;i++ ){
-
-            var shotName = data[i]["name"];
-            var shotLink = '<a class="DataLink" href="#" stalker_target="shots_content_pane" stalker_href="view/shot/' + data[i]['id'] + '">' + shotName + '</a>';
-
-            var userName = data[i]["user_name"];
-            var userLink = '<a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/user/' + data[i]['user_id'] + '">' + userName + '</a>';
-
-            data[i]["shot_link"] = shotLink;
-            data[i]["user_link"] = userLink;
-
-          }
+                status_memory.query().then(function (data) {
+                    shot_data_grid_updater();
+                });
 
 
-          var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
+                function shot_data_grid_updater() {
 
-          var structure = [
-            {name: 'Thumbnail',                         width: '100px'},
-            {name: 'Name',        field: 'shot_link',  width: '100px'},
-            {name: 'Status',      field: 'status',      width: '150px'},
-            {name: 'Created By',  field: 'user_link',     width: '150px'},
-            {name: 'Sequences',  field: 'sequences',     width: '150px'}
-          ];
+                    var shot_memory = new JsonRest({
+                        target: '/get/shots/{{ project.id }}'
+                    });
 
-          shots_data_grid.set('store', my_store );
-          shots_data_grid.set('structure', structure );
+                    shot_memory.query().then(function (data) {
 
-          gotoLink();
-        });
+                        var columns = [
+                            {
+                                field: 'status',
+                                label: "Status",
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (item) {
+
+                                    var bg_color = '#' + item.status_bg_color.toString(16);
+                                    var fg_color = '#' + item.status_fg_color.toString(16);
 
 
+                                    return '<span style="color:' + bg_color + '; background-color:' + bg_color + '; ">....</span><span style="color:' + bg_color + '; ">  ' + item.status + '</span>';
+                                }
 
-      }
+                            },
+                            {
+                                field: 'name',
+                                label: "Name",
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (value) {
 
-  });
+                                    var targetPane = "'shots_content_pane'";
+                                    var address = "'view/shot/" + value.id + "'";
+
+                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                                }
+                            },
+                            {
+                                field: 'user_name',
+                                label: "Created By",
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (value) {
+
+                                    var targetPane = "'central_content'";
+                                    var address = "'view/user/" + value.user_id + "'";
+
+                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
+                                }
+                            },
+                                {
+                                field: 'sequences',
+                                label: "Sequences",
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (value) {
+                                    return value.sequences + '<br/>';
+                                }
+                            }
+                        ];
+
+                        shots_data_grid.renderArray(data);
+                        shots_data_grid.set('columns', columns);
+
+                    });
+                }
+            });
 </script>
 

@@ -161,14 +161,58 @@ def get_departments_byEntity(request):
 
     return [
             {
-             'name': '<a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/department/%s">%s</a>' %(department.id, department.name)
+             'name': department.name,
+             'id': department.id
 
             }
             for department in entity.departments
         ]
 
 
+@view_config(
+    route_name='dialog_append_departments',
+    renderer='templates/department/dialog_append_departments.jinja2'
+)
+def append_departments_dialog(request):
+    """runs for append user dialog
+    """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
 
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+
+    return {
+        'logged_user': logged_user,
+        'user': user
+    }
+
+@view_config(
+    route_name='append_departments'
+)
+def append_departments(request):
+    """appends the given users o the given Project or Department
+    # """
+    # # users
+    # user_ids = [
+    #     int(u_id)
+    #     for u_id in request.POST.getall('entity_users')
+    # ]
+    # users = User.query.filter(User.id.in_(user_ids)).all()
+    #
+    # # entity
+    # entity_id = request.params.get('entity_id', None)
+    # entity = Entity.query.filter(Entity.id==entity_id).first()
+    #
+    # logger.debug('entity : %s' % entity)
+    # logger.debug('users  : %s' % users)
+    #
+    # if users and entity:
+    #     entity.users = users
+    #     DBSession.add(entity)
+    #     DBSession.add_all(users)
+
+    return
 
 
 

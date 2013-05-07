@@ -27,14 +27,13 @@
                     title: 'NavBar',
                     href: 'view/entity_nav_bar/{{ shot.id }}',
                     region: 'top',
-                    style: 'width:100%; height:25px; padding: 0;'
+                    style: 'padding: 0; margin:0;'
                 }, 'shot_nav_bar_content_pane');
 
                 // **********************************************************************
                 // Bottom Part - Complex Data View
                 var shot_related_data_tab_container = new TabContainer({
-                    region: 'center',
-                    style: 'background-color: #fff200'
+                    region: 'center'
                 }, 'shot_related_data_tab_container');
 
                 var tasks_content_pane = new ContentPane({
@@ -54,7 +53,8 @@
 
                 var summary_content_pane = new ContentPane({
                     title: 'Overview',
-                    href: 'summarize/shot/{{ shot.id }}'
+                    href: 'summarize/shot/{{ shot.id }}',
+                    style: 'padding: 0; margin:0;'
                 }, 'shot_summary');
 
                 shot_related_data_tab_container.addChild(tasks_content_pane);

@@ -19,14 +19,14 @@
 #}
 
 <div id='user_details_content_pane'>
-   <div style="background-color: #00aef0;" class="page_title"></div>
+   <div style="background-color: #45b8cc;" class="page_title"></div>
 
   {# Avatar #}
     <div id='user_avatar'
          class='thumbnail'>
       {% if not user.thumbnail %}
-      <img src='{{ request.static_url("stalker:static/stalker/images/NoPicture.gif") }}' alt=''
-              style='width:192px; height: 192px'>
+      <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}' alt=''
+              style='width:120px; height: 142px'>
       {% endif %}
     </div>
 
@@ -65,8 +65,8 @@
     {#  Charts  #}
   <div>
     <div id='user_summary_chart1'
-         style='width: 200px;
-                  height: 200px;
+         style='width: 100px;
+                  height: 100px;
                   position: absolute;
                   right: 20px;'></div>
   </div>
@@ -74,7 +74,7 @@
 
 <script type="text/javascript">
   require(['dojox/charting/Chart',
-    'dojox/charting/themes/Tufte',
+    'dojox/charting/themes/MiamiNice',
     'dojox/charting/plot2d/Pie',
     'dojox/charting/action2d/MoveSlice',
     'dijit/form/Button',
@@ -91,7 +91,7 @@
               // Add the only/default plot
               pieChart.addPlot("default", {
                 type: PiePlot, // our plot2d/Pie module reference as type value
-                radius: 80,
+                radius: 50,
                 fontColor: "black",
                 labelOffset: 0
               });

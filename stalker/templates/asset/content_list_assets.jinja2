@@ -23,13 +23,8 @@
 </div>
 
 <script type='text/javascript'>
-
-    var redirectLink = function (targetPane, address) {
-        var contentPane = dijit.byId(targetPane);
-        contentPane.set('href', address);
-        contentPane.refresh();
-    }
-    require(['dijit/registry',
+    require([
+        'dijit/registry',
         'dojo/data/ObjectStore',
         "dgrid/List",
         "dgrid/Grid",
@@ -48,10 +43,7 @@
                 var asset_data_grid = new Grid({
                     id: 'assets_data_grid',
                     width: '100%',
-                    selectionMode: "single",
-                    cellNavigation: true,
-                    autoHeight: true,
-                    rowSelector: '20px'
+                    autoHeight: true
                 }, 'assets_data_grid');
 
 
@@ -90,9 +82,27 @@
 
                         var columns = [
                             {
-                                field: '_item',
+                                field: 'status',
+                                label: "Status",
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (item) {
+
+                                    var bg_color = '#' + item.status_bg_color.toString(16);
+                                    var fg_color = '#' + item.status_fg_color.toString(16);
+
+
+                                    return '<span style="color:' + bg_color + '; background-color:' + bg_color + '; ">....</span><span style="color:' + bg_color + '; ">  ' + item.status + '</span>';
+                                }
+
+                            },
+                            {
+                                field: 'name',
                                 label: "Name",
-                                sortable: false,
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
                                 formatter: function (value) {
 
                                     var targetPane = "'assets_content_pane'";
@@ -106,22 +116,11 @@
                                 label: "Type"
                             },
                             {
-                                field: '_item',
-                                label: "Status",
-                                formatter: function (item) {
-
-                                    var bg_color = '#'+item.status_bg_color.toString(16);
-                                    var fg_color = '#'+item.status_fg_color.toString(16);
-
-
-                                    return '<span style="color: '+fg_color+'; background-color:'+bg_color+'; ">'+item.status+'</span>';
-                                }
-
-                            },
-                            {
-                                field: '_item',
+                                field: 'user_name',
                                 label: "Created By",
-                                sortable: false,
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
                                 formatter: function (value) {
 
                                     var targetPane = "'central_content'";
@@ -135,17 +134,13 @@
                                 field: 'description',
                                 label: "Description"
                             }
-                        ]
-
+                        ];
 
                         asset_data_grid.renderArray(data);
-
                         asset_data_grid.set('columns', columns);
 
                     });
-
                 }
-
             });
 </script>
 
