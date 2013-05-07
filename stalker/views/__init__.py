@@ -24,6 +24,7 @@ import datetime
 from pyramid.httpexceptions import HTTPServerError
 from pyramid.view import view_config
 from pyramid.response import  Response
+from pyramid.security import has_permission
 
 from stalker import log
 logger = logging.getLogger(__name__)

@@ -146,7 +146,7 @@ def main(global_config, **settings):
     # User
     
     # dialogs
-    config.add_route('dialog_create_user', 'dialog/create/user/{department_id}')
+    config.add_route('dialog_create_user', 'dialog/create/user/{entity_id}')
     config.add_route('dialog_update_user', 'dialog/update/user/{user_id}')
     config.add_route('dialog_append_users', 'dialog/append/user/{entity_id}')
     

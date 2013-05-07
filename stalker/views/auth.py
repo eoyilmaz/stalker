@@ -19,7 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
-from pyramid.security import authenticated_userid, forget, remember, has_permission
+from pyramid.security import (authenticated_userid, forget, remember,
+                              has_permission)
 from pyramid.view import view_config, forbidden_view_config
 from sqlalchemy import or_
 
@@ -44,14 +45,24 @@ def dialog_create_user(request):
     """
     login = authenticated_userid(request)
     logged_user = User.query.filter_by(login=login).first()
-
-    department_id = request.matchdict['department_id']
-    department = Department.query.filter_by(id=department_id).first()
-
+    
+    
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+    
+    department = None
+    group = None
+    
+    if isinstance(entity, Department):
+        department = entity
+    elif isinstance(entity, Group):
+        group = entity
+    
     return {
         'mode': 'CREATE',
         'logged_user': logged_user,
-        'department': department
+        'department': department,
+        'group': group
     }
 
 
@@ -391,25 +402,12 @@ def append_users(request):
     return HTTPOk()
 
 
-@view_config(
-    route_name='create_group'
-)
-def create_group(request):
-    """runs when creating a new Group
+def get_permissions_from_multi_dict(multi_dict):
+    """returns the permission instances from the given multi_dict
     """
-    
-    # get parameters
-    post_multi_dict = request.POST
-    
-    # get name
-    name = post_multi_dict['name']
-    
-    # remove name to leave only permissions in the dictionary
-    post_multi_dict.pop('name')
-    
     permissions = []
-    for key in post_multi_dict.keys():
-        access = post_multi_dict[key]
+    for key in multi_dict.keys():
+        access = multi_dict[key]
         action_and_class_name = key.split('_')
         action = action_and_class_name[0]
         class_name = action_and_class_name[1]
@@ -429,11 +427,57 @@ def create_group(request):
             permissions.append(permission)
     
     logger.debug(permissions)
+    return permissions
+
+
+@view_config(
+    route_name='create_group'
+)
+def create_group(request):
+    """runs when creating a new Group
+    """
+    # get parameters
+    post_multi_dict = request.POST
+    
+    # get name
+    name = post_multi_dict['name']
+    
+    # remove name to leave only permissions in the dictionary
+    post_multi_dict.pop('name')
+    
+    permissions = get_permissions_from_multi_dict(post_multi_dict)
     
     # create the new group
     new_group = Group(name=name)
     new_group.permissions = permissions
     DBSession.add(new_group)
+    
+    return HTTPOk()
+
+
+@view_config(
+    route_name='update_group'
+)
+def update_group(request):
+    """updates the group with data from request
+    """
+    # get parameters
+    post_multi_dict = request.POST
+    
+    # get group_id
+    group_id = post_multi_dict['group_id']
+    group = Group.query.filter_by(id=group_id).first()
+    
+    # get name
+    name = post_multi_dict['name']
+    
+    # remove name to leave only permission in the dictionary
+    post_multi_dict.pop('name')
+    permissions = get_permissions_from_multi_dict(post_multi_dict)
+    
+    if group:
+        group.permissions = permissions
+        DBSession.add(group)
     
     return HTTPOk()
 
@@ -637,6 +681,32 @@ def create_group_dialog(request):
     entity_types = EntityType.query.all()
     
     return {
+        'actions': defaults.actions,
+        'permissions': permissions,
+        'entity_types': entity_types,
+        'logged_user': logged_user,
+        'has_permission': has_permission
+    }
+
+@view_config(
+    route_name='dialog_update_group',
+    renderer='templates/auth/dialog_create_group.jinja2'
+)
+def update_group_dialog(request):
+    """update group dialog
+    """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+    
+    permissions = Permission.query.all()
+    
+    entity_types = EntityType.query.all()
+    
+    group_id = request.matchdict['group_id']
+    group = Group.query.filter_by(id=group_id).first()
+    
+    return {
+        'group': group,
         'actions': defaults.actions,
         'permissions': permissions,
         'entity_types': entity_types,

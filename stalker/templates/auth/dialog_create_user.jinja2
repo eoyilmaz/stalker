@@ -258,6 +258,11 @@
                         {{ department.id }},
                     {% endfor %}
                 ];
+                selected_groups = [
+                    {% for group in user.groups %}
+                        {{ group.id }},
+                    {% endfor %}
+                ];
             {% endif %}
 
             departments_tagSelect = new TagSelect({
@@ -296,7 +301,11 @@
                 target: 'get/groups'
             });
             
-            {% if mode=='UPDATE' %}
+            {% if mode=='CREATE' %}
+                {% if group %}
+                    selected_groups = [{{ group.id }}];
+                {% endif %}
+            {% elif mode=='UPDATE' %}
                 selected_groups = [
                     {% for group in user.groups %}
                         {{ group.id }},

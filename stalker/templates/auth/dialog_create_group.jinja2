@@ -100,9 +100,33 @@
             // Name
             var name_validationTextBox = new ValidationTextBox({
                 name: 'name',
-                required: true
+                required: true,
+                {% if mode=='UPDATE' %}
+                    value: '{{ group.name }}'
+                {% endif %}
             }, 'group_name');
             name_validationTextBox.startup();
+            
+            {% if mode=='UPDATE' %}
+                // update checkboxes
+                var access;
+                var action;
+                var class_name;
+                var checkBox_id;
+                var checkBox;
+                {% for permission in group.permissions %}
+                    {% if  permission.access == 'Allow' %}
+                        access = '{{ permission.access }}';
+                        action = '{{ permission.action }}';
+                        class_name = '{{ permission.class_name }}';
+                        
+                        checkBox_id = action + '_' + class_name;
+                        checkBox = registry.byId(checkBox_id);
+                        checkBox.set('value', 'checked');
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            
             
             // ********************************************************************
             // OK Button
@@ -110,11 +134,22 @@
                 label: 'OK',
                 type: 'button',
                 onClick: function () {
+                    var url;
+                    
+                    {% if mode=='CREATE' %}
+                        url = 'create/group';
+                    {% elif mode=='UPDATE' %}
+                        url = 'update/group';
+                    {% endif %}
                     submitForm({
                         dialog: dialog,
                         form: group_form,
-                        additional_data: {},
-                        url: 'create/group',
+                        additional_data: {
+                            {% if mode=='UPDATE' %}
+                                group_id: {{ group.id }}
+                            {% endif %}
+                        },
+                        url: url,
                         method: 'POST'
                     });
                 }

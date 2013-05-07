@@ -126,12 +126,12 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
         
         // ********************************************************************
         // USER
-        create_user_dialog_creator = function(department_id){
-            department_id = department_id || -1;
+        create_user_dialog_creator = function(entity_id){
+            entity_id = entity_id || -1;
             return new DialogSimple({
                 id: 'create_user_dialog',
                 title: 'New User',
-                href: 'dialog/create/user/' + department_id,
+                href: 'dialog/create/user/' + entity_id,
                 resize: true,
                 style: style,
                 executeScripts: true
