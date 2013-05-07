@@ -51,6 +51,15 @@
                 <td>({{ user.open_tickets|count }})</td>
             </tr>
         </table>
+{#        <div>#}
+{#            {{  has_permission('Create_Asset', request.context, request) }}#}
+{#        </div>#}
+{#        {% if has_permission('Create_Asset', request.context, request) %}#}
+{#            <div>Test 1</div>#}
+{#        {% else %}#}
+{#            <div>Test 2</div>#}
+{#        {% endif %}#}
+        
         <button id='update_user_button'>Edit</button>
     </div>
     {#  Charts  #}

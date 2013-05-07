@@ -51,6 +51,7 @@ def group_finder(login, request):
     :return: Will return the groups of the user in ['Group:{group_name}']
       format.
     """
+    
     if ':' in login:
         login = login.split(':')[1]
     
@@ -79,12 +80,23 @@ class RootFactory(object):
             Permission.query.all()
         )
         
-        # logger.debug('all_permissions: %s' % all_permissions)
-        
-        return [
+        # start with default ACLs
+        ACLs = [
             (Allow, 'Group:' + defaults.admin_department_name, all_permissions),
             (Allow, 'User:' + defaults.admin_name, all_permissions)
         ]
+        
+        # get all users and their ACLs
+        all_users = User.query.all()
+        for user in all_users:
+            ACLs.extend(user.__acl__)
+        
+        # get all groups and their ACLs
+        all_groups = Group.query.all()
+        for group in all_groups:
+            ACLs.extend(group.__acl__)
+        
+        return ACLs
     
     def __init__(self, request):
         pass

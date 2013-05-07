@@ -19,6 +19,9 @@ Stalker Changes
     * Update: TimeLogs are now considered while scheduling the task.
     * Fix: TimeLogs raises OverBookedError when appending the same TimeLog
       instance to the same resource.
+  * Auth:
+    * Fix: The default ACLs for determining the permissions are now working
+      properly.
 * WebUI:
   * Update: Logged in work times will now be visible in gantt charts as a green
     bar in the TaskBar div.

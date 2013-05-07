@@ -437,7 +437,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'create_group_dialog',
                 title: 'New Group',
-                href: '/create/group',
+                href: 'dialog/create/group',
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -448,7 +448,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'update_group_dialog',
                 title: 'Update Group',
-                href: '/update/group/' + group_id,
+                href: 'dialog/update/group/' + group_id,
                 resize: true,
                 style: style,
                 executeScripts: true

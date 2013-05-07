@@ -105,7 +105,6 @@ class EntityType(Base):
     id = Column("id", Integer, primary_key=True)
     name = Column(String(128), nullable=False, unique=True)
     statusable = Column(Boolean, default=False)
-    taskable = Column(Boolean, default=False)
     schedulable = Column(Boolean, default=False)
     
     def __init__(

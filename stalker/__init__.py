@@ -269,6 +269,10 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Group
+    
+    config.add_route('dialog_create_group', 'dialog/create/group')
+    config.add_route('dialog_update_group', 'dialog/update/group')
+    
     config.add_route('create_group', 'create/group')
     config.add_route('update_group', 'update/group/{group_id}')
     config.add_route('view_group', 'view/group/{group_id}')

@@ -19,12 +19,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
-from pyramid.security import authenticated_userid, forget, remember
+from pyramid.security import authenticated_userid, forget, remember, has_permission
 from pyramid.view import view_config, forbidden_view_config
 from sqlalchemy import or_
 
 import stalker
-from stalker import User, Department, Group, Tag, Project, Entity, Studio
+from stalker import (defaults, User, Department, Group, Tag, Project, Entity,
+                     Studio, Permission, EntityType)
 from stalker.db import DBSession
 from stalker.views import log_param
 
@@ -391,14 +392,50 @@ def append_users(request):
 
 
 @view_config(
-    route_name='create_group',
-    renderer='templates/auth/create_groups.jinja2',
-    permission='Create_Group'
+    route_name='create_group'
 )
 def create_group(request):
     """runs when creating a new Group
     """
-    return {}
+    
+    # get parameters
+    post_multi_dict = request.POST
+    
+    # get name
+    name = post_multi_dict['name']
+    
+    # remove name to leave only permissions in the dictionary
+    post_multi_dict.pop('name')
+    
+    permissions = []
+    for key in post_multi_dict.keys():
+        access = post_multi_dict[key]
+        action_and_class_name = key.split('_')
+        action = action_and_class_name[0]
+        class_name = action_and_class_name[1]
+        
+        logger.debug('access     : %s' % access)
+        logger.debug('action     : %s' % action)
+        logger.debug('class_name : %s' % class_name)
+        
+        # get permissions
+        permission = Permission.query\
+            .filter_by(access=access)\
+            .filter_by(action=action)\
+            .filter_by(class_name=class_name)\
+            .first()
+        
+        if permission:
+            permissions.append(permission)
+    
+    logger.debug(permissions)
+    
+    # create the new group
+    new_group = Group(name=name)
+    new_group.permissions = permissions
+    DBSession.add(new_group)
+    
+    return HTTPOk()
 
 
 @view_config(
@@ -412,12 +449,20 @@ def create_group(request):
 def summarize_user(request):
     """runs when getting general User info
     """
+    # get logged in user
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+    
     # get the user id
     user_id = request.matchdict['user_id']
     user = User.query.filter_by(id=user_id).first()
     
+    logger.debug('summarize_user is running')
+    
     return {
-        'user': user
+        'user': user,
+        'logged_user': logged_user,
+        'has_permission': has_permission
     }
 
 
@@ -574,4 +619,27 @@ def check_email_availability(request):
     
     return {
         'available': available
+    }
+
+
+@view_config(
+    route_name='dialog_create_group',
+    renderer='templates/auth/dialog_create_group.jinja2'
+)
+def create_group_dialog(request):
+    """create group dialog
+    """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+    
+    permissions = Permission.query.all()
+    
+    entity_types = EntityType.query.all()
+    
+    return {
+        'actions': defaults.actions,
+        'permissions': permissions,
+        'entity_types': entity_types,
+        'logged_user': logged_user,
+        'has_permission': has_permission
     }

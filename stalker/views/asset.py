@@ -149,7 +149,9 @@ def create_asset(request):
                 get_param('status_id')
 
     project = Project.query.filter_by(id=request.matchdict['project_id']).first()
-
+    
+    
+    
     return {
         'project': project,
         'projects': Project.query.all(),
