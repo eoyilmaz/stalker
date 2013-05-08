@@ -189,39 +189,40 @@ GanttMaster.prototype.addTask = function(task, parent) {
 
 
 /**
- * a project contains tasks, resources, roles, and info about permissions
- * @param project
+ * a ganttData contains tasks, resources, roles
+ * @param ganttData
  * @param Deferred
  */
-GanttMaster.prototype.loadProject = function(project, Deferred) {
+GanttMaster.prototype.loadGanttData = function(ganttData, Deferred) {
     var deferred = new Deferred;
     this.beginTransaction();
-    this.resources = project.resources;
+    this.resources = ganttData.resources;
     this.resource_ids = [];
     for (var i=0; i<this.resources.length; i++){
         this.resource_ids.push(this.resources[i].id);
     }
     
-    this.timing_resolution = project.timing_resolution || this.timing_resolution;
-    this.working_hours = project.working_hours || this.working_hours;
-    this.daily_working_hours = project.daily_working_hours || this.daily_working_hours;
-    this.weekly_working_hours = project.weekly_working_hours || this.weekly_working_hours;
-    this.weekly_working_days = project.weekly_working_days || this.weekly_working_days;
+    this.timing_resolution = ganttData.timing_resolution || this.timing_resolution;
+    this.working_hours = ganttData.working_hours || this.working_hours;
+    this.daily_working_hours = ganttData.daily_working_hours || this.daily_working_hours;
+    this.weekly_working_hours = ganttData.weekly_working_hours || this.weekly_working_hours;
+    this.weekly_working_days = ganttData.weekly_working_days || this.weekly_working_days;
     
-    this.canWrite = project.canWrite;
-    this.canWriteOnParent = project.canWriteOnParent;
+    this.canWrite = ganttData.canWrite;
+    this.canWriteOnParent = ganttData.canWriteOnParent;
     
-    if (project.minEditableDate)
-        this.minEditableDate = computeStart(project.minEditableDate);
+    if (ganttData.minEditableDate)
+        this.minEditableDate = computeStart(ganttData.minEditableDate);
     else
         this.minEditableDate =-Infinity;
 
-    if (project.maxEditableDate)
-        this.maxEditableDate = computeEnd(project.maxEditableDate);
+    if (ganttData.maxEditableDate)
+        this.maxEditableDate = computeEnd(ganttData.maxEditableDate);
     else
         this.maxEditableDate = Infinity;
     
-    this.loadTasks(project.tasks);
+    
+    this.loadTasks(ganttData.tasks);
     this.deletedTaskIds=[];
     this.endTransaction();
     var self=this;
@@ -251,6 +252,7 @@ GanttMaster.prototype.loadTasks = function(tasks) {
                 id: task.id,
                 name: task.name,
                 code: task.code,
+                type: task.type,
                 status: task.status,
                 parent_id: task.parent_id,
                 depend_ids: task.depend_ids,
@@ -447,15 +449,17 @@ GanttMaster.prototype.showTaskEditor = function(taskId) {
     task.rowElement.find(".edit").click();
 };
 
-GanttMaster.prototype.saveProject = function() {
-    return this.saveGantt(false);
-};
-
 GanttMaster.prototype.saveGantt = function(forTransaction) {
     //var prof = new Profiler("gm_saveGantt");
     var saved = [];
     for (var i=0 ; i<this.tasks.length ; i++) {
         var task = this.tasks[i];
+        
+        // skip if project
+        if (task.type == 'Project'){
+            continue;
+        }
+        
         var cloned = task.clone();
         delete cloned.master;
         delete cloned.rowElement;

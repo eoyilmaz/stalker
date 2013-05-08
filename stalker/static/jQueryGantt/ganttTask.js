@@ -58,8 +58,10 @@ function Task(kwargs) {
     this.name = kwargs['name'] || null;
     this.code = kwargs['code'] || null;
     
+    this.type = kwargs['type'] || null;
+    
     this.status = "STATUS_UNDEFINED";
-
+    
     this.project_id = null;
     
     this.children = [];
@@ -154,7 +156,7 @@ Task.prototype.getResourcesString_with_links = function () {
 };
 
 Task.prototype.link = function(){
-    return "<a class='DataLink' href='#' stalker_target='tasks_content_pane' stalker_href='view/task/" + this.id + "'>" + this.name + "</a>";
+    return "<a class='DataLink' href='#' stalker_target='central_content' stalker_href='view/"+ this.type.toLowerCase() +"/" + this.id + "'>" + this.name + " (" + this.type  + ")" + "</a>";
 };
 
 

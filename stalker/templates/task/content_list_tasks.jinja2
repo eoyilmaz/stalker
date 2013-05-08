@@ -39,19 +39,33 @@
       </thead>
     </table>
     --></div>
-
+    <div class="__template__" type="PROJECTROW"><!--
+  <tr projectId="(#=obj.id#)" class="projectEditRow" >
+    <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+    <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
+    <td class="gdfCell indentCell" style="font-weight: bold">(#=obj.name#)</td>
+    <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
+    <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell taskAssigs"></td>
+  </tr>
+--></div>
+    
     <div class="__template__" type="TASKROW"><!--
   <tr taskId="(#=obj.id#)" class="taskEditRow" >
     <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
     <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
-    <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.name#)</td>
+    <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
     <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="timing" value="(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)"></td>
     <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depend_ids#)" (#=obj.hasExternalDep?"readonly":""#)></td>
-    <td class="gdfCell taskAssigs">(#=obj.getResourcesString()#)</td>
+    <td class="gdfCell taskAssigs">(#=obj.getResourcesString_with_links()#)</td>
   </tr>
 --></div>
+    
+    
 
     <div class="__template__" type="TASKEMPTYROW"><!--
   <tr class="taskEditRow emptyRow" >
@@ -67,6 +81,16 @@
   </tr>
 --></div>
 
+
+    <div class="__template__" type="PROJECTBAR"><!--
+  <div class="projectBox" projectId="(#=obj.id#)" >
+    <div class="layout">
+      <div class="projectLabel">(#=obj.link()#)</div>
+    </div>
+  </div>
+  --></div>
+    
+    
     <div class="__template__" type="TASKBAR"><!--
   <div class="taskBox" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
@@ -84,7 +108,7 @@
   --></div>
 
     <div class="__template__" type="PARENTTASKBAR"><!--
-  <div class="parentTaskBox" taskId="(#=obj.id#)" >
+  <div class="parentTaskBox" taskId="(#=obj.id#)">
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
       <div class="parentTaskContextMenu" taskId="(#=obj.id#)"></div>
       <div class="leftPin"></div>
@@ -98,6 +122,18 @@
   </div>
   --></div>
 
+    <div class="__template__" type="PROJECTBAR"><!--
+  <div class="projectBox" projectId="(#=obj.id#)">
+    <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
+      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
+      <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
+      <div class="taskLabel">(#=obj.link()#)</div>
+      <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
+    </div>
+  </div>
+  --></div>
+
+    
 </div>
 
 
@@ -196,7 +232,7 @@
                         data = lang.mixin(data,{'canWrite': 1, 'canWriteOnParent': 1});
                     {% endif %}
 
-                    var promise = ge.loadProject(data, Deferred);
+                    var promise = ge.loadGanttData(data, Deferred);
                     promise.then(function(){
                         // now add the context menu to tasks
 
@@ -413,7 +449,7 @@
 
 
             function saveGanttOnServer() {
-                var prj = ge.saveProject();
+                var prj = ge.saveGantt();
 
                 delete prj.resources;
                 delete prj.roles;
@@ -473,7 +509,7 @@
             //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
             function getFile() {
                 var gimBaPrj = $("#gimBaPrj");
-                gimBaPrj.val(JSON.stringify(ge.saveProject()));
+                gimBaPrj.val(JSON.stringify(ge.saveGantt()));
                 $("#gimmeBack").submit();
                 gimBaPrj.val("");
             }

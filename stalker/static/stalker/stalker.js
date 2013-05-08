@@ -153,7 +153,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'append_user_dialog',
                 title: 'Append User',
-                href: 'dialog/append/user/' + entity_id,
+                href: 'dialog/append/users/' + entity_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -431,8 +431,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             });
         };
 
-        append_department_dialog_creator = function(user_id){
-
+        append_departments_dialog_creator = function(user_id){
             return new DialogSimple({
                 id: 'append_department_dialog',
                 title: 'Append Department',

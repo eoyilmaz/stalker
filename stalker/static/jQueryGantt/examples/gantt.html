@@ -137,7 +137,7 @@ function loadGanttFromServer(taskId, callback) {
     if (response.ok) {
       prof.stop();
 
-      ge.loadProject(response.project);
+      ge.loadGanttData(response.project);
       ge.checkpoint(); //empty the undo stack
 
       if (typeof(callback)=="function") {
@@ -158,7 +158,7 @@ function saveGanttOnServer() {
 
 
   /*
-  var prj = ge.saveProject();
+  var prj = ge.saveGanttData();
 
   delete prj.resources;
   delete prj.roles;
@@ -181,7 +181,7 @@ function saveGanttOnServer() {
       if (response.ok) {
         prof.stop();
         if (response.project) {
-          ge.loadProject(response.project); //must reload as "tmp_" ids are now the good ones
+          ge.loadGanttData(response.project); //must reload as "tmp_" ids are now the good ones
         } else {
           ge.reset();
         }
@@ -287,7 +287,7 @@ function openResourceEditor() {
 //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
 function getFile() {
   var gimBaPrj = $("#gimBaPrj");
-  gimBaPrj.val(JSON.stringify(ge.saveProject()));
+  gimBaPrj.val(JSON.stringify(ge.saveGantt()));
   $("#gimmeBack").submit();
   gimBaPrj.val("");
 
@@ -328,13 +328,13 @@ function loadFromLocalStorage() {
 
 
   }
-  ge.loadProject(ret);
+  ge.loadGanttData(ret);
   ge.checkpoint(); //empty the undo stack
 }
 
 
 function saveInLocalStorage() {
-  var prj = ge.saveProject();
+  var prj = ge.saveGantt();
   if (localStorage) {
     localStorage.setObject("teamworkGantDemo", prj);
   } else {

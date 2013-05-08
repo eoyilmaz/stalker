@@ -100,7 +100,7 @@ GridEditor.prototype.refreshTaskRow = function(task) {
         dep_string = '' + task.depends[i].name + ', ';
     }
     row.find("[name=depends]").val(dep_string);
-    row.find(".taskResources").html(task.getResourcesString());
+    row.find(".taskResources").html(task.getResourcesString_with_links());
 
     //profiler.stop();
 };
@@ -119,12 +119,12 @@ GridEditor.prototype.reset = function() {
 GridEditor.prototype.bindRowEvents = function (task, taskRow) {
   var self = this;
   //console.debug("bindRowEvents",this,this.master,this.master.canWrite);
-  if (this.master.canWrite) {
-    self.bindRowInputEvents(task,taskRow);
+//  if (this.master.canWrite) {
+//    self.bindRowInputEvents(task,taskRow);
 
-  } else { //cannot write: disable input
+//  } else { //cannot write: disable input
     taskRow.find("input").attr("readonly", true);
-  }
+//  }
 
   //taskRow.find(".edit").click(function() {self.openFullEditor(task,taskRow)});
 

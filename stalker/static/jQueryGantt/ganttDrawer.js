@@ -129,8 +129,8 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis,
     }
 
     function createGantt(zoom, startPeriod, endPeriod) {
-        var tr1 = $("<thead>").addClass("ganttHead1");
-        var tr2 = $("<thead>").addClass("ganttHead2");
+        var tr1 = $("<tr>").addClass("ganttHead1");
+        var tr2 = $("<tr>").addClass("ganttHead2");
         var trBody = $("<tbody>").addClass("ganttBody");
 
         function iterate(renderFunction1, renderFunction2) {
@@ -329,14 +329,18 @@ Ganttalendar.prototype.drawTask = function (task) {
     var x = Math.round((task.start - self.startMillis) * self.fx);
 
     var taskBox;
-    if (!task.isParent()) {
-        // if it is a leaf task draw a TASKBAR
-        taskBox = $.JST.createFromTemplate(task, "TASKBAR");
+    if (task.type != 'Project'){
+        if (!task.isParent()) {
+            // if it is a leaf task draw a TASKBAR
+            taskBox = $.JST.createFromTemplate(task, "TASKBAR");
+        } else {
+            // draw a PARENTTASKBAR
+            taskBox = $.JST.createFromTemplate(task, "PARENTTASKBAR");
+        }
     } else {
-        // draw a PARENTTASKBAR
-        taskBox = $.JST.createFromTemplate(task, "PARENTTASKBAR");
+        taskBox = $.JST.createFromTemplate(task, "PROJECTBAR");
     }
-
+    
     //save row element on task
     task.ganttElement = taskBox;
 
@@ -347,32 +351,32 @@ Ganttalendar.prototype.drawTask = function (task) {
 
     taskBox.css({top: top, left: x, width: Math.round((task.end - task.start) * self.fx)});
 
-    if (this.master.canWrite) {
-        taskBox.resizable({
-            handles: 'e,w', //( task.depends ? "" : ",w"), //if depends cannot move start
-            //helper: "ui-resizable-helper",
-            //grid:[oneDaySize,oneDaySize],
-
-            resize: function (event, ui) {
-                //console.debug(ui)
-                $(".taskLabel[taskId=" + ui.helper.attr("taskId") + "]").css("width", ui.position.left);
-                event.stopImmediatePropagation();
-                event.stopPropagation();
-            },
-            stop: function (event, ui) {
-                //console.debug(ui)
-                var task = self.master.getTask(ui.element.attr("taskId"));
-                var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-                var e = Math.round(((ui.position.left + ui.size.width) / self.fx) + self.startMillis);
-
-                self.master.beginTransaction();
-                self.master.changeTaskDates(task, new Date(s), new Date(e));
-                self.master.endTransaction();
-            }
-
-        });
-
-    }
+//    if (this.master.canWrite) {
+//        taskBox.resizable({
+//            handles: 'e,w', //( task.depends ? "" : ",w"), //if depends cannot move start
+//            //helper: "ui-resizable-helper",
+//            //grid:[oneDaySize,oneDaySize],
+//
+//            resize: function (event, ui) {
+//                //console.debug(ui)
+//                $(".taskLabel[taskId=" + ui.helper.attr("taskId") + "]").css("width", ui.position.left);
+//                event.stopImmediatePropagation();
+//                event.stopPropagation();
+//            },
+//            stop: function (event, ui) {
+//                //console.debug(ui)
+//                var task = self.master.getTask(ui.element.attr("taskId"));
+//                var s = Math.round((ui.position.left / self.fx) + self.startMillis);
+//                var e = Math.round(((ui.position.left + ui.size.width) / self.fx) + self.startMillis);
+//
+//                self.master.beginTransaction();
+//                self.master.changeTaskDates(task, new Date(s), new Date(e));
+//                self.master.endTransaction();
+//            }
+//
+//        });
+//
+//    }
 
     //taskBox.dblclick(function() {
     //  self.master.showTaskEditor($(this).closest("[taskId]").attr("taskId"));
@@ -386,28 +390,28 @@ Ganttalendar.prototype.drawTask = function (task) {
     //});
 
     //panning only in no depends
-    if (task.depends.length == 0 && this.master.canWrite) {
-        taskBox.css("position", "absolute").draggable({
-            axis: 'x',
-            drag: function (event, ui) {
-                $(".taskLabel[taskId=" + $(this).attr("taskId") + "]").css("width", ui.position.left);
-            },
-            stop: function (event, ui) {
-                //console.debug(ui,$(this))
-                var task = self.master.getTask($(this).attr("taskId"));
-                var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-
-                self.master.beginTransaction();
-                self.master.moveTask(task, new Date(s));
-                self.master.endTransaction();
-            }/*,
-             start:function(event, ui) {
-             var task = self.master.getTask($(this).attr("taskId"));
-             var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-             console.debug("start",new Date(s));
-             }*/
-        });
-    }
+//    if (task.depends.length == 0 && this.master.canWrite) {
+//        taskBox.css("position", "absolute").draggable({
+//            axis: 'x',
+//            drag: function (event, ui) {
+//                $(".taskLabel[taskId=" + $(this).attr("taskId") + "]").css("width", ui.position.left);
+//            },
+//            stop: function (event, ui) {
+//                //console.debug(ui,$(this))
+//                var task = self.master.getTask($(this).attr("taskId"));
+//                var s = Math.round((ui.position.left / self.fx) + self.startMillis);
+//
+//                self.master.beginTransaction();
+//                self.master.moveTask(task, new Date(s));
+//                self.master.endTransaction();
+//            }/*,
+//             start:function(event, ui) {
+//             var task = self.master.getTask($(this).attr("taskId"));
+//             var s = Math.round((ui.position.left / self.fx) + self.startMillis);
+//             console.debug("start",new Date(s));
+//             }*/
+//        });
+//    }
 
 
     var taskBoxSeparator = $("<div class='ganttLines'></div>");

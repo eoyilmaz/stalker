@@ -1,3 +1,21 @@
+
+/*.gantt, a {*/
+  /*text-decoration: none;*/
+  /*font-weight: bold;*/
+  /*color: #16ABDD;*/
+/*}*/
+
+/*.gantt, th, .tableHeader {*/
+  /*font-weight: normal;*/
+  /*color: #FFFFFF;*/
+  /*border: none;*/
+  /*background-color: #dedede;*/
+  /*padding:2px*/
+/*}*/
+
+
+
+
 .gdfTable {
     table-layout: fixed;
     border-collapse: separate;
@@ -20,6 +38,7 @@
 .gdfColHeader {
     min-width: 5px;
     height: 30px;
+    background-color: #DEDEDE;
 }
 
 .gdfCell, .gdfColHeader {
@@ -142,6 +161,7 @@
 
 .ganttHead1,.ganttHead2{
     height:20px;
+    background-color: #DEDEDE;
 }
 
 .ganttHead1 th,.ganttHead2 th{
@@ -197,6 +217,80 @@
     position: absolute;
     width: 100%;
     height: 15px;
+}
+
+
+/*PROJECT BOX*/
+.projectBox{
+    position: absolute;
+    margin-top: 2px;
+    z-index: 100;
+}
+
+.projectBox .layout {
+    background-color: black;
+    border-radius: 3px 3px 3px 3px;
+    height: 18px;
+}
+
+.projectBox .layout .leftPin {
+    top: 3px;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: url('../images/parentTaskBoxLeftPin.png') no-repeat;
+}
+
+.projectBox .layout .rightPin {
+    top: 3px;
+    right: 0;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: url('../images/parentTaskBoxRightPin.png') no-repeat;
+}
+
+.projectBox .taskStatus {
+    left:5px;
+    top:4px;
+    position:absolute;
+    width:10px;
+    height:10px;
+}
+
+.projectBox .layout .milestone{
+    top: 0;
+    position: absolute;
+    width: 16px;
+    background: url('../images/milestone.png') no-repeat;
+    height: 16px;
+    display: none;
+}
+.projectBox .layout .milestone.end{
+    right:0;
+}
+.projectBox .layout .milestone.active{
+    display:block;
+}
+
+.projectBox.hasChild .layout{
+    /*border:2px solid black;*/
+}
+
+.projectBox .taskProgress{
+    height:3px;
+    position:absolute;
+}
+
+.projectBox .taskBid{
+    height:3px;
+    position:absolute;
+    /*border-radius: 3px;*/
+    top: 3px;
+}
+
+.projectBox .layout.extDep{
+    background-image:url('../images/hasExternalDeps.png');
 }
 
 /*TASK BOX*/
@@ -363,6 +457,10 @@
 .parentTaskBox .layout.extDep{
     background-image:url('../images/hasExternalDeps.png');
 }
+
+
+
+
 
 .taskLabel{
     position:absolute;

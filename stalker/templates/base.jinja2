@@ -40,18 +40,11 @@
     <link rel=stylesheet
           href='{{ request.static_url("stalker:static/jQueryGantt/css/gantt.css") }}'
           type="text/css">
-    <link rel=stylesheet
-          href='{{ request.static_url("stalker:static/Fixed-Header-Table/css/defaultTheme.css") }}'
-          type="text/css">
-
 
     <script src='{{ request.static_url("stalker:static/jquery/1.7/jquery.min.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jqueryui/1.8/jquery-ui.min.js") }}'></script>
     {#  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>#}
     {#  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>#}
-
-    {# FIXED TABLE HEADER #}
-    <script src='{{ request.static_url("stalker:static/Fixed-Header-Table/jquery.fixedheadertable.min.js") }}'></script>
 
     <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/jquery.livequery.min.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/jquery.timers.js") }}'></script>
@@ -62,6 +55,7 @@
     <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/JST/jquery.JST.js") }}'></script>
 
     <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttUtilities.js") }}'></script>
+    <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttProject.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttTask.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttDrawer.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttGridEditor.js") }}'></script>
@@ -131,12 +125,13 @@
 
 
     <script type='text/javascript'>
+    
     var redirectLink = function (targetPane, address) {
-
         var contentPane = dijit.byId(targetPane);
         contentPane.set('href', address);
         contentPane.refresh();
-    }
+    };
+    
     require([
         'dijit/layout/BorderContainer',
         'dojox/layout/ContentPane',

@@ -72,38 +72,69 @@ def convert_to_jquery_gantt_task_format(tasks):
     }
     logger.debug('studio.working_hours : %s' % working_hours)
     
+    # create projects list to only list related projects
+    projects = []
+    for task in tasks:
+        if task.project not in projects:
+            projects.append(task.project)
+    
+    faux_tasks = []
+    
+    # first append projects
+    
+    faux_tasks.extend(
+        [{
+            'type': project.entity_type,
+            'id': project.id,
+            'code': project.code,
+            'name': project.name,
+            'start': int(project.start.strftime('%s')) * 1000,
+            'end': int(project.end.strftime('%s')) * 1000,
+            'schedule_model': 'duration',
+            'schedule_timing': project.duration.days,
+            'schedule_unit': 'd',
+            'parent_id': None,
+            'depend_id': [],
+            'resources': [],
+        } for project in projects]
+    )
+    
+    faux_tasks.extend([
+        {
+            'type': task.entity_type,
+            'id': task.id,
+            'name': task.name,
+            'code': task.id,
+            'description': task.description,
+            'status': 'STATUS_UNDEFINED',
+            'project_id': task.project.id,
+            'parent_id': task.parent.id if task.parent else task.project.id,
+            'depend_ids': [dep.id for dep in task.depends],
+            'resources': [
+                {
+                    'id': resource.id,
+                } for resource in task.resources
+            ],
+            'start': int(task.start.strftime('%s')) * 1000,
+            'end': int(task.end.strftime('%s')) * 1000,
+            'is_scheduled': task.is_scheduled,
+            'schedule_timing': task.schedule_timing,
+            'schedule_unit': task.schedule_unit,
+            'bid_timing': task.bid_timing,
+            'bid_unit': task.bid_unit,
+            'schedule_model': task.schedule_model,
+            'schedule_constraint': task.schedule_constraint,
+            'schedule_seconds': task.schedule_seconds,
+            'total_logged_seconds': task.total_logged_seconds,
+            'computed_start': int(task.computed_start.strftime('%s')) * 1000 if task.computed_start else None,
+            'computed_end': int(task.computed_end.strftime('%s')) * 1000 if task.computed_end else None,
+        }
+        for task in tasks
+    ])
+    
+    
     data = {
-        'tasks' : [
-            {
-                'id': task.id,
-                'name': '%s (%s)' % (task.name, task.entity_type),
-                'code': task.id,
-                'description': task.description,
-                'status': 'STATUS_UNDEFINED',
-                'project_id': task.project.id,
-                'parent_id': task.parent.id if task.parent else None,
-                'depend_ids': [dep.id for dep in task.depends],
-                'resources': [
-                    {
-                        'id': resource.id,
-                    } for resource in task.resources
-                ],
-                'start': int(task.start.strftime('%s')) * 1000,
-                'end': int(task.end.strftime('%s')) * 1000,
-                'is_scheduled': task.is_scheduled,
-                'schedule_timing': task.schedule_timing,
-                'schedule_unit': task.schedule_unit,
-                'bid_timing': task.bid_timing,
-                'bid_unit': task.bid_unit,
-                'schedule_model': task.schedule_model,
-                'schedule_constraint': task.schedule_constraint,
-                'schedule_seconds': task.schedule_seconds,
-                'total_logged_seconds': task.total_logged_seconds,
-                'computed_start': int(task.computed_start.strftime('%s')) * 1000 if task.computed_start else None,
-                'computed_end': int(task.computed_end.strftime('%s')) * 1000 if task.computed_end else None,
-            }
-            for task in tasks
-        ],
+        'tasks' : faux_tasks,
         'resources' : [{
             'id': resource.id,
             'name': resource.name
@@ -122,13 +153,13 @@ def convert_to_jquery_gantt_task_format(tasks):
     
     #logger.debug(data)
     
-    #logger.debug('loading gantt data:\n%s' % 
-    #             json.dumps(data,
-    #                        sort_keys=False,
-    #                        indent=4,
-    #                        separators=(',', ': ')
-    #             )
-    #)
+    logger.debug('loading gantt data:\n%s' % 
+                json.dumps(data,
+                           sort_keys=False,
+                           indent=4,
+                           separators=(',', ': ')
+                )
+    )
     return data
     
 
