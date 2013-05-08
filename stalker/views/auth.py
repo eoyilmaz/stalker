@@ -238,6 +238,62 @@ def update_user(request):
     
     return HTTPOk()
 
+@view_config(
+    route_name='list_users',
+    renderer='templates/auth/content_list_users.jinja2'
+)
+def view_users(request):
+    """
+    """
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+    return {
+        'entity': entity
+
+    }
+
+@view_config(
+    route_name='view_user',
+    renderer='templates/auth/page_view_user.jinja2'
+)
+def view_user(request):
+
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+
+    return {
+        'user': user
+    }
+
+
+@view_config(
+    route_name='summarize_user',
+    renderer='templates/auth/content_summarize_user.jinja2'
+)
+@view_config(
+    route_name='view_user_tasks',
+    renderer='templates/task/content_list_tasks.jinja2'
+)
+def summarize_user(request):
+    """runs when getting general User info
+    """
+    # get logged in user
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+
+    # get the user id
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+
+    logger.debug('summarize_user is running')
+
+    return {
+        'user': user,
+        'logged_user': logged_user,
+        'has_permission': has_permission
+    }
+
 
 @view_config(
     route_name='get_users',
@@ -250,20 +306,6 @@ def get_users(request):
     return [
         {'id': user.id, 'name': user.name}
         for user in User.query.all()
-    ]
-
-
-@view_config(
-    route_name='get_groups',
-    renderer='json',
-    permission='List_Group'
-)
-def get_groups(request):
-    """returns all the groups in database
-    """
-    return [
-        {'id': group.id, 'name': group.name}
-        for group in Group.query.all()
     ]
 
 
@@ -431,116 +473,6 @@ def get_permissions_from_multi_dict(multi_dict):
     logger.debug(permissions)
     return permissions
 
-
-@view_config(
-    route_name='create_group'
-)
-def create_group(request):
-    """runs when creating a new Group
-    """
-    # get parameters
-    post_multi_dict = request.POST
-    
-    # get name
-    name = post_multi_dict['name']
-    
-    # remove name to leave only permissions in the dictionary
-    post_multi_dict.pop('name')
-    
-    permissions = get_permissions_from_multi_dict(post_multi_dict)
-    
-    # create the new group
-    new_group = Group(name=name)
-    new_group.permissions = permissions
-    DBSession.add(new_group)
-    
-    return HTTPOk()
-
-
-@view_config(
-    route_name='update_group'
-)
-def update_group(request):
-    """updates the group with data from request
-    """
-    # get parameters
-    post_multi_dict = request.POST
-    
-    # get group_id
-    group_id = post_multi_dict['group_id']
-    group = Group.query.filter_by(id=group_id).first()
-    
-    # get name
-    name = post_multi_dict['name']
-    
-    # remove name to leave only permission in the dictionary
-    post_multi_dict.pop('name')
-    permissions = get_permissions_from_multi_dict(post_multi_dict)
-    
-    if group:
-        group.permissions = permissions
-        DBSession.add(group)
-    
-    return HTTPOk()
-
-
-@view_config(
-    route_name='summarize_user',
-    renderer='templates/auth/content_summarize_user.jinja2'
-)
-@view_config(
-    route_name='view_user_tasks',
-    renderer='templates/task/content_list_tasks.jinja2'
-)
-def summarize_user(request):
-    """runs when getting general User info
-    """
-    # get logged in user
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
-    
-    # get the user id
-    user_id = request.matchdict['user_id']
-    user = User.query.filter_by(id=user_id).first()
-    
-    logger.debug('summarize_user is running')
-    
-    return {
-        'user': user,
-        'logged_user': logged_user,
-        'has_permission': has_permission
-    }
-
-
-@view_config(
-    route_name='view_user',
-    renderer='templates/auth/page_view_user.jinja2'
-)
-def view_user(request):
-    
-    user_id = request.matchdict['user_id']
-    user = User.query.filter_by(id=user_id).first()
-    
-    return {
-        'user': user
-    }
-
-@view_config(
-    route_name='list_users',
-    renderer='templates/auth/content_list_users.jinja2'
-)
-def view_users(request):
-    """
-    """
-    entity_id = request.matchdict['entity_id']
-    entity = Entity.query.filter_by(id=entity_id).first()
-
-    return {
-        'entity': entity
-
-    }
-
-
 @view_config(route_name='logout')
 def logout(request):
     headers = forget(request)
@@ -635,13 +567,13 @@ def check_login_availability(request):
     """
     login = request.matchdict['login']
     logger.debug('checking availability for: %s' % login)
-    
+
     available = 1
     if login:
         user = User.query.filter(User.login==login).first()
         if user:
             available = 0
-    
+
     return {
         'available': available
     }
@@ -656,17 +588,16 @@ def check_email_availability(request):
     """
     email = request.matchdict['email']
     logger.debug('checking availability for: %s' % email)
-    
+
     available = 1
     if email:
         user = User.query.filter(User.email==email).first()
         if user:
             available = 0
-    
+
     return {
         'available': available
     }
-
 
 @view_config(
     route_name='dialog_create_group',
@@ -677,11 +608,11 @@ def create_group_dialog(request):
     """
     login = authenticated_userid(request)
     logged_user = User.query.filter_by(login=login).first()
-    
+
     permissions = Permission.query.all()
-    
+
     entity_types = EntityType.query.all()
-    
+
     return {
         'actions': defaults.actions,
         'permissions': permissions,
@@ -699,14 +630,14 @@ def update_group_dialog(request):
     """
     login = authenticated_userid(request)
     logged_user = User.query.filter_by(login=login).first()
-    
+
     permissions = Permission.query.all()
-    
+
     entity_types = EntityType.query.all()
-    
+
     group_id = request.matchdict['group_id']
     group = Group.query.filter_by(id=group_id).first()
-    
+
     return {
         'group': group,
         'actions': defaults.actions,
@@ -715,3 +646,185 @@ def update_group_dialog(request):
         'logged_user': logged_user,
         'has_permission': has_permission
     }
+
+@view_config(
+    route_name='create_group'
+)
+def create_group(request):
+    """runs when creating a new Group
+    """
+    # get parameters
+    post_multi_dict = request.POST
+    
+    # get name
+    name = post_multi_dict['name']
+    
+    # remove name to leave only permissions in the dictionary
+    post_multi_dict.pop('name')
+    
+    permissions = get_permissions_from_multi_dict(post_multi_dict)
+    
+    # create the new group
+    new_group = Group(name=name)
+    new_group.permissions = permissions
+    DBSession.add(new_group)
+    
+    return HTTPOk()
+
+@view_config(
+    route_name='update_group'
+)
+def update_group(request):
+    """updates the group with data from request
+    """
+    # get parameters
+    post_multi_dict = request.POST
+    
+    # get group_id
+    group_id = post_multi_dict['group_id']
+    group = Group.query.filter_by(id=group_id).first()
+    
+    # get name
+    name = post_multi_dict['name']
+    
+    # remove name to leave only permission in the dictionary
+    post_multi_dict.pop('name')
+    permissions = get_permissions_from_multi_dict(post_multi_dict)
+    
+    if group:
+        group.permissions = permissions
+        DBSession.add(group)
+    
+    return HTTPOk()
+
+@view_config(
+    route_name='list_groups',
+    renderer='templates/auth/content_list_groups.jinja2',
+    permission='Read_Group'
+)
+def list_groups(request):
+    """
+    """
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+
+    return {
+        'user': user
+    }
+
+@view_config(
+    route_name='view_group',
+    renderer='templates/auth/page_view_group.jinja2',
+    permission='Read_Group'
+)
+def view_group(request):
+    """runs when viewing a group
+    """
+
+    login = authenticated_userid(request)
+    logged_in_user = User.query.filter_by(login=login).first()
+
+
+    group_id = request.matchdict['group_id']
+    group = Group.query.filter_by(id=group_id).first()
+
+    return {
+        'user': logged_in_user,
+        'group': group
+    }
+
+@view_config(
+    route_name='summarize_group',
+    renderer='templates/auth/content_summarize_group.jinja2'
+)
+def summarize_group(request):
+    """runs when getting general User info
+    """
+    # get the user id
+    group_id = request.matchdict['group_id']
+    group = Group.query.filter_by(id=group_id).first()
+
+    return {
+        'group': group
+    }
+
+@view_config(
+    route_name='get_groups',
+    renderer='json',
+    permission='List_Group'
+)
+def get_groups(request):
+    """returns all the groups in database
+    """
+    return [
+        {'id': group.id, 'name': group.name}
+        for group in Group.query.all()
+    ]
+
+@view_config(
+    route_name='get_groups_byEntity',
+    renderer='json',
+    permission='Read_Group'
+)
+def get_groups_byEntity(request):
+    """returns all the Users of a given Entity
+    """
+    entity_id = request.matchdict['entity_id']
+    entity = Entity.query.filter_by(id=entity_id).first()
+
+    return [
+            {
+             'name': group.name,
+             'id': group.id
+
+            }
+            for group in entity.groups
+        ]
+
+@view_config(
+    route_name='dialog_append_groups',
+    renderer='templates/auth/dialog_append_groups.jinja2'
+)
+def append_groups_dialog(request):
+    """runs for append user dialog
+    """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+
+    user_id = request.matchdict['user_id']
+    user = User.query.filter_by(id=user_id).first()
+
+    return {
+        'logged_user': logged_user,
+        'user': user
+    }
+
+@view_config(
+    route_name='append_groups'
+)
+def append_groups(request):
+    """appends the given users o the given Project or Group
+    # """
+    # # users
+    # user_ids = [
+    #     int(u_id)
+    #     for u_id in request.POST.getall('entity_users')
+    # ]
+    # users = User.query.filter(User.id.in_(user_ids)).all()
+    #
+    # # entity
+    # entity_id = request.params.get('entity_id', None)
+    # entity = Entity.query.filter(Entity.id==entity_id).first()
+    #
+    # logger.debug('entity : %s' % entity)
+    # logger.debug('users  : %s' % users)
+    #
+    # if users and entity:
+    #     entity.users = users
+    #     DBSession.add(entity)
+    #     DBSession.add_all(users)
+
+    return
+
+
+

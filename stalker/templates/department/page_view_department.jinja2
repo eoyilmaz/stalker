@@ -27,8 +27,12 @@
 </div>
 
 <script type='text/javascript'>
-    require(['dijit/registry', 'dijit/layout/BorderContainer',
-        'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+    require([
+        'dijit/registry',
+        'dijit/layout/BorderContainer',
+        'dijit/layout/TabContainer',
+        'dojox/layout/ContentPane',
+        'dojo/domReady!'],
             function (registry, BorderContainer, TabContainer, ContentPane) {
 
                 var department_BorderContainer = new BorderContainer({
@@ -50,10 +54,8 @@
                 // Bottom Part - Complex Data View
 
                 var department_related_data_tab_container = new TabContainer({
-
                     region: 'center',
                     style: 'width: 100%; background-color: #7f9599'
-
                 }, 'department_related_data_tab_container');
 
                 var users_content_pane = new ContentPane({

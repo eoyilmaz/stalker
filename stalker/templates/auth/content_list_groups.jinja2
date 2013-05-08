@@ -1,8 +1,8 @@
 {# Stalker a Production Asset Management System
  Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
- 
+
  This file is part of Stalker.
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation;
@@ -17,12 +17,15 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
-<div id='view_projects'>
-    <div id='projects_data_grid'></div>
+<div id='view_groups'>
+    <button id='view_groups_append_group_button'>Append Group
+    </button>
+    <div id='groups_data_grid'></div>
 </div>
 
 <script type='text/javascript'>
-    require(['dijit/registry',
+    require([
+        'dijit/registry',
         'dojo/data/ObjectStore',
         "dgrid/List",
         "dgrid/Grid",
@@ -30,31 +33,28 @@
         "dgrid/Keyboard",
         "dgrid/editor",
         'dojo/store/Memory',
-        'dijit/form/FilteringSelect',
         'dojo/store/JsonRest',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
         'dojo/on',
         'dojo/query',
         'dojo/domReady!'],
-            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, FilteringSelect, JsonRest, fieldUpdater, dialogCaller, on, quer) {
+            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, JsonRest, fieldUpdater, dialogCaller,on, query) {
 
-
-                var projects_DataGrid = new Grid({
-                    id: 'projects_data_grid',
+                var groups_DataGrid = new Grid({
+                    id: 'groups_data_grid',
                     width: '100%',
                     autoHeight: true
-                }, 'projects_data_grid');
+                }, 'groups_data_grid');
 
 
-                function projects_DataGrid_updater() {
+                function groups_DataGrid_updater() {
 
-                    var user_memory = new JsonRest({
-                        target: '/get/projects_byEntity/{{ entity.id }}'
+                    var group_memory = new JsonRest({
+                        target: '/get/groups_byEntity/{{ user.id }}'
                     });
 
-                    user_memory.query().then(function (data) {
-
+                    group_memory.query().then(function (data) {
 
                         var columns = [
                             {
@@ -65,7 +65,7 @@
                                     return object; // return entire item for formatter to use
                                 },
                                 formatter: function (value) {
-                                    return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/NoProjectPicture.jpg") }}">';
+                                    return '<img src="{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}">';
                                 }
                             },
                             {
@@ -77,26 +77,35 @@
                                 formatter: function (value) {
 
                                     var targetPane = "'central_content'";
-                                    var address = "'view/project/" + value.id + "'";
+                                    var address = "'view/group/" + value.id + "'";
 
                                     return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
                                 }
                             }
                         ];
 
-
-                        projects_DataGrid.renderArray(data);
-
-                        projects_DataGrid.set('columns', columns);
-
+                        groups_DataGrid.renderArray(data);
+                        groups_DataGrid.set('columns', columns);
 
                     });
 
                 }
 
+                 var append_group_button = dialogCaller({
+                    label: 'Append Group',
+                    dialog_id: 'append_group_dialog',
+                    content_creator: append_group_dialog_creator,
+                    attach_to: 'view_groups_append_group_button',
+                    related_field_updater: groups_DataGrid_updater,
+                    data_id: '{{ user.id }}'
+                });
 
-                projects_DataGrid_updater();
+                append_group_button.startup();
 
+
+
+
+                groups_DataGrid_updater();
             });
 
 </script>

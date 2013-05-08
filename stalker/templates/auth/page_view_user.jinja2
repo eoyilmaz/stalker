@@ -21,12 +21,12 @@
     {#  <div id='user_summary'>#}
     {# Summary View #}
     {#  </div>#}
-    {#  <div id='user_related_data_tab_container'>#}
-    {#    <div id='tasks_pane'></div>#}
-    {#    <div id='projects_pane'></div>#}
-    {#    <div id='tickets_pane'></div>#}
-    {#    <div id='departments_pane'></div>#}
-    {#  </div>#}
+    <div id='user_related_data_tab_container'>
+        <div id='tasks_pane'></div>
+        <div id='projects_pane'></div>
+        <div id='tickets_pane'></div>
+        <div id='departments_pane'></div>
+    </div>
 </div>
 
 <script type='text/javascript'>
@@ -75,7 +75,7 @@
             title: 'Tasks',
             href: 'list/tasks/{{ user.id }}',
             default_href: 'list/tasks/{{ user.id }}',
-            style:' padding: 0; margin:0;'
+            style: ' padding: 0; margin:0;'
         });
 
 
@@ -83,28 +83,35 @@
             title: 'Projects',
             href: 'list/projects/{{ user.id }}',
             default_href: 'list/projects/{{ user.id }}',
-            style:' padding: 0; margin:0;'
+            style: ' padding: 0; margin:0;'
         });
 
         var departments_content_pane = new ContentPane({
             title: 'Departments',
             href: 'list/departments/{{ user.id }}',
             default_href: 'list/departments/{{ user.id }}',
-            style:' padding: 0; margin:0;'
+            style: ' padding: 0; margin:0;'
         });
 
+        var groups_content_pane = new ContentPane({
+            title: 'Groups',
+            href: 'list/groups/{{ user.id }}',
+            default_href: 'list/groups/{{ user.id }}',
+            style: ' padding: 0; margin:0;'
+        });
 
         var tickets_content_pane = new ContentPane({
             title: 'Tickets',
             href: 'list/tickets/{{ user.id }}',
             default_href: 'list/tickets/{{ user.id }}',
-            style:' padding: 0; margin:0;'
+            style: ' padding: 0; margin:0;'
         });
 
 
         user_related_data_tab_container.addChild(tasks_content_pane);
         user_related_data_tab_container.addChild(projects_content_pane);
         user_related_data_tab_container.addChild(departments_content_pane);
+        user_related_data_tab_container.addChild(groups_content_pane);
         user_related_data_tab_container.addChild(tickets_content_pane);
 
         user_BorderContainer.addChild(user_related_data_tab_container);

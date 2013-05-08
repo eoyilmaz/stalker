@@ -140,8 +140,6 @@ def list_departments(request):
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
 
-
-
     return {
         'entity': entity
 

@@ -82,6 +82,7 @@
                     href: 'list/tasks/{{ project.id }}',
                     style:' padding: 0; margin:0;'
                 }, 'tasks_content_pane');
+                tasks_content_pane.startup();
 
                 var assets_content_pane = new ContentPane({
                     title: 'Assets',
@@ -155,6 +156,7 @@
 
                 project_related_data_tab_container.watch("selectedChildWidget", function (name, oval, nval) {
                     console.log("selected child changed from ", nval.title, " to ", nval.href);
+
                     oval.set('href', '');
                     oval.refresh();
 

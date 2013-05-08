@@ -1,7 +1,11 @@
-<div id='nav_bar_content_pane' style='width:100%; height:25px; padding: 0; margin:0; background-color: #eeeeee;  font-size: 15px;'>
+<div id='nav_bar_content_pane'
+     style='width:100%; height:25px; padding: 0; margin:0; background-color: #eeeeee;  font-size: 15px;'>
     <div style='height: 20px; position: absolute;
                   left: 10px; top: 5px;'>
-        <a href="javascript:redirectLink('{{ entity.entity_type.lower() }}s_content_pane', 'list/{{ entity.entity_type.lower() }}s/{{ entity.project.id }}');">{{ entity.entity_type }}s </a>/{{ entity.name }}({{ entity.code }})</a>
+        <a href="javascript:redirectLink('{{ entity.entity_type.lower() }}s_content_pane','view/project/{{ entity.project.id }}');">{{ entity.project.name }} </a> /
+        <a href="javascript:redirectLink('{{ entity.entity_type.lower() }}s_content_pane','list/{{ entity.entity_type.lower() }}s/{{ entity.project.id }}');">{{ entity.entity_type }}s </a>/ {{ entity.name }}({{ entity.code }})
+
+
     </div>
     <div style='height: 20px; position: absolute;
                   right: 20px; top: 5px;'>{{ entity.status.name }}</div>

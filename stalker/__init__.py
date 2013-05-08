@@ -277,10 +277,15 @@ def main(global_config, **settings):
     
     config.add_route('create_group', 'create/group')
     config.add_route('update_group', 'update/group/{group_id}')
+    config.add_route('list_groups', 'list/groups/{user_id}')
     config.add_route('view_group', 'view/group/{group_id}')
+    config.add_route('summarize_group', 'summarize/group/{group_id}')
     config.add_route('get_groups', 'get/groups')
-    
-    
+    config.add_route('get_groups_byEntity', 'get/groups_byEntity/{entity_id}')
+
+    config.add_route('dialog_append_groups', 'dialog/append/groups/{user_id}')
+    config.add_route('append_groups', 'append/groups')
+
     config.scan()
     return config.make_wsgi_app()
 

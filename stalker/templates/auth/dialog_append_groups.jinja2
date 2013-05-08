@@ -1,0 +1,228 @@
+{# Stalker a Production Asset Management System
+ Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+
+ This file is part of Stalker.
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation;
+ version 2.1 of the License.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#}
+<div class='dijitDialogPaneContentArea'>
+    <form id='append_group_form'>
+        <table style='width: 100%'>
+            <tr>
+                <td class='form_title'>
+                    All Groups
+                </td>
+                <td>&nbsp;</td>
+                <td class='form_title'>
+                    User Groups
+                </td>
+            </tr>
+            <tr>
+                <td class='input_column'>
+                    <select id='all_groups_list'>
+                    </select>
+                </td>
+                <td style='width: 25px;'>
+                    <button id='group_append_button'>Add</button>
+                    <button id='group_remove_button'>Remove</button>
+                </td>
+                <td class='input_column'>
+                    <select id='user_groups_list'>
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<div class='dijitDialogPaneActionBar'>
+    <button id='append_group_submit_button'>OK</button>
+    <button id='append_group_cancel_button'>Cancel</button>
+</div>
+
+{#<div class='dijitDialogPaneActionBar'>#}
+{#  <button id='group_append_button'>Append</button>#}
+{#  <button id='group_cancel_button'>Cancel</button>#}
+{#</div>#}
+
+<script type="text/javascript">
+    require([
+        'dojo/store/Memory',
+        'dojo/data/ObjectStore',
+        'dojo/store/JsonRest',
+        'dojo/_base/lang',
+        'dojo/ready',
+
+        'dijit/registry',
+        'dijit/form/Form',
+        'dijit/form/Button',
+        'dijit/form/MultiSelect',
+
+        'stalker/submitForm',
+        'stalker/dialogCaller',
+        'stalker/fieldUpdater'
+
+    ], function (Memory, ObjectStore, JsonRest, lang, ready, registry, Form,
+                 Button, MultiSelect, submitForm, dialogCaller, fieldUpdater) {
+
+        ready(function () {
+
+
+            // ****************************************************************
+            // Form
+            var append_group_form = new Form({
+                id: 'append_group_form'
+            }, 'append_group_form');
+            append_group_form.startup();
+
+            // ****************************************************************
+            // Project Group List
+            var user_groups_memory = new JsonRest({
+                target: '/get/groups_byEntity/{{ user.id }}'
+            });
+
+
+            var user_groups_multi_select = new MultiSelect({
+                name: 'user_groups',
+                required: false,
+                style: 'height: auto; width: auto; min-width: 200px; min-height: 250px'
+            }, 'user_groups_list');
+            user_groups_multi_select.startup();
+
+            var eliminate_user_groups_from_all_groups = function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    remove_item(all_groups_multi_select, data[i].id);
+                }
+            };
+
+            // The Updater
+            var user_groups_field_updater = fieldUpdater({
+                'memory': user_groups_memory,
+                'widget': user_groups_multi_select,
+                'callBack': eliminate_user_groups_from_all_groups
+            });
+
+            // ****************************************************************
+            // All Group List
+            var all_groups_memory = new JsonRest({
+                target: '/get/groups'
+            });
+
+            var all_groups_multi_select = new MultiSelect({
+                name: 'all_groups',
+                required: false,
+                label: 'All Groups',
+                style: 'height: auto; width: auto; min-width: 200px; min-height: 250px'
+            }, 'all_groups_list');
+            all_groups_multi_select.startup();
+
+            var get_user_groups_data = function (data) {
+                // run the function to fill the data for the first time
+                user_groups_field_updater({animate: false});
+
+            };
+
+            // The Updater
+            var all_groups_field_updater = fieldUpdater({
+                'memory': all_groups_memory,
+                'widget': all_groups_multi_select,
+                'callBack': get_user_groups_data
+            });
+            //run the function to fill the data for the first time
+            all_groups_field_updater({animate: false});
+
+
+            var add_item = function (multi_select, opt) {
+                var domNode = multi_select.domNode;
+                domNode.appendChild(opt);
+            };
+
+            var remove_item = function (multi_select, rId) {
+                var domNode = multi_select.domNode;
+                dojo.query('option', domNode).forEach(function (opt, idx, arr) {
+                    if (opt.value == rId) {
+                        dojo.destroy(opt);
+                    }
+                });
+            };
+
+            // ****************************************************************
+            // Append Group Button
+            var group_append_button = new Button({
+                label: '>>',
+                type: 'button',
+                onClick: function () {
+                    var selected_data = all_groups_multi_select.get('value');
+                    var all_options = dojo.query('option', 'all_groups_list');
+
+                    for (var i = 0; i < all_options.length; i++) {
+                        if (selected_data.indexOf(all_options[i].value) != -1) {
+                            add_item(user_groups_multi_select, all_options[i]);
+                        }
+                    }
+                }
+            }, 'group_append_button');
+
+            // ****************************************************************
+            // Remove Group Button
+            var group_remove_button = new Button({
+                label: '<<',
+                type: 'button',
+                onClick: function () {
+                    var selected_data = user_groups_multi_select.get('value');
+                    var all_options = dojo.query('option', 'user_groups_list');
+
+                    for (var i = 0; i < all_options.length; i++) {
+                        if (selected_data.indexOf(all_options[i].value) != -1) {
+                            add_item(all_groups_multi_select, all_options[i]);
+                        }
+                    }
+                }
+            }, 'group_remove_button');
+
+            // ****************************************************************
+            // Submit Button
+            var submit_button = new Button({
+                label: 'OK',
+                type: 'button',
+                onClick: function () {
+                    submitForm({
+                        dialog: registry.byId('append_group_dialog'),
+                        form: append_group_form,
+                        additional_data: {
+                            'user_id': {{ user.id }}
+                        },
+                        url: 'append/groups',
+                        method: 'POST'
+                    });
+                }
+            }, 'append_group_submit_button');
+            submit_button.startup();
+
+            // ****************************************************************
+            // Cancel Button
+            var cancel_button = new Button({
+                label: 'Cancel',
+                type: 'button',
+                onClick: function () {
+                    registry.byId('append_group_dialog').destroyRecursive();
+                }
+            }, 'append_group_cancel_button');
+            cancel_button.startup();
+
+            append_group_form.startup();
+        });
+    });
+</script>

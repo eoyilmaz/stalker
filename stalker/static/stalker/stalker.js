@@ -465,6 +465,18 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
                 executeScripts: true
             });
         };
+
+        append_group_dialog_creator = function(user_id){
+
+            return new DialogSimple({
+                id: 'append_group_dialog',
+                title: 'Append Group',
+                href: 'dialog/append/groups/' + user_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
         
 });
 
