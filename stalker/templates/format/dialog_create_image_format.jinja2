@@ -18,166 +18,185 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-  <div id='create_image_format_form'>
-    <table style='width: 100%'>
-    
-      {# NAME #}
-      <tr>
-        <td class='label_column'>
-          <label for='image_format_name'>
-            Name
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='image_format_name'>
-        </td>
-      </tr>
-      
-      {# WIDTH #}
-      <tr>
-        <td class='label_column'>
-          <label for='image_format_width'>
-            Width
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='image_format_width'>
-        </td>
-      </tr>
-      
-      {# HEIGHT #}
-      <tr>
-        <td class='label_column'>
-          <label for='image_format_height'>
-            Height
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='image_format_height'>
-        </td>
-      </tr>
-      
-      {# PIXEL ASPECT #}
-      <tr>
-        <td class='label_column'>
-          <label for='image_format_pixel_aspect'>
-            Pixel Aspect
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='image_format_pixel_aspect'>
-        </td>
-      </tr>
-      
-    </table>
-  </div>
+    <div id='image_format_form'>
+        <table style='width: 100%'>
+
+            {# NAME #}
+            <tr>
+                <td class='label_column'>
+                    <label for='image_format_name'>
+                        Name
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='image_format_name'>
+                </td>
+            </tr>
+
+            {# WIDTH #}
+            <tr>
+                <td class='label_column'>
+                    <label for='image_format_width'>
+                        Width
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='image_format_width'>
+                </td>
+            </tr>
+
+            {# HEIGHT #}
+            <tr>
+                <td class='label_column'>
+                    <label for='image_format_height'>
+                        Height
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='image_format_height'>
+                </td>
+            </tr>
+
+            {# PIXEL ASPECT #}
+            <tr>
+                <td class='label_column'>
+                    <label for='image_format_pixel_aspect'>
+                        Pixel Aspect
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='image_format_pixel_aspect'>
+                </td>
+            </tr>
+
+        </table>
+    </div>
 </div>
 <div class='dijitDialogPaneActionBar'>
-  <button id='image_format_submit_button'></button>
-  <button id='image_format_cancel_button'></button>
+    <button id='image_format_ok_button'></button>
+    <button id='image_format_cancel_button'></button>
 </div>
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/request/xhr', 'dojo/store/Memory',
-    'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-    'dijit/form/NumberTextBox', 'dijit/form/Button', 'dojo/Deferred',
-    'stalker/submitForm', 'dojo/domReady!'],
-    function(registry, xhr, Memory, Form, ValidationTextBox, NumberTextBox,
-             TextBox, Button, Deferred, submitForm){
-      
-      // **********************************************************************
-      // Form
-      var create_image_format_form = new Form({
-        id: 'create_image_format_form'
-      }, 'create_image_format_form');
-      create_image_format_form.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // Name
-      var name_textBox = new ValidationTextBox({
-        name: 'name',
-        label: 'Name',
-        placeHolder: 'Enter a name',
-        required: true
-      }, 'image_format_name');
-      name_textBox.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // WIDTH
-      var width_numberTextBox = new NumberTextBox({
-        name: 'width',
-        label: 'Width',
-        placeHolder: '',
-        required: true
-      }, 'image_format_width');
-      width_numberTextBox.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // HEIGHT
-      var height_numberTextBox = new NumberTextBox({
-        name: 'height',
-        label: 'Height',
-        placeHolder: '',
-        required: true
-      }, 'image_format_height');
-      height_numberTextBox.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // PIXEL_ASPECT
-      var pixel_aspect_numberTextBox = new NumberTextBox({
-        name: 'pixel_aspect',
-        label: 'Pixel Aspect',
-        value: 1.0,
-        required: true
-      }, 'image_format_pixel_aspect');
-      pixel_aspect_numberTextBox.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // SUBMIT BUTTON
-      var submit_button = new Button({
-        label: 'OK',
-        type: 'button',
-        onClick: function(){
-          submitForm({
-            dialog: registry.byId('create_image_format_dialog'),
-            form: create_image_format_form,
-            additional_data: {submitted: 'create'},
-            url: '{{ request.route_url("create_image_format") }}',
-            method: 'POST'
-          });
-        }
-      }, 'image_format_submit_button');
-      submit_button.startup();
-      
-      
-      
-      
-      // **********************************************************************
-      // CANCEL BUTTON
-      var cancel_button = new Button({
-        label: 'Cancel',
-        type: 'button',
-        onClick: function(){
-          registry.byId('create_image_format_dialog').destroyRecursive();
-        }
-      }, 'image_format_cancel_button');
-      cancel_button.startup();        
-      
-      
-  });
+    require([
+        'dojo/ready',
+        'dijit/form/Form',
+        'dijit/form/ValidationTextBox',
+        'dijit/form/NumberTextBox',
+        'dijit/form/Button',
+        'stalker/submitForm'
+    ], function (ready, Form, ValidationTextBox, NumberTextBox, Button,
+                 submitForm) {
+        
+        // ********************************************************************
+        // Generate default values
+        var url;
+        var name;
+        var width;
+        var height;
+        var pixel_aspect = 1.0;
+        var additional_data = {};
+        
+        {# fill values based on the dialog mode #}
+        {% if mode == 'CREATE' %}
+            url = '{{ request.route_url("create_image_format") }}';
+        {% elif mode == 'UPDATE' %}
+            url = '{{ request.route_url("update_image_format") }}';
+            name = '{{ imf.name }}';
+            width = {{ imf.width }};
+            height = {{ imf.height }};
+            pixel_aspect = {{ imf.pixel_aspect }};
+            additional_data = {
+                'imf_id': {{ imf.id }}
+            };
+        {% endif %}
+        
+        
+        // ********************************************************************
+        // Form
+        var image_format_form = new Form({
+            id: 'image_format_form'
+        }, 'image_format_form');
+        image_format_form.startup();
+        
+        var dialog = image_format_form.getParent();
+        
+        
+        // ********************************************************************
+        // Name
+        var name_textBox = new ValidationTextBox({
+            name: 'name',
+            label: 'Name',
+            placeHolder: 'Enter a name',
+            required: true,
+            value: name
+        }, 'image_format_name');
+        name_textBox.startup();
+
+
+        // ********************************************************************
+        // WIDTH
+        var width_numberTextBox = new NumberTextBox({
+            name: 'width',
+            label: 'Width',
+            placeHolder: '',
+            required: true,
+            value: width
+        }, 'image_format_width');
+        width_numberTextBox.startup();
+
+
+        // ********************************************************************
+        // HEIGHT
+        var height_numberTextBox = new NumberTextBox({
+            name: 'height',
+            label: 'Height',
+            placeHolder: '',
+            required: true,
+            value: height
+        }, 'image_format_height');
+        height_numberTextBox.startup();
+
+
+        // ********************************************************************
+        // PIXEL_ASPECT
+        var pixel_aspect_numberTextBox = new NumberTextBox({
+            name: 'pixel_aspect',
+            label: 'Pixel Aspect',
+            required: true,
+            value: pixel_aspect
+        }, 'image_format_pixel_aspect');
+        pixel_aspect_numberTextBox.startup();
+
+
+        // ********************************************************************
+        // OK Button
+        var ok_button = new Button({
+            label: 'OK',
+            type: 'button',
+            onClick: function () {
+                submitForm({
+                    dialog: dialog,
+                    form: image_format_form,
+                    additional_data: additional_data,
+                    url: url,
+                    method: 'POST'
+                });
+            }
+        }, 'image_format_ok_button');
+        ok_button.startup();
+        
+        
+        // ********************************************************************
+        // CANCEL BUTTON
+        var cancel_button = new Button({
+            label: 'Cancel',
+            type: 'button',
+            onClick: function () {
+                dialog.destroyRecursive();
+            }
+        }, 'image_format_cancel_button');
+        cancel_button.startup();
+        
+    });
 </script>
 

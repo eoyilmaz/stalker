@@ -341,6 +341,8 @@ Ganttalendar.prototype.drawTask = function (task) {
         taskBox = $.JST.createFromTemplate(task, "PROJECTBAR");
     }
     
+    
+    
     //save row element on task
     task.ganttElement = taskBox;
 

@@ -153,15 +153,14 @@ def convert_to_jquery_gantt_task_format(tasks):
     
     #logger.debug(data)
     
-    logger.debug('loading gantt data:\n%s' % 
-                json.dumps(data,
-                           sort_keys=False,
-                           indent=4,
-                           separators=(',', ': ')
-                )
-    )
+    # logger.debug('loading gantt data:\n%s' % 
+    #             json.dumps(data,
+    #                        sort_keys=False,
+    #                        indent=4,
+    #                        separators=(',', ': ')
+    #             )
+    # )
     return data
-    
 
 
 def update_with_jquery_gantt_task_data(json_data):

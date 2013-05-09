@@ -32,6 +32,40 @@
     {# Basic Info #}
     <div id='group_info' class='summary_info'>
         <h2 style='margin: 0; text-align: left;'>{{ group.name }}</h2>
+        <button id='update_group_button'>Update</button>
     </div>
 </div>
+
+<script type='text/javascript'>
+    require([
+            'dojo/ready',
+            'dijit/form/Button',
+            'stalker/dialogCaller',
+            'stalker/gotoLink'
+    ], function(ready, Button, dialogCaller, gotoLink){
+        ready(function(){
+            
+            // ****************************************************************
+            // Update Group Button
+            var group_summary_updater = function(){
+                // refresh the content pane
+                // get the content pane by id, alternatively we can use the parent of the button
+                var content_pane = update_group_button.getParent();
+                // refresh the pane
+                content_pane.refresh();
+            };
+
+            var update_group_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'update_group_dialog',
+                content_creator: update_group_dialog_creator,
+                attach_to: 'update_group_button',
+                related_field_updater: group_summary_updater,
+                data_id: {{ group.id }}
+            });
+            update_group_button.startup();
+        });
+        gotoLink();
+    });
+</script>
 

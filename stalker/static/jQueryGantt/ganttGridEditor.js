@@ -65,7 +65,7 @@ GridEditor.prototype.addTask = function(task, row) {
   } else {
     var tr = this.element.find("tr.taskEditRow").eq(row);
     if (tr.size() > 0) {
-      tr.before(taskRow);
+      tr.before(taskRow); taskAssigs
     } else {
       this.element.append(taskRow);
     }
@@ -99,8 +99,8 @@ GridEditor.prototype.refreshTaskRow = function(task) {
     for (var i = 0 ; i < task.getDepends().length ; i++){
         dep_string = '' + task.depends[i].name + ', ';
     }
-    row.find("[name=depends]").val(dep_string);
-    row.find(".taskResources").html(task.getResourcesString_with_links());
+//    row.find("[name=depends]").val(dep_string);
+//    row.find(".taskResources").html(task.getResourcesString());
 
     //profiler.stop();
 };

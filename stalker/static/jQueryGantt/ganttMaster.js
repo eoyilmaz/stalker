@@ -67,6 +67,10 @@ function GanttMaster() {
     this.__undoStack = [];
     this.__redoStack = [];
     
+    
+    this.task_link_template;
+    this.resource_link_template;
+    
     var self = this;
 }
 

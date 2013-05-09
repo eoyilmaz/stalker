@@ -114,6 +114,7 @@
                 var class_name;
                 var checkBox_id;
                 var checkBox;
+                var checkBox_dom;
                 {% for permission in group.permissions %}
                     {% if  permission.access == 'Allow' %}
                         access = '{{ permission.access }}';
@@ -121,8 +122,9 @@
                         class_name = '{{ permission.class_name }}';
                         
                         checkBox_id = action + '_' + class_name;
-                        checkBox = registry.byId(checkBox_id);
-                        checkBox.set('value', 'checked');
+                        checkBox_dom = dojo.byId(checkBox_id);
+                        checkBox_dom.setAttribute('checked', true);
+                        
                     {% endif %}
                 {% endfor %}
             {% endif %}

@@ -82,7 +82,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'create_image_format_dialog',
                 title: 'New Image Format',
-                href: '/create/image_format',
+                href: '/dialog/create/image_format',
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -93,7 +93,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'update_image_format_dialog',
                 title: 'Update Image Format',
-                href: '/update/image_format/' + image_format_id,
+                href: '/dialog/update/image_format/' + image_format_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -269,7 +269,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'create_asset_dialog',
                 title: 'New Asset',
-                href: '/create/asset/' + project_id,
+                href: '/dialog/create/asset/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -280,7 +280,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'update_asset_dialog',
                 title: 'Update Asset',
-                href: '/update/asset/' + asset_id,
+                href: '/dialog/update/asset/' + asset_id,
                 resize: true,
                 style: style,
                 executeScripts: true

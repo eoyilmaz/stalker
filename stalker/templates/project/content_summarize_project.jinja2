@@ -128,7 +128,7 @@
                     var project_summary_updater = function(){
                         // refresh the content pane
                         // get the content pane by id, alternatively we can use the parent of the button
-                        var content_pane = dijit.byId('project_summary');
+                        var content_pane = update_project_button.getParent();
                         // refresh the pane
                         content_pane.refresh();
                     };

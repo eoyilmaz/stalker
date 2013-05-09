@@ -60,8 +60,8 @@
     <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="timing" value="(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)"></td>
-    <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depend_ids#)" (#=obj.hasExternalDep?"readonly":""#)></td>
-    <td class="gdfCell taskAssigs">(#=obj.getResourcesString_with_links()#)</td>
+    <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
+    <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
   </tr>
 --></div>
     
@@ -92,17 +92,21 @@
     
     
     <div class="__template__" type="TASKBAR"><!--
+    
   <div class="taskBox" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
       <div class="taskProgress" style="width:(#=obj.schedule_seconds>0?obj.total_logged_seconds/obj.schedule_seconds*100:0#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
       <div class="taskExtraTiming" style="width:(#=(obj.schedule_timing - obj.bid_timing)/obj.schedule_timing*100#)%;;"></div>
-      <div class="taskScheduleModel" style="position: absolute; text-align: center; width: 100%;">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div>
+      <div class="taskScheduleModel"
+           style="position: absolute; text-align: center; width: 100%;">
+           (#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)
+      </div>
       <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
       
       <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
       <div class="taskLabel">(#=obj.link()#)</div>
       <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
-      <div class="taskResourceLabel">(#=obj.getResourcesString_with_links()#)</div>
+      <div class="taskResourceLabel">(#=obj.getResourcesLinks()#)</div>
     </div>
   </div>
   --></div>
@@ -132,7 +136,14 @@
     </div>
   </div>
   --></div>
-
+    
+    <div class="__template__" type='TASKLINK'><!--
+        <a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/(#=obj.type.toLowerCase()#)/(#=obj.id#)">(#=obj.name#) ((#=obj.type#))</a> 
+    --></div>
+    
+    <div class="__template__" type='RESOURCELINK'><!--
+    <a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/user/(#=obj.id#)">(#=obj.name#)</a>
+    --></div>
     
 </div>
 
@@ -144,7 +155,6 @@
             <div style="float: left;">
                 <button id='list_tasks_create_task_button'>Create Task</button>
                 <button id='list_tasks_gantt_reload_button'>Reload</button>
-                <button id='list_tasks_gantt_save_button'>Save</button>
             </div>
             <div style="width: 100px; float: left"></div>
         {% endif %}
@@ -154,7 +164,7 @@
         </div>
         {% if entity.entity_type != 'User' %}
             <div style='float: right;'>
-                <button id='list_tasks_auto_schedule_button'>Auto Schedule</button>
+                <button id="list_tasks_schedule_tasks_button">Schedule Tasks</button>
             </div>
         {% endif %}
 
@@ -285,14 +295,13 @@
                                     var node = this.getParent().currentTarget;
                                     // get task id
                                     var taskId = node.getAttribute('taskid');
-                                    alert('task id: ' + taskId);
+                                    
                                     var contentPane = registry.byId('tasks_content_pane');
                                     contentPane.set(
                                             'href',
                                             'view/task/' + taskId
                                     );
                                     contentPane.refresh();
-
                                 }
                             });
                         };
@@ -313,7 +322,7 @@
                                         var node = this.getParent().currentTarget;
                                         var taskId = node.getAttribute('taskId');
 
-                                        saveGanttOnServer().then(function(){
+{#                                        saveGanttOnServer().then(function(){#}
                                             // create and call update_task dialog
                                             var dialog = dialogCreator({
                                                 dialog_id: 'update_task_dialog',
@@ -321,9 +330,9 @@
                                                 content_creator: update_task_dialog_creator,
                                                 related_field_updater: loadGanttFromServer
                                             });
-
+                                            
                                             dialog.show();
-                                        });
+{#                                        });#}
                                     }
                                 });
                             };
@@ -339,7 +348,7 @@
                                         var node = this.getParent().currentTarget;
                                         var taskId = node.getAttribute('taskId');
 
-                                        saveGanttOnServer().then(function(){
+{#                                        saveGanttOnServer().then(function(){#}
                                             var dialog = dialogCreator({
                                                 dialog_id: 'create_task_dialog',
                                                 data_id: taskId,
@@ -348,7 +357,7 @@
                                             });
 
                                             dialog.show();
-                                        });
+{#                                        });#}
                                     }
                                 });
                             };
@@ -364,7 +373,7 @@
                                         var node = this.getParent().currentTarget;
                                         var taskId = node.getAttribute('taskId');
 
-                                        saveGanttOnServer().then(function(){
+{#                                        saveGanttOnServer().then(function(){#}
                                             var dialog = dialogCreator({
                                                 dialog_id: 'create_task_dialog',
                                                 data_id: taskId,
@@ -372,7 +381,7 @@
                                                 related_field_updater: loadGanttFromServer
                                             });
                                             dialog.show();
-                                        });
+{#                                        });#}
 
                                     }
                                 });
@@ -402,7 +411,7 @@
                                         return;
                                     }
 
-                                    saveGanttOnServer().then(function(){
+{#                                    saveGanttOnServer().then(function(){#}
                                         var dialog = dialogCreator({
                                             dialog_id: 'create_time_log_dialog',
                                             data_id: taskId,
@@ -410,7 +419,7 @@
                                             related_field_updater: loadGanttFromServer
                                         });
                                         dialog.show();
-                                    });
+{#                                    });#}
                                 }
                             })
                         };
@@ -448,41 +457,33 @@
             loadGanttFromServer();
 
 
-            function saveGanttOnServer() {
-                var prj = ge.saveGantt();
+{#            function saveGanttOnServer() {#}
+{#                var prj = ge.saveGantt();#}
+{##}
+{#                delete prj.resources;#}
+{#                delete prj.roles;#}
+{##}
+{#                // xhr.post returns a `promise` use it if needed#}
+{#                return xhr.post(#}
+{#                        '{{ request.route_url('update_gantt_tasks') }}',#}
+{#                        {#}
+{#                            method: 'POST',#}
+{#                            data: {CM:'save_tasks', prj: JSON.stringify(prj)}#}
+{#                        }#}
+{#                );#}
+{#            }#}
 
-                delete prj.resources;
-                delete prj.roles;
-
-                if (ge.deletedTaskIds.length>0) {
-                    if (!confirm("TASK_THAT_WILL_BE_REMOVED\n"+ge.deletedTaskIds.length)) {
-                        // cancel the action by returning null
-                        return;
-                    }
-                }
-
-                // xhr.post returns a `promise` use it if needed
-                return xhr.post(
-                        '{{ request.route_url('update_gantt_tasks') }}',
-                        {
-                            method: 'POST',
-                            data: {CM:'save_tasks', prj: JSON.stringify(prj)}
-                        }
-                );
-            }
-
-            function saveAndLoadGantt(){
-                var promise = saveGanttOnServer();
-                if (promise){
-                    promise.then(function(){
-                        loadGanttFromServer();
-                    });
-                }
-            }
-
-            function clearGantt() {
-                ge.reset();
-            }
+{#            function saveAndLoadGantt(){#}
+{#                var promise = saveGanttOnServer();#}
+{#                if (promise){#}
+{#                    promise.then(function(){#}
+{#                        loadGanttFromServer();#}
+{#                    });#}
+{#                }#}
+{#            }#}
+{#            function clearGantt() {#}
+{#                ge.reset();#}
+{#            }#}
 
             function loadI18n() {
                 GanttMaster.messages = {
@@ -567,17 +568,6 @@
                 }, 'list_tasks_gantt_reload_button');
                 reload_gantt_button.startup();
 
-                // SAVE
-                // TODO: This should be disabled upon permission not according to the existence of a template variable
-                var save_gantt_button = new Button({
-                    label: 'Save',
-                    onClick: function(){
-                        saveGanttOnServer().then(function(){
-                            alert('Tasks are saved!!!')
-                        });
-                    }
-                }, 'list_tasks_gantt_save_button');
-                save_gantt_button.startup();
             {% endif %}
 
             // ZOOM OUT
@@ -624,7 +614,7 @@
                                     busy_dialog.destroyRecursive();
                                 });
                     }
-                }, 'list_tasks_auto_schedule_button');
+                }, 'list_tasks_schedule_tasks_button');
                 auto_schedule_gantt_button.startup();
             {% endif %}
 

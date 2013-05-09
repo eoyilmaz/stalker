@@ -614,6 +614,7 @@ def create_group_dialog(request):
     entity_types = EntityType.query.all()
 
     return {
+        'mode': 'CREATE',
         'actions': defaults.actions,
         'permissions': permissions,
         'entity_types': entity_types,
@@ -639,6 +640,7 @@ def update_group_dialog(request):
     group = Group.query.filter_by(id=group_id).first()
 
     return {
+        'mode': 'UPDATE',
         'group': group,
         'actions': defaults.actions,
         'permissions': permissions,
@@ -653,6 +655,9 @@ def update_group_dialog(request):
 def create_group(request):
     """runs when creating a new Group
     """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+    
     # get parameters
     post_multi_dict = request.POST
     
@@ -666,7 +671,9 @@ def create_group(request):
     
     # create the new group
     new_group = Group(name=name)
+    new_group.created_by = logged_user
     new_group.permissions = permissions
+    
     DBSession.add(new_group)
     
     return HTTPOk()
@@ -677,6 +684,9 @@ def create_group(request):
 def update_group(request):
     """updates the group with data from request
     """
+    login = authenticated_userid(request)
+    logged_user = User.query.filter_by(login=login).first()
+    
     # get parameters
     post_multi_dict = request.POST
     
@@ -693,6 +703,7 @@ def update_group(request):
     
     if group:
         group.permissions = permissions
+        group.updated_by = logged_user
         DBSession.add(group)
     
     return HTTPOk()

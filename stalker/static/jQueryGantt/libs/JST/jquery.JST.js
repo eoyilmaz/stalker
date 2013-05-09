@@ -31,7 +31,6 @@ $.JST = {
                             .split("(#").join("');")
                             .split("#)").join("p.push('")
                             + "');}return p.join('');";
-
           try {
             $.JST._templates[type] = new Function("obj", strFunc);
           } catch (e) {

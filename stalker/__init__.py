@@ -96,7 +96,8 @@ def main(global_config, **settings):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     
-    config.add_route('busy_dialog', 'dialog/busy')
+    config.add_route('busy_dialog',
+                     'dialog/busy')
     
     # *************************************************************************
     # DATA VIEWS
@@ -106,7 +107,9 @@ def main(global_config, **settings):
     # Studio
     config.add_route('dialog_create_studio', 'dialog/create/studio')
     config.add_route('dialog_update_studio', 'dialog/update/studio')
+    
     config.add_route('create_studio', 'create/studio')
+    config.add_route('update_studio', 'update/studio')
     
     # *************************************************************************
     # Project
@@ -116,55 +119,66 @@ def main(global_config, **settings):
     config.add_route('create_project', 'create/project')
     config.add_route('update_project', 'update/project')
     
-    config.add_route('view_project', 'view/project/{project_id}')
-    config.add_route('overview_project', 'overview/project/{project_id}')
-    config.add_route('list_projects', 'list/projects/{entity_id}')
+    config.add_route('view_project',          'view/project/{project_id}')
+    config.add_route('overview_project',      'overview/project/{project_id}')
+    config.add_route('list_projects',         'list/projects/{entity_id}')
+    config.add_route('get_projects',          'get/projects')
     config.add_route('get_projects_byEntity', 'get/projects_byEntity/{entity_id}')
-    config.add_route('summarize_project', 'summarize/project/{project_id}')
-    config.add_route('get_projects', 'get/projects')
-    config.add_route('view_entity_nav_bar','view/entity_nav_bar/{entity_id}')
+    config.add_route('summarize_project',     'summarize/project/{project_id}')
+    
+    config.add_route('view_entity_nav_bar', 'view/entity_nav_bar/{entity_id}')
     
     # *************************************************************************
     # ImageFormat
+    config.add_route('dialog_create_image_format', 'dialog/create/image_format')
+    config.add_route('dialog_update_image_format', 'dialog/update/image_format/{imf_id}')
+    
     config.add_route('create_image_format', 'create/image_format')
-    config.add_route('update_image_format', 'update/image_format/{imf_id}')
+    config.add_route('update_image_format', 'update/image_format')
+    
+    config.add_route('list_image_formats', 'list/image_formats')
     config.add_route('get_image_formats', 'get/image_formats')
     
     # *************************************************************************
     # Repository
+    # TODO: separate dialog and action addresses
+    
     config.add_route('create_repository', 'create/repository')
     config.add_route('update_repository', 'update/repository/{repository_id}')
-    config.add_route('get_repositories', 'get/repositories')
+    
+    config.add_route('list_repositories', 'list/repositories')
+    config.add_route('get_repositories',  'get/repositories')
     
     # ************************************************************************* 
     # Structure
     config.add_route('create_structure', 'create/structure')
     config.add_route('update_structure', 'update/structure/{structure_id}')
-    config.add_route('get_structures', 'get/structures')
+    config.add_route('get_structures',   'get/structures')
     
     # ************************************************************************* 
     # User
     
     # dialogs
-    config.add_route('dialog_create_user', 'dialog/create/user/{entity_id}')
-    config.add_route('dialog_update_user', 'dialog/update/user/{user_id}')
-    config.add_route('dialog_append_users', 'dialog/append/users/{entity_id}')
+    config.add_route('dialog_create_user',      'dialog/create/user/{entity_id}')
+    config.add_route('dialog_update_user',      'dialog/update/user/{user_id}')
+    config.add_route('dialog_append_users',     'dialog/append/users/{entity_id}')
     
-    config.add_route('create_user', 'create/user')
-    config.add_route('update_user', 'update/user/{user_id}')
-    config.add_route('view_user', 'view/user/{user_id}')
-    config.add_route('list_users', 'list/users/{entity_id}')
-    config.add_route('get_users', 'get/users')
-    config.add_route('get_users_byEntity', 'get/users_byEntity/{entity_id}')
+    config.add_route('create_user',             'create/user')
+    config.add_route('update_user',             'update/user/{user_id}') # TODO: remove user_id
+    config.add_route('view_user',               'view/user/{user_id}')
+
+    config.add_route('list_users',              'list/users/{entity_id}')
+    config.add_route('get_users',               'get/users')
+    config.add_route('get_users_byEntity',      'get/users_byEntity/{entity_id}')
     config.add_route('get_users_not_in_entity', 'get/users_not_in_entity/{entity_id}')
     
-    config.add_route('append_user', 'append/user')
+    config.add_route('append_user',  'append/user')
     config.add_route('append_users', 'append/users')
     
-    config.add_route('summarize_user', 'summarize/user/{user_id}')
-    config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
+    config.add_route('summarize_user',     'summarize/user/{user_id}')
+    config.add_route('view_user_tasks',    'view/user/tasks/{user_id}')
     config.add_route('view_user_versions', 'view/user/versions/{user_id}')
-    config.add_route('view_user_tickets', 'view/user/tickets/{user_id}')
+    config.add_route('view_user_tickets',  'view/user/tickets/{user_id}')
     
     config.add_route('check_login_availability', 'check/login_availability/{login}')
     config.add_route('check_email_availability', 'check/email_availability/{email}')
@@ -172,79 +186,95 @@ def main(global_config, **settings):
     # *************************************************************************
     # FilenameTemplate
     config.add_route('create_filename_template', 'create/filename_template')
-    config.add_route('update_filename_template',
-                     'update/filename_template/{filename_template_id}')
-    config.add_route('get_filename_templates', 'get/filename_templates')
+    config.add_route('update_filename_template', 'update/filename_template/{filename_template_id}')
+    config.add_route('get_filename_templates',   'get/filename_templates')
     
     # ************************************************************************* 
     # StatusList
-    config.add_route('create_status_list', 'create/status_list')
-    config.add_route('create_status_list_for',
-                     'create/status_list/{target_entity_type}')
-    config.add_route('update_status_list', 'update/status_list/{target_entity_type}')
-    config.add_route('get_status_lists', 'get/status_lists')
-    config.add_route('get_status_lists_for',
-                     'get/status_lists_for/{target_entity_type}')
+    # TODO: separate dialog and action
+    config.add_route('create_status_list',     'create/status_list')
+    config.add_route('create_status_list_for', 'create/status_list/{target_entity_type}')
+    config.add_route('update_status_list',     'update/status_list/{target_entity_type}')
+    config.add_route('get_status_lists',       'get/status_lists')
+    config.add_route('get_status_lists_for',   'get/status_lists_for/{target_entity_type}')
     
     # *************************************************************************
     # Status
-    config.add_route('create_status', 'create/status')
-    config.add_route('update_status', 'update/status')
-    config.add_route('get_statuses', 'get/statuses')
+    # TODO: separate dialog and action
+    config.add_route('create_status',    'create/status')
+    config.add_route('update_status',    'update/status')
+    config.add_route('get_statuses',     'get/statuses')
     config.add_route('get_statuses_for', 'get/statuses_for/{target_entity_type}')
-    config.add_route('get_statuses_of', 'get/statuses_of/{status_list_id}')
+    config.add_route('get_statuses_of',  'get/statuses_of/{status_list_id}')
     
     # *************************************************************************
     # Assets
-    config.add_route('create_asset', 'create/asset/{project_id}')
-    config.add_route('view_asset', 'view/asset/{asset_id}')
+    config.add_route('dialog_create_asset', 'dialog/create/asset/{project_id}')
+    config.add_route('dialog_update_asset', 'dialog/update/asset/{asset_id}')
+    
+    config.add_route('create_asset',    'create/asset')
+    config.add_route('update_asset',    'update/asset')
+    
+    config.add_route('view_asset',      'view/asset/{asset_id}')
     config.add_route('summarize_asset', 'summarize/asset/{asset_id}')
-    config.add_route('update_asset', 'update/asset/{asset_id}')
-    config.add_route('list_assets', 'list/assets/{project_id}')
-    config.add_route('get_assets', 'get/assets/{project_id}')
+    config.add_route('list_assets',     'list/assets/{project_id}')
+    config.add_route('get_assets',      'get/assets/{project_id}')
     
     # *************************************************************************
     # Shots
-    config.add_route('create_shot', 'create/shot/{project_id}')
-    config.add_route('view_shot', 'view/shot/{shot_id}')
+    # TODO: separate dialog and action
+    config.add_route('create_shot',    'create/shot/{project_id}')
+    config.add_route('view_shot',      'view/shot/{shot_id}')
     config.add_route('summarize_shot', 'summarize/shot/{shot_id}')
-    config.add_route('update_shot', 'update/shot/{shot_id}')
-    config.add_route('list_shots', 'list/shots/{project_id}')
-    config.add_route('get_shots', 'get/shots/{project_id}')
+    config.add_route('update_shot',    'update/shot/{shot_id}')
+    
+    config.add_route('list_shots',     'list/shots/{project_id}')
+    config.add_route('get_shots',      'get/shots/{project_id}')
     
     # *************************************************************************
     # Sequence
-    config.add_route('create_sequence', 'create/sequence/{project_id}')
-    config.add_route('view_sequence', 'view/sequence/{sequence_id}')
+    # TODO: separate dialog and action
+    config.add_route('create_sequence',    'create/sequence/{project_id}')
+    config.add_route('update_sequence',    'update/sequence/{sequence_id}')
+    config.add_route('view_sequence',      'view/sequence/{sequence_id}')
     config.add_route('summarize_sequence', 'summarize/sequence/{sequence_id}')
-    config.add_route('update_sequence', 'update/sequence/{sequence_id}')
-    config.add_route('list_sequences', 'list/sequences/{project_id}')
-    config.add_route('get_sequences',
-                     'get/sequences/{project_id}')
+
+    config.add_route('list_sequences',     'list/sequences/{project_id}')
+    config.add_route('get_sequences',      'get/sequences/{project_id}')
     
     # *************************************************************************
     # Task
     
     # Dialogs
-    config.add_route('dialog_create_task', 'dialog/create/task/{entity_id}')
-    config.add_route('dialog_create_child_task', 'dialog/create/child_task/{task_id}')
-    config.add_route('dialog_create_dependent_task', 'dialog/create/dependent_task/{task_id}')
-    config.add_route('dialog_update_task', 'dialog/update/task/{task_id}')
+    config.add_route('dialog_create_task',
+                     'dialog/create/task/{entity_id}')
+    config.add_route('dialog_create_child_task',
+                     'dialog/create/child_task/{task_id}')
+    config.add_route('dialog_create_dependent_task',
+                     'dialog/create/dependent_task/{task_id}')
+    config.add_route('dialog_update_task',
+                     'dialog/update/task/{task_id}')
     
-    config.add_route('create_task', 'create/task')
+    config.add_route('create_task',
+                     'create/task')
+    config.add_route('update_task',
+                     'update/task/{task_id}') # TODO: remove task_id
     
-    config.add_route('view_task', 'view/task/{task_id}')
-    config.add_route('summarize_task', 'summarize/task/{task_id}')
-    config.add_route('update_task', 'update/task/{task_id}')
-    config.add_route('list_tasks', 'list/tasks/{entity_id}')
+    config.add_route('view_task',
+                     'view/task/{task_id}')
+    config.add_route('summarize_task',
+                     'summarize/task/{task_id}')
+
+    config.add_route('list_tasks',
+                     'list/tasks/{entity_id}')
     
     config.add_route('get_entity_tasks',  'get/entity/tasks/{entity_id}')
     config.add_route('get_user_tasks',    'get/user/tasks/{user_id}')
     config.add_route('get_project_tasks', 'get/project/tasks/{project_id}')
     config.add_route('get_root_tasks',    'get/root/tasks/{project_id}') # TODO: fix this
 
-    config.add_route('get_gantt_tasks', 'get/gantt/tasks/{entity_id}')
-    config.add_route('update_gantt_tasks', 'update/gantt/tasks')
+    config.add_route('get_gantt_tasks',     'get/gantt/tasks/{entity_id}')
+    config.add_route('update_gantt_tasks',  'update/gantt/tasks') # TODO: is this still required
     config.add_route('auto_schedule_tasks', 'auto_schedule_tasks')
     
     # *************************************************************************
@@ -253,9 +283,10 @@ def main(global_config, **settings):
     config.add_route('dialog_update_time_log', 'dialog/update/time_log/{time_log_id}')
     
     config.add_route('create_time_log', 'create/time_log/{task_id}')
+    config.add_route('update_time_log', 'update/time_log/{task_id}')
     
     config.add_route('get_time_logs', 'get/time_logs/{task_id}') # returns json
-    config.add_route('list_time_logs', 'list/time_logs/{task_id}')      # returns response
+    config.add_route('list_time_logs', 'list/time_logs/{task_id}') # returns response
     
     # *************************************************************************
     # Department
@@ -273,10 +304,11 @@ def main(global_config, **settings):
     # Group
     
     config.add_route('dialog_create_group', 'dialog/create/group')
-    config.add_route('dialog_update_group', 'dialog/update/group')
+    config.add_route('dialog_update_group', 'dialog/update/group/{group_id}')
     
     config.add_route('create_group', 'create/group')
-    config.add_route('update_group', 'update/group/{group_id}')
+    config.add_route('update_group', 'update/group')
+    
     config.add_route('list_groups', 'list/groups/{user_id}')
     config.add_route('view_group', 'view/group/{group_id}')
     config.add_route('summarize_group', 'summarize/group/{group_id}')

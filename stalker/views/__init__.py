@@ -31,6 +31,17 @@ logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
+class PermissionChecker(object):
+    """Helper class for permission check
+    """
+    def __init__(self, request):
+        self.has_permission = has_permission
+        self.request = request
+    
+    def __call__(self, perm):
+        return self.has_permission(perm, self.request.context, self.request)
+
+
 def log_param(request, param):
     if param in request.params:
         logger.debug('%s: %s' % (param, request.params[param]))

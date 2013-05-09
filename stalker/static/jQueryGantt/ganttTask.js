@@ -143,20 +143,31 @@ Task.prototype.getResourcesString = function () {
   return ret;
 };
 
-Task.prototype.getResourcesString_with_links = function () {
-  var ret = "";
-  for (var i=0 ; i<this.resources.length ; i++) {
-    var resource = this.resources[i];
-    var res = this.master.getResource(resource.id);
-    if (res) {
-      ret = ret + (ret == "" ? "" : ", ") + "<a class='DataLink' href='#' stalker_target='central_content' stalker_href='view/user/" + resource.id + "'>" + res.name + "</a>";
+Task.prototype.getResourcesLinks = function () {
+    var ret = "";
+    for (var i = 0; i < this.resources.length; i++) {
+        var resource = this.resources[i];
+        var res = this.master.getResource(resource.id);
+        if (res) {
+            var template = $.JST.createFromTemplate(res, 'RESOURCELINK');
+            ret = ret + (ret == "" ? "" : ", ") + template[0].outerHTML;
+        }
     }
-  }
-  return ret;
+    return ret;
+};
+
+Task.prototype.getDependsLinks = function() {
+    var depends = this.getDepends();
+    var ret = "";
+    for (var i = 0; i < depends.length ; i++){
+        ret = ret + (ret == "" ? "" : ", ") + depends[i].link();
+    }
+    return ret;
 };
 
 Task.prototype.link = function(){
-    return "<a class='DataLink' href='#' stalker_target='central_content' stalker_href='view/"+ this.type.toLowerCase() +"/" + this.id + "'>" + this.name + " (" + this.type  + ")" + "</a>";
+    var rendered = $.JST.createFromTemplate(this, "TASKLINK");
+    return rendered[0].outerHTML;
 };
 
 

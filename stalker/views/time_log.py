@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 from pyramid.httpexceptions import HTTPOk
-from pyramid.security import authenticated_userid
+from pyramid.security import authenticated_userid, has_permission
 from pyramid.view import view_config
 from stalker import Task, User, Studio, TimeLog
 
@@ -35,7 +35,6 @@ logger.setLevel(log.logging_level)
 @view_config(
     route_name='dialog_create_time_log',
     renderer='templates/time_log/dialog_create_time_log.jinja2',
-    permission='Create_TimeLog'
 )
 def create_time_log_dialog(request):
     """creates a create_time_log_dialog by using the given task
@@ -61,8 +60,7 @@ def create_time_log_dialog(request):
 
 
 @view_config(
-    route_name='create_time_log',
-    permission='Create_TimeLog'
+    route_name='create_time_log'
 )
 def create_time_log(request):
     """runs when creating a time_log
@@ -96,3 +94,24 @@ def create_time_log(request):
         DBSession.add(time_log)
     
     return HTTPOk()
+
+
+@view_config(
+    route_name='list_time_logs',
+    renderer='templates/time_log/content_list_time_logs.jinja2'
+)
+def list_time_logs(request):
+    """lists the time logs of the given task
+    """
+    task_id = request.matchdict['task_id']
+    task = Task.query.filter_by(id=task_id).first()
+    
+    time_logs = []
+    if task:
+        time_logs = task.time_logs
+    
+    return {
+        'task': task,
+        'time_logs': time_logs,
+        'has_permission': has_permission
+    }
