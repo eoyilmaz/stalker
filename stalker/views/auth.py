@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+import datetime
 
 from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
 from pyramid.security import (authenticated_userid, forget, remember,
@@ -217,6 +218,7 @@ def update_user(request):
         user.login = login
         user.email = email
         user.updated_by = logged_user
+        user.date_updated = datetime.datetime.now()
         user.departments = departments
         user.groups = groups
         user.tags = tags
@@ -704,6 +706,7 @@ def update_group(request):
     if group:
         group.permissions = permissions
         group.updated_by = logged_user
+        group.date_updated = datetime.datetime.now()
         DBSession.add(group)
     
     return HTTPOk()

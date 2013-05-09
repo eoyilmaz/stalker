@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+import datetime
 
 from pyramid.httpexceptions import HTTPServerError
 from pyramid.security import authenticated_userid
@@ -103,6 +104,7 @@ def create_update_status(request):
                 status.name = request.params['name']
                 status.code = request.params['code']
                 status.updated_by = user
+                status.date_updated = datetime.datetime.now()
                 DBSession.add(status)
             
             logger.debug('finished updateing Status')
@@ -218,6 +220,7 @@ def update_status_list(request):
             status_list.name = request.params['name']
             status_list.statuses = statuses
             status_list.updated_by = user
+            status_list.date_updated = datetime.datetime.now()
             
             DBSession.add(status_list)
     

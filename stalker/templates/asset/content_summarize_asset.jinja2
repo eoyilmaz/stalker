@@ -87,59 +87,57 @@
         'dijit/form/Button',
         'stalker/dialogCaller',
         'stalker/gotoLink',
-        'dojo/ready'
+        'dojo/domReady!'
     ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogCaller,
-                 gotoLink, ready) {
-        ready(function () {
+                 gotoLink) {
 
 
-            // Create the chart within it's "holding" node
-            var pieChart = new Chart('asset_summary_chart1');
+        // Create the chart within it's "holding" node
+        var pieChart = new Chart('asset_summary_chart1');
 
-            // Add the only/default plot
-            pieChart.setTheme(theme);
+        // Add the only/default plot
+        pieChart.setTheme(theme);
 
-            // Add the only/default plot
-            pieChart.addPlot("default", {
-                type: PiePlot, // our plot2d/Pie module reference as type value
-                radius: 40,
-                fontColor: "black",
-                labelOffset: 0
-            });
-
-            var chartData = [1000, 12000];
-
-            // Add the series of data
-            pieChart.addSeries('January', chartData);
-
-            // Create the slice mover
-            var mag = new MoveSlice(pieChart, 'default');
-
-            // Render the chart!
-            pieChart.render();
-
-            // UPDATE ASSET BUTTON
-            var asset_summary_updater = function () {
-                // refresh the content pane
-                // get the content pane by id, alternatively we can use the parent of the button
-                var content_pane = update_asset_button.getParent();
-                // refresh the pane
-                content_pane.refresh();
-            };
-
-            var update_asset_button = dialogCaller({
-                label: 'Update',
-                dialog_id: 'update_asset_dialog',
-                content_creator: update_asset_dialog_creator,
-                attach_to: 'update_asset_button',
-                related_field_updater: asset_summary_updater,
-                data_id: {{ asset.id }}
-            });
-            update_asset_button.startup();
-
+        // Add the only/default plot
+        pieChart.addPlot("default", {
+            type: PiePlot, // our plot2d/Pie module reference as type value
+            radius: 40,
+            fontColor: "black",
+            labelOffset: 0
         });
 
-        gotoLink();
+        var chartData = [1000, 12000];
+
+        // Add the series of data
+        pieChart.addSeries('January', chartData);
+
+        // Create the slice mover
+        var mag = new MoveSlice(pieChart, 'default');
+
+        // Render the chart!
+        pieChart.render();
+
+        // UPDATE ASSET BUTTON
+        var asset_summary_updater = function () {
+            // refresh the content pane
+            // get the content pane by id, alternatively we can use the parent of the button
+            var content_pane = update_asset_button.getParent();
+            // refresh the pane
+            content_pane.refresh();
+        };
+
+        var update_asset_button = dialogCaller({
+            label: 'Update',
+            dialog_id: 'update_asset_dialog',
+            content_creator: update_asset_dialog_creator,
+            attach_to: 'update_asset_button',
+            related_field_updater: asset_summary_updater,
+            data_id: {{ asset.id }}
+        });
+        update_asset_button.startup();
 
     });
+
+    gotoLink();
+
 </script>

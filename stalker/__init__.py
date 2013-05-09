@@ -141,16 +141,21 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Repository
-    # TODO: separate dialog and action addresses
+    config.add_route('dialog_create_repository', 'dialog/create/repository')
+    config.add_route('dialog_update_repository', 'dialog/update/repository/{repo_id}')
     
     config.add_route('create_repository', 'create/repository')
-    config.add_route('update_repository', 'update/repository/{repository_id}')
+    config.add_route('update_repository', 'update/repository')
     
     config.add_route('list_repositories', 'list/repositories')
     config.add_route('get_repositories',  'get/repositories')
     
     # ************************************************************************* 
     # Structure
+    # TODO: split dialog and action
+    config.add_route('create_structure', 'create/structure')
+    config.add_route('update_structure', 'update/structure/{structure_id}')
+    
     config.add_route('create_structure', 'create/structure')
     config.add_route('update_structure', 'update/structure/{structure_id}')
     config.add_route('get_structures',   'get/structures')
@@ -159,13 +164,13 @@ def main(global_config, **settings):
     # User
     
     # dialogs
-    config.add_route('dialog_create_user',      'dialog/create/user/{entity_id}')
-    config.add_route('dialog_update_user',      'dialog/update/user/{user_id}')
-    config.add_route('dialog_append_users',     'dialog/append/users/{entity_id}')
+    config.add_route('dialog_create_user',  'dialog/create/user/{entity_id}')
+    config.add_route('dialog_update_user',  'dialog/update/user/{user_id}')
+    config.add_route('dialog_append_users', 'dialog/append/users/{entity_id}')
     
-    config.add_route('create_user',             'create/user')
-    config.add_route('update_user',             'update/user/{user_id}') # TODO: remove user_id
-    config.add_route('view_user',               'view/user/{user_id}')
+    config.add_route('create_user', 'create/user')
+    config.add_route('update_user', 'update/user/{user_id}') # TODO: remove user_id
+    config.add_route('view_user',   'view/user/{user_id}')
 
     config.add_route('list_users',              'list/users/{entity_id}')
     config.add_route('get_users',               'get/users')

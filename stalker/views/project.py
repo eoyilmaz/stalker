@@ -181,6 +181,7 @@ def update_project(request):
         project.image_format = imf
         project.repository = repo
         project.updated_by = logged_user
+        project.date_updated = datetime.datetime.now()
         project.fps = fps
         project.structure = structure
         project.lead = lead

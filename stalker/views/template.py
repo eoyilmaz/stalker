@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
-
+import datetime
 
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
@@ -60,6 +60,7 @@ def update_filename_template(request):
             ft.filename = request.params['filename']
             ft.output_path = request.params['output_path']
             ft.updated_by = user
+            ft.date_updated = datetime.datetime.now()
             
             DBSession.add(ft)
             try:

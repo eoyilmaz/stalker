@@ -190,7 +190,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'create_repository_dialog',
                 title: 'New Repository',
-                href: '/create/repository',
+                href: '/dialog/create/repository',
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -201,7 +201,7 @@ require(['dijit/registry', 'dojo/_base/lang','dojo/request/xhr',
             return new DialogSimple({
                 id: 'update_repository_dialog',
                 title: 'Update Repository',
-                href: '/update/repository/' + repo_id,
+                href: '/dialog/update/repository/' + repo_id,
                 resize: true,
                 style: style,
                 executeScripts: true

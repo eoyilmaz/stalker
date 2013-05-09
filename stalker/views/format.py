@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+import datetime
 from pyramid.httpexceptions import HTTPOk
 
 from pyramid.security import authenticated_userid, has_permission
@@ -116,6 +117,7 @@ def update_image_format(request):
         imf.height = int(request.params['height'])
         imf.pixel_aspect = float(request.params['pixel_aspect'])
         imf.updated_by = logged_in_user
+        imf.date_updated = datetime.datetime.now()
         DBSession.add(imf)
     
     return HTTPOk()

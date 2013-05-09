@@ -95,7 +95,6 @@
 
 <script type='text/javascript'>
     require([
-        'dojo/ready',
         'dojo/store/Memory',
         'dojo/store/JsonRest',
         'dijit/form/Form',
@@ -107,8 +106,9 @@
         'stalker/submitForm',
         'stalker/fieldUpdater',
         'stalker/dialogCreator',
-        'stalker/dialogCaller'
-    ], function (ready, Memory, JsonRest, Form, ValidationTextBox, TextBox,
+        'stalker/dialogCaller',
+        'dojo/domReady!'
+    ], function (Memory, JsonRest, Form, ValidationTextBox, TextBox,
                  FilteringSelect, ComboBox, Button, submitForm, fieldUpdater,
                  dialogCreator, dialogCaller) {
 
@@ -136,7 +136,7 @@
         {% endif %}
 
         ready(function () {
-        
+
             // ****************************************************************
             // Form
             var asset_form = new Form({
@@ -274,7 +274,7 @@
                 required: true
             }, 'asset_status');
             status_filtering_select.startup();
-            
+
             // TODO: Check permission for StatusList creation
             // TODO: Please make it more obvious what we are doing here, or just have two buttons, one hidden, and un-hide it and hide the other when we have got some StatusList
             var update_button_callback_function = function (data) {

@@ -24,9 +24,10 @@ import datetime
 from pyramid.httpexceptions import HTTPServerError
 from pyramid.view import view_config
 from pyramid.response import  Response
-from pyramid.security import has_permission
+from pyramid.security import has_permission, authenticated_userid
 
-from stalker import log
+from stalker import log, User
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
@@ -123,3 +124,7 @@ def busy_dialog(request):
     """generates a busy dialog
     """
     return {}
+
+
+def get_logged_in_user(request):
+    return User.query.filter_by(login=authenticated_userid(request)).first()
