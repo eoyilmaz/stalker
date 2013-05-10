@@ -20,9 +20,9 @@
 import datetime
 from pyramid.httpexceptions import HTTPOk
 
-from pyramid.security import authenticated_userid, has_permission
+from pyramid.security import authenticated_userid
 from pyramid.view import view_config
-import transaction
+
 
 from stalker.db import DBSession
 from stalker import User, ImageFormat
@@ -90,7 +90,7 @@ def create_image_format(request):
         )
         DBSession.add(new_image_format)
     
-    return HTTPOk
+    return HTTPOk()
 
 
 @view_config(

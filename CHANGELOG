@@ -18,6 +18,7 @@ Stalker Changes
   * Fix: Separated the dialog and action routes for Structure.
   * Fix: Fixed unnecessary module imports in stalker.js.
   * Fix: Schedule button is now working properly.
+  * Fix: Image Format creation.
 
 0.2.0.b2
 --------
