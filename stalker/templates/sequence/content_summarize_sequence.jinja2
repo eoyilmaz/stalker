@@ -56,55 +56,56 @@
 </div>
 
 <script type="text/javascript">
-    require(['dojox/charting/Chart',
+    require([
+        'dojox/charting/Chart',
         'dojox/charting/themes/Tufte',
         'dojox/charting/plot2d/Pie',
         'dojox/charting/action2d/MoveSlice',
         'dijit/form/Button',
+        'stalker/dialogs',
         'stalker/gotoLink',
         'stalker/dialogCaller',
-        'dojo/ready'],
-            function (Chart, theme, PiePlot, MoveSlice, Button, gotoLink,
-                      dialogCaller, ready) {
-                ready(function () {
-                    // Create the chart within it's "holding" node
-                    var pieChart = new Chart('sequence_summary_chart1');
+        'dojo/domReady!'
+    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs, gotoLink,
+                 dialogCaller) {
 
-                    // Add the only/default plot
-                    pieChart.setTheme(theme);
+        // Create the chart within it's "holding" node
+        var pieChart = new Chart('sequence_summary_chart1');
 
-                    // Add the only/default plot
-                    pieChart.addPlot("default", {
-                        type: PiePlot, // our plot2d/Pie module reference as type value
-                        radius: 40,
-                        fontColor: "black",
-                        labelOffset: 0
-                    });
+        // Add the only/default plot
+        pieChart.setTheme(theme);
 
-                    var chartData = [1000, 12000];
+        // Add the only/default plot
+        pieChart.addPlot("default", {
+            type: PiePlot, // our plot2d/Pie module reference as type value
+            radius: 40,
+            fontColor: "black",
+            labelOffset: 0
+        });
 
-                    // Add the series of data
-                    pieChart.addSeries('January', chartData);
+        var chartData = [1000, 12000];
 
-                    // Create the slice mover
-                    var mag = new MoveSlice(pieChart, 'default');
+        // Add the series of data
+        pieChart.addSeries('January', chartData);
 
-                    // Render the chart!
-                    pieChart.render();
+        // Create the slice mover
+        var mag = new MoveSlice(pieChart, 'default');
 
-                    // UPDATE STRUCTURE BUTTON
-                    var update_sequence_button = dialogCaller({
-                        label: 'Update',
-                        dialog_id: 'update_sequence_dialog',
-                        content_creator: update_sequence_dialog_creator,
-                        attach_to: 'update_sequence_button',
-                        data_id: {{ sequence.id }}
-                    });
-                    update_sequence_button.startup();
+        // Render the chart!
+        pieChart.render();
 
-                });
+        // UPDATE STRUCTURE BUTTON
+        var update_sequence_button = dialogCaller({
+            label: 'Update',
+            dialog_id: 'update_sequence_dialog',
+            content_creator: dialogs.update_sequence_dialog,
+            attach_to: 'update_sequence_button',
+            data_id: {{ sequence.id }}
+        });
+        update_sequence_button.startup();
 
-                gotoLink();
 
-            });
+        gotoLink();
+
+    });
 </script>

@@ -80,10 +80,8 @@
 
 <script type='text/javascript'>
     require([
-        'dojo/ready',
         'dojo/store/Memory',
 
-        'dijit/registry',
         'dijit/form/Form',
         'dijit/form/ValidationTextBox',
         'dijit/form/TextBox',
@@ -92,91 +90,91 @@
         'dijit/ColorPalette',
 
         'stalker/submitForm'
-    ], function (ready, Memory, registry, Form, ValidationTextBox, TextBox,
-                 SimpleTextarea, Button, ColorPalette, submitForm) {
-        
-        ready(function () {
-            // **********************************************************************
-            // Form
-            var create_status_form = new Form({
-                id: 'create_status_form'
-            }, 'create_status_form');
-            create_status_form.startup();
+    ], function (Memory, Form, ValidationTextBox, TextBox, SimpleTextarea,
+                 Button, ColorPalette, submitForm) {
 
 
-            // **********************************************************************
-            // Name
-            var name_textBox = new ValidationTextBox({
-                name: 'name',
-                label: 'Name',
-                placeHolder: 'Enter a name',
-                required: true
-            }, 'status_name');
-            name_textBox.startup();
+        // **********************************************************************
+        // Form
+        var create_status_form = new Form({}, 'create_status_form');
+        create_status_form.startup();
+
+        var dialog = create_status_form.getParent();
 
 
-            // **********************************************************************
-            // Code
-            var code_textBox = new ValidationTextBox({
-                name: 'code',
-                label: 'Code',
-                placeHolder: 'Enter a code',
-                required: true
-            }, 'status_code');
-            code_textBox.startup();
+        // **********************************************************************
+        // Name
+        var name_textBox = new ValidationTextBox({
+            name: 'name',
+            label: 'Name',
+            placeHolder: 'Enter a name',
+            required: true
+        }, 'status_name');
+        name_textBox.startup();
 
 
-            // **********************************************************************
-            // FG Color
-            var fg_color_colorPalette = new ColorPalette({
-                name: 'fg_color',
-                label: 'FG Color',
-                required: true,
-                value: '#000000'
-            }, 'status_fg_color');
-            fg_color_colorPalette.startup();
+        // **********************************************************************
+        // Code
+        var code_textBox = new ValidationTextBox({
+            name: 'code',
+            label: 'Code',
+            placeHolder: 'Enter a code',
+            required: true
+        }, 'status_code');
+        code_textBox.startup();
 
 
-            // **********************************************************************
-            // BG Color
-            var bg_color_colorPalette = new ColorPalette({
-                name: 'bg_color',
-                label: 'BG Color',
-                required: true,
-                value: '#ffffff'
-            }, 'status_bg_color');
-            bg_color_colorPalette.startup();
+        // **********************************************************************
+        // FG Color
+        var fg_color_colorPalette = new ColorPalette({
+            name: 'fg_color',
+            label: 'FG Color',
+            required: true,
+            value: '#000000'
+        }, 'status_fg_color');
+        fg_color_colorPalette.startup();
 
 
-            // **********************************************************************
-            // Submit Button
-            var submit_button = new Button({
-                label: 'OK',
-                type: 'button',
-                onClick: function () {
-                    submitForm({
-                        dialog: registry.byId('create_status_dialog'),
-                        form: create_status_form,
-                        additional_data: {submitted: 'create'},
-                        url: '{{ request.route_url('create_status')}}',
-                        method: 'POST'
-                    });
-                }
-            }, 'status_submit_button');
-            submit_button.startup();
+        // **********************************************************************
+        // BG Color
+        var bg_color_colorPalette = new ColorPalette({
+            name: 'bg_color',
+            label: 'BG Color',
+            required: true,
+            value: '#ffffff'
+        }, 'status_bg_color');
+        bg_color_colorPalette.startup();
 
 
-            // **********************************************************************
-            // Cancel Button
-            var cancel_button = new Button({
-                label: 'Cancel',
-                type: 'button',
-                onClick: function () {
-                    registry.byId('create_status_dialog').destroyRecursive();
-                }
-            }, 'status_cancel_button');
-            cancel_button.startup();
+        // **********************************************************************
+        // Submit Button
+        var submit_button = new Button({
+            label: 'OK',
+            type: 'button',
+            onClick: function () {
+                submitForm({
+                    dialog: dialog,
+                    form: create_status_form,
+                    additional_data: {submitted: 'create'},
+                    url: '{{ request.route_url('create_status')}}',
+                    method: 'POST'
+                });
+            }
+        }, 'status_submit_button');
+        submit_button.startup();
 
-        });
+
+        // **********************************************************************
+        // Cancel Button
+        var cancel_button = new Button({
+            label: 'Cancel',
+            type: 'button',
+            onClick: function () {
+                dialog.destroyRecursive();
+            }
+        }, 'status_cancel_button');
+        cancel_button.startup();
+
+
     });
 </script>

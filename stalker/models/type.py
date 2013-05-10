@@ -115,7 +115,6 @@ class EntityType(Base):
             schedulable=False):
         self.name = name
         self.statusable = statusable
-        self.taskable = taskable
         self.schedulable = schedulable
     
     # TODO: add tests for the name attribute

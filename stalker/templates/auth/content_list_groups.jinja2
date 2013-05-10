@@ -34,12 +34,15 @@
         "dgrid/editor",
         'dojo/store/Memory',
         'dojo/store/JsonRest',
+        'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
         'dojo/on',
         'dojo/query',
         'dojo/domReady!'],
-            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, JsonRest, fieldUpdater, dialogCaller,on, query) {
+            function (registry, ObjectStore, List, Grid, Selection, Keyboard,
+                      editor, Memory, JsonRest, dialogs, fieldUpdater,
+                      dialogCaller, on, query) {
 
                 var groups_DataGrid = new Grid({
                     id: 'groups_data_grid',
@@ -60,7 +63,7 @@
                             {
                                 label: "Thumbnail",
                                 field: 'thumbnail',
-                                sortable:false,
+                                sortable: false,
                                 get: function (object) {
                                     return object; // return entire item for formatter to use
                                 },
@@ -91,10 +94,10 @@
 
                 }
 
-                 var append_group_button = dialogCaller({
+                var append_group_button = dialogCaller({
                     label: 'Append Group',
                     dialog_id: 'append_group_dialog',
-                    content_creator: append_group_dialog_creator,
+                    content_creator: dialogs.append_group_dialog,
                     attach_to: 'view_groups_append_group_button',
                     related_field_updater: groups_DataGrid_updater,
                     data_id: '{{ user.id }}'

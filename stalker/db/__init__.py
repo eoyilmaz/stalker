@@ -113,7 +113,7 @@ def __init_db__():
     __create_ticket_statuses()
     
     # create FilenameTemplate Types
-    __create_filename_template_types()
+    # __create_filename_template_types()
     
     ## create TimeLog Types
     #__create_time_log_types()
@@ -298,54 +298,54 @@ def __create_time_log_types():
         DBSession.flush()
         logger.debug('TimeLog Types are created successfully')
 
-def __create_filename_template_types():
-    """Creates two default :class:`~stalker.models.type.Type`\ s for
-    :class:`~stalker.models.template.FilenameTemplate` objects. The first
-    Type instance is for "Version"s and the other is for "References".
-    """
-    from stalker import User, Type
-    
-    # I hate doing it in this way but I cannot create UniqueConstraint
-    # between derived and mixed-in attributes ("name" and "target_entity_type")
-    # So I need to be sure that there are no "Version" and "Reference"
-    # FilenameTemplate Types before creating them, cause I literally can.
-    types = Type.query\
-        .filter_by(target_entity_type="FilenameTemplate")\
-        .all()
-    type_names = [t.name for t in types]
-    
-    logger.debug("creating default Types for FilenameTemplates")
-    
-    admin = User.query.filter_by(login=defaults.admin_name).first()
-    
-    if "Version" not in type_names:
-        # mark them as created by admin
-        vers_type = Type(
-            name='Version',
-            code='Vers',
-            target_entity_type='FilenameTemplate',
-            created_by=admin
-        )
-        DBSession.add(vers_type)
-    
-    if 'Reference' not in type_names:
-        ref_type = Type(
-            name='Reference',
-            code='Ref',
-            target_entity_type='FilenameTemplate',
-            created_by=admin
-        )
-        DBSession.add(ref_type)
-    
-    try:
-        transaction.commit()
-    except IntegrityError as e:
-        logger.debug(e)
-        transaction.abort()
-        logger.debug('FilenameTemplate Types are already in database')
-    else:
-        DBSession.flush()
-        logger.debug('FilenameTemplate Types are created successfully')
+# def __create_filename_template_types():
+#     """Creates two default :class:`~stalker.models.type.Type`\ s for
+#     :class:`~stalker.models.template.FilenameTemplate` objects. The first
+#     Type instance is for "Version"s and the other is for "References".
+#     """
+#     from stalker import User, Type
+#     
+#     # I hate doing it in this way but I cannot create UniqueConstraint
+#     # between derived and mixed-in attributes ("name" and "target_entity_type")
+#     # So I need to be sure that there are no "Version" and "Reference"
+#     # FilenameTemplate Types before creating them, cause I literally can.
+#     types = Type.query\
+#         .filter_by(target_entity_type="FilenameTemplate")\
+#         .all()
+#     type_names = [t.name for t in types]
+#     
+#     logger.debug("creating default Types for FilenameTemplates")
+#     
+#     admin = User.query.filter_by(login=defaults.admin_name).first()
+#     
+#     if "Version" not in type_names:
+#         # mark them as created by admin
+#         vers_type = Type(
+#             name='Version',
+#             code='Vers',
+#             target_entity_type='FilenameTemplate',
+#             created_by=admin
+#         )
+#         DBSession.add(vers_type)
+#     
+#     if 'Reference' not in type_names:
+#         ref_type = Type(
+#             name='Reference',
+#             code='Ref',
+#             target_entity_type='FilenameTemplate',
+#             created_by=admin
+#         )
+#         DBSession.add(ref_type)
+#     
+#     try:
+#         transaction.commit()
+#     except IntegrityError as e:
+#         logger.debug(e)
+#         transaction.abort()
+#         logger.debug('FilenameTemplate Types are already in database')
+#     else:
+#         DBSession.flush()
+#         logger.debug('FilenameTemplate Types are created successfully')
 
 def register(class_):
     """Registers the given class to the database.

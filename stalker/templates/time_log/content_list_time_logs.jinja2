@@ -18,106 +18,101 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='view_time_logs'>
-    <button id='create_time_log_button'>Append TimeLog</button>
+    <button id='create_time_log_button'>Create TimeLog</button>
     <div id='time_logs_data_grid'></div>
 </div>
 
 <script type='text/javascript'>
-    require(['dijit/registry',
+    require([
         'dojo/data/ObjectStore',
-        "dgrid/List",
-        "dgrid/Grid",
-        "dgrid/Selection",
-        "dgrid/editor",
         'dojo/store/Memory',
         'dojo/store/JsonRest',
+
+        'dgrid/List',
+        'dgrid/Grid',
+
+        'stalker/dialogs',
         'stalker/dialogCaller',
-        'dojo/date',
-        'dojo/date/stamp',
-        'dojo/date/locale'
-    ],
-            function (registry, ObjectStore, List, Grid, Selection, editor,
-                      Memory, JsonRest, dialogCaller,date, stamp, locale) {
+
+        'dojo/domReady!'
+    ], function (ObjectStore, Memory, JsonRest, List, Grid, dialogs,
+                 dialogCaller) {
+
+        var time_logs_DataGrid = new Grid({
+            id: 'time_logs_data_grid',
+            width: '100%',
+            autoHeight: true
+        }, 'time_logs_data_grid');
+        console.log('code is here 1');
+
+        var create_time_log_button = dialogCaller({
+            label: 'Create TimeLog',
+            dialog_id: 'create_time_log_dialog',
+            content_creator: dialogs.create_time_log_dialog,
+            attach_to: 'create_time_log_button',
+            related_field_updater: time_logs_DataGrid_updater,
+            data_id: '{{ task.id }}'
+        });
+        create_time_log_button.startup();
+        console.log('code is here 2');
 
 
-                var time_logs_DataGrid = new Grid({
-                    id: 'time_logs_data_grid',
-                    width: '100%',
-                    autoHeight: true
-                }, 'time_logs_data_grid');
+        function time_logs_DataGrid_updater() {
 
-                var create_time_log_button = dialogCaller({
-                    label: 'Add TimeLog',
-                    dialog_id: 'create_time_log_dialog',
-                    content_creator: create_time_log_dialog_creator,
-                    attach_to: 'create_time_log_button',
-                    related_field_updater: time_logs_DataGrid_updater,
-                    data_id: '{{ task.id }}'
-                });
+            var time_log_memory = new JsonRest({
+                target: '/get/time_logs/{{ task.id }}'
+            });
 
+            time_log_memory.query().then(function (data) {
+                console.log('code is here 3');
+                var columns = [
+                    {
+                        field: 'id',
+                        label: "ID"
+                    },
+                    {
+                        field: 'resource_name',
+                        label: "Resource",
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
 
-                create_time_log_button.startup();
+                            var targetPane = "'central_content'";
+                            var address = "'view/user/" + value.resource_id + "'";
 
+                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.resource_name + '</a>';
+                        }
+                    },
+                    {
+                        field: 'start_date',
+                        label: "Start Date",
 
-                function time_logs_DataGrid_updater() {
+                        formatter: function (value) {
 
-                    var time_log_memory = new JsonRest({
-                        target: '/get/time_logs/{{ task.id }}'
-                    });
+                            return new Date(parseInt(value) * 1000);
+                        }
+                    },
+                    {
+                        field: 'end_date',
+                        label: "End Date",
+                        formatter: function (value) {
 
-                    time_log_memory.query().then(function (data) {
+                            return new Date(parseInt(value) * 1000);
+                        }
+                    }
+                ];
 
-                        var columns = [
-                            {
-                                field: 'id',
-                                label: "ID"
-                            },
-                            {
-                                field: 'resource_name',
-                                label: "Resource",
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
+                time_logs_DataGrid.renderArray(data);
+                time_logs_DataGrid.set('columns', columns);
 
-                                    var targetPane = "'central_content'";
-                                    var address = "'view/user/" + value.resource_id + "'";
-
-                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.resource_name + '</a>';
-                                }
-                            },
-                            {
-                                field: 'start_date',
-                                label: "Start Date",
-
-                                formatter: function (value) {
-
-                                    return new Date(parseInt(value)*1000);
-                                }
-                            },
-                            {
-                                field: 'end_date',
-                                label: "End Date",
-                                formatter: function (value) {
-
-                                    return new Date(parseInt(value)*1000);
-                                }
-                            }
-                        ];
-
-
-                        time_logs_DataGrid.renderArray(data);
-
-                        time_logs_DataGrid.set('columns', columns);
-
-
-                    });
-
-                }
-
-
-                time_logs_DataGrid_updater();
 
             });
+
+        }
+
+        time_logs_DataGrid_updater();
+
+    });
 </script>
 

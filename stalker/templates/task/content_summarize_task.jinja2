@@ -1,93 +1,100 @@
 <div id='task_details_content_pane'>
-  <div style="background-color: #fff2f0 " class="page_title"></div>
-  <div id='task_summary_chart1'
-       style='width: 200px;
+    <div style="background-color: #fff2f0 " class="page_title"></div>
+    <div id='task_summary_chart1'
+         style='width: 200px;
                   height: 200px;
                   position: absolute;
                   top: 10px;
                   left: 0;'></div>
 
     {# Basic Info #}
-  <div id='task_info' class='summary_info'>
-    <h2 style='margin: 0; text-align: left'>{{ task.name }}</h2>
-    <table>
-      <tr>
-        <td style='text-align: right'><b>Project</b></td>
-        <td>&nbsp;</td>
-        <td>
-          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/project/{{ task.project.id }}">{{ task.project.name }}</a>
-        </td>
-      </tr>
-      <tr>
-        <td style='text-align: right'><b>Status</b></td>
-        <td>&nbsp;</td>
-        <td>{{ task.status.name }}</td>
-      </tr>
-      <tr>
-        <td style='text-align: right'><b>Created By</b></td>
-        <td>&nbsp;</td>
-        <td>
-          <a href="#" class= "DataLink" stalker_target="central_content" stalker_href = "view/user/{{ task.created_by.id }}">{{ task.created_by.name }}</a>
-        </td>
-      </tr>
+    <div id='task_info' class='summary_info'>
+        <h2 style='margin: 0; text-align: left'>{{ task.name }}</h2>
+        <table>
+            <tr>
+                <td style='text-align: right'><b>Project</b></td>
+                <td>&nbsp;</td>
+                <td>
+                    <a href="#" class="DataLink"
+                       stalker_target="central_content"
+                       stalker_href="view/project/{{ task.project.id }}">{{ task.project.name }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><b>Status</b></td>
+                <td>&nbsp;</td>
+                <td>{{ task.status.name }}</td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><b>Created By</b></td>
+                <td>&nbsp;</td>
+                <td>
+                    <a href="#" class="DataLink"
+                       stalker_target="central_content"
+                       stalker_href="view/user/{{ task.created_by.id }}">{{ task.created_by.name }}</a>
+                </td>
+            </tr>
 
 
-    </table>
-    <button id='update_task_button'>Update</button>
-  </div>
+        </table>
+        <button id='update_task_button'>Update</button>
+    </div>
     {#  Charts  #}
 
 </div>
 
 <script type="text/javascript">
-  require(['dojox/charting/Chart',
-    'dojox/charting/themes/DataChart',
-    'dojox/charting/plot2d/Pie',
-    'dojox/charting/action2d/MoveSlice',
-    'dijit/form/Button',
-    'stalker/dialogCaller',
-    'stalker/gotoLink',
-    'dojo/ready'],
-          function(Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller,gotoLink,ready){
-            ready(function(){
-              // Create the chart within it's "holding" node
-              var pieChart = new Chart('task_summary_chart1');
+    require([
+        'dojox/charting/Chart',
+        'dojox/charting/themes/DataChart',
+        'dojox/charting/plot2d/Pie',
+        'dojox/charting/action2d/MoveSlice',
+        'dijit/form/Button',
 
-              // Add the only/default plot
-              pieChart.setTheme(theme);
+        'stalker/dialogs',
+        'stalker/dialogCaller',
+        'stalker/gotoLink',
 
-              // Add the only/default plot
-              pieChart.addPlot("default", {
-                type: PiePlot, // our plot2d/Pie module reference as type value
-                radius: 80,
-                fontColor: "black",
-                labelOffset: 0
-              });
+        'dojo/domReady!'
+    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
+                 dialogCaller, gotoLink) {
 
-              var chartData = [1000, 12000];
+        // Create the chart within it's "holding" node
+        var pieChart = new Chart('task_summary_chart1');
 
-              // Add the series of data
-              pieChart.addSeries('January', chartData);
+        // Add the only/default plot
+        pieChart.setTheme(theme);
 
-              // Create the slice mover
-              var mag = new MoveSlice(pieChart, 'default');
+        // Add the only/default plot
+        pieChart.addPlot("default", {
+            type: PiePlot, // our plot2d/Pie module reference as type value
+            radius: 80,
+            fontColor: "black",
+            labelOffset: 0
+        });
 
-              // Render the chart!
-              pieChart.render();
+        var chartData = [1000, 12000];
 
-              // UPDATE STRUCTURE BUTTON
-              var update_task_button = dialogCaller({
-                label:'Update',
-                dialog_id: 'update_task_dialog',
-                content_creator: update_task_dialog_creator,
-                attach_to: 'update_task_button',
-                data_id: {{ task.id }}
-              });
-              update_task_button.startup();
+        // Add the series of data
+        pieChart.addSeries('January', chartData);
 
-            });
+        // Create the slice mover
+        var mag = new MoveSlice(pieChart, 'default');
 
-            gotoLink();
+        // Render the chart!
+        pieChart.render();
 
-          });
+        // UPDATE STRUCTURE BUTTON
+        var update_task_button = dialogCaller({
+            label: 'Update',
+            dialog_id: 'update_task_dialog',
+            content_creator: dialogs.update_task_dialog,
+            attach_to: 'update_task_button',
+            data_id: {{ task.id }}
+        });
+        update_task_button.startup();
+
+        gotoLink();
+
+    });
 </script>

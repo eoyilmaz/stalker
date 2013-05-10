@@ -53,11 +53,12 @@ class FilenameTemplateTester(unittest2.TestCase):
         """
         self.assertFalse(FilenameTemplate.__auto_name__)
     
-    def test_filename_template_is_strictly_typed(self):
-        """testing if the FilenameTemplate class is strictly typed
+    def test_filename_template_is_not_strictly_typed(self):
+        """testing if the FilenameTemplate class is not strictly typed
         """
         self.kwargs.pop("type")
-        self.assertRaises(TypeError, FilenameTemplate, **self.kwargs)
+        # no errors
+        new_ft = FilenameTemplate(**self.kwargs)
     
     def test_target_entity_type_argument_is_skipped(self):
         """testing if a TypeError will be raised when the target_entity_type

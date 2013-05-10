@@ -34,11 +34,12 @@
         'dojo/store/Memory',
         'dijit/form/Select',
         'dojo/store/JsonRest',
+        'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
         'dojo/domReady!'
     ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
-                 editor, Memory, Select, JsonRest, fieldUpdater,
+                 editor, Memory, Select, JsonRest, dialogs, fieldUpdater,
                  dialogCaller) {
 
 
@@ -52,7 +53,7 @@
         var create_asset_button = dialogCaller({
             label: 'New Asset',
             dialog_id: 'create_asset_dialog',
-            content_creator: create_asset_dialog_creator,
+            content_creator: dialogs.create_asset_dialog,
             attach_to: 'list_assets_create_asset_button',
             related_field_updater: asset_data_grid_updater,
             data_id: '{{ project.id }}'

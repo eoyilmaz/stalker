@@ -91,65 +91,64 @@
 </div>
 
 <script type="text/javascript">
-
-    require(['dijit/registry',
+    require([
         'dojox/charting/Chart',
         'dojox/charting/themes/MiamiNice',
         'dojox/charting/plot2d/Pie',
         'dojox/charting/action2d/MoveSlice',
         'dijit/form/Button',
+
+        'stalker/dialogs',
         'stalker/dialogCaller',
-        'dojo/ready'],
-            function (registry, Chart, theme, PiePlot, MoveSlice, Button,
-                      dialogCaller, ready) {
-                ready(function () {
-                    // Create the chart within it's "holding" node
-                    var pieChart = new Chart('project_summary_chart1');
 
-                    // Add the only/default plot
-                    pieChart.setTheme(theme);
+        'dojo/domReady!'
+    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
+                 dialogCaller) {
 
-                    // Add the only/default plot
-                    pieChart.addPlot("default", {
-                        type: PiePlot, // our plot2d/Pie module reference as type value
-                        radius: 80,
-                        fontColor: "black",
-                        labelOffset: 0
-                    });
+        // Create the chart within it's "holding" node
+        var pieChart = new Chart('project_summary_chart1');
 
-                    var chartData = [100, 120, 50, 15, 80, 66, 90, 30];
+        // Add the only/default plot
+        pieChart.setTheme(theme);
 
-                    // Add the series of data
-                    pieChart.addSeries('January', chartData);
+        // Add the only/default plot
+        pieChart.addPlot("default", {
+            type: PiePlot, // our plot2d/Pie module reference as type value
+            radius: 80,
+            fontColor: "black",
+            labelOffset: 0
+        });
 
-                    // Create the slice mover
-                    var mag = new MoveSlice(pieChart, 'default');
+        var chartData = [100, 120, 50, 15, 80, 66, 90, 30];
 
-                    // Render the chart!
-                    pieChart.render();
+        // Add the series of data
+        pieChart.addSeries('January', chartData);
 
-                    // UPDATE PROJECT BUTTON
+        // Create the slice mover
+        var mag = new MoveSlice(pieChart, 'default');
 
-                    var project_summary_updater = function () {
-                        // refresh the content pane
-                        // get the content pane by id, alternatively we can use the parent of the button
-                        var content_pane = update_project_button.getParent();
-                        // refresh the pane
-                        content_pane.refresh();
-                    };
+        // Render the chart!
+        pieChart.render();
 
-                    var update_project_button = dialogCaller({
-                        label: 'Update',
-                        dialog_id: 'update_project_dialog',
-                        content_creator: update_project_dialog_creator,
-                        attach_to: 'update_project_button',
-                        related_field_updater: project_summary_updater,
-                        data_id: {{ project.id }}
-                    });
-                    update_project_button.startup();
+        // UPDATE PROJECT BUTTON
 
-                });
+        var project_summary_updater = function () {
+            // refresh the content pane
+            // get the content pane by id, alternatively we can use the parent of the button
+            var content_pane = update_project_button.getParent();
+            // refresh the pane
+            content_pane.refresh();
+        };
 
+        var update_project_button = dialogCaller({
+            label: 'Update',
+            dialog_id: 'update_project_dialog',
+            content_creator: dialogs.update_project_dialog,
+            attach_to: 'update_project_button',
+            related_field_updater: project_summary_updater,
+            data_id: {{ project.id }}
+        });
+        update_project_button.startup();
 
-            });
+    });
 </script>

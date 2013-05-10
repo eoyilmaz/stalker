@@ -18,22 +18,21 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-  <div style='width: 100%; height: 100%;'>
-    <div id='progress_bar'></div>
-  </div>
-{#  <div class='dijitDialogPaneActionBar' style='width: 100%; height: 100%;'>#}
-{#    <button id='task_ok_button'>Ok</button>#}
-{#    <button id='task_cancel_button'>Cancel</button>#}
-{#    &nbsp;#}
-{#  </div>#}
+    <div style='width: 100%; height: 100%;'>
+        <div id='progress_bar'></div>
+    </div>
+    {#  <div class='dijitDialogPaneActionBar' style='width: 100%; height: 100%;'>#}
+    {#    <button id='task_ok_button'>Ok</button>#}
+    {#    <button id='task_cancel_button'>Cancel</button>#}
+    {#    &nbsp;#}
+    {#  </div>#}
 </div>
 <script type='text/javascript'>
-  require(['dijit/ProgressBar', 'dojo/ready'],
-    function(ProgressBar, ready){
-      ready(function(){
+    require([
+        'dijit/ProgressBar', 'dojo/domReady!'
+    ], function (ProgressBar) {
         var pBar = new ProgressBar({
-          indeterminate: true
+            indeterminate: true
         }, 'progress_bar');
-      });
     });
 </script>

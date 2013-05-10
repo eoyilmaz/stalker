@@ -34,78 +34,81 @@
         "dgrid/editor",
         'dojo/store/Memory',
         'dojo/store/JsonRest',
+        'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
         'dojo/on',
         'dojo/query',
-        'dojo/domReady!'],
-            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, JsonRest, fieldUpdater, dialogCaller,on, query) {
+        'dojo/domReady!'
+    ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
+                 editor, Memory, JsonRest, dialogs, fieldUpdater, dialogCaller,
+                 on, query) {
 
-                var departments_DataGrid = new Grid({
-                    id: 'departments_data_grid',
-                    width: '100%',
-                    autoHeight: true
-                }, 'departments_data_grid');
+        var departments_DataGrid = new Grid({
+            id: 'departments_data_grid',
+            width: '100%',
+            autoHeight: true
+        }, 'departments_data_grid');
 
-                var append_department_button = dialogCaller({
-                    label: 'Append Department',
-                    dialog_id: 'append_department_dialog',
-                    content_creator: append_departments_dialog_creator,
-                    attach_to: 'view_departments_append_department_button',
-                    related_field_updater: departments_DataGrid_updater,
-                    data_id: '{{ entity.id }}'
-                });
-
-                append_department_button.startup();
-
-
-                function departments_DataGrid_updater() {
-
-                    var department_memory = new JsonRest({
-                        target: '/get/departments_byEntity/{{ entity.id }}'
-                    });
-
-                    department_memory.query().then(function (data) {
-
-                        var columns = [
-                            {
-                                label: "Thumbnail",
-                                field: 'thumbnail',
-                                sortable:false,
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
-                                    return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}">';
-                                }
-                            },
-                            {
-                                field: 'name',
-                                label: "Name",
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
-
-                                    var targetPane = "'central_content'";
-                                    var address = "'view/department/" + value.id + "'";
-
-                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
-                                }
-                            }
-                        ];
-
-
-                        departments_DataGrid.renderArray(data);
-
-                        departments_DataGrid.set('columns', columns);
-
-                    });
-
-                }
-
-                departments_DataGrid_updater();
+            var append_department_button = dialogCaller({
+                label: 'Append Department',
+                dialog_id: 'append_department_dialog',
+                content_creator: append_departments_dialog_creator,
+                attach_to: 'view_departments_append_department_button',
+                related_field_updater: departments_DataGrid_updater,
+                data_id: '{{ entity.id }}'
             });
+
+        append_department_button.startup();
+
+
+        function departments_DataGrid_updater() {
+
+            var department_memory = new JsonRest({
+                target: '/get/departments_byEntity/{{ entity.id }}'
+            });
+
+            department_memory.query().then(function (data) {
+
+                var columns = [
+                    {
+                        label: "Thumbnail",
+                        field: 'thumbnail',
+                        sortable: false,
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
+                            return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}">';
+                        }
+                    },
+                    {
+                        field: 'name',
+                        label: "Name",
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
+
+                            var targetPane = "'central_content'";
+                            var address = "'view/department/" + value.id + "'";
+
+                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                        }
+                    }
+                ];
+
+
+                departments_DataGrid.renderArray(data);
+
+                departments_DataGrid.set('columns', columns);
+
+            });
+
+        }
+
+        departments_DataGrid_updater();
+    });
 
 </script>
 

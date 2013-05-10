@@ -24,7 +24,8 @@ Stalker is a Production Asset Management System (ProdAM) designed for animation
 and vfx studios. See docs for more information.
 """
 
-__version__ = '0.2.0.b2'
+
+__version__ = '0.2.0.b3'
 
 
 from pyramid.config import Configurator
@@ -153,11 +154,11 @@ def main(global_config, **settings):
     # ************************************************************************* 
     # Structure
     # TODO: split dialog and action
-    config.add_route('create_structure', 'create/structure')
-    config.add_route('update_structure', 'update/structure/{structure_id}')
+    config.add_route('dialog_create_structure', 'dialog/create/structure')
+    config.add_route('dialog_update_structure', 'dialog/update/structure/{structure_id}')
     
     config.add_route('create_structure', 'create/structure')
-    config.add_route('update_structure', 'update/structure/{structure_id}')
+    config.add_route('update_structure', 'update/structure')
     config.add_route('get_structures',   'get/structures')
     
     # ************************************************************************* 
@@ -190,8 +191,13 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # FilenameTemplate
+    # TODO: separate dialog and action
+    config.add_route('dialog_create_filename_template', 'dialog/create/filename_template')
+    config.add_route('dialog_update_filename_template', 'dialog/update/filename_template/{ft_id}')
+    
     config.add_route('create_filename_template', 'create/filename_template')
-    config.add_route('update_filename_template', 'update/filename_template/{filename_template_id}')
+    config.add_route('update_filename_template', 'update/filename_template')
+    
     config.add_route('get_filename_templates',   'get/filename_templates')
     
     # ************************************************************************* 

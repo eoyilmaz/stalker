@@ -40,8 +40,6 @@
 
     <script src='{{ request.static_url("stalker:static/jquery/1.7/jquery.min.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jqueryui/1.8/jquery-ui.min.js") }}'></script>
-    {#  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>#}
-    {#  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>#}
 
     <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/jquery.livequery.min.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jQueryGantt/libs/jquery.timers.js") }}'></script>
@@ -57,7 +55,6 @@
     <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttDrawer.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttGridEditor.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jQueryGantt/ganttMaster.js") }}'></script>
-
 
     {# DOJO COMPRESSED #}
     <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
@@ -75,12 +72,6 @@
     <script type='text/javascript'
             data-dojo-config="async: true, parseOnLoad: true"
             src='{{ request.static_url("stalker:static/dojo/dojo.js") }}'>
-    </script>
-
-
-    {# STALKER #}
-    <script type='text/javascript'
-            src='{{ request.static_url("stalker:static/stalker/stalker.js") }}'>
     </script>
 
 </head>
@@ -113,7 +104,7 @@
         <div id='footer' class='edgePanel'>
             {% block footer %}
                 <div class='footer'>&copy; Copyright 2009-2013, Erkan Ozgur
-                    Yilmaz. <span
+                                           Yilmaz. <span
                             style='font-size: 12px;'>Stalker v{{ stalker.__version__ }}</span>
                 </div>
             {% endblock %}
@@ -123,74 +114,66 @@
 
     <script type='text/javascript'>
 
+        var redirectLinkInParent = function (targetPane, address) {
 
-    var redirectLinkSelect = function (targetPane, address, selectedTab) {
+            var tab_container = dijit.byId('data_tab_container');
+            var contentPane = dijit.byId(targetPane);
 
-        redirectLink(targetPane, address);
-
-        var tab_container = dijit.byId('data_tab_container');
-        var contentPane = dijit.byId(selectedTab);
-
-        tab_container.selectChild(contentPane);
-
-
-
-    };
-
-    var redirectLinkInParent = function (targetPane, address) {
-
-        var tab_container = dijit.byId('data_tab_container');
-        var contentPane = dijit.byId(targetPane);
-
-        if (contentPane) {
-            if (contentPane != tab_container.selectedChildWidget) {
-                tab_container.selectChild(contentPane); //Show the selected Tab
+            if (contentPane) {
+                if (contentPane != tab_container.selectedChildWidget) {
+                    tab_container.selectChild(contentPane); //Show the selected Tab
+                }
             }
-        }
-        else {
-            contentPane = tab_container.selectedChildWidget;
-        }
+            else {
+                contentPane = tab_container.selectedChildWidget;
+            }
 
-        contentPane.set('href', address);
-        contentPane.refresh();
+            contentPane.set('href', address);
+            contentPane.refresh();
 
-    };
+        };
 
-    var redirectLink = function (targetPane, address) {
-        var contentPane = dijit.byId(targetPane);
-        contentPane.set('href', address);
-        contentPane.refresh();
-    };
+        var redirectLink = function (targetPane, address) {
+            var contentPane = dijit.byId(targetPane);
+            contentPane.set('href', address);
+            contentPane.refresh();
+        };
 
-    require([
-        'dijit/layout/BorderContainer',
-        'dojox/layout/ContentPane',
+        require([
+            'dijit/layout/BorderContainer',
+            'dojox/layout/ContentPane',
 
-        'dijit/MenuBar',
-        'dijit/MenuBarItem',
-        'dijit/MenuSeparator',
-        'dijit/PopupMenuBarItem',
-        'dijit/PopupMenuItem',
-        'dijit/MenuItem',
-        'dijit/DropDownMenu',
-        'dijit/form/DropDownButton',
-        'dijit/TooltipDialog',
-        'dijit/popup',
+            'dijit/MenuBar',
+            'dijit/MenuBarItem',
+            'dijit/MenuSeparator',
+            'dijit/PopupMenuBarItem',
+            'dijit/PopupMenuItem',
+            'dijit/MenuItem',
+            'dijit/DropDownMenu',
+            'dijit/form/DropDownButton',
+            'dijit/TooltipDialog',
+            'dijit/popup',
 
-        'dojo/on',
+            'dojo/on',
 
 
-        'dojo/store/JsonRest',
-        'dojo/store/Memory',
-        'dojo/_base/fx',
+            'dojo/store/JsonRest',
+            'dojo/store/Memory',
+            'dojo/_base/fx',
 
-        'stalker/dialogCaller',
-        'stalker/dialogCreator',
-        'stalker/teamMenuCreator',
+            'stalker/dialogs',
+            'stalker/dialogCaller',
+            'stalker/dialogCreator',
+            'stalker/teamMenuCreator',
 
-        'dojo/ready'], function (BorderContainer, ContentPane, MenuBar, MenuBarItem, MenuSeparator, PopupMenuBarItem, PopupMenuItem, MenuItem, DropDownMenu, DropDownButton, TooltipDialog, popup, on, JsonRest, Memory, fx, dialogCaller, dialogCreator, teamMenuCreator, ready) {
+            'dojo/domReady!'
+        ], function (BorderContainer, ContentPane, MenuBar, MenuBarItem,
+                     MenuSeparator, PopupMenuBarItem, PopupMenuItem, MenuItem,
+                     DropDownMenu, DropDownButton, TooltipDialog, popup, on,
+                     JsonRest, Memory, fx, dialogs, dialogCaller,
+                     dialogCreator, teamMenuCreator) {
 
-        ready(function () {
+
             // ******************************************************************
             // create the BorderContainer and attach it to our appLayout div
             var appLayout = new BorderContainer({
@@ -268,7 +251,7 @@
                         dialogCaller({
                             label: 'Create Studio',
                             dialog_id: 'create_studio_dialog',
-                            content_creator: create_studio_dialog_creator,
+                            content_creator: dialogs.create_studio_dialog,
                             widget_type: 'MenuItem'
                         })
                 );
@@ -307,7 +290,7 @@
                     dialogCaller({
                         label: 'Filename Tamplate',
                         dialog_id: 'create_filename_template_dialog',
-                        content_creator: create_filename_template_dialog_creator,
+                        content_creator: dialogs.create_filename_template_dialog,
                         widget_type: 'MenuItem'
                     })
             );
@@ -318,7 +301,7 @@
                     dialogCaller({
                         label: 'Image Format',
                         dialog_id: 'create_image_format_dialog',
-                        content_creator: create_image_format_dialog_creator,
+                        content_creator: dialogs.create_image_format_dialog,
                         widget_type: 'MenuItem'
                     })
             );
@@ -329,7 +312,7 @@
                     dialogCaller({
                         label: 'Repository',
                         dialog_id: 'create_repository_dialog',
-                        content_creator: create_repository_dialog_creator,
+                        content_creator: dialogs.create_repository_dialog,
                         widget_type: 'MenuItem'
                     })
             );
@@ -340,7 +323,7 @@
                     dialogCaller({
                         label: 'Status',
                         dialog_id: 'create_status_dialog',
-                        content_creator: create_status_dialog_creator,
+                        content_creator: dialogs.create_status_dialog,
                         widget_type: 'MenuItem'
                     })
             );
@@ -351,7 +334,7 @@
                     dialogCaller({
                         label: 'Status List',
                         dialog_id: 'create_status_list_dialog',
-                        content_creator: create_status_list_dialog_creator,
+                        content_creator: dialogs.create_status_list_dialog,
                         widget_type: 'MenuItem'
                     })
             );
@@ -362,7 +345,7 @@
                     dialogCaller({
                         label: 'Structure',
                         dialog_id: 'create_structure_dialog',
-                        content_creator: create_structure_dialog_creator,
+                        content_creator: dialogs.create_structure_dialog,
                         widget_type: 'MenuItem'
                     })
             );
@@ -420,7 +403,7 @@
                         dialogCaller({
                             label: 'Update',
                             dialog_id: 'update_project_dialog',
-                            content_creator: update_project_dialog_creator,
+                            content_creator: dialogs.update_project_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
 
@@ -437,7 +420,7 @@
                         dialogCaller({
                             label: 'New Asset',
                             dialog_id: 'create_asset_dialog',
-                            content_creator: create_asset_dialog_creator,
+                            content_creator: dialogs.create_asset_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
 
@@ -450,7 +433,7 @@
                         dialogCaller({
                             label: 'New Sequence',
                             dialog_id: 'create_sequence_dialog',
-                            content_creator: create_sequence_dialog_creator,
+                            content_creator: dialogs.create_sequence_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
                         })
@@ -462,7 +445,7 @@
                         dialogCaller({
                             label: 'New Shot',
                             dialog_id: 'create_shot_dialog',
-                            content_creator: create_shot_dialog_creator,
+                            content_creator: dialogs.create_shot_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
                         })
@@ -476,7 +459,7 @@
                         dialogCaller({
                             label: 'Add User',
                             dialog_id: 'create_user_dialog',
-                            content_creator: create_user_dialog_creator,
+                            content_creator: dialogs.create_user_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
                         })
@@ -520,7 +503,7 @@
                             dialogCaller({
                                 label: 'New Project',
                                 dialog_id: 'create_project_dialog',
-                                content_creator: create_project_dialog_creator,
+                                content_creator: dialogs.create_project_dialog,
                                 widget_type: 'MenuItem',
                                 related_field_updater: projects_DropDownMenu_updater
                             })
@@ -536,7 +519,7 @@
                             dialogCaller({
                                 label: 'New Asset',
                                 dialog_id: 'create_asset_dialog',
-                                content_creator: create_asset_dialog_creator,
+                                content_creator: dialogs.create_asset_dialog,
                                 widget_type: 'MenuItem'
 
                             })
@@ -548,7 +531,7 @@
                             dialogCaller({
                                 label: 'New Sequence',
                                 dialog_id: 'create_sequence_dialog',
-                                content_creator: create_sequence_dialog_creator,
+                                content_creator: dialogs.create_sequence_dialog,
                                 widget_type: 'MenuItem'
                             })
                     );
@@ -559,7 +542,7 @@
                             dialogCaller({
                                 label: 'New Shot',
                                 dialog_id: 'create_shot_dialog',
-                                content_creator: create_shot_dialog_creator,
+                                content_creator: dialogs.create_shot_dialog,
                                 widget_type: 'MenuItem'
                             })
                     );
@@ -587,7 +570,7 @@
                 query_entity_url: 'get/users',
                 content_pane_to_update: central_content_pane,
                 new_team_dialog_id: 'create_user_dialog',
-                new_team_dialog_content_creator: create_user_dialog_creator
+                new_team_dialog_content_creator: dialogs.create_user_dialog
             });
 
             teamMenuCreator({
@@ -597,7 +580,7 @@
                 query_entity_url: 'get/departments',
                 content_pane_to_update: central_content_pane,
                 new_team_dialog_id: 'create_department_dialog',
-                new_team_dialog_content_creator: create_department_dialog_creator
+                new_team_dialog_content_creator: dialogs.create_department_dialog
             });
 
             teamMenuCreator({
@@ -607,7 +590,7 @@
                 query_entity_url: 'get/groups',
                 content_pane_to_update: central_content_pane,
                 new_team_dialog_id: 'create_group_dialog',
-                new_team_dialog_content_creator: create_group_dialog_creator
+                new_team_dialog_content_creator: dialogs.create_group_dialog
             });
 
             stalker_MenuBar.startup();
@@ -646,7 +629,6 @@
             central_content_pane.refresh();
 
         });
-    });
     </script>
 {% endblock %}
 </body>

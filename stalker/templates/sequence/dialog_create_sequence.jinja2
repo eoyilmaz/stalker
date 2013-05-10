@@ -108,13 +108,22 @@
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
-    'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-    'dijit/form/FilteringSelect', 'dijit/form/ComboBox', 'dijit/form/Button',
-    'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
-    'stalker/dialogCaller', 'dojo/domReady!'],
+  require(['dijit/registry',
+      'dojo/store/Memory',
+      'dijit/form/Form',
+    'dijit/form/ValidationTextBox',
+      'dijit/form/TextBox',
+    'dijit/form/FilteringSelect',
+      'dijit/form/ComboBox',
+      'dijit/form/Button',
+    'dojo/store/JsonRest',
+      'stalker/dialogs',
+      'stalker/submitForm',
+      'stalker/fieldUpdater',
+    'stalker/dialogCaller',
+      'dojo/domReady!'],
     function(registry, Memory, Form, ValidationTextBox, TextBox,
-             FilteringSelect, ComboBox, Button, JsonRest, submitForm,
+             FilteringSelect, ComboBox, Button, JsonRest, dialogs, submitForm,
              fieldUpdater, dialogCaller){
       
       // **********************************************************************
@@ -224,61 +233,6 @@
       {% endif %}
       
       
-      
-      // **********************************************************************
-{#      // Status List#}
-{#      //#}
-{#      // The Memory#}
-{#      var status_list_memory = new JsonRest({#}
-{#        target: 'get/status_lists_for/Sequence'#}
-{#      });#}
-{#      #}
-{#      // The Field#}
-{#      var status_list_filtering_select = new FilteringSelect({#}
-{#        name: 'status_list_id',#}
-{#        required: true,#}
-{#        label: 'Status List',#}
-{#        onChange: function(){#}
-{#          status_updater({animate: true});#}
-{#        }#}
-{#      }, 'sequence_status_list');#}
-{#      status_list_filtering_select.startup();#}
-{#      #}
-{#      // The Updater#}
-{#      var status_list_field_updater = fieldUpdater({#}
-{#        'memory': status_list_memory,#}
-{#        'widget': status_list_filtering_select#}
-{#      });#}
-{#      status_list_field_updater({animate: false});#}
-{#      #}
-{#      // New Status List Button#}
-{#      var create_status_list_button = dialogCaller({#}
-{#        label: 'New',#}
-{#        dialog_id: 'create_status_list_dialog',#}
-{#        content_creator: create_status_list_dialog_creator,#}
-{#        attach_to: 'sequence_create_status_list_button',#}
-{#        related_field_updater: status_list_field_updater,#}
-{#        data_id: 'Sequence'#}
-{#      });#}
-{#      create_status_list_button.startup();#}
-{#      #}
-{#      // Update Status List Button#}
-{#      var update_status_list_button = dialogCaller({#}
-{#        label: 'Update',#}
-{#        dialog_id: 'update_status_list_dialog',#}
-{#        content_creator: update_status_list_dialog_creator,#}
-{#        attach_to: 'sequence_update_status_list_button',#}
-{#        related_field_updater: status_list_field_updater,#}
-{#        data_id: function(){#}
-{#          var widget = registry.byId('sequence_status_list');#}
-{#          return widget.get('value');#}
-{#        }#}
-{#      });#}
-{#      update_status_list_button.startup();#}
-      
-      
-      
-      
       // **********************************************************************
       // Status
       var status_memory = new JsonRest({
@@ -304,7 +258,7 @@
             if (dialog != null){
               dialog.destroyRecursive();
             }
-            dialog = update_status_list_dialog_creator('Sequence');
+            dialog = dialogs.update_status_list_dialog('Sequence');
             // set the field updater
             dialog.set( 'related_field_updater', status_field_updater );
             // show the dialog
@@ -326,7 +280,7 @@
       var sequence_add_status_button = dialogCaller({
         label: 'Add Status',
         dialog_id: 'create_status_list_dialog',
-        content_creator: create_status_list_dialog_creator,
+        content_creator: dialogs.create_status_list_dialog,
         attach_to: 'sequence_add_status_button',
         related_field_updater: status_field_updater,
         data_id: 'Sequence'

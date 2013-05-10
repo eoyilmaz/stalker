@@ -91,11 +91,12 @@
         'dojox/charting/plot2d/Pie',
         'dojox/charting/action2d/MoveSlice',
         'dijit/form/Button',
+        'stalker/dialogs',
         'stalker/dialogCaller',
         'stalker/gotoLink',
         'dojo/domReady!'
-    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogCaller,
-                 gotoLink) {
+    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
+                 dialogCaller, gotoLink) {
 
 
         // Create the chart within it's "holding" node
@@ -135,7 +136,7 @@
         var update_asset_button = dialogCaller({
             label: 'Update',
             dialog_id: 'update_asset_dialog',
-            content_creator: update_asset_dialog_creator,
+            content_creator: dialogs.update_asset_dialog,
             attach_to: 'update_asset_button',
             related_field_updater: asset_summary_updater,
             data_id: {{ asset.id }}

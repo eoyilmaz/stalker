@@ -19,14 +19,14 @@
 #}
 
 <div id='group_details_content_pane'>
-   <div style="background-color: #f8acac;" class="page_title"></div>
+    <div style="background-color: #f8acac;" class="page_title"></div>
 
-  {# Avatar #}
+    {# Avatar #}
     <div id='group_avatar'
          class='thumbnail'>
-      {% if not group.thumbnail %}
-      <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}' >
-      {% endif %}
+        {% if not group.thumbnail %}
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}'>
+        {% endif %}
     </div>
 
     {# Basic Info #}
@@ -38,33 +38,33 @@
 
 <script type='text/javascript'>
     require([
-            'dojo/ready',
-            'dijit/form/Button',
-            'stalker/dialogCaller',
-            'stalker/gotoLink'
-    ], function(ready, Button, dialogCaller, gotoLink){
-        ready(function(){
-            
-            // ****************************************************************
-            // Update Group Button
-            var group_summary_updater = function(){
-                // refresh the content pane
-                // get the content pane by id, alternatively we can use the parent of the button
-                var content_pane = update_group_button.getParent();
-                // refresh the pane
-                content_pane.refresh();
-            };
+        'dijit/form/Button',
+        'stalker/dialogs',
+        'stalker/dialogCaller',
+        'stalker/gotoLink',
+        'dojo/domReady!'
+    ], function (Button, dialogs, dialogCaller, gotoLink) {
 
-            var update_group_button = dialogCaller({
-                label: 'Update',
-                dialog_id: 'update_group_dialog',
-                content_creator: update_group_dialog_creator,
-                attach_to: 'update_group_button',
-                related_field_updater: group_summary_updater,
-                data_id: {{ group.id }}
-            });
-            update_group_button.startup();
+        // ********************************************************************
+        // Update Group Button
+        var group_summary_updater = function () {
+            // refresh the content pane
+            // get the content pane by id, alternatively we can use the parent of the button
+            var content_pane = update_group_button.getParent();
+            // refresh the pane
+            content_pane.refresh();
+        };
+
+        var update_group_button = dialogCaller({
+            label: 'Update',
+            dialog_id: 'update_group_dialog',
+            content_creator: dialogs.update_group_dialog,
+            attach_to: 'update_group_button',
+            related_field_updater: group_summary_updater,
+            data_id: {{ group.id }}
         });
+        update_group_button.startup();
+
         gotoLink();
     });
 </script>

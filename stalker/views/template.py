@@ -18,6 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 import datetime
+from pyramid.httpexceptions import HTTPOk
 
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
@@ -30,133 +31,107 @@ from stalker import User, FilenameTemplate, Type, EntityType
 
 import logging
 from stalker import log
+from stalker.views import PermissionChecker, get_logged_in_user
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='update_filename_template',
-    renderer='templates/template/update_filename_template.jinja2',
-    permission='Update_FilenameTemplate'
+    route_name='dialog_create_filename_template',
+    renderer='templates/template/dialog_create_filename_template.jinja2'
 )
-def update_filename_template(request):
-    """called when updateing a FilenameTemplate instance
+def dialog_create_filename_template(request):
+    """fills the create filename template dialog
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
+    # for now prepare the data by hand
+    entity_types = ['Asset', 'Shot', 'Sequence', 'Project', 'Task']
     
-    login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
-    
-    if 'submitted' in request.params:
-        if request.params['submitted'] == 'update':
-            logger.debug('updateing a Filename Template')
-            # just update the given filename_template
-            ft_id = request.matchdict['filename_template_id']
-            ft = FilenameTemplate.query.filter_by(id=ft_id).first()
-            
-            ft.name = request.params['name']
-            ft.path = request.params['path']
-            ft.filename = request.params['filename']
-            ft.output_path = request.params['output_path']
-            ft.updated_by = user
-            ft.date_updated = datetime.datetime.now()
-            
-            DBSession.add(ft)
-            try:
-                transaction.commit()
-            except (IntegrityError, DetachedInstanceError) as e:
-                logging.debug(e)
-                transaction.abort()
-            else:
-                DBSession.flush()
-        
-        logger.debug('finished updateing FilenameTemplate')
- 
-     
-    return {}
-
-
-@view_config(
-    route_name='create_filename_template',
-    renderer='templates/template/dialog_create_filename_template.jinja2',
-    permission='Create_FilenameTemplate'
-)
-def create_filename_template(request):
-    """called when adding a FilenameTemplate instance
-    """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
-    
-    login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
-    
-    if 'submitted' in request.params:
-        if request.params['submitted'] == 'create':
-            logger.debug('adding a new FilenameTemplate')
-            # create and add a new FilenameTemplate
-            
-            for param in ['name',
-                          'target_entity_type',
-                          'type_id',
-                          'path',
-                          'filename',
-                          'output_path']:
-                if param not in request.params:
-                    logger.debug('%s is not in parameters' % param)
-            
-            if 'name' in request.params and \
-                'target_entity_type' in request.params and \
-                'type_id' in request.params and\
-                'path' in request.params and \
-                'filename' in request.params and \
-                'output_path' in request.params:
-                
-                logger.debug('we got all the parameters')
-                
-                # get the typ
-                type_ = Type.query\
-                    .filter_by(id=request.params['type_id'])\
-                    .first()
-                
-                try:
-                    new_ft = FilenameTemplate(
-                        name=request.params['name'],
-                        target_entity_type=\
-                            request.params['target_entity_type'],
-                        type=type_,
-                        path=request.params['path'],
-                        filename=request.params['filename'],
-                        created_by=user,
-                    )
-                except (AttributeError, TypeError) as e:
-                    logger.debug(e.message)
-                else:
-                    DBSession.add(new_ft)
-                    try:
-                        transaction.commit()
-                    except IntegrityError as e:
-                        logger.debug(e.message)
-                        transaction.abort()
-                    else:
-                        logger.debug('flushing the DBSession, no problem here!')
-                        DBSession.flush()
-                        logger.debug('finished adding FilenameTemplate')
-            else:
-                logger.debug('there are missing parameters')
     return {
-        'entity_types': EntityType.query.all(),
-        'filename_template_types': 
-            Type.query
-                .filter_by(target_entity_type="FilenameTemplate")
-                .all()
+        'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
+        'entity_types': entity_types
     }
 
 
 @view_config(
+    route_name='dialog_update_filename_template',
+    renderer='templates/template/dialog_create_filename_template.jinja2',
+)
+def dialog_create_filename_template(request):
+    """fills the update filename template dialog
+    """
+    # get the filename template
+    ft_id = request.matchdict['ft_id']
+    ft = FilenameTemplate.query.filter_by(id=ft_id).first()
+    
+    # for now prepare the data by hand
+    entity_types = ['Asset', 'Shot', 'Sequence', 'Project', 'Task']
+    
+    return {
+        'mode': 'UPDATE',
+        'has_permission': PermissionChecker(request),
+        'ft': ft,
+        'entity_types': entity_types
+    }
+
+@view_config(
+    route_name='create_filename_template'
+)
+def create_filename_template(request):
+    """creates a new FilenameTemplate
+    """
+    logged_in_user = get_logged_in_user(request)
+    
+    # get parameters
+    name = request.params.get('name')
+    target_entity_type = request.params.get('target_entity_type')
+    path = request.params.get('path')
+    filename = request.params.get('filaname')
+
+    if name and target_entity_type and path and filename:
+        new_ft = FilenameTemplate(
+            name=name,
+            target_entity_type=target_entity_type,
+            path=path,
+            filename=filename,
+            created_by=logged_in_user
+        )
+        DBSession.add(new_ft)
+    
+    return HTTPOk()
+
+
+@view_config(
+    route_name='update_filename_template',
+)
+def update_filename_template(request):
+    """updates a FilenameTemplate instance
+    """
+    logged_in_user = get_logged_in_user(request)
+    
+    name = request.params.get('name')
+    path = request.params.get('path')
+    filename = request.params.get('filename')
+    ft_id = request.params.get('ft_id')
+    ft = FilenameTemplate.query.filter_by(id=ft_id).first()
+
+    if name and path and filename and ft:
+        ft.name = name
+        ft.path = path
+        ft.filename = filename
+        
+        ft.updated_by = logged_in_user
+        ft.date_updated = datetime.datetime.now()
+        
+        DBSession.add(ft)
+
+    return HTTPOk()
+
+
+@view_config(
     route_name='get_filename_templates',
-    renderer='json',
-    permission='Read_FilenameTemplate'
+    renderer='json'
 )
 def get_filename_templates(request):
     """returns all the FilenameTemplates in the database
@@ -166,7 +141,6 @@ def get_filename_templates(request):
             'id': ft.id,
             'name': ft.name,
             'target_entity_type': ft.target_entity_type,
-            'type': ft.type.name
         }
         for ft in FilenameTemplate.query.all()
     ]
