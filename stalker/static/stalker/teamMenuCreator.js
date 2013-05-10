@@ -18,14 +18,17 @@
 
 define([
     'dojo/store/JsonRest',
+    
     'dijit/MenuItem',
     'dijit/MenuSeparator',
     'dijit/DropDownMenu',
     'dijit/PopupMenuItem',
     'dijit/PopupMenuBarItem',
+    
+    'stalker/dialogs',
     'stalker/dialogCaller'
     ], function(JsonRest, MenuItem, MenuSeparator, DropDownMenu,
-                PopupMenuItem, PopupMenuBarItem, dialogCaller){
+                PopupMenuItem, PopupMenuBarItem, dialogs, dialogCaller){
     
     var teamMenuCreator = function(kwargs){
         
@@ -91,7 +94,7 @@ define([
                     dialogCaller({
                         label: 'New User',
                         dialog_id: 'create_user_dialog',
-                        content_creator: create_user_dialog_creator,
+                        content_creator: dialogs.create_user_dialog,
                         widget_type: 'MenuItem',
                         data_id: tID
                     })

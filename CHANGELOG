@@ -17,6 +17,7 @@ Stalker Changes
     MultiSelect widgets.
   * Fix: Separated the dialog and action routes for Structure.
   * Fix: Fixed unnecessary module imports in stalker.js.
+  * Fix: Schedule button is now working properly.
 
 0.2.0.b2
 --------

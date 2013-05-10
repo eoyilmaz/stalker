@@ -37,6 +37,11 @@
                     style: 'background-color: #fff2f0'
                 }, 'task_related_data_tab_container');
 
+                var summary_content_pane = new ContentPane({
+                    title: 'Summarize',
+                    href: 'summarize/task/{{ task.id }}'
+                });
+                
                 var time_logs_content_pane = new ContentPane({
                     title: 'TimeLogs',
                     href: 'list/time_logs/{{ task.id }}'
@@ -52,16 +57,13 @@
                     content: 'list/tickets/{{ task.id }}'
                 });
 
-                var summary_content_pane = new ContentPane({
-                    title: 'Summarize',
-                    href: 'summarize/task/{{ task.id }}'
-                });
 
 
+                task_related_data_tab_container.addChild(summary_content_pane);
                 task_related_data_tab_container.addChild(time_logs_content_pane);
                 task_related_data_tab_container.addChild(versions_content_pane);
                 task_related_data_tab_container.addChild(tickets_content_pane);
-                task_related_data_tab_container.addChild(summary_content_pane);
+
                 task_related_data_tab_container.startup();
 
                 task_BorderContainer.addChild(nav_bar_content_pane);

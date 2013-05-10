@@ -166,8 +166,7 @@
         </div>
         {% if entity.entity_type != 'User' %}
             <div style='float: right;'>
-                <button id="list_tasks_schedule_tasks_button">Schedule Tasks
-                </button>
+                <button id="list_tasks_schedule_tasks_button">Schedule Tasks</button>
             </div>
         {% endif %}
 
@@ -200,6 +199,7 @@
         'dojo/request/xhr',
         'dojo/_base/lang',
         'dojo/Deferred',
+        'dojo/when',
 
         'stalker/dialogs',
         'stalker/dialogCaller',
@@ -208,7 +208,7 @@
 
         'dojo/domReady!'
     ], function (registry, Button, Menu, MenuItem, MenuSeparator, query,
-                 JsonRest, xhr, lang, Deferred, dialogs, dialogCaller,
+                 JsonRest, xhr, lang, Deferred, when, dialogs, dialogCaller,
                  dialogCreator, gotoLink) {
 
         $('#gantttemplates').loadTemplates();
@@ -515,34 +515,41 @@
         }, 'list_tasks_zoom_in_button');
         zoom_in_button.startup();
 
-        // AUTO - SCHEDULE  
+        // SCHEDULE  
         {% if entity.entity_type != 'User' %}
-            var auto_schedule_gantt_button = new Button({
-                label: 'Auto Schedule',
+            var schedule_tasks_button = new Button({
+                label: 'Schedule Tasks',
                 onClick: function () {
-                    saveGanttOnServer().then(function () {
+                    
+                    
+                    var do_schedule = function () {
                         // xhr.post returns a `promise` use it if needed
                         // show the busy dialog
                         var busy_dialog = dialogs.busy_dialog({
-                            id: 'auto_schedule_busy_dialog'
+                            id: 'schedule_tasks_busy_dialog'
                         });
                         busy_dialog.show();
                         return xhr.post(
-                                '{{ request.route_url('auto_schedule_tasks') }}',
-                                {
-                                    method: 'POST'
-                                }
+                            '{{ request.route_url('auto_schedule_tasks') }}',
+                            {
+                                method: 'POST'
+                            }
                         );
-                    }).then(function () {
-                                // reload scheduled tasks
-                                loadGanttFromServer();
-                                // kill the busy dialog
-                                var busy_dialog = dijit.byId('auto_schedule_busy_dialog');
-                                busy_dialog.destroyRecursive();
-                            });
+                    };
+                    
+                    var do_load = function () {
+                        // reload scheduled tasks
+                        loadGanttFromServer();
+                        // kill the busy dialog
+                        var busy_dialog = dijit.byId('schedule_tasks_busy_dialog');
+                        busy_dialog.destroyRecursive();
+                    };
+                    
+                    when(do_schedule(), do_load);
+            
                 }
             }, 'list_tasks_schedule_tasks_button');
-            auto_schedule_gantt_button.startup();
+            schedule_tasks_button.startup();
         {% endif %}
 
 

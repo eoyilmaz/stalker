@@ -25,24 +25,20 @@
 
 <script type='text/javascript'>
     require([
-        'dijit/registry',
-        'dojo/data/ObjectStore',
-        "dgrid/List",
-        "dgrid/Grid",
-        "dgrid/Selection",
-        "dgrid/Keyboard",
-        "dgrid/editor",
         'dojo/store/Memory',
         'dojo/store/JsonRest',
+        'dojo/data/ObjectStore',
+
+        'dgrid/List',
+        'dgrid/Grid',
+
         'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
-        'dojo/on',
-        'dojo/query',
+
         'dojo/domReady!'
-    ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
-                 editor, Memory, JsonRest, dialogs, fieldUpdater, dialogCaller,
-                 on, query) {
+    ], function (Memory, JsonRest, ObjectStore, List, Grid, dialogs,
+                 fieldUpdater, dialogCaller) {
 
         var departments_DataGrid = new Grid({
             id: 'departments_data_grid',
@@ -50,14 +46,14 @@
             autoHeight: true
         }, 'departments_data_grid');
 
-            var append_department_button = dialogCaller({
-                label: 'Append Department',
-                dialog_id: 'append_department_dialog',
-                content_creator: append_departments_dialog_creator,
-                attach_to: 'view_departments_append_department_button',
-                related_field_updater: departments_DataGrid_updater,
-                data_id: '{{ entity.id }}'
-            });
+        var append_department_button = dialogCaller({
+            label: 'Append Department',
+            dialog_id: 'append_department_dialog',
+            content_creator: dialogs.append_departments_dialog,
+            attach_to: 'view_departments_append_department_button',
+            related_field_updater: departments_DataGrid_updater,
+            data_id: '{{ entity.id }}'
+        });
 
         append_department_button.startup();
 

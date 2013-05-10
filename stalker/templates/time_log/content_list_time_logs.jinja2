@@ -43,7 +43,6 @@
             width: '100%',
             autoHeight: true
         }, 'time_logs_data_grid');
-        console.log('code is here 1');
 
         var create_time_log_button = dialogCaller({
             label: 'Create TimeLog',
@@ -54,7 +53,6 @@
             data_id: '{{ task.id }}'
         });
         create_time_log_button.startup();
-        console.log('code is here 2');
 
 
         function time_logs_DataGrid_updater() {
@@ -64,7 +62,6 @@
             });
 
             time_log_memory.query().then(function (data) {
-                console.log('code is here 3');
                 var columns = [
                     {
                         field: 'id',
