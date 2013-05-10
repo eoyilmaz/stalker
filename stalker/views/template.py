@@ -58,7 +58,7 @@ def dialog_create_filename_template(request):
     route_name='dialog_update_filename_template',
     renderer='templates/template/dialog_create_filename_template.jinja2',
 )
-def dialog_create_filename_template(request):
+def dialog_update_filename_template(request):
     """fills the update filename template dialog
     """
     # get the filename template
