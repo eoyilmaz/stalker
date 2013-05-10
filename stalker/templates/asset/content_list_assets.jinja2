@@ -81,6 +81,19 @@
             asset_memory.query().then(function (data) {
 
                 var columns = [
+
+                            {
+                                label: "Thumbnail",
+                                field: 'thumbnail',
+                                sortable: false,
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (value) {
+                                    return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}">';
+                                }
+                            },
+
                     {
                         field: 'status',
                         label: "Status",
@@ -107,8 +120,7 @@
 
                             var targetPane = "'assets_content_pane'";
                             var address = "'view/asset/" + value.id + "'";
-
-                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                            return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.name + '</a>';
                         }
                     },
                     {

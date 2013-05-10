@@ -1,7 +1,13 @@
 <div id='shot_details_content_pane'>
     <div style="background-color: #fff200 " class="page_title"></div>
     {# Avatar #}
-    <div id='shot_thumbnail' class='thumbnail'>No Avatar</div>
+    <div id='shot_thumbnail' class='thumbnail'>
+        {% if not shot.thumbnail %}
+        <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
+             alt=''
+             style='width:120px;'>
+    {% endif %}
+    </div>
 
     <div id='shot_summary_chart1'
          style='width: 100px;

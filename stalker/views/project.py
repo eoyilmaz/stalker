@@ -298,10 +298,14 @@ def view_project_related_data(request):
         'project': project
     }
 
+
+@view_config(
+    route_name='view_task_nav_bar',
+    renderer='templates/task/content_task_nav_bar.jinja2',
+)
 @view_config(
     route_name='view_entity_nav_bar',
     renderer='templates/content_nav_bar.jinja2',
-    permission='Read_Project'
 )
 def view_entity_nav_bar(request):
     """runs when viewing all projects

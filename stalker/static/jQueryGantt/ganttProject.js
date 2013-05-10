@@ -45,7 +45,11 @@ Project.prototype.clone = function () {
 };
 
 Project.prototype.link = function(){
-    return "<a class='DataLink' href='#' stalker_target='central_pane' stalker_href='view/project/" + this.id + "'>" + this.name + "</a>";
+    var target = "'central_content'";
+    var address =  "'view/project/" + this.id +"'"
+    return '<a href="javascript:redirectLink('+target+','+address +');">' + this.name +'</a>';
+
+    //return "<a class='DataLink' href='#' stalker_target='central_pane' stalker_href='view/project/" + this.id + "'>" + this.name + "</a>";
 };
 
 

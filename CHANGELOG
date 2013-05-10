@@ -49,6 +49,13 @@ Stalker Changes
   * Fix: Separated the dialog and action routes for ImageFormat.
   * Fix: Separated the dialog and action routes for Asset.
   * Fix: Separated the dialog and action routes for Repository.
+  * Add: Added update group dialog.
+  * Add: Append department and append group pages has connected to database.
+  * Add: Timelog List page added.
+  * Add: New placeholders added for different type of object.
+  * Fix: Links between pages is created with redirectLink function which is
+    written in base.jinja2. goToLink.js is deprecated, but still there are some
+    codes that uses gotolink.js, they must be changed for next update.
 * jQueryGantt:
   * Update: Replaced the ``duration`` column with ``timing`` which correctly
     shows the schedule timing info of the related task.

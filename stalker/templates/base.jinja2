@@ -113,7 +113,7 @@
         <div id='footer' class='edgePanel'>
             {% block footer %}
                 <div class='footer'>&copy; Copyright 2009-2013, Erkan Ozgur
-                                           Yilmaz. <span
+                    Yilmaz. <span
                             style='font-size: 12px;'>Stalker v{{ stalker.__version__ }}</span>
                 </div>
             {% endblock %}
@@ -122,13 +122,46 @@
 
 
     <script type='text/javascript'>
-    
+
+
+    var redirectLinkSelect = function (targetPane, address, selectedTab) {
+
+        redirectLink(targetPane, address);
+
+        var tab_container = dijit.byId('data_tab_container');
+        var contentPane = dijit.byId(selectedTab);
+
+        tab_container.selectChild(contentPane);
+
+
+
+    };
+
+    var redirectLinkInParent = function (targetPane, address) {
+
+        var tab_container = dijit.byId('data_tab_container');
+        var contentPane = dijit.byId(targetPane);
+
+        if (contentPane) {
+            if (contentPane != tab_container.selectedChildWidget) {
+                tab_container.selectChild(contentPane); //Show the selected Tab
+            }
+        }
+        else {
+            contentPane = tab_container.selectedChildWidget;
+        }
+
+        contentPane.set('href', address);
+        contentPane.refresh();
+
+    };
+
     var redirectLink = function (targetPane, address) {
         var contentPane = dijit.byId(targetPane);
         contentPane.set('href', address);
         contentPane.refresh();
     };
-    
+
     require([
         'dijit/layout/BorderContainer',
         'dojox/layout/ContentPane',
@@ -155,12 +188,7 @@
         'stalker/dialogCreator',
         'stalker/teamMenuCreator',
 
-        'dojo/ready'], function (BorderContainer, ContentPane, MenuBar,
-                                 MenuBarItem, MenuSeparator, PopupMenuBarItem,
-                                 PopupMenuItem, MenuItem, DropDownMenu,
-                                 DropDownButton, TooltipDialog, popup, on,
-                                 JsonRest, Memory, fx, dialogCaller,
-                                 dialogCreator, teamMenuCreator, ready) {
+        'dojo/ready'], function (BorderContainer, ContentPane, MenuBar, MenuBarItem, MenuSeparator, PopupMenuBarItem, PopupMenuItem, MenuItem, DropDownMenu, DropDownButton, TooltipDialog, popup, on, JsonRest, Memory, fx, dialogCaller, dialogCreator, teamMenuCreator, ready) {
 
         ready(function () {
             // ******************************************************************

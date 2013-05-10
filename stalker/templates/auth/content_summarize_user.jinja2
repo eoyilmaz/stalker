@@ -64,12 +64,6 @@
     </div>
     {#  Charts  #}
   <div>
-    <div id='user_summary_chart1'
-         style='width: 100px;
-                  height: 100px;
-                  position: absolute;
-                  right: 500px;'></div>
-  </div>
 </div>
 
 <script type="text/javascript">
@@ -83,29 +77,29 @@
           function(Chart, theme, PiePlot,  MoveSlice, Button, dialogCaller,ready){
             ready(function(){
               // Create the chart within it's "holding" node
-              var pieChart = new Chart('user_summary_chart1');
-
-              // Add the only/default plot
-              pieChart.setTheme(theme);
-
-              // Add the only/default plot
-              pieChart.addPlot("default", {
-                type: PiePlot, // our plot2d/Pie module reference as type value
-                radius: 50,
-                fontColor: "black",
-                labelOffset: 0
-              });
-
-              var chartData = [10, 14,33,5,8];
-
-              // Add the series of data
-              pieChart.addSeries('January', chartData);
-
-              // Create the slice mover
-              var mag = new MoveSlice(pieChart, 'default');
-
-              // Render the chart!
-              pieChart.render();
+{#              var pieChart = new Chart('user_summary_chart1');#}
+{##}
+{#              // Add the only/default plot#}
+{#              pieChart.setTheme(theme);#}
+{##}
+{#              // Add the only/default plot#}
+{#              pieChart.addPlot("default", {#}
+{#                type: PiePlot, // our plot2d/Pie module reference as type value#}
+{#                radius: 50,#}
+{#                fontColor: "black",#}
+{#                labelOffset: 0#}
+{#              });#}
+{##}
+{#              var chartData = [10, 14,33,5,8];#}
+{##}
+{#              // Add the series of data#}
+{#              pieChart.addSeries('January', chartData);#}
+{##}
+{#              // Create the slice mover#}
+{#              var mag = new MoveSlice(pieChart, 'default');#}
+{##}
+{#              // Render the chart!#}
+{#              pieChart.render();#}
 
               // UPDATE USER BUTTON
               var update_user_button = dialogCaller({
