@@ -20,6 +20,7 @@ Stalker Changes
   * Fix: Schedule button is now working properly.
   * Fix: Fixed Image Format creation.
   * Fix: Fixed Filename Template update dialog routine.
+  * Fix: Fixed entity_types in Filename Template creation UI.
 
 0.2.0.b2
 --------
