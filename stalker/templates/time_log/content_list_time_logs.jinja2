@@ -18,71 +18,76 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='view_time_logs'>
-  <div id='time_logs_data_grid'></div>
+    <div id='time_logs_data_grid'></div>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry',
-    'dojo/data/ObjectStore', 'dojox/grid/DataGrid', 'dojo/store/Memory',
-    'dijit/form/FilteringSelect', 'dojo/store/JsonRest',
-    'stalker/fieldUpdater', 'stalker/dialogCaller', 'stalker/gotoLink','dojo/on', 'dojo/query',
-    'dojo/ready'],
-          function(registry, ObjectStore, DataGrid, Memory, FilteringSelect,
-                   JsonRest, fieldUpdater, dialogCaller, gotoLink, on, query, ready){
+    require([
+        'dojo/data/ObjectStore',
+        'dojo/store/Memory',
+        'dojo/store/JsonRest',
 
-            ready(function(){
-
-              var time_logs_DataGrid = new DataGrid({
-                id: 'time_logs_data_grid',
-                width: '100%',
-                autoHeight: true,
-                singleClickEdit: true,
-                escapeHTMLInData: false,
-                rowSelector: '20px'
-              }, 'time_logs_data_grid');
-
-              {#              var append_time_log_button = dialogCaller({#}
-              {#                label: 'Append User',#}
-              {#                dialog_id: 'append_time_log_dialog',#}
-              {#                content_creator: append_time_log_dialog_creator,#}
-              {#                attach_to: 'view_time_logs_append_time_log_button',#}
-              {#                related_field_updater: time_logs_DataGrid_updater,#}
-              {#                data_id: '{{ entity.id }}'#}
-              {#              });#}
-
-              time_logs_DataGrid.startup();
-              {#              append_time_log_button.startup();#}
+        'dojox/grid/DataGrid',
 
 
+        'stalker/dialogs',
+        'stalker/dialogCaller',
+        'stalker/gotoLink',
 
-              function time_logs_DataGrid_updater(){
-
-                var time_log_memory = new JsonRest({
-                  target: '/get/time_logs_byEntity/{{ entity.id }}'
-                });
-
-                time_log_memory.query().then(function(data){
-
-                  var my_store =  new ObjectStore({ objectStore:new Memory({ data: data }) });
-
-                  var structure = [
-                    {name: 'Thumbnail',                      width: '100px'},
-                    {name: 'Name',         field: 'name',    width: '100px'}
-                  ];
-
-                  time_logs_DataGrid.set('store', my_store );
-                  time_logs_DataGrid.set('structure', structure );
-
-                  gotoLink();
-
-                });
-
-              }
+        'dojo/domReady!'
+    ], function (ObjectStore, DataGrid, Memory, JsonRest, dialogs,
+                 dialogCaller, gotoLink) {
 
 
+        var time_logs_DataGrid = new DataGrid({
+            id: 'time_logs_data_grid',
+            width: '100%',
+            autoHeight: true,
+            singleClickEdit: true,
+            escapeHTMLInData: false,
+            rowSelector: '20px'
+        }, 'time_logs_data_grid');
 
-              time_logs_DataGrid_updater();
+        {#              var append_time_log_button = dialogCaller({#}
+        {#                label: 'Append User',#}
+        {#                dialog_id: 'append_time_log_dialog',#}
+        {#                content_creator: dialogs.append_time_log_dialog,#}
+        {#                attach_to: 'view_time_logs_append_time_log_button',#}
+        {#                related_field_updater: time_logs_DataGrid_updater,#}
+        {#                data_id: '{{ entity.id }}'#}
+        {#              });#}
+
+        time_logs_DataGrid.startup();
+        {#              append_time_log_button.startup();#}
+
+
+        function time_logs_DataGrid_updater() {
+
+            var time_log_memory = new JsonRest({
+                target: '/get/time_logs_byEntity/{{ entity.id }}'
             });
-          });
+
+            time_log_memory.query().then(function (data) {
+
+                var my_store = new ObjectStore({ objectStore: new Memory({ data: data }) });
+
+                var structure = [
+                    {name: 'Thumbnail', width: '100px'},
+                    {name: 'Name', field: 'name', width: '100px'}
+                ];
+
+                time_logs_DataGrid.set('store', my_store);
+                time_logs_DataGrid.set('structure', structure);
+
+                gotoLink();
+
+            });
+
+        }
+
+
+        time_logs_DataGrid_updater();
+
+    });
 </script>
 

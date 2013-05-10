@@ -33,113 +33,116 @@
         "dgrid/editor",
         'dojo/store/Memory',
         'dojo/store/JsonRest',
+        'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
         'dojo/on',
         'dojo/query',
-        'dojo/domReady!'],
-            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, JsonRest, fieldUpdater, dialogCaller, on, query) {
+        'dojo/domReady!'
+    ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
+                 editor, Memory, JsonRest, dialogs, fieldUpdater, dialogCaller,
+                 on, query) {
 
 
-                var users_DataGrid = new Grid({
-                    id: 'users_data_grid',
-                    width: '100%',
-                    autoHeight: true
-                }, 'users_data_grid');
+        var users_DataGrid = new Grid({
+            id: 'users_data_grid',
+            width: '100%',
+            autoHeight: true
+        }, 'users_data_grid');
 
-                var append_user_button = dialogCaller({
-                    label: 'Append User',
-                    dialog_id: 'append_user_dialog',
-                    content_creator: append_user_dialog_creator,
-                    attach_to: 'view_users_append_user_button',
-                    related_field_updater: users_DataGrid_updater,
-                    data_id: '{{ entity.id }}'
-                });
+        var append_user_button = dialogCaller({
+            label: 'Append User',
+            dialog_id: 'append_user_dialog',
+            content_creator: dialogs.append_user_dialog,
+            attach_to: 'view_users_append_user_button',
+            related_field_updater: users_DataGrid_updater,
+            data_id: '{{ entity.id }}'
+        });
 
-                append_user_button.startup();
-
-
-                function users_DataGrid_updater() {
-                    var user_memory = new JsonRest({
-                        target: '/get/users_byEntity/{{ entity.id }}'
-                    });
-
-                    user_memory.query().then(function (data) {
+        append_user_button.startup();
 
 
-                        var columns = [
-                            {
-                                label: "Thumbnail",
-                                field: 'thumbnail',
-                                sortable:false,
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
-                                    return '<img width= "60px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}">';
-                                }
-                            },
-                            {
-                                field: 'name',
-                                label: "Name",
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
-
-                                    var targetPane = "'central_content'";
-                                    var address = "'view/user/" + value.id + "'";
-
-                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a><br/>('+ value.login +')';
-                                }
-                            },
-                            {
-                                field: 'email',
-                                label: "E-mail"
-                            },
-                            {
-                                field: 'tasksCount',
-                                label: "Tasks"
-                            },
-                            {
-                                field: 'departments',
-                                label: "Departments",
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
-                                    return value.departments + '<br/>';
-                                }
-                            },
-                            {
-                                field: 'groups',
-                                label: "Groups",
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
-                                    return value.groups + '<br/>';
-                                }
-                            },
-                            {
-                                field: 'ticketsCount',
-                                label: "Open Tickets"
-                            }
-                        ];
-
-
-                        users_DataGrid.renderArray(data);
-
-                        users_DataGrid.set('columns', columns);
-
-
-                    });
-
-                }
-
-
-                users_DataGrid_updater();
+        function users_DataGrid_updater() {
+            var user_memory = new JsonRest({
+                target: '/get/users_byEntity/{{ entity.id }}'
             });
+
+            user_memory.query().then(function (data) {
+
+
+                var columns = [
+                    {
+                        label: "Thumbnail",
+                        field: 'thumbnail',
+                        sortable: false,
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
+                            return '<img width= "60px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}">';
+                        }
+                    },
+                    {
+                        field: 'name',
+                        label: "Name",
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
+
+                            var targetPane = "'central_content'";
+                            var address = "'view/user/" + value.id + "'";
+
+                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a><br/>(' + value.login + ')';
+                        }
+                    },
+                    {
+                        field: 'email',
+                        label: "E-mail"
+                    },
+                    {
+                        field: 'tasksCount',
+                        label: "Tasks"
+                    },
+                    {
+                        field: 'departments',
+                        label: "Departments",
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
+                            return value.departments + '<br/>';
+                        }
+                    },
+                    {
+                        field: 'groups',
+                        label: "Groups",
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
+                            return value.groups + '<br/>';
+                        }
+                    },
+                    {
+                        field: 'ticketsCount',
+                        label: "Open Tickets"
+                    }
+                ];
+
+
+                users_DataGrid.renderArray(data);
+
+                users_DataGrid.set('columns', columns);
+
+
+            });
+
+        }
+
+
+        users_DataGrid_updater();
+    });
 
 </script>
 

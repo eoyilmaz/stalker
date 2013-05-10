@@ -2,6 +2,22 @@
 Stalker Changes
 ===============
 
+0.2.0.b3
+--------
+
+* SOM:
+  * Update: FilenameTemplate's are not ``strictly typed`` anymore.
+  * Update: Removed the FilenameTemplate type initialization, FilenameTemplates
+    do not depend on Types anymore.
+* WebUI:
+  * Update: Updated to Dojo 1.9
+  * Update: stalker.js is renamed to dialogs.js and it is now fully compatible
+    with Dojo AMD.
+  * Fix: Fixed fieldUpdater.js to work properly with Dojo 1.9 especially for
+    MultiSelect widgets.
+  * Fix: Separated the dialog and action routes for Structure.
+  * Fix: Fixed unnecessary module imports in stalker.js.
+
 0.2.0.b2
 --------
 
@@ -23,32 +39,34 @@ Stalker Changes
     * Fix: The default ACLs for determining the permissions are now working
       properly.
 * WebUI:
-  * Update: Logged in work times will now be visible in gantt charts as a green
-    bar in the TaskBar div.
-  * Fix: The working hours were not correctly passed to the studio instance
-    in Studio creation.
-  * Fix: "Append User Dialog" is now working properly.
-  * Update: Department menus under 'Crew' menu are now showing the department
-    users.
-  * Update: Color choosers in "Create Status Dialog" now have colors picked by default
-    for BG and FG colors.
-  * Update: Combined ``user_create_dialog`` and ``user_update_dialog`` into one.
-  * Update: Replaced DataGrid objects with dgrid.
-  * Update: Added navigation bar for assets, shots, sequences.
-  * Update: Combined ``project_create_dialog`` and ``project_update_dialog`` into one.
+  * Fix: ``user_create_dialog`` now shows and updates groups.
   * Fix: Updating a project now correctly refreshes the ``project_summary``
     content pane.
-  * Update: Merged the 'Crew' menu creation code in to one single
-    teamMenuCreator.js, which is able to create menus for any groups and faux
-    groups.
-  * Fix: ``user_create_dialog`` now shows and updates groups.
-  * Update: All DataGrid field updated with dgrid class.
-  * Add: Placeholder images added for user and department.
-  * Change: Colors for the layouts are changed with MiamiNice PieChart's color.
-  * Add: Added update group dialog.
   * Fix: Separated the dialog and action routes for ImageFormat.
   * Fix: Separated the dialog and action routes for Asset.
   * Fix: Separated the dialog and action routes for Repository.
+  * Fix: The working hours were not correctly passed to the studio instance
+    in Studio creation.
+  * Fix: "Append User Dialog" is now working properly.
+  * Update: Combined ``user_create_dialog`` and ``user_update_dialog`` into
+    one.
+  * Update: Logged in work times will now be visible in gantt charts as a green
+    bar in the TaskBar div.
+  * Update: Department menus under 'Crew' menu are now showing the department
+    users.
+  * Update: Color choosers in "Create Status Dialog" now have colors picked by
+    default for BG and FG colors.
+  * Update: Replaced DataGrid objects with dgrid.
+  * Update: Added navigation bar for assets, shots, sequences.
+  * Update: Combined ``project_create_dialog`` and ``project_update_dialog``
+    into one.
+  * Update: Merged the 'Crew' menu creation code in to one single
+    teamMenuCreator.js, which is able to create menus for any groups and faux
+    groups.
+  * Update: All DataGrid field updated with dgrid class.
+  * Add: Placeholder images added for user and department.
+  * Add: Added update group dialog.
+  * Change: Colors for the layouts are changed with MiamiNice PieChart's color.
 * jQueryGantt:
   * Update: Replaced the ``duration`` column with ``timing`` which correctly
     shows the schedule timing info of the related task.
@@ -64,7 +82,7 @@ Stalker Changes
 0.2.0.b1
 --------
 
-* WorkingHours.is_working_hour() is working now.
+* Fix: WorkingHours.is_working_hour() is working now.
 * WorkingHours class is moved from stalker.models.project to
   stalker.models.studio module.
 * ``daily_working_hours`` attribute is moved from

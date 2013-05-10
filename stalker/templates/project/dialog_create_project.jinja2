@@ -141,7 +141,7 @@
                 </td>
             </tr>
 
-            {# STATUS LIST #}
+            {# STATUS#}
             <tr>
                 <td class='label_column'>
                     <label for='project_status'>Status</label>
@@ -164,535 +164,547 @@
 </div>
 
 <script type='text/javascript'>
-require(['dijit/registry', 'dijit/form/Form',
-    'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-    'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect',
-    'dijit/form/Button', 'dojo/store/JsonRest', 'dojo/date', 'dojo/date/stamp',
-    'dojo/date/locale', 'dijit/form/DateTextBox', 'stalker/submitForm',
-    'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/ready'],
-        function (registry, Form, ValidationTextBox, TextBox, NumberTextBox, FilteringSelect, Button, JsonRest, date, stamp, locale, DateTextBox, submitForm, fieldUpdater, dialogCaller, ready) {
+require([
+    'dojo/store/JsonRest',
+    'dojo/date',
+    'dojo/date/stamp',
+    'dojo/date/locale',
 
-            ready(function () {
-                // ********************************************************************
-                // Form
-                var project_form = new Form({
-                    id: 'project_form'
-                }, 'project_form');
-                
-                // get the dialog
-                var dialog = project_form.getParent();
-                
+    'dijit/registry',
+    'dijit/form/Form',
+    'dijit/form/ValidationTextBox',
+    'dijit/form/TextBox',
+    'dijit/form/NumberTextBox',
+    'dijit/form/FilteringSelect',
+    'dijit/form/Button',
+    'dijit/form/DateTextBox',
 
-                // ********************************************************************
-                // Name
-                var name_textBox = new ValidationTextBox({
-                    name: 'name',
-                    label: 'Name',
-                    required: true,
-                    placeHolder: 'Enter a name',
-                    {% if mode=='UPDATE' %}
-                        value: '{{ project.name }}'
-                    {% endif %}
-                }, 'project_name');
-                name_textBox.startup();
+    'stalker/dialogs',
+    'stalker/submitForm',
+    'stalker/fieldUpdater',
+    'stalker/dialogCaller',
+    'stalker/dialogCreator',
 
+    'dojo/domReady!'
+], function (JsonRest, date, stamp, locale, registry, Form, ValidationTextBox,
+             TextBox, NumberTextBox, FilteringSelect, Button, DateTextBox,
+             dialogs, submitForm, fieldUpdater, dialogCaller, dialogCreator) {
 
-                // ********************************************************************
-                // Code
-                var code_textBox = new ValidationTextBox({
-                    name: 'code',
-                    label: 'Code',
-                    required: true,
-                    placeHolder: 'Enter a code',
-                    {% if mode=='UPDATE' %}
-                        value: '{{ project.code }}',
-                        disabled: true // cannot change the code for an already created project
-                    {% endif %}
-                }, 'project_code');
-                name_textBox.startup();
+    var url;
+    var name;
+    var code;
+    var start_date_value = new Date(); // set it today by default
+    var end_date_value = new Date(); // set it today by default
+    var imf_filteringSelect_selected_value = '';
+    var fps = 25;
+    var repository_filteringSelect_selected_value = '';
+    var structure_filteringSelect_selected_value = '';
+    var lead_filteringSelect_selected_value = '';
+    var status_filteringSelect_selected_value = '';
 
-
-                // **********************************************************************
-                // Start Date
-                
-                var start_date_value = new Date(); // set it today by default
-                
-                {% if mode=='UPDATE' %}
-                    start_date_value = new Date(parseInt({{ project.start.strftime('%s') }})*1000);
-                {% endif %}
-                
-                var start_dateTextBox = new DateTextBox({
-                    name: 'start',
-                    label: 'Start Date',
-                    value: start_date_value,
-                    required: true,
-                    datePattern: 'dd-mm-yyyy',
-                    onChange: function () {
-                        if (this.focused) {
-                            update_dates(
-                                    start_dateTextBox.getValue(),
-                                    end_dateTextBox.getValue(),
-                                    null
-                            );
-                        }
-                    }
-                }, 'project_start');
-                start_dateTextBox.startup();
-
-                // **********************************************************************
-                // End Date
-                var end_date_value = new Date(); // set it today by default
-                
-                {% if mode=='UPDATE' %}
-                    end_date_value = new Date(parseInt({{ project.end.strftime('%s') }})*1000);
-                {% endif %}
-                
-                var end_dateTextBox = new DateTextBox({
-                    name: 'end',
-                    label: 'End Date',
-                    value: end_date_value,
-                    required: true,
-                    datePattern: 'dd-mm-yyyy',
-                    onChange: function () {
-                        if (this.focused) {
-                            update_dates(
-                                    start_dateTextBox.getValue(),
-                                    end_dateTextBox.getValue(),
-                                    null
-                            );
-                        }
-                    }
-                }, 'project_end');
-                end_dateTextBox.startup();
+    {% if mode=='CREATE' %}
+        url = '{{ request.route_url("create_project") }}';
+    {% elif mode=='UPDATE' %}
+        url = '{{ request.route_url("update_project") }}';
+        name = '{{ project.name }}';
+        code = '{{ project.code }}';
+        start_date_value = new Date(parseInt({{ project.start.strftime('%s') }}) * 1000);
+        end_date_value = new Date(parseInt({{ project.end.strftime('%s') }}) * 1000);
+        imf_filteringSelect_selected_value = '{{ project.image_format.id }}';
+        fps = {{ project.fps }};
+        repository_filteringSelect_selected_value = '{{ project.repository.id }}';
+        structure_filteringSelect_selected_value = '{{ project.structure.id }}';
+        lead_filteringSelect_selected_value = '{{ project.lead.id }}';
+        status_filteringSelect_selected_value = '{{ project.status.id }}';
+    {% endif %}
 
 
-                // **********************************************************************
-                // Duration
-                var duration_numberTextBox = new NumberTextBox({
-                    name: 'duration',
-                    label: 'Duration',
-                    value: 0,
-                    onKeyUp: function () {
-                        if (this.focused) {
-                            update_dates(
-                                    start_dateTextBox.getValue(),
-                                    null,
-                                    this.get('value')
-                            )
-                        }
-                    }
-                }, 'project_duration');
-                duration_numberTextBox.startup();
+    // ************************************************************************
+    // Form
+    var project_form = new Form({}, 'project_form');
 
-                var update_dates = function (start, end, duration) {
-                    if (duration == null) {
-                        // update the duration
-                        duration_numberTextBox.set(
-                                'value',
-                                date.difference(start, end)
-                        );
-                    } else if (end == null) {
-                        // update end date
-                        end_dateTextBox.set(
-                                'value',
-                                date.add(
-                                        start,
-                                        'day',
-                                        duration
-                                )
-                        );
-                    }
-                };
+    // get the dialog
+    var dialog = project_form.getParent();
+
+
+    // ************************************************************************
+    // Name
+    var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        required: true,
+        placeHolder: 'Enter a name',
+        value: name
+    }, 'project_name');
+    name_textBox.startup();
+
+
+    // ************************************************************************
+    // Code
+    var code_textBox = new ValidationTextBox({
+        name: 'code',
+        label: 'Code',
+        required: true,
+        placeHolder: 'Enter a code',
+        {% if mode=='UPDATE' %}
+            disabled: true
+            // cannot change the code for an already created project
+        {% endif %}
+    }, 'project_code');
+    name_textBox.startup();
+
+
+    // **********************************************************************
+    // Start Date
+    var start_dateTextBox = new DateTextBox({
+        name: 'start',
+        label: 'Start Date',
+        value: start_date_value,
+        required: true,
+        datePattern: 'dd-mm-yyyy',
+        onChange: function () {
+            if (this.focused) {
                 update_dates(
-                    start_dateTextBox.getValue(),
-                    end_dateTextBox.getValue(),
-                    null
+                        start_dateTextBox.getValue(),
+                        end_dateTextBox.getValue(),
+                        null
                 );
+            }
+        }
+    }, 'project_start');
+    start_dateTextBox.startup();
+
+    // **********************************************************************
+    // End Date
+    var end_dateTextBox = new DateTextBox({
+        name: 'end',
+        label: 'End Date',
+        value: end_date_value,
+        required: true,
+        datePattern: 'dd-mm-yyyy',
+        onChange: function () {
+            if (this.focused) {
+                update_dates(
+                        start_dateTextBox.getValue(),
+                        end_dateTextBox.getValue(),
+                        null
+                );
+            }
+        }
+    }, 'project_end');
+    end_dateTextBox.startup();
 
 
-                // ********************************************************************
-                // Image Format
-                //
-                // The memory
-                var imf_memory = new JsonRest({
-                    target: '/get/image_formats'
+    // **********************************************************************
+    // Duration
+    var duration_numberTextBox = new NumberTextBox({
+        name: 'duration',
+        label: 'Duration',
+        value: 0,
+        onKeyUp: function () {
+            if (this.focused) {
+                update_dates(
+                        start_dateTextBox.getValue(),
+                        null,
+                        this.get('value')
+                )
+            }
+        }
+    }, 'project_duration');
+    duration_numberTextBox.startup();
+
+    var update_dates = function (start, end, duration) {
+        if (duration == null) {
+            // update the duration
+            duration_numberTextBox.set(
+                    'value',
+                    date.difference(start, end)
+            );
+        } else if (end == null) {
+            // update end date
+            end_dateTextBox.set(
+                    'value',
+                    date.add(
+                            start,
+                            'day',
+                            duration
+                    )
+            );
+        }
+    };
+    update_dates(
+            start_dateTextBox.getValue(),
+            end_dateTextBox.getValue(),
+            null
+    );
+
+
+    // ********************************************************************
+    // Image Format
+    //
+    // The memory
+    var imf_memory = new JsonRest({
+        target: '/get/image_formats'
+    });
+
+    // The Field
+    var imf_filteringSelect = new FilteringSelect({
+        name: 'image_format',
+        label: 'Image Format',
+        required: true
+    }, 'project_image_format');
+    imf_filteringSelect.startup();
+
+    var imf_data_length = 0;
+
+    var set_imf_filteringSelect_value = function (data) {
+        // TODO: crossing scopes, this is ugly!!! please fix this!!!
+        // data comes from the fieldUpdater
+        // the internal vars are coming from outside of the current functions'
+        // scope, please pass anything with parameters instead of hacking the
+        // scope
+        //
+        // Yes I know ecmaScript can handle it, but it is not a good practice
+        // 
+        if (imf_data_length != 0 && imf_data_length < data.length) {
+            imf_filteringSelect_selected_value = data[data.length - 1].id;
+        }
+        imf_filteringSelect.set('value', imf_filteringSelect_selected_value);
+        imf_data_length = data.length;
+    };
+
+    // ***********
+    // The Updater
+    //
+    // supply a function to refresh the content of the format
+    var imf_field_updater = fieldUpdater({
+        'memory': imf_memory,
+        'widget': imf_filteringSelect,
+        'selected': imf_filteringSelect_selected_value,
+        'callBack': set_imf_filteringSelect_value
+    });
+
+    // run the function once to fill the data for the first time
+    imf_field_updater({animate: false});
+
+    // New Image Format Button
+    var create_image_format_button = dialogCaller({
+        label: 'New',
+        dialog_id: 'create_image_format_dialog',
+        content_creator: dialogs.create_image_format_dialog,
+        attach_to: 'project_create_image_format_button',
+        related_field_updater: imf_field_updater
+    });
+    create_image_format_button.startup();
+
+    // Update Image Format Button
+    var update_image_format_button = dialogCaller({
+        label: 'Update',
+        dialog_id: 'update_image_format_dialog',
+        content_creator: dialogs.update_image_format_dialog,
+        attach_to: 'project_update_image_format_button',
+        related_field_updater: imf_field_updater,
+        data_id: function () {
+            imf_filteringSelect_selected_value = imf_filteringSelect.get('value');
+            return imf_filteringSelect_selected_value;
+        }
+    });
+    update_image_format_button.startup();
+
+
+    // ********************************************************************
+    // FPS
+    var fps_numberTextBox = new NumberTextBox({
+        name: 'fps',
+        label: 'FPS',
+        value: fps,
+        placeHolder: '',
+        required: true
+    }, 'project_fps');
+    fps_numberTextBox.startup();
+
+
+    // ********************************************************************
+    // REPOSITORY
+    // The Memory
+    var repository_memory = new JsonRest({
+        target: '/get/repositories'
+    });
+
+    var repository_filteringSelect = new FilteringSelect({
+        name: 'repository_id',
+        label: 'Repository',
+        required: true
+    }, 'project_repository');
+    repository_filteringSelect.startup();
+
+    var repository_data_length = 0;
+    var set_repository_filteringSelect_value = function (data) {
+        //
+        // TODO: please see my comments on image format callBackFunction
+        //
+        if (repository_data_length != 0 && repository_data_length < data.length) {
+            repository_filteringSelect_selected_value = data[data.length - 1].id;
+        }
+        repository_filteringSelect.set('value', repository_filteringSelect_selected_value);
+        repository_data_length = data.length;
+    };
+
+    // The Updater
+    var repo_field_updater = fieldUpdater({
+        'memory': repository_memory,
+        'widget': repository_filteringSelect,
+        'selected': repository_filteringSelect_selected_value,
+        'callBack': set_repository_filteringSelect_value
+    });
+    // run the function to fill the data
+    repo_field_updater({animate: false});
+
+    // New Repository Button
+    var create_repository_button = dialogCaller({
+        label: 'New',
+        dialog_id: 'create_repository_dialog',
+        content_creator: dialogs.create_repository_dialog,
+        attach_to: 'project_create_repository_button',
+        related_field_updater: repo_field_updater
+    });
+    create_repository_button.startup();
+
+    // Update Repository Button
+    var update_repository_button = dialogCaller({
+        label: 'Update',
+        dialog_id: 'update_repository_dialog',
+        content_creator: dialogs.update_repository_dialog,
+        attach_to: 'project_update_repository_button',
+        related_field_updater: repo_field_updater,
+        data_id: function () {
+            repository_filteringSelect_selected_value = repository_filteringSelect.get('value');
+            return repository_filteringSelect.get('value');
+        }
+    });
+    update_repository_button.startup();
+
+
+    // ********************************************************************
+    // STRUCTURE
+    //
+    // The memory
+    var structure_memory = new JsonRest({
+        target: '/get/structures'
+    });
+
+    // The Field
+    var structure_filteringSelect = new FilteringSelect({
+        name: 'structure_id',
+        label: 'Structure',
+        required: true
+    }, 'project_structure');
+    structure_filteringSelect.startup();
+
+
+    var structure_data_length = 0;
+    var set_structure_filteringSelect_value = function (data) {
+        if (structure_data_length != 0 && structure_data_length < data.length) {
+            structure_filteringSelect_selected_value = data[data.length - 1].id;
+        }
+        structure_filteringSelect.set('value', structure_filteringSelect_selected_value);
+        structure_data_length = data.length;
+    };
+
+    // The Updater
+    var structure_field_updater = fieldUpdater({
+        'memory': structure_memory,
+        'widget': structure_filteringSelect,
+        'selected': structure_filteringSelect_selected_value,
+        'callBack': set_structure_filteringSelect_value
+    });
+    // call the updater to fill the field for the first time
+    structure_field_updater({animate: false});
+
+    // New Structure Button
+    var create_structure_button = dialogCaller({
+        label: 'New',
+        dialog_id: 'create_structure_dialog',
+        content_creator: dialogs.create_structure_dialog,
+        attach_to: 'project_create_structure_button',
+        related_field_updater: structure_field_updater
+    });
+    create_structure_button.startup();
+
+
+    // UPDATE STRUCTURE BUTTON
+    var update_structure_button = dialogCaller({
+        label: 'Update',
+        dialog_id: 'update_structure_dialog',
+        content_creator: dialogs.update_structure_dialog,
+        attach_to: 'project_update_structure_button',
+        related_field_updater: structure_field_updater,
+        data_id: function () {
+            structure_filteringSelect_selected_value = structure_filteringSelect.get('value');
+            return structure_filteringSelect_selected_value;
+        }
+    });
+    update_structure_button.startup();
+
+
+    // ********************************************************************
+    // LEAD
+    var lead_memory = new JsonRest({
+        target: '/get/users'
+    });
+
+    // The Field
+    var lead_filteringSelect = new FilteringSelect({
+        name: 'lead_id',
+        label: 'User',
+        required: true
+    }, 'project_lead');
+    lead_filteringSelect.startup();
+
+    var lead_data_length = 0;
+    var set_lead_filteringSelect_value = function (data) {
+        if (lead_data_length != 0 && lead_data_length < data.length) {
+            lead_filteringSelect_selected_value = data[data.length - 1].id;
+        }
+        lead_filteringSelect.set('value', lead_filteringSelect_selected_value);
+        lead_data_length = data.length;
+    };
+
+    // The Updater
+    var lead_field_updater = fieldUpdater({
+        'memory': lead_memory,
+        'widget': lead_filteringSelect,
+        'selected': lead_filteringSelect_selected_value,
+        'callBack': set_lead_filteringSelect_value
+    });
+    lead_field_updater({animate: false});
+
+    // New Lead Button
+    var create_lead_button = dialogCaller({
+        label: 'New',
+        dialog_id: 'create_user_dialog',
+        content_creator: dialogs.create_user_dialog,
+        attach_to: 'project_create_lead_button',
+        related_field_updater: lead_field_updater
+    });
+    create_lead_button.startup();
+
+    // Update Lead Button
+    var update_lead_button = dialogCaller({
+        label: 'Update',
+        dialog_id: 'update_user_dialog',
+        content_creator: dialogs.update_user_dialog,
+        attach_to: 'project_update_lead_button',
+        related_field_updater: lead_field_updater,
+        data_id: function () {
+            lead_filteringSelect_selected_value = lead_filteringSelect.get('value');
+            return lead_filteringSelect_selected_value;
+        }
+    });
+    update_lead_button.startup();
+
+    // ********************************************************************
+    // Status List
+    //
+    // The Memory
+    var status_memory = new JsonRest({
+        target: 'get/statuses_for/Project'
+    });
+
+    // The Field
+    var status_filteringSelect = new FilteringSelect({
+        name: 'status_id',
+        label: 'Status',
+        required: true
+    }, 'project_status');
+    status_filteringSelect.startup();
+
+
+    var update_add_status_button_function = function (data) {
+        //
+        // if there are no Status,
+        //     set the button function to create a status list
+        //
+        // if there are any Status,
+        //     set the button function to update the status list
+        //
+        if (data.length > 0) { // Some Status exists
+            console.log('code is here 1');
+            add_status_button.set('onClick', function () {
+                console.log('code is here 3');
+                var myDialog = dialogCreator({
+                    dialog_id: 'update_status_list_dialog',
+                    data_id: 'Project',
+                    content_creator: dialogs.update_status_list_dialog,
+                    related_field_updater: status_field_updater
                 });
-
-                // The Field
-                var imf_filteringSelect = new FilteringSelect({
-                    name: 'image_format',
-                    label: 'Image Format',
-                    required: true
-                }, 'project_image_format');
-                imf_filteringSelect.startup();
-
-                var imf_filteringSelect_selected_value = '';
-                var imf_data_length = 0;
-            
-                {% if mode=='UPDATE' %}
-                    imf_filteringSelect_selected_value = '{{ project.image_format.id }}';
-                {% endif %}
-                
-                var set_imf_filteringSelect_value = function (data) {
-                    if (imf_data_length != 0 && imf_data_length < data.length) {
-                        imf_filteringSelect_selected_value = data[data.length - 1].id;
-                    }
-                    imf_filteringSelect.set('value', imf_filteringSelect_selected_value);
-                    imf_data_length = data.length;
-                };
-
-                // The Updater
-                // supply a function to refresh the content of the format
-                var imf_field_updater = fieldUpdater({
-                    'memory': imf_memory,
-                    'widget': imf_filteringSelect,
-                    'selected': imf_filteringSelect_selected_value,
-                    'callBack': set_imf_filteringSelect_value
-                });
-                // run the function to fill the data for the first time
-                imf_field_updater({animate: false});
-
-                // New Image Format Button
-                var create_image_format_button = dialogCaller({
-                    label: 'New',
-                    dialog_id: 'create_image_format_dialog',
-                    content_creator: create_image_format_dialog_creator,
-                    attach_to: 'project_create_image_format_button',
-                    related_field_updater: imf_field_updater
-                });
-                create_image_format_button.startup();
-
-                // Update Image Format Button
-                var update_image_format_button = dialogCaller({
-                    label: 'Update',
-                    dialog_id: 'update_image_format_dialog',
-                    content_creator: update_image_format_dialog_creator,
-                    attach_to: 'project_update_image_format_button',
-                    related_field_updater: imf_field_updater,
-                    data_id: function () {
-                        imf_filteringSelect_selected_value = imf_filteringSelect.get('value');
-                        return imf_filteringSelect_selected_value;
-                    }
-                });
-                update_image_format_button.startup();
-
-
-                // ********************************************************************
-                // FPS
-                var fps_numberTextBox = new NumberTextBox({
-                    name: 'fps',
-                    label: 'FPS',
-                    {% if mode=='CREATE' %}
-                        value: 25,
-                    {% elif mode=='UPDATE' %}
-                        value: {{ project.fps }},
-                    {% endif %}
-                    placeHolder: '',
-                    required: true
-                }, 'project_fps');
-                fps_numberTextBox.startup();
-
-
-                // ********************************************************************
-                // REPOSITORY
-                // The Memory
-                var repository_memory = new JsonRest({
-                    target: '/get/repositories'
-                });
-
-                var repository_filteringSelect = new FilteringSelect({
-                    name: 'repository_id',
-                    label: 'Repository',
-                    required: true
-                }, 'project_repository');
-                repository_filteringSelect.startup();
-
-                var repository_filteringSelect_selected_value = '';
-                var repository_data_length = 0;
-                
-                {% if mode=='UPDATE' %}
-                    repository_filteringSelect_selected_value = '{{ project.repository.id }}';
-                {% endif %}
-
-                var set_repository_filteringSelect_value = function (data) {
-                    if (repository_data_length != 0 && repository_data_length < data.length) {
-                        repository_filteringSelect_selected_value = data[data.length - 1].id;
-                    }
-                    repository_filteringSelect.set('value', repository_filteringSelect_selected_value);
-                    repository_data_length = data.length;
-                };
-
-                // The Updater
-                var repo_field_updater = fieldUpdater({
-                    'memory': repository_memory,
-                    'widget': repository_filteringSelect,
-                    'selected': repository_filteringSelect_selected_value,
-                    'callBack': set_repository_filteringSelect_value
-                });
-                // run the function to fill the data
-                repo_field_updater({animate: false});
-
-                // New Repository Button
-                var create_repository_button = dialogCaller({
-                    label: 'New',
-                    dialog_id: 'create_repository_dialog',
-                    content_creator: create_repository_dialog_creator,
-                    attach_to: 'project_create_repository_button',
-                    related_field_updater: repo_field_updater
-                });
-                create_repository_button.startup();
-
-                // Update Repository Button
-                var update_repository_button = dialogCaller({
-                    label: 'Update',
-                    dialog_id: 'update_repository_dialog',
-                    content_creator: update_repository_dialog_creator,
-                    attach_to: 'project_update_repository_button',
-                    related_field_updater: repo_field_updater,
-                    data_id: function () {
-                        repository_filteringSelect_selected_value = repository_filteringSelect.get('value');
-                        return repository_filteringSelect.get('value');
-                    }
-                });
-                update_repository_button.startup();
-
-
-                // ********************************************************************
-                // STRUCTURE
-                //
-                // The memory
-                var structure_memory = new JsonRest({
-                    target: '/get/structures'
-                });
-
-                // The Field
-                var structure_filteringSelect = new FilteringSelect({
-                    name: 'structure_id',
-                    label: 'Structure',
-                    required: true
-                }, 'project_structure');
-                structure_filteringSelect.startup();
-
-                var structure_filteringSelect_selected_value = '';
-                var structure_data_length = 0;
-                
-                {% if mode=='UPDATE' %}
-                    structure_filteringSelect_selected_value = '{{ project.structure.id }}';
-                {% endif %}
-
-                var set_structure_filteringSelect_value = function (data) {
-                    if (structure_data_length !=0 && structure_data_length < data.length) {
-                        structure_filteringSelect_selected_value = data[data.length - 1].id;
-                    }
-                    structure_filteringSelect.set('value', structure_filteringSelect_selected_value);
-                    structure_data_length = data.length;
-                };
-
-                // The Updater
-                var structure_field_updater = fieldUpdater({
-                    'memory': structure_memory,
-                    'widget': structure_filteringSelect,
-                    'selected': structure_filteringSelect_selected_value,
-                    'callBack': set_structure_filteringSelect_value
-                });
-                // call the updater to fill the field for the first time
-                structure_field_updater({animate: false});
-
-                // New Structure Button
-                var create_structure_button = dialogCaller({
-                    label: 'New',
-                    dialog_id: 'create_structure_dialog',
-                    content_creator: create_structure_dialog_creator,
-                    attach_to: 'project_create_structure_button',
-                    related_field_updater: structure_field_updater
-                });
-                create_structure_button.startup();
-
-
-                // UPDATE STRUCTURE BUTTON
-                var update_structure_button = dialogCaller({
-                    label: 'Update',
-                    dialog_id: 'update_structure_dialog',
-                    content_creator: update_structure_dialog_creator,
-                    attach_to: 'project_update_structure_button',
-                    related_field_updater: structure_field_updater,
-                    data_id: function () {
-                        structure_filteringSelect_selected_value = structure_filteringSelect.get('value');
-                        return structure_filteringSelect_selected_value;
-                    }
-                });
-                update_structure_button.startup();
-
-
-                // ********************************************************************
-                // LEAD
-                var lead_memory = new JsonRest({
-                    target: '/get/users'
-                });
-
-                // The Field
-                var lead_filteringSelect = new FilteringSelect({
-                    name: 'lead_id',
-                    label: 'User',
-                    required: true
-                }, 'project_lead');
-                lead_filteringSelect.startup();
-
-                var lead_filteringSelect_selected_value = '';
-                var lead_data_length = 0;
-
-                {% if mode=='UPDATE' %}
-                    lead_filteringSelect_selected_value = '{{ project.lead.id }}';
-                {% endif %}
-
-                var set_lead_filteringSelect_value = function (data) {
-                    if (lead_data_length != 0 && lead_data_length < data.length) {
-                        lead_filteringSelect_selected_value = data[data.length - 1].id;
-                    }
-                    lead_filteringSelect.set('value', lead_filteringSelect_selected_value);
-                    lead_data_length = data.length;
-                };
-
-                // The Updater
-                var lead_field_updater = fieldUpdater({
-                    'memory': lead_memory,
-                    'widget': lead_filteringSelect,
-                    'selected': lead_filteringSelect_selected_value,
-                    'callBack': set_lead_filteringSelect_value
-                });
-                lead_field_updater({animate: false});
-
-                // New Lead Button
-                var create_lead_button = dialogCaller({
-                    label: 'New',
-                    dialog_id: 'create_user_dialog',
-                    content_creator: create_user_dialog_creator,
-                    attach_to: 'project_create_lead_button',
-                    related_field_updater: lead_field_updater
-                });
-                create_lead_button.startup();
-
-                // Update Lead Button
-                var update_lead_button = dialogCaller({
-                    label: 'Update',
-                    dialog_id: 'update_user_dialog',
-                    content_creator: update_user_dialog_creator,
-                    attach_to: 'project_update_lead_button',
-                    related_field_updater: lead_field_updater,
-                    data_id: function () {
-                        lead_filteringSelect_selected_value = lead_filteringSelect.get('value');
-                        return lead_filteringSelect_selected_value;
-                    }
-                });
-                update_lead_button.startup();
-
-                // ********************************************************************
-                // Status List
-                //
-                // The Memory
-                var status_memory = new JsonRest({
-                    target: 'get/statuses_for/Project'
-                });
-
-                // The Field
-                var status_filteringSelect = new FilteringSelect({
-                    name: 'status_id',
-                    label: 'Status',
-                    required: true
-                }, 'project_status');
-                status_filteringSelect.startup();
-
-                var status_filteringSelect_selected_value = '';
-                {% if mode=='UPDATE' %}
-                    status_filteringSelect_selected_value = '{{ project.status.id }}';
-                {% endif %}
-
-                var update_button_function = function (data) {
-                    {% if mode=='CREATE' %}
-                        if (data.length > 0) {
-    
-                            add_status_button.set('onClick', function () {
-    
-                                var dialog = dijit.byId('update_status_list_dialog');
-    
-                                if (dialog != null) {
-                                    dialog.destroyRecursive();
-                                }
-                                dialog = update_status_list_dialog_creator('Project');
-                                // set the field updater
-                                dialog.set('related_field_updater', status_field_updater);
-                                // show the dialog
-                                dialog.show();
-                            });
-    
-                        }
-                    {% elif mode=='UPDATE' %}
-                        status_filteringSelect.set('value',status_filteringSelect_selected_value);
-                    {% endif %}
-                };
-
-                // The Updater
-                var status_field_updater = fieldUpdater({
-                    'memory': status_memory,
-                    'widget': status_filteringSelect,
-                    'callBack': update_button_function
-                });
-
-
-                var add_status_button = dialogCaller({
-                    label: 'Add Status',
-                    dialog_id: 'create_status_list_dialog',
-                    content_creator: create_status_list_dialog_creator,
-                    attach_to: 'project_add_status_button',
-                    related_field_updater: status_field_updater,
-                    data_id: 'Project'
-                });
-
-                add_status_button.startup();
-
-                status_field_updater({animate: true});
-
-                // ********************************************************************
-                // Ok Button
-                var ok_button = new Button({
-                    label: 'OK',
-                    type: 'button',
-                    onClick: function () {
-                        submitForm({
-                            dialog: dialog,
-                            form: project_form,
-                            additional_data: {
-                                start: stamp.toISOString(start_dateTextBox.value),
-                                end: stamp.toISOString(end_dateTextBox.value),
-                                {% if mode=='UPDATE' %}
-                                    'project_id': {{ project.id }}
-                                {% endif %}
-                            },
-                            {% if mode=='CREATE' %}
-                                url: '{{ request.route_url("create_project") }}',
-                            {% elif mode=='UPDATE' %}
-                                url: '{{ request.route_url("update_project") }}',
-                            {% endif %}
-                            method: 'POST'
-                        });
-                    }
-                }, 'project_submit_button');
-                ok_button.startup();
-
-                // ********************************************************************
-                // Cancel Button
-                var cancel_button = new Button({
-                    label: 'Cancel',
-                    type: 'button',
-                    onClick: function () {
-                        dialog.destroyRecursive();
-                    }
-                }, 'project_cancel_button');
-                cancel_button.startup();
-
-                project_form.startup();
-
+                console.log(myDialog);
+                myDialog.show();
             });
-        });
+        } else { // No Status
+            console.log('code is here 2');
+            add_status_button.set('onClick', function () {
+                var myDialog = dialogCreator({
+                    dialog_id: 'create_status_list_dialog',
+                    data_id: 'Project',
+                    content_creator: dialogs.create_status_list_dialog,
+                    related_field_updater: status_field_updater
+                });
+                myDialog.show();
+            });
+        }
+    };
+
+    // The Updater
+    var status_field_updater = fieldUpdater({
+        'memory': status_memory,
+        'widget': status_filteringSelect,
+        'selected': status_filteringSelect_selected_value,
+        'callBack': update_add_status_button_function
+    });
+
+    var add_status_button = Button({
+        label: 'Add Status'
+    }, 'project_add_status_button');
+
+
+    status_field_updater({animate: true});
+
+    // ********************************************************************
+    // Ok Button
+    var ok_button = new Button({
+        label: 'OK',
+        type: 'button',
+        onClick: function () {
+            submitForm({
+                dialog: dialog,
+                form: project_form,
+                additional_data: {
+                    start: stamp.toISOString(start_dateTextBox.value),
+                    end: stamp.toISOString(end_dateTextBox.value),
+                    {% if mode=='UPDATE' %}
+                        'project_id': {{ project.id }}
+                    {% endif %}
+                },
+                url: url,
+                method: 'POST'
+            });
+        }
+    }, 'project_submit_button');
+    ok_button.startup();
+
+    // ********************************************************************
+    // Cancel Button
+    var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function () {
+            dialog.destroyRecursive();
+        }
+    }, 'project_cancel_button');
+    cancel_button.startup();
+
+    project_form.startup();
+});
 </script>
 

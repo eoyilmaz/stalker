@@ -31,16 +31,13 @@
 
 <script type='text/javascript'>
     require([
-        "dojo/dom",
         'dijit/layout/BorderContainer',
         'dijit/layout/TabContainer',
         'dojox/layout/ContentPane',
-        'dojo/on',
-        'dijit/registry',
-        'dojo/domReady!'
-    ], function (dom, BorderContainer, TabContainer, ContentPane, on, registry, ready) {
 
-        {#    ready(function(){#}
+        'dojo/domReady!'
+    ], function (BorderContainer, TabContainer, ContentPane) {
+
         var group_BorderContainer = new BorderContainer({
             id: 'group_border_container',
             region: 'center',

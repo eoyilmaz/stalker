@@ -18,316 +18,308 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-  <form id='update_shot_form'>
-    <table style='width: 100%;'>
+    <form id='update_shot_form'>
+        <table style='width: 100%;'>
 
-        {# NAME #}
-      <tr>
-        <td class='label_column'>
-          <label for='update_shot_name'>Name</label>
-        </td>
-        <td class='input_column'>
-          <input id='update_shot_name'>
-        </td>
-      </tr>
+            {# NAME #}
+            <tr>
+                <td class='label_column'>
+                    <label for='update_shot_name'>Name</label>
+                </td>
+                <td class='input_column'>
+                    <input id='update_shot_name'>
+                </td>
+            </tr>
 
-        {# CODE #}
-      <tr>
-        <td class='label_column'>
-          <label for='update_shot_code'>Code</label>
-        </td>
-        <td class='input_column'>
-          <input id='update_shot_code'>
-        </td>
-      </tr>
+            {# CODE #}
+            <tr>
+                <td class='label_column'>
+                    <label for='update_shot_code'>Code</label>
+                </td>
+                <td class='input_column'>
+                    <input id='update_shot_code'>
+                </td>
+            </tr>
 
-        {# PROJECT #}
-      <tr>
-        <td class='label_column'>
-          <label for='update_shot_project'>Project</label>
-        </td>
-        <td class='input_column'>
-          <input id='update_shot_project'>
-        </td>
-      </tr>
+            {# PROJECT #}
+            <tr>
+                <td class='label_column'>
+                    <label for='update_shot_project'>Project</label>
+                </td>
+                <td class='input_column'>
+                    <input id='update_shot_project'>
+                </td>
+            </tr>
 
-        {# SEQUENCE #}
-      <tr>
-        <td class='label_column'>
-          <label for='update_shot_sequence'>Sequence</label>
-        </td>
-        <td class='input_column'>
-          <input id='update_shot_sequence'>
-        </td>
-        <td class='button_column'>
-          <button id='update_shot_create_sequence_button'>New</button>
-          <button id='update_shot_update_sequence_button'>Update</button>
-        </td>
-      </tr>
-      <tr>
-        <td class='label_column'>
-          <label for='update_shot_status'>Status</label>
-        </td>
-        <td class='input_column'>
-          <input id='update_shot_status'>
-        </td>
-        <td class='button_column'>
-          <button id='update_shot_add_status_button'>Add Status</button>
-        </td>
-      </tr>
+            {# SEQUENCE #}
+            <tr>
+                <td class='label_column'>
+                    <label for='update_shot_sequence'>Sequence</label>
+                </td>
+                <td class='input_column'>
+                    <input id='update_shot_sequence'>
+                </td>
+                <td class='button_column'>
+                    <button id='update_shot_create_sequence_button'>New
+                    </button>
+                    <button id='update_shot_update_sequence_button'>Update
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class='label_column'>
+                    <label for='update_shot_status'>Status</label>
+                </td>
+                <td class='input_column'>
+                    <input id='update_shot_status'>
+                </td>
+                <td class='button_column'>
+                    <button id='update_shot_add_status_button'>Add Status
+                    </button>
+                </td>
+            </tr>
 
-    </table>
-  </form>
+        </table>
+    </form>
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='update_shot_submit_button'>Submit</button>
-  <button id='update_shot_cancel_button'>Cancel</button>
+    <button id='update_shot_submit_button'>Submit</button>
+    <button id='update_shot_cancel_button'>Cancel</button>
 </div>
 
 <script type='text/javascript'>
-require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
-  'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-  'dijit/form/FilteringSelect', 'dijit/form/ComboBox', 'dijit/form/Button',
-  'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
-  'stalker/dialogCaller', 'dojo/ready'],
-        function(registry, Memory, Form, ValidationTextBox, TextBox,
-                 FilteringSelect, ComboBox, Button, JsonRest, submitForm,
-                 fieldUpdater, dialogCaller){
+    require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
+        'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
+        'dijit/form/FilteringSelect', 'dijit/form/ComboBox', 'dijit/form/Button',
+        'dojo/store/JsonRest', 'stalker/dialogs', 'stalker/submitForm',
+        'stalker/fieldUpdater', 'stalker/dialogCaller', 'dojo/domReady!'],
+            function (registry, Memory, Form, ValidationTextBox, TextBox,
+                      FilteringSelect, ComboBox, Button, JsonRest, dialogs,
+                      submitForm, fieldUpdater, dialogCaller) {
 
-          // **********************************************************************
-          // Form
-          var update_shot_form = new Form({
-            id: 'update_shot_form'
-          }, 'update_shot_form');
-
-
+                // **********************************************************************
+                // Form
+                var update_shot_form = new Form({
+                    id: 'update_shot_form'
+                }, 'update_shot_form');
 
 
-          // **********************************************************************
-          // Name
-          var name_textBox = new ValidationTextBox({
-            name: 'name',
-            label: 'Name',
-            placeHolder: 'Enter a name',
-            required: true,
-            value: '{{ shot.name }}'
-          }, 'update_shot_name');
-          name_textBox.startup();
+                // **********************************************************************
+                // Name
+                var name_textBox = new ValidationTextBox({
+                    name: 'name',
+                    label: 'Name',
+                    placeHolder: 'Enter a name',
+                    required: true,
+                    value: '{{ shot.name }}'
+                }, 'update_shot_name');
+                name_textBox.startup();
 
 
+                // **********************************************************************
+                // Code
+                var code_textBox = new TextBox({
+                    name: 'code',
+                    label: 'Code',
+                    value: '',
+                    placeHolder: 'Enter a code',
+                    value: '{{ shot.code }}'
+                }, 'update_shot_code');
+                name_textBox.startup();
 
 
-          // **********************************************************************
-          // Code
-          var code_textBox = new TextBox({
-            name: 'code',
-            label: 'Code',
-            value: '',
-            placeHolder: 'Enter a code',
-            value: '{{ shot.code }}'
-          }, 'update_shot_code');
-          name_textBox.startup();
+                // **********************************************************************
+                // Project
+
+                var project_memory = new Memory({
+                    data: [
+                        {% for project in projects %}
+                            {
+                                name: '{{ project.name }}',
+                                id: '{{ project.id }}'
+                            },
+                        {% endfor %}
+                    ]
+                });
+
+                var project_filtering_select = new FilteringSelect({
+                    name: 'project_id',
+                    required: true,
+                    store: project_memory,
+                    placeHolder: 'Select A Project',
+                    onChange: function () {
+                        sequence_field_updater();
+                    }
+                }, 'update_shot_project');
+                project_filtering_select.startup();
+
+                project_filtering_select.set('value', '{{ shot.project.id }}');
+                project_filtering_select.set('disabled', true);
 
 
+                // **********************************************************************
+                // Sequence
+                var sequence_memory = new JsonRest({
+                    target: '/get/sequences/'
+                });
+
+                var sequence_filtering_select = new FilteringSelect({
+                    name: 'sequence_id',
+                    required: false,
+                    label: 'Sequence'
+                }, 'update_shot_sequence');
+                sequence_filtering_select.startup();
+
+                {#          var sequence_filtering_select_selected_value = '{{ shot.sequence.id }}';#}
+                {#          var sequence_data_length= 0;#}
+                {##}
+                {#          var set_sequence_filtering_select_selected_value = function(data){#}
+                {#            if(sequence_data_length!=0 && sequence_data_length < data.length){#}
+                {#              sequence_filtering_select_selected_value = data[data.length-1].id;#}
+                {#            }#}
+                {#            sequence_filtering_select.set('value',sequence_filtering_select_selected_value);#}
+                {#            sequence_data_length = data.length;#}
+                {#          };#}
 
 
-          // **********************************************************************
-          // Project
+                // The Updater
+                var sequence_field_updater = fieldUpdater({
+                    memory: sequence_memory,
+                    query_data: function () {
+                        return {{ shot.project.id }};
+                    },
+                    widget: sequence_filtering_select,
+                    //callBack: set_sequence_filtering_select_selected_value
+                });
+                sequence_field_updater({animate: false});
 
-          var project_memory = new Memory({
-            data: [
-              {% for project in projects %}
-                {
-                  name: '{{ project.name }}',
-                  id: '{{ project.id }}'
-                },
-              {% endfor %}
-            ]
-          });
+                // New Sequence Button
+                var create_sequence_button = dialogCaller({
+                    label: 'New',
+                    dialog_id: 'create_sequence_dialog',
+                    content_creator: dialogs.create_sequence_dialog,
+                    attach_to: 'update_shot_create_sequence_button',
+                    related_field_updater: sequence_field_updater,
+                    data_id: function () {
+                        return project_filtering_select.get('value');
+                    }
+                });
+                create_sequence_button.startup();
 
-          var project_filtering_select = new FilteringSelect({
-            name: 'project_id',
-            required: true,
-            store: project_memory,
-            placeHolder: 'Select A Project',
-            onChange: function(){
-              sequence_field_updater();
-            }
-          }, 'update_shot_project');
-          project_filtering_select.startup();
+                // Update Sequence Button
+                var update_sequence_button = dialogCaller({
+                    label: 'Update',
+                    dialog_id: 'update_sequence_dialog',
+                    content_creator: dialogs.update_sequence_dialog,
+                    attach_to: 'update_shot_update_sequence_button',
+                    related_field_updater: sequence_field_updater,
+                    data_id: function () {
+                        return sequence_filtering_select.get('value')
+                    }
 
-          project_filtering_select.set('value','{{ shot.project.id }}');
-          project_filtering_select.set('disabled',true);
-
-
-
-          // **********************************************************************
-          // Sequence
-          var sequence_memory = new JsonRest({
-            target: '/get/sequences/'
-          });
-
-          var sequence_filtering_select = new FilteringSelect({
-            name: 'sequence_id',
-            required: false,
-            label: 'Sequence'
-          }, 'update_shot_sequence');
-          sequence_filtering_select.startup();
-
-{#          var sequence_filtering_select_selected_value = '{{ shot.sequence.id }}';#}
-{#          var sequence_data_length= 0;#}
-{##}
-{#          var set_sequence_filtering_select_selected_value = function(data){#}
-{#            if(sequence_data_length!=0 && sequence_data_length < data.length){#}
-{#              sequence_filtering_select_selected_value = data[data.length-1].id;#}
-{#            }#}
-{#            sequence_filtering_select.set('value',sequence_filtering_select_selected_value);#}
-{#            sequence_data_length = data.length;#}
-{#          };#}
+                });
+                update_sequence_button.startup();
 
 
-          // The Updater
-          var sequence_field_updater = fieldUpdater({
-              memory: sequence_memory,
-              query_data: function(){
-                return {{ shot.project.id }};
-              },
-              widget: sequence_filtering_select,
-            //callBack: set_sequence_filtering_select_selected_value
+                // **********************************************************************
+                // Status
+                //
+                // The Memory
+                var status_memory = new JsonRest({
+                    target: 'get/statuses_for/Shot'
+                });
+
+                // The Field
+                var status_filtering_select = new FilteringSelect({
+                    name: 'status_id',
+                    label: 'Status',
+                    required: true
+                }, 'update_shot_status');
+                status_filtering_select.startup();
+
+                var status_filtering_select_selected_value = '{{ shot.status.id }}';
+
+
+                var update_button_function = function (data) {
+
+                    status_filtering_select.set('value', status_filtering_select_selected_value);
+
+                    if (data.length > 0) {
+
+                        shot_add_status_button.set('onClick', function () {
+
+                            status_filtering_select_selected_value = '';
+
+                            var dialog = dijit.byId('update_status_list_dialog');
+
+                            if (dialog != null) {
+                                dialog.destroyRecursive();
+                            }
+                            dialog = dialogs.update_status_list_dialog('Shot');
+                            // set the field updater
+                            dialog.set('related_field_updater', status_field_updater);
+                            // show the dialog
+                            dialog.show();
+                        });
+
+                        status_field_updater.set('callBack', function () {
+                        });
+
+                    }
+                };
+                // The Updater
+                var status_field_updater = fieldUpdater({
+                    'memory': status_memory,
+                    'widget': status_filtering_select,
+                    'callBack': update_button_function
+                });
+
+                var shot_add_status_button = dialogCaller({
+                    label: 'Add Status',
+                    dialog_id: 'create_status_list_dialog',
+                    content_creator: dialogs.create_status_list_dialog,
+                    attach_to: 'update_shot_add_status_button',
+                    related_field_updater: status_field_updater,
+                    data_id: 'Shot'
+                });
+
+                shot_add_status_button.startup();
+                status_field_updater({animate: true});
+
+
+                // **********************************************************************
+                // Submit Button
+                var submit_button = new Button({
+                    label: 'OK',
+                    type: 'button',
+                    onClick: function () {
+                        submitForm({
+                            dialog: registry.byId('update_shot_dialog'),
+                            form: update_shot_form,
+                            additional_data: {
+                                submitted: 'update'
+                            },
+                            url: 'update/shot/' + '{{shot.id}}',
+                            method: 'POST'
+                        });
+                    }
+                }, 'update_shot_submit_button');
+                submit_button.startup();
+
+
+                // **********************************************************************
+                // Cancel Button
+                var cancel_button = new Button({
+                    label: 'Cancel',
+                    type: 'button',
+                    onClick: function () {
+                        registry.byId('update_shot_dialog').destroyRecursive();
+                    }
+                }, 'update_shot_cancel_button');
+                cancel_button.startup();
+
+                update_shot_form.startup();
+
             });
-          sequence_field_updater({animate: false});
-
-          // New Sequence Button
-          var create_sequence_button = dialogCaller({
-            label: 'New',
-            dialog_id: 'create_sequence_dialog',
-            content_creator: create_sequence_dialog_creator,
-            attach_to: 'update_shot_create_sequence_button',
-            related_field_updater: sequence_field_updater,
-            data_id: function(){
-              return project_filtering_select.get('value');
-            }
-          });
-          create_sequence_button.startup();
-
-          // Update Sequence Button
-          var update_sequence_button = dialogCaller({
-            label: 'Update',
-            dialog_id: 'update_sequence_dialog',
-            content_creator: update_sequence_dialog_creator,
-            attach_to: 'update_shot_update_sequence_button',
-            related_field_updater: sequence_field_updater,
-            data_id: function(){
-              return sequence_filtering_select.get('value')
-            }
-
-          });
-          update_sequence_button.startup();
-
-
-
-
-          // **********************************************************************
-          // Status
-          //
-          // The Memory
-          var status_memory = new JsonRest({
-            target: 'get/statuses_for/Shot'
-          });
-
-          // The Field
-          var status_filtering_select = new FilteringSelect({
-            name: 'status_id',
-            label: 'Status',
-            required: true
-          }, 'update_shot_status');
-          status_filtering_select.startup();
-
-          var status_filtering_select_selected_value = '{{ shot.status.id }}';
-
-
-          var update_button_function = function(data){
-
-            status_filtering_select.set('value',status_filtering_select_selected_value);
-
-            if(data.length>0){
-
-                shot_add_status_button.set('onClick', function(){
-
-                status_filtering_select_selected_value = '';
-
-                var dialog = dijit.byId('update_status_list_dialog');
-
-                if (dialog != null){
-                  dialog.destroyRecursive();
-                }
-                dialog = update_status_list_dialog_creator('Shot');
-                // set the field updater
-                dialog.set( 'related_field_updater', status_field_updater );
-                // show the dialog
-                dialog.show();
-              });
-
-              status_field_updater.set('callBack', function(){});
-
-            }
-          };
-          // The Updater
-          var status_field_updater = fieldUpdater({
-            'memory': status_memory,
-            'widget': status_filtering_select,
-            'callBack': update_button_function
-          });
-
-          var shot_add_status_button = dialogCaller({
-            label: 'Add Status',
-            dialog_id: 'create_status_list_dialog',
-            content_creator: create_status_list_dialog_creator,
-            attach_to: 'update_shot_add_status_button',
-            related_field_updater: status_field_updater,
-            data_id: 'Shot'
-          });
-
-          shot_add_status_button.startup();
-          status_field_updater({animate: true});
-
-
-
-          // **********************************************************************
-          // Submit Button
-          var submit_button = new Button({
-            label: 'OK',
-            type: 'button',
-            onClick: function(){
-              submitForm({
-                dialog: registry.byId('update_shot_dialog'),
-                form: update_shot_form,
-                additional_data: {
-                  submitted: 'update'
-                },
-                url: 'update/shot/' + '{{shot.id}}',
-                method: 'POST'
-              });
-            }
-          }, 'update_shot_submit_button');
-          submit_button.startup();
-
-
-
-
-          // **********************************************************************
-          // Cancel Button
-          var cancel_button = new Button({
-            label: 'Cancel',
-            type: 'button',
-            onClick: function(){
-              registry.byId('update_shot_dialog').destroyRecursive();
-            }
-          }, 'update_shot_cancel_button');
-          cancel_button.startup();
-
-          update_shot_form.startup();
-
-        });
 </script>

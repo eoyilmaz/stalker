@@ -59,11 +59,10 @@
 
 <script type="text/javascript">
     require([
-        'dojo/store/Memory',
         'dojo/data/ObjectStore',
+        'dojo/store/Memory',
         'dojo/store/JsonRest',
         'dojo/_base/lang',
-        'dojo/ready',
 
         'dijit/registry',
         'dijit/form/Form',
@@ -72,157 +71,156 @@
 
         'stalker/submitForm',
         'stalker/dialogCaller',
-        'stalker/fieldUpdater'
+        'stalker/fieldUpdater',
 
-    ], function (Memory, ObjectStore, JsonRest, lang, ready, registry, Form,
-                 Button, MultiSelect, submitForm, dialogCaller, fieldUpdater) {
+        'dojo/domReady!'
 
-        ready(function () {
+    ], function (ObjectStore, Memory, JsonRest, lang, registry, Form, Button,
+                 MultiSelect, submitForm, dialogCaller, fieldUpdater) {
 
+        // ********************************************************************
+        // Form
+        var append_department_form = new Form({
+            id: 'append_department_form'
+        }, 'append_department_form');
+        append_department_form.startup();
 
-            // ****************************************************************
-            // Form
-            var append_department_form = new Form({
-                id: 'append_department_form'
-            }, 'append_department_form');
-            append_department_form.startup();
-
-            // ****************************************************************
-            // Project Department List
-            var user_departments_memory = new JsonRest({
-                target: '/get/departments_byEntity/{{ user.id }}'
-            });
-
-
-            var user_departments_multi_select = new MultiSelect({
-                name: 'user_departments',
-                required: false,
-                style: 'height: auto; width: auto; min-width: 200px; min-height: 250px'
-            }, 'user_departments_list');
-            user_departments_multi_select.startup();
-
-            var eliminate_user_departments_from_all_departments = function (data) {
-                for (var i = 0; i < data.length; i++) {
-                    remove_item(all_departments_multi_select, data[i].id);
-                }
-            };
-
-            // The Updater
-            var user_departments_field_updater = fieldUpdater({
-                'memory': user_departments_memory,
-                'widget': user_departments_multi_select,
-                'callBack': eliminate_user_departments_from_all_departments
-            });
-
-            // ****************************************************************
-            // All Department List
-            var all_departments_memory = new JsonRest({
-                target: '/get/departments'
-            });
-
-            var all_departments_multi_select = new MultiSelect({
-                name: 'all_departments',
-                required: false,
-                label: 'All Departments',
-                style: 'height: auto; width: auto; min-width: 200px; min-height: 250px'
-            }, 'all_departments_list');
-            all_departments_multi_select.startup();
-
-            var get_user_departments_data = function (data) {
-                // run the function to fill the data for the first time
-                user_departments_field_updater({animate: false});
-
-            };
-
-            // The Updater
-            var all_departments_field_updater = fieldUpdater({
-                'memory': all_departments_memory,
-                'widget': all_departments_multi_select,
-                'callBack': get_user_departments_data
-            });
-            //run the function to fill the data for the first time
-            all_departments_field_updater({animate: false});
-
-
-            var add_item = function (multi_select, opt) {
-                var domNode = multi_select.domNode;
-                domNode.appendChild(opt);
-            };
-
-            var remove_item = function (multi_select, rId) {
-                var domNode = multi_select.domNode;
-                dojo.query('option', domNode).forEach(function (opt, idx, arr) {
-                    if (opt.value == rId) {
-                        dojo.destroy(opt);
-                    }
-                });
-            };
-
-            // ****************************************************************
-            // Append Department Button
-            var department_append_button = new Button({
-                label: '>>',
-                type: 'button',
-                onClick: function () {
-                    var selected_data = all_departments_multi_select.get('value');
-                    var all_options = dojo.query('option', 'all_departments_list');
-
-                    for (var i = 0; i < all_options.length; i++) {
-                        if (selected_data.indexOf(all_options[i].value) != -1) {
-                            add_item(user_departments_multi_select, all_options[i]);
-                        }
-                    }
-                }
-            }, 'department_append_button');
-
-            // ****************************************************************
-            // Remove Department Button
-            var department_remove_button = new Button({
-                label: '<<',
-                type: 'button',
-                onClick: function () {
-                    var selected_data = user_departments_multi_select.get('value');
-                    var all_options = dojo.query('option', 'user_departments_list');
-
-                    for (var i = 0; i < all_options.length; i++) {
-                        if (selected_data.indexOf(all_options[i].value) != -1) {
-                            add_item(all_departments_multi_select, all_options[i]);
-                        }
-                    }
-                }
-            }, 'department_remove_button');
-
-            // ****************************************************************
-            // Submit Button
-            var submit_button = new Button({
-                label: 'OK',
-                type: 'button',
-                onClick: function () {
-                    submitForm({
-                        dialog: registry.byId('append_department_dialog'),
-                        form: append_department_form,
-                        additional_data: {
-                            'user_id': {{ user.id }}
-                        },
-                        url: 'append/departments',
-                        method: 'POST'
-                    });
-                }
-            }, 'append_department_submit_button');
-            submit_button.startup();
-
-            // ****************************************************************
-            // Cancel Button
-            var cancel_button = new Button({
-                label: 'Cancel',
-                type: 'button',
-                onClick: function () {
-                    registry.byId('append_department_dialog').destroyRecursive();
-                }
-            }, 'append_department_cancel_button');
-            cancel_button.startup();
-
-            append_department_form.startup();
+        // ********************************************************************
+        // Project Department List
+        var user_departments_memory = new JsonRest({
+            target: '/get/departments_byEntity/{{ user.id }}'
         });
+
+
+        var user_departments_multi_select = new MultiSelect({
+            name: 'user_departments',
+            required: false,
+            style: 'height: auto; width: auto; min-width: 200px; min-height: 250px'
+        }, 'user_departments_list');
+        user_departments_multi_select.startup();
+
+        var eliminate_user_departments_from_all_departments = function (data) {
+            for (var i = 0; i < data.length; i++) {
+                remove_item(all_departments_multi_select, data[i].id);
+            }
+        };
+
+        // The Updater
+        var user_departments_field_updater = fieldUpdater({
+            'memory': user_departments_memory,
+            'widget': user_departments_multi_select,
+            'callBack': eliminate_user_departments_from_all_departments
+        });
+
+        // ********************************************************************
+        // All Department List
+        var all_departments_memory = new JsonRest({
+            target: '/get/departments'
+        });
+
+        var all_departments_multi_select = new MultiSelect({
+            name: 'all_departments',
+            required: false,
+            label: 'All Departments',
+            style: 'height: auto; width: auto; min-width: 200px; min-height: 250px'
+        }, 'all_departments_list');
+        all_departments_multi_select.startup();
+
+        var get_user_departments_data = function (data) {
+            // run the function to fill the data for the first time
+            user_departments_field_updater({animate: false});
+
+        };
+
+        // The Updater
+        var all_departments_field_updater = fieldUpdater({
+            'memory': all_departments_memory,
+            'widget': all_departments_multi_select,
+            'callBack': get_user_departments_data
+        });
+        //run the function to fill the data for the first time
+        all_departments_field_updater({animate: false});
+
+
+        var add_item = function (multi_select, opt) {
+            var domNode = multi_select.domNode;
+            domNode.appendChild(opt);
+        };
+
+        var remove_item = function (multi_select, rId) {
+            var domNode = multi_select.domNode;
+            dojo.query('option', domNode).forEach(function (opt, idx, arr) {
+                if (opt.value == rId) {
+                    dojo.destroy(opt);
+                }
+            });
+        };
+
+        // ********************************************************************
+        // Append Department Button
+        var department_append_button = new Button({
+            label: '>>',
+            type: 'button',
+            onClick: function () {
+                var selected_data = all_departments_multi_select.get('value');
+                var all_options = dojo.query('option', 'all_departments_list');
+
+                for (var i = 0; i < all_options.length; i++) {
+                    if (selected_data.indexOf(all_options[i].value) != -1) {
+                        add_item(user_departments_multi_select, all_options[i]);
+                    }
+                }
+            }
+        }, 'department_append_button');
+
+        // ********************************************************************
+        // Remove Department Button
+        var department_remove_button = new Button({
+            label: '<<',
+            type: 'button',
+            onClick: function () {
+                var selected_data = user_departments_multi_select.get('value');
+                var all_options = dojo.query('option', 'user_departments_list');
+
+                for (var i = 0; i < all_options.length; i++) {
+                    if (selected_data.indexOf(all_options[i].value) != -1) {
+                        add_item(all_departments_multi_select, all_options[i]);
+                    }
+                }
+            }
+        }, 'department_remove_button');
+
+        // ********************************************************************
+        // Submit Button
+        var submit_button = new Button({
+            label: 'OK',
+            type: 'button',
+            onClick: function () {
+                submitForm({
+                    dialog: registry.byId('append_department_dialog'),
+                    form: append_department_form,
+                    additional_data: {
+                        'user_id': {{ user.id }}
+                    },
+                    url: 'append/departments',
+                    method: 'POST'
+                });
+            }
+        }, 'append_department_submit_button');
+        submit_button.startup();
+
+        // ********************************************************************
+        // Cancel Button
+        var cancel_button = new Button({
+            label: 'Cancel',
+            type: 'button',
+            onClick: function () {
+                registry.byId('append_department_dialog').destroyRecursive();
+            }
+        }, 'append_department_cancel_button');
+        cancel_button.startup();
+
+        append_department_form.startup();
+
     });
 </script>

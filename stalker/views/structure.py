@@ -17,122 +17,133 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
-import datetime
 
-from pyramid.security import authenticated_userid
+import datetime
+from pyramid.httpexceptions import HTTPOk
+
 from pyramid.view import view_config
-import transaction
 
 from stalker.db import DBSession
-from stalker import User, Structure, FilenameTemplate
+from stalker import Structure, FilenameTemplate
 
 import logging
 from stalker import log
+from stalker.views import PermissionChecker, get_logged_in_user
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='update_structure',
-    renderer='templates/structure/dialog_update_structure.jinja2',
-    permission='Update_Structure'
+    route_name='dialog_create_structure',
+    renderer='templates/structure/dialog_create_structure.jinja2'
 )
-def update_structure(request):
-    """called when updateing a structure
+def dialog_create_structure(request):
+    """fills the create structure dialog
     """
-    
-    login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
-    
-    structure_id = request.matchdict['structure_id']
-    structure = Structure.query.filter_by(id=structure_id).first()
-    
-    if 'submitted' in request.params:
-        if request.params['submitted'] == 'update':
-            if 'name' in request.params and \
-                'custom_template' in request.params and \
-                'filename_templates' in request.params:
-                    
-                    # get all FilenameTemplates
-                    ft_ids = [
-                        int(ft_id)
-                        for ft_id in request.POST.getall('filename_templates')
-                    ]
-                    
-                    fts = [
-                        FilenameTemplate.query.filter_by(id=ft_id).first()
-                        for ft_id in ft_ids
-                    ]
-                    
-                    # update structure
-                    structure.name = request.params['name']
-                    structure.templates = fts
-                    structure.custom_template = \
-                        request.params['custom_template']
-                    structure.updated_by = user
-                    structure.date_updated = datetime.datetime.now()
-                    
-                    DBSession.add(structure)
-                    # TODO: update date_updated
-                        
-    return {'structure': structure}
+    return {
+        'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
+        'filename_templates': FilenameTemplate.query.all() # TODO: remove this
+    }
 
 
 @view_config(
-    route_name='create_structure',
-    renderer='templates/structure/dialog_create_structure.jinja2',
-    permission='Create_Structure'
+    route_name='dialog_update_structure',
+    renderer='templates/structure/dialog_create_structure.jinja2'
 )
-def create_structure(request):
-    """called when adding a structure
+def dialog_update_structure(request):
+    """fills the update structure dialog
     """
-    
-    login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
-    
-    if 'submitted' in request.params:
-        logger.debug('"submitted" in request.params')
-        if request.params['submitted'] == 'create':
-            logger.debug('Adding a new structure')
-            # create and add a new structure
-            if 'name' in request.params and \
-                'custom_template' in request.params and \
-                'filename_templates' in request.params:
-                logger.debug('all the parameters are in place')
-                with transaction.manager:
-                    # get all FilenameTemplates
-                    ft_ids = [
-                        int(ft_id)
-                        for ft_id in request.POST.getall('filename_templates')
-                    ]
-                    
-                    fts = [
-                        FilenameTemplate.query.filter_by(id=ft_id).first()
-                        for ft_id in ft_ids
-                    ]
-                    
-                    # create structure
-                    new_structure = Structure(
-                        name=request.params['name'],
-                        custom_template=str(request.params['custom_template']),
-                        templates=fts,
-                        created_by=user,
-                    )
-                    DBSession.add(new_structure)
-            else:
-                logger.debug('there are missing parameters in request')
-    else:
-        logger.debug('submitted is not in request.params')
+    structure_id = request.matchdict['structure_id']
+    structure = Structure.query.filter_by(id=structure_id).first()
     
     return {
-        'filename_templates': FilenameTemplate.query.all()
+        'mode': 'UPDATE',
+        'has_permission': PermissionChecker(request),
+        'structure': structure,
+        'filename_templates': FilenameTemplate.query.all() # TODO: remove this
     }
+
+
+@view_config(
+    route_name='create_structure'
+)
+def create_structure(request):
+    """creates a structure
+    """
+    logged_in_user = get_logged_in_user(request)
+    
+    # get parameters
+    name = request.params.get('name')
+    custom_template = request.params.get('custom_template')
+    ft_ids = [
+        int(ft_id)
+        for ft_id in request.POST.getall('filename_templates')
+    ]
+    
+    fts = [
+        FilenameTemplate.query.filter_by(id=ft_id).first()
+        for ft_id in ft_ids
+    ]
+    
+    if name and custom_template:
+        # create a new structure
+        new_structure = Structure(
+            name=name,
+            custom_template=custom_template,
+            templates=fts,
+            created_by=logged_in_user,
+        )
+        DBSession.add(new_structure)
+    
+    return HTTPOk()
+
+
+@view_config(
+    route_name='update_structure'
+)
+def update_structure(request):
+    """updates a structure
+    """
+    
+    logged_in_user = get_logged_in_user(request)
+    
+    # get params
+    structure_id = request.params.get('structure_id')
+    structure = Structure.query.filter_by(id=structure_id).first()
+    
+    name = request.params.get('name')
+    custom_template = request.params.get('custom_template')
+    
+    # get all FilenameTemplates
+    ft_ids = [
+        int(ft_id)
+        for ft_id in request.POST.getall('filename_templates')
+    ]
+    
+    fts = [
+        FilenameTemplate.query.filter_by(id=ft_id).first()
+        for ft_id in ft_ids
+    ]
+    
+    if name:
+        # update structure
+        structure.name = name
+        structure.custom_template = custom_template
+        structure.templates = fts
+        structure.updated_by = logged_in_user
+        structure.date_updated = datetime.datetime.now()
+        
+        DBSession.add(structure)
+    
+    return HTTPOk()
 
 
 @view_config(
     route_name='get_structures',
     renderer='json',
-    permission='Read_Structure'
+    permission='List_Structure' # TODO: do we need this permission, can it be done inside template, where it is asked
 )
 def get_structures(request):
     """returns all the structures in the database

@@ -18,188 +18,184 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-  <form id='update_status_list_form'>
-    <table style='width: 100%'>
-      
-      {# NAME #}
-      <tr>
-        <td class='label_column'>
-          <label for='update_status_list_name'>
-            Name
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='update_status_list_name'>
-        </td>
-      </tr>
-      
-      {# TARGET ENTITY TYPE #}
-      <tr>
-        <td class='label_column'>
-          <label for='update_status_list_target_entity_type'>
-            Target Entity Type
-          </label>
-        </td>
-        <td class='input_column'>
-          <input id='update_status_list_target_entity_type'>
-        </td>
-      </tr>
-      
-      {# STATUSES #}
-      <tr>
-        <td class='label_column'>
-          <label for='update_status_list_statuses'>
-            Statuses
-          </label>
-        </td>
-        <td class='input_column'>
-          <select id='update_status_list_statuses'></select>
-        </td>
-        <td class='button_column'>
-          <button id='update_status_list_create_status_button'>New</button>
-{#            <button id='status_list_update_status_button'>Update</button>#}
-        </td>
-      </tr>
-      
-    </table>
-  </form>
+    <form id='update_status_list_form'>
+        <table style='width: 100%'>
+
+            {# NAME #}
+            <tr>
+                <td class='label_column'>
+                    <label for='update_status_list_name'>
+                        Name
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='update_status_list_name'>
+                </td>
+            </tr>
+
+            {# TARGET ENTITY TYPE #}
+            <tr>
+                <td class='label_column'>
+                    <label for='update_status_list_target_entity_type'>
+                        Target Entity Type
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <input id='update_status_list_target_entity_type'>
+                </td>
+            </tr>
+
+            {# STATUSES #}
+            <tr>
+                <td class='label_column'>
+                    <label for='update_status_list_statuses'>
+                        Statuses
+                    </label>
+                </td>
+                <td class='input_column'>
+                    <select id='update_status_list_statuses'></select>
+                </td>
+                <td class='button_column'>
+                    <button id='update_status_list_create_status_button'>New
+                    </button>
+                    {#            <button id='status_list_update_status_button'>Update</button>#}
+                </td>
+            </tr>
+
+        </table>
+    </form>
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-  <button id='update_status_list_update_button'></button>
-  <button id='update_status_list_cancel_button'></button>
+    <button id='update_status_list_update_button'></button>
+    <button id='update_status_list_cancel_button'></button>
 </div>
 
 <script type='text/javascript'>
-  require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
-    'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-    'dijit/form/SimpleTextarea', 'dijit/form/Button',
-    'dijit/form/FilteringSelect', 'stalker/TagSelect',
-    'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
-    'stalker/dialogCaller', 'dojo/ready'],
-    function(registry, Memory, Form, ValidationTextBox, TextBox,
-             SimpleTextarea, Button, FilteringSelect, TagSelect, JsonRest,
-             submitForm, fieldUpdater, dialogCaller, ready){
-      
-      ready(function(){
+    require([
+        'dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
+        'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
+        'dijit/form/SimpleTextarea', 'dijit/form/Button',
+        'dijit/form/FilteringSelect', 'stalker/dialogs', 'stalker/TagSelect',
+        'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
+        'stalker/dialogCaller', 'dojo/domReady!'
+    ], function (registry, Memory, Form, ValidationTextBox, TextBox,
+                 SimpleTextarea, Button, FilteringSelect, dialogs, TagSelect,
+                 JsonRest, submitForm, fieldUpdater, dialogCaller) {
+
+
         // **********************************************************************
         // Form
         var update_status_list_form = new Form({
-          id: 'update_status_list_form'
+            id: 'update_status_list_form'
         }, 'update_status_list_form');
         update_status_list_form.startup();
-        
-        
-        
-        
+
+
         // **********************************************************************
         // Name
         var name_textBox = new ValidationTextBox({
-          name: 'name',
-          label: 'Name',
-          disabled: true,
-          value: '{{ status_list.name }}',
-          placeHolder: 'Enter a name',
-          required: true
+            name: 'name',
+            label: 'Name',
+            disabled: true,
+            value: '{{ status_list.name }}',
+            placeHolder: 'Enter a name',
+            required: true
         }, 'update_status_list_name');
         name_textBox.startup();
-        
-        
-        
-        
+
+
         // **********************************************************************
         // Target Entity Type
         var target_entity_type_select = new TextBox({
-          name: 'target_entity_type',
-          label: 'Target Entity Type',
-          required: false,
-          disabled: true,
-          value: '{{ status_list.target_entity_type }}'
+            name: 'target_entity_type',
+            label: 'Target Entity Type',
+            required: false,
+            disabled: true,
+            value: '{{ status_list.target_entity_type }}'
         }, 'update_status_list_target_entity_type');
         target_entity_type_select.startup();
-        
-        
-        
-        
+
+
         // **********************************************************************
         // Statuses
         // 
         // The Memory
         var statuses_memory = new JsonRest({
-          target: '/get/statuses'
+            target: '/get/statuses'
         });
-        
+
         // The Widget
         var statuses_tagSelect = new TagSelect({
-          name: 'statuses',
-          required: false
+            name: 'statuses',
+            required: false
         }, 'update_status_list_statuses');
         statuses_tagSelect.startup();
-        
+
+        var selected_tags = [
+            {% for status in status_list.statuses %}
+                {{ status.id }},
+            {% endfor %}
+        ];
+
         // The Updater
         var statuses_field_updater = fieldUpdater({
-          memory: statuses_memory,
-          widget: statuses_tagSelect
+            memory: statuses_memory,
+            widget: statuses_tagSelect,
+            selected: selected_tags
         });
         // run the function to fill the data for the first time
         statuses_field_updater({animate: false});
 
-        statuses_tagSelect.set('value', [
-          {% for status in status_list.statuses %}
-            {{ status.id }},
-          {% endfor %}
-        ]);
+
+        {#        statuses_tagSelect.set('value', selected_tags);#}
 
         // create Status Button
         var create_status_button = dialogCaller({
-          label: 'New',
-          dialog_id: 'create_status_dialog',
-          content_creator: create_status_dialog_creator,
-          attach_to: 'update_status_list_create_status_button',
-          related_field_updater: statuses_field_updater
+            label: 'New',
+            dialog_id: 'create_status_dialog',
+            content_creator: dialogs.create_status_dialog,
+            attach_to: 'update_status_list_create_status_button',
+            related_field_updater: statuses_field_updater
         });
         create_status_button.startup();
-        
-        
-        
-        
+
+
         // **********************************************************************
         // Update Button
         var update_button = new Button({
-          label: 'OK',
-          type: 'button',
-          onClick: function(){
+            label: 'OK',
+            type: 'button',
+            onClick: function () {
 
-            name_textBox.set('disabled', false);
-            target_entity_type_select.set('disabled', false);
+                name_textBox.set('disabled', false);
+                target_entity_type_select.set('disabled', false);
 
-            submitForm({
-              dialog: registry.byId('update_status_list_dialog'),
-              form: update_status_list_form,
-              additional_data: {submitted: 'update'},
-              url: 'update/status_list/{{status_list.target_entity_type}}',
-{#              url: '{{ request.route_url("update_status_list", target_entity_type=status_list.type) }}',#}
-              method: 'POST'
-            });
-          }
+                submitForm({
+                    dialog: registry.byId('update_status_list_dialog'),
+                    form: update_status_list_form,
+                    additional_data: {submitted: 'update'},
+                    url: 'update/status_list/{{status_list.target_entity_type}}',
+                    {#              url: '{{ request.route_url("update_status_list", target_entity_type=status_list.type) }}',#}
+                    method: 'POST'
+                });
+            }
         }, 'update_status_list_update_button');
         update_button.startup();
-        
-        
-        
-        
+
+
         // **********************************************************************
         // Cancel Button
         var cancel_button = new Button({
-          label: 'Cancel',
-          type: 'button',
-          onClick: function(){
-            registry.byId('update_status_list_dialog').destroyRecursive();
-          }
+            label: 'Cancel',
+            type: 'button',
+            onClick: function () {
+                registry.byId('update_status_list_dialog').destroyRecursive();
+            }
         }, 'update_status_list_cancel_button');
         cancel_button.startup();
-      
-      });
-  });
+
+
+    });
 </script>
 

@@ -17,8 +17,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-define(['dojo/ready'],
-    function(ready){
+define(['dojo/domReady!'],
+    function(){
         // *******************************************************************
         // DialogCaller
         //
@@ -73,7 +73,7 @@ define(['dojo/ready'],
                 } else {
                     dialog = content_creator();
                 }
-
+                
                 // set the field updater
                 dialog.set(
                     'related_field_updater',
@@ -82,9 +82,10 @@ define(['dojo/ready'],
 
                 // show the dialog
                 //dialog.show();
+                
+                return dialog;
             }
-            
-            return dialog;
+
         };
         
         return dialogCreator;

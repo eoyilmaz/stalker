@@ -26,12 +26,20 @@
 // 
 define([
     'require',
-    'dojo/_base/declare', 'dijit/_WidgetBase', 'dijit/_TemplatedMixin',
+    'dojo/_base/declare',
+    'dijit/_WidgetBase',
+    'dijit/_TemplatedMixin',
     'dojo/text!stalker/templates/TagSelect.html',
-    'dojo/_base/lang', 'dojo/dom-construct', 'dojo/dom-geometry', 'stalker/Tag',
-    'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dojo/on', 'dojo/domReady!'
-], function(require, declare, _WidgetBase, _TemplatedMixin, template, lang,
-            domConstruct, domGeometry, Tag, FilteringSelect, TextBox, on){
+    'dojo/_base/lang',
+    'dojo/dom-construct',
+    'dojo/dom-geometry',
+    'stalker/Tag',
+    'dijit/form/FilteringSelect',
+    'dijit/form/TextBox',
+    'dojo/on',
+    'dojo/domReady!'
+], function (require, declare, _WidgetBase, _TemplatedMixin, template, lang,
+             domConstruct, domGeometry, Tag, FilteringSelect, TextBox, on) {
     return declare('stalker.TagSelect', [_WidgetBase, _TemplatedMixin],
         {
             templateString: template,
@@ -51,43 +59,43 @@ define([
 
             button_div: null,
 
-            _setNameAttr: function(value){
-                if (this.input_field_widget){
+            // value: Array
+            //      The value of this widget
+            value: [],
+
+            _setNameAttr: function (value) {
+                if (this.input_field_widget) {
                     this.input_field_widget.set('name', value);
                 }
             },
 
-            _setStyleAttr: function(value){
+            _setStyleAttr: function (value) {
                 console.log(
                     'setting the TagSelect.input_field_widget.style: ', value
                 );
-                if (this.input_field_widget){
+                if (this.input_field_widget) {
                     console.log('there is an input_field_widget');
                     this.input_field_widget.set('style', value);
                 }
             },
 
-            _setStoreAttr: function(value){
-                if (this.input_field_widget){
+            _setStoreAttr: function (value) {
+                if (this.input_field_widget) {
                     this.input_field_widget.set('store', value);
                     this.store = value;
                 }
             },
 
-            // value: Array
-            //      The value of this widget
-            value: [],
-
-            _getValueAttr: function(){
+            _getValueAttr: function () {
                 // return the value of the buttons
                 var value = [];
-                for(var i=0; i < this.tags.length; i++){
+                for (var i = 0; i < this.tags.length; i++) {
                     value.push(this.tags[i].value);
                 }
                 return value;
             },
 
-            _setValueAttr: function(value){
+            _setValueAttr: function (value) {
                 // create the tags for the `selected` list
                 var tag_value;
                 var tag_label;
@@ -96,11 +104,11 @@ define([
                 // remove all previous tags
                 this.reset();
 
-                for (var i=0; i < value.length; i++){
-                    if (this.store){
+                for (var i = 0; i < value.length; i++) {
+                    if (this.store) {
                         // get the labels of the selected ids
                         result = this.store.query({id: value[i]});
-                        if (result.length){
+                        if (result.length) {
                             tag_label = result[0].name;
                         }
                     } else {
@@ -109,7 +117,7 @@ define([
                     tag_value = value[i];
 
                     // create the items
-                    if (tag_label != ''){
+                    if (tag_label != '') {
                         this.add_tag({
                             label: tag_label,
                             value: tag_value
@@ -118,17 +126,17 @@ define([
                 }
             },
 
-            _setDisabledAttr: function(value){
+            _setDisabledAttr: function (value) {
                 // set the input field widget and all the tags disabled
                 this.input_field_widget.set('disabled', value);
-                for (var i=0; i < this.tags.length; i++){
+                for (var i = 0; i < this.tags.length; i++) {
                     this.tags[i].set('disabled', value);
                 }
             },
 
-            isValid: function(){
+            isValid: function () {
                 console.log('TagSelect.isValid is running!!!');
-                if (this.required){
+                if (this.required) {
                     // check if there are any tags selected
                     return this.tags.length > 0;
                 }
@@ -142,23 +150,23 @@ define([
 //            validator: function(){
 //            },
 
-            constructor: function stalker_tagSelect_constructor(args){
-                if (args){
+            constructor: function stalker_tagSelect_constructor(args) {
+                if (args) {
                     lang.mixin(this, args);
                 }
             },
 
-            startup: function stalker_tagSelect_startup(){
+            startup: function stalker_tagSelect_startup() {
                 this.inherited(arguments);
                 this.input_field_widget.startup();
             },
 
-            reset: function stalker_tagSelect_reset(){
+            reset: function stalker_tagSelect_reset() {
                 this.inherited(arguments);
-                if (this.input_field_widget != null){
+                if (this.input_field_widget != null) {
                     this.input_field_widget.reset();
                 }
-                for (var i=0; i < this.tags.length; i++){
+                for (var i = 0; i < this.tags.length; i++) {
                     this.tags[i].destroyRecursive();
                 }
                 this.tags = [];
@@ -170,9 +178,9 @@ define([
             // 
             // TODO: if this is a FilteringSelect use {id, name} but if it is a TextField
             //       do nothing
-            add_value: function(value){
+            add_value: function (value) {
                 // add the value back to the store
-                if (this.store){
+                if (this.store) {
                     this.store.add(value);
                 }
             },
@@ -184,12 +192,12 @@ define([
             // 
             // 
             // 
-            add_tag: function(kwargs){
+            add_tag: function (kwargs) {
                 var label = kwargs.label;
                 var value = kwargs.value;
 
-                if (label != null){
-                    if (label != ''){
+                if (label != null) {
+                    if (label != '') {
                         // add a new button to the the tagList
                         var tag = new Tag({
                             label: label,
@@ -207,7 +215,7 @@ define([
                         this.input_field_widget.set('value', '');
 
                         // also remove the current value from the store
-                        if (this.store){
+                        if (this.store) {
                             this.store.remove(value);
                         }
 
@@ -220,23 +228,23 @@ define([
             // removes the given tag from the tagList and returns the value of
             // the tag to the store
             // 
-            remove_tag: function(/*stalker.Tag*/ tag){
+            remove_tag: function (/*stalker.Tag*/ tag) {
                 // check if it is really a Tag instance
-                if (tag.declaredClass != 'stalker.Tag'){
+                if (tag.declaredClass != 'stalker.Tag') {
                     // TODO: it can be an instance of a derived class
                     // don't bother doing anything with that
                     return;
                 }
 
                 // return the tag value to the store
-                if (this.store){
+                if (this.store) {
                     var value = tag.getValue();
                     this.store.add(value);
                 }
 
                 // remove the tag from the tags list
                 var index = this.tags.indexOf(tag);
-                if (index != -1){
+                if (index != -1) {
                     this.tags.splice(index, 1);
                 }
 
@@ -244,7 +252,7 @@ define([
                 tag.destroyRecursive();
             },
 
-            postCreate: function tagSelect_postCreate(){
+            postCreate: function tagSelect_postCreate() {
                 // Run any parent postCreate processes - can be done at any point
                 this.inherited(arguments);
 
@@ -259,7 +267,7 @@ define([
 
                 // create the input field widget with the given arguments
                 var WidgetClass = null;
-                if (this.type == 'FilteringSelect'){
+                if (this.type == 'FilteringSelect') {
                     WidgetClass = FilteringSelect;
                 } else if (this.type == 'TextBox') {
                     WidgetClass = TextBox;
@@ -277,21 +285,21 @@ define([
                 );
                 tag_list_ap.style.width = String(content_box.w) + 'px';
 
-                var tag_create_func = lang.hitch(this, function(e){
+                var tag_create_func = lang.hitch(this, function (e) {
                     var item;
                     var current_label;
 
-                    if (this.type == 'FilteringSelect'){
+                    if (this.type == 'FilteringSelect') {
                         item = this.input_field_widget.item;
-                        if (item != null){
+                        if (item != null) {
                             current_label = item.name;
                         }
-                    } else if (this.type == 'TextBox'){
+                    } else if (this.type == 'TextBox') {
                         current_label = this.input_field_widget.value;
                     }
 
-                    if (current_label != null){
-                        if (current_label != ''){
+                    if (current_label != null) {
+                        if (current_label != '') {
                             var current_id = this.input_field_widget.value;
 
                             this.add_tag({

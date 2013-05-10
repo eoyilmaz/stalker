@@ -32,12 +32,15 @@
         "dgrid/editor",
         'dojo/store/Memory',
         'dojo/store/JsonRest',
+        'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
         'dojo/on',
         'dojo/query',
         'dojo/domReady!'],
-            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, JsonRest, fieldUpdater, dialogCaller, on, query) {
+            function (registry, ObjectStore, List, Grid, Selection, Keyboard,
+                      editor, Memory, JsonRest, dialogs, fieldUpdater,
+                      dialogCaller, on, query) {
 
                 var shots_data_grid = new Grid({
                     id: 'shots_data_grid',
@@ -48,7 +51,7 @@
                 var create_shot_button = dialogCaller({
                     label: 'New Shot',
                     dialog_id: 'create_shot_dialog',
-                    content_creator: create_shot_dialog_creator,
+                    content_creator: dialogs.create_shot_dialog,
                     attach_to: 'list_shots_create_shot_button',
                     related_field_updater: shot_data_grid_updater,
                     data_id: '{{ project.id }}'
@@ -119,7 +122,7 @@
                                     return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
                                 }
                             },
-                                {
+                            {
                                 field: 'sequences',
                                 label: "Sequences",
                                 get: function (object) {
