@@ -87,7 +87,7 @@ def create_filename_template(request):
     name = request.params.get('name')
     target_entity_type = request.params.get('target_entity_type')
     path = request.params.get('path')
-    filename = request.params.get('filaname')
+    filename = request.params.get('filename')
 
     if name and target_entity_type and path and filename:
         new_ft = FilenameTemplate(

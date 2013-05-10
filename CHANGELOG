@@ -19,6 +19,7 @@ Stalker Changes
   * Fix: Fixed unnecessary module imports in stalker.js.
   * Fix: Schedule button is now working properly.
   * Fix: Fixed Image Format creation.
+  * Fix: Fixed Filename Template create dialog routine.
   * Fix: Fixed Filename Template update dialog routine.
   * Fix: Fixed entity_types in Filename Template creation UI.
 
