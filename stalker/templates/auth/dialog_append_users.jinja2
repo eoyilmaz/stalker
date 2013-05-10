@@ -39,8 +39,7 @@
                     <button id='user_remove_button'>Remove</button>
                 </td>
                 <td class='input_column'>
-                    <select id='entity_users_list'>
-                    </select>
+                    <select id='entity_users_list'></select>
                 </td>
             </tr>
         </table>
@@ -197,11 +196,17 @@
                 label: 'OK',
                 type: 'button',
                 onClick: function () {
+                    var user_ids = [];
+                    dojo.query('option', entity_users_multi_select.domNode).forEach(function(opt, idx, arr){
+                            user_ids.push(opt.value);
+                        });
+
                     submitForm({
                         dialog: registry.byId('append_user_dialog'),
                         form: append_user_form,
                         additional_data: {
-                            'entity_id': {{ entity.id }}
+                            'entity_id': {{ entity.id }},
+                            'user_ids': user_ids
                         },
                         url: 'append/users',
                         method: 'POST'

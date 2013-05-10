@@ -27,77 +27,73 @@
         "dgrid/List",
         "dgrid/Grid",
         "dgrid/Selection",
-        "dgrid/Keyboard",
         "dgrid/editor",
         'dojo/store/Memory',
         'dijit/form/FilteringSelect',
         'dojo/store/JsonRest',
-        'stalker/fieldUpdater',
-        'stalker/dialogCaller',
-        'dojo/on',
-        'dojo/query',
-        'dojo/domReady!'],
-            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, FilteringSelect, JsonRest, fieldUpdater, dialogCaller, on, quer) {
+        'dojo/domReady!'
+    ], function (registry, ObjectStore, List, Grid, Selection,
+                 editor, Memory, FilteringSelect, JsonRest) {
 
 
-                var projects_DataGrid = new Grid({
-                    id: 'projects_data_grid',
-                    width: '100%',
-                    autoHeight: true
-                }, 'projects_data_grid');
+        var projects_DataGrid = new Grid({
+            id: 'projects_data_grid',
+            width: '100%',
+            autoHeight: true
+        }, 'projects_data_grid');
 
 
-                function projects_DataGrid_updater() {
+        function projects_DataGrid_updater() {
 
-                    var user_memory = new JsonRest({
-                        target: '/get/projects_byEntity/{{ entity.id }}'
-                    });
+            var projects_memory = new JsonRest({
+                target: '/get/projects_byEntity/{{ entity.id }}'
+            });
 
-                    user_memory.query().then(function (data) {
-
-
-                        var columns = [
-                            {
-                                label: "Thumbnail",
-                                field: 'thumbnail',
-                                sortable:false,
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
-                                    return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/NoProjectPicture.jpg") }}">';
-                                }
-                            },
-                            {
-                                field: 'name',
-                                label: "Name",
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
-
-                                    var targetPane = "'central_content'";
-                                    var address = "'view/project/" + value.id + "'";
-
-                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
-                                }
-                            }
-                        ];
+            projects_memory.query().then(function (data) {
 
 
-                        projects_DataGrid.renderArray(data);
+                var columns = [
+                    {
+                        label: "Thumbnail",
+                        field: 'thumbnail',
+                        sortable: false,
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
+                            return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/NoProjectPicture.jpg") }}">';
+                        }
+                    },
+                    {
+                        field: 'name',
+                        label: "Name",
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
 
-                        projects_DataGrid.set('columns', columns);
+                            var targetPane = "'central_content'";
+                            var address = "'view/project/" + value.id + "'";
+
+                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                        }
+                    }
+                ];
 
 
-                    });
+                projects_DataGrid.renderArray(data);
 
-                }
+                projects_DataGrid.set('columns', columns);
 
-
-                projects_DataGrid_updater();
 
             });
+
+        }
+
+
+        projects_DataGrid_updater();
+
+    });
 
 </script>
 

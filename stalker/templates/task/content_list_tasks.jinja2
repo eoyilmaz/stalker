@@ -138,11 +138,14 @@
   --></div>
     
     <div class="__template__" type='TASKLINK'><!--
-        <a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/(#=obj.type.toLowerCase()#)/(#=obj.id#)">(#=obj.name#) ((#=obj.type#))</a> 
+      <a href="javascript:redirectLinkInParent('(#=obj.type.toLowerCase()#)s_content_pane','view/(#=obj.type.toLowerCase()#)/(#=obj.id#)');">(#=obj.name#) ((#=obj.type#))</a>
     --></div>
     
     <div class="__template__" type='RESOURCELINK'><!--
-    <a class="DataLink" href="#" stalker_target="central_content" stalker_href="view/user/(#=obj.id#)">(#=obj.name#)</a>
+    <a href="javascript:redirectLink('central_content','view/user/(#=obj.id#)');">(#=obj.name#)</a>
+    --></div>
+    <div class="__template__" type='PROJECTLINK'><!--
+    <a href="javascript:redirectLink('central_content','view/project/(#=obj.id#)');">(#=obj.name#)</a>
     --></div>
     
 </div>

@@ -93,7 +93,6 @@
                 target: '/get/groups_byEntity/{{ user.id }}'
             });
 
-
             var user_groups_multi_select = new MultiSelect({
                 name: 'user_groups',
                 required: false,
@@ -151,7 +150,8 @@
 
             var remove_item = function (multi_select, rId) {
                 var domNode = multi_select.domNode;
-                dojo.query('option', domNode).forEach(function (opt, idx, arr) {
+                dojo.query('option', domNode).forEach(function (opt, idx,
+                                                                arr) {
                     if (opt.value == rId) {
                         dojo.destroy(opt);
                     }
@@ -198,11 +198,21 @@
                 label: 'OK',
                 type: 'button',
                 onClick: function () {
+                    var group_ids = [];
+                    dojo.query('option', user_groups_multi_select.domNode).forEach(function (opt,
+                                                                                             idx,
+                                                                                             arr) {
+                        group_ids.push(opt.value);
+                    });
+
+                    console.log(group_ids);
+
                     submitForm({
                         dialog: registry.byId('append_group_dialog'),
                         form: append_group_form,
                         additional_data: {
-                            'user_id': {{ user.id }}
+                            'user_id': {{ user.id }},
+                            'group_ids': group_ids
                         },
                         url: 'append/groups',
                         method: 'POST'

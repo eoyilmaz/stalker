@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-from pyramid.httpexceptions import HTTPServerError
+from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 
@@ -189,28 +189,28 @@ def append_departments_dialog(request):
     route_name='append_departments'
 )
 def append_departments(request):
-    """appends the given users o the given Project or Department
-    # """
-    # # users
-    # user_ids = [
-    #     int(u_id)
-    #     for u_id in request.POST.getall('entity_users')
-    # ]
-    # users = User.query.filter(User.id.in_(user_ids)).all()
-    #
-    # # entity
-    # entity_id = request.params.get('entity_id', None)
-    # entity = Entity.query.filter(Entity.id==entity_id).first()
-    #
-    # logger.debug('entity : %s' % entity)
-    # logger.debug('users  : %s' % users)
-    #
-    # if users and entity:
-    #     entity.users = users
-    #     DBSession.add(entity)
-    #     DBSession.add_all(users)
+    """appends the given department to the given User
+    """
+    # departments
+    department_ids = [
+        int(d_id)
+        for d_id in request.POST.getall('department_ids')
+    ]
+    departments = Department.query.filter(Department.id.in_(department_ids)).all()
 
-    return
+    # user
+    user_id = request.params.get('user_id', None)
+    user = Entity.query.filter(User.id==user_id).first()
+
+    logger.debug('user : %s' % user)
+    logger.debug('departments  : %s' % departments)
+
+    if departments and user:
+        user.departments = departments
+        DBSession.add(user)
+        DBSession.add_all(departments)
+
+    return HTTPOk()
 
 
 

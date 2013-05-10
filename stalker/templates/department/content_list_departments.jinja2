@@ -47,6 +47,17 @@
                     autoHeight: true
                 }, 'departments_data_grid');
 
+                var append_department_button = dialogCaller({
+                    label: 'Append Department',
+                    dialog_id: 'append_department_dialog',
+                    content_creator: append_departments_dialog_creator,
+                    attach_to: 'view_departments_append_department_button',
+                    related_field_updater: departments_DataGrid_updater,
+                    data_id: '{{ entity.id }}'
+                });
+
+                append_department_button.startup();
+
 
                 function departments_DataGrid_updater() {
 
@@ -92,20 +103,6 @@
                     });
 
                 }
-
-                 var append_department_button = dialogCaller({
-                    label: 'Append Department',
-                    dialog_id: 'append_department_dialog',
-                    content_creator: append_department_dialog_creator,
-                    attach_to: 'view_departments_append_department_button',
-                    related_field_updater: departments_DataGrid_updater,
-                    data_id: '{{ entity.id }}'
-                });
-
-                append_department_button.startup();
-
-
-
 
                 departments_DataGrid_updater();
             });

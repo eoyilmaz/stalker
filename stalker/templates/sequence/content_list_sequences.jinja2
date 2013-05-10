@@ -18,7 +18,9 @@
         'dojo/on',
         'dojo/query',
         'dojo/domReady!'],
-            function (registry, ObjectStore, List, Grid, Selection, Keyboard, editor, Memory, JsonRest, fieldUpdater, dialogCaller, on, query) {
+            function (registry, ObjectStore, List, Grid, Selection, Keyboard,
+                      editor, Memory, JsonRest, fieldUpdater, dialogCaller, on,
+                      query) {
 
                 var sequences_data_grid = new Grid({
                     id: 'sequences_data_grid',
@@ -57,6 +59,17 @@
                     sequence_memory.query().then(function (data) {
 
                         var columns = [
+                            {
+                                label: "Thumbnail",
+                                field: 'thumbnail',
+                                sortable: false,
+                                get: function (object) {
+                                    return object; // return entire item for formatter to use
+                                },
+                                formatter: function (value) {
+                                    return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}">';
+                                }
+                            },
                             {
                                 field: 'status',
                                 label: "Status",

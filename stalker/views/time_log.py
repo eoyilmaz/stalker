@@ -115,3 +115,29 @@ def list_time_logs(request):
         'time_logs': time_logs,
         'has_permission': has_permission
     }
+
+@view_config(
+    route_name='get_time_logs',
+    renderer='json'
+)
+def get_time_logs(request):
+    """returns all the Shots of the given Project
+    """
+    task_id = request.matchdict['task_id']
+    task = Task.query.filter_by(id=task_id).first()
+
+    time_logs = []
+
+    for time_log in TimeLog.query.filter_by(task_id=task_id).all():
+        time_logs.append({
+            'id': time_log.id,
+            'resource_id': time_log.resource_id,
+            'resource_name': time_log.resource.name,
+            'start_date' : time_log.start.strftime('%s'),
+            'end_date':time_log.end.strftime('%s')
+            # 'hours_to_complete': time_log.hours_to_complete,
+            # 'notes': time_log.notes
+        })
+
+
+    return time_logs

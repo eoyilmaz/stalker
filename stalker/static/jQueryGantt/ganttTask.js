@@ -166,7 +166,12 @@ Task.prototype.getDependsLinks = function() {
 };
 
 Task.prototype.link = function(){
-    var rendered = $.JST.createFromTemplate(this, "TASKLINK");
+    var rendered;
+    if (this.type == 'Project'){
+        rendered = $.JST.createFromTemplate(this, "PROJECTLINK");
+    } else {
+        rendered = $.JST.createFromTemplate(this, "TASKLINK");
+    }
     return rendered[0].outerHTML;
 };
 

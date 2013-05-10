@@ -427,8 +427,9 @@ def append_users(request):
     # users
     user_ids = [
         int(u_id)
-        for u_id in request.POST.getall('entity_users')
+        for u_id in request.POST.getall('user_ids')
     ]
+    logger.debug('user_ids  : %s' % user_ids)
     users = User.query.filter(User.id.in_(user_ids)).all()
     
     # entity
@@ -814,28 +815,30 @@ def append_groups_dialog(request):
     route_name='append_groups'
 )
 def append_groups(request):
-    """appends the given users o the given Project or Group
+    """appends the given groups o the given User
     # """
-    # # users
-    # user_ids = [
-    #     int(u_id)
-    #     for u_id in request.POST.getall('entity_users')
-    # ]
-    # users = User.query.filter(User.id.in_(user_ids)).all()
-    #
-    # # entity
-    # entity_id = request.params.get('entity_id', None)
-    # entity = Entity.query.filter(Entity.id==entity_id).first()
-    #
-    # logger.debug('entity : %s' % entity)
-    # logger.debug('users  : %s' % users)
-    #
-    # if users and entity:
-    #     entity.users = users
-    #     DBSession.add(entity)
-    #     DBSession.add_all(users)
+    # groups
+    groups_ids = [
+        int(g_id)
+        for g_id in request.POST.getall('group_ids')
+    ]
+    logger.debug('groups_ids : %s' % groups_ids)
 
-    return
+    groups = Group.query.filter(Group.id.in_(groups_ids)).all()
+
+    # user
+    user_id = request.params.get('user_id', None)
+    user = User.query.filter(User.id==user_id).first()
+
+    logger.debug('user : %s' % user)
+    logger.debug('groups  : %s' % groups)
+
+    if groups and user:
+        user.groups = groups
+        DBSession.add(user)
+        DBSession.add_all(groups)
+
+    return HTTPOk()
 
 
 

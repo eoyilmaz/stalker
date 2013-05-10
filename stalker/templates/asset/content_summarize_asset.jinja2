@@ -20,7 +20,13 @@
 <div style="background-color: #ffb3d0" class="page_title"></div>
 <div id='asset_details_content_pane'>
     {# Avatar #}
-    <div id='asset_thumbnail' class='thumbnail'>No Avatar</div>
+    <div id='asset_thumbnail' class='thumbnail'>
+        {% if not asset.thumbnail %}
+        <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
+             alt=''
+             style='width:120px;'>
+    {% endif %}
+    </div>
     <div id='asset_summary_chart1'
          style='width: 100px;
                   height: 100px;
