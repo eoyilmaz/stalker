@@ -173,14 +173,16 @@ def update_user(request):
     login = authenticated_userid(request)
     logged_user = User.query.filter_by(login=login).first()
     
-    user_id = int(request.matchdict['user_id'])
-    name = request.params.get('name', None)
-    login = request.params.get('login', None)
-    email = request.params.get('email', None)
-    password = request.params.get('password', None)
+    user_id = int(request.params.get('user_id', -1))
+    user = User.query.filter(User.id==user_id).first()
+    
+    name = request.params.get('name')
+    login = request.params.get('login')
+    email = request.params.get('email')
+    password = request.params.get('password')
     
     # create and add a new user
-    if name and login and email and password:
+    if user and name and login and email and password:
         departments = []
 
         # Departments
@@ -211,9 +213,6 @@ def update_user(request):
             ]
             tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
         
-        logger.debug('creating new user')
-        user = User.query.filter(User.id==user_id).first()
-        
         user.name = name
         user.login = login
         user.email = email
@@ -223,7 +222,6 @@ def update_user(request):
         user.groups = groups
         user.tags = tags
         
-        password = request.params['password']
         if password != 'DONTCHANGE':
             user.password = password
         
@@ -232,6 +230,7 @@ def update_user(request):
         logger.debug('updated user successfully')
     else:
         logger.debug('not all parameters are in request.params')
+        log_param(request, 'user_id')
         log_param(request, 'name')
         log_param(request, 'login')
         log_param(request, 'email')
@@ -705,6 +704,7 @@ def update_group(request):
     permissions = get_permissions_from_multi_dict(post_multi_dict)
     
     if group:
+        group.name = name
         group.permissions = permissions
         group.updated_by = logged_user
         group.date_updated = datetime.datetime.now()

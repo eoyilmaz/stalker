@@ -35,7 +35,7 @@ from stalker import (User, Task, Entity, Project, StatusList, Status,
 from stalker.models.task import CircularDependencyError
 from stalker import defaults
 from stalker import log
-from stalker.views import get_datetime
+from stalker.views import get_datetime, PermissionChecker, get_logged_in_user
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -168,6 +168,7 @@ def update_with_jquery_gantt_task_data(json_data):
     
     :param data: jQueryGantt produced json string
     """
+    # TODO: remove this procedure
     
     # logger.debug(json_data)
     data = json.loads(json_data)
@@ -268,6 +269,7 @@ def update_with_jquery_gantt_task_data(json_data):
 def update_gantt_tasks(request):
     """updates the given tasks with the given JSON data
     """
+    # TODO: remove this function, it is not possible to modify tasks with json anymore
     # get the data
     data = request.params['prj']
     if data:
@@ -287,6 +289,7 @@ def update_task_dialog(request):
     
     return {
         'mode': 'UPDATE',
+        'has_permission': PermissionChecker(request),
         'project': task.project,
         'task': task,
         'parent': task.parent,
@@ -520,13 +523,13 @@ def get_project_tasks(request):
 def list_tasks(request):
     """runs when viewing tasks of a TaskableEntity
     """
-    login = authenticated_userid(request)
-    # logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
     
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter(Entity.id==entity_id).first()
     
     return {
+        'has_permission': PermissionChecker(request),
         'entity': entity
     }
 
@@ -555,6 +558,7 @@ def create_task_dialog(request):
     
     return {
         'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
         'project': project,
         'parent': parent,
         'schedule_models': defaults.task_schedule_models
@@ -576,6 +580,7 @@ def create_child_task_dialog(request):
     
     return {
         'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
         'project': project,
         'parent': parent_task,
         'schedule_models': defaults.task_schedule_models
@@ -598,6 +603,7 @@ def create_dependent_task_dialog(request):
      
     return {
         'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
         'project': project,
         'depends_to': depends_to_task,
         'schedule_models': defaults.task_schedule_models
@@ -611,8 +617,7 @@ def create_dependent_task_dialog(request):
 def create_task(request):
     """runs when adding a new task
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
     
     # ***********************************************************************
     # collect params
@@ -652,7 +657,7 @@ def create_task(request):
     
     kwargs = {}
     
-    if project_id and name and is_milestone and status_id:
+    if project_id and name and status_id:
         
         # get the project
         project = Project.query.filter_by(id=project_id).first()
@@ -824,14 +829,13 @@ def auto_schedule_tasks(request):
 def view_task(request):
     """runs when viewing a task
     """
-
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
 
     task_id = request.matchdict['task_id']
     task = Task.query.filter_by(id=task_id).first()
 
     return {
+        'has_permission': PermissionChecker(request),
         'user': logged_in_user,
         'task': task
     }
@@ -851,6 +855,7 @@ def summarize_task(request):
     task = Task.query.filter_by(id=task_id).first()
 
     return {
+        'has_permission': PermissionChecker(request),
         'user': logged_in_user,
         'task': task
     }

@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-    <form id='create_status_list_form'>
+    <form id='status_list_form'>
         <table style='width: 100%'>
 
             {# NAME #}
@@ -66,144 +66,179 @@
 </div>
 
 <div class='dijitDialogPaneActionBar'>
-    <button id='status_list_submit_button'></button>
+    <button id='status_list_ok_button'></button>
     <button id='status_list_cancel_button'></button>
 </div>
 
 <script type='text/javascript'>
-    require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
-        'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-        'dijit/form/SimpleTextarea', 'dijit/form/Button',
-        'dijit/form/FilteringSelect', 'stalker/dialogs', 'stalker/TagSelect',
-        'dojo/store/JsonRest', 'stalker/submitForm', 'stalker/fieldUpdater',
-        'stalker/dialogCaller', 'dojo/domReady!'],
-            function (registry, Memory, Form, ValidationTextBox, TextBox,
-                      SimpleTextarea, Button, FilteringSelect, dialogs,
-                      TagSelect, JsonRest, submitForm, fieldUpdater,
-                      dialogCaller) {
+    require([
+        'dojo/store/Memory',
+        'dojo/store/JsonRest',
+        
+        'dijit/form/Form',
+        'dijit/form/ValidationTextBox',
+        'dijit/form/Button',
+        'dijit/form/FilteringSelect',
+        
+        'stalker/dialogs',
+        'stalker/TagSelect',
+        'stalker/submitForm',
+        'stalker/fieldUpdater',
+        'stalker/dialogCaller',
+        
+        'dojo/domReady!'
+    ], function (Memory, JsonRest, Form, ValidationTextBox,
+                 Button, FilteringSelect, dialogs, TagSelect,
+                 submitForm, fieldUpdater, dialogCaller) {
+        // ********************************************************************
+        // Generate some default values
+        var name;
+        var name_disabled = false;
+        var target_entity_type;
+        var target_entity_type_disabled = false;
+        var url;
+        var additional_data = {};
+        var selected_statuses = [];
+        
+        {% if mode=='CREATE' %}
+            url = '{{ request.route_url('create_status_list') }}';
+            {% if target_entity_type %}
+                name = '{{ target_entity_type }} Statuses';
+                name_disabled = true;
+                target_entity_type = '{{ target_entity_type }}';
+                target_entity_type_disabled = true;
+            {% endif %}
+        {% elif mode=='UPDATE' %}
+            name = '{{ status_list.name }}';
+            name_disabled = true;
+            target_entity_type = '{{ status_list.target_entity_type }}';
+            target_entity_type_disabled = true;
+            selected_statuses = [
+                {% for status in status_list.statuses %}
+                    {{ status.id }},
+                {% endfor %}
+            ];
+            
+            url = '{{ request.route_url('update_status_list') }}';
+            additional_data = {
+                'status_list_id': {{ status_list.id }}
+            };
+        {% endif %}
+        
+        // ********************************************************************
+        // Form
+        var status_list_form = new Form({}, 'status_list_form');
 
-                // **********************************************************************
-                // Form
-                var create_status_list_form = new Form({
-                    id: 'create_status_list_form'
-                }, 'create_status_list_form');
+        var dialog = status_list_form.getParent();
 
-                // **********************************************************************
-                // Name
-                var name_textBox = new ValidationTextBox({
-                    name: 'name',
-                    label: 'Name',
-                    placeHolder: 'Enter a name',
-                    required: true,
-                    {% if target_entity_type %}
-                        disabled: true,
-                        value: '{{ target_entity_type }} Statuses',
-                    {% else %}
-                        disabled: false
-                    {% endif %}
-                }, 'status_list_name');
+        // ********************************************************************
+        // Name
+        var name_textBox = new ValidationTextBox({
+            name: 'name',
+            label: 'Name',
+            placeHolder: 'Enter a name',
+            required: true,
+            disabled: name_disabled,
+            value: name
+        }, 'status_list_name');
 
-                // **********************************************************************
-                // Target Entity Type
+        // ********************************************************************
+        // Target Entity Type
+        var target_entity_type_store = new Memory({
+            data: [
+                {% for entity_type in entity_types %}
+                    {
+                        name: '{{ entity_type.name }}',
+                        id: '{{ entity_type.name }}'
+                    },
+                {% endfor %}
+            ]
+        });
 
-                var target_entity_type_store = new Memory({
-                    data: [
-                        {% for entity_type in entity_types %}
-                            {
-                                name: '{{ entity_type.name }}',
-                                id: '{{ entity_type.name }}'
-                            },
-                        {% endfor %}
-                    ]
+        var target_entity_type_select = new FilteringSelect({
+            name: 'target_entity_type',
+            label: 'Target Entity Type',
+            required: true,
+            placeHolder: 'Select A Target Entity Type',
+            store: target_entity_type_store,
+            disabled: target_entity_type_disabled,
+            value: target_entity_type
+        }, 'status_list_target_entity_type');
+
+
+        // ********************************************************************
+        // Statuses
+        // 
+        // The Memory
+        var statuses_memory = new JsonRest({
+            target: '/get/statuses'
+        });
+
+        // The Widget
+        var statuses_tagSelect = new TagSelect({
+            name: 'status_ids',
+            required: true
+        }, 'status_list_statuses');
+
+        // The Updater
+        var statuses_field_updater = fieldUpdater({
+            'memory': statuses_memory,
+            'widget': statuses_tagSelect,
+            'selected': selected_statuses
+        });
+        // run the function to fill the data for the first time
+        statuses_field_updater({animate: false});
+
+        // New Status Button
+        var create_status_button = dialogCaller({
+            label: 'New',
+            dialog_id: 'create_status_dialog',
+            content_creator: dialogs.create_status_dialog,
+            attach_to: 'status_list_create_status_button',
+            related_field_updater: statuses_field_updater
+        });
+
+
+        // ********************************************************************
+        // Ok Button
+        var ok_button = new Button({
+            label: 'OK',
+            type: 'button',
+            disabled: false,
+            onClick: function () {
+                name_textBox.set('disabled', false);
+                target_entity_type_select.set('disabled', false);
+                submitForm({
+                    dialog: dialog,
+                    form: status_list_form,
+                    additional_data: additional_data,
+                    url: url,
+                    method: 'POST'
                 });
-
-                var target_entity_type_select = new FilteringSelect({
-                    name: 'target_entity_type',
-                    label: 'Target Entity Type',
-                    required: true,
-                    placeHolder: 'Select A Target Entity Type',
-                    store: target_entity_type_store,
-                    {% if target_entity_type %}
-                        disabled: true,
-                        value: '{{ target_entity_type }}',
-                    {% else %}
-                        disabled: false
-                    {% endif %}
-                }, 'status_list_target_entity_type');
+            }
+        }, 'status_list_ok_button');
 
 
-                // **********************************************************************
-                // Statuses
-                // 
-                // The Memory
-                var statuses_memory = new JsonRest({
-                    target: '/get/statuses'
-                });
-
-                // The Widget
-                var statuses_tagSelect = new TagSelect({
-                    name: 'statuses',
-                    required: true
-                }, 'status_list_statuses');
-
-                // The Updater
-                var statuses_field_updater = fieldUpdater({
-                    'memory': statuses_memory,
-                    'widget': statuses_tagSelect
-                });
-                // run the function to fill the data for the first time
-                statuses_field_updater({animate: false});
-
-                // New Status Button
-                var create_status_button = dialogCaller({
-                    label: 'New',
-                    dialog_id: 'create_status_dialog',
-                    content_creator: dialogs.create_status_dialog,
-                    attach_to: 'status_list_create_status_button',
-                    related_field_updater: statuses_field_updater
-                });
+        // ********************************************************************
+        // Cancel Button
+        var cancel_button = new Button({
+            label: 'Cancel',
+            type: 'button',
+            onClick: function () {
+                dialog.destroyRecursive();
+            }
+        }, 'status_list_cancel_button');
 
 
-                // **********************************************************************
-                // Submit Button
-                var submit_button = new Button({
-                    label: 'OK',
-                    type: 'button',
-                    disabled: false,
-                    onClick: function () {
-                        name_textBox.set('disabled', false);
-                        target_entity_type_select.set('disabled', false);
-                        submitForm({
-                            dialog: registry.byId('create_status_list_dialog'),
-                            form: create_status_list_form,
-                            additional_data: {submitted: 'create'},
-                            url: '{{ request.route_url('create_status_list') }}',
-                            method: 'POST'
-                        });
-                    }
-                }, 'status_list_submit_button');
+        // Startups
+        target_entity_type_select.startup();
+        name_textBox.startup();
+        statuses_tagSelect.startup();
+        create_status_button.startup();
+        ok_button.startup();
+        cancel_button.startup();
+        status_list_form.startup();
 
-
-                // **********************************************************************
-                // Cancel Button
-                var cancel_button = new Button({
-                    label: 'Cancel',
-                    type: 'button',
-                    onClick: function () {
-                        registry.byId('create_status_list_dialog').destroyRecursive();
-                    }
-                }, 'status_list_cancel_button');
-
-
-                // Startups
-                target_entity_type_select.startup();
-                name_textBox.startup();
-                statuses_tagSelect.startup();
-                create_status_button.startup();
-                submit_button.startup();
-                cancel_button.startup();
-                create_status_list_form.startup();
-
-            });
+    });
 </script>
 

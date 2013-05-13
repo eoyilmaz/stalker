@@ -45,11 +45,11 @@ class StatusListTest(unittest2.TestCase):
         
         self.test_status_list = StatusList(**self.kwargs)
     
-    def test___auto_name__class_attribute_is_set_to_False(self):
-        """testing if the __auto_name__ class attribute is set to False for
+    def test___auto_name__class_attribute_is_set_to_True(self):
+        """testing if the __auto_name__ class attribute is set to True for
         StatusList class
         """
-        self.assertFalse(StatusList.__auto_name__)
+        self.assertTrue(StatusList.__auto_name__)
      
     def test_statuses_argument_accepts_statuses_only(self):
         """testing if statuses list argument accepts list of statuses only

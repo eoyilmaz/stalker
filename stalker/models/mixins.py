@@ -304,7 +304,7 @@ class StatusMixin(object):
             # there is no db so raise an error because there is no way 
             # to get an appropriate StatusList
             raise TypeError(
-                "'%s' instances can not be initialized without a "
+                "%s instances can not be initialized without a "
                 "stalker.models.status.StatusList instance, please pass a "
                 "suitable StatusList (StatusList.target_entity_type=%s) "
                 "with the 'status_list' argument" %

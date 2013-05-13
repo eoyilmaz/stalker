@@ -121,7 +121,6 @@
         'dojo/store/Memory',
         'dojo/store/JsonRest',
 
-        'dijit/registry',
         'dijit/form/Form',
         'dijit/form/ValidationTextBox',
         'dijit/form/TextBox',
@@ -134,19 +133,55 @@
         'stalker/dialogCaller',
 
         'dojo/domReady!'
-    ], function (Memory, JsonRest, registry, Form, ValidationTextBox, TextBox,
-                 Button, dialogs, TagSelect, submitForm, fieldUpdater,
-                 dialogCaller) {
+    ], function (Memory, JsonRest, Form, ValidationTextBox, TextBox, Button,
+                 dialogs, TagSelect, submitForm, fieldUpdater, dialogCaller) {
 
-        // mode CREATE or UPDATE
+        // ********************************************************************
+        // Generate some default values
         var mode = '{{ mode }}';
+        var url;
+        var name;
+        var login;
+        var email;
+        var password;
+        var selected_departments;
+        var selected_groups;
+        var selected_tags;
+        
+        {% if mode=='CREATE' %}
+            url = 'create/user';
+            {% if department %}
+                selected_departments = [{{ department.id }}];
+            {% endif %}
+            {% if group %}
+                selected_groups = [{{ group.id }}];
+            {% endif %}
+        {% elif mode=='UPDATE'%}
+            url = 'update/user';
+            name = '{{ user.name }}';
+            login = '{{ user.login }}';
+            email = '{{ user.email }}';
+            password = 'DONTCHANGE';
+            selected_departments = [
+                {% for department in user.departments %}
+                    {{ department.id }},
+                {% endfor %}
+            ];
+            selected_groups = [
+                {% for group in user.groups %}
+                    {{ group.id }},
+                {% endfor %}
+            ];
+            selected_tags = [
+                {% for tag in user.tags %}
+                    {{ tag.name }},
+                {% endfor %}
+            ];
+        {% endif %}
 
         // ********************************************************************
         // Form
-        var user_form = new Form({
-            id: 'user_form'
-        }, 'user_form');
-        user_form.startup();
+        var user_form = new Form({}, 'user_form');
 
         var dialog = user_form.getParent();
 
@@ -157,9 +192,7 @@
             label: 'Name',
             placeHolder: 'Enter a user name',
             required: true,
-            {% if mode=='UPDATE' %}
-                value: '{{ user.name }}',
-            {% endif %}
+            value: name
         }, 'user_name');
         name_textBox.startup();
 
@@ -171,9 +204,7 @@
             label: 'Login',
             placeHolder: 'Enter a login name',
             required: true,
-            {% if mode=='UPDATE' %}
-                value: '{{ user.login }}',
-            {% endif %}
+            value: login,
             onChange: function () {
                 // reset the validator
                 this.validator = login_textBox_orig_validator;
@@ -192,9 +223,7 @@
             name: 'email',
             label: 'e-mail',
             placeHolder: 'Enter an e-mail',
-            {% if mode=='UPDATE' %}
-                value: '{{ user.email }}',
-            {% endif %}
+            value: email,
             required: true
         }, 'user_email');
         email_textBox.startup();
@@ -211,9 +240,7 @@
             label: 'Password',
             type: 'password',
             placeHolder: 'Enter a password',
-            {% if mode=='UPDATE' %}
-                value: 'DONTCHANGE',
-            {% endif %}
+            value : password,
             required: true
         }, 'user_password');
         password_textBox.startup();
@@ -232,9 +259,7 @@
                 var pass = password_textBox.value;
                 return value == pass;
             },
-            {% if mode=='UPDATE' %}
-                value: 'DONTCHANGE',
-            {% endif %}
+            value: password
         }, 'user_confirm_password');
         confirm_password_textBox.startup();
 
@@ -243,29 +268,11 @@
         // Departments
         var departments_tagSelect;
         var create_department_button;
-        var selected_departments;
-
+        
         var departments_jsonRest = new JsonRest({
             target: 'get/departments'
         });
-
-        {% if mode=='CREATE' %}
-            {% if department %}
-                selected_departments = [{{ department.id }}];
-            {% endif %}
-        {% elif mode=='UPDATE' %}
-            selected_departments = [
-                {% for department in user.departments %}
-                    {{ department.id }},
-                {% endfor %}
-            ];
-            selected_groups = [
-                {% for group in user.groups %}
-                    {{ group.id }},
-                {% endfor %}
-            ];
-        {% endif %}
-
+        
         departments_tagSelect = new TagSelect({
             name: 'department_ids',
             label: 'Department',
@@ -295,25 +302,12 @@
         // Groups
         var groups_tagSelect;
         var create_group_button;
-        var selected_groups;
 
         // Store
         var groups_jsonRest = new JsonRest({
             target: 'get/groups'
         });
-
-        {% if mode=='CREATE' %}
-            {% if group %}
-                selected_groups = [{{ group.id }}];
-            {% endif %}
-        {% elif mode=='UPDATE' %}
-            selected_groups = [
-                {% for group in user.groups %}
-                    {{ group.id }},
-                {% endfor %}
-            ];
-        {% endif %}
-
+        
         groups_tagSelect = new TagSelect({
             name: 'group_ids',
             placeHolder: 'Select groups'
@@ -351,15 +345,7 @@
             type: 'TextBox'
         }, 'user_tags');
         tags_tagSelect.startup();
-
-        {% if mode=='UPDATE' %}
-            var selected_tags = [
-                {% for tag in user.tags %}
-                    {{ tag.name }},
-                {% endfor %}
-            ];
-            tags_tagSelect.set('value', selected_tags);
-        {% endif %}
+        tags_tagSelect.set('value', selected_tags);
 
 
         // ********************************************************************
@@ -389,16 +375,17 @@
                     // mode is UPDATE and the login is different then previous
 
                     if (data['available'] == 0) {
+                        {# TODO: Update this part, this is absolutely dirty! #}
                         {% if mode=='UPDATE' %}
                             if ( login != '{{ user.login }}' ) {
                         {% endif %}
-                    login_textBox.invalidMessage = 'This login is not available';
-                    login_textBox.validator = function () {
-                        return false;
-                    };
-                    {% if mode=='UPDATE' %}
-                        }
-                    {% endif %}
+                                login_textBox.invalidMessage = 'This login is not available';
+                                login_textBox.validator = function () {
+                                    return false;
+                                };
+                        {% if mode=='UPDATE' %}
+                            }
+                        {% endif %}
                     } else {
                         console.log('code is here 3B');
                         login_textBox.validator = function () {
@@ -407,70 +394,63 @@
                     }
 
                 }).then(function () {
+                    var email_memory = new JsonRest({
+                        target: 'check/email_availability/' + email_textBox.value
+                    });
 
-                            var email_memory = new JsonRest({
-                                target: 'check/email_availability/' + email_textBox.value
-                            });
+                    var email_result = email_memory.query().then(function (data) {
 
-                            var email_result = email_memory.query().then(function (data) {
+                        var email = email_textBox.value;
 
-                                var email = email_textBox.value;
-
-                                if (data['available'] == 0) {
-                                    {% if mode=='UPDATE' %}
-                                        if (email != '{{ user.email }}' ) {
-                                    {% endif %}
-                                email_textBox.invalidMessage = 'This email is not available';
-                                email_textBox.validator = function () {
-                                    return false;
-                                };
-                                {% if mode=='UPDATE' %}
-                                    }
-                                {% endif %}
-
-                                } else {
-                                    console.log('code is here 5B');
+                        if (data['available'] == 0) {
+                            {# TODO: Update this part, again this is absolutely dirty! #}
+                            {% if mode=='UPDATE' %}
+                                if (email != '{{ user.email }}' ) {
+                            {% endif %}
+                                    email_textBox.invalidMessage = 'This email is not available';
                                     email_textBox.validator = function () {
-                                        return true;
+                                        return false;
                                     };
+                            {% if mode=='UPDATE' %}
                                 }
-                            }).then(function () {
-                                        if (login_textBox.validate()) {
-                                            if (email_textBox.validate()) {
+                            {% endif %}
+                        } else {
+                            console.log('code is here 5B');
+                            email_textBox.validator = function () {
+                                return true;
+                            };
+                        }
+                    }).then(function () {
+                        if (login_textBox.validate()) {
+                            if (email_textBox.validate()) {
+                                submitForm({
+                                    dialog: dialog,
+                                    form: user_form,
+                                    method: 'POST',
+                                    url: url,
+                                    additional_data: {
+                                        {% if department %}
+                                            department_id: {{ department.id }},
+                                        {% endif %}
+                                        {% if mode=='UPDATE' %}
+                                            user_id: {{user.id}}
+                                        {% endif %}
+                                    }
+                                });
+                            } else {
+                                // focus on email_textBox to show the error message
+                                console.log('code is here 9');
+                                email_textBox.focus();
+                            }
+                        } else {
+                            console.log('code is here 10');
+                            // focus on login_textBox to show the error message
+                            login_textBox.focus();
+                        }
 
-                                                var url;
-                                                {% if mode=='CREATE' %}
-                                                    url = 'create/user';
-                                                {% elif mode=='UPDATE'%}
-                                                    url = 'update/user/{{user.id}}';
-                                                {% endif %}
-
-                                                submitForm({
-                                                    dialog: dialog,
-                                                    form: user_form,
-                                                    method: 'POST',
-                                                    url: url,
-                                                    additional_data: {
-                                                        {% if department %}
-                                                            department_id:
-                                                            {{ department.id }}
-                                                        {% endif %}
-                                                    }
-                                                });
-                                            } else {
-                                                // focus on email_textBox to show the error message
-                                                console.log('code is here 9');
-                                                email_textBox.focus();
-                                            }
-                                        } else {
-                                            console.log('code is here 10');
-                                            // focus on login_textBox to show the error message
-                                            login_textBox.focus();
-                                        }
-
-                                        console.log('code is here 11');
-                                    });
-                        });
+                        console.log('code is here 11');
+                    });
+                });
             }
         }, 'user_submit_button');
         submit_button.startup();
@@ -485,6 +465,8 @@
             }
         }, 'user_cancel_button');
         cancel_button.startup();
+        
+        user_form.startup();
 
     });
 </script>

@@ -37,7 +37,7 @@
 #     permission='Read_Link'
 # )
 # def list_references(request):
-#     """called when updateing an image format
+#     """called when updating an image format
 #     """
 #     referrer = request.url
 #     came_from = request.params.get('came_from', referrer)
@@ -100,7 +100,7 @@
 #     permission='Create_ImageFormat'
 # )
 # def create_image_format(request):
-#     """called when adding or updateing an image format
+#     """called when adding or updating an image format
 #     """
 #     referrer = request.url
 #     came_from = request.params.get('came_from', referrer)

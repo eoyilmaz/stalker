@@ -170,7 +170,7 @@ def main(global_config, **settings):
     config.add_route('dialog_append_users', 'dialog/append/users/{entity_id}')
     
     config.add_route('create_user', 'create/user')
-    config.add_route('update_user', 'update/user/{user_id}') # TODO: remove user_id
+    config.add_route('update_user', 'update/user')
     config.add_route('view_user',   'view/user/{user_id}')
 
     config.add_route('list_users',              'list/users/{entity_id}')
@@ -191,7 +191,6 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # FilenameTemplate
-    # TODO: separate dialog and action
     config.add_route('dialog_create_filename_template', 'dialog/create/filename_template')
     config.add_route('dialog_update_filename_template', 'dialog/update/filename_template/{ft_id}')
     
@@ -202,18 +201,25 @@ def main(global_config, **settings):
     
     # ************************************************************************* 
     # StatusList
-    # TODO: separate dialog and action
-    config.add_route('create_status_list',     'create/status_list')
-    config.add_route('create_status_list_for', 'create/status_list/{target_entity_type}')
-    config.add_route('update_status_list',     'update/status_list/{target_entity_type}')
-    config.add_route('get_status_lists',       'get/status_lists')
-    config.add_route('get_status_lists_for',   'get/status_lists_for/{target_entity_type}')
+    config.add_route('dialog_create_status_list',     'dialog/create/status_list')
+    config.add_route('dialog_create_status_list_for', 'dialog/create/status_list/{target_entity_type}')
+    config.add_route('dialog_update_status_list',     'dialog/update/status_list/{target_entity_type}')
+    
+    config.add_route('create_status_list', 'create/status_list')
+    config.add_route('update_status_list', 'update/status_list')
+    
+    config.add_route('get_status_lists',     'get/status_lists')
+    config.add_route('get_status_lists_for', 'get/status_lists_for/{target_entity_type}')
     
     # *************************************************************************
     # Status
     # TODO: separate dialog and action
+    config.add_route('dialog_create_status', 'dialog/create/status')
+    config.add_route('dialog_update_status', 'dialog/update/status/{status_id')
+    
     config.add_route('create_status',    'create/status')
     config.add_route('update_status',    'update/status')
+    
     config.add_route('get_statuses',     'get/statuses')
     config.add_route('get_statuses_for', 'get/statuses_for/{target_entity_type}')
     config.add_route('get_statuses_of',  'get/statuses_of/{status_list_id}')

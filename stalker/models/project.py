@@ -291,7 +291,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         from stalker.models.repository import Repository
         
         if not isinstance(repository, Repository):
-            raise TypeError("%s.repository should be an instance of"
+            raise TypeError("%s.repository should be an instance of "
                             "stalker.models.repository.Repository, not %s" %
                             (self.__class__.__name__,
                              repository.__class__.__name__))

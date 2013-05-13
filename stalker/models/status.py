@@ -211,7 +211,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
       its :attr:`~stalker.models.status.StatusList.statuses`. But it is
       useless. The validation for empty statuses list is left to the SOM user.
     """
-    __auto_name__ = False
+    __auto_name__ = True
     __tablename__ = "StatusLists"
     __mapper_args__ = {"polymorphic_identity": "StatusList"}
     
