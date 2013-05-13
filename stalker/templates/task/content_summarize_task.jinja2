@@ -2,10 +2,10 @@
     <div style="background-color: #fff2f0 " class="page_title"></div>
     <div id='task_summary_chart1'
          style='width: 200px;
-                  height: 200px;
-                  position: absolute;
-                  top: 10px;
-                  left: 0;'></div>
+                height: 200px;
+                position: absolute;
+                top: 10px;
+                left: 0;'></div>
 
     {# Basic Info #}
     <div id='task_info' class='summary_info'>
@@ -34,7 +34,11 @@
                        stalker_href="view/user/{{ task.created_by.id }}">{{ task.created_by.name }}</a>
                 </td>
             </tr>
-
+            <tr>
+                <td style='text-align: right'><b>Description</b></td>
+                <td>&nbsp;</td>
+                <td>{{ task.description }}</td>
+            </tr>
 
         </table>
         <button id='update_task_button'>Update</button>
@@ -46,7 +50,7 @@
 <script type="text/javascript">
     require([
         'dojox/charting/Chart',
-        'dojox/charting/themes/DataChart',
+        'dojox/charting/themes/MiamiNice',
         'dojox/charting/plot2d/Pie',
         'dojox/charting/action2d/MoveSlice',
         'dijit/form/Button',
@@ -72,8 +76,14 @@
             fontColor: "black",
             labelOffset: 0
         });
-
-        var chartData = [1000, 12000];
+        
+        var chartData = [
+            {{ task.total_logged_seconds }},
+            {{ task.remaining_seconds }}];
+{#        ,#}
+{#            { stroke: { color: "green" }, fill: "lightgreen" },#}
+{#            { stroke: { color: "red" }, fill: "lightred" }#}
+{#        ];#}
 
         // Add the series of data
         pieChart.addSeries('January', chartData);
@@ -90,7 +100,14 @@
             dialog_id: 'update_task_dialog',
             content_creator: dialogs.update_task_dialog,
             attach_to: 'update_task_button',
-            data_id: {{ task.id }}
+            data_id: {{ task.id }},
+            related_field_updater: function(){
+                var content_pane = pieChart.getParent();
+                if (content_pane){
+                    console.log(content_pane);
+                    content_pane.refresh();
+                }
+            }
         });
         update_task_button.startup();
 
