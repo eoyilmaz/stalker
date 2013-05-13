@@ -59,6 +59,7 @@
 <script type="text/javascript">
     require([
         'dojo/dom-construct',
+        'dojo/query',
         'dojo/store/Memory',
         'dojo/data/ObjectStore',
         'dojo/store/JsonRest',
@@ -73,7 +74,7 @@
         'stalker/dialogCaller',
         'stalker/fieldUpdater',
         'dojo/domReady!'
-    ], function (domConstruct, Memory, ObjectStore, JsonRest, lang, registry,
+    ], function (domConstruct, dojoQuery, Memory, ObjectStore, JsonRest, lang, registry,
                  Form, Button, MultiSelect, submitForm, dialogCaller,
                  fieldUpdater) {
 
@@ -148,7 +149,7 @@
 
         var remove_item = function (multi_select, rId) {
             var domNode = multi_select.domNode;
-            domConstruct.query('option', domNode).forEach(function (opt, idx,
+            dojoQuery('option', domNode).forEach(function (opt, idx,
                                                                     arr) {
                 if (opt.value == rId) {
                     domConstruct.destroy(opt);
@@ -163,7 +164,7 @@
             type: 'button',
             onClick: function () {
                 var selected_data = all_users_multi_select.get('value');
-                var all_options = domConstruct.query('option', 'all_users_list');
+                var all_options = dojoQuery('option', 'all_users_list');
 
                 for (var i = 0; i < all_options.length; i++) {
                     if (selected_data.indexOf(all_options[i].value) != -1) {
@@ -180,7 +181,7 @@
             type: 'button',
             onClick: function () {
                 var selected_data = entity_users_multi_select.get('value');
-                var all_options = domConstruct.query('option', 'entity_users_list');
+                var all_options = dojoQuery('option', 'entity_users_list');
 
                 for (var i = 0; i < all_options.length; i++) {
                     if (selected_data.indexOf(all_options[i].value) != -1) {
@@ -197,7 +198,7 @@
             type: 'button',
             onClick: function () {
                 var user_ids = [];
-                dojo.query('option', entity_users_multi_select.domNode).forEach(function(opt, idx, arr){
+                dojoQuery('option', 'entity_users_list').forEach(function(opt, idx, arr){
                         user_ids.push(opt.value);
                     });
 

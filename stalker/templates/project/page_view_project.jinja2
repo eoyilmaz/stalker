@@ -36,19 +36,16 @@
 
 
 <script type='text/javascript'>
-    require(['dijit/registry',
+    require([
+        'dijit/registry',
+        'dojo/on',
 
         'dijit/layout/BorderContainer',
         'dijit/layout/TabContainer',
         'dojox/layout/ContentPane',
-        'dojo/query',
-        'stalker/gotoLink',
-        'dojo/on',
-        'dojo/ready',
 
         'dojo/domReady!'],
-            function (registry, BorderContainer, TabContainer, ContentPane,
-                      query, gotoLink, on, ready) {
+            function (registry, on, BorderContainer, TabContainer, ContentPane) {
 
 
                 // **********************************************************************
@@ -64,19 +61,21 @@
                 }, 'project_border_container');
 
 
-{#                var title_content_pane = new ContentPane({#}
-{#                    title: 'Title',#}
-{#                    content: '<div style="background-color: #eeeeee; text-align: center"><h4><strong>{{ project.name }} ({{ project.code }})</strong></h4></div>',#}
-{#                    region: 'top',#}
-{#                    style: 'width:100%; height:20px; padding: 0; background-color: #eeeeee;'#}
-{#                }, 'project_title');#}
+                var title_content_pane = new ContentPane({
+                    title: 'Title',
+                    content: '<div style="background-color: #eeeeee; text-align: center"><h4><strong>{{ project.name }} ({{ project.code }})</strong></h4></div>',
+                    region: 'top',
+                    splitter: true,
+                    resizable: false,
+                    style: 'width:100%; height:20px; padding: 0; background-color: #eeeeee;'
+                }, 'project_title');
 
                 var summary_content_pane = new ContentPane({
                     title: 'Summarize',
                     href: 'summarize/project/{{ project.id }}',
                     region: 'top',
                     splitter: true,
-                    style: 'min-height:30px; width:100%; height:200px; padding: 0; background-color: #eeeeee;'
+                    style: 'width:100%; height:200px; padding: 0; background-color: #eeeeee;'
                 }, 'project_summary');
 
 
@@ -154,34 +153,39 @@
                 project_related_data_tab_container.startup();
 
 
+                project_content_BorderContainer.addChild(title_content_pane);
                 project_content_BorderContainer.addChild(summary_content_pane);
                 project_content_BorderContainer.addChild(project_related_data_tab_container);
                 project_content_BorderContainer.startup();
 
                 //var currentPane = tasks_content_pane;
 
-{#                var lSplitter = registry.byId("project_summary")._splitterWidget;#}
-{#                on(lSplitter.domNode, 'mouse_up', showOrHideSummary);#}
-{##}
-{#                var summary_on = true;#}
-{##}
-{#                function showOrHideSummary() {#}
-{##}
-{#                    if(summary_on){#}
-{#                        summary_on = false;#}
-{#                        summary_content_pane.set('style','min-height:30px; width:100%; height:200px; padding: 0; background-color: #eeeeee;')#}
-{#                        project_content_BorderContainer.refresh();#}
-{#                    }#}
-{#                    else{#}
-{#                         summary_on = true;#}
-{#                         summary_content_pane.set('style','min-height:30px; width:100%; height:30px; padding: 0; background-color: #eeeeee;')#}
-{##}
-{##}
-{#                    }#}
-{##}
-{#                    //project_content_BorderContainer.removeChild(summary_content_pane);#}
-{##}
-{#                }#}
+                var lSplitter_title = registry.byId("project_title")._splitterWidget;
+                on(lSplitter_title.domNode, 'click', function(){});
+
+                var lSplitter_summary = registry.byId("project_summary")._splitterWidget;
+                on(lSplitter_summary.domNode, 'click', hideSummary);
+
+                var summary_on = true;
+
+                function hideSummary() {
+
+                    project_content_BorderContainer.removeChild(summary_content_pane);
+
+                    on(lSplitter_title.domNode, 'click', showSummary);
+
+                }
+
+                function showSummary() {
+
+                    project_content_BorderContainer.addChild(summary_content_pane);
+
+                    on(lSplitter_title.domNode, 'click', function(){});
+
+                    lSplitter_summary = registry.byId("project_summary")._splitterWidget;
+                    on(lSplitter_summary.domNode, 'click', hideSummary);
+
+                }
 
 
                 project_related_data_tab_container.watch("selectedChildWidget", function (name,
