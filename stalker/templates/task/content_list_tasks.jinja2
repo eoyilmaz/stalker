@@ -143,8 +143,9 @@
     <div class="__template__" type='RESOURCELINK'><!--
     <a href="javascript:redirectLink('central_content','view/user/(#=obj.id#)');">(#=obj.name#)</a>
     --></div>
+    
     <div class="__template__" type='PROJECTLINK'><!--
-    <a href="javascript:redirectLink('central_content','view/project/(#=obj.id#)');">(#=obj.name#)</a>
+    <a href="javascript:redirectLink('central_content','view/project/(#=obj.id#)');">(#=obj.name#) ((#=obj.type#))</a>
     --></div>
 
 </div>
@@ -153,23 +154,22 @@
 {# BUTTONS #}
 <div style="float: left;">
     <div style="float: left;">
-        {% if entity.entity_type != 'User' %}
             <div style="float: left;">
-                <button id='list_tasks_create_task_button'>Create Task</button>
+                {% if has_permission('Create_Task') %}
+                    <button id='list_tasks_create_task_button'>Create Task</button>
+                {% endif %}
                 <button id='list_tasks_gantt_reload_button'>Reload</button>
             </div>
             <div style="width: 100px; float: left"></div>
-        {% endif %}
         <div style="float: left;">
             <button id='list_tasks_zoom_out_button'>Zoom Out</button>
             <button id='list_tasks_zoom_in_button'>Zoom In</button>
         </div>
-        {% if entity.entity_type != 'User' %}
+        {% if has_permission('Update_Task') %}
             <div style='float: right;'>
                 <button id="list_tasks_schedule_tasks_button">Schedule Tasks</button>
             </div>
         {% endif %}
-
     </div>
 </div>
 
@@ -296,7 +296,7 @@
                     leaf_task_menu.addChild(view_task_summary_menuItem_creator());
                     parent_task_menu.addChild(view_task_summary_menuItem_creator());
 
-                    {% if entity.entity_type != 'User' %}
+                    {% if has_permission('Update_Task') %}
 
                         parent_task_menu.addChild(new MenuSeparator());
                         leaf_task_menu.addChild(new MenuSeparator());
@@ -326,8 +326,9 @@
 
                         parent_task_menu.addChild(update_task_menuItem_creator());
                         leaf_task_menu.addChild(update_task_menuItem_creator());
+                        {% endif %}
 
-
+                    {% if has_permission('Create_Task') %}
                         var create_child_task_menuItem_creator = function () {
                             return new MenuItem({
                                 label: 'Create Child Task',
@@ -378,42 +379,44 @@
                         leaf_task_menu.addChild(create_dependent_task_menuItem_creator());
 
                     {% endif %}
-
-                    var create_time_log_menuItem_creator = function () {
-                        return new MenuItem({
-                            label: 'Create TimeLog',
-                            onClick: function () {
-                                var node = this.getParent().currentTarget;
-                                var taskId = node.getAttribute('taskId');
-
-                                // check if it is a leaf task
-                                var task = ge.getTask(taskId);
-                                //console.log(task);
-
-                                if (task.isParent()) {
-                                    // warn the user and return
-                                    alert('This is a container Task,\n' +
-                                            'You can not enter any time_logs for\n' +
-                                            'container Tasks!');
-                                    return;
+                    
+                    {% if has_permission('Create_TimeLog') %}
+                        var create_time_log_menuItem_creator = function () {
+                            return new MenuItem({
+                                label: 'Create TimeLog',
+                                onClick: function () {
+                                    var node = this.getParent().currentTarget;
+                                    var taskId = node.getAttribute('taskId');
+    
+                                    // check if it is a leaf task
+                                    var task = ge.getTask(taskId);
+                                    //console.log(task);
+    
+                                    if (task.isParent()) {
+                                        // warn the user and return
+                                        alert('This is a container Task,\n' +
+                                                'You can not enter any time_logs for\n' +
+                                                'container Tasks!');
+                                        return;
+                                    }
+    
+                                    {#                                    saveGanttOnServer().then(function(){#}
+                                    var dialog = dialogCreator({
+                                        dialog_id: 'create_time_log_dialog',
+                                        data_id: taskId,
+                                        content_creator: dialogs.create_time_log_dialog,
+                                        related_field_updater: loadGanttFromServer
+                                    });
+                                    dialog.show();
+                                    {#                                    });#}
                                 }
+                            })
+                        };
+    
+                        leaf_task_menu.addChild(create_time_log_menuItem_creator());
+                    {% endif %}
 
-                                {#                                    saveGanttOnServer().then(function(){#}
-                                var dialog = dialogCreator({
-                                    dialog_id: 'create_time_log_dialog',
-                                    data_id: taskId,
-                                    content_creator: dialogs.create_time_log_dialog,
-                                    related_field_updater: loadGanttFromServer
-                                });
-                                dialog.show();
-                                {#                                    });#}
-                            }
-                        })
-                    };
-
-                    leaf_task_menu.addChild(create_time_log_menuItem_creator());
-
-                    {% if entity.entity_type != 'User' %}
+                    {% if has_permission('Delete_Task') %}
 
                         parent_task_menu.addChild(new MenuSeparator());
                         leaf_task_menu.addChild(new MenuSeparator());
@@ -473,8 +476,7 @@
             gimBaPrj.val("");
         }
 
-        {% if entity.entity_type != 'User' %}
-
+        {% if has_permission('Create_Task') %}
             // CREATE TASK
             var create_task_button = dialogCaller({
                 label: 'Create Task',
@@ -485,17 +487,16 @@
                 data_id: '{{ entity.id }}'
             });
             create_task_button.startup();
-
-            // REVERT TO SAVED
-            var reload_gantt_button = new Button({
-                label: 'Reload',
-                onClick: function () {
-                    loadGanttFromServer();
-                }
-            }, 'list_tasks_gantt_reload_button');
-            reload_gantt_button.startup();
-
         {% endif %}
+        
+        // RELOAD
+        var reload_gantt_button = new Button({
+            label: 'Reload',
+            onClick: function () {
+                loadGanttFromServer();
+            }
+        }, 'list_tasks_gantt_reload_button');
+        reload_gantt_button.startup();
 
         // ZOOM OUT
         var zoom_out_button = new Button({
@@ -515,8 +516,8 @@
         }, 'list_tasks_zoom_in_button');
         zoom_in_button.startup();
 
-        // SCHEDULE  
-        {% if entity.entity_type != 'User' %}
+        // SCHEDULE
+        {% if has_permission('Update_Task') %}
             var schedule_tasks_button = new Button({
                 label: 'Schedule Tasks',
                 onClick: function () {

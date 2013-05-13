@@ -218,9 +218,9 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         exports.create_status_list_dialog = function create_status_list_dialog(target_entity_type) {
             var href;
             if (target_entity_type == null) {
-                href = '/create/status_list'
+                href = '/dialog/create/status_list'
             } else {
-                href = '/create/status_list/' + target_entity_type
+                href = '/dialog/create/status_list/' + target_entity_type
             }
             return new DialogSimple({
                 id: 'create_status_list_dialog',
@@ -232,11 +232,11 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             });
         };
 
-        exports.update_status_list_dialog = function update_status_list_dialog(status_list_type) {
+        exports.update_status_list_dialog = function update_status_list_dialog(target_entity_type) {
             return new DialogSimple({
                 id: 'update_status_list_dialog',
                 title: 'Update Status List',
-                href: '/update/status_list/' + status_list_type,
+                href: '/dialog/update/status_list/' + target_entity_type,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -249,7 +249,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'create_status_dialog',
                 title: 'New Status',
-                href: '/create/status',
+                href: '/dialog/create/status',
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -260,7 +260,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'update_status_dialog',
                 title: 'Update Status',
-                href: '/update/status/' + status_id,
+                href: '/dialog/update/status/' + status_id,
                 resize: true,
                 style: style,
                 executeScripts: true

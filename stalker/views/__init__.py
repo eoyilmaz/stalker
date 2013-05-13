@@ -127,4 +127,18 @@ def busy_dialog(request):
 
 
 def get_logged_in_user(request):
+    """Returns the logged in user
+    
+    :param request: Request object
+    """
     return User.query.filter_by(login=authenticated_userid(request)).first()
+
+
+def get_multi_integer(request, attr_name):
+    """Extracts multi data from request.POST
+    
+    :param request: Request object
+    :param attr_name: Attribute name to extract data from
+    :return:
+    """
+    return [int(attr) for attr in request.POST.getall(attr_name)]

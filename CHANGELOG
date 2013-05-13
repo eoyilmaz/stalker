@@ -13,6 +13,9 @@ Stalker Changes
   * Update: Updated to Dojo 1.9
   * Update: stalker.js is renamed to dialogs.js and it is now fully compatible
     with Dojo AMD.
+  * Update: Merged StatusList create and update dialogs in to one.
+  * Update: Content List - Task now checks user permissions to disable part of
+    the UI.
   * Fix: Fixed fieldUpdater.js to work properly with Dojo 1.9 especially for
     MultiSelect widgets.
   * Fix: Separated the dialog and action routes for Structure.
@@ -22,6 +25,8 @@ Stalker Changes
   * Fix: Fixed Filename Template create dialog routine.
   * Fix: Fixed Filename Template update dialog routine.
   * Fix: Fixed entity_types in Filename Template creation UI.
+  * Fix: Fixed Group update dialog, the permissions were not displayed and the
+    name was not updated on the server side.
 
 0.2.0.b2
 --------

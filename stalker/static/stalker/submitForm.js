@@ -79,6 +79,7 @@ define(['dojo/request/xhr', 'dojo/_base/lang'],
                   dialog.destroyRecursive();
                 }, function(err){
                     // Do something when the process errors out
+                    console.log(err);
                     alert(err);
                 });
                 

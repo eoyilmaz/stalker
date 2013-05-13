@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 import datetime
 
-from pyramid.httpexceptions import HTTPServerError
+from pyramid.httpexceptions import HTTPServerError, HTTPOk
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 from sqlalchemy.exc import IntegrityError
@@ -30,156 +30,127 @@ from stalker import User, Status, StatusList, EntityType
 
 import logging
 from stalker import log
+from stalker.views import PermissionChecker, get_logged_in_user, get_multi_integer
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
+# *******************
+#
+# Status Dialogs
+#
+# *******************
+
+@view_config(
+    route_name='dialog_create_status',
+    renderer='templates/status/dialog_create_status.jinja2'
+)
+def dialog_create_status(request):
+    """fills the create status dialog
+    """
+    return {
+        'mode': 'CREATE',
+        'has_permission': PermissionChecker(request)
+    }
+
+
+@view_config(
+    route_name='dialog_update_status',
+    renderer='templates/status/dialog_create_status.jinja2'
+)
+def dialog_update_status(request):
+    """fills update status dialog
+    """
+    status_id = request.matchdict['status_id']
+    status = Status.query.filter_by(id=status_id).first()
+    
+    return {
+        'mode': 'UPDATE',
+        'has_permission': PermissionChecker(request),
+        'status': status
+    }
+
+
 @view_config(
     route_name='create_status',
-    renderer='templates/status/dialog_create_status.jinja2',
-    permission='Create_Status'
 )
-@view_config(
-    route_name='update_status',
-    renderer='templates/status/update_status.jinja2',
-    permission='Update_Status'
-)
-def create_update_status(request):
-    """called when adding or updating a Status
+def create_status(request):
+    """creates a new Status
     """
-    referrer = request.url
-    came_from = request.params.get('came_from', referrer)
+    logged_in_user = get_logged_in_user(request)
     
-    login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
+    # get parameters
+    name = request.params.get('name')
+    code = request.params.get('code')
+    bg_color = request.params.get('bg_color')
+    fg_color = request.params.get('fg_color')
     
-    if 'submitted' in request.params:
-        if request.params['submitted'] == 'create':
-            logger.debug('adding a new Status')
-            # create and add a new Status
-            
-            if 'name' in request.params and \
-                'code' in request.params and \
-                'bg_color' in request.params and \
-                'fg_color' in request.params:
-                
-                logger.debug('we got all the parameters')
-                
-                try:
-                    # get colors
-                    bg_color = int(request.params['bg_color'][1:], 16)
-                    fg_color = int(request.params['fg_color'][1:], 16)
-                    new_status = Status(
-                        name=request.params['name'],
-                        code=request.params['code'],
-                        fg_color=fg_color,
-                        bg_color=bg_color,
-                        created_by=user,
-                    )
-                except (AttributeError, TypeError) as e:
-                    logger.debug(e.message)
-                else:
-                    DBSession.add(new_status)
-                    try:
-                        transaction.commit()
-                    except IntegrityError as e:
-                        logger.debug(e.message)
-                        transaction.abort()
-                    else:
-                        logger.debug('flushing the DBSession, no problem here!')
-                        DBSession.flush()
-                        logger.debug('finished adding Status')
-            else:
-                logger.debug('there are missing parameters')
-                logger.debug(request.params)
-            
-            # TODO: place a return statement here
-        elif request.params['submitted'] == 'update':
-            logger.debug('updateing a Status')
-            # just update the given Status
-            st_id = request.matchdict['status_id']
-            status = Status.query.filter_by(id=st_id).first()
-            
-            with transaction.manager:
-                status.name = request.params['name']
-                status.code = request.params['code']
-                status.updated_by = user
-                status.date_updated = datetime.datetime.now()
-                DBSession.add(status)
-            
-            logger.debug('finished updateing Status')
-            
-            # TODO: place a return statement here
+    if name and code:
+        new_status = Status(
+            name=name,
+            code=code,
+            fg_color=fg_color,
+            bg_color=bg_color,
+            created_by=logged_in_user,
+        )
+        DBSession.add(new_status)
     
-    return {}
+    return HTTPOk()
 
 
 @view_config(
-    route_name='create_status_list',
-    renderer='templates/status/dialog_create_status_list.jinja2',
-    permission='Create_StatusList'
+    route_name='update_status'
+)
+def update_status(request):
+    """updates a status
+    """
+    logged_in_user = get_logged_in_user(request)
+    
+    # get parameters
+    name = request.params.get('name')
+    code = request.params.get('code')
+    bg_color = request.params.get('bg_color')
+    fg_color = request.params.get('fg_color')
+    
+    # just update the given Status
+    st_id = request.matchdict['status_id']
+    status = Status.query.filter_by(id=st_id).first()
+    
+    if status and name and code:
+        status.name = name
+        status.code = code
+        status.fg_color = fg_color
+        status.bg_color = bg_color
+        status.updated_by = logged_in_user
+        status.date_updated = datetime.datetime.now()
+        DBSession.add(status)
+    
+    return HTTPOk()
+
+
+# *******************
+#
+# Status List Dialogs
+#
+# *******************
+ 
+@view_config(
+    route_name='dialog_create_status_list',
+    renderer='templates/status/dialog_create_status_list.jinja2'
 )
 @view_config(
-    route_name='create_status_list_for',
-    renderer='templates/status/dialog_create_status_list.jinja2',
-    permission='Create_StatusList'
+    route_name='dialog_create_status_list_for',
+    renderer='templates/status/dialog_create_status_list.jinja2'
 )
-def create_status_list(request):
-    """called when adding or updating a StatusList
+def dialog_create_status_list(request):
+    """fills the create status_list dialog
     """
-    login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
-    
-    if 'submitted' in request.params:
-        if request.params['submitted'] == 'create':
-            logger.debug('adding a new StatusList')
-            # create and add a new StatusList
-            
-            if 'name' in request.params and \
-                'target_entity_type' in request.params and \
-                'statuses' in request.params:
-                
-                logger.debug('we got all the parameters')
-                
-                # get statuses
-                st_ids = [
-                    int(st_id)
-                    for st_id in request.POST.getall('statuses')
-                ]
-                
-                statuses = Status.query.filter(Status.id.in_(st_ids)).all()
-                
-                try:
-                    new_status_list = StatusList(
-                        name=request.params['name'],
-                        target_entity_type=\
-                            request.params['target_entity_type'],
-                        statuses=statuses,
-                        created_by=user,
-                    )
-                except (AttributeError, TypeError) as e:
-                    logger.debug(e.message)
-                else:
-                    # TODO: This is just a test for HTTPExceptions, do it properly later!
-                    DBSession.add(new_status_list)  
-                    try:
-                        transaction.commit()
-                    except IntegrityError as e:
-                        logger.debug(e.message)
-                        transaction.abort()
-                        http_error = HTTPServerError()
-                        http_error.explanation = e.message
-                        return http_error
-                    else:
-                        logger.debug('flushing the DBSession, no problem here!')
-                        DBSession.flush()
-                        logger.debug('finished adding StatusList')
-            else:
-                logger.debug('there are missing parameters')
-    
     target_entity_type = request.matchdict.get('target_entity_type')
     
     return {
+        'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
         'target_entity_type': target_entity_type,
         'entity_types': EntityType.query.filter_by(statusable=True).all(),
         'statuses': Status.query.all()
@@ -187,46 +158,88 @@ def create_status_list(request):
 
 
 @view_config(
-    route_name='update_status_list',
-    renderer='templates/status/dialog_update_status_list.jinja2',
-    permission='Update_StatusList'
+    route_name='dialog_update_status_list',
+    renderer='templates/status/dialog_create_status_list.jinja2'
+)
+def dialog_update_status_list(request):
+    
+    target_entity_type = request.matchdict.get('target_entity_type')
+    status_list = StatusList.query\
+        .filter_by(target_entity_type=target_entity_type).first()
+    
+    return {
+        'mode': 'UPDATE',
+        'has_permission': PermissionChecker(request),
+        'entity_types': EntityType.query.filter_by(statusable=True).all(),
+        'statuses': Status.query.all(),
+        'status_list': status_list,
+    }
+
+
+# *******************
+#
+# Status List Actions
+#
+# *******************
+
+@view_config(
+    route_name='create_status_list'
+)
+def create_status_list(request):
+    """creates a StatusList
+    """
+    logged_in_user = get_logged_in_user(request)
+    
+    # get parameters
+    name = request.params.get('name')
+    target_entity_type = request.params.get('target_entity_type')
+    
+    # get statuses
+    st_ids = get_multi_integer(request, 'status_ids')
+    statuses = Status.query.filter(Status.id.in_(st_ids)).all()
+    
+    if name and target_entity_type:
+        new_status_list = StatusList(
+            name=name,
+            target_entity_type=target_entity_type,
+            statuses=statuses,
+            created_by=logged_in_user
+        )
+        DBSession.add(new_status_list)  
+    
+    return HTTPOk()
+
+@view_config(
+    route_name='update_status_list'
 )
 def update_status_list(request):
     """called when updating a StatusList
     """
-    login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
     
-    status_list_type = request.matchdict['target_entity_type']
-    status_list = StatusList.query.filter_by(target_entity_type=status_list_type).first()
+    name = request.params.get('name')
     
-    if 'submitted' in request.params:
-        if request.params['submitted'] == 'update':
-            logger.debug('updating a StatusList')
-            # just update the given StatusList
-            
-            # get statuses
-            logger.debug("request.params['statuses']: %s" % 
-                                                request.params['statuses'])
-            st_ids = [
-                int(st_id)
-                for st_id in request.POST.getall('statuses')
-            ]
-            
-            statuses = Status.query.filter(Status.id.in_(st_ids)).all()
-            
-            logger.debug("statuses: %s" % statuses)
-            
-            status_list.name = request.params['name']
-            status_list.statuses = statuses
-            status_list.updated_by = user
-            status_list.date_updated = datetime.datetime.now()
-            
-            DBSession.add(status_list)
+    status_list_id = request.params.get('status_list_id')
+    status_list = StatusList.query.filter_by(id=status_list_id).first()
     
-    return {
-        'status_list': status_list
-    }
+    st_ids = get_multi_integer(request, 'status_ids')
+    statuses = Status.query.filter(Status.id.in_(st_ids)).all()
+    
+    logger.debug('st_ids   : %s' % st_ids)
+    logger.debug('statuses : %s' % statuses)
+    
+    if status_list and name:
+        status_list.name = name
+        status_list.statuses = statuses
+        
+        logger.debug('status_list.statuses : %s' % status_list.statuses)
+        
+        status_list.updated_by = logged_in_user
+        status_list.date_updated = datetime.datetime.now()
+        
+        DBSession.add(status_list)
+    
+    return HTTPOk()
 
 
 @view_config(

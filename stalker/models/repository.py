@@ -54,6 +54,8 @@ class Repository(Entity):
       be a string
     """
     
+    # TODO: Add OpenLDAP support, or at least learn how those stuff works.
+    
     __auto_name__ = False
     __tablename__ = 'Repositories'
     __mapper_args__ = {'polymorphic_identity': 'Repository'}

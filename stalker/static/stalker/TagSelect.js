@@ -100,6 +100,10 @@ define([
                 var tag_value;
                 var tag_label;
                 var result;
+                
+                if (!value){
+                    return;
+                }
 
                 // remove all previous tags
                 this.reset();

@@ -80,7 +80,8 @@
 
 <script type='text/javascript'>
     require([
-        'dijit/registry',
+        'dojo/dom',
+
         'dijit/form/Form',
         'dijit/form/Button',
         'dijit/form/CheckBox',
@@ -89,7 +90,7 @@
         'stalker/submitForm',
 
         'dojo/domReady!'
-    ], function (registry, Form, Button, CheckBox, ValidationTextBox,
+    ], function (dom, Form, Button, CheckBox, ValidationTextBox,
                  submitForm) {
 
         // ********************************************************************
@@ -125,7 +126,7 @@
                     class_name = '{{ permission.class_name }}';
 
                     checkBox_id = action + '_' + class_name;
-                    checkBox_dom = domConstruct.query(checkBox_id);
+                    checkBox_dom = dom.byId(checkBox_id);
                     checkBox_dom.setAttribute('checked', true);
 
                 {% endif %}

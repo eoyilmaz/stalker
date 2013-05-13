@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-    <form id='create_status_form'>
+    <form id='status_form'>
         <table style='width:100%;'>
 
             {# NAME #}
@@ -92,14 +92,40 @@
         'stalker/submitForm'
     ], function (Memory, Form, ValidationTextBox, TextBox, SimpleTextarea,
                  Button, ColorPalette, submitForm) {
-
-
+        
+        // ********************************************************************
+        // Generate some default values
+        var name;
+        var code;
+        var fg_color;
+        var bg_color;
+        var additional_data = {};
+        var url;
+        
+        {% if mode=='CREATE' %}
+            fg_color = '#000000';
+            bg_color = '#ffffff';
+            url = '{{ request.route_url('create_status')}}';
+        {% elif mode=='UPDATE' %}
+            name = {{ status.name }};
+            code = {{ status.code }};
+            fg_color = {{ status.fg_color }};
+            // convert it to hex
+            fg_color = '#' + fg_color.toString(16);
+            bg_color = {{ status.bg_color }};
+            bg_color = '#' + bg_color.toString(16);
+            additional_data = {
+                status_id: {{ status.id }}
+            };
+            url = '{{ request.route_url('update_status')}}';
+        {% endif %}
+        
         // **********************************************************************
         // Form
-        var create_status_form = new Form({}, 'create_status_form');
-        create_status_form.startup();
+        var status_form = new Form({}, 'status_form');
+        status_form.startup();
 
-        var dialog = create_status_form.getParent();
+        var dialog = status_form.getParent();
 
 
         // **********************************************************************
@@ -108,7 +134,8 @@
             name: 'name',
             label: 'Name',
             placeHolder: 'Enter a name',
-            required: true
+            required: true,
+            value: name
         }, 'status_name');
         name_textBox.startup();
 
@@ -119,7 +146,8 @@
             name: 'code',
             label: 'Code',
             placeHolder: 'Enter a code',
-            required: true
+            required: true,
+            value: code
         }, 'status_code');
         code_textBox.startup();
 
@@ -130,7 +158,7 @@
             name: 'fg_color',
             label: 'FG Color',
             required: true,
-            value: '#000000'
+            value: fg_color
         }, 'status_fg_color');
         fg_color_colorPalette.startup();
 
@@ -141,7 +169,7 @@
             name: 'bg_color',
             label: 'BG Color',
             required: true,
-            value: '#ffffff'
+            value: bg_color
         }, 'status_bg_color');
         bg_color_colorPalette.startup();
 
@@ -154,9 +182,9 @@
             onClick: function () {
                 submitForm({
                     dialog: dialog,
-                    form: create_status_form,
-                    additional_data: {submitted: 'create'},
-                    url: '{{ request.route_url('create_status')}}',
+                    form: status_form,
+                    additional_data: additional_data,
+                    url: url,
                     method: 'POST'
                 });
             }

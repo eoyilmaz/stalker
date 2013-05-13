@@ -16,12 +16,10 @@
         'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
-        'dojo/on',
-        'dojo/query',
         'dojo/domReady!'
     ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
-                 editor, Memory, JsonRest, fieldUpdater, dialogCaller, on,
-                 query) {
+                 editor, Memory, JsonRest, dialogs, fieldUpdater,
+                 dialogCaller) {
 
         var sequences_data_grid = new Grid({
             id: 'sequences_data_grid',
