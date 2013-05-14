@@ -49,7 +49,7 @@ def convert_to_jquery_gantt_task_format(tasks):
     """
     
     data_source = Studio.query.first()
-    logger.debug('data_source : %s' % data_source)
+    # logger.debug('data_source : %s' % data_source)
     
     if not data_source:
         data_source = defaults
@@ -70,7 +70,7 @@ def convert_to_jquery_gantt_task_format(tasks):
         'sat': data_source.working_hours['sat'],
         'sun': data_source.working_hours['sun']
     }
-    logger.debug('studio.working_hours : %s' % working_hours)
+    # logger.debug('studio.working_hours : %s' % working_hours)
     
     # create projects list to only list related projects
     projects = []

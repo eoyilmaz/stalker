@@ -19,6 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
+import logging
+
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Interval,
                         DateTime, PickleType)
 from sqlalchemy.exc import UnboundExecutionError
@@ -26,30 +28,14 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
 
 from stalker import defaults
-
 from stalker.db import Base
 from stalker.db.session import DBSession
-
 from stalker.log import logging_level
-import logging
+from stalker.models import make_plural
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-def make_plural(name):
-    """Returns the plural version of the given name argument.
-    """
-    plural_name = name + "s"
-    
-    if name[-1] == "y":
-        plural_name = name[:-1] + "ies"
-    elif name[-2:] == "ch":
-        plural_name = name + "es"
-    elif name[-1] == "f":
-        plural_name = name[:-1] + "ves"
-    elif name[-1] == "s":
-        plural_name = name + "es"
-
-    return plural_name
 
 def create_secondary_table(
         primary_cls_name,
@@ -90,6 +76,7 @@ def create_secondary_table(
         secondary_table = Base.metadata.tables[secondary_table_name]
     
     return secondary_table
+
 
 class TargetEntityTypeMixin(object):
     """Adds target_entity_type attribute to mixed in class.

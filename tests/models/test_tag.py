@@ -30,7 +30,7 @@ class TagTest(unittest2.TestCase):
         self.kwargs = {
             "name": "a test tag",
             "description": "this is a test tag",
-            }
+        }
 
         # create another SimpleEntity with kwargs for __eq__ and __ne__ tests
         self.simple_entity = SimpleEntity(**self.kwargs)
@@ -77,7 +77,8 @@ class TagTest(unittest2.TestCase):
         self.assertTrue(a_tag_object1 != a_tag_object3)
         self.assertTrue(a_tag_object1 != self.simple_entity)
 
-        #def test_plural_name(self):
-        #"""testing the plural name of Tag class
-        #"""
-        #self.assertTrue(Tag.plural_name, "Tags")
+    def test_plural_class_name(self):
+        """testing the plural name of Tag class
+        """
+        test_tag = Tag(**self.kwargs)
+        self.assertTrue(test_tag.plural_class_name, "Tags")

@@ -1418,5 +1418,5 @@ class UserTest(unittest2.TestCase):
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
         """
-        expected_tjp = 'resource User_71 "Erkan Ozgur Yilmaz"'
+        expected_tjp = 'resource User_69 "Erkan Ozgur Yilmaz"'
         self.assertEqual(self.test_user.to_tjp, expected_tjp)

@@ -30,25 +30,8 @@ function TaskFactory() {
      * Build a new Task
      */
     this.build = function(kwargs){
-    //    var start = kwargs['start'] || null;
-    //    var duration = kwargs['duration'] || null;
-        
-        // Set at beginning of day
-    //    var adjusted_start = computeStart(start);
-          
-    //    if (duration != null){
-    //        var calculated_end = computeEndByDuration(adjusted_start, duration);
-    //    } else {
-    //        calculated_end = kwargs['end'];
-    //    }
-        
-    //    kwargs['start'] = adjusted_start;
-    //    kwargs['end'] = calculated_end;
-        
-        // copy computed date values if any
         kwargs['start'] = kwargs['computed_start'] || kwargs['start'];
         kwargs['end']   = kwargs['computed_end'] || kwargs['end'];
-        
         return new Task(kwargs);
     };
 }
@@ -88,7 +71,12 @@ function Task(kwargs) {
     
     this.schedule_seconds = kwargs['schedule_seconds'] || 0;
     this.total_logged_seconds = kwargs['total_logged_seconds'] || 0;
+
+    this.progress = this.schedule_seconds > 0 ? this.total_logged_seconds / this.schedule_seconds * 100 : 0;
     
+    console.debug('this.total_logged_seconds : ', this.total_logged_seconds);
+    console.debug('this.schedule_seconds     : ', this.schedule_seconds);
+    console.debug('this.progress             : ', this.progress);
     
     this.bid_timing = kwargs['bid_timing'] || this.schedule_timing;
     this.bid_unit = kwargs['bid_unit'] || this.schedule_unit;
@@ -800,6 +788,11 @@ Task.prototype.isNew = function(){
 
 Task.prototype.update_duration_from_schedule_timing = function(){
     // updates the duration from schedule_timing    
+};
+
+Task.prototype.getProgress = function(){
+  this.progress = this.schedule_seconds > 0 ? this.total_logged_seconds / this.schedule_seconds * 100: 0;
+  return this.progress;
 };
 
 

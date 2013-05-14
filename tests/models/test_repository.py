@@ -225,10 +225,10 @@ class RepositoryTester(unittest2.TestCase):
         self.assertFalse(repo1 != repo2)
         self.assertTrue(repo1 != repo3)
 
-        #def test_plural_name(self):
-        #"""testing the plural name of Repository class
-        #"""
-        #self.assertTrue(Repository.plural_name, "Repositories")
+    def test_plural_class_name(self):
+        """testing the plural name of Repository class
+        """
+        self.assertTrue(self.test_repo.plural_class_name, "Repositories")
 
     def test_linux_path_argument_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes

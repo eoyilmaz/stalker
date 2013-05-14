@@ -445,10 +445,10 @@ class SequenceTester(unittest2.TestCase):
         new_sequence = Sequence(**self.kwargs)
         self.assertEqual(new_sequence.project, new_project)
 
-        #def test_plural_name(self):
-        #"""testing the plural name of Sequence class
-        #"""
-        #self.assertTrue(Sequence.plural_name, "Sequences")
+    def test_plural_class_name(self):
+        """testing the plural name of Sequence class
+        """
+        self.assertTrue(self.test_sequence.plural_class_name, "Sequences")
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ class attribute is False for

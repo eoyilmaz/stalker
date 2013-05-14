@@ -22,8 +22,16 @@
 
 from sqlalchemy.ext.declarative import declarative_base
 from stalker.db.session import DBSession
+from stalker.models import make_plural
+
 
 class ORMClass(object):
     query = DBSession.query_property()
+    
+    @property
+    def plural_class_name(self):
+        """the plural name of this class
+        """
+        return make_plural(self.__class__.__name__)
 
 Base = declarative_base(cls=ORMClass)

@@ -406,24 +406,6 @@ class DatabaseTester(unittest2.TestCase):
         # clean the test
         shutil.rmtree(temp_db_path)
 
-    def test_default_FilenameTemplate_Type_creation(self):
-        """testing if the default Types for the FilenameTemplates are created
-        successfully
-        """
-        DBSession.remove()
-        DBSession.configure(extension=None)
-        db.setup()
-
-        # now get all the Types for FilenameTemplates
-        f_types = Type.query \
-            .filter_by(target_entity_type="FilenameTemplate") \
-            .all()
-
-        self.assertEqual(len(f_types), 2)
-        type_names = [t.name for t in f_types]
-        self.assertTrue("Version" in type_names)
-        self.assertTrue("Reference" in type_names)
-
 
 class DatabaseModelsTester(unittest2.TestCase):
     """tests the database model

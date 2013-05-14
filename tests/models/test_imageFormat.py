@@ -37,7 +37,7 @@ class ImageFormatTest(unittest2.TestCase):
             "print_resolution": 300,
             }
 
-        self.mock_imageFormat = ImageFormat(**self.kwargs)
+        self.test_imageFormat = ImageFormat(**self.kwargs)
     
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -70,7 +70,7 @@ class ImageFormatTest(unittest2.TestCase):
             self.assertRaises(
                 TypeError,
                 setattr,
-                self.mock_imageFormat,
+                self.test_imageFormat,
                 "width",
                 test_value
             )
@@ -89,8 +89,8 @@ class ImageFormatTest(unittest2.TestCase):
         successfully
         """
         # the given floats should be converted to integer
-        self.mock_imageFormat.width = 1920.0
-        self.assertIsInstance(self.mock_imageFormat.width, int)
+        self.test_imageFormat.width = 1920.0
+        self.assertIsInstance(self.test_imageFormat.width, int)
 
     def test_width_argument_being_zero(self):
         """testing if a ValueError will be raised when the width argument is
@@ -105,7 +105,7 @@ class ImageFormatTest(unittest2.TestCase):
         zero
         """
         # also test the attribute for this
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "width", 0)
 
     def test_width_argument_being_negative(self):
@@ -120,7 +120,7 @@ class ImageFormatTest(unittest2.TestCase):
         negative
         """
         # also test the attribute for this
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "width", -100)
 
     def test_height_argument_int_or_float(self):
@@ -140,7 +140,7 @@ class ImageFormatTest(unittest2.TestCase):
         """
         # test also the attribute
         for test_value in ["1080", [1080]]:
-            self.assertRaises(TypeError, setattr, self.mock_imageFormat,
+            self.assertRaises(TypeError, setattr, self.test_imageFormat,
                               "height", "1080")
 
     def test_height_argument_float_to_int_conversion(self):
@@ -158,8 +158,8 @@ class ImageFormatTest(unittest2.TestCase):
         successfully
         """
         # also test the attribute for this
-        self.mock_imageFormat.height = 1080.0
-        self.assertIsInstance(self.mock_imageFormat.height, int)
+        self.test_imageFormat.height = 1080.0
+        self.assertIsInstance(self.test_imageFormat.height, int)
 
     def test_height_argument_being_zero(self):
         """testing if a ValueError will be raised when the height argument is
@@ -172,7 +172,7 @@ class ImageFormatTest(unittest2.TestCase):
         """testing if a ValueError will be raised when the height attribute is
         zero
         """
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "height", 0)
 
     def test_height_argument_being_negative(self):
@@ -186,13 +186,13 @@ class ImageFormatTest(unittest2.TestCase):
         """testing if a ValueError will be raised when the height attribute is
         negative
         """
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "height", -100)
 
     def test_device_aspect_attribute_float(self):
         """testing the if device aspect ratio is calculated as a float value
         """
-        self.assertIsInstance(self.mock_imageFormat.device_aspect, float)
+        self.assertIsInstance(self.test_imageFormat.device_aspect, float)
 
     def test_device_aspect_ratio_correctly_calculated(self):
         """testing if the device aspect ratio is correctly calculated
@@ -265,7 +265,7 @@ class ImageFormatTest(unittest2.TestCase):
         """
         # the device aspect should be write propetected
         self.assertRaises(AttributeError,
-                          setattr, self.mock_imageFormat, "device_aspect", 10)
+                          setattr, self.test_imageFormat, "device_aspect", 10)
 
     def test_pixel_aspect_int_float(self):
         """testing if a TypeError will be raised when the pixel aspect ratio
@@ -306,7 +306,7 @@ class ImageFormatTest(unittest2.TestCase):
         """testing if a ValueError will be raised when the pixel_aspect
         attribute is zero
         """
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "pixel_aspect", 0)
 
     def test_pixel_aspect_argument_negative(self):
@@ -325,10 +325,10 @@ class ImageFormatTest(unittest2.TestCase):
         is negative
         """
         # also test the attribute
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "pixel_aspect", -1.0)
 
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "pixel_aspect", -1)
 
     def test_pixel_aspect_attribute_if_being_initialized_correctly(self):
@@ -381,7 +381,7 @@ class ImageFormatTest(unittest2.TestCase):
         attribute is zero
         """
         # also test the attribute
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "print_resolution", 0)
 
     def test_print_resolution_argument_negative(self):
@@ -399,10 +399,10 @@ class ImageFormatTest(unittest2.TestCase):
         """testing if a ValueError will be raised when the print_resolution
         attribute is negative
         """
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "print_resolution", -300)
 
-        self.assertRaises(ValueError, setattr, self.mock_imageFormat,
+        self.assertRaises(ValueError, setattr, self.test_imageFormat,
                           "print_resolution", -300.0)
 
     def test_equality(self):
@@ -439,9 +439,8 @@ class ImageFormatTest(unittest2.TestCase):
         self.assertFalse(image_format1 != image_format2)
         self.assertTrue(image_format1 != image_format3)
 
-        #
-        #def test_plural_name(self):
-        #"""testing the plural name of ImageFormat class
-        #"""
-
-        #self.assertTrue(ImageFormat.plural_name, "ImageFormats")
+    def test_plural_class_name(self):
+        """testing the plural name of ImageFormat class
+        """
+        self.assertTrue(self.test_imageFormat.plural_class_name,
+                        "ImageFormats")

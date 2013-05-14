@@ -53,9 +53,9 @@
 --></div>
 
     <div class="__template__" type="TASKROW"><!--
-  <tr taskId="(#=obj.id#)" class="taskEditRow" >
+  <tr taskId="(#=obj.id#)" class="taskEditRow">
     <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
-    <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
+    <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
     <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
     <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
@@ -91,10 +91,9 @@
 
 
     <div class="__template__" type="TASKBAR"><!--
-    
   <div class="taskBox" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
-      <div class="taskProgress" style="width:(#=obj.schedule_seconds>0?obj.total_logged_seconds/obj.schedule_seconds*100:0#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
+      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
       <div class="taskExtraTiming" style="width:(#=(obj.schedule_timing - obj.bid_timing)/obj.schedule_timing*100#)%;;"></div>
       <div class="taskScheduleModel"
            style="position: absolute; text-align: center; width: 100%;">
@@ -116,8 +115,8 @@
       <div class="parentTaskContextMenu" taskId="(#=obj.id#)"></div>
       <div class="leftPin"></div>
       <div class="rightPin"></div>
-      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
-      <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
+      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
+      <div class="taskBid" style="width:(#=obj.bid/obj.effort*100#)%; background-color:red;"></div>
       <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
       <div class="taskLabel">(#=obj.link()#)</div>
       <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
@@ -128,7 +127,7 @@
     <div class="__template__" type="PROJECTBAR"><!--
   <div class="projectBox" projectId="(#=obj.id#)">
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
-      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
+      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;#);"></div>
       <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
       <div class="taskLabel">(#=obj.link()#)</div>
       <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>

@@ -62,7 +62,10 @@ class Config(object):
         database_session_settings = {},
         
         # Storage for uploaded files
-        server_storage_path = os.path.join(tempfile.gettempdir(), 'Stalker'),
+        server_side_storage_path = os.path.join(
+            tempfile.gettempdir(),
+            'Stalker'
+        ),
         
         #
         # Tells Stalker to create an admin by default
@@ -288,8 +291,6 @@ class Config(object):
         {% for project in studio.active_projects %}
             {{project.to_tjp}}
         {% endfor %}
-        
-        # bookings
         
         # reports
         taskreport breakdown "{{csv_file_full_path}}"{

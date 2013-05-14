@@ -9,6 +9,11 @@ Stalker Changes
   * Update: FilenameTemplate's are not ``strictly typed`` anymore.
   * Update: Removed the FilenameTemplate type initialization, FilenameTemplates
     do not depend on Types anymore.
+  * Update: Added back the ``plural_class_name`` (previously ``plural_name``)
+    property to the ORMClass class, so all the classes in SOM now have this new
+    property. 
+  * New: The Link class has a new attribute called ``original_filename`` to
+    store the original file names of link files.
 * WebUI:
   * Update: Updated to Dojo 1.9
   * Update: stalker.js is renamed to dialogs.js and it is now fully compatible
@@ -28,6 +33,9 @@ Stalker Changes
   * Fix: Fixed entity_types in Filename Template creation UI.
   * Fix: Fixed Group update dialog, the permissions were not displayed and the
     name was not updated on the server side.
+  * Fix: Fixed TaskBox CSS template
+  * New: GanttChart now displays the finished/unfinished tasks with a green/red
+    'id' column.
 
 0.2.0.b2
 --------

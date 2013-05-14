@@ -247,35 +247,33 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         # resources
         resource resources "Resources" {
             resource User_3 "admin"
-            resource User_14 "User1"
-            resource User_16 "User2"
-            resource User_17 "User3"
-            resource User_19 "User4"
-            resource User_20 "User5"
-            resource User_21 "User6"
+            resource User_12 "User1"
+            resource User_14 "User2"
+            resource User_15 "User3"
+            resource User_17 "User4"
+            resource User_18 "User5"
+            resource User_19 "User6"
         }
         
         # tasks
         
-            task Project_30 "Test Project 1" {
+            task Project_28 "Test Project 1" {
             
-                task Task_31 "Task1" {
+                task Task_29 "Task1" {
             effort 50.0h
-            allocate User_14, User_16
+            allocate User_12, User_14
         }
         
             
-                task Task_32 "Task2" {
+                task Task_30 "Task2" {
             effort 60.0h
-            allocate User_14, User_16
+            allocate User_12, User_14
         }
         
             
         }
         
         
-        
-        # bookings
         
         # reports
         taskreport breakdown "{{csv_path}}"{

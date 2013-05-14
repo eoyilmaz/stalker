@@ -17,3 +17,21 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+
+
+def make_plural(name):
+    """Returns the plural version of the given name argument.
+    """
+    plural_name = name + "s"
+    
+    if name[-1] == "y":
+        plural_name = name[:-1] + "ies"
+    elif name[-2:] == "ch":
+        plural_name = name + "es"
+    elif name[-1] == "f":
+        plural_name = name[:-1] + "ves"
+    elif name[-1] == "s":
+        plural_name = name + "es"
+
+    return plural_name
+

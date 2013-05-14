@@ -431,14 +431,10 @@ class AssetTester(unittest2.TestCase):
 
         #self.assertIn(new_asset, new_project.assets)
 
-
-
-        #
-        #def test_plural_name(self):
-        #"""testing the default plural name of the Asset class
-        #"""
-
-        #self.assertEqual(Asset.plural_name, "Assets")
+    def test_plural_class_name(self):
+        """testing the default plural name of the Asset class
+        """
+        self.assertEqual(self.test_data_test_asset.plural_class_name, "Assets")
 
     def test___strictly_typed___is_True(self):
         """testing if the __strictly_typed__ class attribute is True

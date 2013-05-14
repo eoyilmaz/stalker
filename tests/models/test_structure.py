@@ -230,10 +230,8 @@ class StructureTester(unittest2.TestCase):
         self.assertTrue(self.test_structure != new_structure3)
         self.assertTrue(self.test_structure != new_structure4)
 
-        #
-        #def test_plural_name(self):
-        #"""testing the plural name of Structure class
-        #"""
-
-        #self.assertTrue(Structure.plural_name, "Structures")
+    def test_plural_class_name(self):
+        """testing the plural name of Structure class
+        """
+        self.assertTrue(self.test_structure.plural_class_name, "Structures")
     

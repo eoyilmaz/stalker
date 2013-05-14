@@ -136,7 +136,7 @@ class NoteTester(unittest2.TestCase):
         self.assertFalse(note1 != note2)
         self.assertTrue(note1 != note3)
 
-        #def test_plural_name(self):
-        #"""testing the plural name of Note class
-        #"""
-        #self.assertTrue(Note.plural_name, "Notes")
+    def test_plural_class_name(self):
+        """testing the plural name of Note class
+        """
+        self.assertTrue(self.test_note.plural_class_name, "Notes")

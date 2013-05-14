@@ -82,10 +82,10 @@ class TypeTester(unittest2.TestCase):
         self.assertTrue(self.test_type != new_type4)
         self.assertTrue(self.test_type != self.entity1)
 
-    #def test_plural_name(self):
-        #"""testing the plural name of Entities class
-        #"""
-        #self.assertTrue(Entity.plural_name, "Entities")
+    def test_plural_class_name(self):
+        """testing the plural name of Type class
+        """
+        self.assertTrue(self.test_type.plural_class_name, "Types")
 
     def test_target_entity_type_argument_can_not_be_skipped(self):
         """testing if a TypeError will be raised when the created Type doesn't

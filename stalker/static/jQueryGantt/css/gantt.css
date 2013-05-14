@@ -299,12 +299,7 @@
     height:15px;
     margin-top:2px;
     z-index:100;
-}
-
-.taskBox .layout {
-    height:100%;
     border-radius: 3px;
-    /*background: #CCCCCC; *//* Old browsers */
     border:1px solid #AAAAAA;
     
     background-image: linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
@@ -320,6 +315,15 @@
         color-stop(0, #E0E0E0),
         color-stop(0.50, #FFFFFF)
     );    
+
+}
+
+.taskBox .layout {
+    height:100%;
+    /*border-radius: 2px;*/
+    /*border:1px solid #AAAAAA;*/
+    /*background: #CCCCCC; *//* Old browsers */
+    
 }
 
 .taskBox .taskStatus {
@@ -367,8 +371,8 @@
         left top,
         color-stop(0, #6DD900),
         color-stop(0.50, #99FF33)
-    );    
-    
+    );
+    border-radius: 2px;
 }
 
 .taskBox .taskExtraTiming{
@@ -514,6 +518,10 @@
 .taskEditRow,.emptyRow {
     height:19px;
 }
+
+/*.taskEditRow,.complete {*/
+    /*text-decoration: line-through;*/
+/*}*/
 
 .taskEditRow input{
     border: 0 none;

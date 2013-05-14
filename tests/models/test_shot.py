@@ -1078,10 +1078,10 @@ class ShotTester(unittest2.TestCase):
                                  self.test_shot.code)
         )
 
-        #def test_plural_name(self):
-        #"""testing the plural name of Shot class
-        #"""
-        #self.assertTrue(Shot.plural_name, "Shots")
+    def test_plural_class_name(self):
+        """testing the plural name of Shot class
+        """
+        self.assertTrue(self.test_shot.plural_class_name, "Shots")
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ class attribute is False for
