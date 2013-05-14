@@ -303,10 +303,10 @@ class Config(object):
         tj_command = '/usr/local/bin/tj3',
         
         # --------------------------------------------
-        # following coming from oyProjectManager 
+        # the following settings came from oyProjectManager 
         sequence_format = "%h%p%t %R",
         file_size_format = "%.2f MB",
-        time_format = '%d.%m.%Y %H:%M',
+        date_time_format = '%Y.%m.%d %H:%M',
         
         resolution_presets = {
             "PC Video": [640, 480, 1.0],

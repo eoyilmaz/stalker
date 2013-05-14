@@ -74,9 +74,9 @@ function Task(kwargs) {
 
     this.progress = this.schedule_seconds > 0 ? this.total_logged_seconds / this.schedule_seconds * 100 : 0;
     
-    console.debug('this.total_logged_seconds : ', this.total_logged_seconds);
-    console.debug('this.schedule_seconds     : ', this.schedule_seconds);
-    console.debug('this.progress             : ', this.progress);
+//    console.debug('this.total_logged_seconds : ', this.total_logged_seconds);
+//    console.debug('this.schedule_seconds     : ', this.schedule_seconds);
+//    console.debug('this.progress             : ', this.progress);
     
     this.bid_timing = kwargs['bid_timing'] || this.schedule_timing;
     this.bid_unit = kwargs['bid_unit'] || this.schedule_unit;

@@ -126,6 +126,9 @@
         {# fill values based on the dialog mode #}
         {% if mode == 'CREATE' %}
             url = '{{ request.route_url("create_asset") }}';
+            {% if project %}
+                project_id = {{ project.id }};
+            {% endif %}
         {% elif mode == 'UPDATE' %}
             url = '{{ request.route_url("update_asset") }}';
             asset_id = {{ asset.id }};
@@ -235,30 +238,32 @@
         var project_memory = new JsonRest({
             target: '{{ request.route_url("get_projects") }}'
         });
+    
+        console.log('{{ request.route_url("get_projects") }}');
 
         // Field
         var project_select = new FilteringSelect({
             name: 'project_id',
             required: true,
             store: project_memory,
-            placeHolder: 'Select A Project'
+            placeHolder: 'Select A Project',
+            {% if project %}
+                disabled: true
+            {% endif %}
         }, 'asset_project');
         project_select.startup();
 
         // Updater
         var project_field_updater = fieldUpdater({
             'memory': project_memory,
-            'widget': project_select
+            'widget': project_select,
+            {% if project %}
+                'selected': project_id
+            {% endif %}
         });
-
+        
         // Fill Widget
         project_field_updater();
-
-        {% if project %}
-            project_select.set('value', project_id);
-            project_select.set('disabled', true);
-        {% endif %}
-
 
         // ****************************************************************
         // Status 
@@ -324,11 +329,14 @@
             label: 'OK',
             type: 'button',
             onClick: function () {
+                project_select.set('disabled', false);
                 submitForm({
                     dialog: dialog,
                     form: asset_form,
                     additional_data: {
-                        asset_id: asset_id,
+                        {% if mode=='UPDATE' %}
+                            asset_id: asset_id,
+                        {% endif %}
                         type_name: type_comboBox.get('value')
                     },
                     url: url,
