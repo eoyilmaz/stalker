@@ -60,8 +60,10 @@
         {#        {% else %}#}
         {#            <div>Test 2</div>#}
         {#        {% endif %}#}
-
-        <button id='update_user_button'>Update</button>
+        
+        {% if has_permission('Update_User') %}
+            <button id='update_user_button'>Update</button>
+        {% endif %}
     </div>
     {#  Charts  #}
   <div>
@@ -104,16 +106,17 @@
 {#              // Render the chart!#}
 {#              pieChart.render();#}
 
-        // UPDATE USER BUTTON
-        var update_user_button = dialogCaller({
-            label: 'Update',
-            dialog_id: 'update_user_dialog',
-            content_creator: dialogs.update_user_dialog,
-            attach_to: 'update_user_button',
-            data_id: {{ user.id }}
-        });
-        update_user_button.startup();
-
+        {% if has_permission('Update_User') %}
+            // UPDATE USER BUTTON
+            var update_user_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'update_user_dialog',
+                content_creator: dialogs.update_user_dialog,
+                attach_to: 'update_user_button',
+                data_id: {{ user.id }}
+            });
+            update_user_button.startup();
+        {% endif %}
 
     });
 </script>
