@@ -16,6 +16,8 @@ Stalker Changes
   * New: The Link class has a new attribute called ``original_filename`` to
     store the original file names of link files.
   * New: Added **alembic** to the project requirements.
+  * New: Added alembic migrations which adds the ``accepts_references`` column
+    to ``EntityTypes`` table and ``original_name`` to the ``Links`` table.
 * WebUI:
   * Update: Updated to Dojo 1.9
   * Update: stalker.js is renamed to dialogs.js and it is now fully compatible
