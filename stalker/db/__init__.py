@@ -404,7 +404,7 @@ def register(class_):
         raise TypeError('To register a class please supply the class itself ')
     
     # register the class name to entity_types table
-    from stalker import EntityType, StatusMixin, ScheduleMixin
+    from stalker import EntityType, StatusMixin, ScheduleMixin, ReferenceMixin
     
     class_name = class_.__name__
     
@@ -415,6 +415,8 @@ def register(class_):
             new_entity_type.statusable = True
         if issubclass(class_, ScheduleMixin):
             new_entity_type.schedulable = True
+        if issubclass(class_, ReferenceMixin):
+            new_entity_type.accepts_references = True
         
         DBSession.add(new_entity_type)
     

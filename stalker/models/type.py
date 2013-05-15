@@ -106,16 +106,18 @@ class EntityType(Base):
     name = Column(String(128), nullable=False, unique=True)
     statusable = Column(Boolean, default=False)
     schedulable = Column(Boolean, default=False)
+    accepts_references = Column(Boolean, default=False)
     
     def __init__(
             self,
             name,
             statusable=False,
-            taskable=False,
-            schedulable=False):
+            schedulable=False,
+            accepts_references=False):
         self.name = name
         self.statusable = statusable
         self.schedulable = schedulable
+        self.accepts_references = accepts_references
     
     # TODO: add tests for the name attribute
 

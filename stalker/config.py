@@ -47,9 +47,9 @@ class Config(object):
     
     .. _configuring stalker: ../configure.html
     """
-    
+
     default_config_values = dict(
-        
+
         #
         # The default settings for the database, see sqlalchemy.create_engine
         # for possible parameters
@@ -58,20 +58,20 @@ class Config(object):
             "sqlalchemy.url": "sqlite:///:memory:",
             "sqlalchemy.echo": True,
         },
-        
+
         database_session_settings = {},
-        
+
         # Storage for uploaded files
         server_side_storage_path = os.path.join(
             tempfile.gettempdir(),
-            'Stalker'
+            'Stalker_Storage'
         ),
-        
+
         #
         # Tells Stalker to create an admin by default
         #
         auto_create_admin = True,
-        
+
         # 
         # these are for new projects
         # after creating the project you can change them from the interface
@@ -83,29 +83,29 @@ class Config(object):
         admin_email = 'admin@admin.com',
         admin_department_name = 'admins',
         admin_group_name = 'admins',
-        
+
         # the default keyword which is going to be used in password scrambling
         key = "stalker_default_key",
-        
+
         version_take_name = "Main",
-        
+
         actions = ['Create', 'Read', 'Update', 'Delete', 'List'], #CRUDL
-        
+
         status_bg_color = 0xffffff,
         status_fg_color = 0x000000,
-        
+
         # Tickets
         ticket_label = "Ticket",
-        
+
         # define the available actions per Status
         ticket_status_order = [
             'new', 'accepted', 'assigned', 'reopened', 'closed'
         ],
-        
+
         ticket_resolutions = [
             'fixed', 'invalid', 'wontfix', 'duplicate', 'worksforme', 'cantfix'
         ],
-        
+
         ticket_workflow = {
             'resolve' : {
                 'new': {
@@ -168,13 +168,13 @@ class Config(object):
                 }
             }
         },
-         
+
         # Task Management
         timing_resolution = datetime.timedelta(hours=1),
         task_duration = datetime.timedelta(hours=1),
-        
+
         task_priority = 500,
-        
+
         working_hours = {
           'mon': [[540, 1080]], # 9:00 - 18:00
           'tue': [[540, 1080]], # 9:00 - 18:00
@@ -184,19 +184,19 @@ class Config(object):
           'sat': [], # saturday off
           'sun': [], # sunday off
         },
-        
+
         # this is strongly related with the working_hours settings,
         # this should match each other
         daily_working_hours = 9,
         weekly_working_hours = 45,
         weekly_working_days = 5,
         yearly_working_days = 260.714, # 5 * 52.1428
-        
+
         day_order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
-        
+
         datetime_units = ['min', 'h', 'd', 'w', 'm', 'y'],
         datetime_unit_names = ['minute', 'hour', 'day', 'week', 'month', 'year'],
-        
+
         datetime_units_to_timedelta_kwargs = {
             'min': {'name': 'minutes', 'multiplier': 1},
             'h'  : {'name': 'hours'  , 'multiplier': 1},
@@ -205,12 +205,11 @@ class Config(object):
             'm'  : {'name': 'days'   , 'multiplier': 30},
             'y'  : {'name': 'days'   , 'multiplier': 365}
         },
-        
-        
+
         task_schedule_models = ['effort', 'length', 'duration'],
-        
+
         task_schedule_constraints = ['none', 'start', 'end', 'both'],
-        
+
         tjp_working_hours_template = """{% macro wh(wh, day) -%}
         {%- if wh[day]|length %}    workinghours {{day}} {% for part in wh[day] -%}
                 {%- if loop.index != 1%}, {% endif -%}
@@ -226,7 +225,7 @@ class Config(object):
         {{wh(workinghours, 'fri')}}
         {{wh(workinghours, 'sat')}}
         {{wh(workinghours, 'sun')}}""",
-        
+
         tjp_studio_template = """project {{ studio.tjp_id }} "{{ studio.name }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
             timingresolution {{ '%i'|format((studio.timing_resolution.days * 86400 + studio.timing_resolution.seconds)//60|int) }}min
             now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
@@ -238,14 +237,14 @@ class Config(object):
             trackingscenario plan
         }
         """,
-        
+
         tjp_project_template = """task {{project.tjp_id}} "{{project.name}}" {
             {% for task in project.root_tasks %}
                 {{task.to_tjp}}
             {% endfor %}
         }
         """,
-        
+
         tjp_task_template = """task {{task.tjp_id}} "{{task.name}}" {
         {%- if task.is_container -%}
             {%- for child_task in task.children %}
@@ -268,30 +267,30 @@ class Config(object):
         {% endif %}
         }
         """,
-        
+
         tjp_department_template = '''resource {{department.tjp_id}} "{{department.name}}" {
         {%- for resource in department.users %}
             {{resource.to_tjp}}
         {%- endfor %}
         }''',
-        
+
         tjp_user_template = '''resource {{user.tjp_id}} "{{user.name}}"''',
-        
+
         tjp_main_template = """# Generated By Stalker v{{stalker.__version__}}
         {{studio.to_tjp}}
-            
+
         # resources
         resource resources "Resources" {
         {%- for user in studio.users %}
             {{user.to_tjp}}
         {%- endfor %}
         }
-        
+
         # tasks
         {% for project in studio.active_projects %}
             {{project.to_tjp}}
         {% endfor %}
-        
+
         # reports
         taskreport breakdown "{{csv_file_full_path}}"{
             formats csv
@@ -299,15 +298,15 @@ class Config(object):
             columns id, start, end
         }
         """,
-        
+
         tj_command = '/usr/local/bin/tj3',
-        
+
         # --------------------------------------------
         # the following settings came from oyProjectManager 
         sequence_format = "%h%p%t %R",
         file_size_format = "%.2f MB",
         date_time_format = '%Y.%m.%d %H:%M',
-        
+
         resolution_presets = {
             "PC Video": [640, 480, 1.0],
             "NTSC": [720, 486, 0.91],
@@ -334,9 +333,9 @@ class Config(object):
             "3k Square": [3072, 3072, 1.0],
             "4k Square": [4096, 4096, 1.0],
         },
-        
+
         default_resolution_preset = "HD 1080",
-        
+
         project_structure = """{% for shot in project.shots %}
                 Shots/{{shot.code}}
                 Shots/{{shot.code}}/Plate
@@ -349,15 +348,13 @@ class Config(object):
             {{asset_path}}/Reference
         {% endfor %}
         """,
-        
+
         thumbnail_format = "jpg",
         thumbnail_quality = 70,
         thumbnail_size = [320, 180],
-        
     )
 
     def __init__(self):
-        
         self.config_values = Config.default_config_values.copy()
         self.user_config = {}
         
@@ -365,27 +362,27 @@ class Config(object):
         # stalker.config
         # config.py under .stalker_rc directory
         # config.py under $STALKER_PATH
-        
+
         self._parse_settings()
-    
+
     def _parse_settings(self):
         # for now just use $STALKER_PATH
         ENV_KEY = "STALKER_PATH"
-        
+
         # try to get the environment variable
         if not os.environ.has_key(ENV_KEY):
             # don't do anything
             logger.debug("no environment key found for user settings")
         else:
             logger.debug("environment key found")
-            
+
             resolved_path = os.path.expanduser(
                 os.path.join(
                     os.environ[ENV_KEY],
                     "config.py"
                 )
             )
-            
+
             # using `while` is not safe to expand variables
             # do the expansion for 5 times which is complex enough
             # and I don't (hopefully) expect anybody to use
@@ -399,7 +396,7 @@ class Config(object):
                     )
                 )
             )
-            
+
             try:
                 logger.debug("importing user config")
                 execfile(resolved_path, self.user_config)
@@ -415,20 +412,18 @@ class Config(object):
                 for key in self.user_config:
                     #if key in self.config_values:
                     self.config_values[key] = self.user_config[key]
-            
-            
-    
+
     def __getattr__(self, name):
         return self.config_values[name]
-    
+
     def __getitem__(self, name):
         return getattr(self, name)
-    
+
     def __setitem__(self, name, value):
         return setattr(self, name, value)
-    
+
     def __delitem__(self, name):
         delattr(self, name)
-    
+
     def __contains__(self, name):
         return name in self.config_values

@@ -12,8 +12,10 @@ Stalker Changes
   * Update: Added back the ``plural_class_name`` (previously ``plural_name``)
     property to the ORMClass class, so all the classes in SOM now have this new
     property. 
+  * Update: Added ``accepts_references`` attribute to the EntityType class.
   * New: The Link class has a new attribute called ``original_filename`` to
     store the original file names of link files.
+  * New: Added **alembic** to the project requirements.
 * WebUI:
   * Update: Updated to Dojo 1.9
   * Update: stalker.js is renamed to dialogs.js and it is now fully compatible

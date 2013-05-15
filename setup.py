@@ -10,6 +10,7 @@ CHANGES = open(os.path.join(here, 'CHANGELOG')).read()
 requires = [
     'pyramid',
     'sqlalchemy',
+    'alembic',
     'transaction',
     'pyramid_tm',
     'pyramid_debugtoolbar',

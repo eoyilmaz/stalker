@@ -124,17 +124,6 @@
   </div>
   --></div>
 
-    <div class="__template__" type="PROJECTBAR"><!--
-  <div class="projectBox" projectId="(#=obj.id#)">
-    <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
-      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;#);"></div>
-      <div class="taskBid" style="width:(#=obj.bid/obj.effort#)%; background-color:red;"></div>
-      <div class="taskLabel">(#=obj.link()#)</div>
-      <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
-    </div>
-  </div>
-  --></div>
-
     <div class="__template__" type='TASKLINK'><!--
       <a href="javascript:redirectLinkInParent('(#=obj.type.toLowerCase()#)s_content_pane','view/(#=obj.type.toLowerCase()#)/(#=obj.id#)');">(#=obj.name#) ((#=obj.type#))</a>
     --></div>
