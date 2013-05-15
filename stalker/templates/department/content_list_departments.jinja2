@@ -18,8 +18,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='view_departments'>
-    <button id='view_departments_append_department_button'>Append Department
-    </button>
+    {% if has_permission('Update_User') and has_permission('Update_Department') %}
+        <button id='view_departments_append_department_button'>Append Department</button>
+    {% endif %}
     <div id='departments_data_grid'></div>
 </div>
 
@@ -46,16 +47,17 @@
             autoHeight: true
         }, 'departments_data_grid');
 
-        var append_department_button = dialogCaller({
-            label: 'Append Department',
-            dialog_id: 'append_department_dialog',
-            content_creator: dialogs.append_departments_dialog,
-            attach_to: 'view_departments_append_department_button',
-            related_field_updater: departments_DataGrid_updater,
-            data_id: '{{ entity.id }}'
-        });
-
-        append_department_button.startup();
+        {% if has_permission('Update_User') and has_permission('Update_Department') %}
+            var append_department_button = dialogCaller({
+                label: 'Append Department',
+                dialog_id: 'append_department_dialog',
+                content_creator: dialogs.append_departments_dialog,
+                attach_to: 'view_departments_append_department_button',
+                related_field_updater: departments_DataGrid_updater,
+                data_id: '{{ entity.id }}'
+            });
+            append_department_button.startup();
+        {% endif %}
 
 
         function departments_DataGrid_updater() {

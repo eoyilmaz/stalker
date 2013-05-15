@@ -47,6 +47,9 @@
 
 
         </table>
+        {% if has_permission('Update_Shot') %}
+            <button id='update_shot_button'>Update</button>
+        {% endif %}
 
     </div>
     {#  Charts  #}
@@ -92,15 +95,17 @@
         // Render the chart!
         pieChart.render();
 
-        // UPDATE STRUCTURE BUTTON
-        var update_shot_button = dialogCaller({
-            label: 'Update',
-            dialog_id: 'update_shot_dialog',
-            content_creator: dialogs.update_shot_dialog,
-            attach_to: 'update_shot_button',
-            data_id: {{ shot.id }}
-        });
-        update_shot_button.startup();
+        {% if has_permission('Update_Shot') %}
+            // UPDATE SHOT BUTTON
+            var update_shot_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'update_shot_dialog',
+                content_creator: dialogs.update_shot_dialog,
+                attach_to: 'update_shot_button',
+                data_id: {{ shot.id }}
+            });
+            update_shot_button.startup();
+        {% endif %}
 
 
         gotoLink();

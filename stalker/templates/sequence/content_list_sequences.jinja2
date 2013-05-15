@@ -1,5 +1,7 @@
 <div id='list_sequences'>
-    <button id='list_sequences_create_sequence_button'>New Sequence</button>
+    {% if has_permission('Create_Sequence') %}
+        <button id='list_sequences_create_sequence_button'>New Sequence</button>
+    {% endif %}
     <div id='sequences_data_grid'></div>
 </div>
 <script type='text/javascript'>
@@ -27,16 +29,18 @@
             autoHeight: true
         }, 'sequences_data_grid');
 
-        var create_sequence_button = dialogCaller({
-            label: 'New Sequence',
-            dialog_id: 'create_sequence_dialog',
-            content_creator: dialogs.create_sequence_dialog,
-            attach_to: 'list_sequences_create_sequence_button',
-            related_field_updater: sequence_data_grid_updater,
-            data_id: '{{ project.id }}'
-        });
+        {% if has_permission('Create_Sequence') %}
+            var create_sequence_button = dialogCaller({
+                label: 'New Sequence',
+                dialog_id: 'create_sequence_dialog',
+                content_creator: dialogs.create_sequence_dialog,
+                attach_to: 'list_sequences_create_sequence_button',
+                related_field_updater: sequence_data_grid_updater,
+                data_id: '{{ project.id }}'
+            });
+            create_sequence_button.startup();
+        {% endif %}
 
-        create_sequence_button.startup();
 
         //asset_data_grid_updater();
 

@@ -26,6 +26,7 @@ Stalker Changes
   * Update: Content List - Task now checks user permissions to disable part of
     the UI.
   * Update: Added description field to the Summarize Task view.
+  * Update: Added permission checks to several views.
   * Fix: Fixed fieldUpdater.js to work properly with Dojo 1.9 especially for
     MultiSelect widgets.
   * Fix: Separated the dialog and action routes for Structure.

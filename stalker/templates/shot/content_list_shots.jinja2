@@ -18,7 +18,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='list_shots'>
-    <button id='list_shots_create_shot_button'>New Shot</button>
+    {% if has_permission('Create_Shot') %}
+        <button id='list_shots_create_shot_button'>New Shot</button>
+    {% endif %}
     <div id='shots_data_grid'></div>
 </div>
 <script type='text/javascript'>
@@ -47,17 +49,18 @@
                     width: '100%',
                     autoHeight: true
                 }, 'shots_data_grid');
-
-                var create_shot_button = dialogCaller({
-                    label: 'New Shot',
-                    dialog_id: 'create_shot_dialog',
-                    content_creator: dialogs.create_shot_dialog,
-                    attach_to: 'list_shots_create_shot_button',
-                    related_field_updater: shot_data_grid_updater,
-                    data_id: '{{ project.id }}'
-                });
-
-                create_shot_button.startup();
+                
+                {% if has_permission('Create_Shot') %}
+                    var create_shot_button = dialogCaller({
+                        label: 'New Shot',
+                        dialog_id: 'create_shot_dialog',
+                        content_creator: dialogs.create_shot_dialog,
+                        attach_to: 'list_shots_create_shot_button',
+                        related_field_updater: shot_data_grid_updater,
+                        data_id: '{{ project.id }}'
+                    });
+                    create_shot_button.startup();
+                {% endif%}
 
 
                 var status_memory = new JsonRest({

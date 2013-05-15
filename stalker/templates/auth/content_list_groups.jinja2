@@ -18,8 +18,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='view_groups'>
-    <button id='view_groups_append_group_button'>Append Group
-    </button>
+    {% if has_permission('Update_Group') and has_permission('Update_User') %}
+        <button id='view_groups_append_group_button'>Append Group</button>
+    {% endif %}
     <div id='groups_data_grid'></div>
 </div>
 
@@ -37,12 +38,10 @@
         'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
-        'dojo/on',
-        'dojo/query',
         'dojo/domReady!'],
             function (registry, ObjectStore, List, Grid, Selection, Keyboard,
                       editor, Memory, JsonRest, dialogs, fieldUpdater,
-                      dialogCaller, on, query) {
+                      dialogCaller) {
 
                 var groups_DataGrid = new Grid({
                     id: 'groups_data_grid',
@@ -94,16 +93,17 @@
 
                 }
 
-                var append_group_button = dialogCaller({
-                    label: 'Append Group',
-                    dialog_id: 'append_group_dialog',
-                    content_creator: dialogs.append_group_dialog,
-                    attach_to: 'view_groups_append_group_button',
-                    related_field_updater: groups_DataGrid_updater,
-                    data_id: '{{ user.id }}'
-                });
-
-                append_group_button.startup();
+                {% if has_permission('Update_Group') and has_permission('Update_User') %}
+                    var append_group_button = dialogCaller({
+                        label: 'Append Group',
+                        dialog_id: 'append_group_dialog',
+                        content_creator: dialogs.append_group_dialog,
+                        attach_to: 'view_groups_append_group_button',
+                        related_field_updater: groups_DataGrid_updater,
+                        data_id: '{{ user.id }}'
+                    });
+                    append_group_button.startup();
+                {% endif %}
 
                 groups_DataGrid_updater();
             });

@@ -27,7 +27,7 @@ from stalker.db import DBSession
 
 import logging
 from stalker import log
-from stalker.views import PermissionChecker
+from stalker.views import PermissionChecker, get_logged_in_user
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -211,16 +211,15 @@ def view_asset(request):
 def summarize_asset(request):
     """runs when viewing an asset
     """
-
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
 
     asset_id = request.matchdict['asset_id']
     asset = Asset.query.filter_by(id=asset_id).first()
 
     return {
         'user': logged_in_user,
-        'asset': asset
+        'asset': asset,
+        'has_permission': PermissionChecker(request)
     }
 
 

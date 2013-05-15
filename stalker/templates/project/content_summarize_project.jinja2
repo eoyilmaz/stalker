@@ -43,7 +43,7 @@
                 <td style='text-align: right'><strong>Lead</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content','view/user/{{ project.lead.id }}');">{{ project.lead.name }}</a>
+                    <a href="javascript:redirectLink('central_content', 'view/user/{{ project.lead.id }}');">{{ project.lead.name }}</a>
                     ({{ project.lead.login }})
                 </td>
             </tr>
@@ -78,7 +78,9 @@
                 <td>{{ project.end }}</td>
             </tr>
         </table>
-        <button id='update_project_button'>Update</button>
+        {% if has_permission('Update_Project') %}
+            <button id='update_project_button'>Update</button>
+        {% endif %}
     </div>
     {#  Charts  #}
     <div>
@@ -139,16 +141,18 @@
             // refresh the pane
             content_pane.refresh();
         };
-
-        var update_project_button = dialogCaller({
-            label: 'Update',
-            dialog_id: 'update_project_dialog',
-            content_creator: dialogs.update_project_dialog,
-            attach_to: 'update_project_button',
-            related_field_updater: project_summary_updater,
-            data_id: {{ project.id }}
-        });
-        update_project_button.startup();
+        
+        {% if has_permission('Update_Project') %}
+            var update_project_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'update_project_dialog',
+                content_creator: dialogs.update_project_dialog,
+                attach_to: 'update_project_button',
+                related_field_updater: project_summary_updater,
+                data_id: {{ project.id }}
+            });
+            update_project_button.startup();
+        {% endif %}
 
     });
 </script>

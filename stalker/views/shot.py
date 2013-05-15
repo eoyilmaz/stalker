@@ -29,14 +29,15 @@ from stalker import User, Sequence, StatusList, Status, Shot, Project
 
 import logging
 from stalker import log
+from stalker.views import PermissionChecker
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
 @view_config(
     route_name='create_shot',
-    renderer='templates/shot/dialog_create_shot.jinja2',
-    permission='Create_Shot'
+    renderer='templates/shot/dialog_create_shot.jinja2'
 )
 def create_shot(request):
     """runs when adding a new shot
@@ -120,10 +121,13 @@ def create_shot(request):
     route_name='view_shot',
     renderer='templates/shot/page_view_shot.jinja2'
 )
+@view_config(
+    route_name='summarize_shot',
+    renderer='templates/shot/content_summarize_shot.jinja2'
+)
 def view_shot(request):
     """runs when viewing an shot
     """
-
     login = authenticated_userid(request)
     logged_in_user = User.query.filter_by(login=login).first()
 
@@ -132,7 +136,8 @@ def view_shot(request):
 
     return {
         'user': logged_in_user,
-        'shot': shot
+        'shot': shot,
+        'has_permission': PermissionChecker(request)
     }
 
 @view_config(
@@ -143,33 +148,12 @@ def view_shot(request):
 def update_shot(request):
     """runs when updating a shot
     """
-
     shot_id = request.matchdict['shot_id']
     shot = Shot.query.filter_by(id=shot_id).first()
 
     return {
         'shot': shot,
         'projects': Project.query.all()
-    }
-
-
-@view_config(
-    route_name='summarize_shot',
-    renderer='templates/shot/content_summarize_shot.jinja2'
-)
-def summarize_shot(request):
-    """runs when viewing an shot
-    """
-
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
-
-    shot_id = request.matchdict['shot_id']
-    shot = Shot.query.filter_by(id=shot_id).first()
-
-    return {
-        'user': logged_in_user,
-        'shot': shot
     }
 
 @view_config(

@@ -72,7 +72,9 @@
             </tr>
 
         </table>
-        <button id='update_asset_button'>Update</button>
+        {% if has_permission('Update_Asset') %}
+            <button id='update_asset_button'>Update</button>
+        {% endif %}
     </div>
     {#  Charts  #}
     {#  <div>#}
@@ -132,16 +134,18 @@
             // refresh the pane
             content_pane.refresh();
         };
-
-        var update_asset_button = dialogCaller({
-            label: 'Update',
-            dialog_id: 'update_asset_dialog',
-            content_creator: dialogs.update_asset_dialog,
-            attach_to: 'update_asset_button',
-            related_field_updater: asset_summary_updater,
-            data_id: {{ asset.id }}
-        });
-        update_asset_button.startup();
+        
+        {% if has_permission('Update_Asset') %}
+            var update_asset_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'update_asset_dialog',
+                content_creator: dialogs.update_asset_dialog,
+                attach_to: 'update_asset_button',
+                related_field_updater: asset_summary_updater,
+                data_id: {{ asset.id }}
+            });
+            update_asset_button.startup();
+        {% endif %}
 
     });
 

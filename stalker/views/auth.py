@@ -20,8 +20,7 @@
 import datetime
 
 from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
-from pyramid.security import (authenticated_userid, forget, remember,
-                              has_permission)
+from pyramid.security import authenticated_userid, forget, remember
 from pyramid.view import view_config, forbidden_view_config
 from sqlalchemy import or_
 
@@ -29,7 +28,7 @@ import stalker
 from stalker import (defaults, User, Department, Group, Tag, Project, Entity,
                      Studio, Permission, EntityType)
 from stalker.db import DBSession
-from stalker.views import log_param
+from stalker.views import log_param, get_logged_in_user, PermissionChecker
 
 import logging
 from stalker import log
@@ -44,9 +43,7 @@ logger.setLevel(log.logging_level)
 def dialog_create_user(request):
     """called by create user dialog
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
-    
+    logged_user = get_logged_in_user(request)
     
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
@@ -61,6 +58,7 @@ def dialog_create_user(request):
     
     return {
         'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
         'logged_user': logged_user,
         'department': department,
         'group': group
@@ -74,14 +72,14 @@ def dialog_create_user(request):
 def dialog_update_user(request):
     """called when updating a user
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     user_id = request.matchdict['user_id']
     user = User.query.filter_by(id=user_id).first()
     
     return {
         'mode': 'UPDATE',
+        'has_permission': PermissionChecker(request),
         'logged_user': logged_user,
         'user': user
     }
@@ -93,8 +91,7 @@ def dialog_update_user(request):
 def create_user(request):
     """called when adding a User
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     name = request.params.get('name', None)
     login = request.params.get('login', None)
@@ -170,8 +167,7 @@ def create_user(request):
 def update_user(request):
     """called when updating a User
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     user_id = int(request.params.get('user_id', -1))
     user = User.query.filter(User.id==user_id).first()
@@ -250,8 +246,8 @@ def view_users(request):
     entity = Entity.query.filter_by(id=entity_id).first()
 
     return {
+        'has_permission': PermissionChecker(request),
         'entity': entity
-
     }
 
 @view_config(
@@ -259,12 +255,12 @@ def view_users(request):
     renderer='templates/auth/page_view_user.jinja2'
 )
 def view_user(request):
-
     user_id = request.matchdict['user_id']
     user = User.query.filter_by(id=user_id).first()
 
     return {
-        'user': user
+        'user': user,
+        'has_permission': PermissionChecker(request)
     }
 
 
@@ -292,7 +288,7 @@ def summarize_user(request):
     return {
         'user': user,
         'logged_user': logged_user,
-        'has_permission': has_permission
+        'has_permission': PermissionChecker(request)
     }
 
 
@@ -387,14 +383,14 @@ def get_users_not_in_entity(request):
 def append_user_dialog(request):
     """runs for append user dialog
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
     
     return {
         'user': logged_user,
+        'has_permission': PermissionChecker(request),
         'entity': entity
     }
 
@@ -557,6 +553,7 @@ def home(request):
         'user': user,
         'projects': projects,
         'studio': studio,
+        'has_permission': PermissionChecker(request)
     }
 
 
@@ -608,8 +605,7 @@ def check_email_availability(request):
 def create_group_dialog(request):
     """create group dialog
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
 
     permissions = Permission.query.all()
 
@@ -621,7 +617,7 @@ def create_group_dialog(request):
         'permissions': permissions,
         'entity_types': entity_types,
         'logged_user': logged_user,
-        'has_permission': has_permission
+        'has_permission': PermissionChecker(request)
     }
 
 @view_config(
@@ -631,8 +627,7 @@ def create_group_dialog(request):
 def update_group_dialog(request):
     """update group dialog
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
 
     permissions = Permission.query.all()
 
@@ -648,7 +643,7 @@ def update_group_dialog(request):
         'permissions': permissions,
         'entity_types': entity_types,
         'logged_user': logged_user,
-        'has_permission': has_permission
+        'has_permission': PermissionChecker(request)
     }
 
 @view_config(
@@ -657,8 +652,7 @@ def update_group_dialog(request):
 def create_group(request):
     """runs when creating a new Group
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     # get parameters
     post_multi_dict = request.POST
@@ -686,8 +680,7 @@ def create_group(request):
 def update_group(request):
     """updates the group with data from request
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     # get parameters
     post_multi_dict = request.POST
@@ -724,6 +717,7 @@ def list_groups(request):
     user = User.query.filter_by(id=user_id).first()
 
     return {
+        'has_permission': PermissionChecker(request),
         'user': user
     }
 
@@ -735,16 +729,14 @@ def list_groups(request):
 def view_group(request):
     """runs when viewing a group
     """
-
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
-
+    logged_in_user = get_logged_in_user(request)
 
     group_id = request.matchdict['group_id']
     group = Group.query.filter_by(id=group_id).first()
 
     return {
         'user': logged_in_user,
+        'has_permission': PermissionChecker(request),
         'group': group
     }
 
@@ -760,7 +752,8 @@ def summarize_group(request):
     group = Group.query.filter_by(id=group_id).first()
 
     return {
-        'group': group
+        'group': group,
+        'has_permission': PermissionChecker(request)
     }
 
 @view_config(
@@ -803,13 +796,13 @@ def get_groups_byEntity(request):
 def append_groups_dialog(request):
     """runs for append user dialog
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
 
     user_id = request.matchdict['user_id']
     user = User.query.filter_by(id=user_id).first()
 
     return {
+        'has_permission': PermissionChecker(request),
         'logged_user': logged_user,
         'user': user
     }
@@ -842,6 +835,4 @@ def append_groups(request):
         DBSession.add_all(groups)
 
     return HTTPOk()
-
-
 

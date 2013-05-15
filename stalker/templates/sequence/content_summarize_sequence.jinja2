@@ -49,7 +49,9 @@
                 </td>
             </tr>
         </table>
-        <button id='update_sequence_button'>Update</button>
+        {% if has_permission('Update_Sequence') %}
+            <button id='update_sequence_button'>Update</button>
+        {% endif %}
     </div>
     {#  Charts  #}
 
@@ -94,15 +96,17 @@
         // Render the chart!
         pieChart.render();
 
-        // UPDATE STRUCTURE BUTTON
-        var update_sequence_button = dialogCaller({
-            label: 'Update',
-            dialog_id: 'update_sequence_dialog',
-            content_creator: dialogs.update_sequence_dialog,
-            attach_to: 'update_sequence_button',
-            data_id: {{ sequence.id }}
-        });
-        update_sequence_button.startup();
+        {% if has_permission('Update_Sequence') %}
+            // UPDATE STRUCTURE BUTTON
+            var update_sequence_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'update_sequence_dialog',
+                content_creator: dialogs.update_sequence_dialog,
+                attach_to: 'update_sequence_button',
+                data_id: {{ sequence.id }}
+            });
+            update_sequence_button.startup();
+        {% endif %}
 
 
         gotoLink();

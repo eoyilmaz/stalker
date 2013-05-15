@@ -32,7 +32,9 @@
     {# Basic Info #}
     <div id='group_info' class='summary_info'>
         <h2 style='margin: 0; text-align: left;'>{{ group.name }}</h2>
-        <button id='update_group_button'>Update</button>
+        {% if has_permission('Update_Group') %}
+            <button id='update_group_button'>Update</button>
+        {% endif %}
     </div>
 </div>
 
@@ -55,15 +57,17 @@
             content_pane.refresh();
         };
 
-        var update_group_button = dialogCaller({
-            label: 'Update',
-            dialog_id: 'update_group_dialog',
-            content_creator: dialogs.update_group_dialog,
-            attach_to: 'update_group_button',
-            related_field_updater: group_summary_updater,
-            data_id: {{ group.id }}
-        });
-        update_group_button.startup();
+        {% if has_permission('Update_Group') %}
+            var update_group_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'update_group_dialog',
+                content_creator: dialogs.update_group_dialog,
+                attach_to: 'update_group_button',
+                related_field_updater: group_summary_updater,
+                data_id: {{ group.id }}
+            });
+            update_group_button.startup();
+        {% endif %}
 
         gotoLink();
     });

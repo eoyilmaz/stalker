@@ -18,7 +18,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='view_users'>
-    <button id='view_users_append_user_button'>Append User</button>
+    {% if has_permission('Update_User') %}
+        <button id='view_users_append_user_button'>Append User</button>
+    {% endif %}
     <div id='users_data_grid'></div>
 </div>
 
@@ -50,17 +52,17 @@
             autoHeight: true
         }, 'users_data_grid');
 
-        var append_user_button = dialogCaller({
-            label: 'Append User',
-            dialog_id: 'append_user_dialog',
-            content_creator: dialogs.append_user_dialog,
-            attach_to: 'view_users_append_user_button',
-            related_field_updater: users_DataGrid_updater,
-            data_id: '{{ entity.id }}'
-        });
-
-        append_user_button.startup();
-
+        {% if has_permission('Update_User') %}
+            var append_user_button = dialogCaller({
+                label: 'Append User',
+                dialog_id: 'append_user_dialog',
+                content_creator: dialogs.append_user_dialog,
+                attach_to: 'view_users_append_user_button',
+                related_field_updater: users_DataGrid_updater,
+                data_id: '{{ entity.id }}'
+            });
+            append_user_button.startup();
+        {% endif %}
 
         function users_DataGrid_updater() {
             var user_memory = new JsonRest({

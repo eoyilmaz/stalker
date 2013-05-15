@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
+from pyramid.httpexceptions import HTTPOk, HTTPServerError
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 
@@ -27,6 +27,8 @@ from stalker import User, Department, Entity
 
 import logging
 from stalker import log
+from stalker.views import PermissionChecker, get_logged_in_user
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
@@ -39,8 +41,7 @@ logger.setLevel(log.logging_level)
 def create_department(request):
     """called when creating a new Department
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
     
     logger.debug('called new_department')
     
@@ -73,6 +74,7 @@ def create_department(request):
         logger.debug('submitted is not in params')
     
     return {
+        'has_permission': PermissionChecker(request),
         'users': User.query.all()
     }
 
@@ -110,6 +112,7 @@ def view_department(request):
     department = Department.query.filter_by(id=department_id).first()
 
     return {
+        'has_permission': PermissionChecker(request),
         'user': logged_in_user,
         'department': department
     }
@@ -126,6 +129,7 @@ def summarize_department(request):
     department = Department.query.filter_by(id=department_id).first()
 
     return {
+        'has_permission': PermissionChecker(request),
         'department': department
     }
 
@@ -141,8 +145,8 @@ def list_departments(request):
     entity = Entity.query.filter_by(id=entity_id).first()
 
     return {
+        'has_permission': PermissionChecker(request),
         'entity': entity
-
     }
 
 @view_config(
@@ -174,13 +178,13 @@ def get_departments_byEntity(request):
 def append_departments_dialog(request):
     """runs for append user dialog
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
 
     user_id = request.matchdict['user_id']
     user = User.query.filter_by(id=user_id).first()
 
     return {
+        'has_permission': PermissionChecker(request),
         'logged_user': logged_user,
         'user': user
     }

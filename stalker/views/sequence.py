@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-from pyramid.httpexceptions import HTTPServerError, HTTPFound
+from pyramid.httpexceptions import HTTPServerError, HTTPOk
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 from sqlalchemy.exc import IntegrityError
@@ -29,6 +29,7 @@ from stalker import User, Project, StatusList, Status, Sequence, Type
 
 import logging
 from stalker import log
+from stalker.views import PermissionChecker
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -164,7 +165,8 @@ def view_sequence(request):
 
     return {
         'user': logged_in_user,
-        'sequence': sequence
+        'sequence': sequence,
+        'has_permission': PermissionChecker(request)
     }
 
 
@@ -184,7 +186,8 @@ def summarize_sequence(request):
 
     return {
         'user': logged_in_user,
-        'sequence': sequence
+        'sequence': sequence,
+        'has_permission': PermissionChecker(request)
     }
 
 

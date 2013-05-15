@@ -19,14 +19,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
-from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
+from pyramid.httpexceptions import HTTPOk, HTTPServerError
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
-from sqlalchemy.exc import IntegrityError
 
-import transaction
 from stalker.db import DBSession
-from stalker.views import get_date
+from stalker.views import get_date, get_logged_in_user, PermissionChecker
 from stalker import (User, ImageFormat, Repository, Structure, Status,
                      StatusList, Project, Entity)
 
@@ -43,11 +41,11 @@ logger.setLevel(log.logging_level)
 def create_project_dialog(request):
     """called when the create project dialog is requested
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     return {
         'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
         'logged_user': logged_user
     }
 
@@ -59,14 +57,14 @@ def create_project_dialog(request):
 def update_project_dialog(request):
     """runs when updating a project
     """
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     project_id = request.matchdict['project_id']
     project = Project.query.filter_by(id=project_id).first()
     
     return {
         'mode': 'UPDATE',
+        'has_permission': PermissionChecker(request),
         'project': project,
         'logged_user': logged_user
     }
@@ -78,9 +76,7 @@ def update_project_dialog(request):
 def create_project(request):
     """called when adding a new Project
     """
-
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     # parameters
     name = request.params.get('name')
@@ -143,9 +139,7 @@ def create_project(request):
 def update_project(request):
     """called when updating a Project
     """
-
-    login = authenticated_userid(request)
-    logged_user = User.query.filter_by(login=login).first()
+    logged_user = get_logged_in_user(request)
     
     # parameters
     project_id = request.params.get('project_id', -1)
@@ -207,13 +201,13 @@ def update_project(request):
 def view_projects(request):
     """runs when viewing all projects
     """
-
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
 
     # just return all the projects
     return {
-        'entity': entity
+        'entity': entity,
+        'has_permission': PermissionChecker(request)
     }
 
 @view_config(
@@ -226,7 +220,6 @@ def get_projects_byEntity(request):
     """
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
-
 
     return [
         {
@@ -287,15 +280,15 @@ def get_projects(request):
 def view_project_related_data(request):
     """runs when viewing project related data
     """
-    login = authenticated_userid(request)
-    user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
     
     project_id = request.matchdict['project_id']
     project = Project.query.filter_by(id=project_id).first()
     
     return {
-        'user': user,
-        'project': project
+        'user': logged_in_user,
+        'project': project,
+        'has_permission': PermissionChecker(request)
     }
 
 
@@ -310,14 +303,11 @@ def view_project_related_data(request):
 def view_entity_nav_bar(request):
     """runs when viewing all projects
     """
-
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
 
-
-
     # just return all the projects
     return {
-        'entity': entity
-
+        'entity': entity,
+        'has_permission': PermissionChecker(request)
     }

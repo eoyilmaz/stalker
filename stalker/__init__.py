@@ -76,6 +76,7 @@ def main(global_config, **settings):
     # setup authorization and authentication
     authn_policy = AuthTktAuthenticationPolicy(
         'sosecret',
+        hashalg='sha512',
         callback=group_finder
     )
     authz_policy = ACLAuthorizationPolicy()
