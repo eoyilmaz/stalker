@@ -17,111 +17,42 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
-#
-# from pyramid.security import authenticated_userid
-# from pyramid.view import view_config
-# import transaction
-#
-# from stalker.db import DBSession
-# from stalker import User, Link
-#
-# import logging
-# from stalker import log
-# logger = logging.getLogger(__name__)
-# logger.setLevel(log.logging_level)
-#
-#
-# @view_config(
-#     route_name='list_references',
-#     renderer='templates/format/content_list_references.jinja2',
-#     permission='Read_Link'
-# )
-# def list_references(request):
-#     """called when updating an image format
-#     """
-#     referrer = request.url
-#     came_from = request.params.get('came_from', referrer)
-#
-#     login = authenticated_userid(request)
-#     user = User.query.filter_by(login=login).first()
-#
-#     imf_id = request.matchdict['imf_id']
-#     imf = ImageFormat.query \
-#         .filter(ImageFormat.id==imf_id) \
-#         .first()
-#
-#     if 'submitted' in request.params:
-#         if 'name' in request.params and \
-#                         'width' in request.params and \
-#                         'height' in request.params and \
-#                         'pixel_aspect' in request.params and \
-#                         'submitted' in request.params:
-#             if request.params['submitted'] == 'update':
-#                 imf.name = request.params['name']
-#                 imf.width = int(request.params['width'])
-#                 imf.height = int(request.params['height'])
-#                 imf.pixel_aspect = float(request.params['pixel_aspect'])
-#                 imf.updated_by = user
-#                 DBSession.add(imf)
-#                 #try:
-#                 #    transaction.commit()
-#                 #except (IntegrityError, DetachedInstanceError) as e:
-#                 #    logging.debug(e)
-#                 #    transaction.abort()
-#                 #else:
-#                 #    DBSession.flush()
-#
-#     return {'image_format': imf}
-#
-#
-# @view_config(
-#     route_name='get_image_formats',
-#     renderer='json',
-#     permission='Read_ImageFormat'
-# )
-# def get_image_formats(request):
-#     """returns all the image formats in the database
-#     """
-#     return [
-#         {
-#             'id': imf.id,
-#             'name': imf.name,
-#             'width': imf.width,
-#             'height': imf.height,
-#             'pixel_aspect': imf.pixel_aspect
-#         }
-#         for imf in ImageFormat.query.all()
-#     ]
-#
-#
-# @view_config(
-#     route_name='create_image_format',
-#     renderer='templates/format/dialog_create_image_format.jinja2',
-#     permission='Create_ImageFormat'
-# )
-# def create_image_format(request):
-#     """called when adding or updating an image format
-#     """
-#     referrer = request.url
-#     came_from = request.params.get('came_from', referrer)
-#
-#     login = authenticated_userid(request)
-#     user = User.query.filter_by(login=login).first()
-#
-#     if 'name' in request.params and \
-#                     'width' in request.params and \
-#                     'height' in request.params and \
-#                     'pixel_aspect' in request.params:
-#
-#         # create a new ImageFormat and save it to the database
-#         with transaction.manager:
-#             new_image_format = ImageFormat(
-#                 name=request.params['name'],
-#                 width=int(request.params['width']),
-#                 height=int(request.params['height']),
-#                 pixel_aspect=float(request.params['pixel_aspect']),
-#                 created_by=user
-#             )
-#             DBSession.add(new_image_format)
-#
-#     return {}
+
+from pyramid.httpexceptions import HTTPOk, HTTPServerError
+from pyramid.view import view_config
+from stalker import Link, Entity
+from stalker.db import DBSession
+from stalker.views import upload_file_to_server
+
+
+view_config(
+    route_name='upload_reference'
+)
+def upload_reference(request):
+    """called when uploading a reference
+    """
+    
+    entity_id = request.matchdict.get('entity_id')
+    entity = Entity.query.filter_by(id=entity_id).first()
+    
+    # check if entity accepts references
+    try:
+        if not entity.accepts_references:
+            raise HTTPServerError()
+    except AttributeError as e:
+        raise HTTPServerError(msg=e.message)
+    
+    filename, file_path = upload_file_to_server(request, 'link')
+    
+    # create a Link and assign it to the given Referencable Entity
+    new_link = Link(
+        path = file_path,
+        original_filename=filename
+    )
+    
+    # assign it as a reference
+    entity.references.append(new_link)
+    
+    DBSession.add(new_link)
+    
+    return HTTPOk()

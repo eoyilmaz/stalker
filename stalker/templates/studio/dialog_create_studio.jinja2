@@ -175,7 +175,6 @@
 
 <script type='text/javascript'>
     require([
-        'dijit/registry',
         'dijit/form/Form',
         'dijit/form/ValidationTextBox',
         'dijit/form/TextBox',
@@ -198,7 +197,7 @@
         'stalker/submitForm',
 
         'dojo/domReady!'
-    ], function (registry, Form, ValidationTextBox, TextBox, NumberSpinner,
+    ], function (Form, ValidationTextBox, TextBox, NumberSpinner,
                  FilteringSelect, Button, DateTextBox, TimeTextBox, Uploader,
                  FileList, JsonRest, date, stamp, locale, submitForm) {
 
@@ -208,6 +207,8 @@
         var create_studio_form = new Form({
             id: 'create_studio_form'
         }, 'create_studio_form');
+
+        var dialog = create_studio_form.getParent();
 
 
         // ********************************************************************
@@ -226,7 +227,7 @@
             label: 'Browse...',
             multiple: false,
             uploadOnSelect: true,
-            url: 'upload/thumbnail'
+            url: 'upload_thumbnail'
         }, 'studio_thumbnail');
         thumbnail_uploader.startup();
 
@@ -353,7 +354,7 @@
             type: 'button',
             onClick: function () {
                 submitForm({
-                    dialog: registry.byId('create_studio_dialog'),
+                    dialog: dialog,
                     form: create_studio_form,
                     additional_data: {
                         mon_start: stamp.toISOString(mon_start.value),
@@ -384,13 +385,12 @@
             label: 'Cancel',
             type: 'button',
             onClick: function () {
-                registry.byId('create_studio_dialog').destroyRecursive();
+                dialog.destroyRecursive();
             }
         }, 'studio_cancel_button');
         cancel_button.startup();
 
         create_studio_form.startup();
-
 
     });
 </script>

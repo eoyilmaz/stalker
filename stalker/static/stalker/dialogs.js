@@ -41,7 +41,18 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
                 executeScripts: true
             });
         };
-
+        
+        // ********************************************************************
+        exports.upload_thumbnail_dialog = function upload_thumbnail_dialog(entity_id) {
+            return new DialogSimple({
+                id: 'upload_thumbnail_dialog',
+                title: 'Upload Thumbnail Dialog',
+                href: '/dialog/upload_thumbnail/' + entity_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
 
         // ********************************************************************
         // STUDIO
@@ -55,7 +66,6 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
                 executeScripts: true
             });
         };
-
 
         // ********************************************************************
         // PROJECT

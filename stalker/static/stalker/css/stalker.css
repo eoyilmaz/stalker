@@ -274,12 +274,34 @@ a:hover {
 .thumbnail {
     width: 192px;
     height: 192px;
-    /*border: 1px black;*/
-    /*background-color: #d3d3d3;*/
     float: left;
     text-align: center;
     vertical-align: middle;
+    position: relative;
 }
+
+.thumbnail_menu {
+    height: 12px;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 12px;
+    visibility: hidden;
+    opacity: 0;
+    -webkit-transition: visibility opacity 0.2s;
+}
+
+.thumbnail:hover .thumbnail_menu {
+    background: url("../images/gmail_icons.png") repeat scroll 40px -100px transparent;
+    height: 12px;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 12px;
+    visibility: visible;
+    opacity: 1;
+}
+
 
 .department_info {
     position: absolute;

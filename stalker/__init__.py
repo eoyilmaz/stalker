@@ -98,8 +98,10 @@ def main(global_config, **settings):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     
-    config.add_route('busy_dialog',
-                     'dialog/busy')
+    config.add_route('busy_dialog', 'dialog/busy')
+    
+    config.add_route('dialog_upload_thumbnail', 'dialog/upload_thumbnail/{entity_id}')
+    config.add_route('upload_thumbnail', 'upload_thumbnail/{entity_id}')
     
     # *************************************************************************
     # DATA VIEWS

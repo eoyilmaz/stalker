@@ -18,93 +18,92 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 
-<div id='user_details_content_pane'>
-    <div style="background-color: #45b8cc;" class="page_title"></div>
+<div style="background-color: #45b8cc;" class="page_title"></div>
 
-    {# Avatar #}
-    <div id='user_avatar'
-         class='thumbnail'>
-        {% if not user.thumbnail %}
-            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}'
-                 alt=''
-                 style='width:120px; height: 142px'>
-        {% endif %}
-    </div>
-
-    {# Basic Info #}
-    <div id='user_info' class='summary_info'>
-        <h4 style='margin: 0; text-align: left;'>{{ user.name }}</h4>
-        <h5 style='margin: 0; text-align: left;'>({{ user.login }})</h5>
-        <table>
-            <tr>
-                <td style='text-align: right'><b>Messages</b></td>
-                <td>&nbsp;</td>
-                <td>({{ user.messages|count }})</td>
-            </tr>
-            <tr>
-                <td style='text-align: right'><b>Tasks</b></td>
-                <td>&nbsp;</td>
-                <td>({{ user.tasks|count }})</td>
-            </tr>
-            <tr>
-                <td style='text-align: right'><b>Open Tickets</b></td>
-                <td>&nbsp;</td>
-                <td>({{ user.open_tickets|count }})</td>
-            </tr>
-        </table>
-        {#        <div>#}
-        {#            {{  has_permission('Create_Asset', request.context, request) }}#}
-        {#        </div>#}
-        {#        {% if has_permission('Create_Asset', request.context, request) %}#}
-        {#            <div>Test 1</div>#}
-        {#        {% else %}#}
-        {#            <div>Test 2</div>#}
-        {#        {% endif %}#}
-        
-        {% if has_permission('Update_User') %}
-            <button id='update_user_button'>Update</button>
-        {% endif %}
-    </div>
-    {#  Charts  #}
-  <div>
+{# Avatar #}
+<div id='user_avatar'
+     class='thumbnail'>
+    {% if not user.thumbnail %}
+        <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}'
+             alt=''
+             style='width:120px; height: 142px'>
+    {% else %}
+        <img src='{{ user.thumbnail.path }}'
+             alt=''
+             style='width:120px; height: 142px'>
+    {% endif %}
+    <div class='thumbnail_menu'>&nbsp</div>
 </div>
+
+{# Basic Info #}
+<div id='user_info' class='summary_info'>
+    <h4 style='margin: 0; text-align: left;'>{{ user.name }}</h4>
+    <h5 style='margin: 0; text-align: left;'>({{ user.login }})</h5>
+    <table>
+        <tr>
+            <td style='text-align: right'><b>Messages</b></td>
+            <td>&nbsp;</td>
+            <td>({{ user.messages|count }})</td>
+        </tr>
+        <tr>
+            <td style='text-align: right'><b>Tasks</b></td>
+            <td>&nbsp;</td>
+            <td>({{ user.tasks|count }})</td>
+        </tr>
+        <tr>
+            <td style='text-align: right'><b>Open Tickets</b></td>
+            <td>&nbsp;</td>
+            <td>({{ user.open_tickets|count }})</td>
+        </tr>
+    </table>
+    {% if has_permission('Update_User') %}
+        <button id='update_user_button'>Update</button>
+    {% endif %}
+</div>
+
 
 <script type="text/javascript">
     require(['dojox/charting/Chart',
         'dojox/charting/themes/MiamiNice',
         'dojox/charting/plot2d/Pie',
         'dojox/charting/action2d/MoveSlice',
+        
         'dijit/form/Button',
+        'dijit/Menu',
+        'dijit/MenuItem',
+
         'stalker/dialogs',
         'stalker/dialogCaller',
+        'stalker/dialogCreator',
+        
         'dojo/domReady!'
-    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
-                 dialogCaller) {
+    ], function (Chart, theme, PiePlot, MoveSlice, Button, Menu, MenuItem,
+                 dialogs, dialogCaller, dialogCreator) {
 
-{#              // Create the chart within it's "holding" node#}
-{#              var pieChart = new Chart('user_summary_chart1');#}
-{##}
-{#              // Add the only/default plot#}
-{#              pieChart.setTheme(theme);#}
-{##}
-{#              // Add the only/default plot#}
-{#              pieChart.addPlot("default", {#}
-{#                type: PiePlot, // our plot2d/Pie module reference as type value#}
-{#                radius: 50,#}
-{#                fontColor: "black",#}
-{#                labelOffset: 0#}
-{#              });#}
-{##}
-{#              var chartData = [10, 14,33,5,8];#}
-{##}
-{#              // Add the series of data#}
-{#              pieChart.addSeries('January', chartData);#}
-{##}
-{#              // Create the slice mover#}
-{#              var mag = new MoveSlice(pieChart, 'default');#}
-{##}
-{#              // Render the chart!#}
-{#              pieChart.render();#}
+        {#              // Create the chart within it's "holding" node#}
+        {#              var pieChart = new Chart('user_summary_chart1');#}
+        {##}
+        {#              // Add the only/default plot#}
+        {#              pieChart.setTheme(theme);#}
+        {##}
+        {#              // Add the only/default plot#}
+        {#              pieChart.addPlot("default", {#}
+        {#                type: PiePlot, // our plot2d/Pie module reference as type value#}
+        {#                radius: 50,#}
+        {#                fontColor: "black",#}
+        {#                labelOffset: 0#}
+        {#              });#}
+        {##}
+        {#              var chartData = [10, 14,33,5,8];#}
+        {##}
+        {#              // Add the series of data#}
+        {#              pieChart.addSeries('January', chartData);#}
+        {##}
+        {#              // Create the slice mover#}
+        {#              var mag = new MoveSlice(pieChart, 'default');#}
+        {##}
+        {#              // Render the chart!#}
+        {#              pieChart.render();#}
 
         {% if has_permission('Update_User') %}
             // UPDATE USER BUTTON
@@ -116,6 +115,39 @@
                 data_id: {{ user.id }}
             });
             update_user_button.startup();
+            
+            // create the thumbnail upload menu
+            var user_thumbnail_menu = new Menu({
+                targetNodeIds: ['user_avatar'],
+                selector: '.thumbnail_menu',
+                leftClickToOpen: true
+            });
+            
+            var upload_thumbnail_menuItem_creator = function () {
+                return new MenuItem({
+                    label: 'Upload Thumbnail...',
+                    onClick: function () {
+                        var node = this.getParent().currentTarget;
+                        // get task id
+                        var entity_id = {{ user.id }};
+                        var dialog = dialogCreator({
+                            dialog_id: 'upload_thumbnail_dialog',
+                            data_id: entity_id,
+                            content_creator: dialogs.upload_thumbnail_dialog
+{#                            related_field_updater: function(){#}
+{#                                var content_pane = registry.byId('user_details_content_pane');#}
+{#                                content_pane.refresh();#}
+{#                            }#}
+                        });
+
+                        dialog.show();
+                    }
+                });
+            };
+            
+            user_thumbnail_menu.addChild(upload_thumbnail_menuItem_creator());
+            
+            
         {% endif %}
 
     });
