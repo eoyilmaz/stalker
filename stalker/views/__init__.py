@@ -25,7 +25,7 @@ import datetime
 
 from pyramid.httpexceptions import HTTPServerError, HTTPOk
 from pyramid.view import view_config
-from pyramid.response import  Response
+from pyramid.response import  Response, FileResponse
 from pyramid.security import has_permission, authenticated_userid
 
 from stalker import log, User, defaults, Entity, Link
@@ -244,21 +244,44 @@ def upload_thumbnail(request):
     """
     entity_id = request.matchdict.get('entity_id')
     entity = Entity.query.filter_by(id=entity_id).first()
-    
+
     logger.debug(request.params)
     logger.debug(request.POST)
     
-    filename, file_path = upload_file_to_server(request, 'thumbnail')
-    
-    # # create a Link and assign it to the given Entity
-    # new_link = Link(
-    #     path = file_path,
-    #     original_filename=filename
-    # )
-    # 
-    # # assign it as a thumbnail
-    # entity.thumbnail.append(new_link)
-    # 
-    # DBSession.add(new_link)
-    
+    try:
+        original_filename, file_path = \
+            upload_file_to_server(request, 'uploadedfile')
+    except IOError:
+        HTTPServerError()
+    else:
+        # create a Link and assign it to the given Entity
+        new_link = Link(
+            path = file_path,
+            original_filename=original_filename
+        )
+        
+        # assign it as a thumbnail
+        entity.thumbnail = new_link
+        
+        DBSession.add(new_link)
+
     return HTTPOk()
+
+
+@view_config(
+    route_name='serve_files'
+)
+def serve_files(request):
+    """serves files in the stalker server side storage
+    """
+    partial_file_path = request.matchdict['partial_file_path']
+    
+    logger.debug('partial_file_path : %s' % partial_file_path)
+    
+    file_full_path = os.path.join(
+        defaults.server_side_storage_path,
+        partial_file_path
+    )
+    
+    return FileResponse(file_full_path)
+    

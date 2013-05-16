@@ -1,5 +1,4 @@
-<form action='upload_thumbnail/{{ entity.id }}' method='post'
-      accept-charset="utf-8" id='upload_thumbnail_form'
+<form accept-charset="utf-8" id='upload_thumbnail_form'
       enctype='multipart/form-data'>
     
     <div class='dijitDialogPaneContentArea'>
@@ -16,84 +15,84 @@
                 </tr>
     
                 {# Thumbnail #}
-                {#            <tr>#}
-                {#                <td class='label_column'>#}
-                {#                    <label for='thumbnail'>Thumbnail</label>#}
-                {#                </td>#}
-                {#                <td class='input_column'>#}
-                {#                    <div id='thumbnail_list'></div>#}
-                {#                    <div id='thumbnail'></div>#}
-                {#                </td>#}
-                {#            </tr>#}
-    
-                {# Thumbnail Old Way #}
                 <tr>
                     <td class='label_column'>
-                        <label for='thumbnail'>Thumbnail (Old Way)</label>
+                        <label for='thumbnail'>Thumbnail</label>
                     </td>
                     <td class='input_column'>
-                        <input id='thumbnail' name='thumbnail' type='file' value=''>
+                        <div id='thumbnail_list'></div>
+                        <div id='thumbnail'></div>
                     </td>
                 </tr>
+    
+                {# Thumbnail Old Way #}
+{#                <tr>#}
+{#                    <td class='label_column'>#}
+{#                        <label for='thumbnail'>Thumbnail (Old Way)</label>#}
+{#                    </td>#}
+{#                    <td class='input_column'>#}
+{#                        <input id='thumbnail' name='thumbnail' type='file' value=''>#}
+{#                    </td>#}
+{#                </tr>#}
     
             </table>
     </div>
     
     <div class='dijitDialogPaneActionBar'>
-        <input id='thumbnail_ok_button' type='submit' value="submit">{# Ok</button> #}
+        <button id='thumbnail_ok_button' >Ok</button>
         <button id='thumbnail_cancel_button'>Cancel</button>
     </div>
 </form>
 
-{#<script type='text/javascript'>#}
-{#    require([#}
-{#        'dijit/form/Form',#}
-{#        'dijit/form/Button',#}
-{#        'dijit/form/ValidationTextBox',#}
-{##}
-{#        'dojox/form/FileInput',#}
-{#        'dojox/form/Uploader',#}
-{#        'dojox/form/uploader/FileList',#}
-{##}
-{#        'stalker/submitForm',#}
-{##}
-{#        'dojo/domReady!'#}
-{#    ], function (Form, Button, ValidationTextBox, FileInput, Uploader,#}
-{#                 FileList, submitForm) {#}
-{##}
-{#        // ********************************************************************#}
-{#        // Form#}
-{#        var upload_thumbnail_form = new Form({#}
-{#            enctype: 'multipart/form-data'#}
-{#        }, 'upload_thumbnail_form');#}
-{##}
-{#        var dialog = upload_thumbnail_form.getParent();#}
-{##}
-{#        // ********************************************************************#}
-{#        // Name#}
-{#        var name_textBox = new ValidationTextBox({#}
-{#            name: 'name',#}
-{#            label: 'Entity',#}
-{#            required: true,#}
-{#            value: '{{ entity.name }} ({{ entity.entity_type }})',#}
-{#            disabled: true#}
-{#        }, 'entity_name');#}
-{#        name_textBox.startup();#}
-{##}
-{#        // ********************************************************************#}
-{#        // Thumbnail#}
-{#        var thumbnail_uploader = new dojox.form.Uploader({#}
-{#            label: 'Browse...',#}
-{#            multiple: false,#}
-{#            uploadOnSelect: true,#}
-{#            url: 'upload_thumbnail/{{ entity.id }}'#}
-{#        }, 'thumbnail');#}
-{#        thumbnail_uploader.startup();#}
-{##}
-{#        var thumbnail_list = new dojox.form.uploader.FileList({#}
-{#            uploader: thumbnail_uploader#}
-{#        }, 'thumbnail_list');#}
-{#        thumbnail_list.startup();#}
+<script type='text/javascript'>
+    require([
+        'dijit/form/Form',
+        'dijit/form/Button',
+        'dijit/form/ValidationTextBox',
+
+        'dojox/form/FileInput',
+        'dojox/form/Uploader',
+        'dojox/form/uploader/FileList',
+        'dojox/form/uploader/plugins/IFrame',
+            
+        'stalker/submitForm',
+
+        'dojo/domReady!'
+    ], function (Form, Button, ValidationTextBox, FileInput, Uploader,
+                 FileList, IFrame, submitForm) {
+
+        // ********************************************************************
+        // Form
+        var upload_thumbnail_form = new Form({}, 'upload_thumbnail_form');
+
+        var dialog = upload_thumbnail_form.getParent();
+
+        // ********************************************************************
+        // Name
+        var name_textBox = new ValidationTextBox({
+            name: 'name',
+            label: 'Entity',
+            required: true,
+            value: '{{ entity.name }} ({{ entity.entity_type }})',
+            disabled: true
+        }, 'entity_name');
+        name_textBox.startup();
+
+        // ********************************************************************
+        // Thumbnail
+        var thumbnail_uploader = new dojox.form.Uploader({
+            label: 'Browse...',
+            multiple: false,
+            uploadOnSelect: true,
+            enctype: 'multipart/form-data',
+            url: 'upload_thumbnail/{{ entity.id }}'
+        }, 'thumbnail');
+        thumbnail_uploader.startup();
+
+        var thumbnail_list = new dojox.form.uploader.FileList({
+            uploader: thumbnail_uploader
+        }, 'thumbnail_list');
+        thumbnail_list.startup();
 
 {#        // ********************************************************************#}
 {#        // Thumbnail - Old Way#}
@@ -102,35 +101,36 @@
 {#        }, 'thumbnail_old_way');#}
 {#        thumbnail_old_way_FileInput.startup();#}
 
-{#        // ********************************************************************#}
-{#        // Ok Button#}
-{#        var ok_button = new Button({#}
-{#            label: 'OK',#}
-{#            type: 'button',#}
-{#            onClick: function () {#}
-{#                submitForm({#}
-{#                    dialog: dialog,#}
-{#                    form: upload_thumbnail_form,#}
-{#                    additional_data: {},#}
+        // ********************************************************************
+        // Ok Button
+        var ok_button = new Button({
+            label: 'OK',
+            type: 'button',
+            onClick: function () {
+                submitForm({
+                    dialog: dialog,
+                    form: upload_thumbnail_form,
+                    additional_data: {},
 {#                    url: '{{ request.route_url("upload_thumbnail", entity_id=entity.id) }}',#}
-{#                    method: 'POST'#}
-{#                });#}
-{#            }#}
-{#        }, 'thumbnail_ok_button');#}
-{#        ok_button.startup();#}
+                    url: '',
+                    method: 'POST'
+                });
+            }
+        }, 'thumbnail_ok_button');
+        ok_button.startup();
 
-{#        // ********************************************************************#}
-{#        // Cancel Button#}
-{#        var cancel_button = new Button({#}
-{#            label: 'Cancel',#}
-{#            type: 'button',#}
-{#            onClick: function () {#}
-{#                dialog.destroyRecursive();#}
-{#            }#}
-{#        }, 'thumbnail_cancel_button');#}
-{#        cancel_button.startup();#}
-{##}
-{#        upload_thumbnail_form.startup();#}
-{##}
-{#    });#}
-{#</script>#}
+        // ********************************************************************
+        // Cancel Button
+        var cancel_button = new Button({
+            label: 'Cancel',
+            type: 'button',
+            onClick: function () {
+                dialog.destroyRecursive();
+            }
+        }, 'thumbnail_cancel_button');
+        cancel_button.startup();
+
+        upload_thumbnail_form.startup();
+
+    });
+</script>

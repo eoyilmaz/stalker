@@ -65,6 +65,13 @@ from stalker.models.type import Type, EntityType
 from stalker.models.version import Version
 from stalker.models.auth import group_finder
 
+
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+
+
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
@@ -102,6 +109,11 @@ def main(global_config, **settings):
     
     config.add_route('dialog_upload_thumbnail', 'dialog/upload_thumbnail/{entity_id}')
     config.add_route('upload_thumbnail', 'upload_thumbnail/{entity_id}')
+    
+    config.add_route('serve_files',
+                     defaults.server_side_storage_path + '/{partial_file_path:[a-zA-Z0-9/\.]+}')
+    
+    logger.debug(defaults.server_side_storage_path + '/{partial_file_path}')
     
     # *************************************************************************
     # DATA VIEWS
