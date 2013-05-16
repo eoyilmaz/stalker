@@ -278,6 +278,7 @@ a:hover {
     text-align: center;
     vertical-align: middle;
     position: relative;
+    overflow: hidden;
 }
 
 .thumbnail_menu {
