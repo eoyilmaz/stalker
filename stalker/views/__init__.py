@@ -240,7 +240,7 @@ def upload_file_to_server(request, file_param_name):
 def dialog_upload_thumbnail(request):
     """fills the upload thumbnail dialog
     """
-    entity_id = int(request.matchdict.get('entity_id', -1))
+    entity_id = request.matchdict.get('entity_id', -1)
     entity = Entity.query.filter_by(id=entity_id).first()
     
     logger.debug('entity_id : %s' % entity_id)

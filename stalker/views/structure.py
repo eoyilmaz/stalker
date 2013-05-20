@@ -28,7 +28,7 @@ from stalker import Structure, FilenameTemplate
 
 import logging
 from stalker import log
-from stalker.views import PermissionChecker, get_logged_in_user
+from stalker.views import PermissionChecker, get_logged_in_user, get_multi_integer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -77,15 +77,8 @@ def create_structure(request):
     # get parameters
     name = request.params.get('name')
     custom_template = request.params.get('custom_template')
-    ft_ids = [
-        int(ft_id)
-        for ft_id in request.POST.getall('filename_templates')
-    ]
-    
-    fts = [
-        FilenameTemplate.query.filter_by(id=ft_id).first()
-        for ft_id in ft_ids
-    ]
+    ft_ids = get_multi_integer(request, 'filename_templates')
+    fts = FilenameTemplate.query.filter(FilenameTemplate.id.in_(ft_ids).all())
     
     if name and custom_template:
         # create a new structure
@@ -117,15 +110,8 @@ def update_structure(request):
     custom_template = request.params.get('custom_template')
     
     # get all FilenameTemplates
-    ft_ids = [
-        int(ft_id)
-        for ft_id in request.POST.getall('filename_templates')
-    ]
-    
-    fts = [
-        FilenameTemplate.query.filter_by(id=ft_id).first()
-        for ft_id in ft_ids
-    ]
+    ft_ids = get_multi_integer(request, 'filename_templates')
+    fts = FilenameTemplate.query.filter(FilenameTemplate.id.in_(ft_ids)).all()
     
     if name:
         # update structure

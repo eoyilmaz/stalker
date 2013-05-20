@@ -73,19 +73,21 @@
 
 <script type='text/javascript'>
     require([
-        'dijit/registry',
         'dojo/store/JsonRest',
+
         'dijit/form/Form',
         'dijit/form/Button',
         'dijit/form/ValidationTextBox',
         'dijit/form/TextBox',
         'dijit/form/FilteringSelect',
+
         'stalker/submitForm',
-        'stalker/TagSelect',
         'stalker/fieldUpdater',
+        'stalker/fields/tagField',
+
         'dojo/domReady!'
-    ], function (registry, JsonRest, Form, Button, ValidationTextBox, TextBox,
-                 FilteringSelect, submitForm, TagSelect, fieldUpdater) {
+    ], function (JsonRest, Form, Button, ValidationTextBox, TextBox,
+                 FilteringSelect, submitForm, fieldUpdater, tagField) {
 
         // Generate default values
         var url;
@@ -106,7 +108,7 @@
                    'department_id': '{{ department.id }}'
             };
             {% if department.lead %}
-              lead_id = '{{ department.lead.id }}';
+              lead_id = {{ department.lead.id }};
             {% endif %}
             selected_tags = [
                 {% for tag in department.tags %}
@@ -116,7 +118,7 @@
 
         {% endif %}
 
-        // ************************************************************************
+        // ********************************************************************
         // Form
         var department_form = new Form({
             id: 'department_form'
@@ -125,7 +127,7 @@
 
         var dialog = department_form.getParent();
 
-        // ************************************************************************
+        // ********************************************************************
         // Name
         var name_validationTextBox = new ValidationTextBox({
             name: 'name',
@@ -136,7 +138,7 @@
         }, 'department_name');
         name_validationTextBox.startup();
 
-        // ************************************************************************
+        // ********************************************************************
 
         // Description
         var description_textBox = new TextBox({
@@ -146,7 +148,8 @@
             value: description
         }, 'department_description');
         description_textBox.startup();
-        // ************************************************************************
+
+        // ********************************************************************
         // Lead
         //
         // There is no need to use the JsonRest here, but we have the
@@ -177,28 +180,15 @@
         // fill the field by calling the updater
         lead_updater({animate: false});
 
-        // ************************************************************************
+        // ********************************************************************
         // Tags
-
-        var tags_jsonRest = new JsonRest({
-            target: 'get/tags'
+        var tags_tagSelect = tagField({
+            attach_to: 'department_tags',
+            selected_tags: selected_tags
         });
-
-        var tags_tagSelect = new TagSelect({
-            name: 'tag_names',
-            type: 'ComboBox'
-        }, 'department_tags');
         tags_tagSelect.startup();
 
-        // The Updater
-        var tags_field_updater = fieldUpdater({
-            memory: tags_jsonRest,
-            widget: tags_tagSelect,
-            selected: selected_tags
-        });
-        tags_field_updater({animate: false});
-
-        // ************************************************************************
+        // ********************************************************************
         // Submit Button
         var submit_button = new Button({
             label: 'OK',
@@ -215,7 +205,7 @@
         }, 'department_submit_button');
         submit_button.startup();
 
-        // ************************************************************************
+        // ********************************************************************
         // Cancel Button
         var cancel_button = new Button({
             label: 'Cancel',

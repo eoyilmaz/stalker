@@ -28,7 +28,7 @@ from stalker import User, Department, Entity, Tag
 
 import logging
 from stalker import log
-from stalker.views import PermissionChecker, get_logged_in_user, log_param
+from stalker.views import PermissionChecker, get_logged_in_user, log_param, get_multi_integer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -84,7 +84,7 @@ def create_department(request):
     if name:
         description =  request.params.get('description')
 
-        lead_id = int(request.params.get('lead_id', -1))
+        lead_id = request.params.get('lead_id', -1)
         lead = User.query.filter_by(id=lead_id).first()
 
         # Tags
@@ -133,7 +133,7 @@ def update_department(request):
         # get the type
         description =  request.params.get('description')
 
-        lead_id = int(request.params.get('lead_id', '-1'))
+        lead_id = request.params.get('lead_id', -1)
         lead = User.query.filter_by(id=lead_id).first()
 
         # Tags
@@ -288,10 +288,7 @@ def append_departments(request):
     """appends the given department to the given User
     """
     # departments
-    department_ids = [
-        int(d_id)
-        for d_id in request.POST.getall('department_ids')
-    ]
+    department_ids = get_multi_integer(request, 'department_ids')
     departments = Department.query.filter(Department.id.in_(department_ids)).all()
 
     # user

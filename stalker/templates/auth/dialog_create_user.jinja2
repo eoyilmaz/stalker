@@ -132,10 +132,12 @@
         'stalker/submitForm',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
+        'stalker/fields/tagField',
 
         'dojo/domReady!'
     ], function (Memory, JsonRest, Form, ValidationTextBox, TextBox, Button,
-                 dialogs, TagSelect, submitForm, fieldUpdater, dialogCaller) {
+                 dialogs, TagSelect, submitForm, fieldUpdater, dialogCaller,
+                 tagField) {
 
         // ********************************************************************
         // Generate some default values
@@ -175,7 +177,7 @@
             ];
             selected_tags = [
                 {% for tag in user.tags %}
-                    {{ tag.name }},
+                    {{ tag.id }},
                 {% endfor %}
             ];
         {% endif %}
@@ -354,12 +356,11 @@
 
         // ********************************************************************
         // Tags
-        var tags_tagSelect = new TagSelect({
-            name: 'tag_names',
-            type: 'TextBox'
-        }, 'user_tags');
+        var tags_tagSelect = tagField({
+            attach_to: 'user_tags',
+            selected_tags: selected_tags
+        });
         tags_tagSelect.startup();
-        tags_tagSelect.set('value', selected_tags);
 
 
         // ********************************************************************

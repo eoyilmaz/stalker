@@ -35,7 +35,7 @@ from stalker import (User, Task, Entity, Project, StatusList, Status,
 from stalker.models.task import CircularDependencyError
 from stalker import defaults
 from stalker import log
-from stalker.views import get_datetime, PermissionChecker, get_logged_in_user
+from stalker.views import get_datetime, PermissionChecker, get_logged_in_user, get_multi_integer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -325,16 +325,10 @@ def update_task(request):
     end = get_datetime(request, 'end_date', 'end_time')
     update_bid = request.params.get('update_bid')
     
-    depend_ids = [
-        int(d_id)
-        for d_id in request.POST.getall('depend_ids')
-    ]
+    depend_ids = get_multi_integer(request, 'depend_ids')
     depends = Task.query.filter(Task.id.in_(depend_ids)).all()
     
-    resource_ids = [
-        int(r_id)
-        for r_id in request.POST.getall('resource_ids')
-    ]
+    resource_ids = get_multi_integer(request, 'resource_ids')
     resources = User.query.filter(User.id.in_(resource_ids)).all()
     
     logger.debug('parent_id       : %s' % parent_id)
@@ -629,6 +623,7 @@ def create_task(request):
     status_id = request.params.get('status_id', None)
     if status_id:
         status_id = int(status_id)
+    
     schedule_model = request.params.get('schedule_model') # there should be one
     schedule_timing = float(request.params.get('schedule_timing'))
     schedule_unit = request.params.get('schedule_unit')
@@ -637,10 +632,7 @@ def create_task(request):
     resources = []
     resource_ids = []
     if 'resource_ids' in request.params:
-        resource_ids = [
-            int(r_id)
-            for r_id in request.POST.getall('resource_ids')
-        ]
+        resource_ids = get_multi_integer(request, 'resource_ids')
         resources = User.query.filter(User.id.in_(resource_ids)).all()
     
     logger.debug('project_id      : %s' % project_id)
@@ -695,10 +687,7 @@ def create_task(request):
         logger.debug('end : %s' % end)
         
         # get the dependencies
-        depend_ids = [
-            int(d_id)
-            for d_id in request.POST.getall('depend_ids')
-        ]
+        depend_ids = get_multi_integer(request, 'depend_ids')
         depends = Task.query.filter(Task.id.in_(depend_ids)).all()
         logger.debug('depends: %s' % depends)
         

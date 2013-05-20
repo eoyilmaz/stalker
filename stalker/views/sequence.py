@@ -71,7 +71,7 @@ def create_sequence(request):
                         detail='No StatusList found'
                     )
 
-                status_id = int(request.params['status_id'])
+                status_id = request.params['status_id']
                 status = Status.query.filter_by(id=status_id).first()
 
                 try:

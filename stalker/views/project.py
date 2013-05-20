@@ -83,19 +83,19 @@ def create_project(request):
     code = request.params.get('code')
     fps = int(request.params.get('fps'))
     
-    imf_id = int(request.params.get('image_format', -1))
+    imf_id = request.params.get('image_format', -1)
     imf = ImageFormat.query.filter_by(id=imf_id).first()
     
-    repo_id = int(request.params.get('repository_id', -1))
+    repo_id = request.params.get('repository_id', -1)
     repo = Repository.query.filter_by(id=repo_id).first()
     
-    structure_id = int(request.params.get('structure_id', -1))
+    structure_id = request.params.get('structure_id', -1)
     structure = Structure.query.filter_by(id=structure_id).first()
     
-    lead_id = int(request.params.get('lead_id', -1))
+    lead_id = request.params.get('lead_id', -1)
     lead = User.query.filter_by(id=lead_id).first()
     
-    status_id = int(request.params.get('status_id', -1))
+    status_id = request.params.get('status_id', -1)
     status = Status.query.filter_by(id=status_id).first()
     
     # get the dates
@@ -110,12 +110,12 @@ def create_project(request):
             .filter_by(target_entity_type='Project').first()
         
         new_project = Project(
-            name=request.params['name'],
-            code=request.params['code'],
+            name=name,
+            code=code,
             image_format=imf,
             repository=repo,
             created_by=logged_in_user,
-            fps=request.params['fps'],
+            fps=fps,
             structure=structure,
             lead=lead,
             status_list=status_list,
@@ -149,19 +149,19 @@ def update_project(request):
     
     fps = int(request.params.get('fps'))
     
-    imf_id = int(request.params.get('image_format', -1))
+    imf_id = request.params.get('image_format', -1)
     imf = ImageFormat.query.filter_by(id=imf_id).first()
     
-    repo_id = int(request.params.get('repository_id', -1))
+    repo_id = request.params.get('repository_id', -1)
     repo = Repository.query.filter_by(id=repo_id).first()
     
-    structure_id = int(request.params.get('structure_id', -1))
+    structure_id = request.params.get('structure_id', -1)
     structure = Structure.query.filter_by(id=structure_id).first()
     
-    lead_id = int(request.params.get('lead_id', -1))
+    lead_id = request.params.get('lead_id', -1)
     lead = User.query.filter_by(id=lead_id).first()
     
-    status_id = int(request.params.get('status_id', -1))
+    status_id = request.params.get('status_id', -1)
     status = Status.query.filter_by(id=status_id).first()
     
     # get the dates
