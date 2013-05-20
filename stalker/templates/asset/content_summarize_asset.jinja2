@@ -22,10 +22,10 @@
     {# Avatar #}
     <div id='asset_thumbnail' class='thumbnail'>
         {% if not asset.thumbnail %}
-        <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
-             alt=''
-             style='width:120px;'>
-    {% endif %}
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
+                 alt=''
+                 style='width:120px;'>
+        {% endif %}
     </div>
     <div id='asset_summary_chart1'
          style='width: 100px;
@@ -41,9 +41,7 @@
                 <td style='text-align: right'><b>Project</b></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="#" class="DataLink"
-                       stalker_target="central_content"
-                       stalker_href="view/project/{{ asset.project.id }}">{{ asset.project.name }}</a>
+                    <a href="javascript:redirectLink('central_content','view/project/{{ asset.project.id }}');">{{ asset.project.name }}</a>
                 </td>
             </tr>
             <tr>
@@ -65,14 +63,15 @@
                 <td style='text-align: right'><strong>Created By</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="#" class="DataLink"
-                       stalker_target="central_content"
-                       stalker_href="view/user/{{ asset.created_by.id }}">{{ asset.created_by.name }}</a>
+                    <a href="javascript:redirectLink('central_content','view/user/{{ asset.created_by.id }}');">{{ asset.created_by.name }}</a>
                 </td>
             </tr>
-
+            <tr>
+                <td style='text-align: right'></td>
+                <td>&nbsp;</td>
+                <td><button id='update_asset_button'>Update</button></td>
+            </tr>
         </table>
-        <button id='update_asset_button'>Update</button>
     </div>
     {#  Charts  #}
     {#  <div>#}
@@ -93,10 +92,9 @@
         'dijit/form/Button',
         'stalker/dialogs',
         'stalker/dialogCaller',
-        'stalker/gotoLink',
         'dojo/domReady!'
     ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
-                 dialogCaller, gotoLink) {
+                 dialogCaller) {
 
 
         // Create the chart within it's "holding" node
@@ -135,7 +133,7 @@
 
         var update_asset_button = dialogCaller({
             label: 'Update',
-            dialog_id: 'update_asset_dialog',
+            dialog_id: 'asset_dialog',
             content_creator: dialogs.update_asset_dialog,
             attach_to: 'update_asset_button',
             related_field_updater: asset_summary_updater,
@@ -144,7 +142,5 @@
         update_asset_button.startup();
 
     });
-
-    gotoLink();
 
 </script>

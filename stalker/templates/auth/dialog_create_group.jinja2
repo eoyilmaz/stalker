@@ -31,6 +31,16 @@
                 </td>
             </tr>
 
+            {# DESCRIPTION #}
+            <tr>
+                <td class='label_column'>
+                    <label for='group_description'>Description</label>
+                </td>
+                <td class='input_column'>
+                    <input id='group_description'>
+                </td>
+            </tr>
+
 
             <tr>
                 <td class='label_column'>
@@ -98,17 +108,19 @@
         'dijit/form/Button',
         'dijit/form/CheckBox',
         'dijit/form/ValidationTextBox',
+        'dijit/form/TextBox',
 
         'stalker/submitForm',
 
         'dojo/domReady!'
     ], function (registry, dom, on, Form, Button, CheckBox, ValidationTextBox,
-                 submitForm) {
+                 TextBox, submitForm) {
 
         // Generate default values
         var url;
         var name;
         var additional_data;
+        var description;
 
         {# fill values based on the dialog mode #}
         {% if mode == 'CREATE' %}
@@ -119,6 +131,7 @@
             additional_data = {
                 group_id: {{ group.id }}
             };
+            description = '{{ group.description }}'
         {% endif %}
 
         // ********************************************************************
@@ -136,6 +149,17 @@
             value: name
         }, 'group_name');
         name_validationTextBox.startup();
+
+        // ************************************************************************
+
+        // Description
+        var description_textBox = new TextBox({
+            name: 'description',
+            label: 'Description',
+            placeHolder: 'Enter description',
+            value: description
+        }, 'group_description');
+        description_textBox.startup();
 
         var selectAllClassOfAction = function (value) {
             var action_name = this.name;

@@ -180,6 +180,13 @@
             required: true
         }, 'status_list_statuses');
 
+
+        var set_statuses_tagSelect_value = function(){
+
+            statuses_tagSelect.set('value', selected_statuses);
+
+        }
+
         // The Updater
         var statuses_field_updater = fieldUpdater({
             'memory': statuses_memory,
@@ -192,7 +199,7 @@
         // New Status Button
         var create_status_button = dialogCaller({
             label: 'New',
-            dialog_id: 'create_status_dialog',
+            dialog_id: 'status_dialog',
             content_creator: dialogs.create_status_dialog,
             attach_to: 'status_list_create_status_button',
             related_field_updater: statuses_field_updater

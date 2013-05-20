@@ -353,7 +353,7 @@
             type: 'button',
             onClick: function () {
                 submitForm({
-                    dialog: registry.byId('create_studio_dialog'),
+                    dialog: registry.byId('studio_dialog'),
                     form: create_studio_form,
                     additional_data: {
                         mon_start: stamp.toISOString(mon_start.value),
@@ -384,7 +384,7 @@
             label: 'Cancel',
             type: 'button',
             onClick: function () {
-                registry.byId('create_studio_dialog').destroyRecursive();
+                registry.byId('studio_dialog').destroyRecursive();
             }
         }, 'studio_cancel_button');
         cancel_button.startup();

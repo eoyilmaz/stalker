@@ -240,14 +240,17 @@ def main(global_config, **settings):
     # *************************************************************************
     # Shots
     # TODO: separate dialog and action
-    config.add_route('create_shot',    'create/shot/{project_id}')
+    config.add_route('dialog_create_shot', 'dialog/create/shot/{project_id}')
+    config.add_route('dialog_update_shot', 'dialog/update/shot/{shot_id}')
+
+    config.add_route('create_shot',    'create/shot')
+    config.add_route('update_shot',    'update/shot')
+
     config.add_route('view_shot',      'view/shot/{shot_id}')
     config.add_route('summarize_shot', 'summarize/shot/{shot_id}')
-    config.add_route('update_shot',    'update/shot/{shot_id}')
-    
     config.add_route('list_shots',     'list/shots/{project_id}')
     config.add_route('get_shots',      'get/shots/{project_id}')
-    
+
     # *************************************************************************
     # Sequence
     # TODO: separate dialog and action

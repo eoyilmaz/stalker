@@ -116,6 +116,7 @@ define([
                 // remove all previous tags
                 this.reset();
 
+
                 for (var i = 0; i < value.length; i++) {
                     if (this.store) {
                         // get the labels of the selected ids

@@ -670,14 +670,19 @@ def create_group(request):
     
     # get name
     name = post_multi_dict['name']
+
+    # get description
+    description =  post_multi_dict['description']
     
-    # remove name to leave only permissions in the dictionary
+    # remove name and description to leave only permissions in the dictionary
     post_multi_dict.pop('name')
+    post_multi_dict.pop('description')
     
     permissions = get_permissions_from_multi_dict(post_multi_dict)
     
     # create the new group
     new_group = Group(name=name)
+    new_group.description = description
     new_group.created_by = logged_user
     new_group.permissions = permissions
     
@@ -703,13 +708,20 @@ def update_group(request):
     
     # get name
     name = post_multi_dict['name']
+
+
+    # get description
+    description =  post_multi_dict['description']
+
     
-    # remove name to leave only permission in the dictionary
+    # remove name and description to leave only permission in the dictionary
     post_multi_dict.pop('name')
+    post_multi_dict.pop('description')
     permissions = get_permissions_from_multi_dict(post_multi_dict)
     
     if group:
         group.name = name
+        group.description = description
         group.permissions = permissions
         group.updated_by = logged_user
         group.date_updated = datetime.datetime.now()

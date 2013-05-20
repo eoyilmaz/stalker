@@ -58,7 +58,7 @@ define(['dijit/registry', 'dojo/domReady!'],
             var related_field_updater = kwargs.related_field_updater || function(){};            
             
             if (dialog_id != null){
-                var dialog = registry.byId(dialog_id);
+                var dialog = dijit.byId(dialog_id);
                 if (dialog != null){
                     dialog.destroyRecursive();
                 }
