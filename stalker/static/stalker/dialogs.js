@@ -309,7 +309,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'shot_dialog',
                 title: 'New Shot',
-                href: '/create/shot/' + project_id,
+                href: '/dialog/create/shot/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -320,7 +320,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'shot_dialog',
                 title: 'Update Shot',
-                href: '/update/shot/' + shot_id,
+                href: '/dialog/update/shot/' + shot_id,
                 resize: true,
                 style: style,
                 executeScripts: true
