@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Stalker a Production Asset Management System
+# Stalker a Production Shot Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
 # This file is part of Stalker.
@@ -34,6 +34,39 @@ from stalker.views import PermissionChecker
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
+@view_config(
+    route_name='dialog_create_shot',
+    renderer='templates/shot/dialog_create_shot.jinja2'
+)
+def create_shot_dialog(request):
+    """fills the create shot dialog
+    """
+    project_id = request.matchdict['project_id']
+    project = Project.query.filter_by(id=project_id).first()
+
+    return {
+        'mode': 'CREATE',
+        'project': project,
+        'projects': Project.query.all()
+    }
+
+
+@view_config(
+    route_name='dialog_update_shot',
+    renderer='templates/shot/dialog_create_shot.jinja2'
+)
+def update_shot_dialog(request):
+    """fills the create shot dialog
+    """
+    shot_id = request.matchdict['shot_id']
+    shot = Shot.query.filter_by(id=shot_id).first()
+
+    return {
+        'mode': 'CREATE',
+        'shot': shot,
+        'project': shot.project,
+        'projects': Project.query.all()
+    }
 
 @view_config(
     route_name='create_shot',

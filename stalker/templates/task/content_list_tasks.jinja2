@@ -192,12 +192,11 @@
         'stalker/dialogs',
         'stalker/dialogCaller',
         'stalker/dialogCreator',
-        'stalker/gotoLink',
 
         'dojo/domReady!'
     ], function (registry, Button, Menu, MenuItem, MenuSeparator, query,
                  JsonRest, xhr, lang, Deferred, when, dialogs, dialogCaller,
-                 dialogCreator, gotoLink) {
+                 dialogCreator) {
 
         $('#gantttemplates').loadTemplates();
 
@@ -300,7 +299,7 @@
                                     {#                                        saveGanttOnServer().then(function(){#}
                                     // create and call update_task dialog
                                     var dialog = dialogCreator({
-                                        dialog_id: 'update_task_dialog',
+                                        dialog_id: 'task_dialog',
                                         data_id: taskId,
                                         content_creator: dialogs.update_task_dialog,
                                         related_field_updater: loadGanttFromServer
@@ -326,7 +325,7 @@
 
                                     {#                                        saveGanttOnServer().then(function(){#}
                                     var dialog = dialogCreator({
-                                        dialog_id: 'create_task_dialog',
+                                        dialog_id: 'task_dialog',
                                         data_id: taskId,
                                         content_creator: dialogs.create_child_task_dialog,
                                         related_field_updater: loadGanttFromServer
@@ -351,7 +350,7 @@
 
                                     {#                                        saveGanttOnServer().then(function(){#}
                                     var dialog = dialogCreator({
-                                        dialog_id: 'create_task_dialog',
+                                        dialog_id: 'task_dialog',
                                         data_id: taskId,
                                         content_creator: dialogs.create_dependent_task_dialog,
                                         related_field_updater: loadGanttFromServer
@@ -390,7 +389,7 @@
     
                                     {#                                    saveGanttOnServer().then(function(){#}
                                     var dialog = dialogCreator({
-                                        dialog_id: 'create_time_log_dialog',
+                                        dialog_id: 'time_log_dialog',
                                         data_id: taskId,
                                         content_creator: dialogs.create_time_log_dialog,
                                         related_field_updater: loadGanttFromServer
@@ -425,8 +424,6 @@
                     leaf_task_menu.startup();
                     parent_task_menu.startup();
 
-                    // create User page links
-                    gotoLink();
 
                 });
             });
@@ -468,7 +465,7 @@
             // CREATE TASK
             var create_task_button = dialogCaller({
                 label: 'Create Task',
-                dialog_id: 'create_task_dialog',
+                dialog_id: 'task_dialog',
                 content_creator: dialogs.create_task_dialog,
                 attach_to: 'list_tasks_create_task_button',
                 related_field_updater: loadGanttFromServer,

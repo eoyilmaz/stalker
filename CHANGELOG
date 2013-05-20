@@ -55,6 +55,14 @@ Stalker Changes
   * Fix: Fixed TaskBox CSS template
   * New: GanttChart now displays the finished/unfinished tasks with a green/red
     'id' column.
+  * Fix: Status color attribute converted from unicode to integer.
+  * Fix: To destroy previous open dialog, same dialog id is given for create
+    and update dialogs.
+  * Update: In create/update_group dialog, to check all rows new checkboxes are
+    added to head of each column.
+  * Update: For the necessary in create/update_department dialog, ComboBox is
+    added to TagSelect widget as a new input area type.
+  * Update: Description field is added to Department dialog.
 
 0.2.0.b2
 --------

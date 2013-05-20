@@ -63,11 +63,11 @@
 
                 var title_content_pane = new ContentPane({
                     title: 'Title',
-                    content: '<div style="background-color: #eeeeee; text-align: center"><h4><strong>{{ project.name }} ({{ project.code }})</strong></h4></div>',
+                    content: '<div style="background-color: #eeeeee; text-align: center"><h3><strong>{{ project.name }} ({{ project.code }})</strong></h3></div>',
                     region: 'top',
                     splitter: true,
                     resizable: false,
-                    style: 'width:100%; height:20px; padding: 0; background-color: #eeeeee;'
+                    style: 'width:100%; height:30px; padding: 0; background-color: #eeeeee;'
                 }, 'project_title');
 
                 var summary_content_pane = new ContentPane({
@@ -162,6 +162,13 @@
 
                 var lSplitter_title = registry.byId("project_title")._splitterWidget;
                 on(lSplitter_title.domNode, 'click', function(){});
+                on(lSplitter_title.domNode, 'onmouseup', testFunction);
+
+                function testFunction(){
+
+                    alert('testFunction');
+
+                }
 
                 var lSplitter_summary = registry.byId("project_summary")._splitterWidget;
                 on(lSplitter_summary.domNode, 'click', hideSummary);

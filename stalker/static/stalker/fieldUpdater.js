@@ -100,6 +100,7 @@ define([
 
                     // select selected
                     if (selected.length) {
+                        alert('selected.length: '+selected.length)
                         widget.set('value', selected);
                     }
                 } else if (widget.declaredClass == 'dojox.grid.DataGrid') {

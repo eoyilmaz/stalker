@@ -53,7 +53,7 @@
                 {% if has_permission('Create_Shot') %}
                     var create_shot_button = dialogCaller({
                         label: 'New Shot',
-                        dialog_id: 'create_shot_dialog',
+                        dialog_id: 'shot_dialog',
                         content_creator: dialogs.create_shot_dialog,
                         attach_to: 'list_shots_create_shot_button',
                         related_field_updater: shot_data_grid_updater,

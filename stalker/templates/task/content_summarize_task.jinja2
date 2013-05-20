@@ -15,9 +15,7 @@
                 <td style='text-align: right'><b>Project</b></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="#" class="DataLink"
-                       stalker_target="central_content"
-                       stalker_href="view/project/{{ task.project.id }}">{{ task.project.name }}</a>
+                    <a href="javascript:redirectLink('central_content','view/project/{{ task.project.id }}');">{{ task.project.name }}</a>
                 </td>
             </tr>
             <tr>
@@ -29,9 +27,7 @@
                 <td style='text-align: right'><b>Created By</b></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="#" class="DataLink"
-                       stalker_target="central_content"
-                       stalker_href="view/user/{{ task.created_by.id }}">{{ task.created_by.name }}</a>
+                    <a href="javascript:redirectLink('central_content','view/user/{{ task.created_by.id }}');">{{ task.created_by.name }}</a>
                 </td>
             </tr>
             <tr>
@@ -59,11 +55,10 @@
 
         'stalker/dialogs',
         'stalker/dialogCaller',
-        'stalker/gotoLink',
 
         'dojo/domReady!'
     ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
-                 dialogCaller, gotoLink) {
+                 dialogCaller) {
 
         // Create the chart within it's "holding" node
         var pieChart = new Chart('task_summary_chart1');
@@ -115,7 +110,6 @@
             update_task_button.startup();
         {% endif %}
 
-        gotoLink();
 
     });
 </script>

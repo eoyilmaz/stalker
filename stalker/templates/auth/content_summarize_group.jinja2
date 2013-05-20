@@ -31,10 +31,35 @@
 
     {# Basic Info #}
     <div id='group_info' class='summary_info'>
-        <h2 style='margin: 0; text-align: left;'>{{ group.name }}</h2>
-        {% if has_permission('Update_Group') %}
-            <button id='update_group_button'>Update</button>
-        {% endif %}
+        <h3 style='margin: 0; text-align: left;'>{{ group.name }}</h3>
+        <table>
+            {% if group.description %}
+                <tr>
+                    <td style='text-align: right'><strong>Description</strong>
+                    </td>
+                    <td>&nbsp;</td>
+                    <td>{{ group.description }}</td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td style='text-align: right'><strong>Created By</strong>
+                </td>
+                <td>&nbsp;</td>
+                <td>
+                    <a href="javascript:redirectLink('central_content','view/user/{{ group.created_by.id }}');">{{ group.created_by.name }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td style='text-align: right'></td>
+                <td>&nbsp;</td>
+                <td>
+					{% if has_permission('Update_Group') %}
+                    	<button id='update_group_button'>Update</button>
+					{% endif %}
+                </td>
+            </tr>
+        </table>
+
     </div>
 </div>
 
@@ -43,9 +68,8 @@
         'dijit/form/Button',
         'stalker/dialogs',
         'stalker/dialogCaller',
-        'stalker/gotoLink',
         'dojo/domReady!'
-    ], function (Button, dialogs, dialogCaller, gotoLink) {
+    ], function (Button, dialogs, dialogCaller) {
 
         // ********************************************************************
         // Update Group Button
@@ -60,7 +84,7 @@
         {% if has_permission('Update_Group') %}
             var update_group_button = dialogCaller({
                 label: 'Update',
-                dialog_id: 'update_group_dialog',
+                dialog_id: 'group_dialog',
                 content_creator: dialogs.update_group_dialog,
                 attach_to: 'update_group_button',
                 related_field_updater: group_summary_updater,
@@ -69,7 +93,6 @@
             update_group_button.startup();
         {% endif %}
 
-        gotoLink();
     });
 </script>
 

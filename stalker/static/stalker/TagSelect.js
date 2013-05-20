@@ -36,10 +36,12 @@ define([
     'stalker/Tag',
     'dijit/form/FilteringSelect',
     'dijit/form/TextBox',
+    'dijit/form/ComboBox',
     'dojo/on',
     'dojo/domReady!'
 ], function (require, declare, _WidgetBase, _TemplatedMixin, template, lang,
-             domConstruct, domGeometry, Tag, FilteringSelect, TextBox, on) {
+             domConstruct, domGeometry, Tag, FilteringSelect, TextBox,
+             ComboBox, on) {
     return declare('stalker.TagSelect', [_WidgetBase, _TemplatedMixin],
         {
             templateString: template,
@@ -92,7 +94,13 @@ define([
                 // return the value of the buttons
                 var value = [];
                 for (var i = 0; i < this.tags.length; i++) {
-                    value.push(this.tags[i].value);
+                    if (this.type == 'ComboBox'){
+                        value.push(this.tags[i].label);
+                    }
+                    else{
+                        value.push(this.tags[i].value);
+                    }
+
                 }
                 return value;
             },
@@ -109,6 +117,7 @@ define([
 
                 // remove all previous tags
                 this.reset();
+
 
                 for (var i = 0; i < value.length; i++) {
                     if (this.store) {
@@ -210,6 +219,7 @@ define([
 
                 if (label != null) {
                     if (label != '') {
+
                         // add a new button to the the tagList
                         var tag = new Tag({
                             label: label,
@@ -280,10 +290,19 @@ define([
 
                 // create the input field widget with the given arguments
                 var WidgetClass = null;
+
                 if (this.type == 'FilteringSelect') {
+
                     WidgetClass = FilteringSelect;
+
                 } else if (this.type == 'TextBox') {
+
                     WidgetClass = TextBox;
+
+                }else if (this.type == 'ComboBox'){
+
+                    WidgetClass = ComboBox;
+
                 }
 
                 this.input_field_widget = new WidgetClass({
@@ -300,21 +319,43 @@ define([
                 tag_list_ap.style.width = String(content_box.w) + 'px';
 
                 var tag_create_func = lang.hitch(this, function (e) {
+
                     var item;
                     var current_label;
+                    var current_id;
+
+
 
                     if (this.type == 'FilteringSelect') {
+
                         item = this.input_field_widget.item;
                         if (item != null) {
                             current_label = item.name;
+                            current_id = this.input_field_widget.value;
                         }
+
                     } else if (this.type == 'TextBox') {
+
                         current_label = this.input_field_widget.value;
+                        current_id = this.input_field_widget.value;
+
+                    }else if (this.type == 'ComboBox'){
+
+                        item = this.input_field_widget.item;
+                        if (item != null) {
+                            current_label = this.input_field_widget.item.name;
+                            current_id = this.input_field_widget.item.id;
+                        }
+                        else{
+
+                            current_label = this.input_field_widget.value;
+                            current_id = this.input_field_widget.value;
+
+                        }
                     }
 
                     if (current_label != null) {
                         if (current_label != '') {
-                            var current_id = this.input_field_widget.value;
 
                             this.add_tag({
                                 label: current_label,

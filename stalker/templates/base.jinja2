@@ -115,6 +115,7 @@
 
 
     <script type='text/javascript'>
+
         var redirectLinkInParent = function (targetPane, address) {
 
             var tab_container = dijit.byId('data_tab_container');
@@ -251,7 +252,7 @@
                 studio_DropDownMenu.addChild(
                         dialogCaller({
                             label: 'Create Studio',
-                            dialog_id: 'create_studio_dialog',
+                            dialog_id: 'studio_dialog',
                             content_creator: dialogs.create_studio_dialog,
                             widget_type: 'MenuItem'
                         })
@@ -290,7 +291,7 @@
             settings_DropDownMenu.addChild(
                     dialogCaller({
                         label: 'Filename Tamplate',
-                        dialog_id: 'create_filename_template_dialog',
+                        dialog_id: 'filename_template_dialog',
                         content_creator: dialogs.create_filename_template_dialog,
                         widget_type: 'MenuItem'
                     })
@@ -301,7 +302,7 @@
             settings_DropDownMenu.addChild(
                     dialogCaller({
                         label: 'Image Format',
-                        dialog_id: 'create_image_format_dialog',
+                        dialog_id: 'image_format_dialog',
                         content_creator: dialogs.create_image_format_dialog,
                         widget_type: 'MenuItem'
                     })
@@ -312,7 +313,7 @@
             settings_DropDownMenu.addChild(
                     dialogCaller({
                         label: 'Repository',
-                        dialog_id: 'create_repository_dialog',
+                        dialog_id: 'repository_dialog',
                         content_creator: dialogs.create_repository_dialog,
                         widget_type: 'MenuItem'
                     })
@@ -323,7 +324,7 @@
             settings_DropDownMenu.addChild(
                     dialogCaller({
                         label: 'Status',
-                        dialog_id: 'create_status_dialog',
+                        dialog_id: 'status_dialog',
                         content_creator: dialogs.create_status_dialog,
                         widget_type: 'MenuItem'
                     })
@@ -334,7 +335,7 @@
             settings_DropDownMenu.addChild(
                     dialogCaller({
                         label: 'Status List',
-                        dialog_id: 'create_status_list_dialog',
+                        dialog_id: 'status_list_dialog',
                         content_creator: dialogs.create_status_list_dialog,
                         widget_type: 'MenuItem'
                     })
@@ -345,7 +346,7 @@
             settings_DropDownMenu.addChild(
                     dialogCaller({
                         label: 'Structure',
-                        dialog_id: 'create_structure_dialog',
+                        dialog_id: 'structure_dialog',
                         content_creator: dialogs.create_structure_dialog,
                         widget_type: 'MenuItem'
                     })
@@ -403,7 +404,7 @@
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
                             label: 'Update',
-                            dialog_id: 'update_project_dialog',
+                            dialog_id: 'project_dialog',
                             content_creator: dialogs.update_project_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
@@ -420,7 +421,7 @@
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
                             label: 'New Asset',
-                            dialog_id: 'create_asset_dialog',
+                            dialog_id: 'asset_dialog',
                             content_creator: dialogs.create_asset_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
@@ -433,7 +434,7 @@
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
                             label: 'New Sequence',
-                            dialog_id: 'create_sequence_dialog',
+                            dialog_id: 'sequence_dialog',
                             content_creator: dialogs.create_sequence_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
@@ -445,7 +446,7 @@
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
                             label: 'New Shot',
-                            dialog_id: 'create_shot_dialog',
+                            dialog_id: 'shot_dialog',
                             content_creator: dialogs.create_shot_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
@@ -459,7 +460,7 @@
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
                             label: 'Add User',
-                            dialog_id: 'create_user_dialog',
+                            dialog_id: 'user_dialog',
                             content_creator: dialogs.create_user_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
@@ -503,7 +504,7 @@
                     projects_DropDownMenu.addChild(
                             dialogCaller({
                                 label: 'New Project',
-                                dialog_id: 'create_project_dialog',
+                                dialog_id: 'project_dialog',
                                 content_creator: dialogs.create_project_dialog,
                                 widget_type: 'MenuItem',
                                 related_field_updater: projects_DropDownMenu_updater
@@ -519,7 +520,7 @@
                     projects_DropDownMenu.addChild(
                             dialogCaller({
                                 label: 'New Asset',
-                                dialog_id: 'create_asset_dialog',
+                                dialog_id: 'asset_dialog',
                                 content_creator: dialogs.create_asset_dialog,
                                 widget_type: 'MenuItem'
 
@@ -531,7 +532,7 @@
                     projects_DropDownMenu.addChild(
                             dialogCaller({
                                 label: 'New Sequence',
-                                dialog_id: 'create_sequence_dialog',
+                                dialog_id: 'sequence_dialog',
                                 content_creator: dialogs.create_sequence_dialog,
                                 widget_type: 'MenuItem'
                             })
@@ -542,7 +543,7 @@
                     projects_DropDownMenu.addChild(
                             dialogCaller({
                                 label: 'New Shot',
-                                dialog_id: 'create_shot_dialog',
+                                dialog_id: 'shot_dialog',
                                 content_creator: dialogs.create_shot_dialog,
                                 widget_type: 'MenuItem'
                             })
@@ -571,7 +572,7 @@
                     view_entity_url: 'view/user/',
                     query_entity_url: 'get/users',
                     content_pane_to_update: central_content_pane,
-                    new_team_dialog_id: 'create_user_dialog',
+                    new_team_dialog_id: 'user_dialog',
                     new_team_dialog_content_creator: dialogs.create_user_dialog,
                     allow_create_new: {%  if has_permission('Create_User') %} true {% else %} false {% endif %}
                 });
@@ -584,7 +585,7 @@
                     view_entity_url: 'view/department/',
                     query_entity_url: 'get/departments',
                     content_pane_to_update: central_content_pane,
-                    new_team_dialog_id: 'create_department_dialog',
+                    new_team_dialog_id: 'department_dialog',
                     new_team_dialog_content_creator: dialogs.create_department_dialog,
                     allow_create_new: {%  if has_permission('Create_Department') %} true {% else %} false {% endif %}
                 });
@@ -597,7 +598,7 @@
                     view_entity_url: 'view/group/',
                     query_entity_url: 'get/groups',
                     content_pane_to_update: central_content_pane,
-                    new_team_dialog_id: 'create_group_dialog',
+                    new_team_dialog_id: 'group_dialog',
                     new_team_dialog_content_creator: dialogs.create_group_dialog,
                     allow_create_new: {%  if has_permission('Create_Group') %} true {% else %} false {% endif %}
                 });

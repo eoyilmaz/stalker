@@ -651,7 +651,7 @@ require([
     var update_status_button_function = function (data) {
         if (data.length > 0) {
             add_status_button.set('onClick', function () {
-                var dialog = dijit.byId('update_status_list_dialog');
+                var dialog = dijit.byId('status_list_dialog');
                 if (dialog != null) {
                     dialog.destroyRecursive();
                 }
@@ -672,7 +672,7 @@ require([
 
     var add_status_button = dialogCaller({
         label: 'Add Status',
-        dialog_id: 'create_status_list_dialog',
+        dialog_id: 'status_list_dialog',
         content_creator: dialogs.create_status_list_dialog,
         attach_to: 'task_add_status_button',
         related_field_updater: status_field_updater,
@@ -708,10 +708,10 @@ require([
             var url;
 
             {% if mode=='CREATE' %}
-                dialog_id = 'create_task_dialog';
+                dialog_id = 'task_dialog';
                 url = '{{ request.route_url('create_task')}}';
             {% elif mode=='UPDATE' %}
-                dialog_id = 'update_task_dialog';
+                dialog_id = 'task_dialog';
                 url = '{{ request.route_url('update_task', task_id=task.id) }}';
             {% endif %}
 

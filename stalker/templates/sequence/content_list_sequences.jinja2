@@ -32,7 +32,7 @@
         {% if has_permission('Create_Sequence') %}
             var create_sequence_button = dialogCaller({
                 label: 'New Sequence',
-                dialog_id: 'create_sequence_dialog',
+                dialog_id: 'sequence_dialog',
                 content_creator: dialogs.create_sequence_dialog,
                 attach_to: 'list_sequences_create_sequence_button',
                 related_field_updater: sequence_data_grid_updater,

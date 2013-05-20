@@ -197,7 +197,7 @@
                 // New Sequence Button
                 var create_sequence_button = dialogCaller({
                     label: 'New',
-                    dialog_id: 'create_sequence_dialog',
+                    dialog_id: 'sequence_dialog',
                     content_creator: dialogs.create_sequence_dialog,
                     attach_to: 'update_shot_create_sequence_button',
                     related_field_updater: sequence_field_updater,
@@ -210,7 +210,7 @@
                 // Update Sequence Button
                 var update_sequence_button = dialogCaller({
                     label: 'Update',
-                    dialog_id: 'update_sequence_dialog',
+                    dialog_id: 'sequence_dialog',
                     content_creator: dialogs.update_sequence_dialog,
                     attach_to: 'update_shot_update_sequence_button',
                     related_field_updater: sequence_field_updater,
@@ -251,7 +251,7 @@
 
                             status_filtering_select_selected_value = '';
 
-                            var dialog = dijit.byId('update_status_list_dialog');
+                            var dialog = dijit.byId('status_list_dialog');
 
                             if (dialog != null) {
                                 dialog.destroyRecursive();
@@ -277,7 +277,7 @@
 
                 var shot_add_status_button = dialogCaller({
                     label: 'Add Status',
-                    dialog_id: 'create_status_list_dialog',
+                    dialog_id: 'status_list_dialog',
                     content_creator: dialogs.create_status_list_dialog,
                     attach_to: 'update_shot_add_status_button',
                     related_field_updater: status_field_updater,
@@ -295,7 +295,7 @@
                     type: 'button',
                     onClick: function () {
                         submitForm({
-                            dialog: registry.byId('update_shot_dialog'),
+                            dialog: registry.byId('shot_dialog'),
                             form: update_shot_form,
                             additional_data: {
                                 submitted: 'update'
@@ -314,7 +314,7 @@
                     label: 'Cancel',
                     type: 'button',
                     onClick: function () {
-                        registry.byId('update_shot_dialog').destroyRecursive();
+                        registry.byId('shot_dialog').destroyRecursive();
                     }
                 }, 'update_shot_cancel_button');
                 cancel_button.startup();
