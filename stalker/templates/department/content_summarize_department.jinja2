@@ -18,29 +18,84 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='department_details_content_pane'>
-  <div style="background-color: #7f9599 " class="page_title"></div>
+    <div style="background-color: #7f9599 " class="page_title"></div>
     {# Avatar #}
-      {# Avatar #}
+    {# Avatar #}
     <div id='user_avatar'
          class='thumbnail'>
-      {% if not department.thumbnail %}
-      <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}'>
-      {% endif %}
+        {% if not department.thumbnail %}
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}'>
+        {% endif %}
     </div>
 
     {# Basic Info #}
-  <div id='department_info' class='summary_info'>
-    <h2 style='margin: 0; text-align: left;'>{{ department.name }}</h2>
-    <table>
-        {% if department.lead %}
-      <tr>
-        <td style='text-align: right'><b>Lead</b></td>
-        <td>&nbsp;</td>
-        <td>
-          <a href="#" class= "DataLink" stalker_target = "central_content" stalker_href = "view/user/{{ department.lead.id }}">{{ department.lead.name}}</a>
-          ({{ department.lead.login }})</td>
-      </tr>
-        {% endif %}
-    </table>
-  </div>
+    <div id='department_info' class='summary_info'>
+        <h3 style='margin: 0; text-align: left;'>{{ department.name }}</h3>
+        <table>
+            {% if department.lead %}
+                <tr>
+                    <td style='text-align: right'><b>Lead</b></td>
+                    <td>&nbsp;</td>
+                    <td>
+                        <a href="javascript:redirectLink('central_content','view/user/{{ department.lead.id }}');">{{ department.lead.name }}</a>
+
+                        ({{ department.lead.login }})
+                    </td>
+                </tr>
+            {% endif %}
+            {% if department.description %}
+                <tr>
+                    <td style='text-align: right'><strong>Description</strong></td>
+                    <td>&nbsp;</td>
+                    <td>{{ department.description }}</td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td style='text-align: right'><strong>Created By</strong>
+                </td>
+                <td>&nbsp;</td>
+                <td>
+                    <a href="javascript:redirectLink('central_content','view/user/{{ department.created_by.id }}');">{{ department.created_by.name }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td style='text-align: right'></td>
+                <td>&nbsp;</td>
+                <td><button id='update_department_button'>Update</button></td>
+            </tr>
+        </table>
+
+    </div>
 </div>
+
+<script type='text/javascript'>
+    require([
+        'dijit/form/Button',
+        'stalker/dialogs',
+        'stalker/dialogCaller',
+        'dojo/domReady!'
+    ], function (Button, dialogs, dialogCaller) {
+
+        // ********************************************************************
+        // Update Department Button
+        var department_summary_updater = function () {
+            // refresh the content pane
+            // get the content pane by id, alternatively we can use the parent of the button
+            var content_pane = update_department_button.getParent();
+            // refresh the pane
+            content_pane.refresh();
+        };
+
+        var update_department_button = dialogCaller({
+            label: 'Update',
+            dialog_id: 'department_dialog',
+            content_creator: dialogs.update_department_dialog,
+            attach_to: 'update_department_button',
+            related_field_updater: department_summary_updater,
+            data_id: '{{ department.id }}'
+        });
+        update_department_button.startup();
+
+    });
+</script>
+

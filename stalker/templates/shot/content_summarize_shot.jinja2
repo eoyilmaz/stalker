@@ -25,9 +25,7 @@
                 <td style='text-align: right'><strong>Project</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="#" class="DataLink"
-                       stalker_target="central_content"
-                       stalker_href="view/project/{{ shot.project.id }}">{{ shot.project.name }}</a>
+                    <a href="javascript:redirectLink('central_content','view/project/{{ shot.project.id }}');">{{ shot.project.name }}</a>
                 </td>
             </tr>
             <tr>
@@ -39,18 +37,19 @@
                 <td style='text-align: right'><strong>Created By</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="#" class="DataLink"
-                       stalker_target="central_content"
-                       stalker_href="view/user/{{ shot.created_by.id }}">{{ shot.created_by.name }}</a>
+                    <a href="javascript:redirectLink('central_content','view/user/{{ shot.created_by.id }}');">{{ shot.created_by.name }}</a>
                 </td>
             </tr>
-
-
+            <tr>
+                <td style='text-align: right'></td>
+                <td>&nbsp;</td>
+                <td>
+					{% if has_permission('Update_Shot') %}
+                    <button id='update_shot_button'>Update</button>
+					{% endif %}
+                </td>
+            </tr>
         </table>
-        {% if has_permission('Update_Shot') %}
-            <button id='update_shot_button'>Update</button>
-        {% endif %}
-
     </div>
     {#  Charts  #}
 
@@ -65,10 +64,9 @@
         'dijit/form/Button',
         'stalker/dialogs',
         'stalker/dialogCaller',
-        'stalker/gotoLink',
         'dojo/domReady!'
     ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
-                 dialogCaller, gotoLink) {
+                 dialogCaller) {
 
         // Create the chart within it's "holding" node
         var pieChart = new Chart('shot_summary_chart1');
@@ -95,20 +93,29 @@
         // Render the chart!
         pieChart.render();
 
+        var shot_summary_updater = function () {
+            // refresh the content pane
+            // get the content pane by id, alternatively we can use the parent of the button
+            var content_pane = update_shot_button.getParent();
+            // refresh the pane
+            content_pane.refresh();
+        };
+	
+	
+						
+
         {% if has_permission('Update_Shot') %}
-            // UPDATE SHOT BUTTON
-            var update_shot_button = dialogCaller({
-                label: 'Update',
-                dialog_id: 'update_shot_dialog',
-                content_creator: dialogs.update_shot_dialog,
-                attach_to: 'update_shot_button',
-                data_id: {{ shot.id }}
-            });
-            update_shot_button.startup();
-        {% endif %}
-
-
-        gotoLink();
+		// UPDATE SHOT BUTTON
+        var update_shot_button = dialogCaller({
+            label: 'Update',
+            dialog_id: 'shot_dialog',
+            content_creator: dialogs.update_shot_dialog,
+            attach_to: 'update_shot_button',
+            related_field_updater: shot_summary_updater,
+            data_id: {{ shot.id }}
+        });
+        update_shot_button.startup();
+		{% endif %}
 
     });
 </script>

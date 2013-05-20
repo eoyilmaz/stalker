@@ -238,8 +238,7 @@
         var project_memory = new JsonRest({
             target: '{{ request.route_url("get_projects") }}'
         });
-    
-        console.log('{{ request.route_url("get_projects") }}');
+
 
         // Field
         var project_select = new FilteringSelect({
@@ -289,7 +288,7 @@
                 // if we got some StatusList
                 asset_add_status_button.set('onClick', function () {
                     var myDialog = dialogCreator({
-                        dialog_id: 'update_status_list_dialog',
+                        dialog_id: 'status_list_dialog',
                         data_id: 'Asset',
                         content_creator: dialogs.update_status_list_dialog,
                         related_field_updater: status_field_updater
@@ -312,7 +311,7 @@
 
         var asset_add_status_button = dialogCaller({
             label: 'Add Status',
-            dialog_id: 'create_status_list_dialog',
+            dialog_id: 'status_list_dialog',
             content_creator: dialogs.create_status_list_dialog,
             attach_to: 'asset_add_status_button',
             related_field_updater: status_field_updater,

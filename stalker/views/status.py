@@ -30,7 +30,7 @@ from stalker import User, Status, StatusList, EntityType
 
 import logging
 from stalker import log
-from stalker.views import PermissionChecker, get_logged_in_user, get_multi_integer
+from stalker.views import PermissionChecker, get_logged_in_user, get_multi_integer, get_color_as_int
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -83,8 +83,8 @@ def create_status(request):
     # get parameters
     name = request.params.get('name')
     code = request.params.get('code')
-    bg_color = request.params.get('bg_color')
-    fg_color = request.params.get('fg_color')
+    bg_color = get_color_as_int(request, 'bg_color')
+    fg_color = get_color_as_int(request, 'fg_color')
     
     if name and code:
         new_status = Status(
@@ -110,8 +110,8 @@ def update_status(request):
     # get parameters
     name = request.params.get('name')
     code = request.params.get('code')
-    bg_color = request.params.get('bg_color')
-    fg_color = request.params.get('fg_color')
+    bg_color = get_color_as_int(request, 'bg_color')
+    fg_color = get_color_as_int(request, 'fg_color')
     
     # just update the given Status
     st_id = request.matchdict['status_id']

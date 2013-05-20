@@ -58,7 +58,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // STUDIO
         exports.create_studio_dialog = function create_studio_dialog() {
             return new DialogSimple({
-                id: 'create_studio_dialog',
+                id: 'studio_dialog',
                 title: 'New Studio',
                 href: 'dialog/create/studio',
                 resize: true,
@@ -71,7 +71,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // PROJECT
         exports.create_project_dialog = function create_project_dialog() {
             return new DialogSimple({
-                id: 'create_project_dialog',
+                id: 'project_dialog',
                 title: 'New Project',
                 href: '/dialog/create/project',
                 resize: true,
@@ -82,7 +82,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_project_dialog = function update_project_dialog(project_id) {
             return new DialogSimple({
-                id: 'update_project_dialog',
+                id: 'project_dialog',
                 title: 'Update Project',
                 href: '/dialog/update/project/' + project_id,
                 resize: true,
@@ -95,7 +95,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // IMAGE FORMAT
         exports.create_image_format_dialog = function create_image_format_dialog() {
             return new DialogSimple({
-                id: 'create_image_format_dialog',
+                id: 'image_format_dialog',
                 title: 'New Image Format',
                 href: '/dialog/create/image_format',
                 resize: true,
@@ -106,7 +106,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_image_format_dialog = function update_image_format_dialog(image_format_id) {
             return new DialogSimple({
-                id: 'update_image_format_dialog',
+                id: 'image_format_dialog',
                 title: 'Update Image Format',
                 href: '/dialog/update/image_format/' + image_format_id,
                 resize: true,
@@ -119,7 +119,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // STRUCTURE
         exports.create_structure_dialog = function create_structure_dialog() {
             return new DialogSimple({
-                id: 'create_structure_dialog',
+                id: 'structure_dialog',
                 title: 'New Structure',
                 href: '/dialog/create/structure',
                 resize: true,
@@ -130,7 +130,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_structure_dialog = function update_structure_dialog(structure_id) {
             return new DialogSimple({
-                id: 'update_structure_dialog',
+                id: 'structure_dialog',
                 title: 'Update Structure',
                 href: '/dialog/update/structure/' + structure_id,
                 resize: true,
@@ -144,7 +144,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         exports.create_user_dialog = function create_user_dialog(entity_id) {
             entity_id = entity_id || -1;
             return new DialogSimple({
-                id: 'create_user_dialog',
+                id: 'user_dialog',
                 title: 'New User',
                 href: 'dialog/create/user/' + entity_id,
                 resize: true,
@@ -155,7 +155,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_user_dialog = function update_user_dialog(user_id) {
             return new DialogSimple({
-                id: 'update_user_dialog',
+                id: 'user_dialog',
                 title: 'Update User',
                 href: 'dialog/update/user/' + user_id,
                 resize: true,
@@ -179,7 +179,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // FILENAME TEMPLATE
         exports.create_filename_template_dialog = function create_filename_template_dialog() {
             return new DialogSimple({
-                id: 'create_filename_template_dialog',
+                id: 'filename_template_dialog',
                 title: 'New Filename Template',
                 href: 'dialog/create/filename_template',
                 resize: true,
@@ -190,7 +190,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_filename_template_dialog = function update_filename_template_dialog(filename_template_id) {
             var myDialog = new DialogSimple({
-                id: 'update_filename_template_dialog',
+                id: 'filename_template_dialog',
                 title: 'Update Filename Template',
                 href: 'dialog/update/filename_template/' + filename_template_id,
                 resize: true,
@@ -203,7 +203,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // REPOSITORY
         exports.create_repository_dialog = function create_repository_dialog() {
             return new DialogSimple({
-                id: 'create_repository_dialog',
+                id: 'repository_dialog',
                 title: 'New Repository',
                 href: '/dialog/create/repository',
                 resize: true,
@@ -214,7 +214,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_repository_dialog = function update_repository_dialog(repo_id) {
             return new DialogSimple({
-                id: 'update_repository_dialog',
+                id: 'repository_dialog',
                 title: 'Update Repository',
                 href: '/dialog/update/repository/' + repo_id,
                 resize: true,
@@ -233,7 +233,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
                 href = '/dialog/create/status_list/' + target_entity_type
             }
             return new DialogSimple({
-                id: 'create_status_list_dialog',
+                id: 'status_list_dialog',
                 title: 'New Status List',
                 href: href,
                 resize: true,
@@ -244,7 +244,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_status_list_dialog = function update_status_list_dialog(target_entity_type) {
             return new DialogSimple({
-                id: 'update_status_list_dialog',
+                id: 'status_list_dialog',
                 title: 'Update Status List',
                 href: '/dialog/update/status_list/' + target_entity_type,
                 resize: true,
@@ -257,7 +257,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // STATUS
         exports.create_status_dialog = function create_status_dialog() {
             return new DialogSimple({
-                id: 'create_status_dialog',
+                id: 'status_dialog',
                 title: 'New Status',
                 href: '/dialog/create/status',
                 resize: true,
@@ -268,7 +268,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_status_dialog = function update_status_dialog(status_id) {
             return new DialogSimple({
-                id: 'update_status_dialog',
+                id: 'status_dialog',
                 title: 'Update Status',
                 href: '/dialog/update/status/' + status_id,
                 resize: true,
@@ -282,7 +282,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         exports.create_asset_dialog = function create_asset_dialog(project_id) {
             project_id = project_id || -1;
             return new DialogSimple({
-                id: 'create_asset_dialog',
+                id: 'asset_dialog',
                 title: 'New Asset',
                 href: '/dialog/create/asset/' + project_id,
                 resize: true,
@@ -293,7 +293,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_asset_dialog = function update_asset_dialog(asset_id) {
             return new DialogSimple({
-                id: 'update_asset_dialog',
+                id: 'asset_dialog',
                 title: 'Update Asset',
                 href: '/dialog/update/asset/' + asset_id,
                 resize: true,
@@ -307,7 +307,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         exports.create_shot_dialog = function create_shot_dialog(project_id) {
             project_id = project_id || -1;
             return new DialogSimple({
-                id: 'create_shot_dialog',
+                id: 'shot_dialog',
                 title: 'New Shot',
                 href: '/create/shot/' + project_id,
                 resize: true,
@@ -318,7 +318,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_shot_dialog = function update_shot_dialog(shot_id) {
             return new DialogSimple({
-                id: 'update_shot_dialog',
+                id: 'shot_dialog',
                 title: 'Update Shot',
                 href: '/update/shot/' + shot_id,
                 resize: true,
@@ -332,7 +332,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         exports.create_sequence_dialog = function create_sequence_dialog(project_id) {
             project_id = project_id || -1;
             return new DialogSimple({
-                id: 'create_sequence_dialog',
+                id: 'sequence_dialog',
                 title: 'New Sequence',
                 href: '/create/sequence/' + project_id,
                 resize: true,
@@ -343,7 +343,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_sequence_dialog = function update_sequence_dialog(sequence_id) {
             return new DialogSimple({
-                id: 'update_sequence_dialog',
+                id: 'sequence_dialog',
                 title: 'Update Sequence',
                 href: '/update/sequence/' + sequence_id,
                 resize: true,
@@ -356,7 +356,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // TASK
         exports.create_task_dialog = function create_task_dialog(project_id) {
             return new DialogSimple({
-                id: 'create_task_dialog',
+                id: 'task_dialog',
                 title: 'New Task',
                 href: 'dialog/create/task/' + project_id,
                 resize: true,
@@ -367,7 +367,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_task_dialog = function update_task_dialog(task_id) {
             return new DialogSimple({
-                id: 'update_task_dialog',
+                id: 'task_dialog',
                 title: 'Update Task',
                 href: '/dialog/update/task/' + task_id,
                 resize: true,
@@ -378,7 +378,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.create_child_task_dialog = function create_child_task_dialog(task_id) {
             return new DialogSimple({
-                id: 'create_task_dialog',
+                id: 'task_dialog',
                 title: 'New Child Task',
                 href: '/dialog/create/child_task/' + task_id,
                 resize: true,
@@ -389,7 +389,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.create_dependent_task_dialog = function create_dependent_task_dialog(task_id) {
             return new DialogSimple({
-                id: 'create_task_dialog',
+                id: 'task_dialog',
                 title: 'New Dependent Task',
                 href: '/dialog/create/dependent_task/' + task_id,
                 resize: true,
@@ -402,7 +402,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // TIME LOG
         exports.create_time_log_dialog = function create_time_log_dialog(task_id) {
             return new DialogSimple({
-                id: 'create_time_log_dialog',
+                id: 'time_log_dialog',
                 title: 'New TimeLog',
                 href: 'dialog/create/time_log/' + task_id,
                 resize: true,
@@ -413,7 +413,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_time_log_dialog = function update_time_log_dialog(time_log_id) {
             return new DialogSimple({
-                id: 'update_time_log_dialog',
+                id: 'time_log_dialog',
                 title: 'Update TimeLog',
                 href: 'dialog/update/time_log/' + time_log_id,
                 resize: true,
@@ -426,9 +426,9 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // DEPARTMENT
         exports.create_department_dialog = function create_department_dialog() {
             return new DialogSimple({
-                id: 'create_department_dialog',
+                id: 'department_dialog',
                 title: 'New Department',
-                href: '/create/department',
+                href: 'dialog/create/department',
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -437,9 +437,9 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_department_dialog = function update_department_dialog(department_id) {
             return new DialogSimple({
-                id: 'update_department_dialog',
+                id: 'department_dialog',
                 title: 'Update Department',
-                href: '/update/department/' + department_id,
+                href: 'dialog/update/department/' + department_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -461,7 +461,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // GROUPS
         exports.create_group_dialog = function create_group_dialog() {
             return new DialogSimple({
-                id: 'create_group_dialog',
+                id: 'group_dialog',
                 title: 'New Group',
                 href: 'dialog/create/group',
                 resize: true,
@@ -472,7 +472,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
 
         exports.update_group_dialog = function update_group_dialog(group_id) {
             return new DialogSimple({
-                id: 'update_group_dialog',
+                id: 'group_dialog',
                 title: 'Update Group',
                 href: 'dialog/update/group/' + group_id,
                 resize: true,

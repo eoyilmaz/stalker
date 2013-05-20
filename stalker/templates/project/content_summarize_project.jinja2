@@ -18,11 +18,11 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 
-<div style="background-color: #eeeeee; text-align: center">
-    <h3>
-      <strong>{{ project.name }} ({{ project.code }})</strong>
-    </h3>
-</div>
+{#<div style="background-color: #eeeeee; text-align: center">#}
+{#    <h3>#}
+{#      <strong>{{ project.name }} ({{ project.code }})</strong>#}
+{#    </h3>#}
+{#</div>#}
 
 <div id='project_details'>
 <div style="background-color: #8ecfb0;" class="page_title"></div>
@@ -43,7 +43,7 @@
                 <td style='text-align: right'><strong>Lead</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content', 'view/user/{{ project.lead.id }}');">{{ project.lead.name }}</a>
+                    <a href="javascript:redirectLink('central_content','view/user/{{ project.lead.id }}');">{{ project.lead.name }}</a>
                     ({{ project.lead.login }})
                 </td>
             </tr>
@@ -145,7 +145,7 @@
         {% if has_permission('Update_Project') %}
             var update_project_button = dialogCaller({
                 label: 'Update',
-                dialog_id: 'update_project_dialog',
+                dialog_id: 'project_dialog',
                 content_creator: dialogs.update_project_dialog,
                 attach_to: 'update_project_button',
                 related_field_updater: project_summary_updater,

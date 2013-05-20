@@ -290,7 +290,7 @@
         // New Department Button
         create_department_button = dialogCaller({
             label: 'New',
-            dialog_id: 'create_department_dialog',
+            dialog_id: 'department_dialog',
             content_creator: dialogs.create_department_dialog,
             attach_to: 'user_create_department_button',
             related_field_updater: departments_field_updater
@@ -330,7 +330,7 @@
         // New Group Button
         create_group_button = dialogCaller({
             label: 'New',
-            dialog_id: 'create_group_dialog',
+            dialog_id: 'group_dialog',
             content_creator: dialogs.create_group_dialog,
             attach_to: 'user_create_group_button',
             related_field_updater: groups_field_updater
@@ -341,7 +341,7 @@
         // ********************************************************************
         // Tags
         var tags_tagSelect = new TagSelect({
-            name: 'tags',
+            name: 'tag_names',
             type: 'TextBox'
         }, 'user_tags');
         tags_tagSelect.startup();

@@ -24,9 +24,7 @@
                 <td style='text-align: right'><strong>Project</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="#" class="DataLink"
-                       stalker_target="central_content"
-                       stalker_href="view/project/{{ sequence.project.id }}">{{ sequence.project.name }}</a>
+                    <a href="javascript:redirectLink('central_content','view/project/{{ sequence.project.id }}');">{{ sequence.project.name }}</a>
                 </td>
             </tr>
             <tr>
@@ -43,15 +41,19 @@
                 <td style='text-align: right'><strong>Created By</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="#" class="DataLink"
-                       stalker_target="central_content"
-                       stalker_href="view/user/{{ sequence.created_by.id }}">{{ sequence.created_by.name }}</a>
+                    <a href="javascript:redirectLink('central_content','view/user/{{ sequence.created_by.id }}');">{{ sequence.created_by.name }}</a>
                 </td>
             </tr>
+            <tr>
+                <td style='text-align: right'></td>
+                <td>&nbsp;</td>
+                <td>
+					{% if has_permission('Update_Sequence') %}
+                     <button id='update_sequence_button'>Update</button>
+					{% endif %}                
+				</td>
+            </tr>
         </table>
-        {% if has_permission('Update_Sequence') %}
-            <button id='update_sequence_button'>Update</button>
-        {% endif %}
     </div>
     {#  Charts  #}
 
@@ -65,10 +67,9 @@
         'dojox/charting/action2d/MoveSlice',
         'dijit/form/Button',
         'stalker/dialogs',
-        'stalker/gotoLink',
         'stalker/dialogCaller',
         'dojo/domReady!'
-    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs, gotoLink,
+    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
                  dialogCaller) {
 
         // Create the chart within it's "holding" node
@@ -96,6 +97,14 @@
         // Render the chart!
         pieChart.render();
 
+        var sequence_summary_updater = function () {
+            // refresh the content pane
+            // get the content pane by id, alternatively we can use the parent of the button
+            var content_pane = update_sequence_button.getParent();
+            // refresh the pane
+            content_pane.refresh();
+        };
+
         {% if has_permission('Update_Sequence') %}
             // UPDATE STRUCTURE BUTTON
             var update_sequence_button = dialogCaller({
@@ -103,13 +112,13 @@
                 dialog_id: 'update_sequence_dialog',
                 content_creator: dialogs.update_sequence_dialog,
                 attach_to: 'update_sequence_button',
+				related_field_updater: sequence_summary_updater,
                 data_id: {{ sequence.id }}
             });
             update_sequence_button.startup();
         {% endif %}
 
 
-        gotoLink();
 
     });
 </script>

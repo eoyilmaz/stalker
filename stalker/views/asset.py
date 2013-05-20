@@ -46,9 +46,9 @@ def create_asset_dialog(request):
     
     return {
         'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
         'project': project,
-        'types': asset_types,
-        'has_permission': PermissionChecker(request)
+        'types': asset_types
     }
 
 @view_config(
@@ -77,8 +77,7 @@ def update_asset_dialog(request):
 def create_asset(request):
     """creates a new Asset
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
     
     # get params
     name = request.params.get('name')
@@ -91,6 +90,7 @@ def create_asset(request):
     
     project_id = request.params.get('project_id')
     project = Project.query.filter_by(id=project_id).first()
+    logger.debug('project_id   : %s' % project_id)
     
     if name and code and type_name and status and  project:
         # get the type
@@ -131,7 +131,15 @@ def create_asset(request):
         )
         
         DBSession.add(new_asset)
-    
+    else:
+        logger.debug('there are missing parameters')
+        logger.debug('name      : %s' % name)
+        logger.debug('code      : %s' % code)
+        logger.debug('type_name : %s' % type_name)
+        logger.debug('status    : %s' % status)
+        logger.debug('project   : %s' % project)
+        HTTPServerError()
+
     return HTTPOk()
 
 
