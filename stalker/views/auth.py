@@ -101,11 +101,10 @@ def create_user(request):
     email = request.params.get('email', None)
     password = request.params.get('password', None)
     department_id = request.params.get('department_id', None)
-    
+
     # create and add a new user
     if name and login and email and password:
         departments = []
-
         if department_id:
             department = Department.query.filter_by(id=department_id).first()
             departments = [department]
@@ -119,7 +118,7 @@ def create_user(request):
                 departments = Department.query.filter(
                                 Department.id.in_(dep_ids)).all()
     
-    # Groups
+        # Groups
         groups = []
         if 'group_ids' in request.params:
             grp_ids = [
@@ -131,13 +130,13 @@ def create_user(request):
         
         # Tags
         tags = []
-        if 'tag_ids' in request.params:
-            tag_ids = [
-                int(tag_id)
-                for tag_id in request.POST.getall('tag_ids')
-            ]
-            tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
-        
+        tag_names = request.POST.getall('tag_names')
+        for tag_name in tag_names:
+            tag = Tag.query.filter(Tag.name==tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+            tags.append(tag)
+
         logger.debug('creating new user')
         new_user = User(
             name=request.params['name'],
@@ -206,12 +205,12 @@ def update_user(request):
         
         # Tags
         tags = []
-        if 'tag_ids' in request.params:
-            tag_ids = [
-                int(tag_id)
-                for tag_id in request.POST.getall('tag_ids')
-            ]
-            tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+        tag_names = request.POST.getall('tag_names')
+        for tag_name in tag_names:
+            tag = Tag.query.filter(Tag.name==tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+            tags.append(tag)
         
         user.name = name
         user.login = login
@@ -455,22 +454,28 @@ def get_permissions_from_multi_dict(multi_dict):
     for key in multi_dict.keys():
         access = multi_dict[key]
         action_and_class_name = key.split('_')
-        action = action_and_class_name[0]
-        class_name = action_and_class_name[1]
-        
-        logger.debug('access     : %s' % access)
-        logger.debug('action     : %s' % action)
-        logger.debug('class_name : %s' % class_name)
-        
-        # get permissions
-        permission = Permission.query\
-            .filter_by(access=access)\
-            .filter_by(action=action)\
-            .filter_by(class_name=class_name)\
-            .first()
-        
-        if permission:
-            permissions.append(permission)
+
+        try:
+            action = action_and_class_name[0]
+            class_name = action_and_class_name[1]
+
+            logger.debug('access     : %s' % access)
+            logger.debug('action     : %s' % action)
+            logger.debug('class_name : %s' % class_name)
+
+        except IndexError:
+            continue
+
+        else:
+            # get permissions
+            permission = Permission.query\
+                .filter_by(access=access)\
+                .filter_by(action=action)\
+                .filter_by(class_name=class_name)\
+                .first()
+
+            if permission:
+                permissions.append(permission)
     
     logger.debug(permissions)
     return permissions

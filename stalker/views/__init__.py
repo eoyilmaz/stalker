@@ -142,3 +142,8 @@ def get_multi_integer(request, attr_name):
     :return:
     """
     return [int(attr) for attr in request.POST.getall(attr_name)]
+
+def get_color_as_int(request, attr_name):
+    """Extracts a color from request
+    """
+    return int(request.params.get(attr_name, '#000000')[1:], 16)

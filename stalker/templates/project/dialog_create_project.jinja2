@@ -505,6 +505,7 @@ require([
 
     var structure_data_length = 0;
     var set_structure_filteringSelect_value = function (data) {
+
         if (structure_data_length != 0 && structure_data_length < data.length) {
             structure_filteringSelect_selected_value = data[data.length - 1].id;
         }

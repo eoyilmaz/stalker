@@ -48,16 +48,24 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <tr style='font-weight: bold'>
+                                <td style='text-align: right'>ALL</td>
+                                {% for action in actions %}
+                                    <td style='text-align: center'>
+                                        <input id='{{ action }}'>
+                                    </td>
+                                {% endfor %}
+                            </tr>
                             {% for entity in entity_types %}
                                 <tr>
                                     <td style='text-align: right'>{{ entity.name }}</td>
                                     {% for action in actions %}
                                         <td style='text-align: center'>
-                                            <input id='{{ action }}_{{ entity.name }}'
-                                                   name='{{ action }}_{{ entity.name }}'
-                                                   type='checkbox'
-                                                   data-dojo-type='dijit/form/CheckBox'
-                                                   value='Allow'>
+                                            <input id='{{ action }}_{{ entity.name }}'>
+                                            {#                                                   name='{{ action }}_{{ entity.name }}'#}
+                                            {#                                                   type='checkbox'#}
+                                            {#                                                   data-dojo-type='dijit/form/CheckBox'#}
+                                            {#                                                   value='Allow'>#}
                                         </td>
                                     {% endfor %}
                                 </tr>
@@ -79,8 +87,12 @@
 
 
 <script type='text/javascript'>
+
+
     require([
+        'dijit/registry',
         'dojo/dom',
+        'dojo/on',
 
         'dijit/form/Form',
         'dijit/form/Button',
@@ -90,8 +102,24 @@
         'stalker/submitForm',
 
         'dojo/domReady!'
-    ], function (dom, Form, Button, CheckBox, ValidationTextBox,
+    ], function (registry, dom, on, Form, Button, CheckBox, ValidationTextBox,
                  submitForm) {
+
+        // Generate default values
+        var url;
+        var name;
+        var additional_data;
+
+        {# fill values based on the dialog mode #}
+        {% if mode == 'CREATE' %}
+            url = '{{ request.route_url("create_group") }}';
+        {% elif mode == 'UPDATE' %}
+            url = '{{ request.route_url("update_group") }}';
+            name = '{{ group.name }}';
+            additional_data = {
+                group_id: {{ group.id }}
+            };
+        {% endif %}
 
         // ********************************************************************
         // Form
@@ -105,11 +133,47 @@
         var name_validationTextBox = new ValidationTextBox({
             name: 'name',
             required: true,
-            {% if mode=='UPDATE' %}
-                value: '{{ group.name }}'
-            {% endif %}
+            value: name
         }, 'group_name');
         name_validationTextBox.startup();
+
+        var selectAllClassOfAction = function (value) {
+            var action_name = this.name;
+            {% for entity in entity_types %}
+                var action_class_checkBox = registry.byId(action_name + '_{{ entity.name }}');
+                action_class_checkBox.setAttribute('checked', this.checked);
+            {% endfor %}
+        };
+
+        var uncheckedForAction = function (value) {
+            if (!this.checked) {
+                var action_class_checkBox = registry.byId(this.action_type);
+                action_class_checkBox.setAttribute('checked', false);
+            }
+        };
+
+
+        {% for action in actions %}
+            var action_all_checkBox = new CheckBox({
+                name: '{{ action }}',
+                value: 'Allow',
+                onClick: selectAllClassOfAction
+            }, '{{ action }}');
+            action_all_checkBox.startup();
+        {% endfor %}
+
+
+        {% for entity in entity_types %}
+            {% for action in actions %}
+                var action_class_checkBox = new CheckBox({
+                    name: '{{ action }}_{{ entity.name }}',
+                    action_type: '{{ action }}',
+                    value: 'Allow',
+                    onClick: uncheckedForAction
+                }, '{{ action }}_{{ entity.name }}');
+                action_class_checkBox.startup();
+            {% endfor %}
+        {% endfor %}
 
         {% if mode=='UPDATE' %}
             // update checkboxes
@@ -126,9 +190,8 @@
                     class_name = '{{ permission.class_name }}';
 
                     checkBox_id = action + '_' + class_name;
-                    checkBox_dom = dom.byId(checkBox_id);
+                    checkBox_dom = registry.byId(checkBox_id);
                     checkBox_dom.setAttribute('checked', true);
-
                 {% endif %}
             {% endfor %}
         {% endif %}
@@ -140,21 +203,10 @@
             label: 'OK',
             type: 'button',
             onClick: function () {
-                var url;
-
-                {% if mode=='CREATE' %}
-                    url = 'create/group';
-                {% elif mode=='UPDATE' %}
-                    url = 'update/group';
-                {% endif %}
                 submitForm({
                     dialog: dialog,
                     form: group_form,
-                    additional_data: {
-                        {% if mode=='UPDATE' %}
-                            group_id: {{ group.id }}
-                        {% endif %}
-                    },
+                    additional_data: additional_data,
                     url: url,
                     method: 'POST'
                 });

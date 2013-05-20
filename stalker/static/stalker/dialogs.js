@@ -418,7 +418,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'create_department_dialog',
                 title: 'New Department',
-                href: '/create/department',
+                href: 'dialog/create/department',
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -429,7 +429,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'update_department_dialog',
                 title: 'Update Department',
-                href: '/update/department/' + department_id,
+                href: 'dialog/update/department/' + department_id,
                 resize: true,
                 style: style,
                 executeScripts: true

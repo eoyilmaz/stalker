@@ -17,8 +17,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-define(['dojo/domReady!'],
-    function(){
+define(['dijit/registry', 'dojo/domReady!'],
+    function(registry){
         // *******************************************************************
         // DialogCaller
         //
@@ -58,7 +58,7 @@ define(['dojo/domReady!'],
             var related_field_updater = kwargs.related_field_updater || function(){};            
             
             if (dialog_id != null){
-                var dialog = dijit.byId(dialog_id);
+                var dialog = registry.byId(dialog_id);
                 if (dialog != null){
                     dialog.destroyRecursive();
                 }

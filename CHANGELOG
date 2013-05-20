@@ -40,6 +40,7 @@ Stalker Changes
   * Fix: Fixed TaskBox CSS template
   * New: GanttChart now displays the finished/unfinished tasks with a green/red
     'id' column.
+  * Fix: Status color attribute converted from unicode to integer.
 
 0.2.0.b2
 --------

@@ -17,64 +17,155 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+import datetime
 
 from pyramid.httpexceptions import HTTPFound, HTTPOk, HTTPServerError
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 
 from stalker.db import DBSession
-from stalker import User, Department, Entity
+from stalker import User, Department, Entity, Tag
 
 import logging
 from stalker import log
+from stalker.views import get_logged_in_user, log_param
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
 @view_config(
-    route_name='create_department',
-    renderer='templates/department/dialog_create_department.jinja2',
-    permission='Create_Department'
+    route_name='dialog_create_department',
+    renderer='templates/department/dialog_create_department.jinja2'
+)
+def create_department_dialog(request):
+    """fills the create department dialog
+    """
+
+    return {
+        'mode': 'CREATE'
+        # 'users': User.query.all()
+    }
+
+@view_config(
+    route_name='dialog_update_department',
+    renderer='templates/department/dialog_create_department.jinja2'
+)
+def update_department_dialog(request):
+    """fills the update department dialog
+    """
+    department_id = request.matchdict['department_id']
+    department = Department.query.filter_by(id=department_id).first()
+
+    logger.debug('called update_department_dialog %s' % department_id)
+    return {
+        'mode': 'UPDATE',
+        'department': department
+    }
+
+
+@view_config(
+    route_name='create_department'
 )
 def create_department(request):
-    """called when creating a new Department
+    """creates a new Department
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
     
     logger.debug('called new_department')
-    
-    try:
-        logger.debug('submitted: %s' % request.params['submitted'])
-        if request.params['submitted'] == 'create':
-            # get the params and create the Department
-            try:
-                name = request.params['name']
-            except KeyError:
-                message = 'The name parameter is missing'
-                logger.debug(message)
-                return HTTPServerError(detail=message)
-            
-            try:
-                lead_id = request.params['lead_id']
-                lead = User.query.filter_by(id=lead_id).first()
-            except KeyError:
-                lead = None
-            
-            logger.debug('creating new department')
-            new_department = Department(
-                name=name,
-                lead=lead,
-                created_by=logged_in_user
-            )
-            DBSession.add(new_department)
-            logger.debug('created new department')
-    except KeyError:
-        logger.debug('submitted is not in params')
-    
-    return {
-        'users': User.query.all()
-    }
+
+    # get params
+
+    name =  request.params.get('name')
+
+    if name:
+        description =  request.params.get('description')
+
+        lead_id = int(request.params.get('lead_id', -1))
+        lead = User.query.filter_by(id=lead_id).first()
+
+        # Tags
+        tags = []
+        tag_names = request.POST.getall('tag_names')
+        for tag_name in tag_names:
+            tag = Tag.query.filter(Tag.name==tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+            tags.append(tag)
+
+        logger.debug('creating new department')
+        new_department = Department(
+           name = name,
+           description = description,
+           lead = lead,
+           created_by=logged_in_user,
+           tags = tags
+        )
+        DBSession.add(new_department)
+        logger.debug('created new department')
+    else:
+        logger.debug('not all parameters are in request.params')
+        log_param(request, 'name')
+        HTTPServerError()
+
+    return HTTPOk()
+
+@view_config(
+    route_name='update_department'
+)
+def update_department(request):
+    """updates an Department
+    """
+    logged_in_user = get_logged_in_user(request)
+
+    logger.debug('called update_department')
+    # get params
+    department_id = request.params.get('department_id')
+    department = Department.query.filter_by(id=department_id).first()
+
+    name = request.params.get('name')
+
+
+    if department and name:
+        # get the type
+        description =  request.params.get('description')
+
+        lead_id = int(request.params.get('lead_id', '-1'))
+        lead = User.query.filter_by(id=lead_id).first()
+
+        # Tags
+        tags = []
+        tag_names = request.POST.getall('tag_names')
+        for tag_name in tag_names:
+            logger.debug('tag_name %s' % tag_name)
+            tag = Tag.query.filter(Tag.name==tag_name).first()
+            if tag is None:
+                logger.debug('new tag is created %s' % tag_name)
+                tag = Tag(name=tag_name)
+            tags.append(tag)
+
+
+        # update the department
+        department.name = name
+        department.description = description
+        logger.debug('request.description: %s' % description)
+        logger.debug('department.description  : %s' % department.description)
+        department.lead = lead
+        department.tags = tags
+        department.updated_by = logged_in_user
+        department.date_updated = datetime.datetime.now()
+
+        logger.debug('updating department')
+        DBSession.add(department)
+        logger.debug('updated department successfully')
+    else:
+        logger.debug('not all parameters are in request.params')
+        log_param(request, 'department_id')
+        log_param(request, 'name')
+        HTTPServerError()
+
+    return HTTPOk()
+
 
 
 @view_config(

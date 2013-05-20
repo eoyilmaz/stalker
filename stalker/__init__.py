@@ -308,8 +308,12 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Department
+
+    config.add_route('dialog_create_department', 'dialog/create/department')
+    config.add_route('dialog_update_department', 'dialog/update/department/{department_id}')
+
     config.add_route('create_department', 'create/department')
-    config.add_route('update_department', 'update/department/{department_id}')
+    config.add_route('update_department', 'update/department')
     config.add_route('summarize_department', 'summarize/department/{department_id}')
     config.add_route('view_department', 'view/department/{department_id}')
     config.add_route('list_departments', 'list/departments/{entity_id}')
@@ -335,6 +339,12 @@ def main(global_config, **settings):
 
     config.add_route('dialog_append_groups', 'dialog/append/groups/{user_id}')
     config.add_route('append_groups', 'append/groups')
+
+
+    # *************************************************************************
+    # Tag
+
+    config.add_route('get_tags', 'get/tags')
 
     config.scan()
     return config.make_wsgi_app()
