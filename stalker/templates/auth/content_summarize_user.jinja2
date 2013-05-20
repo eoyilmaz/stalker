@@ -55,57 +55,26 @@
             <td>&nbsp;</td>
             <td>({{ user.open_tickets|count }})</td>
         </tr>
+        <tr>
+            <td>
+                {% if has_permission('Update_User') or user==logged_in_user %}
+                    <button id='update_user_button'>Update</button>
+                {% endif %}
+            </td>
+        </tr>
     </table>
-    {% if has_permission('Update_User') %}
-        <button id='update_user_button'>Update</button>
-    {% endif %}
 </div>
-
-
 <script type="text/javascript">
-    require(['dojox/charting/Chart',
-        'dojox/charting/themes/MiamiNice',
-        'dojox/charting/plot2d/Pie',
-        'dojox/charting/action2d/MoveSlice',
-        
+    require([
         'dijit/form/Button',
-        'dijit/Menu',
-        'dijit/MenuItem',
 
         'stalker/dialogs',
         'stalker/dialogCaller',
-        'stalker/dialogCreator',
-        
+        'stalker/thumbnailMenu',
+
         'dojo/domReady!'
-    ], function (Chart, theme, PiePlot, MoveSlice, Button, Menu, MenuItem,
-                 dialogs, dialogCaller, dialogCreator) {
-
-        {#              // Create the chart within it's "holding" node#}
-        {#              var pieChart = new Chart('user_summary_chart1');#}
-        {##}
-        {#              // Add the only/default plot#}
-        {#              pieChart.setTheme(theme);#}
-        {##}
-        {#              // Add the only/default plot#}
-        {#              pieChart.addPlot("default", {#}
-        {#                type: PiePlot, // our plot2d/Pie module reference as type value#}
-        {#                radius: 50,#}
-        {#                fontColor: "black",#}
-        {#                labelOffset: 0#}
-        {#              });#}
-        {##}
-        {#              var chartData = [10, 14,33,5,8];#}
-        {##}
-        {#              // Add the series of data#}
-        {#              pieChart.addSeries('January', chartData);#}
-        {##}
-        {#              // Create the slice mover#}
-        {#              var mag = new MoveSlice(pieChart, 'default');#}
-        {##}
-        {#              // Render the chart!#}
-        {#              pieChart.render();#}
-
-        {% if has_permission('Update_User') %}
+    ], function (Button, dialogs, dialogCaller, thumbnailMenu) {
+        {% if has_permission('Update_User') or user==logged_in_user %}
             // UPDATE USER BUTTON
             var update_user_button = dialogCaller({
                 label: 'Update',
@@ -115,40 +84,18 @@
                 data_id: {{ user.id }}
             });
             update_user_button.startup();
-            
-            // create the thumbnail upload menu
-            var user_thumbnail_menu = new Menu({
+
+            thumbnailMenu({
                 targetNodeIds: ['user_avatar'],
                 selector: '.thumbnail_menu',
-                leftClickToOpen: true
-            });
-            
-            var upload_thumbnail_menuItem_creator = function () {
-                return new MenuItem({
-                    label: 'Upload Thumbnail...',
-                    onClick: function () {
-                        var node = this.getParent().currentTarget;
-                        // get task id
-                        var entity_id = {{ user.id }};
-                        var dialog = dialogCreator({
-                            dialog_id: 'upload_thumbnail_dialog',
-                            data_id: entity_id,
-                            content_creator: dialogs.upload_thumbnail_dialog
-{#                            related_field_updater: function(){#}
-{#                                var content_pane = registry.byId('user_details_content_pane');#}
-{#                                content_pane.refresh();#}
-{#                            }#}
-                        });
-
-                        dialog.show();
+                entity_id: {{ user.id }},
+                related_field_updater: function(){
+                    var content_pane = update_user_button.getParent();
+                    if (content_pane != null){
+                        content_pane.refresh();
                     }
-                });
-            };
-            
-            user_thumbnail_menu.addChild(upload_thumbnail_menuItem_creator());
-            
-            
+                }
+            });
         {% endif %}
-
     });
 </script>

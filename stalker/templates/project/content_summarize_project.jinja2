@@ -26,13 +26,20 @@
 
 <div id='project_details'>
 <div style="background-color: #8ecfb0;" class="page_title"></div>
+    
     {# Thumbnail #}
     <div id='project_thumbnail' class='thumbnail'>
         {% if not project.thumbnail %}
-            <img src='{{ request.static_url("stalker:static/stalker/images/NoProjectPicture.jpg") }}'
+            <img src='{{ request.static_url("stalker:static/stalker/images/T_NO_IMAGE.gif") }}'
                  alt=''
-                 style='width:192px; height: 192px'>
-        {% endif %}</div>
+                 style='width:192px; height: auto;'>
+        {% else %}
+            <img src='{{ project.thumbnail.path }}'
+                alt=''
+                style='width:192px; height: auto;'>
+        {% endif %}
+        <div class='thumbnail_menu'>&nbsp</div>
+    </div>
 
     {# Basic Info #}
     <div id='project_info' class='summary_info'>
@@ -43,7 +50,7 @@
                 <td style='text-align: right'><strong>Lead</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content', 'view/user/{{ project.lead.id }}');">{{ project.lead.name }}</a>
+                    <a href="javascript:redirectLink('central_content', 'view/user/{{ project.lead.id }}')">{{ project.lead.name }}</a>
                     ({{ project.lead.login }})
                 </td>
             </tr>
@@ -98,14 +105,16 @@
         'dojox/charting/themes/MiamiNice',
         'dojox/charting/plot2d/Pie',
         'dojox/charting/action2d/MoveSlice',
+
         'dijit/form/Button',
 
         'stalker/dialogs',
         'stalker/dialogCaller',
+        'stalker/thumbnailMenu',
 
         'dojo/domReady!'
-    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
-                 dialogCaller) {
+    ], function (Chart, theme, PiePlot, MoveSlice, Button,
+                 dialogs, dialogCaller, thumbnailMenu) {
 
         // Create the chart within it's "holding" node
         var pieChart = new Chart('project_summary_chart1');
@@ -152,6 +161,14 @@
                 data_id: {{ project.id }}
             });
             update_project_button.startup();
+            
+            // thumbnail menu
+            thumbnailMenu({
+                targetNodeIds: ['project_thumbnail'],
+                selector: '.thumbnail_menu',
+                entity_id: {{ project.id }},
+                related_field_updater: project_summary_updater
+            });
         {% endif %}
 
     });

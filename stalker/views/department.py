@@ -178,14 +178,14 @@ def get_departments_byEntity(request):
 def append_departments_dialog(request):
     """runs for append user dialog
     """
-    logged_user = get_logged_in_user(request)
+    logged_in_user = get_logged_in_user(request)
 
     user_id = request.matchdict['user_id']
     user = User.query.filter_by(id=user_id).first()
 
     return {
         'has_permission': PermissionChecker(request),
-        'logged_user': logged_user,
+        'logged_in_user': logged_in_user,
         'user': user
     }
 

@@ -81,12 +81,12 @@ function Task(kwargs) {
     this.bid_timing = kwargs['bid_timing'] || this.schedule_timing;
     this.bid_unit = kwargs['bid_unit'] || this.schedule_unit;
     
-//    console.log('schedule_constraint : ', this.schedule_constraint);
-//    console.log('schedule_model      : ', this.schedule_model);
-//    console.log('schedule_timing     : ', this.schedule_timing);
-//    console.log('schedule_unit       : ', this.schedule_unit);
-//    console.log('bid_timing          : ', this.bid_timing);
-//    console.log('bid_unit            : ', this.bid_unit);
+//    console.debug('schedule_constraint : ', this.schedule_constraint);
+//    console.debug('schedule_model      : ', this.schedule_model);
+//    console.debug('schedule_timing     : ', this.schedule_timing);
+//    console.debug('schedule_unit       : ', this.schedule_unit);
+//    console.debug('bid_timing          : ', this.bid_timing);
+//    console.debug('bid_unit            : ', this.bid_unit);
     
     
     this.is_milestone = false;

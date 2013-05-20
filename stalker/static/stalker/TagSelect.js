@@ -46,6 +46,8 @@ define([
 
             baseClass: 'stalker.tagSelect',
 
+            disabled: false,
+
             name: null,
             store: null,
 
@@ -70,11 +72,11 @@ define([
             },
 
             _setStyleAttr: function (value) {
-                console.log(
+                console.debug(
                     'setting the TagSelect.input_field_widget.style: ', value
                 );
                 if (this.input_field_widget) {
-                    console.log('there is an input_field_widget');
+                    console.debug('there is an input_field_widget');
                     this.input_field_widget.set('style', value);
                 }
             },
@@ -100,8 +102,8 @@ define([
                 var tag_value;
                 var tag_label;
                 var result;
-                
-                if (!value){
+
+                if (!value) {
                     return;
                 }
 
@@ -132,14 +134,18 @@ define([
 
             _setDisabledAttr: function (value) {
                 // set the input field widget and all the tags disabled
-                this.input_field_widget.set('disabled', value);
+                this.disabled = value;
+                if (this.input_field_widget) {
+                    this.input_field_widget.set('disabled', value);
+                }
+
                 for (var i = 0; i < this.tags.length; i++) {
                     this.tags[i].set('disabled', value);
                 }
             },
 
             isValid: function () {
-                console.log('TagSelect.isValid is running!!!');
+                console.debug('TagSelect.isValid is running!!!');
                 if (this.required) {
                     // check if there are any tags selected
                     return this.tags.length > 0;
@@ -200,12 +206,15 @@ define([
                 var label = kwargs.label;
                 var value = kwargs.value;
 
+                var is_disabled = this.get('disabled');
+
                 if (label != null) {
                     if (label != '') {
                         // add a new button to the the tagList
                         var tag = new Tag({
                             label: label,
-                            value: value
+                            value: value,
+                            disabled: is_disabled
                         }, domConstruct.create('div', null, this.tag_list_ap));
                         tag.startup();
 
@@ -278,7 +287,8 @@ define([
                 }
 
                 this.input_field_widget = new WidgetClass({
-                        required: false
+                        required: false,
+                        disabled: this.disabled
                     }, domConstruct.create("div", {}, input_widget_ap)
                 );
 
@@ -314,7 +324,7 @@ define([
                         }
                     }
                 });
-
+                
                 // register the tag_create_func to `change` event
                 on(this.input_field_widget, 'change', tag_create_func);
 

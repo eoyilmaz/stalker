@@ -115,7 +115,6 @@
 
 
     <script type='text/javascript'>
-
         var redirectLinkInParent = function (targetPane, address) {
 
             var tab_container = dijit.byId('data_tab_container');
@@ -564,36 +563,45 @@
                 popup: crew_DropDownMenu
             }));
 
-            teamMenuCreator({
-                team_is_singular: true,
-                menu_to_attach: crew_DropDownMenu,
-                entity_type_name: 'user',
-                view_entity_url: 'view/user/',
-                query_entity_url: 'get/users',
-                content_pane_to_update: central_content_pane,
-                new_team_dialog_id: 'create_user_dialog',
-                new_team_dialog_content_creator: dialogs.create_user_dialog
-            });
+            {% if has_permission('List_User') %}
+                teamMenuCreator({
+                    team_is_singular: true,
+                    menu_to_attach: crew_DropDownMenu,
+                    entity_type_name: 'user',
+                    view_entity_url: 'view/user/',
+                    query_entity_url: 'get/users',
+                    content_pane_to_update: central_content_pane,
+                    new_team_dialog_id: 'create_user_dialog',
+                    new_team_dialog_content_creator: dialogs.create_user_dialog,
+                    allow_create_new: {%  if has_permission('Create_User') %} true {% else %} false {% endif %}
+                });
+            {% endif %}
 
-            teamMenuCreator({
-                menu_to_attach: crew_DropDownMenu,
-                entity_type_name: 'department',
-                view_entity_url: 'view/department/',
-                query_entity_url: 'get/departments',
-                content_pane_to_update: central_content_pane,
-                new_team_dialog_id: 'create_department_dialog',
-                new_team_dialog_content_creator: dialogs.create_department_dialog
-            });
+            {% if has_permission('List_Department') %}
+                teamMenuCreator({
+                    menu_to_attach: crew_DropDownMenu,
+                    entity_type_name: 'department',
+                    view_entity_url: 'view/department/',
+                    query_entity_url: 'get/departments',
+                    content_pane_to_update: central_content_pane,
+                    new_team_dialog_id: 'create_department_dialog',
+                    new_team_dialog_content_creator: dialogs.create_department_dialog,
+                    allow_create_new: {%  if has_permission('Create_Department') %} true {% else %} false {% endif %}
+                });
+            {% endif %}
 
-            teamMenuCreator({
-                menu_to_attach: crew_DropDownMenu,
-                entity_type_name: 'group',
-                view_entity_url: 'view/group/',
-                query_entity_url: 'get/groups',
-                content_pane_to_update: central_content_pane,
-                new_team_dialog_id: 'create_group_dialog',
-                new_team_dialog_content_creator: dialogs.create_group_dialog
-            });
+            {% if has_permission('List_Group') %}
+                teamMenuCreator({
+                    menu_to_attach: crew_DropDownMenu,
+                    entity_type_name: 'group',
+                    view_entity_url: 'view/group/',
+                    query_entity_url: 'get/groups',
+                    content_pane_to_update: central_content_pane,
+                    new_team_dialog_id: 'create_group_dialog',
+                    new_team_dialog_content_creator: dialogs.create_group_dialog,
+                    allow_create_new: {%  if has_permission('Create_Group') %} true {% else %} false {% endif %}
+                });
+            {% endif %}
 
             stalker_MenuBar.startup();
 
@@ -629,7 +637,6 @@
                     'view/user/{{ user.id }}'
             );
             central_content_pane.refresh();
-
         });
     </script>
 {% endblock %}

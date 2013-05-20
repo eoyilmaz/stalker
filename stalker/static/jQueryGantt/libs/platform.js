@@ -6,7 +6,7 @@ if(!window.console) {
     this.error = function(str) {/*alert(str)*/};
   };
 }
-if(!window.console.debug || !window.console.error|| !window.console.log ) {
+if(!window.console.debug || !window.console.error|| !window.console.debug ) {
   window.console = new function() {
     this.log = function(str) {/*alert(str)*/};
     this.debug = function(str) {/*alert(str)*/};

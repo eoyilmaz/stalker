@@ -630,20 +630,17 @@ require([
         //     set the button function to update the status list
         //
         if (data.length > 0) { // Some Status exists
-            console.log('code is here 1');
             add_status_button.set('onClick', function () {
-                console.log('code is here 3');
                 var myDialog = dialogCreator({
                     dialog_id: 'update_status_list_dialog',
                     data_id: 'Project',
                     content_creator: dialogs.update_status_list_dialog,
                     related_field_updater: status_field_updater
                 });
-                console.log(myDialog);
+                console.debug(myDialog);
                 myDialog.show();
             });
         } else { // No Status
-            console.log('code is here 2');
             add_status_button.set('onClick', function () {
                 var myDialog = dialogCreator({
                     dialog_id: 'create_status_list_dialog',

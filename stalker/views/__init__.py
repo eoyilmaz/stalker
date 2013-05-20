@@ -27,6 +27,7 @@ from pyramid.httpexceptions import HTTPServerError, HTTPOk
 from pyramid.view import view_config
 from pyramid.response import  Response, FileResponse
 from pyramid.security import has_permission, authenticated_userid
+import transaction
 
 from stalker import log, User, defaults, Entity, Link
 from stalker.db import DBSession
@@ -215,7 +216,16 @@ def upload_file_to_server(request, file_param_name):
     # data is written completely, rename temp file to original file
     os.rename(temp_file_path, file_full_path)
     
-    return filename, file_full_path
+    # create a Link instance and return it
+    new_link = Link(
+        path = file_full_path,
+        original_filename=filename,
+        created_by=get_logged_in_user(request)
+    )
+    DBSession.add(new_link)
+    transaction.commit()
+    
+    return new_link
 
 @view_config(
     route_name='dialog_upload_thumbnail',
@@ -237,35 +247,57 @@ def dialog_upload_thumbnail(request):
 
 
 @view_config(
-    route_name='upload_thumbnail'
+    route_name='upload_thumbnail',
+    renderer='json'
 )
 def upload_thumbnail(request):
     """uploads a thumbnail to the server
     """
-    entity_id = request.matchdict.get('entity_id')
-    entity = Entity.query.filter_by(id=entity_id).first()
+    # entity_id = request.matchdict.get('entity_id')
+    # entity = Entity.query.filter_by(id=entity_id).first()
 
-    logger.debug(request.params)
-    logger.debug(request.POST)
-    
     try:
-        original_filename, file_path = \
-            upload_file_to_server(request, 'uploadedfile')
+        new_link = upload_file_to_server(request, 'uploadedfile')
     except IOError:
         HTTPServerError()
     else:
-        # create a Link and assign it to the given Entity
-        new_link = Link(
-            path = file_path,
-            original_filename=original_filename
-        )
-        
-        # assign it as a thumbnail
-        entity.thumbnail = new_link
-        
+        # store the link object
         DBSession.add(new_link)
+        
+        return {
+            'file': new_link.path,
+            'name': new_link.original_filename,
+            'width': 320,
+            'height': 240,
+            'type': os.path.splitext(new_link.original_filename)[1],
+            'link_id': new_link.id
+        }
 
+
+@view_config(
+    route_name='assign_thumbnail',
+)
+def assign_thumbnail(request):
+    """assigns the thumbnail to the given entity
+    """
+    link_id = request.params.get('link_id', -1)
+    entity_id = request.params.get('entity_id', -1)
+    
+    link = Link.query.filter_by(id=link_id).first()
+    entity = Entity.query.filter_by(id=entity_id).first()
+    
+    logger.debug('link_id   : %s' % link_id)
+    logger.debug('link      : %s' % link)
+    logger.debug('entity_id : %s' % entity_id)
+    logger.debug('entity    : %s' % entity)
+    
+    if entity and link:
+        entity.thumbnail = link
+        DBSession.add(entity)
+        DBSession.add(link)
+    
     return HTTPOk()
+
 
 
 @view_config(

@@ -26,24 +26,17 @@
 
 <script type='text/javascript'>
     require([
-        'dijit/registry',
-        'dojo/data/ObjectStore',
-        "dgrid/List",
         "dgrid/Grid",
-        "dgrid/Selection",
-        "dgrid/Keyboard",
-        "dgrid/editor",
+
         'dojo/store/Memory',
         'dojo/store/JsonRest',
+
         'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
-        'dojo/on',
-        'dojo/query',
+
         'dojo/domReady!'
-    ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
-                 editor, Memory, JsonRest, dialogs, fieldUpdater, dialogCaller,
-                 on, query) {
+    ], function (Grid, Memory, JsonRest, dialogs, fieldUpdater, dialogCaller) {
 
 
         var users_DataGrid = new Grid({
@@ -80,8 +73,12 @@
                         get: function (object) {
                             return object; // return entire item for formatter to use
                         },
-                        formatter: function (value) {
-                            return '<img width= "60px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}">';
+                        formatter: function (object) {
+                            var path = '{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}';
+                            if (object.thumbnail_path) {
+                                path = object.thumbnail_path;
+                            }
+                            return '<img width= "60px"; src="' + path + '">';
                         }
                     },
                     {

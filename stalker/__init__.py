@@ -25,8 +25,9 @@ and vfx studios. See docs for more information.
 """
 
 
-__version__ = '0.2.0.b3'
+__version__ = '0.2.0.b4'
 
+# TODO: if run in standalone mode do not import any of the Pyramid modules.
 
 from pyramid.config import Configurator
 from pyramid.authentication import AuthTktAuthenticationPolicy
@@ -107,9 +108,6 @@ def main(global_config, **settings):
     
     config.add_route('busy_dialog', 'dialog/busy')
     
-    config.add_route('dialog_upload_thumbnail', 'dialog/upload_thumbnail/{entity_id}')
-    config.add_route('upload_thumbnail', 'upload_thumbnail/{entity_id}')
-    
     config.add_route('serve_files',
                      defaults.server_side_storage_path + '/{partial_file_path:[a-zA-Z0-9/\.]+}')
     
@@ -118,6 +116,14 @@ def main(global_config, **settings):
     # *************************************************************************
     # DATA VIEWS
     # *************************************************************************
+    
+    # *************************************************************************
+    # Thumbnail
+    config.add_route('dialog_upload_thumbnail',
+                     'dialog/upload_thumbnail/{entity_id}')
+    config.add_route('upload_thumbnail', 'upload_thumbnail')
+    config.add_route('assign_thumbnail', 'assign_thumbnail')
+
     
     # *************************************************************************
     # Studio

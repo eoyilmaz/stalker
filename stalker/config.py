@@ -62,10 +62,7 @@ class Config(object):
         database_session_settings = {},
 
         # Storage for uploaded files
-        server_side_storage_path = os.path.join(
-            tempfile.gettempdir(),
-            'Stalker_Storage'
-        ),
+        server_side_storage_path = os.path.expanduser('~/Stalker_Storage'),
 
         #
         # Tells Stalker to create an admin by default

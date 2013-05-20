@@ -1,48 +1,39 @@
-<form accept-charset="utf-8" id='upload_thumbnail_form'
-      enctype='multipart/form-data'>
-    
-    <div class='dijitDialogPaneContentArea'>
-            <table style='width: 100%'>
-    
-                {# Entity Name #}
-                <tr>
-                    <td class='label_column'>
-                        <label for='entity_name'>Entity</label>
-                    </td>
-                    <td class='input_column'>
-                        <input id='entity_name'>
-                    </td>
-                </tr>
-    
-                {# Thumbnail #}
-                <tr>
-                    <td class='label_column'>
-                        <label for='thumbnail'>Thumbnail</label>
-                    </td>
-                    <td class='input_column'>
-                        <div id='thumbnail_list'></div>
-                        <div id='thumbnail'></div>
-                    </td>
-                </tr>
-    
-                {# Thumbnail Old Way #}
-{#                <tr>#}
-{#                    <td class='label_column'>#}
-{#                        <label for='thumbnail'>Thumbnail (Old Way)</label>#}
-{#                    </td>#}
-{#                    <td class='input_column'>#}
-{#                        <input id='thumbnail' name='thumbnail' type='file' value=''>#}
-{#                    </td>#}
-{#                </tr>#}
-    
-            </table>
-    </div>
-    
-    <div class='dijitDialogPaneActionBar'>
-        <button id='thumbnail_ok_button' >Ok</button>
-        <button id='thumbnail_cancel_button'>Cancel</button>
-    </div>
-</form>
+<div class='dijitDialogPaneContentArea'>
+    <form accept-charset="utf-8" id='upload_thumbnail_form'>
+    {#      enctype='multipart/form-data'>#}
+        
+        <div class='dijitDialogPaneContentArea'>
+                <table style='width: 100%'>
+        
+                    {# Entity Name #}
+                    <tr>
+                        <td class='label_column'>
+                            <label for='entity_name'>Entity</label>
+                        </td>
+                        <td class='input_column'>
+                            <input id='entity_name'>
+                        </td>
+                    </tr>
+                    
+                    Thumbnail 
+                    <tr>
+                        <td class='label_column'>
+                            <label for='thumbnail'>Thumbnail</label>
+                        </td>
+                        <td class='input_column'>
+                            <div id='thumbnail_list'></div>
+                            <div id='thumbnail'></div>
+                        </td>
+                    </tr>
+                </table>
+        </div>
+    </form>
+</div>
+
+<div class='dijitDialogPaneActionBar'>
+    <button id='thumbnail_ok_button' >Ok</button>
+    <button id='thumbnail_cancel_button'>Cancel</button>
+</div>
 
 <script type='text/javascript'>
     require([
@@ -53,19 +44,25 @@
         'dojox/form/FileInput',
         'dojox/form/Uploader',
         'dojox/form/uploader/FileList',
-        'dojox/form/uploader/plugins/IFrame',
             
         'stalker/submitForm',
 
         'dojo/domReady!'
     ], function (Form, Button, ValidationTextBox, FileInput, Uploader,
-                 FileList, IFrame, submitForm) {
-
+                 FileList, submitForm) {
+        
+        // ********************************************************************
+        // Some important vars
+        var is_upload_finished = false;
+        var entity_id = {{ entity.id }};
+        var link_id = -1;
+        
         // ********************************************************************
         // Form
         var upload_thumbnail_form = new Form({}, 'upload_thumbnail_form');
 
         var dialog = upload_thumbnail_form.getParent();
+        
 
         // ********************************************************************
         // Name
@@ -85,7 +82,19 @@
             multiple: false,
             uploadOnSelect: true,
             enctype: 'multipart/form-data',
-            url: 'upload_thumbnail/{{ entity.id }}'
+            url: 'upload_thumbnail',
+            onBegin: function(data){
+                // reset data
+                is_upload_finished = false;
+                link_id = -1;
+            },
+            onComplete: function(data){
+                // store the link.id
+                console.debug(data);
+                is_upload_finished = true;
+                link_id = data.link_id;
+                console.debug('link_id :', link_id);
+            }
         }, 'thumbnail');
         thumbnail_uploader.startup();
 
@@ -94,27 +103,29 @@
         }, 'thumbnail_list');
         thumbnail_list.startup();
 
-{#        // ********************************************************************#}
-{#        // Thumbnail - Old Way#}
-{#        var thumbnail_old_way_FileInput = new FileInput({#}
-{#            #}
-{#        }, 'thumbnail_old_way');#}
-{#        thumbnail_old_way_FileInput.startup();#}
-
         // ********************************************************************
         // Ok Button
         var ok_button = new Button({
             label: 'OK',
             type: 'button',
             onClick: function () {
-                submitForm({
-                    dialog: dialog,
-                    form: upload_thumbnail_form,
-                    additional_data: {},
-{#                    url: '{{ request.route_url("upload_thumbnail", entity_id=entity.id) }}',#}
-                    url: '',
-                    method: 'POST'
-                });
+                if (is_upload_finished && link_id != -1){
+                    console.debug('is_upload_finished : ', is_upload_finished);
+                    console.debug('link_id            : ', link_id);
+                    console.debug('dialog             : ', dialog);
+                    submitForm({
+                        dialog: dialog,
+                        form: upload_thumbnail_form,
+                        additional_data: {
+                            entity_id: entity_id,
+                            link_id: link_id
+                        },
+                        url: '{{ request.route_url('assign_thumbnail') }}',
+                        method: 'POST'
+                    });
+                }else{
+                    alert('Upload has not finished yet!');
+                }
             }
         }, 'thumbnail_ok_button');
         ok_button.startup();

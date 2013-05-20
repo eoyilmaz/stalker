@@ -41,12 +41,12 @@ logger.setLevel(log.logging_level)
 def create_project_dialog(request):
     """called when the create project dialog is requested
     """
-    logged_user = get_logged_in_user(request)
+    logged_in_user = get_logged_in_user(request)
     
     return {
         'mode': 'CREATE',
         'has_permission': PermissionChecker(request),
-        'logged_user': logged_user
+        'logged_in_user': logged_in_user
     }
 
 
@@ -57,7 +57,7 @@ def create_project_dialog(request):
 def update_project_dialog(request):
     """runs when updating a project
     """
-    logged_user = get_logged_in_user(request)
+    logged_in_user = get_logged_in_user(request)
     
     project_id = request.matchdict['project_id']
     project = Project.query.filter_by(id=project_id).first()
@@ -66,7 +66,7 @@ def update_project_dialog(request):
         'mode': 'UPDATE',
         'has_permission': PermissionChecker(request),
         'project': project,
-        'logged_user': logged_user
+        'logged_in_user': logged_in_user
     }
 
 
@@ -76,7 +76,7 @@ def update_project_dialog(request):
 def create_project(request):
     """called when adding a new Project
     """
-    logged_user = get_logged_in_user(request)
+    logged_in_user = get_logged_in_user(request)
     
     # parameters
     name = request.params.get('name')
@@ -114,7 +114,7 @@ def create_project(request):
             code=request.params['code'],
             image_format=imf,
             repository=repo,
-            created_by=logged_user,
+            created_by=logged_in_user,
             fps=request.params['fps'],
             structure=structure,
             lead=lead,
@@ -139,7 +139,7 @@ def create_project(request):
 def update_project(request):
     """called when updating a Project
     """
-    logged_user = get_logged_in_user(request)
+    logged_in_user = get_logged_in_user(request)
     
     # parameters
     project_id = request.params.get('project_id', -1)
@@ -174,7 +174,7 @@ def update_project(request):
         project.name = name
         project.image_format = imf
         project.repository = repo
-        project.updated_by = logged_user
+        project.updated_by = logged_in_user
         project.date_updated = datetime.datetime.now()
         project.fps = fps
         project.structure = structure
@@ -225,7 +225,9 @@ def get_projects_byEntity(request):
         {
             'id': project.id,
             'name': project.name,
-            }
+            'thumbnail_path': project.thumbnail.path 
+                                            if project.thumbnail else None
+        }
         for project in entity.projects
     ]
 

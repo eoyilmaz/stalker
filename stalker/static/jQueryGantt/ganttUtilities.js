@@ -36,8 +36,8 @@ $.gridify = {
     elems.each(function() {
       var table = $(this);
       
-//      console.log('table                       : ',  table);
-//      console.log('table.width() --- UPPER --- : ' + table.width());
+//      console.debug('table                       : ',  table);
+//      console.debug('table.width() --- UPPER --- : ' + table.width());
       
       
       //----------------------  header management start
@@ -58,11 +58,11 @@ $.gridify = {
 //          console.clear();
 //          table.attr('initialWidth', table.width());
 //          colHeader.attr('initialWidth', $(this).width());
-//          console.log('***********************');
-//          console.log('e.pageX                 : ' + e.pageX);
-//          console.log('colHeader.offset().left : ' + colHeader.offset().left);
-//          console.log('mousePos                : ' + mousePos);
-//          console.log('initialWidth            : ' + colHeader.width());
+//          console.debug('***********************');
+//          console.debug('e.pageX                 : ' + e.pageX);
+//          console.debug('colHeader.offset().left : ' + colHeader.offset().left);
+//          console.debug('mousePos                : ' + mousePos);
+//          console.debug('initialWidth            : ' + colHeader.width());
 //          
           if (colHeader.width() - mousePos < opt.colResizeZoneWidth) {
             $("body").addClass("gdfHResizing");
@@ -85,12 +85,12 @@ $.gridify = {
             var new_width = (e.pageX - $.gridify.columInResize.offset().left);
             $.gridify.columInResize.width(new_width);
               
-//            console.log('****************************************');
-//            console.log('table.width()                         : ' + table.width());
-//            console.log('initialWidth                          : ' + colHeader.attr('initialWidth'));
-//            console.log('e.pageX                               : ' + e.pageX);
-//            console.log('$.gridify.columInResize.offset().left : ' + $.gridify.columInResize.offset().left);
-//            console.log('new_width                             : ' + new_width);
+//            console.debug('****************************************');
+//            console.debug('table.width()                         : ' + table.width());
+//            console.debug('initialWidth                          : ' + colHeader.attr('initialWidth'));
+//            console.debug('e.pageX                               : ' + e.pageX);
+//            console.debug('$.gridify.columInResize.offset().left : ' + $.gridify.columInResize.offset().left);
+//            console.debug('new_width                             : ' + new_width);
             
 //            table.width(
 //                table.attr('initialWidth') + colHeader.width() - colHeader.attr('initialWidth')

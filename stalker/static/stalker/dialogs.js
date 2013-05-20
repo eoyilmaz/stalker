@@ -27,6 +27,10 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         // TODOC: summary not showing up in output, see https://github.com/csnover/js-doc-parse/issues/42
 
         var style = 'width: auto; height: auto; padding: 0px;';
+        
+        var dialog_killer = function(id){
+            // TODO: kill the given dialog
+        };
 
         // ********************************************************************
         exports.busy_dialog = function busy_dialog(kwargs) {
@@ -44,6 +48,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
         
         // ********************************************************************
         exports.upload_thumbnail_dialog = function upload_thumbnail_dialog(entity_id) {
+            // TODO: use dialog_killer
             return new DialogSimple({
                 id: 'upload_thumbnail_dialog',
                 title: 'Upload Thumbnail Dialog',

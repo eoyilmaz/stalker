@@ -191,7 +191,7 @@
                 project_related_data_tab_container.watch("selectedChildWidget", function (name,
                                                                                           oval,
                                                                                           nval) {
-                    console.log("selected child changed from ", nval.title, " to ", nval.href);
+                    console.debug("selected child changed from ", nval.title, " to ", nval.href);
 
                     oval.set('href', '');
                     oval.refresh();

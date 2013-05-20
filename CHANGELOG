@@ -2,6 +2,20 @@
 Stalker Changes
 ===============
 
+0.2.0.b4
+--------
+* WebUI:
+  * Fix: Fixed the error in rendering of the **home** occurred when there is no
+    user login information found in the request.
+  * New: User thumbnails now can be changed.
+  * New: Project thumbnails now can be changed.
+  * New: ``content_list_projects`` now shows the project thumbnails.
+  * New: ``content_list_users`` now shows the user thumbnails.
+  * New: ``submitForm.js`` now enables all the disabled fields of the given
+    form, and disables them back again upon error.
+  * Fix: ``TagSelect.js`` will now correctly disable the child widgets if the
+    ``disabled`` attribute is set to **true**.
+
 0.2.0.b3
 --------
 

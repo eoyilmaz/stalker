@@ -203,7 +203,7 @@
 
         var ge = new GanttMaster();
         ge.init($("#workSpace"));
-        //console.log(ge);
+        //console.debug(ge);
 
         // The Memory
         var tasks_memory;
@@ -378,7 +378,7 @@
     
                                     // check if it is a leaf task
                                     var task = ge.getTask(taskId);
-                                    //console.log(task);
+                                    //console.debug(task);
     
                                     if (task.isParent()) {
                                         // warn the user and return

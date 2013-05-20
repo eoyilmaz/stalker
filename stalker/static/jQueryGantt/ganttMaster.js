@@ -235,9 +235,9 @@ GanttMaster.prototype.loadGanttData = function(ganttData, Deferred) {
         deferred.resolve('success');
     });
     
-//    console.log('daily_working_hours : ', this.daily_working_hours);
-//    console.log('timing_resolution   : ', this.timing_resolution);
-//    console.log('working_hours       : ', this.working_hours);
+//    console.debug('daily_working_hours : ', this.daily_working_hours);
+//    console.debug('timing_resolution   : ', this.timing_resolution);
+//    console.debug('working_hours       : ', this.working_hours);
     
     return deferred.promise;
 };
@@ -302,8 +302,8 @@ GanttMaster.prototype.loadTasks = function(tasks) {
         this.task_ids.push(task.id); //lookup table for task ids
     }
     
-//    console.log('this.tasks    : ', this.tasks);
-//    console.log('this.task_ids : ', this.task_ids);
+//    console.debug('this.tasks    : ', this.tasks);
+//    console.debug('this.task_ids : ', this.task_ids);
     
     // find root tasks
     var root_tasks = [];
@@ -315,8 +315,8 @@ GanttMaster.prototype.loadTasks = function(tasks) {
         }
         // also fill the task.depends
         this.tasks[i].getDepends();
-//        console.log('task.depend_ids : ', this.tasks[i].depend_ids);
-//        console.log('task.depends    : ', this.tasks[i].depends);
+//        console.debug('task.depend_ids : ', this.tasks[i].depend_ids);
+//        console.debug('task.depends    : ', this.tasks[i].depends);
     }
     
     
