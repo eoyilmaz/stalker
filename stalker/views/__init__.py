@@ -29,7 +29,7 @@ from pyramid.response import  Response, FileResponse
 from pyramid.security import has_permission, authenticated_userid
 import transaction
 
-from stalker import log, User, defaults, Entity, Link
+from stalker import log, User, defaults, Entity, Link, Tag
 from stalker.db import DBSession
 
 logger = logging.getLogger(__name__)
@@ -152,6 +152,28 @@ def get_color_as_int(request, attr_name):
     """Extracts a color from request
     """
     return int(request.params.get(attr_name, '#000000')[1:], 16)
+
+
+def get_tags(request):
+    """Extracts Tags from the given request
+    
+    :param request: Request object
+    :return: A list of stalker.models.tag.Tag instances
+    """
+
+    # Tags
+    tags = []
+    tag_names = request.POST.getall('tag_names')
+    for tag_name in tag_names:
+        logger.debug('tag_name %s' % tag_name)
+        tag = Tag.query.filter(Tag.name==tag_name).first()
+        if not tag:
+            logger.debug('new tag is created %s' % tag_name)
+            tag = Tag(name=tag_name)
+            DBSession.add(tag)
+        tags.append(tag)
+        
+    return tags
 
 
 def upload_file_to_server(request, file_param_name):

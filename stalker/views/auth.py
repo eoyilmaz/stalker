@@ -28,7 +28,7 @@ import stalker
 from stalker import (defaults, User, Department, Group, Tag, Project, Entity,
                      Studio, Permission, EntityType)
 from stalker.db import DBSession
-from stalker.views import log_param, get_logged_in_user, PermissionChecker, get_multi_integer
+from stalker.views import log_param, get_logged_in_user, PermissionChecker, get_multi_integer, get_tags
 
 import logging
 from stalker import log
@@ -120,13 +120,7 @@ def create_user(request):
                             Group.id.in_(grp_ids)).all()
         
         # Tags
-        tags = []
-        tag_names = request.POST.getall('tag_names')
-        for tag_name in tag_names:
-            tag = Tag.query.filter(Tag.name==tag_name).first()
-            if not tag:
-                tag = Tag(name=tag_name)
-            tags.append(tag)
+        tags = get_tags(request)
 
         logger.debug('creating new user')
         new_user = User(
@@ -186,16 +180,10 @@ def update_user(request):
             grp_ids = get_multi_integer(request, 'group_ids')
             groups = Group.query \
                 .filter(Group.id.in_(grp_ids)).all()
-        
+
         # Tags
-        tags = []
-        tag_names = request.POST.getall('tag_names')
-        for tag_name in tag_names:
-            tag = Tag.query.filter(Tag.name==tag_name).first()
-            if not tag:
-                tag = Tag(name=tag_name)
-            tags.append(tag)
-        
+        tags = get_tags(request)
+
         user.name = name
         user.login = login
         user.email = email
@@ -204,7 +192,7 @@ def update_user(request):
         user.departments = departments
         user.groups = groups
         user.tags = tags
-        
+
         if password != 'DONTCHANGE':
             user.password = password
         

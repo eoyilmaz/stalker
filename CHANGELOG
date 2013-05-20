@@ -21,6 +21,10 @@ Stalker Changes
   * New: Added the first input field to stalker/fields, called ``tagField``. It
     is now possible to add a TagSelect field which is correctly updated by only
     two lines of code.
+  * New: Added ``get_tags()`` to stalker.views.__init__ module. Because all the
+    tags now should be created with the ``tagField`` the way to retrieve tags
+    is the same, so this helper function will let you retrieve tags from the
+    given request instance.
 
 0.2.0.b3
 --------
