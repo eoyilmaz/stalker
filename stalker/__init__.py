@@ -260,7 +260,6 @@ def main(global_config, **settings):
     
     # *************************************************************************
     # Shots
-    # TODO: separate dialog and action
     config.add_route('dialog_create_shot', 'dialog/create/shot/{project_id}')
     config.add_route('dialog_update_shot', 'dialog/update/shot/{shot_id}')
 
@@ -275,11 +274,14 @@ def main(global_config, **settings):
     # *************************************************************************
     # Sequence
     # TODO: separate dialog and action
-    config.add_route('create_sequence',    'create/sequence/{project_id}')
-    config.add_route('update_sequence',    'update/sequence/{sequence_id}')
+    config.add_route('dialog_create_sequence', 'dialog/create/sequence/{project_id}')
+    config.add_route('dialog_update_sequence', 'dialog/update/sequence/{sequence_id}')
+
+    config.add_route('create_sequence',    'create/sequence')
+    config.add_route('update_sequence',    'update/sequence')
+
     config.add_route('view_sequence',      'view/sequence/{sequence_id}')
     config.add_route('summarize_sequence', 'summarize/sequence/{sequence_id}')
-
     config.add_route('list_sequences',     'list/sequences/{project_id}')
     config.add_route('get_sequences',      'get/sequences/{project_id}')
     
@@ -364,7 +366,7 @@ def main(global_config, **settings):
     config.add_route('dialog_append_groups', 'dialog/append/groups/{user_id}')
     config.add_route('append_groups', 'append/groups')
 
-
+    config.add_route('list_permissions', 'list/permissions/{group_id}')
     # *************************************************************************
     # Tag
 

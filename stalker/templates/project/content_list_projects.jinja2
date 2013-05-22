@@ -27,16 +27,18 @@
         "dgrid/List",
         "dgrid/Grid",
         "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dojo/_base/declare",
         "dgrid/editor",
         'dojo/store/Memory',
         'dijit/form/FilteringSelect',
         'dojo/store/JsonRest',
         'dojo/domReady!'
-    ], function (registry, ObjectStore, List, Grid, Selection,
-                 editor, Memory, FilteringSelect, JsonRest) {
+    ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
+                 declare, editor, Memory, FilteringSelect, JsonRest) {
 
-
-        var projects_DataGrid = new Grid({
+        var StandardGrid = declare([Grid, Selection, Keyboard]);
+        var projects_DataGrid = new StandardGrid({
             id: 'projects_data_grid',
             width: '100%',
             autoHeight: true
@@ -62,7 +64,7 @@
                         },
                         formatter: function (value) {
                             var path = '{{ request.static_url("stalker:static/stalker/images/T_NO_IMAGE.gif") }}';
-                            if (value.thumbnail_path){
+                            if (value.thumbnail_path) {
                                 path = value.thumbnail_path;
                             }
                             return '<img width= "100px"; src="' + path + '">';

@@ -1,6 +1,7 @@
 <div id='list_sequences'>
     {% if has_permission('Create_Sequence') %}
-        <button id='list_sequences_create_sequence_button'>New Sequence</button>
+        <button id='list_sequences_create_sequence_button'>New Sequence
+        </button>
     {% endif %}
     <div id='sequences_data_grid'></div>
 </div>
@@ -12,6 +13,7 @@
         "dgrid/Grid",
         "dgrid/Selection",
         "dgrid/Keyboard",
+        "dojo/_base/declare",
         "dgrid/editor",
         'dojo/store/Memory',
         'dojo/store/JsonRest',
@@ -20,10 +22,11 @@
         'stalker/dialogCaller',
         'dojo/domReady!'
     ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
-                 editor, Memory, JsonRest, dialogs, fieldUpdater,
+                 declare, editor, Memory, JsonRest, dialogs, fieldUpdater,
                  dialogCaller) {
 
-        var sequences_data_grid = new Grid({
+        var StandardGrid = declare([Grid, Selection, Keyboard]);
+        var sequences_data_grid = new StandardGrid({
             id: 'sequences_data_grid',
             width: '100%',
             autoHeight: true

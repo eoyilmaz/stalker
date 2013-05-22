@@ -94,273 +94,273 @@
 </div>
 
 <script type='text/javascript'>
-    require([
-        'dojo/store/Memory',
-        'dojo/store/JsonRest',
-        'dijit/form/Form',
-        'dijit/form/ValidationTextBox',
-        'dijit/form/TextBox',
-        'dijit/form/FilteringSelect',
-        'dijit/form/ComboBox',
-        'dijit/form/Button',
-        'stalker/dialogs',
-        'stalker/submitForm',
-        'stalker/fieldUpdater',
-        'stalker/dialogCreator',
-        'stalker/dialogCaller',
-        'dojo/domReady!'
-    ], function (Memory, JsonRest, Form, ValidationTextBox, TextBox,
-                 FilteringSelect, ComboBox, Button, dialogs, submitForm,
-                 fieldUpdater, dialogCreator, dialogCaller) {
+require([
+    'dojo/store/Memory',
+    'dojo/store/JsonRest',
+    'dijit/form/Form',
+    'dijit/form/ValidationTextBox',
+    'dijit/form/TextBox',
+    'dijit/form/FilteringSelect',
+    'dijit/form/ComboBox',
+    'dijit/form/Button',
+    'stalker/dialogs',
+    'stalker/submitForm',
+    'stalker/fieldUpdater',
+    'stalker/dialogCreator',
+    'stalker/dialogCaller',
+    'dojo/domReady!'],
+        function (Memory, JsonRest, Form, ValidationTextBox, TextBox,
+                  FilteringSelect, ComboBox, Button, dialogs, submitForm,
+                  fieldUpdater, dialogCreator, dialogCaller) {
 
-        // ********************************************************************
-        // Generate default values
-        var url;
-        var name;
-        var code;
-        var description;
-        var type_id;
-        var asset_id;
-        var project_id;
+            // ********************************************************************
+            // Generate default values
+            var url;
+            var name;
+            var code;
+            var description;
+            var type_id;
+            var asset_id;
+            var project_id;
 
-        {# fill values based on the dialog mode #}
-        {% if mode == 'CREATE' %}
-            url = '{{ request.route_url("create_asset") }}';
-            {% if project %}
-                project_id = {{ project.id }};
+
+            {# fill values based on the dialog mode #}
+            {% if mode == 'CREATE' %}
+                url = '{{ request.route_url("create_asset") }}';
+                {% if project %}
+                    project_id = '{{ project.id }}';
+                {% endif %}
+            {% elif mode == 'UPDATE' %}
+                url = '{{ request.route_url("update_asset") }}';
+                asset_id = {{ asset.id }};
+                name = '{{ asset.name }}';
+                code = '{{ asset.code }}';
+                description = '{{ asset.description }}';
+                type_id = '{{ asset.type_id }}';
+                project_id = {{ asset.project_id }};
             {% endif %}
-        {% elif mode == 'UPDATE' %}
-            url = '{{ request.route_url("update_asset") }}';
-            asset_id = {{ asset.id }};
-            name = '{{ asset.name }}';
-            code = '{{ asset.code }}';
-            description = '{{ asset.description }}';
-            type_id = '{{ asset.type_id }}';
-            project_id = {{ asset.project_id }};
-        {% endif %}
 
 
 
-        // ****************************************************************
-        // Form
-        var asset_form = new Form({
-            id: 'asset_form'
-        }, 'asset_form');
+            // ****************************************************************
+            // Form
+            var asset_form = new Form({
+                id: 'asset_form'
+            }, 'asset_form');
 
-        var dialog = asset_form.getParent();
-
-
-        // ****************************************************************
-        // Name
-        var name_textBox = new ValidationTextBox({
-            name: 'name',
-            label: 'Name',
-            placeHolder: 'Enter a name',
-            required: true,
-            value: name
-        }, 'asset_name');
-        name_textBox.startup();
+            var dialog = asset_form.getParent();
 
 
-        // ****************************************************************
-        // Code
-        var code_textBox = new TextBox({
-            name: 'code',
-            label: 'Code',
-            placeHolder: 'Enter a code',
-            {% if mode=='UPDATE' %}
-                disabled: true,
+            // ****************************************************************
+            // Name
+            var name_textBox = new ValidationTextBox({
+                name: 'name',
+                label: 'Name',
+                placeHolder: 'Enter a name',
+                required: true,
+                value: name
+            }, 'asset_name');
+            name_textBox.startup();
+
+
+            // ****************************************************************
+            // Code
+            var code_textBox = new TextBox({
+                name: 'code',
+                label: 'Code',
+                placeHolder: 'Enter a code',
+                {% if mode=='UPDATE' %}
+                    disabled: true,
+                {% endif %}
+                value: code
+            }, 'asset_code');
+            code_textBox.startup();
+
+
+            // ****************************************************************
+            // Description
+            var description_textBox = new TextBox({
+                name: 'description',
+                label: 'Description',
+                placeHolder: 'Enter description',
+                value: description
+            }, 'asset_description');
+            description_textBox.startup();
+
+
+            // ****************************************************************
+            // Type
+            var type_memory = new Memory({
+                data: [
+                    {% for type_ in types %}
+                        {
+                            id: '{{ type_.id }}',
+                            name: '{{type_.name}}'
+                        },
+                    {% endfor %}
+                ]
+            });
+
+            {# define the UI widget type #}
+            var type_widget_type;
+            var type_place_holder;
+
+            {% if has_permission('Create_Type') %}
+                type_widget_type = ComboBox;
+                type_place_holder = 'Enter A New Type or Select A Type';
+            {% else %}
+                type_widget_type = FilteringSelect;
+                type_place_holder = 'Select A Type';
             {% endif %}
-            value: code
-        }, 'asset_code');
-        name_textBox.startup();
 
+            var type_comboBox = new type_widget_type({
+                name: 'type_name',
+                required: true,
+                store: type_memory,
+                placeHolder: type_place_holder,
+                value: type_id
+            }, 'asset_type');
+            type_comboBox.startup();
 
-        // ****************************************************************
-        // Description
-        var description_textBox = new TextBox({
-            name: 'description',
-            label: 'Description',
-            placeHolder: 'Enter description',
-            value: description
-        }, 'asset_description');
-        description_textBox.startup();
-
-
-        // ****************************************************************
-        // Type
-        var type_memory = new Memory({
-            data: [
-                {% for type_ in types %}
-                    {
-                        id: '{{ type_.id }}',
-                        name: '{{type_.name}}'
-                    },
-                {% endfor %}
-            ]
-        });
-
-        {# define the UI widget type #}
-        var type_widget_type;
-        var type_place_holder;
-
-        {% if has_permission('Create_Type') %}
-            type_widget_type = ComboBox;
-            type_place_holder = 'Enter A New Type or Select A Type';
-        {% else %}
-            type_widget_type = FilteringSelect;
-            type_place_holder = 'Select A Type';
-        {% endif %}
-
-        var type_comboBox = new type_widget_type({
-            name: 'type_name',
-            required: true,
-            store: type_memory,
-            placeHolder: type_place_holder,
-            value: type_id
-        }, 'asset_type');
-        type_comboBox.startup();
-
-        // set value of Type
-        if (type_memory.data[0] != undefined) {
-            try {
-                type_comboBox.attr('value', type_memory.data[0].name);
-            } catch (e) {
-                // don't do anything
+            // set value of Type
+            if (type_memory.data[0] != undefined) {
+                try {
+                    type_comboBox.attr('value', type_memory.data[0].name);
+                } catch (e) {
+                    // don't do anything
+                }
             }
-        }
 
 
-        // ****************************************************************
-        // Project
+            // ****************************************************************
+            // Project
 
-        // Memory
-        var project_memory = new JsonRest({
-            target: '{{ request.route_url("get_projects") }}'
-        });
+            // Memory
+            var project_memory = new JsonRest({
+                target: '{{ request.route_url("get_projects") }}'
+            });
 
-        console.debug('{{ request.route_url("get_projects") }}');
+            console.debug('{{ request.route_url("get_projects") }}');
 
-        // Field
-        var project_select = new FilteringSelect({
-            name: 'project_id',
-            required: true,
-            store: project_memory,
-            placeHolder: 'Select A Project',
-            {% if project %}
-                disabled: true
-            {% endif %}
-        }, 'asset_project');
-        project_select.startup();
+            // Field
+            var project_select = new FilteringSelect({
+                name: 'project_id',
+                required: true,
+                label: 'Project',
+                {% if project %}
+                    disabled: true
+                {% endif %}
+            }, 'asset_project');
+            project_select.startup();
 
-        // Updater
-        var project_field_updater = fieldUpdater({
-            'memory': project_memory,
-            'widget': project_select,
-            {% if project %}
-                'selected': project_id
-            {% endif %}
-        });
-        
-        // Fill Widget
-        project_field_updater();
+            // Updater
+            var project_field_updater = fieldUpdater({
+                'memory': project_memory,
+                'widget': project_select,
+                {% if project %}
+                    'selected': project_id
+                {% endif %}
+            });
 
-        // ****************************************************************
-        // Status 
-        // 
-        // The Memory
-        var status_memory = new JsonRest({
-            target: ' {{ request.route_url('get_statuses_for', target_entity_type="Asset") }}'
-        });
+            // Fill Widget
+            project_field_updater();
 
-        // The Field
-        var status_filtering_select = new FilteringSelect({
-            name: 'status_id',
-            label: 'Status',
-            required: true
-        }, 'asset_status');
-        status_filtering_select.startup();
+            // ****************************************************************
+            // Status
+            //
+            // The Memory
+            var status_memory = new JsonRest({
+                target: ' {{ request.route_url('get_statuses_for', target_entity_type="Asset") }}'
+            });
 
-        // TODO: Check permission for StatusList creation
-        // TODO: Please make it more obvious what we are doing here, or just have two buttons, one hidden, and un-hide it and hide the other when we have got some StatusList
-        var update_button_callback_function = function (data) {
-            if (data.length > 0) {
-                // replace asset_add_status_button on click function
-                // if we got some StatusList
-                asset_add_status_button.set('onClick', function () {
-                    var myDialog = dialogCreator({
-                        dialog_id: 'status_list_dialog',
-                        data_id: 'Asset',
-                        content_creator: dialogs.update_status_list_dialog,
-                        related_field_updater: status_field_updater
+            // The Field
+            var status_filtering_select = new FilteringSelect({
+                name: 'status_id',
+                label: 'Status',
+                required: true
+            }, 'asset_status');
+            status_filtering_select.startup();
+
+            // TODO: Check permission for StatusList creation
+            // TODO: Please make it more obvious what we are doing here, or just have two buttons, one hidden, and un-hide it and hide the other when we have got some StatusList
+            var update_button_callback_function = function (data) {
+                if (data.length > 0) {
+                    // replace asset_add_status_button on click function
+                    // if we got some StatusList
+                    asset_add_status_button.set('onClick', function () {
+                        var myDialog = dialogCreator({
+                            dialog_id: 'status_list_dialog',
+                            data_id: 'Asset',
+                            content_creator: dialogs.update_status_list_dialog,
+                            related_field_updater: status_field_updater
+                        });
+                        myDialog.show();
                     });
-                    myDialog.show();
-                });
-            }
-        };
+                }
+            };
 
-        // The Updater
-        var status_field_updater = fieldUpdater({
-            'memory': status_memory,
-            'widget': status_filtering_select,
-            'callBack': update_button_callback_function,
-            {% if mode=='UPDATE' %}
-                'selected': '{{ asset.status.id }}'
-            {% endif %}
+            // The Updater
+            var status_field_updater = fieldUpdater({
+                'memory': status_memory,
+                'widget': status_filtering_select,
+                'callBack': update_button_callback_function,
+                {% if mode=='UPDATE' %}
+                    'selected': '{{ asset.status.id }}'
+                {% endif %}
+            });
+
+
+            var asset_add_status_button = dialogCaller({
+                label: 'Add Status',
+                dialog_id: 'status_list_dialog',
+                content_creator: dialogs.create_status_list_dialog,
+                attach_to: 'asset_add_status_button',
+                related_field_updater: status_field_updater,
+                data_id: 'Asset'
+            });
+
+            asset_add_status_button.startup();
+            status_field_updater({animate: true});
+
+
+            // ****************************************************************
+            // Ok Button
+            var ok_button = new Button({
+                label: 'OK',
+                type: 'button',
+                onClick: function () {
+                    project_select.set('disabled', false);
+                    submitForm({
+                        dialog: dialog,
+                        form: asset_form,
+                        additional_data: {
+                            {% if mode=='UPDATE' %}
+                                asset_id: asset_id,
+                            {% endif %}
+                            type_name: type_comboBox.get('value')
+                        },
+                        url: url,
+                        method: 'POST'
+                    });
+                }
+            }, 'asset_ok_button');
+            ok_button.startup();
+
+
+            // ****************************************************************
+            // Cancel Button
+            var cancel_button = new Button({
+                label: 'Cancel',
+                type: 'button',
+                onClick: function () {
+                    dialog.destroyRecursive();
+                }
+            }, 'asset_cancel_button');
+            cancel_button.startup();
+
+            asset_form.startup();
+
+
         });
-
-
-        var asset_add_status_button = dialogCaller({
-            label: 'Add Status',
-            dialog_id: 'status_list_dialog',
-            content_creator: dialogs.create_status_list_dialog,
-            attach_to: 'asset_add_status_button',
-            related_field_updater: status_field_updater,
-            data_id: 'Asset'
-        });
-
-        asset_add_status_button.startup();
-        status_field_updater({animate: true});
-
-
-        // ****************************************************************
-        // Ok Button
-        var ok_button = new Button({
-            label: 'OK',
-            type: 'button',
-            onClick: function () {
-                project_select.set('disabled', false);
-                submitForm({
-                    dialog: dialog,
-                    form: asset_form,
-                    additional_data: {
-                        {% if mode=='UPDATE' %}
-                            asset_id: asset_id,
-                        {% endif %}
-                        type_name: type_comboBox.get('value')
-                    },
-                    url: url,
-                    method: 'POST'
-                });
-            }
-        }, 'asset_ok_button');
-        ok_button.startup();
-
-
-        // ****************************************************************
-        // Cancel Button
-        var cancel_button = new Button({
-            label: 'Cancel',
-            type: 'button',
-            onClick: function () {
-                dialog.destroyRecursive();
-            }
-        }, 'asset_cancel_button');
-        cancel_button.startup();
-
-        asset_form.startup();
-
-
-    });
 </script>
 

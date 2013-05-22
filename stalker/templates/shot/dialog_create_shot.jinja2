@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div class='dijitDialogPaneContentArea'>
-    <form id='create_shot_form'>
+    <form id='shot_form'>
         <table style='width: 100%;'>
 
             {# NAME #}
@@ -38,6 +38,15 @@
                 </td>
                 <td class='input_column'>
                     <input id='shot_code'>
+                </td>
+            </tr>
+            {# DESCRIPTION #}
+            <tr>
+                <td class='label_column'>
+                    <label for='shot_description'>Description</label>
+                </td>
+                <td class='input_column'>
+                    <input id='shot_description'>
                 </td>
             </tr>
 
@@ -65,20 +74,6 @@
                 </td>
             </tr>
 
-            {# STATUS LIST #}
-            {#      <tr>#}
-            {#        <td class='label_column'>#}
-            {#          <label for='shot_status_list'>Status List</label>#}
-            {#        </td>#}
-            {#        <td class='input_column'>#}
-            {#          <input id='shot_status_list'>#}
-            {#        </td>#}
-            {#        <td class='button_column'>#}
-            {#          <button id='shot_create_status_list_button'>New</button>#}
-            {#          <button id='shot_update_status_list_button'>Update</button>#}
-            {#        </td>#}
-            {#      </tr>#}
-
             {# STATUS #}
             <tr>
                 <td class='label_column'>
@@ -102,233 +97,282 @@
 </div>
 
 <script type='text/javascript'>
-    require(['dijit/registry', 'dojo/store/Memory', 'dijit/form/Form',
-        'dijit/form/ValidationTextBox', 'dijit/form/TextBox',
-        'dijit/form/FilteringSelect', 'dijit/form/ComboBox', 'dijit/form/Button',
-        'dojo/store/JsonRest', 'stalker/dialogs', 'stalker/submitForm', 'stalker/fieldUpdater',
-        'stalker/dialogCaller', 'dojo/domReady!'],
-            function (registry, Memory, Form, ValidationTextBox, TextBox,
-                      FilteringSelect, ComboBox, Button, JsonRest, dialogs,
-                      submitForm, fieldUpdater, dialogCaller) {
+require([
+    'dijit/registry',
+    'dojo/store/Memory',
+    'dojo/store/JsonRest',
+    'dijit/form/Form',
+    'dijit/form/ValidationTextBox',
+    'dijit/form/TextBox',
+    'dijit/form/FilteringSelect',
+    'dijit/form/ComboBox',
+    'dijit/form/Button',
+    'stalker/dialogs',
+    'stalker/submitForm',
+    'stalker/fieldUpdater',
+    'stalker/dialogCreator',
+    'stalker/dialogCaller',
+    'dojo/domReady!'],
+        function (registry, Memory, JsonRest, Form, ValidationTextBox, TextBox,
+                  FilteringSelect, ComboBox, Button, dialogs, submitForm,
+                  fieldUpdater, dialogCreator, dialogCaller) {
 
-                // **********************************************************************
-                // Form
-                var create_shot_form = new Form({
-                    id: 'create_shot_form'
-                }, 'create_shot_form');
+            // ********************************************************************
+            // Generate default values
+            var url;
+            var name;
+            var code;
+            var description;
+            var project_id;
+            var additional_data;
 
-
-                // **********************************************************************
-                // Name
-                var name_textBox = new ValidationTextBox({
-                    name: 'name',
-                    label: 'Name',
-                    placeHolder: 'Enter a name',
-                    required: true
-                }, 'shot_name');
-                name_textBox.startup();
-
-
-                // **********************************************************************
-                // Code
-                var code_textBox = new TextBox({
-                    name: 'code',
-                    label: 'Code',
-                    value: '',
-                    placeHolder: 'Enter a code'
-                }, 'shot_code');
-                name_textBox.startup();
-
-
-                // **********************************************************************
-                // Project
-
-                var project_memory = new Memory({
-                    data: [
-                        {% for project in projects %}
-                            {
-                                name: '{{ project.name }}',
-                                id: '{{ project.id }}'
-                            },
-                        {% endfor %}
-                    ]
-                });
-
-                var project_filtering_select = new FilteringSelect({
-                    name: 'project_id',
-                    required: true,
-                    store: project_memory,
-                    placeHolder: 'Select A Project',
-                    onChange: function () {
-                        sequence_field_updater();
-                    }
-                }, 'shot_project');
-                project_filtering_select.startup();
-
+            {# fill values based on the dialog mode #}
+            {% if mode == 'CREATE' %}
+                url = '{{ request.route_url("create_shot") }}';
                 {% if project %}
-                    project_filtering_select.set('value', '{{ project.id }}');
-                    project_filtering_select.set('disabled', true);
+                    project_id = '{{ project.id }}';
                 {% endif %}
-
-
-                // **********************************************************************
-                // Sequence
-                var sequence_memory = new JsonRest({
-                    target: '/get/sequences/'
-                });
-
-                var sequence_filtering_select = new FilteringSelect({
-                    name: 'sequence_id',
-                    required: false,
-                    disabled: true,
-                    label: 'Sequence'
-                }, 'shot_sequence');
-                sequence_filtering_select.startup();
-
-
-                // The Updater
-                var sequence_field_updater;
-
-                {% if project %}
-                    sequence_field_updater = fieldUpdater({
-                        memory: sequence_memory,
-                        query_data: function () {
-                            return {{ project.id }};
-                        },
-                        widget: sequence_filtering_select
-                    });
-                    sequence_filtering_select.set('disabled', false);
-                    sequence_field_updater({animate: false});
-                {% else %}
-                    sequence_field_updater = fieldUpdater({
-                        memory: sequence_memory,
-                        query_data: function () {
-                            sequence_filtering_select.set('disabled', false);
-                            return project_filtering_select.get('value');
-                        },
-                        widget: sequence_filtering_select
-                    });
-                {% endif %}
-
-                // New Sequence Button
-                var create_sequence_button = dialogCaller({
-                    label: 'New',
-                    dialog_id: 'sequence_dialog',
-                    content_creator: dialogs.create_sequence_dialog,
-                    attach_to: 'shot_create_sequence_button',
-                    related_field_updater: sequence_field_updater,
-                    data_id: function () {
-                        return project_filtering_select.get('value');
-                    }
-                });
-                create_sequence_button.startup();
-
-                // Update Sequence Button
-                var update_sequence_button = dialogCaller({
-                    label: 'Update',
-                    dialog_id: 'sequence_dialog',
-                    content_creator: dialogs.update_sequence_dialog,
-                    attach_to: 'shot_update_sequence_button',
-                    related_field_updater: sequence_field_updater,
-                    data_id: function () {
-                        return sequence_filtering_select.get('value')
-                    }
-
-                });
-                update_sequence_button.startup();
-
-
-                // **********************************************************************
-                // Status
-                //
-                // The Memory
-                var status_memory = new JsonRest({
-                    target: 'get/statuses_for/Shot'
-                });
-
-                // The Field
-                var status_filtering_select = new FilteringSelect({
-                    name: 'status_id',
-                    label: 'Status',
-                    required: true
-                }, 'shot_status');
-                status_filtering_select.startup();
-
-                var update_button_function = function (data) {
-
-                    if (data.length > 0) {
-
-                        shot_add_status_button.set('onClick', function () {
-
-                            var dialog = dijit.byId('status_list_dialog');
-
-                            if (dialog != null) {
-                                dialog.destroyRecursive();
-                            }
-                            dialog = dialogs.update_status_list_dialog('Shot');
-                            // set the field updater
-                            dialog.set('related_field_updater', status_field_updater);
-                            // show the dialog
-                            dialog.show();
-                        });
-
-                        status_field_updater.set('callBack', function () {
-                        });
-
-                    }
+            {% elif mode == 'UPDATE' %}
+                url = '{{ request.route_url("update_shot") }}';
+                name = '{{ shot.name }}';
+                code = '{{ shot.code }}';
+                description = '{{ shot.description }}';
+                project_id = '{{ shot.project_id }}';
+                additional_data = {
+                    'shot_id':{{ shot.id }}
                 };
-                // The Updater
-                var status_field_updater = fieldUpdater({
-                    'memory': status_memory,
-                    'widget': status_filtering_select,
-                    'callBack': update_button_function
+            {% endif %}
+
+            // **********************************************************************
+            // Form
+            var shot_form = new Form({
+            }, 'shot_form');
+
+
+            // **********************************************************************
+            // Name
+            var name_textBox = new ValidationTextBox({
+                name: 'name',
+                label: 'Name',
+                placeHolder: 'Enter a name',
+                required: true,
+                value: name
+            }, 'shot_name');
+            name_textBox.startup();
+
+
+            // **********************************************************************
+            // Code
+            var code_textBox = new TextBox({
+                name: 'code',
+                label: 'Code',
+                placeHolder: 'Enter a code',
+                value: code,
+                {% if mode=='UPDATE' %}
+                    disabled: true,
+                {% endif %}
+            }, 'shot_code');
+            code_textBox.startup();
+
+
+            // ****************************************************************
+            // Description
+            var description_textBox = new TextBox({
+                name: 'description',
+                label: 'Description',
+                placeHolder: 'Enter description',
+                value: description
+            }, 'shot_description');
+            description_textBox.startup();
+
+
+            // **********************************************************************
+            // Project
+
+            // Memory
+            var project_memory = new JsonRest({
+                target: '{{ request.route_url("get_projects") }}'
+            });
+
+
+            var project_filtering_select = new FilteringSelect({
+                name: 'project_id',
+                required: true,
+                label: 'Project',
+                {% if project %}
+                    disabled: true,
+                {% endif %}
+                onChange: function () {
+                    sequence_field_updater();
+                }
+            }, 'shot_project');
+            project_filtering_select.startup();
+
+            // Updater
+            var project_field_updater = fieldUpdater({
+                'memory': project_memory,
+                'widget': project_filtering_select,
+                {% if project %}
+                    'selected': project_id
+                {% endif %}
+            });
+
+            // Fill Widget
+            project_field_updater();
+
+
+            // **********************************************************************
+            // Sequence
+            var sequence_memory = new JsonRest({
+                target: '/get/sequences/'
+            });
+
+            var sequence_filtering_select = new FilteringSelect({
+                name: 'sequence_id',
+                required: false,
+                disabled: true,
+                label: 'Sequence'
+            }, 'shot_sequence');
+            sequence_filtering_select.startup();
+
+
+            // The Updater
+            var sequence_field_updater;
+
+            {% if project %}
+                sequence_field_updater = fieldUpdater({
+                    memory: sequence_memory,
+                    query_data: function () {
+                        return {{ project.id }};
+                    },
+                    widget: sequence_filtering_select
                 });
-
-                var shot_add_status_button = dialogCaller({
-                    label: 'Add Status',
-                    dialog_id: 'status_list_dialog',
-                    content_creator: dialogs.create_status_list_dialog,
-                    attach_to: 'shot_add_status_button',
-                    related_field_updater: status_field_updater,
-                    data_id: 'Shot'
+                sequence_filtering_select.set('disabled', false);
+                sequence_field_updater({animate: false});
+            {% else %}
+                sequence_field_updater = fieldUpdater({
+                    memory: sequence_memory,
+                    query_data: function () {
+                        sequence_filtering_select.set('disabled', false);
+                        return project_filtering_select.get('value');
+                    },
+                    widget: sequence_filtering_select
                 });
+            {% endif %}
 
-                shot_add_status_button.startup();
-                status_field_updater({animate: true});
+            // New Sequence Button
+            var create_sequence_button = dialogCaller({
+                label: 'New',
+                dialog_id: 'sequence_dialog',
+                content_creator: dialogs.create_sequence_dialog,
+                attach_to: 'shot_create_sequence_button',
+                related_field_updater: sequence_field_updater,
+                data_id: function () {
+                    return project_filtering_select.get('value');
+                }
+            });
+            create_sequence_button.startup();
 
-
-                // **********************************************************************
-                // Submit Button
-                var submit_button = new Button({
-                    label: 'OK',
-                    type: 'button',
-                    onClick: function () {
-                        submitForm({
-                            dialog: registry.byId('shot_dialog'),
-                            form: create_shot_form,
-                            additional_data: {
-                                submitted: 'create'
-                            },
-                            url: 'create/shot/' + project_filtering_select.value,
-                            method: 'POST'
-                        });
-                    }
-                }, 'shot_submit_button');
-                submit_button.startup();
-
-
-                // **********************************************************************
-                // Cancel Button
-                var cancel_button = new Button({
-                    label: 'Cancel',
-                    type: 'button',
-                    onClick: function () {
-                        registry.byId('shot_dialog').destroyRecursive();
-                    }
-                }, 'shot_cancel_button');
-                cancel_button.startup();
-
-                create_shot_form.startup();
+            // Update Sequence Button
+            var update_sequence_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'sequence_dialog',
+                content_creator: dialogs.update_sequence_dialog,
+                attach_to: 'shot_update_sequence_button',
+                related_field_updater: sequence_field_updater,
+                data_id: function () {
+                    return sequence_filtering_select.get('value')
+                }
 
             });
+            update_sequence_button.startup();
+
+
+            // **********************************************************************
+            // Status
+            //
+            // The Memory
+            var status_memory = new JsonRest({
+                target: ' {{ request.route_url('get_statuses_for', target_entity_type="Shot") }}'
+            });
+
+            // The Field
+            var status_filtering_select = new FilteringSelect({
+                name: 'status_id',
+                label: 'Status',
+                required: true
+            }, 'shot_status');
+            status_filtering_select.startup();
+
+            var update_button_callback_function = function (data) {
+
+                if (data.length > 0) {
+
+                    shot_add_status_button.set('onClick', function () {
+                        var myDialog = dialogCreator({
+                            dialog_id: 'status_list_dialog',
+                            data_id: 'Shot',
+                            content_creator: dialogs.update_status_list_dialog,
+                            related_field_updater: status_field_updater
+                        });
+                        myDialog.show();
+                    });
+
+                }
+            };
+            // The Updater
+            var status_field_updater = fieldUpdater({
+                'memory': status_memory,
+                'widget': status_filtering_select,
+                'callBack': update_button_callback_function,
+                {% if mode=='UPDATE' %}
+                    'selected': '{{ shot.status.id }}'
+                {% endif %}
+            });
+
+            var shot_add_status_button = dialogCaller({
+                label: 'Add Status',
+                dialog_id: 'status_list_dialog',
+                content_creator: dialogs.create_status_list_dialog,
+                attach_to: 'shot_add_status_button',
+                related_field_updater: status_field_updater,
+                data_id: 'Shot'
+            });
+
+            shot_add_status_button.startup();
+            status_field_updater({animate: true});
+
+
+            // **********************************************************************
+            // Submit Button
+            var submit_button = new Button({
+                label: 'OK',
+                type: 'button',
+                onClick: function () {
+                    submitForm({
+                        dialog: registry.byId('shot_dialog'),
+                        form: shot_form,
+                        additional_data: additional_data,
+                        url: url,
+                        method: 'POST'
+                    });
+                }
+            }, 'shot_submit_button');
+            submit_button.startup();
+
+
+            // **********************************************************************
+            // Cancel Button
+            var cancel_button = new Button({
+                label: 'Cancel',
+                type: 'button',
+                onClick: function () {
+                    registry.byId('shot_dialog').destroyRecursive();
+                }
+            }, 'shot_cancel_button');
+            cancel_button.startup();
+
+            shot_form.startup();
+
+        });
 </script>

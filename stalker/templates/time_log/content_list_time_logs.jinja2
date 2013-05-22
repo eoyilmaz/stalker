@@ -28,17 +28,23 @@
         'dojo/store/Memory',
         'dojo/store/JsonRest',
 
-        'dgrid/List',
-        'dgrid/Grid',
+        "dgrid/List",
+        "dgrid/Grid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dojo/_base/declare",
+        "dgrid/editor",
 
         'stalker/dialogs',
         'stalker/dialogCaller',
 
         'dojo/domReady!'
-    ], function (ObjectStore, Memory, JsonRest, List, Grid, dialogs,
-                 dialogCaller) {
+    ], function (ObjectStore, Memory, JsonRest, List, Grid, Selection,
+                 Keyboard, declare, editor, dialogs, dialogCaller) {
 
-        var time_logs_DataGrid = new Grid({
+        var StandardGrid = declare([Grid, Selection, Keyboard]);
+
+        var time_logs_DataGrid = new StandardGrid({
             id: 'time_logs_data_grid',
             width: '100%',
             autoHeight: true

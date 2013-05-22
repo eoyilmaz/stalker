@@ -17,8 +17,9 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+import datetime
 
-from pyramid.httpexceptions import HTTPServerError
+from pyramid.httpexceptions import HTTPServerError, HTTPOk
 from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 from sqlalchemy.exc import IntegrityError
@@ -29,7 +30,7 @@ from stalker import User, Sequence, StatusList, Status, Shot, Project
 
 import logging
 from stalker import log
-from stalker.views import PermissionChecker
+from stalker.views import PermissionChecker, get_logged_in_user
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -46,8 +47,7 @@ def create_shot_dialog(request):
 
     return {
         'mode': 'CREATE',
-        'project': project,
-        'projects': Project.query.all()
+        'project': project
     }
 
 
@@ -62,93 +62,113 @@ def update_shot_dialog(request):
     shot = Shot.query.filter_by(id=shot_id).first()
 
     return {
-        'mode': 'CREATE',
+        'mode': 'UPDATE',
         'shot': shot,
-        'project': shot.project,
-        'projects': Project.query.all()
+        'project': shot.project
     }
 
 @view_config(
-    route_name='create_shot',
-    renderer='templates/shot/dialog_create_shot.jinja2'
+    route_name='create_shot'
 )
 def create_shot(request):
     """runs when adding a new shot
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
-    
-    if 'submitted' in request.params:
-        logger.debug('request.params["submitted"]: %s' % request.params['submitted'])
-        
-        if request.params['submitted'] == 'create':
-            if 'name' in request.params and \
-               'code' in request.params and  \
-               'sequence_id' in request.params and \
-               'status_id' in request.params:
-                
-                sequence_id = request.params['sequence_id']
-                sequence = Sequence.query.filter_by(id=sequence_id).first()
+    logged_in_user = get_logged_in_user(request)
 
-                project_id = request.matchdict['project_id']
-                project = Project.query.filter_by(id=project_id).first()
-                # get the status_list
-                status_list = StatusList.query.filter_by(
-                    target_entity_type='Shot'
-                ).first()
-                
-                # there should be a status_list
-                if status_list is None:
-                    return HTTPServerError(
-                        detail='No StatusList found'
-                    )
-                
-                status_id = request.params['status_id']
-                status = Status.query.filter_by(id=status_id).first()
-                
-                # get the info
-                try:
-                    new_shot = Shot(
-                        name=request.params['name'],
-                        code=request.params['code'],
+    name = request.params.get('name')
+    code = request.params.get('code')
+
+    status_id = request.params.get('status_id')
+    status = Status.query.filter_by(id=status_id).first()
+
+    project_id = request.params.get('project_id')
+    project = Project.query.filter_by(id=project_id).first()
+    logger.debug('project_id   : %s' % project_id)
+
+    if name and code  and status and  project:
+        # get descriptions
+        description = request.params.get('description')
+
+        sequence_id = request.params['sequence_id']
+        sequence = Sequence.query.filter_by(id=sequence_id).first()
+
+        # get the status_list
+        status_list = StatusList.query.filter_by(
+            target_entity_type='Shot'
+        ).first()
+
+        # there should be a status_list
+        # TODO: you should think about how much possible this is
+        if status_list is None:
+            return HTTPServerError(detail='No StatusList found')
+
+
+        new_shot = Shot(
+                        name=name,
+                        code=code,
+                        description=description,
                         sequence=sequence,
                         status_list=status_list,
                         status=status,
                         created_by=logged_in_user,
                         project=project
                     )
-                    
-                    DBSession.add(new_shot)
-                except (AttributeError, TypeError) as e:
-                    logger.debug(e.message)
-                else:
-                    DBSession.add(new_shot)
-                    try:
-                        transaction.commit()
-                    except IntegrityError as e:
-                        logger.debug(e.message)
-                        transaction.abort()
-                    else:
-                        logger.debug('flushing the DBSession, no problem here!')
-                        DBSession.flush()
-                        logger.debug('finished adding Shot')
-            else:
-                logger.debug('there are missing parameters')
-                def get_param(param):
-                    if param in request.params:
-                        logger.debug('%s: %s' % (param, request.params[param]))
-                    else:
-                        logger.debug('%s not in params' % param)
-                get_param('project_id')
 
-    project = Project.query.filter_by(id=request.matchdict['project_id']).first()
+        DBSession.add(new_shot)
+    
+    else:
+        logger.debug('there are missing parameters')
+        logger.debug('name      : %s' % name)
+        logger.debug('code      : %s' % code)
+        logger.debug('status    : %s' % status)
+        logger.debug('project   : %s' % project)
+        HTTPServerError()
 
-    return {
-        'project': project,
-        'projects': Project.query.all(),
-        'status_list':
-            StatusList.query.filter_by(target_entity_type='Shot').first()
-    }
+    return HTTPOk()
+
+@view_config(
+    route_name='update_shot'
+)
+def update_shot(request):
+    """runs when adding a new shot
+    """
+    logged_in_user = get_logged_in_user(request)
+
+    shot_id = request.params.get('shot_id')
+    shot = Shot.query.filter_by(id=shot_id).first()
+
+    name = request.params.get('name')
+
+    status_id = request.params.get('status_id')
+    status = Status.query.filter_by(id=status_id).first()
+
+
+    if shot and name  and status:
+        # get descriptions
+        description = request.params.get('description')
+
+        sequence_id = request.params['sequence_id']
+        sequence = Sequence.query.filter_by(id=sequence_id).first()
+
+        #update the shot
+
+        shot.name = name
+        shot.description = description
+        shot.sequence = sequence
+        shot.status = status
+        shot.updated_by = logged_in_user
+        shot.date_updated = datetime.datetime.now()
+
+        DBSession.add(shot)
+
+    else:
+        logger.debug('there are missing parameters')
+        logger.debug('name      : %s' % name)
+        logger.debug('status    : %s' % status)
+        HTTPServerError()
+
+    return HTTPOk()
+
 
 @view_config(
     route_name='view_shot',
@@ -173,21 +193,6 @@ def view_shot(request):
         'has_permission': PermissionChecker(request)
     }
 
-@view_config(
-    route_name='update_shot',
-    renderer='templates/shot/dialog_update_shot.jinja2',
-    permission='Update_Shot'
-)
-def update_shot(request):
-    """runs when updating a shot
-    """
-    shot_id = request.matchdict['shot_id']
-    shot = Shot.query.filter_by(id=shot_id).first()
-
-    return {
-        'shot': shot,
-        'projects': Project.query.all()
-    }
 
 @view_config(
     route_name='get_shots',
@@ -204,6 +209,7 @@ def get_shots(request):
 
     for shot in Shot.query.filter_by(project_id=project_id).all():
         sequenceStr = ''
+
         for sequence in shot.sequences:
             sequenceStr += '<a href="javascript:redirectLink(%s, %s)">%s</a><br/>' % \
                              ("'sequences_content_pane'" , ("'view/sequence/%s'" % sequence.id) , sequence.name)
@@ -215,7 +221,8 @@ def get_shots(request):
             'status_bg_color': shot.status.bg_color,
             'status_fg_color': shot.status.fg_color,
             'user_id': shot.created_by.id,
-            'user_name': shot.created_by.name
+            'user_name': shot.created_by.name,
+            'description': shot.description
         })
 
 

@@ -31,6 +31,7 @@
         "dgrid/Grid",
         "dgrid/Selection",
         "dgrid/Keyboard",
+        "dojo/_base/declare",
         "dgrid/editor",
         'dojo/store/Memory',
         'dojo/store/JsonRest',
@@ -41,15 +42,16 @@
         'dojo/query',
         'dojo/domReady!'],
             function (registry, ObjectStore, List, Grid, Selection, Keyboard,
-                      editor, Memory, JsonRest, dialogs, fieldUpdater,
+                      declare, editor, Memory, JsonRest, dialogs, fieldUpdater,
                       dialogCaller, on, query) {
 
-                var shots_data_grid = new Grid({
+                var StandardGrid = declare([Grid, Selection, Keyboard]);
+                var shots_data_grid = new StandardGrid({
                     id: 'shots_data_grid',
                     width: '100%',
                     autoHeight: true
                 }, 'shots_data_grid');
-                
+
                 {% if has_permission('Create_Shot') %}
                     var create_shot_button = dialogCaller({
                         label: 'New Shot',
@@ -145,6 +147,10 @@
                                 formatter: function (value) {
                                     return value.sequences + '<br/>';
                                 }
+                            },
+                            {
+                                field: 'description',
+                                label: "Description"
                             }
                         ];
 

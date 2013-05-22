@@ -22,8 +22,6 @@
     {# Summary View #}
     {#  </div>#}
     <div id='group_related_data_tab_container'>
-        <div id='tasks_pane'></div>
-        <div id='projects_pane'></div>
         <div id='tickets_pane'></div>
         <div id='departments_pane'></div>
     </div>
@@ -68,8 +66,9 @@
         });
 
         var permissions_content_pane = new ContentPane({
+            id: 'permission_content_pane',
             title: 'Permissions',
-            content: 'list/permissions/{{ group.id }}',
+            href: 'list/permissions/{{ group.id }}',
             style: 'padding: 0; margin:0;'
         });
 

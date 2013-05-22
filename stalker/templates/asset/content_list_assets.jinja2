@@ -32,6 +32,7 @@
         "dgrid/Grid",
         "dgrid/Selection",
         "dgrid/Keyboard",
+        "dojo/_base/declare",
         "dgrid/editor",
         'dojo/store/Memory',
         'dijit/form/Select',
@@ -41,11 +42,11 @@
         'stalker/dialogCaller',
         'dojo/domReady!'
     ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
-                 editor, Memory, Select, JsonRest, dialogs, fieldUpdater,
+                 declare, editor, Memory, Select, JsonRest, dialogs, fieldUpdater,
                  dialogCaller) {
 
-
-        var asset_data_grid = new Grid({
+         var StandardGrid = declare([Grid, Selection, Keyboard]);
+        var asset_data_grid = new StandardGrid({
             id: 'assets_data_grid',
             width: '100%',
             autoHeight: true

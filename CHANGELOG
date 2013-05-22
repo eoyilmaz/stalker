@@ -25,6 +25,9 @@ Stalker Changes
     tags now should be created with the ``tagField`` the way to retrieve tags
     is the same, so this helper function will let you retrieve tags from the
     given request instance.
+  * Add: Permissions page is added to Group Page.
+  * Fix: dgrid object is declared from [Grid, Selection, Keyboard]. So it's
+    posible to select a row and navigate by Keyboard.
 
 0.2.0.b3
 --------

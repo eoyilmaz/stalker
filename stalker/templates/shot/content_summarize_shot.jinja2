@@ -3,10 +3,10 @@
     {# Avatar #}
     <div id='shot_thumbnail' class='thumbnail'>
         {% if not shot.thumbnail %}
-        <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
-             alt=''
-             style='width:120px;'>
-    {% endif %}
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
+                 alt=''
+                 style='width:120px;'>
+        {% endif %}
     </div>
 
     <div id='shot_summary_chart1'
@@ -18,9 +18,15 @@
     {# Basic Info #}
     <div id='shot_info' class='summary_info'>
 
-        <h2 style='margin: 0;'>{{ shot.name }}</h2>
+        <h4 style='margin: 0;'>{{ shot.name }}</h4>
         <h5 style='margin: 0;'>({{ shot.code }})</h5>
         <table>
+
+            <tr>
+                <td style='text-align: right'><strong>Description</strong></td>
+                <td>&nbsp;</td>
+                <td>{{ shot.description }}</td>
+            </tr>
             <tr>
                 <td style='text-align: right'><strong>Project</strong></td>
                 <td>&nbsp;</td>
@@ -44,9 +50,9 @@
                 <td style='text-align: right'></td>
                 <td>&nbsp;</td>
                 <td>
-					{% if has_permission('Update_Shot') %}
-                    <button id='update_shot_button'>Update</button>
-					{% endif %}
+                    {% if has_permission('Update_Shot') %}
+                        <button id='update_shot_button'>Update</button>
+                    {% endif %}
                 </td>
             </tr>
         </table>
@@ -100,22 +106,22 @@
             // refresh the pane
             content_pane.refresh();
         };
-	
-	
-						
+
+
+
 
         {% if has_permission('Update_Shot') %}
-		// UPDATE SHOT BUTTON
-        var update_shot_button = dialogCaller({
-            label: 'Update',
-            dialog_id: 'shot_dialog',
-            content_creator: dialogs.update_shot_dialog,
-            attach_to: 'update_shot_button',
-            related_field_updater: shot_summary_updater,
-            data_id: {{ shot.id }}
-        });
-        update_shot_button.startup();
-		{% endif %}
+            // UPDATE SHOT BUTTON
+            var update_shot_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'shot_dialog',
+                content_creator: dialogs.update_shot_dialog,
+                attach_to: 'update_shot_button',
+                related_field_updater: shot_summary_updater,
+                data_id: {{ shot.id }}
+            });
+            update_shot_button.startup();
+        {% endif %}
 
     });
 </script>

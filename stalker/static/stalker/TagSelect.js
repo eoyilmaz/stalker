@@ -119,17 +119,24 @@ define([
                 this.reset();
 
 
+
+
                 for (var i = 0; i < value.length; i++) {
                     if (this.store) {
+
                         // get the labels of the selected ids
                         result = this.store.query({id: value[i]});
+                        console.log('result:  '+ result.length)
                         if (result.length) {
                             tag_label = result[0].name;
                         }
                     } else {
+
                         tag_label = value[i];
+                        console.log('tag_label:  '+tag_label)
                     }
                     tag_value = value[i];
+                    console.log('tag_value:  '+ tag_value+' tag_label:  '+ tag_label)
 
                     // create the items
                     if (tag_label != '') {

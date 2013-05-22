@@ -1,0 +1,104 @@
+{# Stalker a Production Asset Management System
+ Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+
+ This file is part of Stalker.
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation;
+ version 2.1 of the License.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#}
+<div id='view_permissions'>
+    {#    {% if has_permission('Update_Group') and has_permission('Update_User') %}#}
+    {#        <button id='view_groups_append_group_button'>Append Group</button>#}
+    {#    {% endif %}#}
+    <div id='permissions_data_grid'></div>
+</div>
+
+<script type='text/javascript'>
+    require([
+        'dijit/registry',
+        'dojo/data/ObjectStore',
+        "dgrid/List",
+        "dgrid/Grid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dojo/_base/declare",
+        "dgrid/editor",
+        'dojo/store/Memory',
+        'dojo/store/JsonRest',
+        'stalker/dialogs',
+        'stalker/fieldUpdater',
+        'stalker/dialogCaller',
+        'dojo/domReady!'],
+            function (registry, ObjectStore, List, Grid, Selection, Keyboard,
+                      declare, editor, Memory, JsonRest, dialogs, fieldUpdater,
+                      dialogCaller) {
+
+                var getPermissionAccess = function (action, class_name) {
+                    {% for permission in group.permissions %}
+                        if ('{{ permission.action }}' == action && '{{ permission.class_name }}' == class_name) {
+
+                            return '{{ permission.access }}';
+                        }
+                    {% endfor %}
+                };
+
+                var StandardGrid = declare([Grid, Selection, Keyboard]);
+
+                var permissions_DataGrid = new StandardGrid({
+                    id: 'permissions_data_grid',
+                    width: '100%'
+                }, 'permissions_data_grid');
+
+                var columns = [];
+
+                columns.push({
+                    label: 'Name',
+                    field: 'name'
+                });
+
+                {% for action in actions %}
+                    columns.push({
+                        label: '{{ action }}',
+                        field: '{{ action }}',
+                        formatter: function (value) {
+
+                            if (value == 'Allow') {
+
+                                return '<img width= "12px"; src="{{ request.static_url("stalker:static/stalker/images/icon-small-check.gif") }}">';
+                            }
+                            return '';
+                        }
+                    });
+                {% endfor %}
+
+                var data = [];
+
+                {% for entity in entity_types %}
+                    var item = {
+                        'name': '{{ entity.name }}'
+                    };
+                    {% for action in actions %}
+                        item['{{ action }}'] = getPermissionAccess('{{ action }}', '{{ entity.name }}');
+                    {% endfor %}
+                    data.push(item);
+                {% endfor %}
+
+
+                permissions_DataGrid.renderArray(data);
+                permissions_DataGrid.set('columns', columns);
+            });
+
+
+</script>
+

@@ -834,3 +834,29 @@ def append_groups(request):
 
     return HTTPOk()
 
+
+@view_config(
+    route_name='list_permissions',
+    renderer='templates/auth/content_list_permissions.jinja2'
+)
+def view_permissions(request):
+    """create group dialog
+    """
+    logged_in_user = get_logged_in_user(request)
+
+    permissions = Permission.query.all()
+
+    entity_types = EntityType.query.all()
+
+    group_id = request.matchdict['group_id']
+    group = Group.query.filter_by(id=group_id).first()
+
+    return {
+        'mode': 'UPDATE',
+        'group': group,
+        'actions': defaults.actions,
+        'permissions': permissions,
+        'entity_types': entity_types,
+        'logged_in_user': logged_in_user,
+        'has_permission': PermissionChecker(request)
+    }
