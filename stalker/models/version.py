@@ -19,11 +19,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import re
+
 from sqlalchemy import Table, Column, Integer, ForeignKey, String, Boolean
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates
+
 from stalker.db.declarative import Base
-from stalker.models.entity import Entity
+from stalker.models import check_circular_dependency
+from stalker.models.link import Link
 from stalker.models.mixins import StatusMixin
 
 
@@ -34,54 +37,56 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-# TODO: Add parent_version attribute to hold a parent child relation between
-# version to pin point the source of the given version.
 
-class Version(Entity, StatusMixin):
-    """The connection to the filesystem.
+class Version(Link, StatusMixin):
+    """Holds information about the created versions (files) for a class:`~stalker.models.task.Task`
     
     A :class:`~stalker.models.version.Version` holds information about the
-    every incarnation of the files in the
-    :class:`~stalker.models.repository.Repository`.
-    So if one creates a new version for a file or a sequences of file for a
+    created files related to a class:`~stalker.models.task.Task`. So if one
+    creates a new version for a file or a sequences of file for a
     :class:`~stalker.models.task.Task` then the information is hold in the
     :class:`~stalker.models.version.Version` instance.
     
-    The :attr:`~stalker.models.version.Version.version_number` attribute is
-    read-only. Trying to change it will produce an AttributeError.
+    :param str take_name: A short string holding the current take name. Takes
+      in Stalker are used solely for grouping individual versions together.
+      Versions with the same ``take_name`` (of the same Task) are numbered
+      together. It can be any alphanumeric value (a-zA-Z0-9\_). The default is
+      the string "Main". When skipped or given as None or an empty string then
+      it will use the default value. It can not start with a number. It can not
+      have white spaces.
     
-    :param str take_name: A short string holding the current take name. Can be
-      any alphanumeric value (a-zA-Z0-9\_). The default is the string "Main".
-      When skipped or given as None or an empty string then it will use the
-      default value. It can not start with a number. It can not have white
-      spaces.
+    :param inputs: A list o :class:`~stalker.models.link.Link` instances,
+      holding the inputs of the current version. It could be a texture for a
+      Maya file or an image sequence for Nuke, or anything those you can think
+      as the input for the current Version.
     
-    :param source_file: A :class:`~stalker.models.link.Link` instance, showing
-      the source file of this version. It can be a Maya scene file
-      (*.ma, *.mb), a Nuke file (*.nk) or anything that is opened with the
-      application you have created this version.
-    
-    :type source_file: :class:`~stalker.models.link.Link`
-    
+    :type inputs: list of :class:`~stalker.models.link.Link`
+
     :param outputs: A list of :class:`~stalker.models.link.Link` instances,
       holding the outputs of the current version. It could be the rendered
       image sequences out of Maya or Nuke, or it can be a Targa file which is
       the output of a Photoshop file (*.psd), or anything that you can think
-      as the output which is created using the
-      :attr:`~stalker.models.version.Version.source_file`\ .
-    
+      as the output which is created out of this Version.
+
     :type outputs: list of :class:`~stalker.models.link.Link` instances
-    
+
     :param version_of: A :class:`~stalker.models.task.Task` instance showing
       the owner of this Version.
-    
+
     :type version_of: :class:`~stalker.models.task.Task`
+
+    :param parent: A :class:`~stalker.models.version.Version` instance which is
+      the parent of this Version. It is mainly used to see which Version is
+      derived from which in the Version history of a
+      :class:`~stalker.models.task.Task`.
+
+    :type parent: :class:`~stalker.models.version.Version`
     """
     __auto_name__ = True
     __tablename__ = "Versions"
     __mapper_args__ = {"polymorphic_identity": "Version"}
     
-    version_id = Column("id", Integer, ForeignKey("Entities.id"),
+    version_id = Column("id", Integer, ForeignKey("Links.id"),
                         primary_key=True)
     version_of_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
     version_of = relationship(
@@ -91,24 +96,56 @@ class Version(Entity, StatusMixin):
         """,
         uselist=False,
         back_populates="versions",
-        )
+    )
     
-    take_name = Column(String(256), default="MAIN")
-    version_number = Column(Integer, default=1, nullable=False)
+    take_name = Column(
+        String(256),
+        default=defaults.version_take_name,
+        doc="""Takes in Versions are used solely for grouping individual
+        versions together."""
+    )
     
-    source_file_id = Column(Integer, ForeignKey("Links.id"))
-    source_file = relationship(
-        "Link",
-        primaryjoin="Versions.c.source_file_id==Links.c.id",
-        uselist=False,
-        doc="""This is the source file of this Version instance.
-        
-        It holds a :class:`~stalker.models.link.Link` instance which is showing
-        a source file for this version. It is let say the scene file for Maya
-        or a psd file for Photoshop etc.
+    version_number = Column(
+        Integer,
+        default=1,
+        nullable=False,
+        doc="""The :attr:`.version_number` attribute is read-only.
+        Trying to change it will produce an AttributeError.
         """
     )
     
+    # source_file_id = Column(Integer, ForeignKey("Links.id"))
+    # source_file = relationship(
+    #     "Link",
+    #     primaryjoin="Versions.c.source_file_id==Links.c.id",
+    #     uselist=False,
+    #     doc="""This is the source file of this Version instance.
+    #     
+    #     It holds a :class:`~stalker.models.link.Link` instance which is showing
+    #     a source file for this version. It is let say the scene file for Maya
+    #     or a psd file for Photoshop etc.
+    #     """
+    # )
+
+    parent_id = Column('parent_id', Integer, ForeignKey('Versions.id'))
+    parent = relationship(
+        'Version',
+        remote_side=[version_id],
+        primaryjoin='Versions.c.parent_id==Versions.c.id',
+        back_populates='children',
+        post_update=True
+    )
+
+    children = relationship(
+        'Version',
+        primaryjoin='Versions.c.parent_id==Versions.c.id',
+        back_populates='parent',
+        post_update=True,
+        doc="""The children :class:`~stalker.models.version.Version` instances
+        which are derived from this particular Version instance.
+        """
+    )
+
     inputs = relationship(
         "Link",
         secondary="Version_Inputs",
@@ -136,17 +173,18 @@ class Version(Entity, StatusMixin):
     def __init__(self,
                  version_of=None,
                  take_name=defaults.version_take_name,
-                 #version_number=None,
-                 source_file=None,
                  inputs=None,
                  outputs=None,
+                 parent=None,
+                 path=None,
                  **kwargs):
         # call supers __init__
+        kwargs['path'] = path
         super(Version, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
         
         self.take_name = take_name
-        self.source_file = source_file
+        # self.source_file = source_file
         self.version_of = version_of
         self.version_number = None
         if inputs is None:
@@ -160,20 +198,22 @@ class Version(Entity, StatusMixin):
         
         # set published to False by default
         self.is_published = False
+        
+        self.parent = parent
     
-    @validates("source_file")
-    def _validate_source_file(self, key, source_file):
-        """validates the given source_file value
-        """
-        from stalker.models.link import Link
-        
-        if source_file is not None:
-            if not isinstance(source_file, Link):
-                raise TypeError("Version.source_file attribute should be a "
-                                "stalker.models.link.Link instance, not %s"\
-                                % source_file.__class__.__name__)
-        
-        return source_file
+    # @validates("source_file")
+    # def _validate_source_file(self, key, source_file):
+    #     """validates the given source_file value
+    #     """
+    #     from stalker.models.link import Link
+    #     
+    #     if source_file is not None:
+    #         if not isinstance(source_file, Link):
+    #             raise TypeError("Version.source_file attribute should be a "
+    #                             "stalker.models.link.Link instance, not %s"\
+    #                             % source_file.__class__.__name__)
+    #     
+    #     return source_file
 
     def _format_take_name(self, take_name):
         """formats the given take_name value
@@ -294,21 +334,34 @@ class Version(Entity, StatusMixin):
             )
 
         return output
+
+    @validates('parent')
+    def _validate_parent(self, key, parent):
+        """validates the given parent value
+        """
+        if parent is not None:
+            if not isinstance(parent, Version):
+                raise TypeError('%s.parent should be a '
+                                'stalker.models.version.Version instance, '
+                                'not %s' % (self.__class__.__name__,
+                                            parent.__class__.__name__))
+        
+        # check for CircularDependency
+        check_circular_dependency(self, parent, 'children')
+        
+        return parent
     
-#    @validates("tickets")
-#    def _validate_tickets(self, key, ticket):
-#        """validates the given ticket value
-#        """
-#        
-#        from stalker.models.ticket import Ticket
-#        
-#        if not isinstance(ticket, Ticket):
-#            raise TypeError("%s.tickets should be a list of "
-#                            "stalker.models.ticket.Ticket instances not %s" %
-#                            (self.__class__.__name__,
-#                             ticket.__class__.__name__))
-#        
-#        return ticket
+    @validates('children')
+    def _validate_children(self, key, child):
+        """validates the given child value
+        """
+        if not isinstance(child, Version):
+            raise TypeError('All elements in %s.children should be a '
+                            'stalker.models.version.Version instance, not %s' %
+                            (self.__class__.__name__,
+                             child.__class__.__name__))
+        return child
+
 
 # VERSION INPUTS
 Version_Inputs = Table(

@@ -2,6 +2,17 @@
 Stalker Changes
 ===============
 
+0.2.0.b5
+--------
+
+* SOM:
+  * New: Version class now has two new attributes called ``parent`` and
+    ``children`` which will be used in tracking of the history of Version
+    instances and track which Versions are derived from which Version.
+  * New: Versions instances are now derived from Link class and not Entity.
+  * Update: Added new revisions to alembic to reflect the change in
+    ``Versions`` table.
+
 0.2.0.b4
 --------
 
@@ -310,7 +321,7 @@ Stalker Changes
     allow more complex Task-to-Task relation.
   * Secondary table name for holding Task to Task dependency relation is
     renamed from ``Task_Tasks`` to ``Task_Dependencies``.
-  * _check_circular_dependency function is now accepting a third argument which
+  * check_circular_dependency function is now accepting a third argument which
     is the name of the attribute to be investigated for circular relationship.
     It is done in that way to be able to use the same function in searching for
     circular relations both in parent/child and depender/dependee relations.

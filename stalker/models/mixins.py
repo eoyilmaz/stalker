@@ -43,17 +43,17 @@ def create_secondary_table(
         primary_cls_table_name,
         secondary_cls_table_name,
         secondary_table_name=None
-    ):
+):
     """creates any secondary table
     """
-    
+
     plural_secondary_cls_name = make_plural(secondary_cls_name)
-    
+
     # use the given class_name and the class_table
     if not secondary_table_name:
         secondary_table_name = \
             primary_cls_name + "_" + plural_secondary_cls_name
-    
+
     # check if the table is already defined
     if secondary_table_name not in Base.metadata:
         secondary_table = Table(
@@ -64,7 +64,7 @@ def create_secondary_table(
                 ForeignKey(primary_cls_table_name + ".id"),
                 primary_key=True,
             ),
-            
+
             Column(
                 secondary_cls_name.lower() + "_id",
                 Integer,
@@ -74,7 +74,7 @@ def create_secondary_table(
         )
     else:
         secondary_table = Base.metadata.tables[secondary_table_name]
-    
+
     return secondary_table
 
 
@@ -113,10 +113,10 @@ class TargetEntityTypeMixin(object):
                           unique, so there is only one object for one type.
                           Default is False.
     """
-    
+
     __nullable_target__ = False
     __unique_target__ = False
-    
+
     @declared_attr
     def _target_entity_type(cls):
         return Column(
@@ -125,9 +125,9 @@ class TargetEntityTypeMixin(object):
             nullable=cls.__nullable_target__,
             unique=cls.__unique_target__
         )
-    
+
     def __init__(self, target_entity_type=None, **kwargs):
-        self._target_entity_type =\
+        self._target_entity_type = \
             self._validate_target_entity_type(target_entity_type)
 
     def _validate_target_entity_type(self, target_entity_type_in):
@@ -135,22 +135,22 @@ class TargetEntityTypeMixin(object):
         """
         # it can not be None
         if target_entity_type_in is None:
-            raise TypeError("%s.target_entity_type can not be None" % 
-                             self.__class__.__name__)
+            raise TypeError("%s.target_entity_type can not be None" %
+                            self.__class__.__name__)
 
         if str(target_entity_type_in) == "":
-            raise ValueError("%s.target_entity_type can not be empty" % 
+            raise ValueError("%s.target_entity_type can not be empty" %
                              self.__class__.__name__)
 
         # check if it is a class
         if isinstance(target_entity_type_in, type):
             target_entity_type_in = target_entity_type_in.__name__
-        
+
         return str(target_entity_type_in)
-    
+
     def _target_entity_type_getter(self):
         return self._target_entity_type
-    
+
     @declared_attr
     def target_entity_type(cls):
         return synonym(
@@ -163,6 +163,7 @@ class TargetEntityTypeMixin(object):
                 """
             )
         )
+
 
 class StatusMixin(object):
     """Makes the mixed in object statusable.
@@ -206,16 +207,16 @@ class StatusMixin(object):
         :attr:`~stalker.models.mixins.StatusMixin.status` will return a proper
         :class:`~stalker.models.status.Status` instance.
     """
-    
+
     def __init__(self, status=None, status_list=None, **kwargs):
         self.status_list = status_list
         self.status = status
         # logger.debug('%s.status: %s' % (self.__class__.__name__, status))
-    
+
     @declared_attr
     def status_id(cls):
         return Column(
-            "status_id",
+            'status_id',
             Integer,
             ForeignKey('Statuses.id'),
             nullable=False
@@ -227,13 +228,13 @@ class StatusMixin(object):
             # in the related StatusList, and it was complaining about the
             # status can not be null
         )
-    
+
     @declared_attr
     def status(cls):
         return relationship(
             'Status',
-            primaryjoin=\
-            "%s.status_id==Status.status_id" % cls.__name__,
+            primaryjoin= \
+                "%s.status_id==Status.status_id" % cls.__name__,
             doc="""The current status of the object.
             
             It is a :class:`~stalker.models.status.Status` instance which
@@ -241,13 +242,13 @@ class StatusMixin(object):
             of this object.
             """
         )
-    
+
     @declared_attr
     def status_list_id(cls):
         return Column(
-            "status_list_id",
+            'status_list_id',
             Integer,
-            ForeignKey("StatusLists.id"), #, use_alter=True, name="x"),
+            ForeignKey('StatusLists.id'), #, use_alter=True, name="x"),
             nullable=False
         )
 
@@ -255,29 +256,29 @@ class StatusMixin(object):
     def status_list(cls):
         return relationship(
             "StatusList",
-            primaryjoin=\
-            "%s.status_list_id==StatusList.status_list_id" %
+            primaryjoin= \
+                "%s.status_list_id==StatusList.status_list_id" %
                 cls.__name__,
         )
-    
+
     @validates("status_list")
     def _validate_status_list(self, key, status_list):
         """validates the given status_list_in value
         """
         from stalker.models.status import StatusList
-        
+
         if status_list is None:
             # check if there is a db setup and try to get the appropriate 
             # StatusList from the database
-            
+
             # disable autoflush to prevent premature class initialization
             autoflush = DBSession.autoflush
             DBSession.autoflush = False
             try:
                 # try to get a StatusList with the target_entity_type is 
                 # matching the class name
-                status_list = DBSession.query(StatusList)\
-                    .filter_by(target_entity_type=self.__class__.__name__)\
+                status_list = DBSession.query(StatusList) \
+                    .filter_by(target_entity_type=self.__class__.__name__) \
                     .first()
             except UnboundExecutionError:
                 # it is not mapped just skip it
@@ -285,7 +286,7 @@ class StatusMixin(object):
             finally:
                 # restore autoflush
                 DBSession.autoflush = autoflush
-        
+
         # if it is still None
         if status_list is None:
             # there is no db so raise an error because there is no way 
@@ -306,65 +307,65 @@ class StatusMixin(object):
                     (self.__class__.__name__,
                      status_list.__class__.__name__)
                 )
-            
+
             # check if the entity_type matches to the StatusList.target_entity_type
             if self.__class__.__name__ != status_list.target_entity_type:
                 raise TypeError(
                     "the given StatusLists' target_entity_type is %s, "
-                    "whereas the entity_type of this object is %s" %\
+                    "whereas the entity_type of this object is %s" % \
                     (status_list.target_entity_type,
                      self.__class__.__name__))
-        
+
         return status_list
-    
+
     @validates('status')
     def _validate_status(self, key, status):
         """validates the given status value
         """
         from stalker.models.status import Status, StatusList
-        
+
         if not isinstance(self.status_list, StatusList):
             raise TypeError("please set the %s.status_list attribute first" %
-                self.__class__.__name__)
-        
+                            self.__class__.__name__)
+
         # it is set to None
         if status is None:
             status = self.status_list.statuses[0]
-        
+
         # it is not an instance of status or int
         if not isinstance(status, (Status, int)):
             raise TypeError("%s.status must be an instance of "
                             "stalker.models.status.Status or an integer "
                             "showing the index of the Status object in the "
-                            "%s.status_list, not %s" % 
+                            "%s.status_list, not %s" %
                             (self.__class__.__name__,
                              self.__class__.__name__,
                              status.__class__.__name__))
-        
+
         if isinstance(status, int):
             # if it is not in the correct range:
             if status < 0:
                 raise ValueError("%s.status must be a non-negative integer" %
-                    self.__class__.__name__)
-            
+                                 self.__class__.__name__)
+
             if status >= len(self.status_list.statuses):
                 raise ValueError("%s.status can not be bigger than the length "
-                                 "of the status_list" % 
+                                 "of the status_list" %
                                  self.__class__.__name__)
-            # get the tatus instance out of the status_list instance
+                # get the tatus instance out of the status_list instance
             status = self.status_list[status]
-        
+
         # check if the given status is in the status_list
         # logger.debug('self.status_list: %s' % self.status_list)
         # logger.debug('given status: %s' % status)
-        
+
         if status not in self.status_list:
             raise ValueError("The given Status instance for %s.status is not "
                              "in the %s.status_list, please supply a status "
-                             "from that list." % 
+                             "from that list." %
                              (self.__class__.__name__, self.__class__.__name__)
             )
-        
+
         return status
 
 
@@ -461,10 +462,10 @@ class ScheduleMixin(object):
     
     :type timing_resolution: datetime.timedelta
     """
-    
+
     #    # add this lines for Sphinx
     #    __tablename__ = "ScheduleMixins"
-    
+
     def __init__(self,
                  start=None,
                  end=None,
@@ -473,11 +474,11 @@ class ScheduleMixin(object):
                  **kwargs):
         self.timing_resolution = timing_resolution
         self._validate_dates(start, end, duration)
-    
+
     @declared_attr
     def _end(cls):
         return Column("end", DateTime)
-    
+
     def _end_getter(self):
         """The date that the entity should be delivered.
         
@@ -488,10 +489,10 @@ class ScheduleMixin(object):
         default value is 10 days
         """
         return self._end
-    
+
     def _end_setter(self, end_in):
         self._validate_dates(self.start, end_in, self.duration)
-    
+
     @declared_attr
     def end(cls):
         return synonym(
@@ -501,11 +502,11 @@ class ScheduleMixin(object):
                 cls._end_setter
             )
         )
-    
+
     @declared_attr
     def _start(cls):
         return Column("start", DateTime)
-    
+
     def _start_getter(self):
         """The date that this entity should start.
         
@@ -521,10 +522,10 @@ class ScheduleMixin(object):
         :func:`datetime.datetime.now()`
         """
         return self._start
-    
+
     def _start_setter(self, start_in):
         self._validate_dates(start_in, self.end, self.duration)
-    
+
     @declared_attr
     def start(cls):
         return synonym(
@@ -532,16 +533,16 @@ class ScheduleMixin(object):
             descriptor=property(
                 cls._start_getter,
                 cls._start_setter,
-                )
+            )
         )
-    
+
     @declared_attr
     def _duration(cls):
         return Column('duration', Interval)
-    
+
     def _duration_getter(self):
         return self._duration
-    
+
     def _duration_setter(self, duration_in):
         if duration_in is not None:
             if isinstance(duration_in, datetime.timedelta):
@@ -552,7 +553,7 @@ class ScheduleMixin(object):
                 self._validate_dates(self.start, self.end, duration_in)
         else:
             self._validate_dates(self.start, self.end, duration_in)
-    
+
     @declared_attr
     def duration(self):
         return synonym(
@@ -566,67 +567,67 @@ It is a datetime.timedelta instance. Showing the difference of the
 :attr:`.start` and the :attr:`.end`. If edited it changes the :attr:`.end`
 attribute value."""
             )
-            
-        )    
-   
+
+        )
+
     def _validate_dates(self, start, end, duration):
         """updates the date values
         """
         if not isinstance(start, datetime.datetime):
             start = None
-        
+
         if not isinstance(end, datetime.datetime):
             end = None
-        
+
         if not isinstance(duration, datetime.timedelta):
             duration = None
-        
+
         # check start
         if start is None:
             # try to calculate the start from end and duration
             if end is None:
                 # set the defaults
                 start = datetime.datetime.now()
-                
+
                 if duration is None:
                     # set the defaults
                     duration = defaults.task_duration
-                
+
                 end = start + duration
             else:
                 if duration is None:
                     duration = defaults.task_duration
-                    
+
                 start = end - duration
-        
+
         # check end
         if end is None:
             if duration is None:
                 duration = defaults.task_duration
-            
+
             end = start + duration
-        
+
         if end < start:
             # check duration
             if duration < datetime.timedelta(1):
                 duration = datetime.timedelta(1)
 
             end = start + duration
-        
+
         # round the dates to the timing_resolution
         self._start = self.round_time(start)
         self._end = self.round_time(end)
         self._duration = self._end - self._start
-    
+
     @declared_attr
     def _timing_resolution(cls):
-         return Column("timing_resolution", Interval)
-    
+        return Column("timing_resolution", Interval)
+
     def _timing_resolution_getter(self):
         """returns the timing_resolution
         """
         return self._timing_resolution
-    
+
     def _timing_resolution_setter(self, res_in):
         """sets the timing_resolution
         """
@@ -639,7 +640,7 @@ attribute value."""
                 self.round_time(self.end),
                 None
             )
-    
+
     @declared_attr
     def timing_resolution(cls):
         return synonym(
@@ -655,25 +656,25 @@ attribute value."""
                 """
             )
         )
-    
+
     def _validate_timing_resolution(self, timing_resolution):
         """validates the given timing_resolution value
         """
         if timing_resolution is None:
             timing_resolution = defaults.timing_resolution
-        
+
         if not isinstance(timing_resolution, datetime.timedelta):
             raise TypeError('%s.timing_resolution should be an instance of '
-                            'datetime.timedelta not, %s' % 
+                            'datetime.timedelta not, %s' %
                             (self.__class__.__name__,
                              timing_resolution.__class__.__name__))
-        
+
         return timing_resolution
-    
+
     @declared_attr
     def computed_start(cls):
         return Column('computed_start', DateTime)
-    
+
     #def _computed_start_getter(self):
     #    return self._computed_start
     #
@@ -687,11 +688,11 @@ attribute value."""
     #            """
     #        )
     #    )
-    
+
     @declared_attr
     def computed_end(cls):
         return Column('computed_end', DateTime)
-    
+
 
     #def _computed_end_getter(self):
     #    return self._computed_end
@@ -706,7 +707,7 @@ attribute value."""
     #            """
     #        )
     #    )
-    
+
     @property
     def computed_duration(self):
         """returns the computed_duration as the difference of computed_start
@@ -715,7 +716,7 @@ attribute value."""
         """
         return self.computed_end - self.computed_start \
             if self.computed_end and self.computed_start else None
-    
+
     def round_time(self, dt):
         """Round a datetime object to any time laps in seconds.
         
@@ -772,8 +773,8 @@ class ProjectMixin(object):
 
         return relationship(
             "Project",
-            primaryjoin=\
-            cls.__tablename__ + ".c.project_id==Projects.c.id",
+            primaryjoin= \
+                cls.__tablename__ + ".c.project_id==Projects.c.id",
             post_update=True, # for project itself
             uselist=False,
             backref=backref,
@@ -789,7 +790,7 @@ class ProjectMixin(object):
     def _validate_project(self, key, project):
         """validates the given project value
         """
-        
+
         from stalker.models.project import Project
 
         if project is None:
@@ -804,6 +805,7 @@ class ProjectMixin(object):
                              project.__class__.__name__))
         return project
 
+
 class ReferenceMixin(object):
     """Adds reference capabilities to the mixed in class.
     
@@ -817,7 +819,7 @@ class ReferenceMixin(object):
     
     :type references: list of :class:`~stalker.models.entity.Entity` objects.
     """
-    
+
     # add this lines for Sphinx
     #    __tablename__ = "ReferenceMixins"
 
@@ -826,9 +828,9 @@ class ReferenceMixin(object):
                  **kwargs):
         if references is None:
             references = []
-        
+
         self.references = references
-    
+
     @declared_attr
     def references(cls):
         # TODO: there is something wrong here, the documentation and the implementation is not telling the same story
@@ -847,9 +849,9 @@ class ReferenceMixin(object):
     def _validate_references(self, key, reference):
         """validates the given reference
         """
-        
+
         from stalker.models.entity import SimpleEntity
-        
+
         # all the elements should be instance of stalker.models.entity.Entity
         if not isinstance(reference, SimpleEntity):
             raise TypeError("%s.references should be all instances of "
@@ -857,6 +859,7 @@ class ReferenceMixin(object):
                             % (self.__class__.__name__,
                                reference.__class__.__name__))
         return reference
+
 
 class ACLMixin(object):
     """A Mixin for adding ACLs to mixed in class.
@@ -869,7 +872,7 @@ class ACLMixin(object):
     property called ``__acl__`` to be able to pass the permission data to
     Pyramid framework.
     """
-    
+
     @declared_attr
     def permissions(cls):
         # get the secondary table
@@ -877,20 +880,21 @@ class ACLMixin(object):
             cls.__name__, 'Permission', cls.__tablename__, 'Permissions'
         )
         return relationship('Permission', secondary=secondary_table)
-    
+
     @validates('permissions')
     def _validate_permissions(self, key, permission):
         """validates the given permission value
         """
         from stalker.models.auth import Permission
-        
+
         if not isinstance(permission, Permission):
             raise TypeError("%s.permissions should be all instances of "
                             "stalker.models.auth.Permission not %s" %
-                (self.__class__.__name__, permission.__class__.__name__))
-        
+                            (self.__class__.__name__,
+                             permission.__class__.__name__))
+
         return permission
-    
+
     @property
     def __acl__(self):
         """Returns Pyramid friendly ACL list composed by the:
@@ -911,7 +915,7 @@ class ACLMixin(object):
         return [(perm.access,
                  self.__class__.__name__ + ':' + self.name,
                  perm.action + '_' + perm.class_name)
-                 for perm in self.permissions]
+                for perm in self.permissions]
 
 
 class CodeMixin(object):
@@ -932,7 +936,7 @@ class CodeMixin(object):
     :param str code: The code attribute is a string, can not be empty or can
       not be None.
     """
-    
+
     def __init__(
             self,
             code=None,
@@ -950,7 +954,7 @@ class CodeMixin(object):
                 
                 It accepts strings. Can not be None."""
         )
-    
+
     @validates('code')
     def _validate_code(self, key, code):
         """validates the given code attribute
@@ -958,17 +962,17 @@ class CodeMixin(object):
         logger.debug('validating code value of: %s' % code)
         if code is None:
             raise TypeError("%s.code cannot be None" % self.__class__.__name__)
-        
+
         if not isinstance(code, (str, unicode)):
             raise TypeError('%s.code should be an instance of string or '
                             'unicode not %s' %
                             (self.__class__.__name__,
                              code.__class__.__name__)
             )
-        
+
         if code == '':
             raise ValueError('%s.code can not be an empty string')
-        
+
         return code
 
 
@@ -981,16 +985,16 @@ class WorkingHoursMixin(object):
       instance showing the working hours settings for that project. This data
       is stored as a PickleType in the database.
     """
-    
+
     def __init__(self,
                  working_hours=None,
                  **kwargs):
         self.working_hours = working_hours
-    
+
     @declared_attr
     def working_hours(cls):
         return Column(PickleType)
-    
+
     @validates('working_hours')
     def _validate_working_hours(self, key, wh):
         """validates the given working hours value
@@ -998,6 +1002,7 @@ class WorkingHoursMixin(object):
         if wh is None:
             # use the default one
             from stalker import WorkingHours
+
             wh = WorkingHours()
         return wh
 

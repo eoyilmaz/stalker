@@ -2690,11 +2690,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             version_of=test_task,
             version=10,
             take='MAIN',
-            source=Link(
-                name='Modeling',
-                path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting' + \
-                     '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma'
-            ),
+            path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting' + \
+                     '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
             outputs=[
                 Link(
                     name='Renders',
@@ -2727,7 +2724,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         notes = test_version.notes
         outputs = test_version.outputs
         is_published = test_version.is_published
-        source_file = test_version.source_file
+        path = test_version.path
         status = test_version.status
         status_list = test_version.status_list
         tags = test_version.tags
@@ -2753,7 +2750,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(notes, test_version_DB.notes)
         self.assertEqual(outputs, test_version_DB.outputs)
         self.assertEqual(is_published, test_version_DB.is_published)
-        self.assertEqual(source_file, test_version_DB.source_file)
+        self.assertEqual(path, test_version_DB.path)
         self.assertEqual(status, test_version_DB.status)
         self.assertEqual(status_list, test_version_DB.status_list)
         self.assertEqual(tags, test_version_DB.tags)

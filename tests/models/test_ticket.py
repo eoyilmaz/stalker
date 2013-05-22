@@ -136,7 +136,8 @@ class TicketTester(unittest2.TestCase):
             name='Test Version',
             version_of=self.test_task,
             status_list=self.test_version_status_list,
-            version=1
+            version=1,
+            path='some/path'
         )
         
         # create the Ticket

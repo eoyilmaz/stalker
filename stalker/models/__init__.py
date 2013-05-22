@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+from stalker.exceptions import CircularDependencyError
 
 
 def make_plural(name):
@@ -34,4 +35,21 @@ def make_plural(name):
         plural_name = name + "es"
 
     return plural_name
+
+
+def check_circular_dependency(entity, other_entity, attr_name):
+    """Checks the circular dependency in entity if it has other_entity in its
+    dependency attr which is specified with attr_name
+    """
+    for dependent_entity in getattr(entity, attr_name):
+        if dependent_entity is other_entity:
+            raise CircularDependencyError(
+                '%s %s and %s creates a circular dependency' %
+                (entity.__class__.__name__, entity, other_entity)
+            )
+        else:
+            check_circular_dependency(
+                dependent_entity, other_entity, attr_name
+            )
+
 
