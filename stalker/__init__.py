@@ -25,7 +25,7 @@ and vfx studios. See docs for more information.
 """
 
 
-__version__ = '0.2.0.b4'
+__version__ = '0.2.0.b5'
 
 # TODO: if run in standalone mode do not import any of the Pyramid modules.
 
@@ -372,6 +372,6 @@ def main(global_config, **settings):
 
     config.add_route('get_tags', 'get/tags')
 
-    config.scan()
+    config.scan(ignore='stalker.env')
     return config.make_wsgi_app()
 

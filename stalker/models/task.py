@@ -19,23 +19,24 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import datetime
+import logging
+
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float)
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 
-
 from stalker import defaults
+from stalker.models import check_circular_dependency
 from stalker.models.entity import Entity
 from stalker.models.auth import User
 from stalker.models.mixins import ScheduleMixin, StatusMixin
 from stalker.db import DBSession
 from stalker.db.declarative import Base
 from stalker.exceptions import OverBookedError, CircularDependencyError
-
 from stalker.log import logging_level
-import logging
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
@@ -428,14 +429,14 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         remote_side=[task_id],
         primaryjoin='Tasks.c.parent_id==Tasks.c.id',
         back_populates='children',
-        post_update=True,
+        post_update=True
     )
 
     children = relationship(
         'Task',
         primaryjoin='Tasks.c.parent_id==Tasks.c.id',
         back_populates='parent',
-        post_update=True,
+        post_update=True
     )
 
     tasks = synonym('children')
@@ -675,8 +676,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                             "instance of stalker.models.task.Task")
 
         # check for the circular dependency
-        _check_circular_dependency(depends, self, 'depends')
-        _check_circular_dependency(depends, self, 'children')
+        check_circular_dependency(depends, self, 'depends')
+        check_circular_dependency(depends, self, 'children')
 
         # check for circular dependency toward the parent, non of the parents
         # should be depending to the given depends_to_task
@@ -689,7 +690,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                         'depending to %s' %
                         (self, depends))
                 parent = parent.parent
-
         return depends
 
     @validates('schedule_timing')
@@ -796,8 +796,8 @@ class Task(Entity, StatusMixin, ScheduleMixin):
                                           parent.__class__.__name__))
 
             # check for cycle
-            _check_circular_dependency(self, parent, 'children')
-            _check_circular_dependency(self, parent, 'depends')
+            check_circular_dependency(self, parent, 'children')
+            check_circular_dependency(self, parent, 'depends')
 
         return parent
 
@@ -1188,22 +1188,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """
         return self.computed_end - self.computed_start \
             if self.computed_end and self.computed_start else None
-
-
-def _check_circular_dependency(task, check_for_task, attr_name):
-    """checks the circular dependency in task if it has check_for_task in its
-    depends list
-    """
-    for dependent_task in getattr(task, attr_name):
-        if dependent_task is check_for_task:
-            raise CircularDependencyError(
-                'task %s and %s creates a circular dependency' %
-                (task, check_for_task)
-            )
-        else:
-            _check_circular_dependency(
-                dependent_task, check_for_task, attr_name
-            )
 
 
 # TASK_DEPENDENCIES

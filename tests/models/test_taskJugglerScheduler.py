@@ -243,7 +243,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             trackingscenario plan
         }
         
-            
+
         # resources
         resource resources "Resources" {
             resource User_3 "admin"
@@ -343,6 +343,3 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         self.assertEqual(
             self.test_task2.computed_end,
             datetime.datetime(2013, 4, 19, 12, 0)
-        )
-    
-
