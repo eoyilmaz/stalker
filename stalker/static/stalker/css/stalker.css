@@ -347,31 +347,31 @@ a:hover {
 
 }
 
-.dgrid {
-    height: auto;
-    background: #efefef;
-    position: absolute;
-    left: 0;
-    right: 0;
-}
+/*.dgrid {*/
+    /*height: auto;*/
+    /*background: #efefef;*/
+    /*position: absolute;*/
+    /*left: 0;*/
+    /*right: 0;*/
+/*}*/
 
-.dgrid .dgrid-column-name {
-   width: auto;
-   background: #FF0000;
-   font-weight: bold;
-}
+/*.dgrid .dgrid-column-name {*/
+   /*width: auto;*/
+   /*background: #FF0000;*/
+   /*font-weight: bold;*/
+/*}*/
 
-.dgrid .dgrid-header-scroll {
-    display: none;
-}
+/*.dgrid .dgrid-header-scroll {*/
+    /*display: none;*/
+/*}*/
 
-.dgrid .dgrid-header {
-    right: 0;
-    background: #dddddd;
-}
+/*.dgrid .dgrid-header {*/
+    /*right: 0;*/
+    /*background: #dddddd;*/
+/*}*/
 
-.dgrid .dgrid-scroller {
-    position: relative;
-    overflow-y: hidden;
-    margin-top: 0;
-}
+/*.dgrid .dgrid-scroller {*/
+    /*position: relative;*/
+    /*overflow-y: hidden;*/
+    /*margin-top: 0;*/
+/*}*/

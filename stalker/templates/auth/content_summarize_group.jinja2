@@ -53,9 +53,9 @@
                 <td style='text-align: right'></td>
                 <td>&nbsp;</td>
                 <td>
-					{% if has_permission('Update_Group') %}
-                    	<button id='update_group_button'>Update</button>
-					{% endif %}
+                    {% if has_permission('Update_Group') %}
+                        <button id='update_group_button'>Update</button>
+                    {% endif %}
                 </td>
             </tr>
         </table>
@@ -65,11 +65,12 @@
 
 <script type='text/javascript'>
     require([
+        'dijit/registry',
         'dijit/form/Button',
         'stalker/dialogs',
         'stalker/dialogCaller',
         'dojo/domReady!'
-    ], function (Button, dialogs, dialogCaller) {
+    ], function (registry, Button, dialogs, dialogCaller) {
 
         // ********************************************************************
         // Update Group Button
@@ -79,6 +80,10 @@
             var content_pane = update_group_button.getParent();
             // refresh the pane
             content_pane.refresh();
+
+            // Refresh the Permission Tab if it is visible
+            var permission_tab = registry.byId('permission_content_pane');
+             permission_tab.refresh();
         };
 
         {% if has_permission('Update_Group') %}

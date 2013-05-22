@@ -32,6 +32,7 @@
         "dgrid/Grid",
         "dgrid/Selection",
         "dgrid/Keyboard",
+        "dojo/_base/declare",
         "dgrid/editor",
         'dojo/store/Memory',
         'dojo/store/JsonRest',
@@ -40,13 +41,16 @@
         'stalker/dialogCaller',
         'dojo/domReady!'],
             function (registry, ObjectStore, List, Grid, Selection, Keyboard,
-                      editor, Memory, JsonRest, dialogs, fieldUpdater,
+                      declare, editor, Memory, JsonRest, dialogs, fieldUpdater,
                       dialogCaller) {
 
-                var groups_DataGrid = new Grid({
+
+                var StandardGrid = declare([Grid, Selection, Keyboard]);
+
+                var groups_DataGrid = new StandardGrid({
                     id: 'groups_data_grid',
                     width: '100%',
-                    autoHeight: true
+                    height: '100%'
                 }, 'groups_data_grid');
 
 

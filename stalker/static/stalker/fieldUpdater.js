@@ -137,13 +137,14 @@ define([
                         }
 
                         // restore the old value
-                        try {
-                            if (old_value) {
-                                widget.set('value', old_value);
-                            }
-                        } catch (err) {
-                            // don't do anything
-                        }
+//                        try {
+//                            if (old_value) {
+//                                console.log('old value setted!')
+//                                widget.set('value', old_value);
+//                            }
+//                        } catch (err) {
+//                            // don't do anything
+//                        }
 
                     } else {
                         if (widget.label) {
@@ -154,6 +155,7 @@ define([
                         widget.set('placeHolder', placeHolder);
                     }
                     if (selected.length) {
+                        console.log('selected value setted!')
                         widget.set('value', selected);
                     }
                 }

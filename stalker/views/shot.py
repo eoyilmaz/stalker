@@ -47,8 +47,7 @@ def create_shot_dialog(request):
 
     return {
         'mode': 'CREATE',
-        'project': project,
-        'projects': Project.query.all()
+        'project': project
     }
 
 
@@ -63,10 +62,9 @@ def update_shot_dialog(request):
     shot = Shot.query.filter_by(id=shot_id).first()
 
     return {
-        'mode': 'CREATE',
+        'mode': 'UPDATE',
         'shot': shot,
-        'project': shot.project,
-        'projects': Project.query.all()
+        'project': shot.project
     }
 
 @view_config(
@@ -122,7 +120,6 @@ def create_shot(request):
         logger.debug('there are missing parameters')
         logger.debug('name      : %s' % name)
         logger.debug('code      : %s' % code)
-        logger.debug('description : %s' % description)
         logger.debug('status    : %s' % status)
         logger.debug('project   : %s' % project)
         HTTPServerError()
@@ -167,10 +164,7 @@ def update_shot(request):
     else:
         logger.debug('there are missing parameters')
         logger.debug('name      : %s' % name)
-        logger.debug('code      : %s' % code)
-        logger.debug('description : %s' % description)
         logger.debug('status    : %s' % status)
-        logger.debug('project   : %s' % project)
         HTTPServerError()
 
     return HTTPOk()
@@ -199,21 +193,6 @@ def view_shot(request):
         'has_permission': PermissionChecker(request)
     }
 
-@view_config(
-    route_name='update_shot',
-    renderer='templates/shot/dialog_update_shot.jinja2',
-    permission='Update_Shot'
-)
-def update_shot(request):
-    """runs when updating a shot
-    """
-    shot_id = request.matchdict['shot_id']
-    shot = Shot.query.filter_by(id=shot_id).first()
-
-    return {
-        'shot': shot,
-        'projects': Project.query.all()
-    }
 
 @view_config(
     route_name='get_shots',
@@ -230,6 +209,7 @@ def get_shots(request):
 
     for shot in Shot.query.filter_by(project_id=project_id).all():
         sequenceStr = ''
+
         for sequence in shot.sequences:
             sequenceStr += '<a href="javascript:redirectLink(%s, %s)">%s</a><br/>' % \
                              ("'sequences_content_pane'" , ("'view/sequence/%s'" % sequence.id) , sequence.name)
@@ -241,7 +221,8 @@ def get_shots(request):
             'status_bg_color': shot.status.bg_color,
             'status_fg_color': shot.status.fg_color,
             'user_id': shot.created_by.id,
-            'user_name': shot.created_by.name
+            'user_name': shot.created_by.name,
+            'description': shot.description
         })
 
 

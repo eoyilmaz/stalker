@@ -183,6 +183,8 @@
 
         var set_statuses_tagSelect_value = function(){
 
+            alert('selected value setted from template!')
+
             statuses_tagSelect.set('value', selected_statuses);
 
         }
@@ -192,6 +194,7 @@
             'memory': statuses_memory,
             'widget': statuses_tagSelect,
             'selected': selected_statuses
+            //'callBack':set_statuses_tagSelect_value
         });
         // run the function to fill the data for the first time
         statuses_field_updater({animate: false});

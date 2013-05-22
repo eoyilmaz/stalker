@@ -84,7 +84,7 @@ def create_department(request):
     if name:
         description =  request.params.get('description')
 
-        lead_id = int(request.params.get('lead_id', -1))
+        lead_id = request.params.get('lead_id', -1)
         lead = User.query.filter_by(id=lead_id).first()
 
         # Tags
@@ -133,7 +133,7 @@ def update_department(request):
         # get the type
         description =  request.params.get('description')
 
-        lead_id = int(request.params.get('lead_id', '-1'))
+        lead_id = request.params.get('lead_id', -1)
         lead = User.query.filter_by(id=lead_id).first()
 
         # Tags

@@ -339,7 +339,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'sequence_dialog',
                 title: 'New Sequence',
-                href: '/create/sequence/' + project_id,
+                href: '/dialog/create/sequence/' + project_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -350,7 +350,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'sequence_dialog',
                 title: 'Update Sequence',
-                href: '/update/sequence/' + sequence_id,
+                href: '/dialog/update/sequence/' + sequence_id,
                 resize: true,
                 style: style,
                 executeScripts: true

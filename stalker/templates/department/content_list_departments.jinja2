@@ -30,21 +30,25 @@
         'dojo/store/JsonRest',
         'dojo/data/ObjectStore',
 
-        'dgrid/List',
-        'dgrid/Grid',
+        "dgrid/List",
+        "dgrid/Grid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dojo/_base/declare",
 
         'stalker/dialogs',
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
 
         'dojo/domReady!'
-    ], function (Memory, JsonRest, ObjectStore, List, Grid, dialogs,
+    ], function (Memory, JsonRest, ObjectStore, List, Grid, Selection, Keyboard, declare, dialogs,
                  fieldUpdater, dialogCaller) {
 
-        var departments_DataGrid = new Grid({
+        var StandardGrid = declare([Grid, Selection, Keyboard]);
+        var departments_DataGrid = new StandardGrid({
             id: 'departments_data_grid',
             width: '100%',
-            autoHeight: true
+            height: '100%'
         }, 'departments_data_grid');
 
         {% if has_permission('Update_User') and has_permission('Update_Department') %}

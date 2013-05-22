@@ -26,7 +26,11 @@
 
 <script type='text/javascript'>
     require([
+        "dgrid/List",
         "dgrid/Grid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dojo/_base/declare",
 
         'dojo/store/Memory',
         'dojo/store/JsonRest',
@@ -36,10 +40,11 @@
         'stalker/dialogCaller',
 
         'dojo/domReady!'
-    ], function (Grid, Memory, JsonRest, dialogs, fieldUpdater, dialogCaller) {
+    ], function (List, Grid, Selection, Keyboard, declare, Memory, JsonRest,
+                 dialogs, fieldUpdater, dialogCaller) {
 
-
-        var users_DataGrid = new Grid({
+        var StandardGrid = declare([Grid, Selection, Keyboard]);
+        var users_DataGrid = new StandardGrid({
             id: 'users_data_grid',
             width: '100%',
             autoHeight: true

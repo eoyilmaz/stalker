@@ -15,6 +15,9 @@ Stalker Changes
     form, and disables them back again upon error.
   * Fix: ``TagSelect.js`` will now correctly disable the child widgets if the
     ``disabled`` attribute is set to **true**.
+  * Add: Permissions page is added to Group Page.
+  * Fix: dgrid object is declared from [Grid, Selection, Keyboard]. So it's
+    posible to select a row and navigate by Keyboard.
 
 0.2.0.b3
 --------
