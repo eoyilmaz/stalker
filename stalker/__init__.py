@@ -326,8 +326,8 @@ def main(global_config, **settings):
     config.add_route('dialog_create_time_log', 'dialog/create/time_log/{task_id}')
     config.add_route('dialog_update_time_log', 'dialog/update/time_log/{time_log_id}')
     
-    config.add_route('create_time_log', 'create/time_log/{task_id}')
-    config.add_route('update_time_log', 'update/time_log/{task_id}')
+    config.add_route('create_time_log', 'create/time_log')
+    config.add_route('update_time_log', 'update/time_log')
     
     config.add_route('get_time_logs', 'get/time_logs/{task_id}') # returns json
     config.add_route('list_time_logs', 'list/time_logs/{task_id}') # returns response

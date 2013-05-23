@@ -28,6 +28,7 @@
         'dojo/store/Memory',
         'dojo/store/JsonRest',
 
+        "dgrid/selector",
         "dgrid/List",
         "dgrid/Grid",
         "dgrid/Selection",
@@ -35,19 +36,24 @@
         "dojo/_base/declare",
         "dgrid/editor",
 
+        'dijit/form/Button',
+
         'stalker/dialogs',
         'stalker/dialogCaller',
 
         'dojo/domReady!'
-    ], function (ObjectStore, Memory, JsonRest, List, Grid, Selection,
-                 Keyboard, declare, editor, dialogs, dialogCaller) {
+    ], function (ObjectStore, Memory, JsonRest, selector,List, Grid, Selection,
+                 Keyboard, declare, editor, Button, dialogs, dialogCaller) {
 
         var StandardGrid = declare([Grid, Selection, Keyboard]);
 
         var time_logs_DataGrid = new StandardGrid({
             id: 'time_logs_data_grid',
             width: '100%',
-            autoHeight: true
+            autoHeight: true,
+            selectionMode: 'single',
+            cellNavigation: false,
+            allowSelectAll: true
         }, 'time_logs_data_grid');
 
         var create_time_log_button = dialogCaller({
@@ -61,6 +67,7 @@
         create_time_log_button.startup();
 
 
+
         function time_logs_DataGrid_updater() {
 
             var time_log_memory = new JsonRest({
@@ -69,10 +76,6 @@
 
             time_log_memory.query().then(function (data) {
                 var columns = [
-                    {
-                        field: 'id',
-                        label: "ID"
-                    },
                     {
                         field: 'resource_name',
                         label: "Resource",

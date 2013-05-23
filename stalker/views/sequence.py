@@ -208,8 +208,7 @@ def summarize_sequence(request):
 
 @view_config(
     route_name='get_sequences',
-    renderer='json',
-    permission='Read_Sequence'
+    renderer='json'
 )
 def get_sequences(request):
     """returns the related sequences of the given project as a json data

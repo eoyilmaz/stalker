@@ -181,8 +181,7 @@ def update_shot(request):
 def view_shot(request):
     """runs when viewing an shot
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
 
     shot_id = request.matchdict['shot_id']
     shot = Shot.query.filter_by(id=shot_id).first()
@@ -196,8 +195,7 @@ def view_shot(request):
 
 @view_config(
     route_name='get_shots',
-    renderer='json',
-    permission='Read_Shot'
+    renderer='json'
 )
 def get_shots(request):
     """returns all the Shots of the given Project

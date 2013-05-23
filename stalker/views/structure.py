@@ -128,8 +128,7 @@ def update_structure(request):
 
 @view_config(
     route_name='get_structures',
-    renderer='json',
-    permission='List_Structure' # TODO: do we need this permission, can it be done inside template, where it is asked
+    renderer='json'
 )
 def get_structures(request):
     """returns all the structures in the database

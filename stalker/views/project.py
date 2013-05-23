@@ -195,8 +195,7 @@ def update_project(request):
 
 @view_config(
     route_name='list_projects',
-    renderer='templates/project/content_list_projects.jinja2',
-    permission='Read_Project'
+    renderer='templates/project/content_list_projects.jinja2'
 )
 def view_projects(request):
     """runs when viewing all projects
@@ -212,8 +211,7 @@ def view_projects(request):
 
 @view_config(
     route_name='get_projects_byEntity',
-    renderer='json',
-    permission='Read_Project'
+    renderer='json'
 )
 def get_projects_byEntity(request):
     """
@@ -234,8 +232,7 @@ def get_projects_byEntity(request):
 
 @view_config(
     route_name='get_projects',
-    renderer='json',
-    permission='Read_Project'
+    renderer='json'
 )
 def get_projects(request):
     """returns all the Project instances in the database
@@ -251,33 +248,27 @@ def get_projects(request):
 
 @view_config(
     route_name='overview_project',
-    renderer='templates/project/page_view_project_overview.jinja2',
-    permission='Read_Project'
+    renderer='templates/project/page_view_project_overview.jinja2'
 )
 @view_config(
     route_name='view_project',
-    renderer='templates/project/page_view_project.jinja2',
-    permission='Read_Project'
+    renderer='templates/project/page_view_project.jinja2'
 )
 @view_config(
     route_name='list_assets',
-    renderer='templates/asset/content_list_assets.jinja2',
-    permission='Read_Asset'
+    renderer='templates/asset/content_list_assets.jinja2'
 )
 @view_config(
     route_name='list_shots',
-    renderer='templates/shot/content_list_shots.jinja2',
-    permission='Read_Shot'
+    renderer='templates/shot/content_list_shots.jinja2'
 )
 @view_config(
     route_name='list_sequences',
-    renderer='templates/sequence/content_list_sequences.jinja2',
-    permission='Read_Sequence'
+    renderer='templates/sequence/content_list_sequences.jinja2'
 )
 @view_config(
     route_name='summarize_project',
-    renderer='templates/project/content_summarize_project.jinja2',
-    permission='Read_Project'
+    renderer='templates/project/content_summarize_project.jinja2'
 )
 def view_project_related_data(request):
     """runs when viewing project related data

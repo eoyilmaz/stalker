@@ -119,6 +119,17 @@
     ], function (Form, TextBox, FilteringSelect, Button, SimpleTextarea,
                  NumberSpinner, CheckBox, DateTextBox, TimeTextBox, Memory,
                  stamp, submitForm) {
+        // ********************************************************************
+            // Generate default values
+            var url;
+            {# fill values based on the dialog mode #}
+            {% if mode == 'CREATE' %}
+                url = '{{ request.route_url("create_time_log") }}';
+
+            {% elif mode == 'UPDATE' %}
+                url = '{{ request.route_url("update_time_log") }}';
+
+            {% endif %}
 
         // ****************************************************************
         // Form
@@ -330,9 +341,10 @@
                         start_date: stamp.toISOString(start_dateTextBox.value),
                         end_date: stamp.toISOString(end_dateTextBox.value),
                         start_time: stamp.toISOString(start_time_timeTextBox.value),
-                        end_time: stamp.toISOString(end_time_timeTextBox.value)
+                        end_time: stamp.toISOString(end_time_timeTextBox.value),
+                        task_id: '{{task.id }}'
                     },
-                    url: '{{ request.route_url('create_time_log', task_id=task.id) }}',
+                    url: url,
                     method: 'POST'
                 });
             }
