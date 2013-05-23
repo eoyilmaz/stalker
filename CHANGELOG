@@ -12,6 +12,9 @@ Stalker Changes
   * New: Versions instances are now derived from Link class and not Entity.
   * Update: Added new revisions to alembic to reflect the change in
     ``Versions`` table.
+  * Update: Links.path is renamed to Links.full_path.
+  * Update: Added new revisions to alembic to reflect the change in ``Links``
+    table.
 
 0.2.0.b4
 --------

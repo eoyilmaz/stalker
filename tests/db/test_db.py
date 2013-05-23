@@ -1282,14 +1282,14 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         ref1 = Link(
             name="Ref1",
-            path="/mnt/M/JOBs/TEST_PROJECT",
+            full_path="/mnt/M/JOBs/TEST_PROJECT",
             filename="1.jpg",
             type=link_type
         )
 
         ref2 = Link(
             name="Ref2",
-            path="/mnt/M/JOBs/TEST_PROJECT",
+            full_path="/mnt/M/JOBs/TEST_PROJECT",
             filename="1.jpg",
             type=link_type
         )
@@ -2690,12 +2690,12 @@ class DatabaseModelsTester(unittest2.TestCase):
             version_of=test_task,
             version=10,
             take='MAIN',
-            path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting' + \
+            full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting' + \
                      '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
             outputs=[
                 Link(
                     name='Renders',
-                    path='M:/Shows/Proj1/Seq1/Shots/SH001/Lighting/Output/' + \
+                    full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Lighting/Output/' + \
                          'test1.###.jpg'
                 ),
             ],

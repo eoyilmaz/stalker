@@ -732,7 +732,7 @@ class SimpleEntityTester(unittest2.TestCase):
         attribute correctly
         """
         from stalker import Link
-        thumb = Link(path='some path')
+        thumb = Link(full_path='some path')
         self.kwargs['thumbnail'] = thumb
         new_simple_entity = SimpleEntity(**self.kwargs)
         self.assertEqual(new_simple_entity.thumbnail, thumb)
@@ -741,7 +741,7 @@ class SimpleEntityTester(unittest2.TestCase):
         """testing if the thumbnail attribute is working properly
         """
         from stalker import Link
-        thumb = Link(path='some path')
+        thumb = Link(full_path='some path')
         self.assertNotEqual(self.test_simple_entity.thumbnail, thumb)
         self.test_simple_entity.thumbnail = thumb
         self.assertEqual(self.test_simple_entity.thumbnail, thumb)

@@ -67,8 +67,8 @@ class ReferenceMixinTester(unittest2.TestCase):
         a_ins = DeclRefMixA(name="ozgur")
         b_ins = DeclRefMixB(name="bozgur")
 
-        new_link1 = Link(name="test link 1", path="none")
-        new_link2 = Link(name="test link 2", path="no path")
+        new_link1 = Link(name="test link 1", full_path="none")
+        new_link2 = Link(name="test link 2", full_path="no path")
 
         a_ins.references.append(new_link1)
         b_ins.references.append(new_link2)

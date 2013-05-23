@@ -233,7 +233,7 @@ class Fusion(EnvironmentBase):
         self.comp = self.fusion.GetCurrentComp()
         self.comp_prefs = self.comp.GetPrefs()['Comp']
 
-        self._main_output_node_name = "MAIN_OUTPUT"
+        self._main_output_node_name = "Main_Output"
 
     def save_as(self, version):
         """"the save action for fusion environment

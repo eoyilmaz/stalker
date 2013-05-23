@@ -246,7 +246,7 @@ def upload_file_to_server(request, file_param_name):
     
     # create a Link instance and return it
     new_link = Link(
-        path = file_full_path,
+        full_path= file_full_path,
         original_filename=filename,
         created_by=get_logged_in_user(request)
     )

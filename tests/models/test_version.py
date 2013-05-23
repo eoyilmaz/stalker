@@ -175,13 +175,13 @@ class VersionTester(unittest2.TestCase):
         # a Link for the input file
         self.test_input_link1 = Link(
             name='Input Link 1',
-            path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
                  'SH001_beauty_v001.###.exr'
         )
 
         self.test_input_link2 = Link(
             name='Input Link 2',
-            path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
                  'SH001_occ_v001.###.exr'
         )
 
@@ -189,13 +189,13 @@ class VersionTester(unittest2.TestCase):
         # a Link for the ouput file
         self.test_output_link1 = Link(
             name='Output Link 1',
-            path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
                  'SH001_beauty_v001.###.exr'
         )
 
         self.test_output_link2 = Link(
             name='Output Link 2',
-            path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
                  'SH001_occ_v001.###.exr'
         )
 
