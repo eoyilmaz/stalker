@@ -1045,7 +1045,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         # create a Link
         kwargs = {
             'name': 'My Sound',
-            'path': 'M:/PROJECTS/my_movie_sound.wav',
+            'full_path': 'M:/PROJECTS/my_movie_sound.wav',
             'type': sound_link_type
         }
 
@@ -1063,9 +1063,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         name = new_link.name
         nice_name = new_link.nice_name
         notes = new_link.notes
-        path = new_link.path
+        full_path = new_link.full_path
         tags = new_link.tags
-        type = new_link.type
+        type_ = new_link.type
         updated_by = new_link.updated_by
 
         # delete the link
@@ -1084,9 +1084,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(name, new_link_DB.name)
         self.assertEqual(nice_name, new_link_DB.nice_name)
         self.assertEqual(notes, new_link_DB.notes)
-        self.assertEqual(path, new_link_DB.path)
+        self.assertEqual(full_path, new_link_DB.full_path)
         self.assertEqual(tags, new_link_DB.tags)
-        self.assertEqual(type, new_link_DB.type)
+        self.assertEqual(type_, new_link_DB.type)
         self.assertEqual(updated_by, new_link_DB.updated_by)
 
     def test_persistence_Note(self):
@@ -2724,7 +2724,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         notes = test_version.notes
         outputs = test_version.outputs
         is_published = test_version.is_published
-        path = test_version.path
+        full_path = test_version.full_path
         status = test_version.status
         status_list = test_version.status_list
         tags = test_version.tags
@@ -2750,7 +2750,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(notes, test_version_DB.notes)
         self.assertEqual(outputs, test_version_DB.outputs)
         self.assertEqual(is_published, test_version_DB.is_published)
-        self.assertEqual(path, test_version_DB.path)
+        self.assertEqual(full_path, test_version_DB.full_path)
         self.assertEqual(status, test_version_DB.status)
         self.assertEqual(status_list, test_version_DB.status_list)
         self.assertEqual(tags, test_version_DB.tags)

@@ -293,7 +293,7 @@ def upload_thumbnail(request):
         DBSession.add(new_link)
         
         return {
-            'file': new_link.path,
+            'file': new_link.full_path,
             'name': new_link.original_filename,
             'width': 320,
             'height': 240,

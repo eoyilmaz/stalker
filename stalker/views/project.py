@@ -225,7 +225,7 @@ def get_projects_byEntity(request):
         {
             'id': project.id,
             'name': project.name,
-            'thumbnail_path': project.thumbnail.path 
+            'thumbnail_path': project.thumbnail.full_path
                                             if project.thumbnail else None
         }
         for project in entity.projects

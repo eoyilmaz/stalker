@@ -12,7 +12,8 @@ Stalker Changes
   * New: Versions instances are now derived from Link class and not Entity.
   * Update: Added new revisions to alembic to reflect the change in
     ``Versions`` table.
-  * Update: Links.path is renamed to Links.full_path.
+  * Update: Links.path is renamed to Links.full_path and added three new
+    attributes called ``path``, ``filename`` and ``extension``.
   * Update: Added new revisions to alembic to reflect the change in ``Links``
     table.
 
@@ -41,7 +42,7 @@ Stalker Changes
     given request instance.
   * Add: Permissions page is added to Group Page.
   * Fix: dgrid object is declared from [Grid, Selection, Keyboard]. So it's
-    posible to select a row and navigate by Keyboard.
+    possible to select a row and navigate by Keyboard.
 
 0.2.0.b3
 --------

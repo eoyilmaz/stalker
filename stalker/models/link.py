@@ -17,14 +17,15 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+
 import os
+import logging
 
 from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
-from stalker.models.entity import Entity
 
+from stalker.models.entity import Entity
 from stalker.log import logging_level
-import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
@@ -45,6 +46,16 @@ class Link(Entity):
 
     For sequences of files the file name should be in "%h%p%t %R" format in
     `PySeq`_ formatting rules.
+
+    There are three secondary attributes (properties to be more precise)
+    ``path``, ``filename`` and ``extension``. These attributes are derived from
+    the :attr:`.full_path` attribute and they modify it.
+
+    Path : It is the path part of the full_path
+    Filename : It is the filename part of the full_path, also includes the
+      extension, so changing the filename also changes the extension part.
+    Extension : It is the extension part of the full_path. It also includes the
+      extension separator ('.' for most of the file systems).
 
     :param full_path: The full path to the link, it can be a path to a folder
       or a file in the file system, or a web page. For file sequences use
@@ -77,7 +88,7 @@ class Link(Entity):
 
     def __init__(self, full_path='', original_filename='', **kwargs):
         super(Link, self).__init__(**kwargs)
-        self.path = full_path
+        self.full_path = full_path
         self.original_filename = original_filename
 
     @validates('full_path')
@@ -104,7 +115,7 @@ class Link(Entity):
     def _validate_original_filename(self, key, original_filename):
         """validates the given original_filename value
         """
-        filename_from_path = os.path.basename(self.path)
+        filename_from_path = os.path.basename(self.full_path)
         if original_filename is None:
             original_filename = filename_from_path
 
@@ -125,10 +136,90 @@ class Link(Entity):
         """
         return path.replace("\\", "/")
 
+    @property
+    def path(self):
+        """the path property
+        """
+        return os.path.split(self.full_path)[0]
+
+    @path.setter
+    def path(self, path):
+        """setter for the path
+
+        :param str path: the new path
+        """
+        if path is None:
+            raise TypeError('%s.path can not be set to None' %
+                            self.__class__.__name__)
+
+        if not isinstance(path, str):
+            raise TypeError('%s.path should be an instance of str, not %s' %
+                            (self.__class__.__name__,
+                             path.__class__.__name__))
+
+        if path == '':
+            raise ValueError('%s.path can not be an empty string')
+
+        self.full_path = self._format_path(
+            os.path.join(path, self.filename)
+        )
+    
+    @property
+    def filename(self):
+        """the filename property
+        """
+        return os.path.split(self.full_path)[1]
+
+    @filename.setter
+    def filename(self, filename):
+        """filename setter
+
+        :param str filename: the new filename
+        """
+        if filename is None:
+            filename = ''
+
+        if not isinstance(filename, str):
+            raise TypeError('%s.filename should be an instance of str, not '
+                            '%s' % (self.__class__.__name__,
+                                    filename.__class__.__name__))
+
+        self.full_path = self._format_path(
+            os.path.join(self.path, filename)
+        )
+
+    @property
+    def extension(self):
+        """the extension property
+        """
+        return os.path.splitext(self.full_path)[1]
+
+    @extension.setter
+    def extension(self, extension):
+        """extension setter
+
+        :param extension: the new extension
+        """
+        if extension is None:
+            extension = ''
+
+        if not isinstance(extension, str):
+            raise TypeError('%s.extension should be an instance of str, '
+                            'not %s' % (self.__class__.__name__,
+                                        extension.__class__.__name__))
+
+        if extension != '':
+            if not extension.startswith(os.path.extsep):
+                extension = os.path.extsep + extension
+
+        self.filename = os.path.join(
+            os.path.splitext(self.filename)[0] + extension
+        )
+
     def __eq__(self, other):
         """the equality operator
         """
         return super(Link, self).__eq__(other) and \
             isinstance(other, Link) and \
-            self.path == other.path and \
+            self.full_path == other.full_path and \
             self.type == other.type
